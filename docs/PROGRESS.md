@@ -77,7 +77,17 @@ every work block so work can resume after context compaction.
   completion, removal hook, startup init that also registers stray `.zim` files found
   in `content/zim`, e.g. copied with Finder/Files), HTML→text and link extraction.
 - Reader (`/reader/[itemId]`) and global search (`/search`) screens; `reader` i18n namespace.
-- Verified: iOS Release simulator build with a real ZIM; Android `assembleDebug` compiles.
+- Verified on the iOS 26.5 simulator (Release) with `wikipedia_en_100_mini`: reader
+  (main page, links, back/forward, bookmark, text size, dark mode, find, history
+  sheet), in-book and global search (titles + full text), and the facade
+  (`getLinks` 95 links in order, `getArticleText`, `randomPath`, `search` snippets).
+  Screenshots in `docs/screenshots/{reader,reader-dark,reader-search-sheet,search}-ios.png`.
+  Android: `assembleDebug` compiles (runtime not tested).
+- Fixed in shared code: `formatRelativeDate` crashed on Hermes (no `Intl.RelativeTimeFormat`).
+- Known limits / TODO: reader toolbar doesn't auto-hide on scroll; no table of contents;
+  Android `libc++_shared.so` is shared between RN and libkiwix (one copy wins — check at
+  runtime); media Range path untested with a real video ZIM; iOS find-in-page is a
+  JS highlighter (counts), Android uses WebView's native find.
 
 ## Next steps
 

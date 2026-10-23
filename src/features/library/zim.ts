@@ -121,7 +121,11 @@ function interleave(lists: ZimSearchHit[][], limit: number): ZimSearchHit[] {
 function toHit(itemId: string, h: NativeZimHit, withSnippet = true): ZimSearchHit {
   const hit: ZimSearchHit = { itemId, path: h.path, title: decodeEntities(h.title) };
   // Title-index "snippets" just repeat the highlighted title: keep only full-text ones.
-  if (withSnippet && h.snippet) hit.snippet = stripTags(h.snippet);
+  if (withSnippet && h.snippet) {
+    const snippet = stripTags(h.snippet);
+    // Redirect/stub entries come back with the title as their only "snippet".
+    if (snippet && snippet.toLowerCase() !== hit.title.toLowerCase()) hit.snippet = snippet;
+  }
   if (typeof h.wordCount === 'number' && h.wordCount >= 0) hit.wordCount = h.wordCount;
   return hit;
 }

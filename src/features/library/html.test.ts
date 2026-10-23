@@ -1,4 +1,4 @@
-// @ts-nocheck -- run with `npm test` (node --test --experimental-strip-types); the app has no @types/node.
+/// <reference types="node" />
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
@@ -9,6 +9,7 @@ const ARTICLE = `<!DOCTYPE html><html><head><title>Water &amp; Ice</title><style
 <header><a href="Home">Home</a></header>
 <div class="mw-body"><h1>Water</h1>
 <div role="note" class="hatnote">For other uses, see <a href="Water_(disambiguation)">Water (disambiguation)</a>.</div>
+<table class="infobox"><tr><th>Formula</th><td>H2O infobox</td></tr></table>
 <p>Water is an <b>inorganic</b> compound<sup class="reference"><a href="#cite_note-1">[1]</a></sup> with the formula H<sub>2</sub>O.</p>
 <p>It is   vital&nbsp;for <a href="Life" title="Life">all known forms of life</a>, see <a href="./Ice#Phases">ice</a> and <a href="https://example.org">the web</a>.</p>
 <ul><li>Solid</li><li>Liquid</li></ul>
@@ -32,7 +33,7 @@ test('htmlToText keeps paragraphs and drops chrome', () => {
   assert.match(text, /^Water\n\nWater is an inorganic compound with the formula H2O\./);
   assert.match(text, /It is vital for all known forms of life, see ice and the web\./);
   assert.match(text, /• Solid\n• Liquid/);
-  for (const banned of ['nope', 'color:red', 'Footer', 'Home', 'Nav', '[1]', 'For other uses']) {
+  for (const banned of ['infobox', 'nope', 'color:red', 'Footer', 'Home', 'Nav', '[1]', 'For other uses']) {
     assert.ok(!text.includes(banned), `should not contain ${banned}`);
   }
 });
