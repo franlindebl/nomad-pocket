@@ -340,12 +340,10 @@ const SYSTEM: Record<Lang, string> = {
   es: [
     'Eres Nomad, un asistente que funciona sin conexión dentro de la app Nomad Pocket.',
     'Responde siempre en español, de forma clara, práctica y breve. Usa Markdown sencillo (negritas, listas) cuando ayude.',
-    'En temas de salud o emergencias, termina con una línea breve: «Información de referencia, no consejo médico.»',
   ].join(' '),
   en: [
     'You are Nomad, an assistant that runs offline inside the Nomad Pocket app.',
     'Always answer in English, clearly, practically and concisely. Use simple Markdown (bold, lists) when it helps.',
-    'For health or emergency topics, end with one short line: "Reference information, not medical advice."',
   ].join(' '),
 };
 
@@ -369,8 +367,29 @@ const NO_HITS: Record<Lang, string> = {
   en: "I searched the user's offline library and found no relevant articles for this question. Start by briefly saying you couldn't find it in their library, then answer from your own knowledge, warning that it may not be accurate.",
 };
 
-export function systemPrompt(lang: Lang, rag: boolean): string {
-  return rag ? `${SYSTEM[lang]}\n\n${RAG_RULES[lang]}` : SYSTEM[lang];
+const HEALTH_NOTE: Record<Lang, string> = {
+  es: 'Termina con una línea breve: «Información de referencia, no consejo médico.»',
+  en: 'End with one short line: "Reference information, not medical advice."',
+};
+
+const HEALTH_TERMS = [
+  'salud', 'medic', 'enferm', 'herid', 'quemad', 'sangr', 'dolor', 'fiebre', 'hipoterm', 'picad', 'mordedur',
+  'fractur', 'envenen', 'intoxic', 'auxilio', 'sintom', 'infecc', 'dosis', 'pastill', 'embaraz', 'alergi',
+  'health', 'medical', 'medicine', 'injur', 'wound', 'burn', 'bleed', 'pain', 'fever', 'hypotherm', 'bite',
+  'sting', 'fractur', 'poison', 'first aid', 'symptom', 'infect', 'dose', 'pill', 'pregnan', 'allerg', 'cpr', 'rcp',
+];
+
+/** Whether a question is about health/first aid (adds the "not medical advice" note). */
+export function isHealthQuestion(question: string): boolean {
+  const q = normalize(question);
+  const ws = words(question);
+  // Word-prefix match so "interesting" doesn't hit "sting".
+  return HEALTH_TERMS.some((t) => (t.includes(' ') ? q.includes(t) : ws.some((w) => w.startsWith(t))));
+}
+
+export function systemPrompt(lang: Lang, rag: boolean, health = false): string {
+  const base = health ? `${SYSTEM[lang]} ${HEALTH_NOTE[lang]}` : SYSTEM[lang];
+  return rag ? `${base}\n\n${RAG_RULES[lang]}` : base;
 }
 
 /** Renders packed sources as the numbered context block. */

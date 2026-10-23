@@ -70,7 +70,7 @@ export default function AssistantScreen() {
       ) : empty ? (
         <ScrollView contentContainerStyle={styles.emptyContent} keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive">
           <View style={styles.hero}>
-            <IconBadge icon={Cpu} hue="ai" size={56} />
+            <IconBadge icon={Cpu} hue="ai" size={48} />
             <Text variant="title2" align="center">
               {t('empty.title')}
             </Text>
@@ -171,7 +171,7 @@ function NoModel({ systemAvailable }: { systemAvailable: boolean }) {
 function NoLibraryCard() {
   const { t } = useTranslation('assistant');
   return (
-    <Card style={{ gap: space.md }}>
+    <Card style={{ gap: space.md }} onPress={() => router.navigate('/library')} accessibilityLabel={t('noLibrary.action')}>
       <Row gap={space.md} align="flex-start">
         <IconBadge icon={Library} hue="reference" size={36} />
         <View style={{ flex: 1, gap: 2 }}>
@@ -179,9 +179,11 @@ function NoLibraryCard() {
           <Text variant="footnote" color="textSecondary">
             {t('noLibrary.body')}
           </Text>
+          <Text variant="footnote" weight="600" color="accent" style={{ marginTop: space.xs }}>
+            {t('noLibrary.action')} →
+          </Text>
         </View>
       </Row>
-      <Button title={t('noLibrary.action')} variant="secondary" size="sm" onPress={() => router.navigate('/library')} style={{ alignSelf: 'flex-start' }} />
     </Card>
   );
 }
@@ -204,14 +206,15 @@ function ErrorBanner({ code }: { code: string }) {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   list: { paddingHorizontal: space.gutter, paddingVertical: space.lg, gap: space.xxl },
-  emptyContent: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: space.gutter, paddingVertical: space.xxl, gap: space.xxl },
+  emptyContent: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: space.gutter, paddingVertical: space.xl, gap: space.xl },
   hero: { alignItems: 'center', gap: space.md },
   starters: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },
   starter: {
     flexBasis: '47%',
     flexGrow: 1,
-    minHeight: 72,
-    padding: space.lg,
+    minHeight: 64,
+    padding: space.md,
+    paddingHorizontal: space.lg,
     borderRadius: radius.lg,
     borderCurve: 'continuous',
     borderWidth: StyleSheet.hairlineWidth,

@@ -165,7 +165,7 @@ function ModelCard({ model, ram, recommended }: { model: GgufModel; ram: number 
   return (
     <Card style={[{ gap: space.md }, active && { borderColor: colors.accent, borderWidth: 1.5 }]}>
       <View style={{ gap: 6 }}>
-        <Row gap={space.sm} style={{ flexWrap: 'wrap' }}>
+        <Row gap={space.sm} style={[{ flexWrap: 'wrap' }, installed && active && { paddingRight: 36 }]}>
           <Text variant="title3">{model.name}</Text>
           {recommended ? <Badge label={t('models.recommended')} tone="accent" icon={Sparkles} /> : null}
           {active ? <Badge label={t('models.active')} tone="success" icon={Check} /> : null}
@@ -180,6 +180,9 @@ function ModelCard({ model, ram, recommended }: { model: GgufModel; ram: number 
           </Text>
         </Row>
       </View>
+      {installed && active ? (
+        <IconButton icon={Trash2} size={34} variant="plain" color={colors.textSecondary} accessibilityLabel={t('models.delete')} onPress={confirmDelete} style={styles.cornerDelete} />
+      ) : null}
 
       {downloading && download ? (
         <View style={{ gap: space.sm }}>
@@ -202,13 +205,13 @@ function ModelCard({ model, ram, recommended }: { model: GgufModel; ram: number 
             </Row>
           </Row>
         </View>
-      ) : installed ? (
+      ) : installed && !active ? (
         <Row gap={space.sm}>
           {!active ? <Button title={t('models.use')} size="sm" onPress={() => setAiModelId(model.id)} /> : null}
           <View style={{ flex: 1 }} />
           <IconButton icon={Trash2} size={34} variant="plain" color={colors.textSecondary} accessibilityLabel={t('models.delete')} onPress={confirmDelete} />
         </Row>
-      ) : (
+      ) : installed ? null : (
         <Button
           title={tc('actions.downloadSize', { size: formatBytes(model.sizeBytes) })}
           icon={ArrowDown}
@@ -233,4 +236,5 @@ const styles = StyleSheet.create({
   lead: { marginBottom: space.md, paddingHorizontal: space.xs },
   action: { alignSelf: 'flex-start' },
   privacy: { marginTop: space.xxl, paddingHorizontal: space.xs },
+  cornerDelete: { position: 'absolute', right: space.sm, top: space.sm },
 });

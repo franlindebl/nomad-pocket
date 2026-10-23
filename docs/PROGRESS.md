@@ -22,7 +22,7 @@ every work block so work can resume after context compaction.
 | 2. ZIM library (native module, reader, search) | pending |
 | 3. Maps (extractor, MapLibre, regions, markers) | done (iOS verified, Android compiles) — merged |
 | 4. Courses | UI + progress done (needs ZIM module for syllabus) |
-| 5. Local AI (system + GGUF, RAG) | pending |
+| 5. Local AI (system + GGUF, RAG) | done — verified on iOS sim (llama.cpp CPU + Apple FM); RAG waits for ZIM module |
 | 6. Polish, icon, builds on simulator/emulator | pending |
 
 ## Log
@@ -51,7 +51,6 @@ every work block so work can resume after context compaction.
 ## In flight (parallel agents, git worktrees — merge into main when done)
 
 - ZIM agent (worktree branch): `modules/nomad-zim`, `src/features/library/{zim,register}.ts`, reader + `/search` screens, `reader` i18n ns.
-- AI agent (worktree branch): `modules/nomad-llm`, llama.rn, `src/features/assistant`, assistant tab, `assistant` i18n ns.
 
 ### 2026-10-24 — Maps (phase 3)
 - `src/lib/pmtiles`: PMTiles v3 reader/extractor in TS with node tests (Hilbert ids
@@ -67,6 +66,20 @@ every work block so work can resume after context compaction.
   (those labels are dropped); country bboxes skip remote territories; very large
   areas are refused above 2.5 M tiles (choose less detail).
 
+### 2026-10-24 — Local AI assistant (phase 5)
+- `modules/nomad-llm`: Apple Foundation Models (weak-linked, iOS 26+) and Gemini Nano
+  (ML Kit GenAI Prompt API `1.0.0-beta4`) with status, streaming and cancel.
+- `llama.rn` 0.13.0-rc.8 (+ config plugin) for GGUF; curated Qwen3.5 0.8B/2B/4B and
+  Gemma 4 E2B (Q4_K_M, commit-pinned HF URLs, sizes HEAD-checked); RAM-based pick.
+- `src/features/assistant`: engine (lazy load, stream, stop, release on background /
+  4 min idle), RAG (keyword queries → ZIM full-text → BM25 over chunks → packed
+  numbered sources → `[n]` citations), chats in `chat_sessions`/`chat_messages`.
+- UI: chat with streaming Markdown, source chips → reader, stop, "use my library"
+  toggle, starters; conversations sheet; model screen with downloads.
+- Verified: iOS Release sim build, Qwen3.5 0.8B downloaded in-app and streamed an
+  answer on the CPU; Apple Intelligence streamed on the simulator; Android
+  `assembleDebug` OK. RAG returns "not in your library" until `zim.ts` is real.
+
 ## Next steps
 
 - Merge agent branches (expect small conflicts in package.json, app.json, resources.ts, registry.ts).
@@ -77,6 +90,10 @@ every work block so work can resume after context compaction.
 - Downloads interrupted by app termination restart from zero unless paused first
   (expo-file-system tasks don't survive relaunch).
 - Map extraction runs in the JS thread while the app is in foreground.
+- Hermes has no `Intl.RelativeTimeFormat`: `formatRelativeDate` throws ("undefined
+  cannot be used as a constructor"); the assistant uses its own date labels.
+- llama.rn's `stopCompletion()`/`release()` may not return promises — don't chain `.catch`.
+- Gemini Nano path compiled but untested on a real AICore device.
 
 ## Build gotchas
 

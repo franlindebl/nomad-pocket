@@ -11,7 +11,7 @@ import { useSettings } from '@/stores/settings';
 
 import { EngineUnavailableError, stopGeneration, withEngine } from './engine';
 import { retrieve } from './rag';
-import { citedNumbers, detectLanguage, estimateTokens, systemPrompt, tokensToChars, trimHistory, type Lang, type Turn } from './rag-core';
+import { citedNumbers, detectLanguage, isHealthQuestion, estimateTokens, systemPrompt, tokensToChars, trimHistory, type Lang, type Turn } from './rag-core';
 
 export type MessageSource = { n: number; itemId: string; path: string; title: string };
 
@@ -58,7 +58,17 @@ export function listSessions(): ChatSession[] {
       `SELECT s.*, (SELECT content FROM chat_messages m WHERE m.session_id = s.id ORDER BY created_at DESC LIMIT 1) AS preview
        FROM chat_sessions s ORDER BY updated_at DESC`,
     )
-    .map((r) => ({ id: r.id, title: r.title, modelId: r.model_id, createdAt: r.created_at, updatedAt: r.updated_at, preview: r.preview?.slice(0, 140) ?? undefined }));
+    .map((r) => ({ id: r.id, title: r.title, modelId: r.model_id, createdAt: r.created_at, updatedAt: r.updated_at, preview: r.preview ? plainPreview(r.preview) : undefined }));
+}
+
+/** First line-ish of a message without Markdown markers, for the conversation list. */
+function plainPreview(text: string): string {
+  return text
+    .replace(/^\s*(#{1,6}|[-*•+]|\d+[.)]|>)\s+/gm, '')
+    .replace(/[*_`]+/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 140);
 }
 
 export function loadMessages(sessionId: string): ChatMessage[] {
@@ -207,7 +217,7 @@ export async function sendMessage(question: string) {
     await withEngine(modelId, async (engine) => {
       // Token budget: system + history + sources + answer must fit the window.
       const answerTokens = engine.kind === 'system' ? SYSTEM_ANSWER_TOKENS : MAX_ANSWER_TOKENS;
-      const sys = systemPrompt(lang, st.useLibrary);
+      const sys = systemPrompt(lang, st.useLibrary, isHealthQuestion(text));
       const free = engine.contextTokens - answerTokens - estimateTokens(sys) - estimateTokens(text) - 120;
       const historyBudget = tokensToChars(Math.max(0, Math.floor(free * 0.25)));
       const turns = trimHistory(history, historyBudget);

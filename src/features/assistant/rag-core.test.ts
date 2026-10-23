@@ -10,11 +10,13 @@ import {
   citedNumbers,
   detectLanguage,
   extractKeywords,
+  isHealthQuestion,
   normalize,
   packContext,
   rankChunks,
   stem,
   stripThinking,
+  systemPrompt,
   tokenize,
   trimHistory,
   type Chunk,
@@ -223,5 +225,17 @@ describe('answers and history', () => {
       [],
     );
     assert.equal(trimHistory(turns, 10_000).length, 4);
+  });
+});
+
+describe('system prompt', () => {
+  test('health note only for health questions', () => {
+    assert.equal(isHealthQuestion('Primeros auxilios para una quemadura leve'), true);
+    assert.equal(isHealthQuestion('What should I do after a snake bite?'), true);
+    assert.equal(isHealthQuestion('Explícame la fotosíntesis'), false);
+    assert.equal(isHealthQuestion('An interesting fact about Spain'), false);
+    assert.match(systemPrompt('es', false, true), /no consejo médico/);
+    assert.doesNotMatch(systemPrompt('es', false, false), /consejo médico/);
+    assert.match(systemPrompt('en', true), /\[1\]/);
   });
 });
