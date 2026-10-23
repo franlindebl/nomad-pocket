@@ -42,6 +42,8 @@ export default function RootLayout() {
           <Stack.Screen name="downloads" options={{ title: t('downloads.title'), presentation: 'formSheet', sheetAllowedDetents: [0.6, 1], sheetGrabberVisible: true }} />
           <Stack.Screen name="settings" options={{ headerShown: false, presentation: 'modal' }} />
           <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }} />
+          <Stack.Screen name="reader/[itemId]" options={{ title: '' }} />
+          <Stack.Screen name="search" options={{ title: t('reader:globalSearch') }} />
         </Stack>
       </ThemeProvider>
     </GestureHandlerRootView>
