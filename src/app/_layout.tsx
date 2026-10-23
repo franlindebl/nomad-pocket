@@ -1,12 +1,13 @@
 import '@/i18n';
 
-import { DarkTheme, DefaultTheme, ThemeProvider, Stack } from 'expo-router';
+import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { bootstrap } from '@/features/bootstrap';
+import { useSettings } from '@/stores/settings';
 import { fontFamily, palette, useTheme } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -16,7 +17,10 @@ export default function RootLayout() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    bootstrap().finally(() => SplashScreen.hideAsync());
+    bootstrap().finally(() => {
+      SplashScreen.hideAsync();
+      if (!useSettings.getState().onboarded) router.push('/onboarding');
+    });
   }, []);
 
   const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
@@ -39,7 +43,10 @@ export default function RootLayout() {
             headerTintColor: colors.text,
           }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="downloads" options={{ title: t('downloads.title'), presentation: 'formSheet', sheetAllowedDetents: [0.6, 1], sheetGrabberVisible: true }} />
+          <Stack.Screen
+            name="downloads"
+            options={{ title: t('downloads.title'), presentation: 'formSheet', sheetAllowedDetents: [0.6, 1], sheetGrabberVisible: true }}
+          />
           <Stack.Screen name="settings" options={{ headerShown: false, presentation: 'modal' }} />
           <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }} />
         </Stack>
