@@ -5,11 +5,12 @@
 // app goes to the background or after a few idle minutes (GGUF contexts hold
 // hundreds of MB to several GB of RAM).
 import * as Device from 'expo-device';
+import { File } from 'expo-file-system';
 import { initLlama, type LlamaContext } from 'llama.rn';
 import { AppState, Platform } from 'react-native';
 
-import { getItem } from '@/features/content/items';
-import { toNativePath } from '@/lib/storage';
+import { getItem, type InstalledItem } from '@/features/content/items';
+import { contentFile, toNativePath } from '@/lib/storage';
 
 import * as SystemLLM from '../../../modules/nomad-llm';
 import { getModel, SYSTEM_MODEL_ID } from './models';
@@ -74,8 +75,12 @@ class SystemEngine implements Engine {
     let stopped = false;
     try {
       const full = await SystemLLM.generate(id, { prompt, system: req.system, temperature: req.temperature, maxTokens: req.maxTokens }, (delta, reset) => {
-        text = reset ? delta : text + delta;
-        req.onText(text);
+        try {
+          text = reset ? delta : text + delta;
+          req.onText(text);
+        } catch (e) {
+          console.warn('[assistant] delta callback failed', e);
+        }
       });
       text = full || text;
     } finally {
@@ -97,6 +102,15 @@ class SystemEngine implements Engine {
 
 // ---------------------------------------------------------------------------
 // GGUF via llama.rn
+
+/** Runs a native call that may return a promise, a value or throw; never rejects. */
+async function quietly(fn: () => unknown): Promise<void> {
+  try {
+    await fn();
+  } catch {
+    // ignore
+  }
+}
 
 class LlamaEngine implements Engine {
   readonly kind = 'gguf' as const;
@@ -126,7 +140,13 @@ class LlamaEngine implements Engine {
           use_mlock: false,
           use_mmap: true,
         },
-        (p) => onProgress?.(p / 100),
+        (p) => {
+          try {
+            onProgress?.(Number(p) / 100);
+          } catch {
+            // never throw from a native callback
+          }
+        },
       )
         .then((ctx) => {
           this.ctx = ctx;
@@ -158,17 +178,22 @@ class LlamaEngine implements Engine {
         penalty_repeat: 1.05,
       },
       (data) => {
-        // `content` is the parsed answer so far (reasoning separated); fall back
-        // to accumulating raw tokens for templates without a parser.
-        if (typeof data.content === 'string') {
-          raw = data.content;
-        } else {
-          raw += data.token;
-        }
-        const next = stripThinking(raw);
-        if (next !== text) {
-          text = next;
-          req.onText(text);
+        // Runs inside a native callback: an exception here would crash Release builds.
+        try {
+          // `content` is the parsed answer so far (reasoning separated); fall back
+          // to accumulating raw tokens for templates without a parser.
+          if (typeof data.content === 'string') {
+            raw = data.content;
+          } else {
+            raw += data.token;
+          }
+          const next = stripThinking(raw);
+          if (next !== text) {
+            text = next;
+            req.onText(text);
+          }
+        } catch (e) {
+          console.warn('[assistant] token callback failed', e);
         }
       },
     );
@@ -178,7 +203,8 @@ class LlamaEngine implements Engine {
 
   async stop() {
     this.stopRequested = true;
-    await this.ctx?.stopCompletion().catch(() => {});
+    const ctx = this.ctx;
+    if (ctx) await quietly(() => ctx.stopCompletion());
   }
 
   async release() {
@@ -186,8 +212,9 @@ class LlamaEngine implements Engine {
     if (this.loading) await this.loading.catch(() => {});
     const ctx = this.ctx;
     this.ctx = null;
-    await ctx?.stopCompletion().catch(() => {});
-    await ctx?.release().catch(() => {});
+    if (!ctx) return;
+    await quietly(() => ctx.stopCompletion());
+    await quietly(() => ctx.release());
   }
 }
 
@@ -207,12 +234,28 @@ function scheduleIdleRelease() {
   }, IDLE_RELEASE_MS);
 }
 
+/**
+ * The stored URI is absolute, but the app container path changes on reinstall
+ * and app updates: fall back to the same filename inside content/models.
+ */
+function modelPath(item: InstalledItem, filename: string | undefined): string {
+  try {
+    if (new File(item.fileUri).exists) return toNativePath(item.fileUri);
+    const name = filename ?? decodeURIComponent(item.fileUri.split('/').pop() ?? '');
+    const moved = contentFile('model', name);
+    if (moved.exists) return toNativePath(moved.uri);
+  } catch {
+    // fall through
+  }
+  throw new EngineUnavailableError('notInstalled');
+}
+
 function createEngine(modelId: string): Engine {
   if (modelId === SYSTEM_MODEL_ID) return new SystemEngine();
   const item = getItem(modelId);
   if (!item || item.kind !== 'model') throw new EngineUnavailableError('notInstalled');
   const def = getModel(item.catalogId ?? item.id);
-  return new LlamaEngine(modelId, toNativePath(item.fileUri), def?.contextTokens ?? 4096);
+  return new LlamaEngine(modelId, modelPath(item, def?.filename), def?.contextTokens ?? 4096);
 }
 
 /** Returns the (lazily created) engine for a model id, releasing any other one. */

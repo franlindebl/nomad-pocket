@@ -25,7 +25,12 @@ export function generate(requestId: string, options: GenerateOptions, onDelta: (
   return new Promise<string>((resolve, reject) => {
     const subs = [
       mod.addListener('onDelta', (e) => {
-        if (e.requestId === requestId) onDelta(e.delta, !!e.reset);
+        if (e.requestId !== requestId) return;
+        try {
+          onDelta(e.delta, !!e.reset);
+        } catch (err) {
+          console.warn('[nomad-llm] onDelta handler failed', err);
+        }
       }),
       mod.addListener('onDone', (e) => {
         if (e.requestId !== requestId) return;
@@ -54,7 +59,16 @@ export function cancel(requestId: string) {
 
 export async function downloadSystemModel(onProgress?: (done: number, total: number) => void): Promise<boolean> {
   if (!NomadLlm) return false;
-  const sub = onProgress ? NomadLlm.addListener('onDownloadProgress', (e) => onProgress(e.bytesDownloaded, e.totalBytes)) : null;
+  const sub = onProgress
+    ? NomadLlm.addListener('onDownloadProgress', (e) => {
+        try {
+          // Longs may arrive as BigInt.
+          onProgress(Number(e.bytesDownloaded), Number(e.totalBytes));
+        } catch {
+          // never throw from a native event
+        }
+      })
+    : null;
   try {
     return await NomadLlm.downloadSystemModel();
   } finally {

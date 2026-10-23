@@ -10,7 +10,8 @@ import { downloadModel, OfflineError, WifiRequiredError } from '@/features/assis
 import { useSystemModel } from '@/features/assistant/system';
 import { removeItem, useItems } from '@/features/content/items';
 import { cancelDownload, NotEnoughStorageError, pauseDownload, resumeDownload, useDownload } from '@/features/downloads/manager';
-import { formatBytes, formatPercent } from '@/lib/format';
+import { formatPercent } from '@/features/assistant/format';
+import { formatBytes } from '@/lib/format';
 import { freeBytes } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
 import { space, useTheme } from '@/theme';

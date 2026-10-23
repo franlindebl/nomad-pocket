@@ -87,7 +87,7 @@ export default function AssistantScreen() {
                 accessibilityRole="button"
                 onPress={() => sendMessage(t(`empty.starters.${k}`))}
                 style={[styles.starter, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                <Text variant="callout" numberOfLines={2}>
+                <Text variant="callout" numberOfLines={3}>
                   {t(`empty.starters.${k}`)}
                 </Text>
               </PressableScale>

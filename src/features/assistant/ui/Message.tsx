@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 
 import { PressableScale, Text } from '@/components/ui';
-import { formatPercent } from '@/lib/format';
+import { formatPercent } from '../format';
 import { radius, space, useTheme } from '@/theme';
 
 import type { ChatMessage, MessageSource, Phase } from '../chats';

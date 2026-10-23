@@ -6,7 +6,7 @@ import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Button, EmptyState, IconButton, ListGroup, ListRow, SectionHeader } from '@/components/ui';
 import { deleteSession, newChat, openSession, refreshSessions, useChat, type ChatSession } from '@/features/assistant/chats';
-import { formatRelativeDate } from '@/lib/format';
+import { formatChatDate } from '@/features/assistant/format';
 import { space, useTheme } from '@/theme';
 
 export default function ConversationsScreen() {
@@ -39,7 +39,7 @@ export default function ConversationsScreen() {
     <ListRow
       key={s.id}
       title={s.title}
-      subtitle={[formatRelativeDate(s.updatedAt), s.preview?.replace(/\s+/g, ' ')].filter(Boolean).join(' · ')}
+      subtitle={[formatChatDate(s.updatedAt), s.preview?.replace(/\s+/g, ' ')].filter(Boolean).join(' · ')}
       titleLines={1}
       subtitleLines={1}
       style={s.id === activeId ? { backgroundColor: colors.surfaceAlt } : undefined}
