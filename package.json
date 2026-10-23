@@ -5,8 +5,10 @@
   "dependencies": {
     "@expo/ui": "~58.0.22",
     "@maplibre/maplibre-react-native": "^11.5.0",
+    "@protomaps/basemaps": "^5.7.2",
     "@shopify/flash-list": "2.3.2",
     "expo": "~58.0.17",
+    "expo-asset": "~58.0.18",
     "expo-blur": "~58.0.5",
     "expo-build-properties": "~58.0.11",
     "expo-constants": "~58.0.13",
@@ -47,7 +49,11 @@
     "zustand": "^5.0.16"
   },
   "devDependencies": {
+    "@types/node": "^26.6.5",
     "@types/react": "~19.3.0",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~58.0.4",
+    "pmtiles": "^4.5.0",
     "typescript": "~6.0.3"
   },
   "scripts": {
