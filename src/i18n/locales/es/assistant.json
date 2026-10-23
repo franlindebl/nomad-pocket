@@ -1,1 +1,107 @@
-{}
+{
+  "title": "Asistente",
+  "newChat": "Nueva conversación",
+  "history": "Conversaciones",
+  "model": "Modelo",
+  "composer": {
+    "placeholder": "Pregunta lo que quieras…",
+    "placeholderLibrary": "Pregunta a tu biblioteca…",
+    "send": "Enviar",
+    "stop": "Detener",
+    "useLibrary": "Usar mi biblioteca",
+    "useLibraryOn": "Las respuestas citan tu biblioteca sin conexión",
+    "useLibraryOff": "Las respuestas salen solo del modelo"
+  },
+  "empty": {
+    "title": "¿En qué te ayudo?",
+    "body": "Todo funciona en tu dispositivo. Nada sale de tu teléfono.",
+    "bodyLibrary": "Buscaré en tu biblioteca sin conexión y te diré de dónde sale cada respuesta.",
+    "starters": {
+      "water": "¿Cómo potabilizo agua sin hervirla?",
+      "burn": "Primeros auxilios para una quemadura leve",
+      "fire": "¿Cómo enciendo fuego si todo está mojado?",
+      "photosynthesis": "Explícame la fotosíntesis de forma sencilla"
+    }
+  },
+  "noModel": {
+    "title": "Elige un modelo para empezar",
+    "body": "El asistente necesita un modelo de lenguaje en tu dispositivo. Descárgalo una vez (desde unos 500 MB) y úsalo sin conexión para siempre.",
+    "bodySystem": "Tu dispositivo tiene un modelo integrado listo para usar, o puedes descargar uno que funciona igual sin conexión.",
+    "action": "Elegir modelo",
+    "useSystem": "Usar modelo integrado"
+  },
+  "noLibrary": {
+    "title": "Tu biblioteca está vacía",
+    "body": "Para responder con fuentes, el asistente busca en el contenido que has descargado. Consigue Wikipedia, medicina o guías de supervivencia en Biblioteca.",
+    "action": "Ir a Biblioteca"
+  },
+  "phase": {
+    "searching": "Buscando en tu biblioteca…",
+    "loading": "Cargando el modelo…",
+    "loadingProgress": "Cargando el modelo · {{percent}}",
+    "generating": "Escribiendo…"
+  },
+  "sources": "Fuentes",
+  "sourcesCount_one": "{{count}} fuente",
+  "sourcesCount_other": "{{count}} fuentes",
+  "stopped": "Detenido",
+  "copy": "Copiar",
+  "copied": "Copiado",
+  "errors": {
+    "noModel": "Primero elige un modelo.",
+    "notInstalled": "El modelo elegido ya no está instalado. Elige otro.",
+    "systemUnavailable": "El modelo integrado no está disponible ahora mismo.",
+    "generic": "El modelo no ha podido responder: {{message}}"
+  },
+  "conversations": {
+    "title": "Conversaciones",
+    "empty": "Aún no hay conversaciones",
+    "emptyBody": "Tus chats se guardan en este dispositivo para que puedas retomarlos.",
+    "delete": "Eliminar conversación",
+    "deleteConfirm": "Se eliminará «{{title}}» de este dispositivo.",
+    "today": "Hoy",
+    "earlier": "Anteriores"
+  },
+  "models": {
+    "title": "Modelos",
+    "device": "Tu dispositivo",
+    "deviceRam": "{{ram}} GB de RAM",
+    "deviceRamUnknown": "RAM desconocida",
+    "free": "{{size}} libres",
+    "system": "Modelo integrado",
+    "downloadable": "Descargar un modelo",
+    "downloadableBody": "Funcionan por completo en tu dispositivo con llama.cpp. Los más grandes responden mejor, pero necesitan más memoria y espacio.",
+    "active": "En uso",
+    "use": "Usar",
+    "recommended": "Recomendado",
+    "fitGood": "Va bien en tu dispositivo",
+    "fitTight": "Puede ir lento",
+    "fitTooBig": "Necesita {{ram}} GB de RAM",
+    "ramNeeded": "{{ram}} GB RAM",
+    "license": "Licencia {{license}}",
+    "delete": "Eliminar modelo",
+    "deleteConfirm": "Se eliminará {{title}} ({{size}}). Puedes volver a descargarlo cuando quieras.",
+    "privacy": "Los modelos nunca envían tus preguntas a ningún sitio. Las descargas vienen de Hugging Face.",
+    "blurb": {
+      "tiny": "El más rápido y ligero. Bien para preguntas sencillas y resúmenes.",
+      "balanced": "El mejor equilibrio entre velocidad y calidad para la mayoría de móviles.",
+      "smart": "Respuestas más listas y cuidadas. Necesita un móvil reciente.",
+      "multilingual": "El modelo de Google, con un español excelente y más de 140 idiomas."
+    },
+    "systemProvider": {
+      "apple": "Apple Intelligence",
+      "gemini": "Gemini Nano"
+    },
+    "systemStatus": {
+      "available": "Listo. Rápido, privado y sin descargas.",
+      "notEnabled": "Activa Apple Intelligence en Ajustes para usarlo.",
+      "deviceNotEligible": "Este dispositivo no puede ejecutar el modelo integrado.",
+      "modelNotReady": "El sistema aún está preparando el modelo. Prueba más tarde.",
+      "downloadable": "Disponible para este dispositivo. Descárgalo a través del sistema.",
+      "unsupportedOS": "Requiere iOS 26 o posterior.",
+      "unsupported": "Este dispositivo no tiene modelo integrado.",
+      "checking": "Comprobando…"
+    },
+    "downloadSystem": "Descargar"
+  }
+}
