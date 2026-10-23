@@ -18,10 +18,10 @@ every work block so work can resume after context compaction.
 | Phase | Status |
 |---|---|
 | 0. Foundation (project, design system, nav, i18n, db, downloads core) | done — iOS/Android builds OK |
-| 1. Catalog + downloads UI + onboarding | library UI done; catalog data + onboarding in progress |
+| 1. Catalog + downloads UI + onboarding | done |
 | 2. ZIM library (native module, reader, search) | pending |
 | 3. Maps (extractor, MapLibre, regions, markers) | pending |
-| 4. Courses | pending |
+| 4. Courses | UI + progress done (needs ZIM module for syllabus) |
 | 5. Local AI (system + GGUF, RAG) | pending |
 | 6. Polish, icon, builds on simulator/emulator | pending |
 
@@ -32,14 +32,20 @@ every work block so work can resume after context compaction.
 - Scaffolded Expo 58 app, design tokens + UI kit, navigation shell (native tabs),
   i18n (es/en), SQLite schema, content registry, download manager, settings screen,
   downloads sheet, home screen.
+- Library UI (categories, cumulative tiers, resource sheet, Wikipedia picker,
+  Kiwix OPDS explore with prefix search, ZIM import from Files).
+- Catalog agent delivered `src/data/catalog.json` (101 verified resources, 23 es,
+  14 courses), `scripts/validate-catalog.mjs`, OPDS client + tests.
+- Courses tab: my courses, subject filter, detail with syllabus (main-page links)
+  and lesson completion (history ∪ manual marks).
+- Setup wizard (language → starter pack sized to free space → tips), auto-shown
+  on first launch. App icon (compass mark), adaptive icons, themed splash.
 
 ## In flight (parallel agents, git worktrees — merge into main when done)
 
-- Catalog data agent (main tree): `src/data/catalog.json`, `scripts/validate-catalog.mjs`, `src/features/catalog/opds.ts` (+test).
 - ZIM agent (worktree branch): `modules/nomad-zim`, `src/features/library/{zim,register}.ts`, reader + `/search` screens, `reader` i18n ns.
 - Maps agent (worktree branch): `src/lib/pmtiles`, `src/features/maps`, maps tab, `maps` i18n ns.
 - AI agent (worktree branch): `modules/nomad-llm`, llama.rn, `src/features/assistant`, assistant tab, `assistant` i18n ns.
-- Me (main): courses tab + progress, onboarding wizard, home polish, app icon.
 
 ## Next steps
 
@@ -51,3 +57,12 @@ every work block so work can resume after context compaction.
 - Downloads interrupted by app termination restart from zero unless paused first
   (expo-file-system tasks don't survive relaunch).
 - Map extraction runs in the JS thread while the app is in foreground.
+
+## Build gotchas
+
+- **xcodebuild hangs at "Resolve packages"** (MapLibre SPM binary): SwiftPM waits on a
+  macOS Keychain prompt for github.com credentials. Always pass
+  `-packageAuthorizationProvider netrc`; for `swift package` use `--disable-keychain`.
+- Android builds need `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`.
+- Tests: `npm test` (node --test with type stripping; import with `.ts` extensions, no `@/` aliases).
+- Catalog check: `node scripts/validate-catalog.mjs` (`--offline` to skip URL checks).

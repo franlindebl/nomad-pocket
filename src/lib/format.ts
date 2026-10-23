@@ -16,10 +16,6 @@ export function formatMB(mb: number): string {
   return formatBytes(mb * 1e6);
 }
 
-export function formatPercent(value: number): string {
-  return `${Math.round(Math.max(0, Math.min(1, value)) * 100)} %`.replace(' %', i18n.language === 'es' ? ' %' : '%');
-}
-
 export function formatDuration(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds <= 0) return '—';
   if (seconds < 60) return `${Math.ceil(seconds)} s`;
