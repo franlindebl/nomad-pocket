@@ -1,0 +1,23 @@
+src/app/_layout.tsx
+  s_cbd2a9b15986bf::t_025e981157dbbc 9,54
+src/components/Toast.tsx
+  s_cbd2a9b15986bf::t_24fc4e44df9798 1-72
+src/features/bootstrap.ts
+  s_cbd2a9b15986bf::t_05f9b390216ab1 6-8,35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1d69016bbde3f501b3d952bfc8c1c6135e5916c9",
+  "prompts": {},
+  "sessions": {
+    "s_cbd2a9b15986bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8fb325cf-e8f4-4b02-a113-0dab7f1f1a40",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
