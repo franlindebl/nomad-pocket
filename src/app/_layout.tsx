@@ -21,7 +21,12 @@ export default function RootLayout() {
   useEffect(() => {
     bootstrap().finally(() => {
       SplashScreen.hideAsync();
-      if (!useSettings.getState().onboarded) router.push('/onboarding');
+      // Settings hydrate asynchronously from SQLite: wait before deciding.
+      const decide = () => {
+        if (!useSettings.getState().onboarded) router.push('/onboarding');
+      };
+      if (useSettings.persist.hasHydrated()) decide();
+      else useSettings.persist.onFinishHydration(decide);
     });
   }, []);
 
