@@ -19,7 +19,7 @@ every work block so work can resume after context compaction.
 |---|---|
 | 0. Foundation (project, design system, nav, i18n, db, downloads core) | in progress |
 | 1. Catalog + downloads UI + onboarding | pending |
-| 2. ZIM library (native module, reader, search) | pending |
+| 2. ZIM library (native module, reader, search) | done (Android runtime untested) |
 | 3. Maps (extractor, MapLibre, regions, markers) | pending |
 | 4. Courses | pending |
 | 5. Local AI (system + GGUF, RAG) | pending |
@@ -32,6 +32,18 @@ every work block so work can resume after context compaction.
 - Scaffolded Expo 58 app, design tokens + UI kit, navigation shell (native tabs),
   i18n (es/en), SQLite schema, content registry, download manager, settings screen,
   downloads sheet, home screen.
+
+### 2026-10-24 — ZIM library (phase 2)
+- `modules/nomad-zim`: libkiwix 14.2.1 xcframework (iOS, Obj-C++ wrapper) and
+  `org.kiwix:libkiwix:2.7.0` (Android). Open/close, metadata + illustration, suggestions,
+  full-text search with snippets, entry content, random page, exclude-from-backup.
+- `ZimWebView` native view with custom scheme handler (Range/206, redirects, MIME),
+  dark mode (CSS invert, media re-inverted), text zoom, find in page, external links.
+- `src/features/library/{zim,register,html}.ts`: facade, registration (download
+  completion, removal hook, startup init that also registers stray `.zim` files found
+  in `content/zim`, e.g. copied with Finder/Files), HTML→text and link extraction.
+- Reader (`/reader/[itemId]`) and global search (`/search`) screens; `reader` i18n namespace.
+- Verified: iOS Release simulator build with a real ZIM; Android `assembleDebug` compiles.
 
 ## Next steps
 

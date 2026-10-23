@@ -87,10 +87,19 @@ Add a migration by appending a SQL string to `MIGRATIONS` (never edit old ones).
   `onItemRemoved(kind, hook)`, `useItems(kind?)`, `getItem(id)`.
 
 ### ZIM (`modules/nomad-zim`, wrapped by `src/features/library/zim.ts`)
-- `openArchive(path) → ZimInfo`, `search`, `suggest`, `getArticleText`, `getMainPath`,
-  `randomPath`, `excludeFromBackup`.
-- `<ZimWebView archiveId path … />` serves `zim://<archiveId>/<path>` natively
-  (WKURLSchemeHandler / `shouldInterceptRequest`).
+- `openArchive(itemId, fileUri) → ZimInfo`, `closeArchive`, `suggest`, `search`,
+  `getArticleText`, `getArticleHtml`, `getLinks`, `getMainPath`, `randomPath`,
+  `excludeFromBackup`. Functions taking item ids open installed archives lazily.
+- Native: iOS wraps the prebuilt libkiwix xcframework (`CoreKiwix.xcframework`, fetched by
+  `modules/nomad-zim/scripts/fetch-ios-libs.sh` from `postinstall`, gitignored) with an
+  Objective-C++ class (`NZArchive`); Android uses Maven `org.kiwix:libkiwix`. All libzim
+  work runs on a concurrent background queue / `Dispatchers.IO`.
+- `<ZimWebView archiveId path darkMode textZoom onNavigationChange onLoadEnd />` serves
+  `zim://<uuid>/<path>` (iOS, WKURLSchemeHandler) or `https://zim.local/<uuid>/<path>`
+  (Android, `shouldInterceptRequest`), with HTTP Range (206) for media, redirects
+  resolved, external links opened in the system browser. Ref commands: `goBack`,
+  `goForward`, `reload`, `loadPath`, `findInPage`, `clearFind`, `setTextZoom`, `setDarkMode`.
+- HTML → text and link extraction are pure TS (`src/features/library/html.ts`, unit tested).
 
 ### Feature registration
 Each feature exposes `src/features/<name>/register.ts` that calls
