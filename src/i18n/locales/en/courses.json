@@ -1,1 +1,25 @@
-{}
+{
+  "myCourses": "My courses",
+  "myCoursesEmpty": "No courses yet",
+  "myCoursesEmptyBody": "Download a course and study offline. We keep your progress lesson by lesson.",
+  "explore": "Explore courses",
+  "all": "All",
+  "lessons_one": "{{count}} lesson",
+  "lessons_other": "{{count}} lessons",
+  "progress": "{{done}} of {{total}} lessons",
+  "percent": "{{value}}% complete",
+  "continue": "Continue",
+  "start": "Start course",
+  "next": "Next: {{title}}",
+  "syllabus": "Syllabus",
+  "syllabusEmpty": "This course has no structured syllabus. Open it and explore freely; your history counts as progress.",
+  "openCourse": "Open course",
+  "markDone": "Mark as done",
+  "markUndone": "Mark as not done",
+  "reset": "Reset progress",
+  "resetConfirm": "Your progress in this course will be erased.",
+  "downloadToStart": "Download it to study offline.",
+  "lastOpened": "Last opened {{when}}",
+  "completed": "Course completed!",
+  "building": "Preparing the syllabus…"
+}

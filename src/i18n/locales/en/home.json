@@ -25,5 +25,44 @@
     "action": "Get started"
   },
   "downloadsActive": "Downloads in progress",
-  "offlineReady": "Ready offline"
+  "offlineReady": "Ready offline",
+  "onboarding": {
+    "welcomeTitle": "Knowledge that stays with you offline",
+    "welcomeBody": "Wikipedia, medical and survival guides, maps, courses and a local AI. Download once, use it wherever there's no signal.",
+    "appLanguage": "App language",
+    "contentLanguages": "Content in",
+    "packTitle": "Choose your starter pack",
+    "packBody": "You can always add or remove content from the Library.",
+    "free": "You have {{size}} free",
+    "packs": {
+      "light": {
+        "name": "Light",
+        "body": "The essentials: compact Wikipedia, first aid and basic survival."
+      },
+      "balanced": {
+        "name": "Balanced",
+        "body": "Wikipedia without images plus the essential tier of every collection."
+      },
+      "complete": {
+        "name": "Complete",
+        "body": "Full compact Wikipedia plus the standard tier of every collection."
+      },
+      "none": {
+        "name": "I'll choose",
+        "body": "Start empty and browse the catalog at your own pace."
+      }
+    },
+    "items_one": "{{count}} resource",
+    "items_other": "{{count}} resources",
+    "tooBig": "Doesn't fit in your free space",
+    "readyTitle": "All set",
+    "readyBodyDownloads": "We've started downloading {{count}} resources ({{size}}). You can keep using the app meanwhile.",
+    "readyBodyEmpty": "Browse the Library, download the map of your area and try the assistant.",
+    "tipWifi": "Large downloads work best on Wi‑Fi with your phone charging.",
+    "tipMaps": "In Maps you can download your country or whatever area is on screen.",
+    "tipAi": "In Assistant you can download an AI model that works without internet.",
+    "next": "Next",
+    "start": "Get started",
+    "finish": "Go to Nomad"
+  }
 }

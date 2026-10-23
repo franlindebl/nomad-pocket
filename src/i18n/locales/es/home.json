@@ -25,5 +25,44 @@
     "action": "Empezar"
   },
   "downloadsActive": "Descargas en curso",
-  "offlineReady": "Listo sin conexión"
+  "offlineReady": "Listo sin conexión",
+  "onboarding": {
+    "welcomeTitle": "Conocimiento que te acompaña sin conexión",
+    "welcomeBody": "Wikipedia, guías médicas y de supervivencia, mapas, cursos y una IA local. Descárgalo una vez y úsalo donde no haya cobertura.",
+    "appLanguage": "Idioma de la app",
+    "contentLanguages": "Contenido en",
+    "packTitle": "Elige tu pack de inicio",
+    "packBody": "Siempre podrás añadir o quitar contenido desde la Biblioteca.",
+    "free": "Tienes {{size}} libres",
+    "packs": {
+      "light": {
+        "name": "Ligero",
+        "body": "Lo esencial: Wikipedia compacta, primeros auxilios y supervivencia básica."
+      },
+      "balanced": {
+        "name": "Equilibrado",
+        "body": "Wikipedia sin imágenes y el nivel esencial de todas las colecciones."
+      },
+      "complete": {
+        "name": "Completo",
+        "body": "Wikipedia completa compacta y el nivel estándar de todas las colecciones."
+      },
+      "none": {
+        "name": "Lo elijo yo",
+        "body": "Empieza vacío y explora el catálogo a tu ritmo."
+      }
+    },
+    "items_one": "{{count}} recurso",
+    "items_other": "{{count}} recursos",
+    "tooBig": "No cabe en tu espacio libre",
+    "readyTitle": "Todo listo",
+    "readyBodyDownloads": "Hemos empezado a descargar {{count}} recursos ({{size}}). Puedes seguir usando la app mientras tanto.",
+    "readyBodyEmpty": "Explora la Biblioteca, descarga el mapa de tu zona y prueba el asistente.",
+    "tipWifi": "Las descargas grandes van mejor con Wi‑Fi y el móvil cargando.",
+    "tipMaps": "En Mapas puedes descargar tu país o la zona que veas en pantalla.",
+    "tipAi": "En Asistente puedes descargar un modelo de IA que funciona sin internet.",
+    "next": "Siguiente",
+    "start": "Empezar",
+    "finish": "Ir a Nomad"
+  }
 }

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:dc="http://purl.org/dc/terms/"
+      xmlns:opds="https://specs.opds.io/opds-1.2"
+      xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">
+  <id>db710e28-62c9-9446-6c85-01472d50c227</id>
+
+  <link rel="self"
+        href="/catalog/v2/entries?name=wikipedia_es_top"
+        type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+  <link rel="start"
+        href="/catalog/v2/root.xml"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <link rel="up"
+        href="/catalog/v2/root.xml"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+
+  <title>Filtered Entries (name=wikipedia_es_top)</title>
+  <updated>2026-10-23T22:39:30Z</updated>
+  <totalResults>3</totalResults>
+  <startIndex>0</startIndex>
+  <itemsPerPage>3</itemsPerPage>
+  <entry>
+    <id>urn:uuid:487006c3-b751-64db-54e8-f43cf6011dc7</id>
+    <title>Lo mejor de Wikipedia</title>
+    <updated>2026-10-10T00:00:00Z</updated>
+    <summary>Una selección de los mejores 50,000 artículos de Wikipedia en español</summary>
+    <language>spa</language>
+    <name>wikipedia_es_top</name>
+    <flavour>mini</flavour>
+    <category>wikipedia</category>
+    <tags>wikipedia;_category:wikipedia;_pictures:no;_videos:no;_details:no;_ftindex:yes</tags>
+    <articleCount>340128</articleCount>
+    <mediaCount>2115</mediaCount>
+    <link rel="http://opds-spec.org/image/thumbnail"
+          href="/catalog/v2/illustration/487006c3-b751-64db-54e8-f43cf6011dc7/?size=48"
+          type="image/png;width=48;height=48;scale=1"/>
+    <link type="text/html" href="https://browse.library.kiwix.org/content/wikipedia_es_top_mini_2026-10" />
+    <author>
+      <name>Wikipedia</name>
+    </author>
+    <publisher>
+      <name>openZIM</name>
+    </publisher>
+    <dc:issued>2026-10-10T00:00:00Z</dc:issued>
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim" href="https://lb.download.kiwix.org/zim/wikipedia/wikipedia_es_top_mini_2026-10.zim.meta4" length="217315328" />
+  </entry>
+  <entry>
+    <id>urn:uuid:23658caa-7c73-fd5a-727d-29224ed70597</id>
+    <title>Lo mejor de Wikipedia</title>
+    <updated>2026-10-10T00:00:00Z</updated>
+    <summary>Una selección de los mejores 50,000 artículos de Wikipedia en español</summary>
+    <language>spa</language>
+    <name>wikipedia_es_top</name>
+    <flavour>nopic</flavour>
+    <category>wikipedia</category>
+    <tags>wikipedia;_category:wikipedia;_pictures:no;_videos:no;_details:yes;_ftindex:yes</tags>
+    <articleCount>348403</articleCount>
+    <mediaCount>38308</mediaCount>
+    <link rel="http://opds-spec.org/image/thumbnail"
+          href="/catalog/v2/illustration/23658caa-7c73-fd5a-727d-29224ed70597/?size=48"
+          type="image/png;width=48;height=48;scale=1"/>
+    <link type="text/html" href="https://browse.library.kiwix.org/content/wikipedia_es_top_nopic_2026-10" />
+    <author>
+      <name>Wikipedia</name>
+    </author>
+    <publisher>
+      <name>openZIM</name>
+    </publisher>
+    <dc:issued>2026-10-10T00:00:00Z</dc:issued>
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim" href="https://lb.download.kiwix.org/zim/wikipedia/wikipedia_es_top_nopic_2026-10.zim.meta4" length="1209174016" />
+  </entry>
+  <entry>
+    <id>urn:uuid:64e02b0b-c87f-00f2-7dc4-5ce1418e8c31</id>
+    <title>Lo mejor de Wikipedia</title>
+    <updated>2026-10-10T00:00:00Z</updated>
+    <summary>Una selección de los mejores 50,000 artículos de Wikipedia en español</summary>
+    <language>spa</language>
+    <name>wikipedia_es_top</name>
+    <flavour>maxi</flavour>
+    <category>wikipedia</category>
+    <tags>wikipedia;_category:wikipedia;_pictures:yes;_videos:no;_details:yes;_ftindex:yes</tags>
+    <articleCount>348403</articleCount>
+    <mediaCount>446090</mediaCount>
+    <link rel="http://opds-spec.org/image/thumbnail"
+          href="/catalog/v2/illustration/64e02b0b-c87f-00f2-7dc4-5ce1418e8c31/?size=48"
+          type="image/png;width=48;height=48;scale=1"/>
+    <link type="text/html" href="https://browse.library.kiwix.org/content/wikipedia_es_top_maxi_2026-10" />
+    <author>
+      <name>Wikipedia</name>
+    </author>
+    <publisher>
+      <name>openZIM</name>
+    </publisher>
+    <dc:issued>2026-10-10T00:00:00Z</dc:issued>
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim" href="https://lb.download.kiwix.org/zim/wikipedia/wikipedia_es_top_maxi_2026-10.zim.meta4" length="4066448384" />
+  </entry>
+</feed>

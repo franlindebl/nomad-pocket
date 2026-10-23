@@ -30,17 +30,17 @@ export function toNativePath(uri: string): string {
 }
 
 export function freeBytes(): number {
-  return Paths.availableDiskSpace;
+  return Number(Paths.availableDiskSpace);
 }
 
 export function totalBytes(): number {
-  return Paths.totalDiskSpace;
+  return Number(Paths.totalDiskSpace);
 }
 
 export function fileSize(uri: string): number {
   try {
     const f = new File(uri);
-    return f.exists ? (f.size ?? 0) : 0;
+    return f.exists ? Number(f.size ?? 0) : 0;
   } catch {
     return 0;
   }

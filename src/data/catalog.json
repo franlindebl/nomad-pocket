@@ -1,1 +1,2379 @@
-{"version":"stub","resources":{},"categories":[],"wikipedia":{"es":[],"en":[]},"courseSubjects":[],"courses":[]}
+{
+  "version": "2026-10-24",
+  "resources": {
+    "zimgit-medicine_en": {
+      "id": "zimgit-medicine_en",
+      "kiwixName": "zimgit-medicine_en",
+      "title": {
+        "es": "Biblioteca médica",
+        "en": "Medical Library"
+      },
+      "description": {
+        "es": "Libros y guías de medicina de campo y de emergencia.",
+        "en": "Field and emergency medicine books and guides."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/other/zimgit-medicine_en_2024-08.zim",
+      "sizeMB": 70,
+      "version": "2024-08",
+      "category": "medicine",
+      "medical": true
+    },
+    "nhs.uk_en_medicines": {
+      "id": "nhs.uk_en_medicines",
+      "kiwixName": "nhs.uk_en_medicines",
+      "title": {
+        "es": "Medicamentos A-Z del NHS",
+        "en": "NHS Medicines A to Z"
+      },
+      "description": {
+        "es": "Cómo funcionan los medicamentos, dosis, efectos secundarios e interacciones.",
+        "en": "How medicines work, dosages, side effects and interactions."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/zimit/nhs.uk_en_medicines_2026-09b.zim",
+      "sizeMB": 15,
+      "version": "2026-09",
+      "category": "medicine",
+      "medical": true
+    },
+    "irp.fas.org_en_military-medicine": {
+      "id": "irp.fas.org_en_military-medicine",
+      "kiwixName": "irp.fas.org_en_military-medicine",
+      "title": {
+        "es": "Medicina militar",
+        "en": "Military Medicine"
+      },
+      "description": {
+        "es": "Manuales de medicina táctica y de campaña.",
+        "en": "Tactical and field medicine manuals."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/zimit/irp.fas.org_en_military-medicine_2026-05.zim",
+      "sizeMB": 76,
+      "version": "2026-05",
+      "category": "medicine",
+      "medical": true
+    },
+    "wwwnc.cdc.gov_en_all": {
+      "id": "wwwnc.cdc.gov_en_all",
+      "kiwixName": "wwwnc.cdc.gov_en_all",
+      "title": {
+        "es": "Salud del viajero (CDC)",
+        "en": "CDC Travelers' Health"
+      },
+      "description": {
+        "es": "Prevención de enfermedades, salud en viajes y brotes, de los CDC de EE. UU.",
+        "en": "Disease prevention, travel health and outbreak information from the US CDC."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/zimit/wwwnc.cdc.gov_en_all_2024-11.zim",
+      "sizeMB": 178,
+      "version": "2024-11",
+      "category": "medicine",
+      "medical": true
+    },
+    "medlineplus.gov_en_all": {
+      "id": "medlineplus.gov_en_all",
+      "kiwixName": "medlineplus.gov_en_all",
+      "title": {
+        "es": "MedlinePlus (inglés)",
+        "en": "MedlinePlus"
+      },
+      "description": {
+        "es": "Enciclopedia de salud de los NIH: enfermedades, síntomas, fármacos y suplementos.",
+        "en": "The NIH consumer health encyclopedia: diseases, conditions, drugs and supplements."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/zimit/medlineplus.gov_en_all_2025-01.zim",
+      "sizeMB": 1945,
+      "version": "2025-01",
+      "category": "medicine",
+      "medical": true
+    },
+    "wikipedia_en_medicine_maxi": {
+      "id": "wikipedia_en_medicine_maxi",
+      "kiwixName": "wikipedia_en_medicine_maxi",
+      "title": {
+        "es": "WikiMed (inglés, con imágenes)",
+        "en": "WikiMed Medical Encyclopedia"
+      },
+      "description": {
+        "es": "Artículos médicos de Wikipedia en inglés, con imágenes.",
+        "en": "Curated medical articles from Wikipedia, with images."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_en_medicine_maxi_2026-10.zim",
+      "sizeMB": 1864,
+      "version": "2026-10",
+      "category": "medicine",
+      "medical": true
+    },
+    "libretexts.org_en_med": {
+      "id": "libretexts.org_en_med",
+      "kiwixName": "libretexts.org_en_med",
+      "title": {
+        "es": "LibreTexts Medicina",
+        "en": "LibreTexts Medicine"
+      },
+      "description": {
+        "es": "Libros de texto abiertos de medicina y ciencias de la salud.",
+        "en": "Open medical and health-science textbooks."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/libretexts/libretexts.org_en_med_2025-01.zim",
+      "sizeMB": 1193,
+      "version": "2025-01",
+      "category": "medicine",
+      "medical": true,
+      "isCourse": true,
+      "subject": "health"
+    },
+    "librepathology_en_all_maxi": {
+      "id": "librepathology_en_all_maxi",
+      "kiwixName": "librepathology_en_all_maxi",
+      "title": {
+        "es": "LibrePathology",
+        "en": "LibrePathology"
+      },
+      "description": {
+        "es": "Referencia de anatomía patológica para identificar enfermedades.",
+        "en": "Pathology reference for disease identification."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/other/librepathology_en_all_maxi_2026-09.zim",
+      "sizeMB": 95,
+      "version": "2026-09",
+      "category": "medicine",
+      "medical": true
+    },
+    "wikipedia_es_medicine_nopic": {
+      "id": "wikipedia_es_medicine_nopic",
+      "kiwixName": "wikipedia_es_medicine_nopic",
+      "title": {
+        "es": "Wikipedia Médica",
+        "en": "Medical Wikipedia (Spanish)"
+      },
+      "description": {
+        "es": "Más de 50 000 artículos de medicina y salud de Wikipedia en español, sin imágenes.",
+        "en": "Over 50,000 medicine and health articles from Spanish Wikipedia, text only."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_es_medicine_nopic_2026-10.zim",
+      "sizeMB": 171,
+      "version": "2026-10",
+      "category": "medicine",
+      "medical": true
+    },
+    "medlineplus.gov_es_all": {
+      "id": "medlineplus.gov_es_all",
+      "kiwixName": "medlineplus.gov_es_all",
+      "title": {
+        "es": "MedlinePlus en español",
+        "en": "MedlinePlus (Spanish)"
+      },
+      "description": {
+        "es": "Información de salud de la Biblioteca Nacional de Medicina de EE. UU.: enfermedades, medicamentos y pruebas.",
+        "en": "Health information from the US National Library of Medicine: conditions, drugs and tests."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/zimit/medlineplus.gov_es_all_2024-12.zim",
+      "sizeMB": 1767,
+      "version": "2024-12",
+      "category": "medicine",
+      "medical": true
+    },
+    "ted_mul_disease": {
+      "id": "ted_mul_disease",
+      "kiwixName": "ted_mul_disease",
+      "title": {
+        "es": "TED: enfermedades",
+        "en": "TED: Disease"
+      },
+      "description": {
+        "es": "Charlas TED sobre enfermedades, epidemias y tratamientos, con subtítulos en español.",
+        "en": "TED talks on diseases, epidemics and treatments, with subtitles in many languages."
+      },
+      "language": "mul",
+      "url": "https://download.kiwix.org/zim/ted/ted_mul_disease_2026-09.zim",
+      "sizeMB": 2205,
+      "version": "2026-09",
+      "category": "medicine",
+      "medical": true
+    },
+    "zimgit-water_en": {
+      "id": "zimgit-water_en",
+      "kiwixName": "zimgit-water_en",
+      "title": {
+        "es": "Tratamiento del agua",
+        "en": "Water Treatment Library"
+      },
+      "description": {
+        "es": "Cómo recoger, filtrar y potabilizar agua.",
+        "en": "Collecting, filtering and purifying drinking water."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/other/zimgit-water_en_2024-08.zim",
+      "sizeMB": 21,
+      "version": "2024-08",
+      "category": "survival"
+    },
+    "zimgit-food-preparation_en": {
+      "id": "zimgit-food-preparation_en",
+      "kiwixName": "zimgit-food-preparation_en",
+      "title": {
+        "es": "Comida para emergencias",
+        "en": "Food for Preppers"
+      },
+      "description": {
+        "es": "Recetas y técnicas para preparar y conservar alimentos.",
+        "en": "Recipes and techniques for preparing and preserving food."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/other/zimgit-food-preparation_en_2025-04.zim",
+      "sizeMB": 98,
+      "version": "2025-04",
+      "category": "survival"
+    },
+    "zimgit-knots_en": {
+      "id": "zimgit-knots_en",
+      "kiwixName": "zimgit-knots_en",
+      "title": {
+        "es": "Biblioteca de nudos",
+        "en": "A Library of Knots"
+      },
+      "description": {
+        "es": "Guías ilustradas de nudos, amarres, escalas y suturas.",
+        "en": "Illustrated guides to knots, lashings, ladders and sutures."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/other/zimgit-knots_en_2024-08.zim",
+      "sizeMB": 28,
+      "version": "2024-08",
+      "category": "survival"
+    },
+    "canadian-prepper_en_winterprepping": {
+      "id": "canadian-prepper_en_winterprepping",
+      "kiwixName": "canadian-prepper_en_winterprepping",
+      "title": {
+        "es": "Canadian Prepper: invierno",
+        "en": "Canadian Prepper: Winter Prepping"
+      },
+      "description": {
+        "es": "Vídeos sobre supervivencia en invierno y emergencias con frío extremo.",
+        "en": "Video guides for winter survival and cold-weather emergencies."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/videos/canadian-prepper_en_winterprepping_2026-08.zim",
+      "sizeMB": 1342,
+      "version": "2026-08",
+      "category": "survival"
+    },
+    "canadian-prepper_en_bugoutroll": {
+      "id": "canadian-prepper_en_bugoutroll",
+      "kiwixName": "canadian-prepper_en_bugoutroll",
+      "title": {
+        "es": "Canadian Prepper: kit de evacuación",
+        "en": "Canadian Prepper: Bug Out Roll"
+      },
+      "description": {
+        "es": "Vídeos sobre cómo elegir el equipo de tu mochila de evacuación.",
+        "en": "Choosing the essential gear for your bug-out bag."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/videos/canadian-prepper_en_bugoutroll_2026-10.zim",
+      "sizeMB": 879,
+      "version": "2026-10",
+      "category": "survival"
+    },
+    "ready.gov_en_all": {
+      "id": "ready.gov_en_all",
+      "kiwixName": "ready.gov_en_all",
+      "title": {
+        "es": "Ready.gov (inglés)",
+        "en": "Ready.gov"
+      },
+      "description": {
+        "es": "Guía oficial de EE. UU. para planificar ante desastres: clima, incendios, evacuación y kits.",
+        "en": "Official US disaster planning: weather, fire, evacuation plans and emergency kits."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/zimit/ready.gov_en_all_2026-10.zim",
+      "sizeMB": 2064,
+      "version": "2026-10",
+      "category": "survival"
+    },
+    "outdoors.stackexchange.com_en_all": {
+      "id": "outdoors.stackexchange.com_en_all",
+      "kiwixName": "outdoors.stackexchange.com_en_all",
+      "title": {
+        "es": "Preguntas sobre vida al aire libre",
+        "en": "The Great Outdoors Q&A"
+      },
+      "description": {
+        "es": "Preguntas y respuestas sobre senderismo, acampada, orientación y habilidades en la naturaleza.",
+        "en": "Answered questions on hiking, camping, navigation and wilderness skills."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/stack_exchange/outdoors.stackexchange.com_en_all_2026-10.zim",
+      "sizeMB": 142,
+      "version": "2026-10",
+      "category": "survival"
+    },
+    "ham.stackexchange.com_en_all": {
+      "id": "ham.stackexchange.com_en_all",
+      "kiwixName": "ham.stackexchange.com_en_all",
+      "title": {
+        "es": "Preguntas sobre radioaficionados",
+        "en": "Amateur Radio Q&A"
+      },
+      "description": {
+        "es": "Equipos de radio, antenas, licencias y comunicaciones de emergencia.",
+        "en": "Radio equipment, antennas, licensing and emergency communications."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/stack_exchange/ham.stackexchange.com_en_all_2026-10.zim",
+      "sizeMB": 77,
+      "version": "2026-10",
+      "category": "survival"
+    },
+    "canadian-prepper_en_bugoutconcepts": {
+      "id": "canadian-prepper_en_bugoutconcepts",
+      "kiwixName": "canadian-prepper_en_bugoutconcepts",
+      "title": {
+        "es": "Canadian Prepper: evacuación",
+        "en": "Canadian Prepper: Bug Out Concepts"
+      },
+      "description": {
+        "es": "Estrategias y planificación para evacuar en una emergencia.",
+        "en": "Strategies and planning for emergency evacuation."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/videos/canadian-prepper_en_bugoutconcepts_2026-08.zim",
+      "sizeMB": 2886,
+      "version": "2026-08",
+      "category": "survival"
+    },
+    "urban-prepper_en_all": {
+      "id": "urban-prepper_en_all",
+      "kiwixName": "urban-prepper_en_all",
+      "title": {
+        "es": "Urban Prepper",
+        "en": "Urban Prepper"
+      },
+      "description": {
+        "es": "Serie de vídeos sobre preparación ante emergencias en la ciudad.",
+        "en": "Video series on urban emergency preparedness."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/videos/urban-prepper_en_all_2026-08.zim",
+      "sizeMB": 2245,
+      "version": "2026-08",
+      "category": "survival"
+    },
+    "canadian-prepper_en_preppingfood": {
+      "id": "canadian-prepper_en_preppingfood",
+      "kiwixName": "canadian-prepper_en_preppingfood",
+      "title": {
+        "es": "Canadian Prepper: alimentos",
+        "en": "Canadian Prepper: Prepping Food"
+      },
+      "description": {
+        "es": "Almacenamiento de alimentos a largo plazo y comidas de supervivencia.",
+        "en": "Long-term food storage and survival meals."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/videos/canadian-prepper_en_preppingfood_2026-10.zim",
+      "sizeMB": 2195,
+      "version": "2026-10",
+      "category": "survival"
+    },
+    "zimgit-post-disaster_en": {
+      "id": "zimgit-post-disaster_en",
+      "kiwixName": "zimgit-post-disaster_en",
+      "title": {
+        "es": "Después del desastre",
+        "en": "Post Disaster Resource Library"
+      },
+      "description": {
+        "es": "Refugio, saneamiento, recuperación de materiales y reconstrucción tras un desastre.",
+        "en": "Shelter, sanitation, salvage and recovery after a disaster."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/other/zimgit-post-disaster_en_2024-05.zim",
+      "sizeMB": 645,
+      "version": "2024-05",
+      "category": "survival"
+    },
+    "100r.co_en_all": {
+      "id": "100r.co_en_all",
+      "kiwixName": "100r.co_en_all",
+      "title": {
+        "es": "Hundred Rabbits",
+        "en": "Hundred Rabbits"
+      },
+      "description": {
+        "es": "Notas sobre vida low-tech: energía solar, agua, comida y reparaciones tras una década fuera de la red.",
+        "en": "Field notes on low-tech living — solar, water, food and repair from a decade off-grid."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/zimit/100r.co_en_all_2026-08.zim",
+      "sizeMB": 177,
+      "version": "2026-08",
+      "category": "survival"
+    },
+    "gutenberg_en_lcc-u": {
+      "id": "gutenberg_en_lcc-u",
+      "kiwixName": "gutenberg_en_lcc-u",
+      "title": {
+        "es": "Gutenberg: ciencia militar",
+        "en": "Project Gutenberg: Military Science"
+      },
+      "description": {
+        "es": "Clásicos de estrategia, táctica y manuales de campaña.",
+        "en": "Classic military strategy, tactics and field manuals."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/gutenberg/gutenberg_en_lcc-u_2026-03.zim",
+      "sizeMB": 1288,
+      "version": "2026-03",
+      "category": "survival"
+    },
+    "cd3wdproject.org_en_all": {
+      "id": "cd3wdproject.org_en_all",
+      "kiwixName": "cd3wdproject.org_en_all",
+      "title": {
+        "es": "CD3WD: tecnología apropiada",
+        "en": "CD3WD: Appropriate Technology"
+      },
+      "description": {
+        "es": "Guías prácticas de producción de alimentos, agua, construcción y fabricación a pequeña escala.",
+        "en": "Practical guides to food production, water and sanitation, construction and village-scale manufacturing."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/zimit/cd3wdproject.org_en_all_2025-11.zim",
+      "sizeMB": 581,
+      "version": "2025-11",
+      "category": "survival"
+    },
+    "scoutwiki.org_es_all_maxi": {
+      "id": "scoutwiki.org_es_all_maxi",
+      "kiwixName": "scoutwiki.org_es_all_maxi",
+      "title": {
+        "es": "WikiRoca (scouts)",
+        "en": "WikiRoca (Scouting, Spanish)"
+      },
+      "description": {
+        "es": "Conocimiento scout en español: acampada, nudos, orientación, primeros auxilios y juegos.",
+        "en": "Spanish scouting wiki: camping, knots, orienteering, first aid and games."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/other/scoutwiki.org_es_all_maxi_2026-10.zim",
+      "sizeMB": 20,
+      "version": "2026-10",
+      "category": "survival"
+    },
+    "ready.gov_es_all": {
+      "id": "ready.gov_es_all",
+      "kiwixName": "ready.gov_es_all",
+      "title": {
+        "es": "Ready.gov en español",
+        "en": "Ready.gov (Spanish)"
+      },
+      "description": {
+        "es": "Guía oficial para prepararse ante desastres: kits de emergencia, planes familiares, clima extremo y evacuación.",
+        "en": "Official disaster preparedness guidance in Spanish: kits, family plans, severe weather and evacuation."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/zimit/ready.gov_es_all_2026-10.zim",
+      "sizeMB": 2066,
+      "version": "2026-10",
+      "category": "survival"
+    },
+    "ted_mul_water": {
+      "id": "ted_mul_water",
+      "kiwixName": "ted_mul_water",
+      "title": {
+        "es": "TED: agua",
+        "en": "TED: Water"
+      },
+      "description": {
+        "es": "Charlas TED sobre agua potable, escasez y saneamiento, con subtítulos en español.",
+        "en": "TED talks on clean water, scarcity and sanitation, with multilingual subtitles."
+      },
+      "language": "mul",
+      "url": "https://download.kiwix.org/zim/ted/ted_mul_water_2026-09.zim",
+      "sizeMB": 872,
+      "version": "2026-09",
+      "category": "survival"
+    },
+    "wikibooks_en_all_nopic": {
+      "id": "wikibooks_en_all_nopic",
+      "kiwixName": "wikibooks_en_all_nopic",
+      "title": {
+        "es": "Wikibooks (inglés)",
+        "en": "Wikibooks"
+      },
+      "description": {
+        "es": "Libros de texto abiertos de matemáticas, ciencias, informática y más.",
+        "en": "Open textbooks covering math, science, computing and more."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/wikibooks/wikibooks_en_all_nopic_2026-04.zim",
+      "sizeMB": 3508,
+      "version": "2026-04",
+      "category": "education"
+    },
+    "ted_mul_ted-ed": {
+      "id": "ted_mul_ted-ed",
+      "kiwixName": "ted_mul_ted-ed",
+      "title": {
+        "es": "TED-Ed",
+        "en": "TED-Ed"
+      },
+      "description": {
+        "es": "Lecciones animadas de ciencia, historia, literatura y más, con subtítulos.",
+        "en": "Animated video lessons on science, history, literature and more."
+      },
+      "language": "mul",
+      "url": "https://download.kiwix.org/zim/ted/ted_mul_ted-ed_2026-09.zim",
+      "sizeMB": 6381,
+      "version": "2026-09",
+      "category": "education"
+    },
+    "wikiversity_en_all_nopic": {
+      "id": "wikiversity_en_all_nopic",
+      "kiwixName": "wikiversity_en_all_nopic",
+      "title": {
+        "es": "Wikiversity (inglés)",
+        "en": "Wikiversity"
+      },
+      "description": {
+        "es": "Tutoriales, cursos y materiales de aprendizaje para todos los niveles.",
+        "en": "Tutorials, courses and learning materials for all levels."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/wikiversity/wikiversity_en_all_nopic_2026-08.zim",
+      "sizeMB": 1630,
+      "version": "2026-08",
+      "category": "education",
+      "isCourse": true,
+      "subject": "general"
+    },
+    "libretexts.org_en_math": {
+      "id": "libretexts.org_en_math",
+      "kiwixName": "libretexts.org_en_math",
+      "title": {
+        "es": "LibreTexts Matemáticas",
+        "en": "LibreTexts Mathematics"
+      },
+      "description": {
+        "es": "Libros abiertos de matemáticas, del álgebra al cálculo.",
+        "en": "Open math textbooks, from algebra to calculus."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/libretexts/libretexts.org_en_math_2026-01.zim",
+      "sizeMB": 831,
+      "version": "2026-01",
+      "category": "education",
+      "isCourse": true,
+      "subject": "math"
+    },
+    "libretexts.org_en_phys": {
+      "id": "libretexts.org_en_phys",
+      "kiwixName": "libretexts.org_en_phys",
+      "title": {
+        "es": "LibreTexts Física",
+        "en": "LibreTexts Physics"
+      },
+      "description": {
+        "es": "Cursos y libros de texto de física.",
+        "en": "Physics courses and textbooks."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/libretexts/libretexts.org_en_phys_2026-01.zim",
+      "sizeMB": 560,
+      "version": "2026-01",
+      "category": "education",
+      "isCourse": true,
+      "subject": "science"
+    },
+    "libretexts.org_en_chem": {
+      "id": "libretexts.org_en_chem",
+      "kiwixName": "libretexts.org_en_chem",
+      "title": {
+        "es": "LibreTexts Química",
+        "en": "LibreTexts Chemistry"
+      },
+      "description": {
+        "es": "Cursos y libros de texto de química.",
+        "en": "Chemistry courses and textbooks."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/libretexts/libretexts.org_en_chem_2025-01.zim",
+      "sizeMB": 2183,
+      "version": "2025-01",
+      "category": "education"
+    },
+    "libretexts.org_en_bio": {
+      "id": "libretexts.org_en_bio",
+      "kiwixName": "libretexts.org_en_bio",
+      "title": {
+        "es": "LibreTexts Biología",
+        "en": "LibreTexts Biology"
+      },
+      "description": {
+        "es": "Cursos y libros de texto de biología.",
+        "en": "Biology courses and textbooks."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/libretexts/libretexts.org_en_bio_2025-01.zim",
+      "sizeMB": 2241,
+      "version": "2025-01",
+      "category": "education"
+    },
+    "wikibooks_en_all_maxi": {
+      "id": "wikibooks_en_all_maxi",
+      "kiwixName": "wikibooks_en_all_maxi",
+      "title": {
+        "es": "Wikibooks con imágenes (inglés)",
+        "en": "Wikibooks (With Images)"
+      },
+      "description": {
+        "es": "Libros de texto abiertos con todas sus ilustraciones y diagramas.",
+        "en": "Open textbooks with full illustrations and diagrams."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/wikibooks/wikibooks_en_all_maxi_2026-04.zim",
+      "sizeMB": 6178,
+      "version": "2026-04",
+      "category": "education"
+    },
+    "ted_mul_ted-conference": {
+      "id": "ted_mul_ted-conference",
+      "kiwixName": "ted_mul_ted-conference",
+      "title": {
+        "es": "Conferencias TED",
+        "en": "TED Conference"
+      },
+      "description": {
+        "es": "Charlas de la conferencia principal de TED, con subtítulos.",
+        "en": "Main TED conference talks, with subtitles."
+      },
+      "language": "mul",
+      "url": "https://download.kiwix.org/zim/ted/ted_mul_ted-conference_2026-09.zim",
+      "sizeMB": 18136,
+      "version": "2026-09",
+      "category": "education"
+    },
+    "libretexts.org_en_human": {
+      "id": "libretexts.org_en_human",
+      "kiwixName": "libretexts.org_en_human",
+      "title": {
+        "es": "LibreTexts Humanidades",
+        "en": "LibreTexts Humanities"
+      },
+      "description": {
+        "es": "Literatura, filosofía, historia y ciencias sociales.",
+        "en": "Literature, philosophy, history and social sciences."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/libretexts/libretexts.org_en_human_2026-07.zim",
+      "sizeMB": 4434,
+      "version": "2026-07",
+      "category": "education"
+    },
+    "libretexts.org_en_geo": {
+      "id": "libretexts.org_en_geo",
+      "kiwixName": "libretexts.org_en_geo",
+      "title": {
+        "es": "LibreTexts Geociencias",
+        "en": "LibreTexts Geosciences"
+      },
+      "description": {
+        "es": "Ciencias de la Tierra, geología y medio ambiente.",
+        "en": "Earth science, geology and environmental studies."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/libretexts/libretexts.org_en_geo_2026-01.zim",
+      "sizeMB": 1188,
+      "version": "2026-01",
+      "category": "education"
+    },
+    "libretexts.org_en_eng": {
+      "id": "libretexts.org_en_eng",
+      "kiwixName": "libretexts.org_en_eng",
+      "title": {
+        "es": "LibreTexts Ingeniería",
+        "en": "LibreTexts Engineering"
+      },
+      "description": {
+        "es": "Cursos de ingeniería y referencias técnicas.",
+        "en": "Engineering courses and technical references."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/libretexts/libretexts.org_en_eng_2025-01.zim",
+      "sizeMB": 678,
+      "version": "2025-01",
+      "category": "education"
+    },
+    "libretexts.org_en_biz": {
+      "id": "libretexts.org_en_biz",
+      "kiwixName": "libretexts.org_en_biz",
+      "title": {
+        "es": "LibreTexts Empresa",
+        "en": "LibreTexts Business"
+      },
+      "description": {
+        "es": "Libros de empresa, economía y gestión.",
+        "en": "Business, economics and management textbooks."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/libretexts/libretexts.org_en_biz_2026-01.zim",
+      "sizeMB": 840,
+      "version": "2026-01",
+      "category": "education"
+    },
+    "wikibooks_es_all_nopic": {
+      "id": "wikibooks_es_all_nopic",
+      "kiwixName": "wikibooks_es_all_nopic",
+      "title": {
+        "es": "Wikilibros",
+        "en": "Wikibooks (Spanish)"
+      },
+      "description": {
+        "es": "Libros de texto libres en español sobre ciencias, idiomas, informática y más.",
+        "en": "Free Spanish textbooks on science, languages, computing and more."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/wikibooks/wikibooks_es_all_nopic_2025-10.zim",
+      "sizeMB": 112,
+      "version": "2025-10",
+      "category": "education"
+    },
+    "wikivoyage_es_all_nopic": {
+      "id": "wikivoyage_es_all_nopic",
+      "kiwixName": "wikivoyage_es_all_nopic",
+      "title": {
+        "es": "Wikiviajes",
+        "en": "Wikivoyage (Spanish)"
+      },
+      "description": {
+        "es": "Guía de viajes colaborativa: destinos, transporte, alojamiento y consejos.",
+        "en": "Collaborative travel guide in Spanish: destinations, transport, lodging and tips."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/wikivoyage/wikivoyage_es_all_nopic_2026-09.zim",
+      "sizeMB": 43,
+      "version": "2026-09",
+      "category": "education"
+    },
+    "vikidia_es_all_nopic": {
+      "id": "vikidia_es_all_nopic",
+      "kiwixName": "vikidia_es_all_nopic",
+      "title": {
+        "es": "Vikidia",
+        "en": "Vikidia (Spanish)"
+      },
+      "description": {
+        "es": "Enciclopedia en español escrita para niños y jóvenes de 8 a 13 años.",
+        "en": "Spanish encyclopedia written for readers aged 8 to 13."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/vikidia/vikidia_es_all_nopic_2026-09.zim",
+      "sizeMB": 16,
+      "version": "2026-09",
+      "category": "education"
+    },
+    "wiktionary_es_all_nopic": {
+      "id": "wiktionary_es_all_nopic",
+      "kiwixName": "wiktionary_es_all_nopic",
+      "title": {
+        "es": "Wikcionario",
+        "en": "Wiktionary (Spanish)"
+      },
+      "description": {
+        "es": "Diccionario libre en español: definiciones, etimologías, sinónimos y traducciones.",
+        "en": "Free Spanish dictionary: definitions, etymology, synonyms and translations."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/wiktionary/wiktionary_es_all_nopic_2026-09.zim",
+      "sizeMB": 656,
+      "version": "2026-09",
+      "category": "education"
+    },
+    "wikisource_es_all_nopic": {
+      "id": "wikisource_es_all_nopic",
+      "kiwixName": "wikisource_es_all_nopic",
+      "title": {
+        "es": "Wikisource",
+        "en": "Wikisource (Spanish)"
+      },
+      "description": {
+        "es": "Biblioteca de textos en español de dominio público: literatura, historia y documentos.",
+        "en": "Library of public-domain Spanish texts: literature, history and documents."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/wikisource/wikisource_es_all_nopic_2026-10.zim",
+      "sizeMB": 400,
+      "version": "2026-10",
+      "category": "education"
+    },
+    "wikiquote_es_all_nopic": {
+      "id": "wikiquote_es_all_nopic",
+      "kiwixName": "wikiquote_es_all_nopic",
+      "title": {
+        "es": "Wikiquote",
+        "en": "Wikiquote (Spanish)"
+      },
+      "description": {
+        "es": "Colección de citas célebres, proverbios y refranes en español.",
+        "en": "Collection of famous quotations and proverbs in Spanish."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/wikiquote/wikiquote_es_all_nopic_2026-10.zim",
+      "sizeMB": 31,
+      "version": "2026-10",
+      "category": "education"
+    },
+    "gutenberg_es_all": {
+      "id": "gutenberg_es_all",
+      "kiwixName": "gutenberg_es_all",
+      "title": {
+        "es": "Proyecto Gutenberg en español",
+        "en": "Project Gutenberg (Spanish)"
+      },
+      "description": {
+        "es": "Más de mil libros clásicos en español de dominio público.",
+        "en": "Over a thousand public-domain classic books in Spanish."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/gutenberg/gutenberg_es_all_2026-01.zim",
+      "sizeMB": 1860,
+      "version": "2026-01",
+      "category": "education"
+    },
+    "wikibooks_es_all_maxi": {
+      "id": "wikibooks_es_all_maxi",
+      "kiwixName": "wikibooks_es_all_maxi",
+      "title": {
+        "es": "Wikilibros con imágenes",
+        "en": "Wikibooks with images (Spanish)"
+      },
+      "description": {
+        "es": "Los libros de texto de Wikilibros con todas sus ilustraciones.",
+        "en": "Spanish Wikibooks textbooks with all illustrations."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/wikibooks/wikibooks_es_all_maxi_2025-10.zim",
+      "sizeMB": 350,
+      "version": "2025-10",
+      "category": "education"
+    },
+    "woodworking.stackexchange.com_en_all": {
+      "id": "woodworking.stackexchange.com_en_all",
+      "kiwixName": "woodworking.stackexchange.com_en_all",
+      "title": {
+        "es": "Preguntas sobre carpintería",
+        "en": "Woodworking Q&A"
+      },
+      "description": {
+        "es": "Preguntas y respuestas sobre carpintería, ensambles y trabajo con madera.",
+        "en": "Q&A on carpentry, joinery and woodcraft."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/stack_exchange/woodworking.stackexchange.com_en_all_2026-10.zim",
+      "sizeMB": 107,
+      "version": "2026-10",
+      "category": "diy"
+    },
+    "mechanics.stackexchange.com_en_all": {
+      "id": "mechanics.stackexchange.com_en_all",
+      "kiwixName": "mechanics.stackexchange.com_en_all",
+      "title": {
+        "es": "Preguntas sobre mecánica",
+        "en": "Motor Vehicle Maintenance Q&A"
+      },
+      "description": {
+        "es": "Reparación y mantenimiento de coches y motos.",
+        "en": "Car and motorcycle repair and maintenance."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/stack_exchange/mechanics.stackexchange.com_en_all_2026-10.zim",
+      "sizeMB": 342,
+      "version": "2026-10",
+      "category": "diy"
+    },
+    "diy.stackexchange.com_en_all": {
+      "id": "diy.stackexchange.com_en_all",
+      "kiwixName": "diy.stackexchange.com_en_all",
+      "title": {
+        "es": "Preguntas sobre bricolaje",
+        "en": "DIY & Home Improvement Q&A"
+      },
+      "description": {
+        "es": "Reparaciones del hogar, electricidad, fontanería y construcción.",
+        "en": "Home repairs, electrical, plumbing and construction."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/stack_exchange/diy.stackexchange.com_en_all_2026-10.zim",
+      "sizeMB": 2086,
+      "version": "2026-10",
+      "category": "diy"
+    },
+    "ifixit_en_all": {
+      "id": "ifixit_en_all",
+      "kiwixName": "ifixit_en_all",
+      "title": {
+        "es": "iFixit (inglés)",
+        "en": "iFixit Repair Guides"
+      },
+      "description": {
+        "es": "Guías de reparación paso a paso para electrónica, electrodomésticos y vehículos.",
+        "en": "Step-by-step repair guides for electronics, appliances and vehicles."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/ifixit/ifixit_en_all_2025-12.zim",
+      "sizeMB": 3571,
+      "version": "2025-12",
+      "category": "diy"
+    },
+    "solar.lowtechmagazine.com_mul_all": {
+      "id": "solar.lowtechmagazine.com_mul_all",
+      "kiwixName": "solar.lowtechmagazine.com_mul_all",
+      "title": {
+        "es": "Low-tech Magazine",
+        "en": "Low-tech Magazine"
+      },
+      "description": {
+        "es": "Artículos sobre tecnologías sencillas y sostenibles: energía, calor, transporte y herramientas. Parte en español.",
+        "en": "Articles on simple, sustainable technology — energy, heating, transport and tools. Multilingual."
+      },
+      "language": "mul",
+      "url": "https://download.kiwix.org/zim/zimit/solar.lowtechmagazine.com_mul_all_2025-01.zim",
+      "sizeMB": 701,
+      "version": "2025-01",
+      "category": "diy"
+    },
+    "ifixit_es_all": {
+      "id": "ifixit_es_all",
+      "kiwixName": "ifixit_es_all",
+      "title": {
+        "es": "iFixit en español",
+        "en": "iFixit (Spanish)"
+      },
+      "description": {
+        "es": "Guías de reparación paso a paso para móviles, ordenadores, electrodomésticos y más.",
+        "en": "Step-by-step repair guides in Spanish for phones, computers, appliances and more."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/ifixit/ifixit_es_all_2026-03.zim",
+      "sizeMB": 3681,
+      "version": "2026-03",
+      "category": "diy"
+    },
+    "foss.cooking_en_all": {
+      "id": "foss.cooking_en_all",
+      "kiwixName": "foss.cooking_en_all",
+      "title": {
+        "es": "FOSS Cooking",
+        "en": "FOSS Cooking"
+      },
+      "description": {
+        "es": "Recetas y guías de cocina rápidas y sencillas.",
+        "en": "Quick and easy cooking guides and recipes."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/zimit/foss.cooking_en_all_2026-05.zim",
+      "sizeMB": 24,
+      "version": "2026-05",
+      "category": "agriculture"
+    },
+    "based.cooking_en_all": {
+      "id": "based.cooking_en_all",
+      "kiwixName": "based.cooking_en_all",
+      "title": {
+        "es": "Based.Cooking",
+        "en": "Based.Cooking"
+      },
+      "description": {
+        "es": "Recetas sencillas y prácticas de la comunidad.",
+        "en": "Simple, practical recipes from the community."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/zimit/based.cooking_en_all_2026-08.zim",
+      "sizeMB": 16,
+      "version": "2026-08",
+      "category": "agriculture"
+    },
+    "gardening.stackexchange.com_en_all": {
+      "id": "gardening.stackexchange.com_en_all",
+      "kiwixName": "gardening.stackexchange.com_en_all",
+      "title": {
+        "es": "Preguntas sobre jardinería",
+        "en": "Gardening Q&A"
+      },
+      "description": {
+        "es": "Cultivar tus propios alimentos, cuidado de plantas y paisajismo.",
+        "en": "Growing your own food, plant care and landscaping."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/stack_exchange/gardening.stackexchange.com_en_all_2026-10.zim",
+      "sizeMB": 933,
+      "version": "2026-10",
+      "category": "agriculture"
+    },
+    "cooking.stackexchange.com_en_all": {
+      "id": "cooking.stackexchange.com_en_all",
+      "kiwixName": "cooking.stackexchange.com_en_all",
+      "title": {
+        "es": "Preguntas sobre cocina",
+        "en": "Cooking Q&A"
+      },
+      "description": {
+        "es": "Técnicas de cocina, seguridad alimentaria y recetas.",
+        "en": "Cooking techniques, food safety and recipes."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/stack_exchange/cooking.stackexchange.com_en_all_2026-10.zim",
+      "sizeMB": 238,
+      "version": "2026-10",
+      "category": "agriculture"
+    },
+    "lrnselfreliance_en_all": {
+      "id": "lrnselfreliance_en_all",
+      "kiwixName": "lrnselfreliance_en_all",
+      "title": {
+        "es": "Learning Self-Reliance",
+        "en": "Learning Self-Reliance"
+      },
+      "description": {
+        "es": "Vídeos sobre apicultura, cría de animales y vida autosuficiente.",
+        "en": "Videos on beekeeping, animal husbandry and sustainable living."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/videos/lrnselfreliance_en_all_2026-09.zim",
+      "sizeMB": 3974,
+      "version": "2026-09",
+      "category": "agriculture"
+    },
+    "gutenberg_en_lcc-s": {
+      "id": "gutenberg_en_lcc-s",
+      "kiwixName": "gutenberg_en_lcc-s",
+      "title": {
+        "es": "Gutenberg: agricultura",
+        "en": "Project Gutenberg: Agriculture"
+      },
+      "description": {
+        "es": "Textos clásicos sobre cultivo, ganadería, horticultura y conservación de alimentos.",
+        "en": "Classic texts on farming, animal husbandry, cultivation and food preservation."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/gutenberg/gutenberg_en_lcc-s_2026-03.zim",
+      "sizeMB": 4533,
+      "version": "2026-03",
+      "category": "agriculture"
+    },
+    "ted_mul_gardening": {
+      "id": "ted_mul_gardening",
+      "kiwixName": "ted_mul_gardening",
+      "title": {
+        "es": "TED: jardinería y huerto",
+        "en": "TED: Gardening"
+      },
+      "description": {
+        "es": "Charlas TED sobre huertos, jardinería urbana y cultivo de alimentos, con subtítulos en español.",
+        "en": "TED talks on gardens, urban growing and food plants, with multilingual subtitles."
+      },
+      "language": "mul",
+      "url": "https://download.kiwix.org/zim/ted/ted_mul_gardening_2026-09.zim",
+      "sizeMB": 326,
+      "version": "2026-09",
+      "category": "agriculture"
+    },
+    "ted_mul_farming": {
+      "id": "ted_mul_farming",
+      "kiwixName": "ted_mul_farming",
+      "title": {
+        "es": "TED: cultivo",
+        "en": "TED: Farming"
+      },
+      "description": {
+        "es": "Charlas TED sobre cultivo y producción de alimentos, con subtítulos en español.",
+        "en": "TED talks on farming and food production, with multilingual subtitles."
+      },
+      "language": "mul",
+      "url": "https://download.kiwix.org/zim/ted/ted_mul_farming_2026-09.zim",
+      "sizeMB": 828,
+      "version": "2026-09",
+      "category": "agriculture"
+    },
+    "ted_mul_agriculture": {
+      "id": "ted_mul_agriculture",
+      "kiwixName": "ted_mul_agriculture",
+      "title": {
+        "es": "TED: agricultura",
+        "en": "TED: Agriculture"
+      },
+      "description": {
+        "es": "Charlas TED sobre agricultura, suelos y sistemas alimentarios, con subtítulos en español.",
+        "en": "TED talks on agriculture, soil and food systems, with multilingual subtitles."
+      },
+      "language": "mul",
+      "url": "https://download.kiwix.org/zim/ted/ted_mul_agriculture_2026-09.zim",
+      "sizeMB": 1270,
+      "version": "2026-09",
+      "category": "agriculture"
+    },
+    "freecodecamp_en_all": {
+      "id": "freecodecamp_en_all",
+      "kiwixName": "freecodecamp_en_all",
+      "title": {
+        "es": "freeCodeCamp (inglés)",
+        "en": "freeCodeCamp"
+      },
+      "description": {
+        "es": "Ejercicios interactivos de programación: JavaScript, algoritmos y estructuras de datos.",
+        "en": "Interactive programming exercises: JavaScript, algorithms and data structures."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/freecodecamp/freecodecamp_en_all_2026-08.zim",
+      "sizeMB": 8,
+      "version": "2026-08",
+      "category": "computing",
+      "isCourse": true,
+      "subject": "programming"
+    },
+    "devdocs_en_python": {
+      "id": "devdocs_en_python",
+      "kiwixName": "devdocs_en_python",
+      "title": {
+        "es": "Documentación de Python",
+        "en": "Python Documentation"
+      },
+      "description": {
+        "es": "Referencia completa del lenguaje Python.",
+        "en": "Complete Python language reference."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/devdocs/devdocs_en_python_2026-08.zim",
+      "sizeMB": 4,
+      "version": "2026-08",
+      "category": "computing"
+    },
+    "devdocs_en_javascript": {
+      "id": "devdocs_en_javascript",
+      "kiwixName": "devdocs_en_javascript",
+      "title": {
+        "es": "Documentación de JavaScript",
+        "en": "JavaScript Documentation"
+      },
+      "description": {
+        "es": "Referencia y guías de JavaScript de MDN.",
+        "en": "MDN JavaScript reference and guides."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/devdocs/devdocs_en_javascript_2026-10.zim",
+      "sizeMB": 3,
+      "version": "2026-10",
+      "category": "computing"
+    },
+    "devdocs_en_html": {
+      "id": "devdocs_en_html",
+      "kiwixName": "devdocs_en_html",
+      "title": {
+        "es": "Documentación de HTML",
+        "en": "HTML Documentation"
+      },
+      "description": {
+        "es": "Referencia de elementos y atributos HTML de MDN.",
+        "en": "MDN HTML elements and attributes reference."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/devdocs/devdocs_en_html_2026-10.zim",
+      "sizeMB": 2,
+      "version": "2026-10",
+      "category": "computing"
+    },
+    "devdocs_en_css": {
+      "id": "devdocs_en_css",
+      "kiwixName": "devdocs_en_css",
+      "title": {
+        "es": "Documentación de CSS",
+        "en": "CSS Documentation"
+      },
+      "description": {
+        "es": "Referencia de propiedades y selectores CSS de MDN.",
+        "en": "MDN CSS properties and selectors reference."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/devdocs/devdocs_en_css_2026-10.zim",
+      "sizeMB": 3,
+      "version": "2026-10",
+      "category": "computing"
+    },
+    "arduino.stackexchange.com_en_all": {
+      "id": "arduino.stackexchange.com_en_all",
+      "kiwixName": "arduino.stackexchange.com_en_all",
+      "title": {
+        "es": "Preguntas sobre Arduino",
+        "en": "Arduino Q&A"
+      },
+      "description": {
+        "es": "Proyectos con microcontroladores Arduino.",
+        "en": "Arduino microcontroller projects."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/stack_exchange/arduino.stackexchange.com_en_all_2026-10.zim",
+      "sizeMB": 260,
+      "version": "2026-10",
+      "category": "computing"
+    },
+    "raspberrypi.stackexchange.com_en_all": {
+      "id": "raspberrypi.stackexchange.com_en_all",
+      "kiwixName": "raspberrypi.stackexchange.com_en_all",
+      "title": {
+        "es": "Preguntas sobre Raspberry Pi",
+        "en": "Raspberry Pi Q&A"
+      },
+      "description": {
+        "es": "Proyectos y resolución de problemas con Raspberry Pi.",
+        "en": "Raspberry Pi projects and troubleshooting."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/stack_exchange/raspberrypi.stackexchange.com_en_all_2026-10.zim",
+      "sizeMB": 299,
+      "version": "2026-10",
+      "category": "computing"
+    },
+    "devdocs_en_node": {
+      "id": "devdocs_en_node",
+      "kiwixName": "devdocs_en_node",
+      "title": {
+        "es": "Documentación de Node.js",
+        "en": "Node.js Documentation"
+      },
+      "description": {
+        "es": "Referencia de la API de Node.js.",
+        "en": "Node.js API reference."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/devdocs/devdocs_en_node_2026-08.zim",
+      "sizeMB": 1,
+      "version": "2026-08",
+      "category": "computing"
+    },
+    "devdocs_en_react": {
+      "id": "devdocs_en_react",
+      "kiwixName": "devdocs_en_react",
+      "title": {
+        "es": "Documentación de React",
+        "en": "React Documentation"
+      },
+      "description": {
+        "es": "Referencia de la librería React.",
+        "en": "React library reference."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/devdocs/devdocs_en_react_2026-05.zim",
+      "sizeMB": 3,
+      "version": "2026-05",
+      "category": "computing"
+    },
+    "devdocs_en_git": {
+      "id": "devdocs_en_git",
+      "kiwixName": "devdocs_en_git",
+      "title": {
+        "es": "Documentación de Git",
+        "en": "Git Documentation"
+      },
+      "description": {
+        "es": "Referencia del sistema de control de versiones Git.",
+        "en": "Git version control reference."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/devdocs/devdocs_en_git_2026-10.zim",
+      "sizeMB": 2,
+      "version": "2026-10",
+      "category": "computing"
+    },
+    "electronics.stackexchange.com_en_all": {
+      "id": "electronics.stackexchange.com_en_all",
+      "kiwixName": "electronics.stackexchange.com_en_all",
+      "title": {
+        "es": "Preguntas sobre electrónica",
+        "en": "Electronics Q&A"
+      },
+      "description": {
+        "es": "Diseño de circuitos, componentes e ingeniería eléctrica.",
+        "en": "Circuit design, components and electrical engineering."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/stack_exchange/electronics.stackexchange.com_en_all_2026-10.zim",
+      "sizeMB": 4261,
+      "version": "2026-10",
+      "category": "computing"
+    },
+    "robotics.stackexchange.com_en_all": {
+      "id": "robotics.stackexchange.com_en_all",
+      "kiwixName": "robotics.stackexchange.com_en_all",
+      "title": {
+        "es": "Preguntas sobre robótica",
+        "en": "Robotics Q&A"
+      },
+      "description": {
+        "es": "Proyectos de robótica y automatización.",
+        "en": "Robotics projects and automation."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/stack_exchange/robotics.stackexchange.com_en_all_2026-10.zim",
+      "sizeMB": 243,
+      "version": "2026-10",
+      "category": "computing"
+    },
+    "devdocs_en_docker": {
+      "id": "devdocs_en_docker",
+      "kiwixName": "devdocs_en_docker",
+      "title": {
+        "es": "Documentación de Docker",
+        "en": "Docker Documentation"
+      },
+      "description": {
+        "es": "Referencia y guías de contenedores Docker.",
+        "en": "Docker container reference and guides."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/devdocs/devdocs_en_docker_2026-10.zim",
+      "sizeMB": 2,
+      "version": "2026-10",
+      "category": "computing"
+    },
+    "devdocs_en_bash": {
+      "id": "devdocs_en_bash",
+      "kiwixName": "devdocs_en_bash",
+      "title": {
+        "es": "Documentación de Bash",
+        "en": "Bash Documentation"
+      },
+      "description": {
+        "es": "Referencia de la shell Bash y comandos de Linux.",
+        "en": "Bash shell and Linux command reference."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/devdocs/devdocs_en_bash_2026-10.zim",
+      "sizeMB": 1,
+      "version": "2026-10",
+      "category": "computing"
+    },
+    "freecodecamp_es_all": {
+      "id": "freecodecamp_es_all",
+      "kiwixName": "freecodecamp_es_all",
+      "title": {
+        "es": "freeCodeCamp en español",
+        "en": "freeCodeCamp (Spanish)"
+      },
+      "description": {
+        "es": "Cursos interactivos de programación en español: JavaScript, algoritmos y retos.",
+        "en": "Interactive programming courses in Spanish: JavaScript, algorithms and challenges."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/freecodecamp/freecodecamp_es_all_2026-10.zim",
+      "sizeMB": 12,
+      "version": "2026-10",
+      "category": "computing",
+      "isCourse": true,
+      "subject": "programming"
+    },
+    "wikipedia_es_computer_nopic": {
+      "id": "wikipedia_es_computer_nopic",
+      "kiwixName": "wikipedia_es_computer_nopic",
+      "title": {
+        "es": "Informática en Wikipedia",
+        "en": "Computing on Wikipedia (Spanish)"
+      },
+      "description": {
+        "es": "Selección de artículos de Wikipedia en español sobre informática y ordenadores.",
+        "en": "Selection of Spanish Wikipedia articles about computers and computing."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_es_computer_nopic_2026-10.zim",
+      "sizeMB": 103,
+      "version": "2026-10",
+      "category": "computing"
+    },
+    "es.stackoverflow.com_mul_all": {
+      "id": "es.stackoverflow.com_mul_all",
+      "kiwixName": "es.stackoverflow.com_mul_all",
+      "title": {
+        "es": "Stack Overflow en español",
+        "en": "Stack Overflow in Spanish"
+      },
+      "description": {
+        "es": "Preguntas y respuestas de programación en español.",
+        "en": "Programming questions and answers in Spanish."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/stack_exchange/es.stackoverflow.com_mul_all_2026-10.zim",
+      "sizeMB": 1436,
+      "version": "2026-10",
+      "category": "computing"
+    },
+    "ted_mul_computers": {
+      "id": "ted_mul_computers",
+      "kiwixName": "ted_mul_computers",
+      "title": {
+        "es": "TED: computación",
+        "en": "TED: Computers"
+      },
+      "description": {
+        "es": "Charlas TED sobre ordenadores, internet e inteligencia artificial, con subtítulos en español.",
+        "en": "TED talks on computers, the internet and AI, with multilingual subtitles."
+      },
+      "language": "mul",
+      "url": "https://download.kiwix.org/zim/ted/ted_mul_computers_2026-09.zim",
+      "sizeMB": 3222,
+      "version": "2026-09",
+      "category": "computing"
+    },
+    "phet_es_all": {
+      "id": "phet_es_all",
+      "kiwixName": "phet_es_all",
+      "title": {
+        "es": "Simulaciones PhET",
+        "en": "PhET Simulations (Spanish)"
+      },
+      "description": {
+        "es": "Simulaciones interactivas de física, química, biología y matemáticas de la Universidad de Colorado.",
+        "en": "Interactive physics, chemistry, biology and math simulations from the University of Colorado, in Spanish."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/phet/phet_es_all_2026-08.zim",
+      "sizeMB": 109,
+      "version": "2026-08",
+      "category": "education",
+      "isCourse": true,
+      "subject": "science"
+    },
+    "wikiversity_es_all_maxi": {
+      "id": "wikiversity_es_all_maxi",
+      "kiwixName": "wikiversity_es_all_maxi",
+      "title": {
+        "es": "Wikiversidad",
+        "en": "Wikiversity (Spanish)"
+      },
+      "description": {
+        "es": "Cursos y materiales de aprendizaje libres en español.",
+        "en": "Free courses and learning materials in Spanish."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/wikiversity/wikiversity_es_all_maxi_2026-10.zim",
+      "sizeMB": 41,
+      "version": "2026-10",
+      "category": "education",
+      "isCourse": true,
+      "subject": "general"
+    },
+    "ted_mul_math": {
+      "id": "ted_mul_math",
+      "kiwixName": "ted_mul_math",
+      "title": {
+        "es": "TED: matemáticas",
+        "en": "TED: Math"
+      },
+      "description": {
+        "es": "Charlas y lecciones TED sobre matemáticas, con subtítulos en español.",
+        "en": "TED talks and lessons on mathematics, with multilingual subtitles."
+      },
+      "language": "mul",
+      "url": "https://download.kiwix.org/zim/ted/ted_mul_math_2026-09.zim",
+      "sizeMB": 1458,
+      "version": "2026-09",
+      "category": "education",
+      "isCourse": true,
+      "subject": "math"
+    },
+    "ted_mul_human-body": {
+      "id": "ted_mul_human-body",
+      "kiwixName": "ted_mul_human-body",
+      "title": {
+        "es": "TED: el cuerpo humano",
+        "en": "TED: The Human Body"
+      },
+      "description": {
+        "es": "Charlas y lecciones TED sobre anatomía y funcionamiento del cuerpo, con subtítulos en español.",
+        "en": "TED talks and lessons on anatomy and how the body works, with multilingual subtitles."
+      },
+      "language": "mul",
+      "url": "https://download.kiwix.org/zim/ted/ted_mul_human-body_2026-09.zim",
+      "sizeMB": 2316,
+      "version": "2026-09",
+      "category": "medicine",
+      "medical": true,
+      "isCourse": true,
+      "subject": "health"
+    },
+    "phet_en_all": {
+      "id": "phet_en_all",
+      "kiwixName": "phet_en_all",
+      "title": {
+        "es": "Simulaciones PhET (inglés)",
+        "en": "PhET Simulations"
+      },
+      "description": {
+        "es": "Simulaciones interactivas de ciencias y matemáticas.",
+        "en": "Interactive science and math simulations from the University of Colorado."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/phet/phet_en_all_2026-08.zim",
+      "sizeMB": 109,
+      "version": "2026-08",
+      "category": "education",
+      "isCourse": true,
+      "subject": "science"
+    },
+    "libretexts.org_en_stats": {
+      "id": "libretexts.org_en_stats",
+      "kiwixName": "libretexts.org_en_stats",
+      "title": {
+        "es": "LibreTexts Estadística",
+        "en": "LibreTexts Statistics"
+      },
+      "description": {
+        "es": "Cursos y libros de estadística.",
+        "en": "Statistics courses and textbooks."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/libretexts/libretexts.org_en_stats_2026-01.zim",
+      "sizeMB": 216,
+      "version": "2026-01",
+      "category": "education",
+      "isCourse": true,
+      "subject": "math"
+    },
+    "biologycourses_en_all": {
+      "id": "biologycourses_en_all",
+      "kiwixName": "biologycourses_en_all",
+      "title": {
+        "es": "Cursos de biología",
+        "en": "Biology Courses"
+      },
+      "description": {
+        "es": "Materiales docentes de biología de la Universidad De Montfort.",
+        "en": "Biology teaching resources from De Montfort University."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/videos/biologycourses_en_all_2026-09.zim",
+      "sizeMB": 199,
+      "version": "2026-09",
+      "category": "education",
+      "isCourse": true,
+      "subject": "science"
+    },
+    "coreyms_en_python-tutorials": {
+      "id": "coreyms_en_python-tutorials",
+      "kiwixName": "coreyms_en_python-tutorials",
+      "title": {
+        "es": "Tutoriales de Python (Corey Schafer)",
+        "en": "Python Tutorials (Corey Schafer)"
+      },
+      "description": {
+        "es": "Curso en vídeo de Python, desde lo básico hasta temas avanzados.",
+        "en": "Video course on Python, from the basics to advanced topics."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/videos/coreyms_en_python-tutorials_2026-09.zim",
+      "sizeMB": 2568,
+      "version": "2026-09",
+      "category": "computing",
+      "isCourse": true,
+      "subject": "programming"
+    },
+    "wikipedia_es_top_mini": {
+      "id": "wikipedia_es_top_mini",
+      "kiwixName": "wikipedia_es_top_mini",
+      "title": {
+        "es": "Wikipedia en español: consulta rápida",
+        "en": "Spanish Wikipedia: quick reference"
+      },
+      "description": {
+        "es": "Los 50.000 mejores artículos, resumidos y casi sin imágenes. Ideal para consultas rápidas.",
+        "en": "The best 50,000 articles, summarized with minimal images. Great for quick lookups."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_es_top_mini_2026-10.zim",
+      "sizeMB": 217,
+      "version": "2026-10",
+      "category": "reference"
+    },
+    "wikipedia_es_top_nopic": {
+      "id": "wikipedia_es_top_nopic",
+      "kiwixName": "wikipedia_es_top_nopic",
+      "title": {
+        "es": "Wikipedia en español: artículos populares",
+        "en": "Spanish Wikipedia: popular articles"
+      },
+      "description": {
+        "es": "Los 50.000 mejores artículos completos, sin imágenes.",
+        "en": "The best 50,000 articles in full, without images."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_es_top_nopic_2026-10.zim",
+      "sizeMB": 1209,
+      "version": "2026-10",
+      "category": "reference"
+    },
+    "wikipedia_es_all_mini": {
+      "id": "wikipedia_es_all_mini",
+      "kiwixName": "wikipedia_es_all_mini",
+      "title": {
+        "es": "Wikipedia en español: completa (compacta)",
+        "en": "Spanish Wikipedia: complete (compact)"
+      },
+      "description": {
+        "es": "Los más de 2 millones de artículos, resumidos.",
+        "en": "All 2+ million articles, summarized."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_es_all_mini_2026-10.zim",
+      "sizeMB": 4114,
+      "version": "2026-10",
+      "category": "reference"
+    },
+    "wikipedia_es_all_nopic": {
+      "id": "wikipedia_es_all_nopic",
+      "kiwixName": "wikipedia_es_all_nopic",
+      "title": {
+        "es": "Wikipedia en español: completa (sin imágenes)",
+        "en": "Spanish Wikipedia: complete (no images)"
+      },
+      "description": {
+        "es": "Los más de 2 millones de artículos completos, sin imágenes.",
+        "en": "All 2+ million articles in full, without images."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_es_all_nopic_2026-10.zim",
+      "sizeMB": 13298,
+      "version": "2026-10",
+      "category": "reference"
+    },
+    "wikipedia_es_all_maxi": {
+      "id": "wikipedia_es_all_maxi",
+      "kiwixName": "wikipedia_es_all_maxi",
+      "title": {
+        "es": "Wikipedia en español: completa (con imágenes)",
+        "en": "Spanish Wikipedia: complete (with images)"
+      },
+      "description": {
+        "es": "Los más de 2 millones de artículos con todas sus imágenes. Requiere mucho espacio.",
+        "en": "All 2+ million articles with every image. Needs a lot of space."
+      },
+      "language": "es",
+      "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_es_all_maxi_2026-10.zim",
+      "sizeMB": 36517,
+      "version": "2026-10",
+      "category": "reference"
+    },
+    "wikipedia_en_top_mini": {
+      "id": "wikipedia_en_top_mini",
+      "kiwixName": "wikipedia_en_top_mini",
+      "title": {
+        "es": "Wikipedia en inglés: consulta rápida",
+        "en": "English Wikipedia: quick reference"
+      },
+      "description": {
+        "es": "Los 50.000 mejores artículos, resumidos y casi sin imágenes. Ideal para consultas rápidas.",
+        "en": "The best 50,000 articles, summarized with minimal images. Great for quick lookups."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_en_top_mini_2026-09.zim",
+      "sizeMB": 297,
+      "version": "2026-09",
+      "category": "reference"
+    },
+    "wikipedia_en_top_nopic": {
+      "id": "wikipedia_en_top_nopic",
+      "kiwixName": "wikipedia_en_top_nopic",
+      "title": {
+        "es": "Wikipedia en inglés: artículos populares",
+        "en": "English Wikipedia: popular articles"
+      },
+      "description": {
+        "es": "Los 50.000 mejores artículos completos, sin imágenes.",
+        "en": "The best 50,000 articles in full, without images."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_en_top_nopic_2026-09.zim",
+      "sizeMB": 2746,
+      "version": "2026-09",
+      "category": "reference"
+    },
+    "wikipedia_en_all_mini": {
+      "id": "wikipedia_en_all_mini",
+      "kiwixName": "wikipedia_en_all_mini",
+      "title": {
+        "es": "Wikipedia en inglés: completa (compacta)",
+        "en": "English Wikipedia: complete (compact)"
+      },
+      "description": {
+        "es": "Los más de 6 millones de artículos, resumidos.",
+        "en": "All 6+ million articles, summarized."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_en_all_mini_2026-09.zim",
+      "sizeMB": 14387,
+      "version": "2026-09",
+      "category": "reference"
+    },
+    "wikipedia_en_all_nopic": {
+      "id": "wikipedia_en_all_nopic",
+      "kiwixName": "wikipedia_en_all_nopic",
+      "title": {
+        "es": "Wikipedia en inglés: completa (sin imágenes)",
+        "en": "English Wikipedia: complete (no images)"
+      },
+      "description": {
+        "es": "Los más de 6 millones de artículos completos, sin imágenes.",
+        "en": "All 6+ million articles in full, without images."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_en_all_nopic_2026-06.zim",
+      "sizeMB": 52691,
+      "version": "2026-06",
+      "category": "reference"
+    },
+    "wikipedia_en_all_maxi": {
+      "id": "wikipedia_en_all_maxi",
+      "kiwixName": "wikipedia_en_all_maxi",
+      "title": {
+        "es": "Wikipedia en inglés: completa (con imágenes)",
+        "en": "English Wikipedia: complete (with images)"
+      },
+      "description": {
+        "es": "Los más de 6 millones de artículos con todas sus imágenes. Requiere mucho espacio.",
+        "en": "All 6+ million articles with every image. Needs a lot of space."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_en_all_maxi_2026-08.zim",
+      "sizeMB": 127418,
+      "version": "2026-08",
+      "category": "reference"
+    }
+  },
+  "categories": [
+    {
+      "slug": "medicine",
+      "hue": "medicine",
+      "icon": "Stethoscope",
+      "name": {
+        "es": "Medicina",
+        "en": "Medicine"
+      },
+      "description": {
+        "es": "Referencias médicas, primeros auxilios y enciclopedias de salud para emergencias.",
+        "en": "Medical references, first aid and health encyclopedias for emergencies."
+      },
+      "tiers": [
+        {
+          "slug": "medicine-essential",
+          "name": {
+            "es": "Esencial",
+            "en": "Essential"
+          },
+          "description": {
+            "es": "Primeros auxilios, medicamentos y atención de emergencia. Empieza por aquí.",
+            "en": "First aid, medications and emergency care. Start here."
+          },
+          "recommended": true,
+          "resources": [
+            "wikipedia_es_medicine_nopic",
+            "zimgit-medicine_en",
+            "nhs.uk_en_medicines",
+            "irp.fas.org_en_military-medicine",
+            "wwwnc.cdc.gov_en_all"
+          ]
+        },
+        {
+          "slug": "medicine-standard",
+          "name": {
+            "es": "Estándar",
+            "en": "Standard"
+          },
+          "description": {
+            "es": "Enciclopedias de salud completas. Incluye todo lo de Esencial.",
+            "en": "Complete consumer health encyclopedias. Includes everything in Essential."
+          },
+          "includesTier": "medicine-essential",
+          "resources": [
+            "medlineplus.gov_es_all",
+            "medlineplus.gov_en_all"
+          ]
+        },
+        {
+          "slug": "medicine-comprehensive",
+          "name": {
+            "es": "Completo",
+            "en": "Comprehensive"
+          },
+          "description": {
+            "es": "Libros de texto, patología y vídeos de nivel profesional. Incluye todo lo de Estándar.",
+            "en": "Professional textbooks, pathology and videos. Includes everything in Standard."
+          },
+          "includesTier": "medicine-standard",
+          "resources": [
+            "ted_mul_disease",
+            "wikipedia_en_medicine_maxi",
+            "libretexts.org_en_med",
+            "librepathology_en_all_maxi"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "survival",
+      "hue": "survival",
+      "icon": "Tent",
+      "name": {
+        "es": "Supervivencia",
+        "en": "Survival & Preparedness"
+      },
+      "description": {
+        "es": "Preparación ante emergencias, evacuación y habilidades de supervivencia.",
+        "en": "Emergency preparedness, evacuation planning and survival skills."
+      },
+      "tiers": [
+        {
+          "slug": "survival-essential",
+          "name": {
+            "es": "Esencial",
+            "en": "Essential"
+          },
+          "description": {
+            "es": "Agua, comida, nudos y vida al aire libre. Lo básico para una emergencia.",
+            "en": "Water, food, knots and outdoor basics. Start here for emergencies."
+          },
+          "recommended": true,
+          "resources": [
+            "scoutwiki.org_es_all_maxi",
+            "zimgit-water_en",
+            "zimgit-food-preparation_en",
+            "zimgit-knots_en",
+            "canadian-prepper_en_winterprepping",
+            "canadian-prepper_en_bugoutroll"
+          ]
+        },
+        {
+          "slug": "survival-standard",
+          "name": {
+            "es": "Estándar",
+            "en": "Standard"
+          },
+          "description": {
+            "es": "Planes oficiales ante desastres, habilidades de campo y radiocomunicación. Incluye todo lo de Esencial.",
+            "en": "Official disaster planning, field skills and radio communications. Includes everything in Essential."
+          },
+          "includesTier": "survival-essential",
+          "resources": [
+            "ready.gov_es_all",
+            "ready.gov_en_all",
+            "outdoors.stackexchange.com_en_all",
+            "ham.stackexchange.com_en_all",
+            "canadian-prepper_en_bugoutconcepts",
+            "urban-prepper_en_all"
+          ]
+        },
+        {
+          "slug": "survival-comprehensive",
+          "name": {
+            "es": "Completo",
+            "en": "Comprehensive"
+          },
+          "description": {
+            "es": "Biblioteca completa: recuperación tras desastres, alimentos, agua y tecnología apropiada. Incluye todo lo de Estándar.",
+            "en": "Complete library: post-disaster recovery, food, water and appropriate technology. Includes everything in Standard."
+          },
+          "includesTier": "survival-standard",
+          "resources": [
+            "ted_mul_water",
+            "canadian-prepper_en_preppingfood",
+            "zimgit-post-disaster_en",
+            "100r.co_en_all",
+            "gutenberg_en_lcc-u",
+            "cd3wdproject.org_en_all"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "education",
+      "hue": "education",
+      "icon": "GraduationCap",
+      "name": {
+        "es": "Educación y consulta",
+        "en": "Education & Reference"
+      },
+      "description": {
+        "es": "Libros de texto, diccionarios, bibliotecas y vídeos educativos para aprender por tu cuenta.",
+        "en": "Textbooks, dictionaries, libraries and educational videos for self-directed learning."
+      },
+      "tiers": [
+        {
+          "slug": "education-essential",
+          "name": {
+            "es": "Esencial",
+            "en": "Essential"
+          },
+          "description": {
+            "es": "Libros de texto y obras de consulta ligeras, solo texto.",
+            "en": "Lightweight, text-only textbooks and reference works."
+          },
+          "recommended": true,
+          "resources": [
+            "wikibooks_es_all_nopic",
+            "wikivoyage_es_all_nopic",
+            "vikidia_es_all_nopic",
+            "wikiquote_es_all_nopic",
+            "wikibooks_en_all_nopic"
+          ]
+        },
+        {
+          "slug": "education-standard",
+          "name": {
+            "es": "Estándar",
+            "en": "Standard"
+          },
+          "description": {
+            "es": "Diccionario, literatura clásica, vídeos educativos y libros de ciencias. Incluye todo lo de Esencial.",
+            "en": "Dictionary, classic literature, educational videos and STEM textbooks. Includes everything in Essential."
+          },
+          "includesTier": "education-essential",
+          "resources": [
+            "wiktionary_es_all_nopic",
+            "wikisource_es_all_nopic",
+            "ted_mul_ted-ed",
+            "wikiversity_en_all_nopic",
+            "libretexts.org_en_math",
+            "libretexts.org_en_phys",
+            "libretexts.org_en_chem",
+            "libretexts.org_en_bio"
+          ]
+        },
+        {
+          "slug": "education-comprehensive",
+          "name": {
+            "es": "Completo",
+            "en": "Comprehensive"
+          },
+          "description": {
+            "es": "Biblioteca educativa completa con libros ilustrados y charlas TED. Incluye todo lo de Estándar.",
+            "en": "Complete educational library with illustrated textbooks and TED talks. Includes everything in Standard."
+          },
+          "includesTier": "education-standard",
+          "resources": [
+            "gutenberg_es_all",
+            "wikibooks_es_all_maxi",
+            "wikibooks_en_all_maxi",
+            "ted_mul_ted-conference",
+            "libretexts.org_en_human",
+            "libretexts.org_en_geo",
+            "libretexts.org_en_eng",
+            "libretexts.org_en_biz"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "diy",
+      "hue": "diy",
+      "icon": "Wrench",
+      "name": {
+        "es": "Bricolaje y reparación",
+        "en": "DIY & Repair"
+      },
+      "description": {
+        "es": "Arréglalo tú mismo: guías de reparación, hogar, carpintería y mecánica.",
+        "en": "Fix it yourself: repair guides, home improvement, woodworking and vehicles."
+      },
+      "tiers": [
+        {
+          "slug": "diy-essential",
+          "name": {
+            "es": "Esencial",
+            "en": "Essential"
+          },
+          "description": {
+            "es": "Conocimientos básicos de carpintería y mantenimiento de vehículos.",
+            "en": "Core repair knowledge: woodworking and vehicle maintenance."
+          },
+          "recommended": true,
+          "resources": [
+            "woodworking.stackexchange.com_en_all",
+            "mechanics.stackexchange.com_en_all"
+          ]
+        },
+        {
+          "slug": "diy-standard",
+          "name": {
+            "es": "Estándar",
+            "en": "Standard"
+          },
+          "description": {
+            "es": "Tecnología sencilla y miles de preguntas sobre el hogar. Incluye todo lo de Esencial.",
+            "en": "Low-tech solutions and thousands of home improvement answers. Includes everything in Essential."
+          },
+          "includesTier": "diy-essential",
+          "resources": [
+            "solar.lowtechmagazine.com_mul_all",
+            "diy.stackexchange.com_en_all"
+          ]
+        },
+        {
+          "slug": "diy-comprehensive",
+          "name": {
+            "es": "Completo",
+            "en": "Comprehensive"
+          },
+          "description": {
+            "es": "Guías paso a paso para reparar electrónica y electrodomésticos. Incluye todo lo de Estándar.",
+            "en": "Step-by-step guides for electronics and appliances. Includes everything in Standard."
+          },
+          "includesTier": "diy-standard",
+          "resources": [
+            "ifixit_es_all",
+            "ifixit_en_all"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "agriculture",
+      "hue": "agriculture",
+      "icon": "Sprout",
+      "name": {
+        "es": "Agricultura y alimentación",
+        "en": "Agriculture & Food"
+      },
+      "description": {
+        "es": "Cultiva y prepara tu propia comida: huerto, cocina y conservación.",
+        "en": "Grow and prepare your own food: gardening, cooking and preservation."
+      },
+      "tiers": [
+        {
+          "slug": "agriculture-essential",
+          "name": {
+            "es": "Esencial",
+            "en": "Essential"
+          },
+          "description": {
+            "es": "Huerto básico, recetas rápidas y cocina sencilla.",
+            "en": "Gardening basics, quick recipes and simple cooking."
+          },
+          "recommended": true,
+          "resources": [
+            "ted_mul_gardening",
+            "foss.cooking_en_all",
+            "based.cooking_en_all"
+          ]
+        },
+        {
+          "slug": "agriculture-standard",
+          "name": {
+            "es": "Estándar",
+            "en": "Standard"
+          },
+          "description": {
+            "es": "Huerto, cocina y conservación de alimentos. Incluye todo lo de Esencial.",
+            "en": "Gardening, cooking and food preservation. Includes everything in Essential."
+          },
+          "includesTier": "agriculture-essential",
+          "resources": [
+            "ted_mul_farming",
+            "gardening.stackexchange.com_en_all",
+            "cooking.stackexchange.com_en_all",
+            "zimgit-food-preparation_en"
+          ]
+        },
+        {
+          "slug": "agriculture-comprehensive",
+          "name": {
+            "es": "Completo",
+            "en": "Comprehensive"
+          },
+          "description": {
+            "es": "Autosuficiencia: vídeos de granja y textos agrícolas clásicos. Incluye todo lo de Estándar.",
+            "en": "Self-sufficiency: homesteading videos and classic agricultural texts. Includes everything in Standard."
+          },
+          "includesTier": "agriculture-standard",
+          "resources": [
+            "ted_mul_agriculture",
+            "lrnselfreliance_en_all",
+            "gutenberg_en_lcc-s"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "computing",
+      "hue": "computing",
+      "icon": "Cpu",
+      "name": {
+        "es": "Informática y tecnología",
+        "en": "Computing & Technology"
+      },
+      "description": {
+        "es": "Programación, electrónica y documentación técnica para makers y desarrolladores.",
+        "en": "Programming, electronics and technical documentation for makers and developers."
+      },
+      "tiers": [
+        {
+          "slug": "computing-essential",
+          "name": {
+            "es": "Esencial",
+            "en": "Essential"
+          },
+          "description": {
+            "es": "Aprende a programar con ejercicios interactivos y la documentación esencial.",
+            "en": "Learn to code with interactive exercises and core documentation."
+          },
+          "recommended": true,
+          "resources": [
+            "freecodecamp_es_all",
+            "wikipedia_es_computer_nopic",
+            "freecodecamp_en_all",
+            "devdocs_en_python",
+            "devdocs_en_javascript",
+            "devdocs_en_html",
+            "devdocs_en_css"
+          ]
+        },
+        {
+          "slug": "computing-standard",
+          "name": {
+            "es": "Estándar",
+            "en": "Standard"
+          },
+          "description": {
+            "es": "Preguntas de programación, Arduino, Raspberry Pi y más documentación. Incluye todo lo de Esencial.",
+            "en": "Programming Q&A, Arduino, Raspberry Pi and more docs. Includes everything in Essential."
+          },
+          "includesTier": "computing-essential",
+          "resources": [
+            "es.stackoverflow.com_mul_all",
+            "arduino.stackexchange.com_en_all",
+            "raspberrypi.stackexchange.com_en_all",
+            "devdocs_en_node",
+            "devdocs_en_react",
+            "devdocs_en_git"
+          ]
+        },
+        {
+          "slug": "computing-comprehensive",
+          "name": {
+            "es": "Completo",
+            "en": "Comprehensive"
+          },
+          "description": {
+            "es": "Electrónica a fondo, robótica y charlas sobre tecnología. Incluye todo lo de Estándar.",
+            "en": "In-depth electronics, robotics and technology talks. Includes everything in Standard."
+          },
+          "includesTier": "computing-standard",
+          "resources": [
+            "ted_mul_computers",
+            "electronics.stackexchange.com_en_all",
+            "robotics.stackexchange.com_en_all",
+            "devdocs_en_docker",
+            "devdocs_en_bash"
+          ]
+        }
+      ]
+    }
+  ],
+  "wikipedia": {
+    "es": [
+      {
+        "id": "top-mini",
+        "resourceId": "wikipedia_es_top_mini",
+        "name": {
+          "es": "Consulta rápida",
+          "en": "Quick reference"
+        },
+        "description": {
+          "es": "Los 50.000 mejores artículos, resumidos y casi sin imágenes. Ideal para consultas rápidas.",
+          "en": "The best 50,000 articles, summarized with minimal images. Great for quick lookups."
+        }
+      },
+      {
+        "id": "top-nopic",
+        "resourceId": "wikipedia_es_top_nopic",
+        "name": {
+          "es": "Artículos populares",
+          "en": "Popular articles"
+        },
+        "description": {
+          "es": "Los 50.000 mejores artículos completos, sin imágenes.",
+          "en": "The best 50,000 articles in full, without images."
+        }
+      },
+      {
+        "id": "all-mini",
+        "resourceId": "wikipedia_es_all_mini",
+        "name": {
+          "es": "Completa (compacta)",
+          "en": "Complete (compact)"
+        },
+        "description": {
+          "es": "Los más de 2 millones de artículos, resumidos.",
+          "en": "All 2+ million articles, summarized."
+        }
+      },
+      {
+        "id": "all-nopic",
+        "resourceId": "wikipedia_es_all_nopic",
+        "name": {
+          "es": "Completa (sin imágenes)",
+          "en": "Complete (no images)"
+        },
+        "description": {
+          "es": "Los más de 2 millones de artículos completos, sin imágenes.",
+          "en": "All 2+ million articles in full, without images."
+        }
+      },
+      {
+        "id": "all-maxi",
+        "resourceId": "wikipedia_es_all_maxi",
+        "name": {
+          "es": "Completa (con imágenes)",
+          "en": "Complete (with images)"
+        },
+        "description": {
+          "es": "Los más de 2 millones de artículos con todas sus imágenes. Requiere mucho espacio.",
+          "en": "All 2+ million articles with every image. Needs a lot of space."
+        }
+      }
+    ],
+    "en": [
+      {
+        "id": "top-mini",
+        "resourceId": "wikipedia_en_top_mini",
+        "name": {
+          "es": "Consulta rápida",
+          "en": "Quick reference"
+        },
+        "description": {
+          "es": "Los 50.000 mejores artículos, resumidos y casi sin imágenes. Ideal para consultas rápidas.",
+          "en": "The best 50,000 articles, summarized with minimal images. Great for quick lookups."
+        }
+      },
+      {
+        "id": "top-nopic",
+        "resourceId": "wikipedia_en_top_nopic",
+        "name": {
+          "es": "Artículos populares",
+          "en": "Popular articles"
+        },
+        "description": {
+          "es": "Los 50.000 mejores artículos completos, sin imágenes.",
+          "en": "The best 50,000 articles in full, without images."
+        }
+      },
+      {
+        "id": "all-mini",
+        "resourceId": "wikipedia_en_all_mini",
+        "name": {
+          "es": "Completa (compacta)",
+          "en": "Complete (compact)"
+        },
+        "description": {
+          "es": "Los más de 6 millones de artículos, resumidos.",
+          "en": "All 6+ million articles, summarized."
+        }
+      },
+      {
+        "id": "all-nopic",
+        "resourceId": "wikipedia_en_all_nopic",
+        "name": {
+          "es": "Completa (sin imágenes)",
+          "en": "Complete (no images)"
+        },
+        "description": {
+          "es": "Los más de 6 millones de artículos completos, sin imágenes.",
+          "en": "All 6+ million articles in full, without images."
+        }
+      },
+      {
+        "id": "all-maxi",
+        "resourceId": "wikipedia_en_all_maxi",
+        "name": {
+          "es": "Completa (con imágenes)",
+          "en": "Complete (with images)"
+        },
+        "description": {
+          "es": "Los más de 6 millones de artículos con todas sus imágenes. Requiere mucho espacio.",
+          "en": "All 6+ million articles with every image. Needs a lot of space."
+        }
+      }
+    ]
+  },
+  "courseSubjects": [
+    {
+      "slug": "math",
+      "hue": "education",
+      "icon": "Sigma",
+      "name": {
+        "es": "Matemáticas",
+        "en": "Mathematics"
+      }
+    },
+    {
+      "slug": "science",
+      "hue": "reference",
+      "icon": "FlaskConical",
+      "name": {
+        "es": "Ciencias",
+        "en": "Science"
+      }
+    },
+    {
+      "slug": "programming",
+      "hue": "computing",
+      "icon": "CodeXml",
+      "name": {
+        "es": "Programación",
+        "en": "Programming"
+      }
+    },
+    {
+      "slug": "health",
+      "hue": "medicine",
+      "icon": "HeartPulse",
+      "name": {
+        "es": "Salud",
+        "en": "Health"
+      }
+    },
+    {
+      "slug": "general",
+      "hue": "courses",
+      "icon": "BookOpen",
+      "name": {
+        "es": "Varios",
+        "en": "General studies"
+      }
+    }
+  ],
+  "courses": [
+    "phet_es_all",
+    "freecodecamp_es_all",
+    "wikiversity_es_all_maxi",
+    "ted_mul_math",
+    "ted_mul_human-body",
+    "phet_en_all",
+    "freecodecamp_en_all",
+    "libretexts.org_en_math",
+    "libretexts.org_en_stats",
+    "libretexts.org_en_phys",
+    "biologycourses_en_all",
+    "coreyms_en_python-tutorials",
+    "libretexts.org_en_med",
+    "wikiversity_en_all_nopic"
+  ]
+}

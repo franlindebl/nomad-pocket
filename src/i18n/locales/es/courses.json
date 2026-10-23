@@ -1,1 +1,25 @@
-{}
+{
+  "myCourses": "Mis cursos",
+  "myCoursesEmpty": "Aún no tienes cursos",
+  "myCoursesEmptyBody": "Descarga un curso y estudia sin conexión. Guardamos tu progreso lección a lección.",
+  "explore": "Explorar cursos",
+  "all": "Todos",
+  "lessons_one": "{{count}} lección",
+  "lessons_other": "{{count}} lecciones",
+  "progress": "{{done}} de {{total}} lecciones",
+  "percent": "{{value}} % completado",
+  "continue": "Continuar",
+  "start": "Empezar curso",
+  "next": "Siguiente: {{title}}",
+  "syllabus": "Temario",
+  "syllabusEmpty": "Este curso no tiene un temario estructurado. Ábrelo y explora libremente; tu historial cuenta como progreso.",
+  "openCourse": "Abrir curso",
+  "markDone": "Marcar como hecha",
+  "markUndone": "Marcar como pendiente",
+  "reset": "Reiniciar progreso",
+  "resetConfirm": "Se borrará tu progreso en este curso.",
+  "downloadToStart": "Descárgalo para estudiarlo sin conexión.",
+  "lastOpened": "Última vez {{when}}",
+  "completed": "¡Curso completado!",
+  "building": "Preparando el temario…"
+}

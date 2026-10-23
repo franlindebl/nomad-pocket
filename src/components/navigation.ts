@@ -22,7 +22,7 @@ export function useStackOptions(): NativeStackNavigationOptions {
 export function largeTitle(title: string): NativeStackNavigationOptions {
   return {
     title,
-    headerLargeTitle: true,
+    headerLargeTitleEnabled: true,
     headerTransparent: Platform.OS === 'ios',
     headerBlurEffect: Platform.OS === 'ios' ? 'systemMaterial' : undefined,
   };
