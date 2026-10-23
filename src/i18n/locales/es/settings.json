@@ -1,0 +1,31 @@
+{
+  "title": "Ajustes",
+  "general": "General",
+  "language": "Idioma de la app",
+  "contentLanguages": "Idiomas del contenido",
+  "contentLanguagesBody": "Qué idiomas mostrar en el catálogo",
+  "theme": "Apariencia",
+  "themeSystem": "Sistema",
+  "themeLight": "Claro",
+  "themeDark": "Oscuro",
+  "downloads": "Descargas",
+  "wifiOnly": "Solo con Wi‑Fi",
+  "wifiOnlyBody": "Evita gastar datos móviles con descargas grandes",
+  "storage": "Almacenamiento",
+  "storageUsed": "Usado por Nomad",
+  "storageFree": "Libre en el dispositivo",
+  "kind": {
+    "zim": "Biblioteca y cursos",
+    "map": "Mapas",
+    "model": "Modelos de IA"
+  },
+  "manageContent": "Gestionar contenido",
+  "deleteConfirm": "¿Eliminar {{title}}? Liberarás {{size}}.",
+  "about": "Acerca de",
+  "aboutBody": "Nomad Pocket es una app de código abierto (GPL‑3.0) inspirada en Project N.O.M.A.D. de Crosstalk Solutions. Contenido de Kiwix, Wikipedia, OpenStreetMap y Protomaps.",
+  "version": "Versión {{version}}",
+  "credits": "Créditos y licencias",
+  "setupAgain": "Asistente de configuración",
+  "clearHistory": "Borrar historial de lectura",
+  "historyCleared": "Historial borrado"
+}

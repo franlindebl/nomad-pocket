@@ -1,0 +1,69 @@
+{
+  "appName": "Nomad Pocket",
+  "tagline": "El conocimiento que nunca se desconecta",
+  "tabs": {
+    "home": "Inicio",
+    "library": "Biblioteca",
+    "maps": "Mapas",
+    "courses": "Cursos",
+    "assistant": "Asistente"
+  },
+  "actions": {
+    "download": "Descargar",
+    "downloadSize": "Descargar · {{size}}",
+    "open": "Abrir",
+    "cancel": "Cancelar",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "retry": "Reintentar",
+    "delete": "Eliminar",
+    "done": "Hecho",
+    "close": "Cerrar",
+    "continue": "Continuar",
+    "seeAll": "Ver todo",
+    "search": "Buscar",
+    "clear": "Borrar",
+    "save": "Guardar",
+    "back": "Atrás",
+    "skip": "Omitir"
+  },
+  "status": {
+    "installed": "Instalado",
+    "queued": "En cola",
+    "running": "Descargando",
+    "paused": "En pausa",
+    "processing": "Preparando",
+    "failed": "Error",
+    "done": "Completado",
+    "cancelled": "Cancelado",
+    "notInstalled": "No instalado"
+  },
+  "storage": {
+    "free": "{{size}} libres",
+    "of": "{{used}} de {{total}}",
+    "notEnough": "No hay espacio suficiente. Necesitas {{needed}} y tienes {{free}} libres."
+  },
+  "downloads": {
+    "title": "Descargas",
+    "empty": "No hay descargas activas",
+    "emptyBody": "Lo que descargues aparecerá aquí con su progreso.",
+    "progress": "{{done}} de {{total}}",
+    "eta": "{{time}} restantes",
+    "active_one": "{{count}} descarga activa",
+    "active_other": "{{count}} descargas activas",
+    "finished": "{{title}} está listo para usar sin conexión",
+    "needsConnection": "Necesitas conexión a internet para descargar."
+  },
+  "errors": {
+    "generic": "Algo ha ido mal",
+    "network": "Sin conexión. Inténtalo cuando tengas internet."
+  },
+  "health": {
+    "disclaimer": "Información de referencia, no consejo médico. En una emergencia, busca ayuda profesional."
+  },
+  "language": {
+    "es": "Español",
+    "en": "Inglés",
+    "mul": "Varios idiomas"
+  }
+}

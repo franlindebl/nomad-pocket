@@ -1,0 +1,29 @@
+{
+  "greeting": {
+    "morning": "Buenos días",
+    "afternoon": "Buenas tardes",
+    "evening": "Buenas noches"
+  },
+  "storageTitle": "Tu biblioteca sin conexión",
+  "storageBody": "{{count}} elementos · {{size}}",
+  "storageEmpty": "Aún no has descargado nada",
+  "continue": "Continuar",
+  "modules": "Explorar",
+  "module": {
+    "library": "Biblioteca",
+    "libraryBody": "Wikipedia, medicina, supervivencia y libros",
+    "maps": "Mapas",
+    "mapsBody": "Regiones sin conexión con GPS",
+    "courses": "Cursos",
+    "coursesBody": "Aprende a tu ritmo, sin internet",
+    "assistant": "Asistente",
+    "assistantBody": "IA local que consulta tu biblioteca"
+  },
+  "getStarted": {
+    "title": "Prepara tu Nomad",
+    "body": "Elige qué conocimiento quieres llevar contigo. Te recomendamos un pack para empezar según tu espacio libre.",
+    "action": "Empezar"
+  },
+  "downloadsActive": "Descargas en curso",
+  "offlineReady": "Listo sin conexión"
+}

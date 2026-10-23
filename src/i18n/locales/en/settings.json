@@ -1,0 +1,31 @@
+{
+  "title": "Settings",
+  "general": "General",
+  "language": "App language",
+  "contentLanguages": "Content languages",
+  "contentLanguagesBody": "Which languages to show in the catalog",
+  "theme": "Appearance",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "downloads": "Downloads",
+  "wifiOnly": "Wi‑Fi only",
+  "wifiOnlyBody": "Avoid using mobile data for large downloads",
+  "storage": "Storage",
+  "storageUsed": "Used by Nomad",
+  "storageFree": "Free on device",
+  "kind": {
+    "zim": "Library & courses",
+    "map": "Maps",
+    "model": "AI models"
+  },
+  "manageContent": "Manage content",
+  "deleteConfirm": "Delete {{title}}? This frees {{size}}.",
+  "about": "About",
+  "aboutBody": "Nomad Pocket is open source (GPL‑3.0), inspired by Project N.O.M.A.D. by Crosstalk Solutions. Content from Kiwix, Wikipedia, OpenStreetMap and Protomaps.",
+  "version": "Version {{version}}",
+  "credits": "Credits & licenses",
+  "setupAgain": "Setup assistant",
+  "clearHistory": "Clear reading history",
+  "historyCleared": "History cleared"
+}

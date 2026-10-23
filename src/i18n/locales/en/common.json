@@ -1,0 +1,69 @@
+{
+  "appName": "Nomad Pocket",
+  "tagline": "Knowledge that never goes offline",
+  "tabs": {
+    "home": "Home",
+    "library": "Library",
+    "maps": "Maps",
+    "courses": "Courses",
+    "assistant": "Assistant"
+  },
+  "actions": {
+    "download": "Download",
+    "downloadSize": "Download · {{size}}",
+    "open": "Open",
+    "cancel": "Cancel",
+    "pause": "Pause",
+    "resume": "Resume",
+    "retry": "Retry",
+    "delete": "Delete",
+    "done": "Done",
+    "close": "Close",
+    "continue": "Continue",
+    "seeAll": "See all",
+    "search": "Search",
+    "clear": "Clear",
+    "save": "Save",
+    "back": "Back",
+    "skip": "Skip"
+  },
+  "status": {
+    "installed": "Installed",
+    "queued": "Queued",
+    "running": "Downloading",
+    "paused": "Paused",
+    "processing": "Preparing",
+    "failed": "Failed",
+    "done": "Done",
+    "cancelled": "Cancelled",
+    "notInstalled": "Not installed"
+  },
+  "storage": {
+    "free": "{{size}} free",
+    "of": "{{used}} of {{total}}",
+    "notEnough": "Not enough space. You need {{needed}} and have {{free}} free."
+  },
+  "downloads": {
+    "title": "Downloads",
+    "empty": "No active downloads",
+    "emptyBody": "Anything you download shows up here with its progress.",
+    "progress": "{{done}} of {{total}}",
+    "eta": "{{time}} left",
+    "active_one": "{{count}} active download",
+    "active_other": "{{count}} active downloads",
+    "finished": "{{title}} is ready to use offline",
+    "needsConnection": "You need an internet connection to download."
+  },
+  "errors": {
+    "generic": "Something went wrong",
+    "network": "You're offline. Try again when you have internet."
+  },
+  "health": {
+    "disclaimer": "Reference information, not medical advice. In an emergency, seek professional help."
+  },
+  "language": {
+    "es": "Spanish",
+    "en": "English",
+    "mul": "Multiple languages"
+  }
+}

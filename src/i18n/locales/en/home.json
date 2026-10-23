@@ -1,0 +1,29 @@
+{
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening"
+  },
+  "storageTitle": "Your offline library",
+  "storageBody": "{{count}} items · {{size}}",
+  "storageEmpty": "You haven't downloaded anything yet",
+  "continue": "Continue",
+  "modules": "Explore",
+  "module": {
+    "library": "Library",
+    "libraryBody": "Wikipedia, medicine, survival and books",
+    "maps": "Maps",
+    "mapsBody": "Offline regions with GPS",
+    "courses": "Courses",
+    "coursesBody": "Learn at your own pace, no internet",
+    "assistant": "Assistant",
+    "assistantBody": "Local AI that reads your library"
+  },
+  "getStarted": {
+    "title": "Set up your Nomad",
+    "body": "Choose the knowledge you want to carry with you. We'll suggest a starter pack based on your free space.",
+    "action": "Get started"
+  },
+  "downloadsActive": "Downloads in progress",
+  "offlineReady": "Ready offline"
+}
