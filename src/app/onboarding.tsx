@@ -52,8 +52,8 @@ export default function OnboardingScreen() {
         await downloadResource(r);
         count++;
       } catch (e) {
-        showDownloadError(e, tc);
-        break;
+        showDownloadError(e, tc, startDownloads);
+        return;
       }
     }
     setStarted({ count, mb: sumMB(chosen.slice(0, count)) });

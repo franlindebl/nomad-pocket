@@ -6,8 +6,8 @@ import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Badge, Button, Card, IconBadge, ListGroup, PressableScale, ProgressBar, ProgressRing, Row, Screen, SectionHeader, Text } from '@/components/ui';
-import { downloadResource, getResource, loc } from '@/features/catalog';
-import { showDownloadError, useResourceState } from '@/features/catalog/DownloadButton';
+import { getResource, loc } from '@/features/catalog';
+import { startResourceDownload, useResourceState } from '@/features/catalog/DownloadButton';
 import { iconByName } from '@/features/catalog/icons';
 import { subjectOf } from '@/features/courses/CourseCard';
 import { courseProgress, ensureCourse, nextLesson, recordCourseOpen, resetCourse, setLessonDone, useCourses, type CourseState, type Lesson } from '@/features/courses/courses';
@@ -125,7 +125,7 @@ export default function CourseScreen() {
               title={tc('actions.downloadSize', { size: formatMB(resource.sizeMB) })}
               size="lg"
               fullWidth
-              onPress={() => downloadResource(resource).catch((e) => showDownloadError(e, tc))}
+              onPress={() => startResourceDownload(resource, tc)}
             />
             <Text variant="footnote" color="textSecondary" align="center">
               {t('downloadToStart')}

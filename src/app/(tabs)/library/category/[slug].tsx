@@ -6,7 +6,16 @@ import { Alert, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Badge, Button, Card, IconBadge, ListGroup, PressableScale, Row, Screen, SectionHeader, Text } from '@/components/ui';
-import { downloadResource, getCategory, loc, sumMB, tierOwnResources, tierResources, type CatalogCategory, type CatalogTier } from '@/features/catalog';
+import {
+  downloadResource,
+  getCategory,
+  loc,
+  sumMB,
+  tierOwnResources,
+  tierResources,
+  type CatalogCategory,
+  type CatalogTier,
+} from '@/features/catalog';
 import { showDownloadError } from '@/features/catalog/DownloadButton';
 import { categoryHue, iconByName } from '@/features/catalog/icons';
 import { ResourceRow } from '@/features/catalog/ResourceRow';
@@ -43,7 +52,14 @@ export default function CategoryScreen() {
       <SectionHeader title={t('tiers')} />
       <View style={{ gap: space.md }}>
         {category.tiers.map((x) => (
-          <TierCard key={x.slug} category={category} tier={x} selected={x.slug === tier.slug} onSelect={() => setTierSlug(x.slug)} langs={langs} />
+          <TierCard
+            key={x.slug}
+            category={category}
+            tier={x}
+            selected={x.slug === tier.slug}
+            onSelect={() => setTierSlug(x.slug)}
+            langs={langs}
+          />
         ))}
       </View>
 
@@ -101,15 +117,18 @@ function TierCard({
         { text: tc('actions.cancel'), style: 'cancel' },
         {
           text: tc('actions.download'),
-          onPress: async () => {
-            for (const r of missing) {
-              try {
-                await downloadResource(r);
-              } catch (e) {
-                showDownloadError(e, tc);
-                break;
+          onPress: () => {
+            const go = async () => {
+              for (const r of missing) {
+                try {
+                  await downloadResource(r);
+                } catch (e) {
+                  showDownloadError(e, tc, go);
+                  return;
+                }
               }
-            }
+            };
+            go();
           },
         },
       ],
@@ -125,7 +144,11 @@ function TierCard({
       accessibilityState={{ selected }}
       style={[
         styles.tier,
-        { backgroundColor: colors.surface, borderColor: selected ? colors.ink : colors.border, borderWidth: selected ? 2 : StyleSheet.hairlineWidth },
+        {
+          backgroundColor: colors.surface,
+          borderColor: selected ? colors.ink : colors.border,
+          borderWidth: selected ? 2 : StyleSheet.hairlineWidth,
+        },
       ]}>
       <Row style={{ justifyContent: 'space-between' }}>
         <Row gap={space.sm}>

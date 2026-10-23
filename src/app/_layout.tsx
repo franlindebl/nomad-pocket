@@ -2,6 +2,7 @@ import '@/i18n';
 
 import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -52,6 +53,7 @@ export default function RootLayout() {
           <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }} />
         </Stack>
         <ToastHost />
+        <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       </ThemeProvider>
     </GestureHandlerRootView>
   );

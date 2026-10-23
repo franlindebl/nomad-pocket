@@ -8,21 +8,40 @@ import { useContent } from '@/features/content/items';
 import { NotEnoughStorageError, pauseDownload, resumeDownload, useDownload } from '@/features/downloads/manager';
 import { formatBytes, formatMB } from '@/lib/format';
 import { freeBytes } from '@/lib/storage';
+import { useSettings } from '@/stores/settings';
 import { radius, space, useTheme } from '@/theme';
 
 import { downloadResource, OfflineError, WifiRequiredError } from './index';
 import type { CatalogResource } from './types';
 
-export function showDownloadError(e: unknown, t: (k: string, o?: Record<string, unknown>) => string) {
+/** Explain a failed download start. `retry` is offered after allowing mobile data. */
+export function showDownloadError(e: unknown, t: (k: string, o?: Record<string, unknown>) => string, retry?: () => void) {
   if (e instanceof NotEnoughStorageError) {
     Alert.alert(t('errors.generic'), t('storage.notEnough', { needed: formatBytes(e.needed), free: formatBytes(freeBytes()) }));
   } else if (e instanceof WifiRequiredError) {
-    Alert.alert(t('errors.generic'), t('library:wifiRequired'));
+    Alert.alert(t('library:wifiTitle'), t('library:wifiRequired'), [
+      { text: t('actions.cancel'), style: 'cancel' },
+      {
+        text: t('library:useMobileData'),
+        onPress: () => {
+          useSettings.getState().setWifiOnly(false);
+          retry?.();
+        },
+      },
+    ]);
   } else if (e instanceof OfflineError) {
     Alert.alert(t('errors.generic'), t('downloads.needsConnection'));
   } else {
     Alert.alert(t('errors.generic'), String((e as Error)?.message ?? e));
   }
+}
+
+/** Start a download, explaining failures (and retrying after allowing mobile data). */
+export function startResourceDownload(resource: CatalogResource, t: (k: string, o?: Record<string, unknown>) => string) {
+  const go = () => {
+    downloadResource(resource).catch((e) => showDownloadError(e, t, go));
+  };
+  go();
 }
 
 export function useResourceState(resourceId: string) {
@@ -78,7 +97,7 @@ export function DownloadButton({ resource, onOpen }: { resource: CatalogResource
       haptic="light"
       accessibilityRole="button"
       accessibilityLabel={t('actions.downloadSize', { size: formatMB(resource.sizeMB) })}
-      onPress={() => downloadResource(resource).catch((e) => showDownloadError(e, t))}
+      onPress={() => startResourceDownload(resource, t)}
       style={[styles.pill, { backgroundColor: colors.ink }]}>
       <ArrowDown size={14} color={colors.onInk} strokeWidth={2.5} />
       <Text variant="footnote" weight="600" color="onInk" tabular>
