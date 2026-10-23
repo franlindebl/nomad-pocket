@@ -38,7 +38,7 @@ export default function HomeScreen() {
   const total = totalBytes();
 
   return (
-    <Screen contentStyle={{ paddingTop: insets.top + space.lg }}>
+    <Screen contentStyle={{ paddingTop: insets.top + space.lg }} contentInsetAdjustmentBehavior="never">
       <Row style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <View style={{ flex: 1 }}>
           <Text variant="footnote" color="textSecondary">

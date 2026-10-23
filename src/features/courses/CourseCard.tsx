@@ -6,7 +6,6 @@ import { Card, IconBadge, ProgressBar, Row, Text } from '@/components/ui';
 import { catalog, loc, type CatalogResource } from '@/features/catalog';
 import { DownloadButton, LanguageTag } from '@/features/catalog/DownloadButton';
 import { iconByName } from '@/features/catalog/icons';
-import { formatMB } from '@/lib/format';
 import { radius, space, useTheme, type Hue } from '@/theme';
 
 export function subjectOf(r: CatalogResource) {
@@ -51,10 +50,7 @@ export function CourseCard({ resource, progress, lessons, wide }: { resource: Ca
             </Text>
           </View>
         ) : (
-          <Row style={{ justifyContent: 'space-between', marginTop: space.xs }}>
-            <Text variant="caption" color="textTertiary" tabular>
-              {formatMB(resource.sizeMB)}
-            </Text>
+          <Row style={{ justifyContent: 'flex-end', marginTop: space.xs }}>
             <DownloadButton resource={resource} onOpen={() => router.push({ pathname: '/courses/[id]', params: { id: resource.id } })} />
           </Row>
         )}
@@ -66,6 +62,6 @@ export function CourseCard({ resource, progress, lessons, wide }: { resource: Ca
 const styles = StyleSheet.create({
   card: { width: 240 },
   wide: { alignSelf: 'stretch' },
-  band: { height: 96, padding: space.lg, justifyContent: 'space-between', flexDirection: 'row', alignItems: 'flex-start', borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg },
+  band: { height: 76, padding: space.lg, justifyContent: 'space-between', flexDirection: 'row', alignItems: 'flex-start', borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg },
   body: { padding: space.lg, gap: space.xs },
 });
