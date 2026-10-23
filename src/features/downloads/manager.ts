@@ -13,7 +13,7 @@ import { AppState, Platform } from 'react-native';
 import { create } from 'zustand';
 
 import { db, parseJson } from '@/db';
-import { contentFile, deleteFile, hasRoomFor, partialDir, type ContentKind } from '@/lib/storage';
+import { contentFile, deleteFile, hasRoomFor, partialDir, resolveContentUri, type ContentKind } from '@/lib/storage';
 
 export type DownloadStatus = 'queued' | 'running' | 'paused' | 'processing' | 'failed' | 'done' | 'cancelled';
 
@@ -98,7 +98,7 @@ const fromRow = (r: Row): DownloadRecord => ({
   kind: r.kind,
   title: r.title,
   url: r.url,
-  destUri: r.dest_uri,
+  destUri: resolveContentUri(r.dest_uri),
   totalBytes: r.total_bytes,
   bytesWritten: r.bytes_written,
   status: r.status,
@@ -327,7 +327,7 @@ async function run(id: string) {
     setStatus(id, 'processing', {}, { pause_state: null });
     const dest = new File(rec.destUri);
     if (dest.exists) dest.delete();
-    file.move(dest);
+    await file.move(dest);
     const current = useDownloads.getState().records[id] ?? rec;
     const size = Number(dest.size ?? current.totalBytes);
     await handlers[rec.kind]?.(dest, { ...current, bytesWritten: size, totalBytes: size });

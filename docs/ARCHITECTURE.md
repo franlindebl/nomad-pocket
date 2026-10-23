@@ -92,6 +92,53 @@ Add a migration by appending a SQL string to `MIGRATIONS` (never edit old ones).
 - `<ZimWebView archiveId path … />` serves `zim://<archiveId>/<path>` natively
   (WKURLSchemeHandler / `shouldInterceptRequest`).
 
+### Maps (`src/lib/pmtiles`, `src/features/maps`, `src/app/(tabs)/maps`)
+
+**Extractor** (`src/lib/pmtiles`, pure TS, no `@/` aliases so `node --test` loads it):
+`readArchiveInfo`, `planExtract(source, { bbox, minZoom, maxZoom, overfetch, signal,
+onProgress })` → `ExtractPlan` (exact archive size + download size; this *is* the
+dry-run estimate), `executeExtract(source, plan, sink)`, `extract()` = both.
+I/O is injected: `RangeSource` (`FetchSource` = HTTP Range with retries and ETag
+pinning via `If-Match`; `BytesSource` for tests) and `Sink.write(offset, bytes)`
+(app: expo-file-system `FileHandle`; tests: memory / `node:fs`).
+
+How it works (same idea as `pmtiles extract`): bbox → Hilbert tile-id ranges per
+zoom via quadtree descent (descendants of a tile form one contiguous id range, so
+ranges are O(perimeter)); walk the root directory and fetch only the leaf
+directories whose id span intersects the ranges (coalesced); collect entries,
+deduplicate contents by source offset (keeps the output clustered), lay out
+`header | root | metadata | leaves | tile data`, rebuild directories (root ≤ 16 KiB,
+gzip via fflate) and coalesce tile byte ranges (merge smallest gaps while overfetch
+≤ 5 %, requests ≤ 4 MiB). Tiles are written straight to their final offsets, so
+downloads run 4 at a time out of order. Measured against build 20261023: world
+z0–5 15 MB (2 s plan), central Madrid z0–15 10.7 MB, Comunidad de Madrid z0–14
+58 MB, Spain z0–14 1.6 GB (plan 4 s, 2.9 MB of directories).
+
+**Rendering**: MapLibre Native (iOS 6.31 / Android 13.6 via maplibre-react-native
+11.5) reads local archives natively with `pmtiles://file:///…/x.pmtiles` — no
+local tile server or protocol handler needed (verified on the iOS simulator; the
+app opens no network sockets while rendering). Style = `@protomaps/basemaps`
+`layers()` per source (light/dark from the app theme, labels in the app language);
+the world basemap (`map-world`, z0–5) is the bottom source and each region gets its
+own layer stack on top, so the map is never empty outside a region (duplicate
+labels collapse through symbol collision). Glyphs (Noto Sans Regular/Medium/Italic,
+ranges 0–1279, 7680–8703: Latin, Latin Ext, Greek, Cyrillic, punctuation) and v4
+sprites ship as `assets/maps/basemap-assets.zip` (1.4 MB), unpacked once to
+`Documents/map-assets/v1/` and referenced with `file://` URLs (MapLibre
+percent-decodes the `Noto%20Sans%20Regular` fontstack path). `regions.json` and
+the zip are regenerated with the scripts in `scripts/maps/` (Natural Earth +
+basemaps-assets downloads). Screenshots: `docs/screenshots/maps-*.png`.
+
+**Feature**: `regions.json` (312 regions: Natural Earth countries with far-flung
+overseas territories trimmed from the bbox, 19 Spanish autonomous communities,
+51 US states; ES/EN names, continent), `extraction.ts` (`latestBuild` from
+`builds.json`, `estimateExtract` cached plans, `startMapDownload` → external job →
+`content/maps/<key>.pmtiles` → `upsertItem({ kind: 'map', meta: { role, bbox,
+minZoom, maxZoom, buildDate, regionId } })`), `markers.ts` (`map_markers`),
+`store.ts` (persisted viewport + camera requests from sheets), `style.ts`,
+`assets.ts`. Routes: `maps/index` (full-screen map), sheets `regions`, `pick`,
+`download` (zoom 12/14/15 + exact size before confirming), `markers`, `marker`.
+
 ### Feature registration
 Each feature exposes `src/features/<name>/register.ts` that calls
 `registerCompletionHandler`, `onItemRemoved` and `registerInit` (from

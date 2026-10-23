@@ -3,7 +3,7 @@
 import { create } from 'zustand';
 
 import { db, parseJson } from '@/db';
-import { deleteFile, type ContentKind } from '@/lib/storage';
+import { deleteFile, resolveContentUri, type ContentKind } from '@/lib/storage';
 
 export type InstalledItem = {
   id: string;
@@ -49,7 +49,7 @@ const fromRow = (r: Row): InstalledItem => ({
   language: r.language,
   category: r.category,
   isCourse: !!r.is_course,
-  fileUri: r.file_path,
+  fileUri: resolveContentUri(r.file_path),
   sizeBytes: r.size_bytes,
   version: r.version,
   sourceUrl: r.source_url,
