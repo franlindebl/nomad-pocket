@@ -51,6 +51,8 @@ export default function RootLayout() {
           />
           <Stack.Screen name="settings" options={{ headerShown: false, presentation: 'modal' }} />
           <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }} />
+          <Stack.Screen name="reader/[itemId]" options={{ title: '' }} />
+          <Stack.Screen name="search" options={{ title: t('reader:globalSearch') }} />
         </Stack>
         <ToastHost />
         <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />

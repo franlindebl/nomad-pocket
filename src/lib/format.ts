@@ -31,6 +31,10 @@ export function formatNumber(n: number): string {
 
 export function formatRelativeDate(ts: number): string {
   const diff = (ts - Date.now()) / 1000;
+  // Hermes has no Intl.RelativeTimeFormat: fall back to an absolute date/time.
+  if (typeof Intl.RelativeTimeFormat !== 'function') {
+    return new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(ts);
+  }
   const rtf = new Intl.RelativeTimeFormat(i18n.language, { numeric: 'auto' });
   const abs = Math.abs(diff);
   if (abs < 60) return rtf.format(Math.round(diff), 'second');

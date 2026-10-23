@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["NomadZimModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.nomadzim.NomadZimModule"]
+  }
+}

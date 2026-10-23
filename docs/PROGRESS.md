@@ -19,7 +19,7 @@ every work block so work can resume after context compaction.
 |---|---|
 | 0. Foundation (project, design system, nav, i18n, db, downloads core) | done — iOS/Android builds OK |
 | 1. Catalog + downloads UI + onboarding | done |
-| 2. ZIM library (native module, reader, search) | pending |
+| 2. ZIM library (native module, reader, search) | done (iOS verified, Android compiles) |
 | 3. Maps (extractor, MapLibre, regions, markers) | done (iOS verified, Android compiles) — merged |
 | 4. Courses | UI + progress done (needs ZIM module for syllabus) |
 | 5. Local AI (system + GGUF, RAG) | done — verified on iOS sim (llama.cpp CPU + Apple FM); RAG waits for ZIM module |
@@ -66,6 +66,28 @@ every work block so work can resume after context compaction.
   (those labels are dropped); country bboxes skip remote territories; very large
   areas are refused above 2.5 M tiles (choose less detail).
 
+### 2026-10-24 — ZIM library (phase 2)
+- `modules/nomad-zim`: libkiwix 14.2.1 xcframework (iOS, Obj-C++ wrapper) and
+  `org.kiwix:libkiwix:2.7.0` (Android). Open/close, metadata + illustration, suggestions,
+  full-text search with snippets, entry content, random page, exclude-from-backup.
+- `ZimWebView` native view with custom scheme handler (Range/206, redirects, MIME),
+  dark mode (CSS invert, media re-inverted), text zoom, find in page, external links.
+- `src/features/library/{zim,register,html}.ts`: facade, registration (download
+  completion, removal hook, startup init that also registers stray `.zim` files found
+  in `content/zim`, e.g. copied with Finder/Files), HTML→text and link extraction.
+- Reader (`/reader/[itemId]`) and global search (`/search`) screens; `reader` i18n namespace.
+- Verified on the iOS 26.5 simulator (Release) with `wikipedia_en_100_mini`: reader
+  (main page, links, back/forward, bookmark, text size, dark mode, find, history
+  sheet), in-book and global search (titles + full text), and the facade
+  (`getLinks` 95 links in order, `getArticleText`, `randomPath`, `search` snippets).
+  Screenshots in `docs/screenshots/{reader,reader-dark,reader-search-sheet,search}-ios.png`.
+  Android: `assembleDebug` compiles (runtime not tested).
+- Fixed in shared code: `formatRelativeDate` crashed on Hermes (no `Intl.RelativeTimeFormat`).
+- Known limits / TODO: reader toolbar doesn't auto-hide on scroll; no table of contents;
+  Android `libc++_shared.so` is shared between RN and libkiwix (one copy wins — check at
+  runtime); media Range path untested with a real video ZIM; iOS find-in-page is a
+  JS highlighter (counts), Android uses WebView's native find.
+
 ### 2026-10-24 — Local AI assistant (phase 5)
 - `modules/nomad-llm`: Apple Foundation Models (weak-linked, iOS 26+) and Gemini Nano
   (ML Kit GenAI Prompt API `1.0.0-beta4`) with status, streaming and cancel.
@@ -90,8 +112,6 @@ every work block so work can resume after context compaction.
 - Downloads interrupted by app termination restart from zero unless paused first
   (expo-file-system tasks don't survive relaunch).
 - Map extraction runs in the JS thread while the app is in foreground.
-- Hermes has no `Intl.RelativeTimeFormat`: `formatRelativeDate` throws ("undefined
-  cannot be used as a constructor"); the assistant uses its own date labels.
 - llama.rn's `stopCompletion()`/`release()` may not return promises — don't chain `.catch`.
 - Gemini Nano path compiled but untested on a real AICore device.
 
