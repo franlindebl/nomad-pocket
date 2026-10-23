@@ -1,1 +1,93 @@
-{}
+{
+  "title": "Maps",
+  "controls": {
+    "regions": "Offline maps",
+    "markers": "Saved places",
+    "north": "Reset to north",
+    "locate": "Show my location"
+  },
+  "empty": {
+    "title": "Maps that work anywhere",
+    "body": "Download the world map and the regions you need. They keep working with no signal.",
+    "world": "Get world map · {{size}}",
+    "worldNoSize": "Get world map",
+    "pickRegion": "Choose a region"
+  },
+  "loadingAssets": "Preparing offline map…",
+  "location": {
+    "deniedTitle": "Location is off",
+    "deniedBody": "Allow location access in Settings to see where you are on the map. It works offline using GPS.",
+    "openSettings": "Open Settings",
+    "unavailable": "Couldn't get your location. Try again outdoors."
+  },
+  "regions": {
+    "title": "Offline maps",
+    "world": "World map",
+    "worldBody": "Countries, cities and main roads, down to zoom {{zoom}}. Shown under your regions.",
+    "visibleArea": "Download visible area",
+    "visibleAreaBody": "Save exactly what's on screen now",
+    "addRegion": "Add a country or region",
+    "addRegionBody": "Countries, Spanish communities, US states",
+    "installed": "Downloaded",
+    "none": "No regions yet. Pick one or download the area you're looking at.",
+    "detail": "Detail to zoom {{zoom}} · {{size}} · {{date}}",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteBody": "It frees {{size}}. You can download it again later.",
+    "update": "Update",
+    "downloading": "Downloading…"
+  },
+  "picker": {
+    "title": "Choose a region",
+    "search": "Search countries and regions",
+    "subdivisions": "{{country}} · regions",
+    "noResults": "No regions match “{{query}}”"
+  },
+  "continent": {
+    "europe": "Europe",
+    "africa": "Africa",
+    "asia": "Asia",
+    "north-america": "North America",
+    "south-america": "South America",
+    "oceania": "Oceania",
+    "antarctica": "Antarctica"
+  },
+  "download": {
+    "titleArea": "Visible area",
+    "titleWorld": "World map",
+    "detail": "Detail",
+    "zoom12": "Towns",
+    "zoom14": "Streets",
+    "zoom15": "Maximum",
+    "zoomHint": {
+      "12": "Towns, main roads and land use. Smallest download.",
+      "14": "Every street and path. Good for walking and driving.",
+      "15": "Buildings and full detail. Largest download."
+    },
+    "estimating": "Calculating size…",
+    "size": "Download size",
+    "tiles": "{{n}} tiles",
+    "free": "{{size}} free on this device",
+    "notEnough": "Not enough space: you need {{needed}} and have {{free}} free.",
+    "tooLarge": "This area is too big for this detail level. Choose less detail or a smaller area.",
+    "offline": "You need an internet connection to download maps. Downloaded maps then work offline.",
+    "estimateFailed": "Couldn't calculate the size: {{error}}",
+    "action": "Download · {{size}}",
+    "source": "Protomaps build {{date}} · © OpenStreetMap",
+    "areaName": "Area near {{coords}}"
+  },
+  "markers": {
+    "title": "Saved places",
+    "emptyTitle": "No saved places",
+    "emptyBody": "Long-press anywhere on the map to drop a pin.",
+    "new": "New place",
+    "edit": "Place",
+    "name": "Name",
+    "namePlaceholder": "E.g. Camp, water source…",
+    "note": "Note",
+    "notePlaceholder": "Optional",
+    "defaultName": "Pin {{n}}",
+    "showOnMap": "Show on map",
+    "deleteTitle": "Delete “{{name}}”?",
+    "coordinates": "Coordinates"
+  }
+}
