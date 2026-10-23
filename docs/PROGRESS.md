@@ -17,8 +17,8 @@ every work block so work can resume after context compaction.
 
 | Phase | Status |
 |---|---|
-| 0. Foundation (project, design system, nav, i18n, db, downloads core) | in progress |
-| 1. Catalog + downloads UI + onboarding | pending |
+| 0. Foundation (project, design system, nav, i18n, db, downloads core) | done — iOS/Android builds OK |
+| 1. Catalog + downloads UI + onboarding | library UI done; catalog data + onboarding in progress |
 | 2. ZIM library (native module, reader, search) | pending |
 | 3. Maps (extractor, MapLibre, regions, markers) | pending |
 | 4. Courses | pending |
@@ -33,10 +33,18 @@ every work block so work can resume after context compaction.
   i18n (es/en), SQLite schema, content registry, download manager, settings screen,
   downloads sheet, home screen.
 
+## In flight (parallel agents, git worktrees — merge into main when done)
+
+- Catalog data agent (main tree): `src/data/catalog.json`, `scripts/validate-catalog.mjs`, `src/features/catalog/opds.ts` (+test).
+- ZIM agent (worktree branch): `modules/nomad-zim`, `src/features/library/{zim,register}.ts`, reader + `/search` screens, `reader` i18n ns.
+- Maps agent (worktree branch): `src/lib/pmtiles`, `src/features/maps`, maps tab, `maps` i18n ns.
+- AI agent (worktree branch): `modules/nomad-llm`, llama.rn, `src/features/assistant`, assistant tab, `assistant` i18n ns.
+- Me (main): courses tab + progress, onboarding wizard, home polish, app icon.
+
 ## Next steps
 
-- Verify iOS + Android builds of the foundation.
-- Spawn parallel work: ZIM native module, maps, AI, catalog data.
+- Merge agent branches (expect small conflicts in package.json, app.json, resources.ts, registry.ts).
+- Full iOS + Android builds after merge; run on simulator + emulator; screenshots.
 
 ## Known issues / risks
 
