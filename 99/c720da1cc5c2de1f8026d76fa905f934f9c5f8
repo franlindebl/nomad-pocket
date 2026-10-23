@@ -1,0 +1,67 @@
+modules/nomad-llm/android/build.gradle
+  s_cbd2a9b15986bf::t_f6aa6615b17160 1-25
+modules/nomad-llm/android/build/.transforms/9166254271aea1e49e5258460f959853/results.bin
+  s_cbd2a9b15986bf::t_cb4453a5a458f6 1
+modules/nomad-llm/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+  s_cbd2a9b15986bf::t_22c194709f5198 1-7
+modules/nomad-llm/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+  s_cbd2a9b15986bf::t_5c439297732bfc 1-18
+modules/nomad-llm/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+  s_cbd2a9b15986bf::t_10a176947fd54d 1-7
+modules/nomad-llm/android/build/intermediates/android_res_source_set_path_map/debug/mapDebugSourceSetPaths/file-map.txt
+  s_cbd2a9b15986bf::t_8a2a42966d4a2a 1-9
+modules/nomad-llm/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+  s_cbd2a9b15986bf::t_d3e3f6bae6ae4e 1
+modules/nomad-llm/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+  s_cbd2a9b15986bf::t_fad678c6daf4d6 1
+modules/nomad-llm/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+  s_cbd2a9b15986bf::t_8dc12f3666151e 1-2
+modules/nomad-llm/android/build/intermediates/incremental/mergeDebugAssets/merger.xml
+  s_cbd2a9b15986bf::t_665de9c0225391 1-2
+modules/nomad-llm/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+  s_cbd2a9b15986bf::t_82932b695777c3 1-2
+modules/nomad-llm/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+  s_cbd2a9b15986bf::t_245a8ade2e6a17 1-2
+modules/nomad-llm/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+  s_cbd2a9b15986bf::t_f12e7e503d1f74 1-9
+modules/nomad-llm/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+  s_cbd2a9b15986bf::t_73a146546fe2ef 1-7
+modules/nomad-llm/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+  s_cbd2a9b15986bf::t_9422349092df3e 1
+modules/nomad-llm/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+  s_cbd2a9b15986bf::t_9a5cde86a880cc 1
+modules/nomad-llm/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+  s_cbd2a9b15986bf::t_aef2121656d16c 1
+modules/nomad-llm/android/build/outputs/logs/manifest-merger-debug-report.txt
+  s_cbd2a9b15986bf::t_bcc19a54b2fac7 1-16
+modules/nomad-llm/android/src/main/java/expo/modules/nomadllm/NomadLlmModule.kt
+  s_cbd2a9b15986bf::t_dbcc3d755fdb9e 1-138
+modules/nomad-llm/expo-module.config.json
+  s_cbd2a9b15986bf::t_1bd4110cbeb9a8 1-9
+modules/nomad-llm/index.ts
+  s_cbd2a9b15986bf::t_ace1d45c3cda61 1-63
+modules/nomad-llm/ios/NomadLlm.podspec
+  s_cbd2a9b15986bf::t_25c7e2147d7b9a 1-24
+modules/nomad-llm/ios/NomadLlmModule.swift
+  s_cbd2a9b15986bf::t_ab2eac747bc046 1-168
+modules/nomad-llm/src/NomadLlm.types.ts
+  s_cbd2a9b15986bf::t_7f259a472bba20 1-46
+modules/nomad-llm/src/NomadLlmModule.ts
+  s_cbd2a9b15986bf::t_0e2bf27c5d7570 1-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "99c720da1cc5c2de1f8026d76fa905f934f9c5f8",
+  "prompts": {},
+  "sessions": {
+    "s_cbd2a9b15986bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8fb325cf-e8f4-4b02-a113-0dab7f1f1a40",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
