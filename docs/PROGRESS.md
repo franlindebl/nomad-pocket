@@ -20,7 +20,7 @@ every work block so work can resume after context compaction.
 | 0. Foundation (project, design system, nav, i18n, db, downloads core) | in progress |
 | 1. Catalog + downloads UI + onboarding | pending |
 | 2. ZIM library (native module, reader, search) | pending |
-| 3. Maps (extractor, MapLibre, regions, markers) | pending |
+| 3. Maps (extractor, MapLibre, regions, markers) | done (iOS verified, Android compiles) |
 | 4. Courses | pending |
 | 5. Local AI (system + GGUF, RAG) | pending |
 | 6. Polish, icon, builds on simulator/emulator | pending |
@@ -32,6 +32,20 @@ every work block so work can resume after context compaction.
 - Scaffolded Expo 58 app, design tokens + UI kit, navigation shell (native tabs),
   i18n (es/en), SQLite schema, content registry, download manager, settings screen,
   downloads sheet, home screen.
+
+### 2026-10-24 — Maps (phase 3)
+- `src/lib/pmtiles`: PMTiles v3 reader/extractor in TS with node tests (Hilbert ids
+  vs. the official `pmtiles` package, directory round-trips, end-to-end extracts
+  validated with the official reader, a real 120 KB planet fixture, opt-in live
+  test `PMTILES_NETWORK=1 npm test`).
+- Maps tab: full-screen MapLibre map on local `pmtiles://file://` archives, bundled
+  glyphs/sprites, world z0–5 basemap under regions, region picker (countries, CCAA,
+  US states), "download visible area" with zoom choice and exact size, markers,
+  locate-me, compass. Verified on the iOS simulator (Release build).
+- Known limits: extraction runs on the JS thread in the foreground (screen kept
+  awake) and does not resume after the app is killed; no CJK/Arabic glyphs bundled
+  (those labels are dropped); country bboxes skip remote territories; very large
+  areas are refused above 2.5 M tiles (choose less detail).
 
 ## Next steps
 
