@@ -58,6 +58,7 @@
     "android": "expo run:android",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
+    "postinstall": "bash modules/nomad-zim/scripts/fetch-ios-libs.sh",
     "test": "node --test --experimental-strip-types \"src/**/*.test.ts\""
   },
   "private": true,
