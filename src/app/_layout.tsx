@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { ToastHost } from '@/components/Toast';
 import { bootstrap } from '@/features/bootstrap';
 import { useSettings } from '@/stores/settings';
 import { fontFamily, palette, useTheme } from '@/theme';
@@ -50,6 +51,7 @@ export default function RootLayout() {
           <Stack.Screen name="settings" options={{ headerShown: false, presentation: 'modal' }} />
           <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }} />
         </Stack>
+        <ToastHost />
       </ThemeProvider>
     </GestureHandlerRootView>
   );
