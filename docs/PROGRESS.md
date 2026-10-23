@@ -41,6 +41,13 @@ every work block so work can resume after context compaction.
 - Setup wizard (language → starter pack sized to free space → tips), auto-shown
   on first launch. App icon (compass mark), adaptive icons, themed splash.
 
+- Verified on iOS 26.5 simulator (Release): onboarding, library, category tiers,
+  courses, Light pack real download with progress/ETA, pause/resume, queue (2 slots).
+  Verified Android emulator (API 36, Release APK) boots and renders onboarding.
+- Fixed: crash from BigInt sizes in expo-file-system progress events; large titles
+  (`headerLargeTitleEnabled`); home double top inset on iOS; Wi‑Fi-only prompt now
+  offers "use mobile data"; lighter starter packs.
+
 ## In flight (parallel agents, git worktrees — merge into main when done)
 
 - ZIM agent (worktree branch): `modules/nomad-zim`, `src/features/library/{zim,register}.ts`, reader + `/search` screens, `reader` i18n ns.
@@ -64,5 +71,6 @@ every work block so work can resume after context compaction.
   macOS Keychain prompt for github.com credentials. Always pass
   `-packageAuthorizationProvider netrc`; for `swift package` use `--disable-keychain`.
 - Android builds need `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`.
+- UI automation: `axe` (brew cameroncooke/axe) for the iOS simulator; `adb shell uiautomator dump` + `input tap` on Android.
 - Tests: `npm test` (node --test with type stripping; import with `.ts` extensions, no `@/` aliases).
 - Catalog check: `node scripts/validate-catalog.mjs` (`--offline` to skip URL checks).

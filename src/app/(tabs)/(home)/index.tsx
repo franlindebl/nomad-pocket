@@ -1,7 +1,7 @@
 import { router, type Href } from 'expo-router';
 import { BookOpen, Download, GraduationCap, HardDrive, Map, Settings, Sparkles, type LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Card, IconBadge, IconButton, ProgressBar, Row, Screen, SectionHeader, Text } from '@/components/ui';
@@ -38,7 +38,8 @@ export default function HomeScreen() {
   const total = totalBytes();
 
   return (
-    <Screen contentStyle={{ paddingTop: insets.top + space.lg }} contentInsetAdjustmentBehavior="never">
+    // iOS native tabs already inset the screen below the status bar.
+    <Screen contentStyle={{ paddingTop: (Platform.OS === 'ios' ? 0 : insets.top) + space.lg }} contentInsetAdjustmentBehavior="never">
       <Row style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <View style={{ flex: 1 }}>
           <Text variant="footnote" color="textSecondary">
