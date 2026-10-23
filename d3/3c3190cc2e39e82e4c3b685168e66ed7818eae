@@ -1,0 +1,25 @@
+app.json
+  s_cbd2a9b15986bf::t_7adfb0ee1f51bd 16-19,42,45,66-85,97-104
+assets/expo.icon/Assets/needle.svg
+  s_cbd2a9b15986bf::t_d40caf9c673406 1-7
+assets/expo.icon/Assets/ring.svg
+  s_cbd2a9b15986bf::t_e45cf892871057 1-2
+assets/expo.icon/icon.json
+  s_cbd2a9b15986bf::t_37e1f64b0af3a5 3,9-10,19-31,41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d33c3190cc2e39e82e4c3b685168e66ed7818eae",
+  "prompts": {},
+  "sessions": {
+    "s_cbd2a9b15986bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8fb325cf-e8f4-4b02-a113-0dab7f1f1a40",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
