@@ -34,7 +34,7 @@ export default function LibraryScreen() {
       const src = new File(asset.uri);
       const dest = new File(contentDir('zim'), asset.name.endsWith('.zim') ? asset.name : `${asset.name}.zim`);
       if (dest.exists) dest.delete();
-      src.copy(dest);
+      await src.copy(dest);
       await registerZimFile(dest.uri);
     } catch (e) {
       Alert.alert(t('importFailed'), String((e as Error)?.message ?? e));
