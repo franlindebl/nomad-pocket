@@ -6,7 +6,7 @@ import { db } from '@/db';
 import { registerInit } from '@/features/bootstrap';
 import { getItem, listItems, onItemRemoved, upsertItem, type InstalledItem } from '@/features/content/items';
 import { registerCompletionHandler } from '@/features/downloads/manager';
-import { contentDir, deleteFile, fileSize } from '@/lib/storage';
+import { contentDir, deleteFile, fileSize, resolveContentUri } from '@/lib/storage';
 
 import { NomadZim, isNomadZimAvailable } from '../../../modules/nomad-zim';
 
@@ -107,7 +107,7 @@ onItemRemoved('zim', (item) => {
 function unregisteredZimFiles(): File[] {
   const known = new Set(listItems('zim').map((i) => i.fileUri));
   const pending = db().getAllSync<{ dest_uri: string }>("SELECT dest_uri FROM downloads WHERE status NOT IN ('done','cancelled')");
-  for (const p of pending) known.add(p.dest_uri);
+  for (const p of pending) known.add(resolveContentUri(p.dest_uri));
   const norm = (u: string) => decodeURIComponent(u.replace(/^file:\/\//, ''));
   const knownPaths = new Set([...known].map(norm));
   return contentDir('zim')

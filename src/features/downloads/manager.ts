@@ -13,7 +13,7 @@ import { AppState, Platform } from 'react-native';
 import { create } from 'zustand';
 
 import { db, parseJson } from '@/db';
-import { contentFile, deleteFile, hasRoomFor, partialDir, type ContentKind } from '@/lib/storage';
+import { contentFile, deleteFile, hasRoomFor, partialDir, resolveContentUri, type ContentKind } from '@/lib/storage';
 
 export type DownloadStatus = 'queued' | 'running' | 'paused' | 'processing' | 'failed' | 'done' | 'cancelled';
 
@@ -98,7 +98,7 @@ const fromRow = (r: Row): DownloadRecord => ({
   kind: r.kind,
   title: r.title,
   url: r.url,
-  destUri: r.dest_uri,
+  destUri: resolveContentUri(r.dest_uri),
   totalBytes: r.total_bytes,
   bytesWritten: r.bytes_written,
   status: r.status,
@@ -133,7 +133,12 @@ function persist(id: string, fields: Partial<Row>) {
   const keys = Object.keys(fields);
   if (!keys.length) return;
   const sets = keys.map((k) => `${k} = ?`).join(', ');
-  db().runSync(`UPDATE downloads SET ${sets}, updated_at = ? WHERE id = ?`, ...(Object.values(fields) as (string | number | null)[]), Date.now(), id);
+  db().runSync(
+    `UPDATE downloads SET ${sets}, updated_at = ? WHERE id = ?`,
+    ...(Object.values(fields) as (string | number | null)[]),
+    Date.now(),
+    id,
+  );
 }
 
 function setStatus(id: string, status: DownloadStatus, extra: Partial<DownloadRecord> = {}, row: Partial<Row> = {}) {
@@ -270,7 +275,15 @@ async function run(id: string) {
   const saved = parseJson<DownloadPauseState | null>(row?.pause_state, null);
   const options = {
     sessionType: 'background' as const,
-    onProgress: ({ bytesWritten, totalBytes }: { bytesWritten: number; totalBytes: number }) => onProgress(id, bytesWritten, totalBytes),
+    // Native sizes may arrive as BigInt (int64); everything downstream expects numbers.
+    onProgress: ({ bytesWritten, totalBytes }: { bytesWritten: number | bigint; totalBytes: number | bigint }) => {
+      // An exception thrown from a native event callback is fatal in release builds.
+      try {
+        onProgress(id, Number(bytesWritten), Number(totalBytes));
+      } catch (e) {
+        console.warn('[downloads] progress', e);
+      }
+    },
   };
 
   let task: DownloadTask;
@@ -314,9 +327,9 @@ async function run(id: string) {
     setStatus(id, 'processing', {}, { pause_state: null });
     const dest = new File(rec.destUri);
     if (dest.exists) dest.delete();
-    file.move(dest);
+    await file.move(dest);
     const current = useDownloads.getState().records[id] ?? rec;
-    const size = dest.size ?? current.totalBytes;
+    const size = Number(dest.size ?? current.totalBytes);
     await handlers[rec.kind]?.(dest, { ...current, bytesWritten: size, totalBytes: size });
     setStatus(id, 'done', { bytesWritten: size, totalBytes: size }, { bytes_written: size, total_bytes: size });
     const done = useDownloads.getState().records[id];
@@ -385,7 +398,13 @@ export type ExternalJob = {
   fail: (error: string) => void;
 };
 
-export function startExternalJob(input: { id: string; kind: ContentKind; title: string; totalBytes: number; cancel: () => void }): ExternalJob {
+export function startExternalJob(input: {
+  id: string;
+  kind: ContentKind;
+  title: string;
+  totalBytes: number;
+  cancel: () => void;
+}): ExternalJob {
   const now = Date.now();
   externalCancels.set(input.id, input.cancel);
   useDownloads.setState((s) => ({

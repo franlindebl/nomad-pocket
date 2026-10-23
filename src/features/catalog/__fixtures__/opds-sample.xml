@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:dc="http://purl.org/dc/terms/"
+      xmlns:opds="https://specs.opds.io/opds-1.2"
+      xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">
+  <id>aa354e2f-d16f-0741-253a-f1314da6db26</id>
+
+  <link rel="self"
+        href="/catalog/v2/entries?lang=spa&amp;count=6"
+        type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+  <link rel="start"
+        href="/catalog/v2/root.xml"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <link rel="up"
+        href="/catalog/v2/root.xml"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+
+  <title>Filtered Entries (lang=spa&amp;count=6)</title>
+  <updated>2026-10-23T22:39:30Z</updated>
+  <totalResults>430</totalResults>
+  <startIndex>0</startIndex>
+  <itemsPerPage>6</itemsPerPage>
+  <entry>
+    <id>urn:uuid:87e75aa6-c845-217e-7666-9485e2229457</id>
+    <title>EcuRed</title>
+    <updated>2019-05-21T00:00:00Z</updated>
+    <summary>EcuRed</summary>
+    <language>spa</language>
+    <name>kiwix.ecured_es_all</name>
+    <flavour></flavour>
+    <category></category>
+    <tags>ecured;_ftindex:yes;_pictures:yes;_videos:yes;_details:yes</tags>
+    <articleCount>200968</articleCount>
+    <mediaCount>277212</mediaCount>
+    <link rel="http://opds-spec.org/image/thumbnail"
+          href="/catalog/v2/illustration/87e75aa6-c845-217e-7666-9485e2229457/?size=48"
+          type="image/png;width=48;height=48;scale=1"/>
+    <link type="text/html" href="https://browse.library.kiwix.org/content/ecured_es_all_2019-05" />
+    <author>
+      <name>Ecured</name>
+    </author>
+    <publisher>
+      <name>Kiwix</name>
+    </publisher>
+    <dc:issued>2019-05-21T00:00:00Z</dc:issued>
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim" href="https://lb.download.kiwix.org/zim/other/ecured_es_all_2019-05.zim.meta4" length="3321638912" />
+  </entry>
+  <entry>
+    <id>urn:uuid:67505525-4c92-a6ae-9260-76dd16e9d541</id>
+    <title>Inciclopedia</title>
+    <updated>2025-07-27T00:00:00Z</updated>
+    <summary>De Inciclopedia</summary>
+    <language>spa</language>
+    <name>inciclopedia_es_all</name>
+    <flavour></flavour>
+    <category></category>
+    <tags>inciclopedia;_details:yes;_ftindex:yes;_pictures:yes;_videos:yes</tags>
+    <articleCount>23089</articleCount>
+    <mediaCount>58031</mediaCount>
+    <link rel="http://opds-spec.org/image/thumbnail"
+          href="/catalog/v2/illustration/67505525-4c92-a6ae-9260-76dd16e9d541/?size=48"
+          type="image/png;width=48;height=48;scale=1"/>
+    <link type="text/html" href="https://browse.library.kiwix.org/content/inciclopedia_es_all_2025-07" />
+    <author>
+      <name>Inciclopedia</name>
+    </author>
+    <publisher>
+      <name>openZIM</name>
+    </publisher>
+    <dc:issued>2025-07-27T00:00:00Z</dc:issued>
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim" href="https://lb.download.kiwix.org/zim/other/inciclopedia_es_all_2025-07.zim.meta4" length="1063518208" />
+  </entry>
+  <entry>
+    <id>urn:uuid:89332759-bf5e-7579-cd26-b3d036b9afa0</id>
+    <title>Vikidia</title>
+    <updated>2026-09-08T00:00:00Z</updated>
+    <summary>De Vikidia</summary>
+    <language>spa</language>
+    <name>vikidia_es_all</name>
+    <flavour>nopic</flavour>
+    <category>vikidia</category>
+    <tags>vikidia;_category:vikidia;_pictures:no;_videos:no;_details:yes;_ftindex:yes</tags>
+    <articleCount>10524</articleCount>
+    <mediaCount>23</mediaCount>
+    <link rel="http://opds-spec.org/image/thumbnail"
+          href="/catalog/v2/illustration/89332759-bf5e-7579-cd26-b3d036b9afa0/?size=48"
+          type="image/png;width=48;height=48;scale=1"/>
+    <link type="text/html" href="https://browse.library.kiwix.org/content/vikidia_es_all_nopic_2026-09" />
+    <author>
+      <name>Vikidia</name>
+    </author>
+    <publisher>
+      <name>openZIM</name>
+    </publisher>
+    <dc:issued>2026-09-08T00:00:00Z</dc:issued>
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim" href="https://lb.download.kiwix.org/zim/vikidia/vikidia_es_all_nopic_2026-09.zim.meta4" length="15534080" />
+  </entry>
+  <entry>
+    <id>urn:uuid:c3c33ffa-d625-0c48-1528-fc7ec666e94d</id>
+    <title>Vikidia</title>
+    <updated>2026-09-08T00:00:00Z</updated>
+    <summary>De Vikidia</summary>
+    <language>spa</language>
+    <name>vikidia_es_all</name>
+    <flavour>maxi</flavour>
+    <category>vikidia</category>
+    <tags>vikidia;_category:vikidia;_pictures:yes;_videos:no;_details:yes;_ftindex:yes</tags>
+    <articleCount>10523</articleCount>
+    <mediaCount>9926</mediaCount>
+    <link rel="http://opds-spec.org/image/thumbnail"
+          href="/catalog/v2/illustration/c3c33ffa-d625-0c48-1528-fc7ec666e94d/?size=48"
+          type="image/png;width=48;height=48;scale=1"/>
+    <link type="text/html" href="https://browse.library.kiwix.org/content/vikidia_es_all_maxi_2026-09" />
+    <author>
+      <name>Vikidia</name>
+    </author>
+    <publisher>
+      <name>openZIM</name>
+    </publisher>
+    <dc:issued>2026-09-08T00:00:00Z</dc:issued>
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim" href="https://lb.download.kiwix.org/zim/vikidia/vikidia_es_all_maxi_2026-09.zim.meta4" length="133549056" />
+  </entry>
+  <entry>
+    <id>urn:uuid:38d30729-4c28-a979-9887-5fd6ecfbee18</id>
+    <title>TED worklife</title>
+    <updated>2026-09-16T00:00:00Z</updated>
+    <summary>A collection of TED videos about worklife</summary>
+    <language>eng,ara,spa,zho</language>
+    <name>ted_mul_worklife</name>
+    <flavour></flavour>
+    <category>ted</category>
+    <tags>_category:ted;ted;_videos:yes;_ftindex:yes;_pictures:yes;_details:yes</tags>
+    <articleCount>23</articleCount>
+    <mediaCount>70</mediaCount>
+    <link rel="http://opds-spec.org/image/thumbnail"
+          href="/catalog/v2/illustration/38d30729-4c28-a979-9887-5fd6ecfbee18/?size=48"
+          type="image/png;width=48;height=48;scale=1"/>
+    <link type="text/html" href="https://browse.library.kiwix.org/content/ted_mul_worklife_2026-09" />
+    <author>
+      <name>TED</name>
+    </author>
+    <publisher>
+      <name>openZIM</name>
+    </publisher>
+    <dc:issued>2026-09-16T00:00:00Z</dc:issued>
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim" href="https://lb.download.kiwix.org/zim/ted/ted_mul_worklife_2026-09.zim.meta4" length="371139584" />
+  </entry>
+  <entry>
+    <id>urn:uuid:477f8cb7-eef2-cbb3-14c8-207073c9dfb3</id>
+    <title>TED competition</title>
+    <updated>2026-09-08T00:00:00Z</updated>
+    <summary>A collection of TED videos about competition</summary>
+    <language>eng,ara,spa,heb</language>
+    <name>ted_mul_competition</name>
+    <flavour></flavour>
+    <category>ted</category>
+    <tags>_category:ted;ted;_videos:yes;_ftindex:yes;_pictures:yes;_details:yes</tags>
+    <articleCount>6</articleCount>
+    <mediaCount>17</mediaCount>
+    <link rel="http://opds-spec.org/image/thumbnail"
+          href="/catalog/v2/illustration/477f8cb7-eef2-cbb3-14c8-207073c9dfb3/?size=48"
+          type="image/png;width=48;height=48;scale=1"/>
+    <link type="text/html" href="https://browse.library.kiwix.org/content/ted_mul_competition_2026-09" />
+    <author>
+      <name>TED</name>
+    </author>
+    <publisher>
+      <name>openZIM</name>
+    </publisher>
+    <dc:issued>2026-09-08T00:00:00Z</dc:issued>
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim" href="https://lb.download.kiwix.org/zim/ted/ted_mul_competition_2026-09.zim.meta4" length="119384064" />
+  </entry>
+</feed>

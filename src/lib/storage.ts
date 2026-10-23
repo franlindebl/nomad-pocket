@@ -24,23 +24,36 @@ export function contentFile(kind: ContentKind, filename: string): File {
   return new File(contentDir(kind), filename);
 }
 
+/**
+ * iOS moves the app container on reinstall/update, so absolute URIs stored in the
+ * database go stale. Re-anchor anything under `<documents>/content/` to the
+ * current documents directory.
+ */
+export function resolveContentUri(uri: string): string {
+  const marker = `/${ROOT}/`;
+  const at = uri.indexOf(marker);
+  if (at < 0) return uri;
+  const base = Paths.document.uri.replace(/\/$/, '');
+  return `${base}${uri.slice(at)}`;
+}
+
 /** Strip the file:// scheme — native libraries (libzim, llama.cpp) want plain paths. */
 export function toNativePath(uri: string): string {
   return decodeURIComponent(uri.replace(/^file:\/\//, ''));
 }
 
 export function freeBytes(): number {
-  return Paths.availableDiskSpace;
+  return Number(Paths.availableDiskSpace);
 }
 
 export function totalBytes(): number {
-  return Paths.totalDiskSpace;
+  return Number(Paths.totalDiskSpace);
 }
 
 export function fileSize(uri: string): number {
   try {
     const f = new File(uri);
-    return f.exists ? (f.size ?? 0) : 0;
+    return f.exists ? Number(f.size ?? 0) : 0;
   } catch {
     return 0;
   }

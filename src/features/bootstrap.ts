@@ -3,7 +3,9 @@
 // idempotent and fast (heavy work goes to the background).
 import { db } from '@/db';
 import { useContent } from '@/features/content/items';
-import { initDownloads } from '@/features/downloads/manager';
+import { showToast } from '@/components/Toast';
+import { initDownloads, onDownloadFinished } from '@/features/downloads/manager';
+import i18n from '@/i18n';
 
 type InitFn = () => void | Promise<void>;
 const featureInits: InitFn[] = [];
@@ -30,6 +32,7 @@ export function bootstrap(): Promise<void> {
       }
     }
     initDownloads();
+    onDownloadFinished((r) => showToast(i18n.t('downloads.finished', { title: r.title })));
   })();
   return started;
 }

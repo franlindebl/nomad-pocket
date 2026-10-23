@@ -28,9 +28,11 @@
   "explorePlaceholder": "Search the Kiwix catalog",
   "exploreOffline": "You need a connection to explore the Kiwix catalog.",
   "exploreEmpty": "No results",
-  "wifiRequired": "Downloads are limited to Wi‑Fi. You can change this in Settings.",
+  "wifiRequired": "You're on mobile data and downloads are limited to Wi‑Fi.",
   "articles": "{{count}} articles",
   "openMain": "Open",
   "wikipediaPick": "Choose your Wikipedia",
-  "wikipediaPickBody": "All of them work offline. Versions without images are much smaller."
+  "wikipediaPickBody": "All of them work offline. Versions without images are much smaller.",
+  "wifiTitle": "Wi‑Fi only downloads",
+  "useMobileData": "Use mobile data"
 }

@@ -16,6 +16,13 @@ import { radius, space, useTheme } from '@/theme';
 
 const LANG_CODES: Record<string, string> = { es: 'spa', en: 'eng' };
 
+/** Kiwix search matches whole words only; make the last word a prefix match. */
+function toKiwixQuery(q: string): string | undefined {
+  const trimmed = q.trim();
+  if (!trimmed) return undefined;
+  return /[*"]$/.test(trimmed) ? trimmed : `${trimmed}*`;
+}
+
 export default function ExploreScreen() {
   const { t } = useTranslation('library');
   const contentLangs = useSettings((s) => s.contentLanguages);
@@ -32,7 +39,7 @@ export default function ExploreScreen() {
       const ctrl = new AbortController();
       abort.current = ctrl;
       setLoading(true);
-      searchKiwix({ q: query.trim() || undefined, lang: LANG_CODES[lang], count: 40 }, ctrl.signal)
+      searchKiwix({ q: toKiwixQuery(query), lang: LANG_CODES[lang], count: 40 }, ctrl.signal)
         .then((res) => {
           setEntries(res.entries);
           setOffline(false);

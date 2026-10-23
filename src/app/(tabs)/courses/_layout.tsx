@@ -8,6 +8,7 @@ export default function Layout() {
   return (
     <Stack screenOptions={useStackOptions()}>
       <Stack.Screen name="index" options={largeTitle(t('tabs.courses'))} />
+      <Stack.Screen name="[id]" options={{ title: '', headerTransparent: true }} />
     </Stack>
   );
 }

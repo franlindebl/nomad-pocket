@@ -80,27 +80,29 @@ export function decodeEntities(s: string): string {
   });
 }
 
-/** Text content of a node: CDATA kept verbatim, everything else entity-decoded. */
+/**
+ * Text content of a node. Child markup is dropped and entities decoded. CDATA
+ * sections are treated as embedded HTML (tags dropped, entities decoded), which is
+ * what feeds put there in practice.
+ */
 function textContent(raw: string): string {
+  const plain = (s: string) => decodeEntities(s.replace(/<[^>]*>/g, ''));
   let out = '';
   let i = 0;
   while (i < raw.length) {
     const start = raw.indexOf('<![CDATA[', i);
     if (start === -1) {
-      out += decodeEntities(raw.slice(i));
+      out += plain(raw.slice(i));
       break;
     }
-    out += decodeEntities(raw.slice(i, start));
+    out += plain(raw.slice(i, start));
     const end = raw.indexOf(']]>', start + 9);
-    if (end === -1) {
-      out += raw.slice(start + 9);
-      break;
-    }
-    out += raw.slice(start + 9, end);
+    const cdata = raw.slice(start + 9, end === -1 ? raw.length : end);
+    out += plain(cdata);
+    if (end === -1) break;
     i = end + 3;
   }
-  // Strip any nested markup (e.g. inline XHTML) and normalise whitespace.
-  return out.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+  return out.replace(/\s+/g, ' ').trim();
 }
 
 function escapeRegExp(s: string): string {
@@ -148,8 +150,10 @@ function toInt(s: string | null | undefined): number | null {
 // ---------------------------------------------------------------------------
 // Feed parsing
 
-function parseEntry(xml: string, base: string): KiwixEntry | null {
-  const allLinks = links(xml);
+function parseEntry(rawXml: string, base: string): KiwixEntry | null {
+  const allLinks = links(rawXml);
+  // <author>/<publisher> contain their own <name>; drop them before reading fields.
+  const xml = rawXml.replace(/<(author|publisher|contributor)\b[\s\S]*?<\/\1\s*>/g, '');
   const acquisition = allLinks.find((l) => l.rel === ACQUISITION_REL);
   if (!acquisition?.href) return null;
   const url = acquisition.href.replace(/\.meta4$/i, '');

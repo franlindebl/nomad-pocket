@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Badge, Button, IconBadge, ProgressBar, Row, Text } from '@/components/ui';
-import { downloadResource, getResource, loc } from '@/features/catalog';
-import { showDownloadError, useResourceState } from '@/features/catalog/DownloadButton';
+import { getResource, loc } from '@/features/catalog';
+import { startResourceDownload, useResourceState } from '@/features/catalog/DownloadButton';
 import { categoryHue, categoryIcon } from '@/features/catalog/icons';
 import { removeItem } from '@/features/content/items';
 import { cancelDownload, pauseDownload, resumeDownload } from '@/features/downloads/manager';
@@ -88,7 +88,7 @@ export default function ResourceSheet() {
           title={tc('actions.downloadSize', { size: formatMB(resource.sizeMB) })}
           size="lg"
           fullWidth
-          onPress={() => downloadResource(resource).catch((e) => showDownloadError(e, tc))}
+          onPress={() => startResourceDownload(resource, tc)}
         />
       )}
     </ScrollView>

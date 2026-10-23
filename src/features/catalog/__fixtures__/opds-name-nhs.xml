@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:dc="http://purl.org/dc/terms/"
+      xmlns:opds="https://specs.opds.io/opds-1.2"
+      xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">
+  <id>55c72735-d5af-7f84-2a63-1182785c0251</id>
+
+  <link rel="self"
+        href="/catalog/v2/entries?name=nhs.uk_en_medicines"
+        type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+  <link rel="start"
+        href="/catalog/v2/root.xml"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <link rel="up"
+        href="/catalog/v2/root.xml"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+
+  <title>Filtered Entries (name=nhs.uk_en_medicines)</title>
+  <updated>2026-10-23T22:39:30Z</updated>
+  <totalResults>1</totalResults>
+  <startIndex>0</startIndex>
+  <itemsPerPage>1</itemsPerPage>
+  <entry>
+    <id>urn:uuid:1e2f2cb1-4301-93d4-4776-b59649de340f</id>
+    <title>NHS&apos; Medicines A to Z</title>
+    <updated>2026-09-18T00:00:00Z</updated>
+    <summary>How medicines work, how and when to take them</summary>
+    <language>eng</language>
+    <name>nhs.uk_en_medicines</name>
+    <flavour></flavour>
+    <category>other</category>
+    <tags>_category:other;_ftindex:yes;medical;_pictures:yes;_videos:yes;_details:yes</tags>
+    <articleCount>1347</articleCount>
+    <mediaCount>32</mediaCount>
+    <link rel="http://opds-spec.org/image/thumbnail"
+          href="/catalog/v2/illustration/1e2f2cb1-4301-93d4-4776-b59649de340f/?size=48"
+          type="image/png;width=48;height=48;scale=1"/>
+    <link type="text/html" href="https://browse.library.kiwix.org/content/nhs.uk_en_medicines_2026-09b" />
+    <author>
+      <name>-</name>
+    </author>
+    <publisher>
+      <name>openZIM</name>
+    </publisher>
+    <dc:issued>2026-09-18T00:00:00Z</dc:issued>
+    <link rel="http://opds-spec.org/acquisition/open-access" type="application/x-zim" href="https://lb.download.kiwix.org/zim/zimit/nhs.uk_en_medicines_2026-09b.zim.meta4" length="15323136" />
+  </entry>
+</feed>

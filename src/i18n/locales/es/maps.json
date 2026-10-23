@@ -1,1 +1,93 @@
-{}
+{
+  "title": "Mapas",
+  "controls": {
+    "regions": "Mapas sin conexión",
+    "markers": "Lugares guardados",
+    "north": "Orientar al norte",
+    "locate": "Mostrar mi ubicación"
+  },
+  "empty": {
+    "title": "Mapas que funcionan en cualquier sitio",
+    "body": "Descarga el mapa del mundo y las regiones que necesites. Siguen funcionando sin cobertura.",
+    "world": "Descargar mapa del mundo · {{size}}",
+    "worldNoSize": "Descargar mapa del mundo",
+    "pickRegion": "Elegir una región"
+  },
+  "loadingAssets": "Preparando el mapa sin conexión…",
+  "location": {
+    "deniedTitle": "La ubicación está desactivada",
+    "deniedBody": "Permite el acceso a la ubicación en Ajustes para verte en el mapa. Funciona sin conexión gracias al GPS.",
+    "openSettings": "Abrir Ajustes",
+    "unavailable": "No se ha podido obtener tu ubicación. Prueba de nuevo al aire libre."
+  },
+  "regions": {
+    "title": "Mapas sin conexión",
+    "world": "Mapa del mundo",
+    "worldBody": "Países, ciudades y carreteras principales, hasta el zoom {{zoom}}. Se muestra bajo tus regiones.",
+    "visibleArea": "Descargar la zona visible",
+    "visibleAreaBody": "Guarda justo lo que ves ahora en pantalla",
+    "addRegion": "Añadir un país o región",
+    "addRegionBody": "Países, comunidades autónomas, estados de EE. UU.",
+    "installed": "Descargados",
+    "none": "Aún no tienes regiones. Elige una o descarga la zona que estás viendo.",
+    "detail": "Detalle hasta zoom {{zoom}} · {{size}} · {{date}}",
+    "deleteTitle": "¿Eliminar {{name}}?",
+    "deleteBody": "Liberarás {{size}}. Podrás volver a descargarlo cuando quieras.",
+    "update": "Actualizar",
+    "downloading": "Descargando…"
+  },
+  "picker": {
+    "title": "Elegir una región",
+    "search": "Buscar países y regiones",
+    "subdivisions": "{{country}} · regiones",
+    "noResults": "Ninguna región coincide con «{{query}}»"
+  },
+  "continent": {
+    "europe": "Europa",
+    "africa": "África",
+    "asia": "Asia",
+    "north-america": "América del Norte",
+    "south-america": "América del Sur",
+    "oceania": "Oceanía",
+    "antarctica": "Antártida"
+  },
+  "download": {
+    "titleArea": "Zona visible",
+    "titleWorld": "Mapa del mundo",
+    "detail": "Nivel de detalle",
+    "zoom12": "Pueblos",
+    "zoom14": "Calles",
+    "zoom15": "Máximo",
+    "zoomHint": {
+      "12": "Pueblos, carreteras principales y usos del suelo. La descarga más ligera.",
+      "14": "Todas las calles y caminos. Ideal para ir a pie o en coche.",
+      "15": "Edificios y todo el detalle. La descarga más pesada."
+    },
+    "estimating": "Calculando el tamaño…",
+    "size": "Tamaño de la descarga",
+    "tiles": "{{n}} teselas",
+    "free": "{{size}} libres en este dispositivo",
+    "notEnough": "No hay espacio suficiente: necesitas {{needed}} y tienes {{free}} libres.",
+    "tooLarge": "La zona es demasiado grande para este nivel de detalle. Elige menos detalle o una zona más pequeña.",
+    "offline": "Necesitas conexión a internet para descargar mapas. Después funcionan sin conexión.",
+    "estimateFailed": "No se ha podido calcular el tamaño: {{error}}",
+    "action": "Descargar · {{size}}",
+    "source": "Protomaps, versión del {{date}} · © OpenStreetMap",
+    "areaName": "Zona cerca de {{coords}}"
+  },
+  "markers": {
+    "title": "Lugares guardados",
+    "emptyTitle": "No hay lugares guardados",
+    "emptyBody": "Mantén pulsado cualquier punto del mapa para poner una chincheta.",
+    "new": "Nuevo lugar",
+    "edit": "Lugar",
+    "name": "Nombre",
+    "namePlaceholder": "P. ej. campamento, fuente…",
+    "note": "Nota",
+    "notePlaceholder": "Opcional",
+    "defaultName": "Chincheta {{n}}",
+    "showOnMap": "Ver en el mapa",
+    "deleteTitle": "¿Eliminar «{{name}}»?",
+    "coordinates": "Coordenadas"
+  }
+}

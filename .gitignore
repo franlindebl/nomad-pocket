@@ -42,6 +42,9 @@ example
 /ios
 /android
 
+# agent worktrees
+.claude/worktrees/
+
 # nomad-zim: prebuilt libkiwix binaries (fetched by modules/nomad-zim/scripts/fetch-ios-libs.sh)
 modules/nomad-zim/ios/Frameworks/
 modules/*/android/build/
