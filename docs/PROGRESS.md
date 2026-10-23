@@ -20,7 +20,7 @@ every work block so work can resume after context compaction.
 | 0. Foundation (project, design system, nav, i18n, db, downloads core) | done — iOS/Android builds OK |
 | 1. Catalog + downloads UI + onboarding | done |
 | 2. ZIM library (native module, reader, search) | pending |
-| 3. Maps (extractor, MapLibre, regions, markers) | pending |
+| 3. Maps (extractor, MapLibre, regions, markers) | done (iOS verified, Android compiles) — merged |
 | 4. Courses | UI + progress done (needs ZIM module for syllabus) |
 | 5. Local AI (system + GGUF, RAG) | pending |
 | 6. Polish, icon, builds on simulator/emulator | pending |
@@ -51,8 +51,21 @@ every work block so work can resume after context compaction.
 ## In flight (parallel agents, git worktrees — merge into main when done)
 
 - ZIM agent (worktree branch): `modules/nomad-zim`, `src/features/library/{zim,register}.ts`, reader + `/search` screens, `reader` i18n ns.
-- Maps agent (worktree branch): `src/lib/pmtiles`, `src/features/maps`, maps tab, `maps` i18n ns.
 - AI agent (worktree branch): `modules/nomad-llm`, llama.rn, `src/features/assistant`, assistant tab, `assistant` i18n ns.
+
+### 2026-10-24 — Maps (phase 3)
+- `src/lib/pmtiles`: PMTiles v3 reader/extractor in TS with node tests (Hilbert ids
+  vs. the official `pmtiles` package, directory round-trips, end-to-end extracts
+  validated with the official reader, a real 120 KB planet fixture, opt-in live
+  test `PMTILES_NETWORK=1 npm test`).
+- Maps tab: full-screen MapLibre map on local `pmtiles://file://` archives, bundled
+  glyphs/sprites, world z0–5 basemap under regions, region picker (countries, CCAA,
+  US states), "download visible area" with zoom choice and exact size, markers,
+  locate-me, compass. Verified on the iOS simulator (Release build).
+- Known limits: extraction runs on the JS thread in the foreground (screen kept
+  awake) and does not resume after the app is killed; no CJK/Arabic glyphs bundled
+  (those labels are dropped); country bboxes skip remote territories; very large
+  areas are refused above 2.5 M tiles (choose less detail).
 
 ## Next steps
 
