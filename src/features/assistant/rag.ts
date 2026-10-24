@@ -67,13 +67,13 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
   const articles = await Promise.all(
     hits.map(async (h) => ({ hit: h, article: await getArticleText(h.itemId, h.path, ARTICLE_CHARS).catch(() => null) })),
   );
-  for (const { hit, article } of articles) {
+  for (const [hitRank, { hit, article }] of articles.entries()) {
     const text = article?.text || hit.snippet;
     if (!text) continue;
     const title = article?.title || hit.title;
     const key = keyOf(hit.itemId, hit.path);
     refs.set(key, { itemId: hit.itemId, path: hit.path, title });
-    chunkText(text, CHUNK_SIZE, CHUNK_OVERLAP).forEach((c, index) => chunks.push({ sourceKey: key, title, text: c, index }));
+    chunkText(text, CHUNK_SIZE, CHUNK_OVERLAP).forEach((c, index) => chunks.push({ sourceKey: key, title, text: c, index, hitRank }));
   }
 
   let ranked = rankChunks(question, chunks, 16);

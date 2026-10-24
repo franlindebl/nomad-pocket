@@ -22,7 +22,7 @@ every work block so work can resume after context compaction.
 | 2. ZIM library (native module, reader, search) | done (iOS verified, Android compiles) |
 | 3. Maps (extractor, MapLibre, regions, markers) | done (iOS verified, Android compiles) — merged |
 | 4. Courses | UI + progress done (needs ZIM module for syllabus) |
-| 5. Local AI (system + GGUF, RAG) | done — verified on iOS sim (llama.cpp CPU + Apple FM); RAG waits for ZIM module |
+| 5. Local AI (system + GGUF, RAG) | done — verified on iOS sim (llama.cpp CPU, Apple FM, RAG with citations) |
 | 6. Polish, icon, builds on simulator/emulator | pending |
 
 ## Log
@@ -98,9 +98,15 @@ every work block so work can resume after context compaction.
   numbered sources → `[n]` citations), chats in `chat_sessions`/`chat_messages`.
 - UI: chat with streaming Markdown, source chips → reader, stop, "use my library"
   toggle, starters; conversations sheet; model screen with downloads.
-- Verified: iOS Release sim build, Qwen3.5 0.8B downloaded in-app and streamed an
-  answer on the CPU; Apple Intelligence streamed on the simulator; Android
-  `assembleDebug` OK. RAG returns "not in your library" until `zim.ts` is real.
+- Verified on the iOS 27 simulator (Release): Qwen3.5 0.8B downloaded in-app and
+  streamed on the CPU (llama.cpp); Apple Intelligence available and streaming; RAG
+  over `wikipedia_es_top_mini` with Apple FM answers with inline `[n]` citations and
+  source chips that open the reader. Android `assembleDebug` OK (runtime untested).
+  Screenshots: `docs/screenshots/assistant-*.png`.
+- Limits / TODO: Qwen3.5 0.8B rarely emits `[n]` (all retrieved sources are shown
+  then) and is unreliable for health answers — recommend 2B+; keyboard avoidance only
+  checked with the hardware keyboard; Gemini Nano path untested on a real AICore
+  device; `maxOutputTokens` limits of Gemini Nano unverified; no copy/regenerate yet.
 
 ## Next steps
 

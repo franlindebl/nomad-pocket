@@ -146,6 +146,8 @@ export type Chunk = {
   text: string;
   /** Position of the chunk within its article (0 = lead). */
   index: number;
+  /** Rank of the article in the search engine's results (0 = best), if known. */
+  hitRank?: number;
 };
 
 /** Split into sentences, keeping the terminator. */
@@ -263,9 +265,27 @@ export function rankChunks(question: string, chunks: Chunk[], limit = 12): Score
   const index = new BM25<Chunk>();
   for (const c of chunks) index.add(c, [...tokenize(c.title), ...tokenize(c.text)]);
   const q = tokenize(question);
+  const qSet = new Set(q);
+  const titleMatch = new Map<string, number>();
+  const titleBoost = (title: string) => {
+    let v = titleMatch.get(title);
+    if (v === undefined) {
+      const t = tokenize(title);
+      // Share of the title's terms the question mentions ("Fotosíntesis" for "explain photosynthesis").
+      v = t.length ? t.filter((x) => qSet.has(x)).length / t.length : 0;
+      titleMatch.set(title, v);
+    }
+    return v;
+  };
   return index
     .search(q)
-    .map((s) => ({ item: s.item, score: s.score * (1 + 0.15 / (1 + s.item.index)) }))
+    .map((s) => {
+      const c = s.item;
+      const lead = 1 + 0.15 / (1 + c.index);
+      const title = 1 + 0.8 * titleBoost(c.title);
+      const engine = c.hitRank === undefined ? 1 : 1 + 0.3 / (1 + c.hitRank);
+      return { item: c, score: s.score * lead * title * engine };
+    })
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 }
@@ -403,8 +423,12 @@ export function formatSources(sources: PackedSource[]): string {
  */
 export function buildRagUserMessage(question: string, sources: PackedSource[], lang: Lang): string {
   if (!sources.length) return `${NO_HITS[lang]}\n\n${lang === 'es' ? 'Pregunta' : 'Question'}: ${question}`;
-  const label = lang === 'es' ? { src: 'Fuentes', q: 'Pregunta', a: 'Responde citando las fuentes con [n].' } : { src: 'Sources', q: 'Question', a: 'Answer citing the sources with [n].' };
-  return `${label.src}:\n\n${formatSources(sources)}\n\n${label.q}: ${question}\n\n${label.a}`;
+  const label =
+    lang === 'es'
+      ? { src: 'Fuentes de la biblioteca', q: 'Pregunta', a: 'Responde ahora a la pregunta con tus palabras, usando estas fuentes y citándolas con [n].' }
+      : { src: 'Library sources', q: 'Question', a: 'Now answer the question in your own words using these sources, citing them with [n].' };
+  // Question first and last: small models lose track of it after long context.
+  return `${label.q}: ${question}\n\n${label.src}:\n\n${formatSources(sources)}\n\n${label.q}: ${question}\n${label.a}`;
 }
 
 /** Citation numbers actually used in an answer, e.g. "… [1][3]" → [1, 3]. */

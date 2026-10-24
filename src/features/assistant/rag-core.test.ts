@@ -143,6 +143,15 @@ describe('BM25', () => {
     assert.equal(ranked[0].item.sourceKey, 'a');
     assert.equal(ranked[0].item.index, 0);
   });
+
+  test('rankChunks prefers the article whose title the question names', () => {
+    const chunks: Chunk[] = [
+      { sourceKey: 'g', title: 'Gliceraldehído', text: 'Producto intermedio de la fotosíntesis y la glucólisis, presente en la fotosíntesis.', index: 0, hitRank: 0 },
+      { sourceKey: 'f', title: 'Fotosíntesis', text: 'Proceso por el que las plantas convierten la luz en energía química.', index: 0, hitRank: 2 },
+    ];
+    const ranked = rankChunks('Explícame la fotosíntesis de forma sencilla', chunks);
+    assert.equal(ranked[0].item.sourceKey, 'f');
+  });
 });
 
 describe('context packing', () => {
@@ -189,7 +198,8 @@ describe('context packing', () => {
   test('buildRagUserMessage numbers sources and handles no hits', () => {
     const packed = packContext([scored(chunk('c', 0, 40), 1)], (k) => refs[k], 1000);
     const msg = buildRagUserMessage('¿Cómo curo una quemadura?', packed.sources, 'es');
-    assert.match(msg, /^Fuentes:/);
+    assert.match(msg, /^Pregunta: ¿Cómo curo una quemadura\?/);
+    assert.match(msg, /Fuentes de la biblioteca:/);
     assert.match(msg, /\[1\] Quemadura/);
     assert.match(msg, /Pregunta: ¿Cómo curo una quemadura\?/);
     const none = buildRagUserMessage('What is X?', [], 'en');
