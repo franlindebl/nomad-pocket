@@ -23,7 +23,7 @@ every work block so work can resume after context compaction.
 | 3. Maps (extractor, MapLibre, regions, markers) | done — iOS + Android verified |
 | 4. Courses | done (syllabus from static main-page links; SPA courses fall back to free exploration) |
 | 5. Local AI (system + GGUF, RAG) | done — verified on iOS sim (llama.cpp CPU, Apple FM, RAG with citations) |
-| 6. Polish, icon, builds on simulator/emulator | in progress |
+| 6. Polish, icon, builds on simulator/emulator | done for MVP (see Next steps) |
 
 ## Log
 
@@ -122,6 +122,18 @@ every work block so work can resume after context compaction.
   checked with the hardware keyboard; Gemini Nano path untested on a real AICore
   device; `maxOutputTokens` limits of Gemini Nano unverified; no copy/regenerate yet.
 
+### 2026-10-24 — Review pass (lead + review agent)
+- Independent bug review (16 findings) fixed: Android background download stall,
+  ZIM import could delete the installed archive, Android archive dispose while in use,
+  UUID map clobbered by metadata probes, decimals split in RAG passages, stop ignored
+  while searching/loading, cancel during processing, pause right at completion,
+  partial-file leaks + startup sweep, storage check ignores queued downloads,
+  citation ranges, empty syllabus persisted, orphan chat answers, untranslated map
+  storage error, archive re-opened after deletion. i18n checker: `npm run check:i18n`.
+- Reader table of contents (h2/h3 anchors). Scanned/imported ZIMs match the catalog by
+  file name (ZIM `Name` lacks the flavour) and their ids migrate with history intact.
+- Verified again on both platforms; Android background → foreground resumes downloads.
+
 ## Next steps
 
 - Smoke-test the merged build on iOS simulator + Android emulator (all tabs).
@@ -132,7 +144,8 @@ every work block so work can resume after context compaction.
 ## Known issues / risks
 
 - Downloads interrupted by app termination restart from zero unless paused first
-  (expo-file-system tasks don't survive relaunch).
+  (expo-file-system tasks don't survive relaunch; reattaching the iOS background
+  URLSession would need a small native module).
 - Map extraction runs in the JS thread while the app is in foreground.
 - llama.rn's `stopCompletion()`/`release()` may not return promises — don't chain `.catch`.
 - Gemini Nano path compiled but untested on a real AICore device.
