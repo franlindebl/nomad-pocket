@@ -1,0 +1,59 @@
+app.json
+  s_5fff5382100178::t_5dd63d861df6c3 5
+modules/nomad-zim/android/src/main/java/expo/modules/nomadzim/ZimWebView.kt
+  s_5fff5382100178::t_8224f299373d86 9,31-33,237,275,277-294,298
+modules/nomad-zim/ios/ZimWebView.swift
+  s_5fff5382100178::t_d6f982e1e9fd2e 10-12,31-37,44-47,262,264-265,274-285,290-291,303-304
+package-lock.json
+  s_5fff5382100178::t_8fd49358be021c 3,9
+package.json
+  s_5fff5382100178::t_5eff6f46643f99 3
+src/app/(tabs)/(home)/index.tsx
+  s_5fff5382100178::t_88c6b9a5b54770 71,82
+src/features/downloads/manager.ts
+  s_5fff5382100178::t_462acc1d7ef89a 18-19,354-356,359
+src/features/downloads/mirrors.test.ts
+  s_5fff5382100178::t_872d5b182abd96 1-19
+modules/nomad-zim/android/src/main/java/expo/modules/nomadzim/NomadZimModule.kt
+  s_5fff5382100178::t_6840b9fd94c048 86-89
+modules/nomad-zim/android/src/main/java/expo/modules/nomadzim/ZimRegistry.kt
+  s_5fff5382100178::t_34abe261cc2d3a 79-98
+modules/nomad-zim/ios/NZArchive.h
+  s_5fff5382100178::t_3c255ee43e8f9e 62-64
+modules/nomad-zim/ios/NZArchive.mm
+  s_5fff5382100178::t_a85eae73427e2d 188-203
+modules/nomad-zim/ios/NomadZimModule.swift
+  s_5fff5382100178::t_489d20d14b6070 77-81
+modules/nomad-zim/src/NomadZim.types.ts
+  s_5fff5382100178::t_d30d9ead6d8b64 44-45
+src/features/content/items.ts
+  s_5fff5382100178::t_125289930963d5 5,7,10-16,56-57,140-141
+src/features/courses/courses.ts
+  s_5fff5382100178::t_b2d4db58d483eb 2-5,10-11,68-86,91-93,108-110,114-116,135-136
+src/features/downloads/mirrors.ts
+  s_5fff5382100178::t_131176c4d46721 1-65
+src/features/library/html.test.ts
+  s_5fff5382100178::t_889f1af37ae373 64-69
+src/features/library/html.ts
+  s_5fff5382100178::t_78bc204ead08c2 44
+src/features/library/zim.ts
+  s_5fff5382100178::t_53654e5914d882 209-229
+docs/PROGRESS.md
+  s_5fff5382100178::t_aefa1d23b96d5d 137-155
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6e5927ff628a2005324e154bef336d15f9fa5c57",
+  "prompts": {},
+  "sessions": {
+    "s_5fff5382100178": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "88d7e0d4-d56b-4052-8337-f770c60c73de",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
