@@ -1,0 +1,155 @@
+# ANDROID-02 — map labels in every script the app ships glyphs for (Arabic, Thai, CJK via
+# the system font, Georgian, Ethiopic, Devanagari): for each city the emulator's location is
+# set, the map centres on it and the visible area is downloaded (a few MB each). Visual check.
+appId: com.fjlinde.nomadpocket
+tags: [android, network]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { point: "50%,93%" }   # Mapas
+- extendedWaitUntil:
+    visible: "Mapas sin conexión"
+    timeout: 20000
+- setLocation: { latitude: 35.2937, longitude: -2.9383 }
+- tapOn: "Mostrar mi ubicación"
+- extendedWaitUntil:
+    visible: "NoExiste"
+    timeout: 3000
+    optional: true
+- tapOn: "Mapas sin conexión"
+- tapOn: "Descargar la zona visible.*"
+- extendedWaitUntil:
+    visible: "Descargar · .*"
+    timeout: 60000
+- tapOn: "Descargar · .*"
+- tapOn:
+    text: "(?i)usar datos móviles"
+    optional: true
+- extendedWaitUntil:
+    notVisible: "Descargando.*|Preparando.*"
+    timeout: 300000
+- back
+- extendedWaitUntil:
+    visible: "NoExiste"
+    timeout: 4000
+    optional: true
+- takeScreenshot: melilla
+- setLocation: { latitude: 13.745, longitude: 100.5 }
+- tapOn: "Mostrar mi ubicación"
+- extendedWaitUntil:
+    visible: "NoExiste"
+    timeout: 3000
+    optional: true
+- tapOn: "Mapas sin conexión"
+- tapOn: "Descargar la zona visible.*"
+- extendedWaitUntil:
+    visible: "Descargar · .*"
+    timeout: 60000
+- tapOn: "Descargar · .*"
+- tapOn:
+    text: "(?i)usar datos móviles"
+    optional: true
+- extendedWaitUntil:
+    notVisible: "Descargando.*|Preparando.*"
+    timeout: 300000
+- back
+- extendedWaitUntil:
+    visible: "NoExiste"
+    timeout: 4000
+    optional: true
+- takeScreenshot: bangkok
+- setLocation: { latitude: 35.68, longitude: 139.765 }
+- tapOn: "Mostrar mi ubicación"
+- extendedWaitUntil:
+    visible: "NoExiste"
+    timeout: 3000
+    optional: true
+- tapOn: "Mapas sin conexión"
+- tapOn: "Descargar la zona visible.*"
+- extendedWaitUntil:
+    visible: "Descargar · .*"
+    timeout: 60000
+- tapOn: "Descargar · .*"
+- tapOn:
+    text: "(?i)usar datos móviles"
+    optional: true
+- extendedWaitUntil:
+    notVisible: "Descargando.*|Preparando.*"
+    timeout: 300000
+- back
+- extendedWaitUntil:
+    visible: "NoExiste"
+    timeout: 4000
+    optional: true
+- takeScreenshot: tokyo
+- setLocation: { latitude: 41.695, longitude: 44.8 }
+- tapOn: "Mostrar mi ubicación"
+- extendedWaitUntil:
+    visible: "NoExiste"
+    timeout: 3000
+    optional: true
+- tapOn: "Mapas sin conexión"
+- tapOn: "Descargar la zona visible.*"
+- extendedWaitUntil:
+    visible: "Descargar · .*"
+    timeout: 60000
+- tapOn: "Descargar · .*"
+- tapOn:
+    text: "(?i)usar datos móviles"
+    optional: true
+- extendedWaitUntil:
+    notVisible: "Descargando.*|Preparando.*"
+    timeout: 300000
+- back
+- extendedWaitUntil:
+    visible: "NoExiste"
+    timeout: 4000
+    optional: true
+- takeScreenshot: tbilisi
+- setLocation: { latitude: 9.02, longitude: 38.75 }
+- tapOn: "Mostrar mi ubicación"
+- extendedWaitUntil:
+    visible: "NoExiste"
+    timeout: 3000
+    optional: true
+- tapOn: "Mapas sin conexión"
+- tapOn: "Descargar la zona visible.*"
+- extendedWaitUntil:
+    visible: "Descargar · .*"
+    timeout: 60000
+- tapOn: "Descargar · .*"
+- tapOn:
+    text: "(?i)usar datos móviles"
+    optional: true
+- extendedWaitUntil:
+    notVisible: "Descargando.*|Preparando.*"
+    timeout: 300000
+- back
+- extendedWaitUntil:
+    visible: "NoExiste"
+    timeout: 4000
+    optional: true
+- takeScreenshot: addis
+- setLocation: { latitude: 27.705, longitude: 85.31 }
+- tapOn: "Mostrar mi ubicación"
+- extendedWaitUntil:
+    visible: "NoExiste"
+    timeout: 3000
+    optional: true
+- tapOn: "Mapas sin conexión"
+- tapOn: "Descargar la zona visible.*"
+- extendedWaitUntil:
+    visible: "Descargar · .*"
+    timeout: 60000
+- tapOn: "Descargar · .*"
+- tapOn:
+    text: "(?i)usar datos móviles"
+    optional: true
+- extendedWaitUntil:
+    notVisible: "Descargando.*|Preparando.*"
+    timeout: 300000
+- back
+- extendedWaitUntil:
+    visible: "NoExiste"
+    timeout: 4000
+    optional: true
+- takeScreenshot: kathmandu

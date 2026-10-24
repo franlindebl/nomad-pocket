@@ -18,13 +18,13 @@ APK="$ROOT/android/app/build/outputs/apk/release/app-release.apk"
 MAESTRO="${MAESTRO:-maestro}"
 
 if [[ "${1:-}" == "--build" || ! -f "$APK" ]]; then
-  echo "Building $APK…"
+  echo "Building ${APK}…"
   (cd "$ROOT/android" && JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" \
     ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a -q)
 fi
 
 if ! "$ADB" devices | grep -q "emulator-.*device$"; then
-  echo "Starting emulator $AVD…"
+  echo "Starting emulator ${AVD}…"
   "$ANDROID_HOME/emulator/emulator" -avd "$AVD" -no-snapshot-save -no-audio >/dev/null 2>&1 &
   "$ADB" wait-for-device
   until [[ "$("$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == 1 ]]; do sleep 2; done
