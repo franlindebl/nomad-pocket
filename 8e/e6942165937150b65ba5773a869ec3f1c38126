@@ -1,0 +1,57 @@
+.githooks/pre-commit
+  s_7f4d89e27550a2::t_fa0cb79ce4e6c5 1-20
+docs/E2E.md
+  s_7f4d89e27550a2::t_cf1ee9d8c2cdf1 5,43-46,53-55,118-119,134,170,206,218,238-239
+docs/PROGRESS.md
+  s_7f4d89e27550a2::t_7fe94e8e1ac367 177-183
+docs/STYLE_GUIDE.md
+  s_7f4d89e27550a2::t_54181f7dd718cc 136-138
+e2e/flows/ipad/ipad-01-tour.yaml
+  s_7f4d89e27550a2::t_4d1313e9d256d3 1,5,7-8,10-15,46-49
+e2e/flows/maps/map-02-seeded-region.yaml
+  s_7f4d89e27550a2::t_e9f98b61a26a89 1-24
+package.json
+  s_7f4d89e27550a2::t_748fb2a6aaad55 69
+scripts/e2e.sh
+  s_7f4d89e27550a2::t_16004b3bfd9831 11-13,46,83-91
+src/app/(tabs)/assistant/conversations.tsx
+  s_7f4d89e27550a2::t_1bbff7b7303184 10,86
+src/app/(tabs)/assistant/index.tsx
+  s_7f4d89e27550a2::t_fb5d05f93e27e3 17,220-221,235
+src/app/(tabs)/courses/[id].tsx
+  s_7f4d89e27550a2::t_92201740b5e2c5 3,46-48,50
+src/app/(tabs)/library/explore.tsx
+  s_7f4d89e27550a2::t_87ea30d7c998f6 15,155
+src/app/(tabs)/library/resource/[id].tsx
+  s_7f4d89e27550a2::t_a74fa39c9a95b1 12,101
+src/app/(tabs)/library/wikipedia.tsx
+  s_7f4d89e27550a2::t_e6ff99d570fde7 5
+src/app/onboarding.tsx
+  s_7f4d89e27550a2::t_839e038e23bd9d 17,230
+src/app/search.tsx
+  s_7f4d89e27550a2::t_dd0e19f0ab9b60 14,107
+src/components/ui/Screen.tsx
+  s_7f4d89e27550a2::t_ffeaf7ee10cc36 5,28-32,44
+src/features/library/components/ReaderTocSheet.tsx
+  s_7f4d89e27550a2::t_9975cf580017d6 33-39
+src/features/maps/register.ts
+  s_7f4d89e27550a2::t_6cc09abf3c50ff 2-4,6-8,10,12,15-62,75-84
+src/theme/tokens.ts
+  s_7f4d89e27550a2::t_d9bb123a1dbd12 127-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8ee6942165937150b65ba5773a869ec3f1c38126",
+  "prompts": {},
+  "sessions": {
+    "s_7f4d89e27550a2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "99f9ab25-1210-41a5-af44-46d9a81f8ba6",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
