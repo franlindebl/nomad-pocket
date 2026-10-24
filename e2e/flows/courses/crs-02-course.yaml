@@ -1,0 +1,33 @@
+# CRS-02 + CRS-03 + CRS-04 — seeded course: syllabus, start in the reader, mark a lesson done/undone, reset progress.
+appId: com.fjlinde.nomadpocket
+tags: [full, courses, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "graduationcap" }
+- assertVisible: "freeCodeCamp en español.*"
+- tapOn: "freeCodeCamp en español.*"
+- extendedWaitUntil:
+    visible: "Marcar como hecha, 1, .*"
+    timeout: 30000
+- takeScreenshot: 01-syllabus
+# The check button is merged into the lesson row for accessibility; long-press toggles it.
+- longPressOn: "Marcar como hecha, 1, .*"
+- assertVisible: "Marcar como pendiente, 1, .*"
+- longPressOn: "Marcar como pendiente, 1, .*"
+- assertVisible: "Marcar como hecha, 1, .*"
+- longPressOn: "Marcar como hecha, 2, .*"
+- tapOn: "Reiniciar progreso"
+- assertVisible: "Se borrará tu progreso en este curso."
+- tapOn: { text: "Reiniciar progreso", index: 2 }
+- assertVisible: "Marcar como hecha, 2, .*"
+- tapOn: "Empezar curso"
+- extendedWaitUntil:
+    visible: "Buscar en este libro"
+    timeout: 15000
+# JS-app lesson: blank for a few seconds while it boots (no loading indicator).
+- extendedWaitUntil:
+    visible: "Los comentarios son líneas.*"
+    timeout: 30000
+- takeScreenshot: 02-lesson
+- tapOn: { id: "BackButton" }
+- assertVisible: "Continuar"

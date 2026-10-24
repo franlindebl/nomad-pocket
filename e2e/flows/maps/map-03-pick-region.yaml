@@ -1,0 +1,17 @@
+# MAP-03 — region picker search opens the download sheet.
+appId: com.fjlinde.nomadpocket
+tags: [full, maps]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: "Elegir una región"
+    timeout: 20000
+- tapOn: "Elegir una región"
+- tapOn: "Buscar países y regiones"
+- inputText: "Madrid"
+- tapOn: { text: "Comunidad de Madrid.*", index: 0 }
+- extendedWaitUntil:
+    visible: "Descargar · .*"
+    timeout: 30000
+- takeScreenshot: 01-download-sheet

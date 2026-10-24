@@ -1,0 +1,9 @@
+# Opens the seeded "Wikipedia 100" archive in the reader from the Library tab.
+appId: com.fjlinde.nomadpocket
+---
+- tapOn: { id: "books.vertical" }
+- tapOn: "Wikipedia 100.*"
+- extendedWaitUntil:
+    visible: "Buscar en este libro"
+    timeout: 15000
+- assertNotVisible: "No se ha podido abrir.*"

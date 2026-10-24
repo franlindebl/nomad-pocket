@@ -1,0 +1,16 @@
+# LIB-06 — Kiwix catalog search (network).
+appId: com.fjlinde.nomadpocket
+tags: [nightly, library, network]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "books.vertical" }
+- scrollUntilVisible:
+    element: "Explorar todo Kiwix.*"
+- tapOn: "Explorar todo Kiwix.*"
+- tapOn: "Busca en el catálogo de Kiwix"
+- inputText: "wikipedia"
+- extendedWaitUntil:
+    visible: ".*Wikipedia.*"
+    timeout: 20000
+- assertNotVisible: "Necesitas conexión.*"
+- takeScreenshot: 01-explore-results

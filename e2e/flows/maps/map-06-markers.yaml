@@ -1,0 +1,26 @@
+# MAP-06 + MAP-07 — long-press on the map adds a place; it is listed, can be edited and deleted.
+appId: com.fjlinde.nomadpocket
+tags: [full, maps]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: "Mapas sin conexión"
+    timeout: 20000
+- longPressOn: { point: "50%,25%" }
+- assertVisible: "Nuevo lugar"
+- inputText: "Campamento"
+- tapOn: "Guardar"
+- tapOn: "Lugares guardados"
+- assertVisible: "Campamento.*"
+- takeScreenshot: 01-places
+- longPressOn: "Campamento.*"
+- tapOn: "Nota"
+- inputText: "Junto al río"
+- tapOn: "Guardar"
+- assertVisible: "Campamento.*"
+# The row's trash button is merged into the row for accessibility (bug): delete from the edit sheet.
+- longPressOn: "Campamento.*"
+- tapOn: "Eliminar"
+- tapOn: "Lugares guardados"
+- assertVisible: "No hay lugares guardados.*"

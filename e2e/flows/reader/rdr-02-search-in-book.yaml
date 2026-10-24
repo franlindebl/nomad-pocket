@@ -1,0 +1,16 @@
+# RDR-02 — "search in this book" sheet finds and opens an article.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, reader, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- runFlow: ../../subflows/open-wikipedia.yaml
+- tapOn: "Buscar en este libro"
+- inputText: "Jackson"
+- extendedWaitUntil:
+    visible: "Michael Jackson.*"
+    timeout: 10000
+- tapOn: "Michael Jackson.*"
+- extendedWaitUntil:
+    visible: "Buscar en este libro"
+    timeout: 10000
+- takeScreenshot: 01-jackson

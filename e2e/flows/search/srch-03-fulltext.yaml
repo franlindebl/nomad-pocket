@@ -1,0 +1,20 @@
+# SRCH-03 + SRCH-04 — full-text search returns hits with snippets; no-match and cleared states.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, search, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "books.vertical" }
+- tapOn: "Buscar en tu biblioteca"
+- tapOn: "Texto completo"
+- inputText: "Thriller"
+- extendedWaitUntil:
+    visible: "Michael Jackson.*"
+    timeout: 15000
+- takeScreenshot: 01-fulltext-hits
+- eraseText: 20
+- inputText: "zzqxvj"
+- extendedWaitUntil:
+    visible: "Sin resultados"
+    timeout: 10000
+- eraseText: 20
+- assertVisible: "Escribe para buscar"

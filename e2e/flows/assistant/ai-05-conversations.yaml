@@ -1,0 +1,18 @@
+# AI-05 — a chat is listed under Today in Conversations and can be deleted with confirmation.
+appId: com.fjlinde.nomadpocket
+tags: [nightly, assistant]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "sparkles" }
+- tapOn: "Usar modelo integrado"
+- tapOn: "¿Cómo enciendo fuego si todo está mojado\\?"
+- extendedWaitUntil:
+    visible: "Enviar"
+    timeout: 120000
+- tapOn: "Conversaciones"
+- assertVisible: "Hoy|HOY"
+- takeScreenshot: 01-conversations
+# The row's trash button is merged into the row for accessibility (bug): long-press instead.
+- longPressOn: "¿Cómo enciendo fuego.*"
+- tapOn: "Eliminar"
+- assertVisible: "Aún no hay conversaciones"

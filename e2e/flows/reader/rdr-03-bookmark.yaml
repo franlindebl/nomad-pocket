@@ -1,0 +1,19 @@
+# RDR-03 — bookmarking toggles the button and lists the page under Bookmarks; removing clears it.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, reader, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- runFlow: ../../subflows/open-wikipedia.yaml
+- tapOn: "Guardar"
+- assertVisible: "Quitar de guardados"
+- tapOn: "Más"
+- tapOn: "Guardados e historial"
+- assertNotVisible: "Aún no has guardado nada"
+- takeScreenshot: 01-bookmarks
+- tapOn: "Hecho"
+- waitForAnimationToEnd
+- tapOn: "Quitar de guardados"
+- assertVisible: "Guardar"
+- tapOn: "Más"
+- tapOn: "Guardados e historial"
+- assertVisible: "Aún no has guardado nada"

@@ -1,0 +1,37 @@
+# X-01 — settings, bookmarks, places and course progress survive an app restart.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, cross, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: "Settings"
+- tapOn: "Oscuro"
+- swipe: { direction: DOWN }
+- runFlow: ../../subflows/open-wikipedia.yaml
+- tapOn: "Guardar"
+- tapOn: { id: "BackButton" }
+- tapOn: { id: "graduationcap" }
+- tapOn: "freeCodeCamp en español.*"
+- extendedWaitUntil:
+    visible: "Marcar como hecha, 1, .*"
+    timeout: 30000
+- longPressOn: "Marcar como hecha, 1, .*"
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: "Mapas sin conexión"
+    timeout: 20000
+- longPressOn: { point: "50%,25%" }
+- inputText: "Refugio"
+- tapOn: "Guardar"
+- stopApp
+- launchApp
+- assertNotVisible: "Siguiente"
+- takeScreenshot: 01-relaunched-dark
+- tapOn: { id: "map" }
+- tapOn: "Lugares guardados"
+- assertVisible: "Refugio.*"
+- swipe: { direction: DOWN }
+- tapOn: { id: "graduationcap" }
+- tapOn: "freeCodeCamp en español.*"
+- assertVisible: "Marcar como pendiente, 1, .*"
+- runFlow: ../../subflows/open-wikipedia.yaml
+- assertVisible: "Quitar de guardados"

@@ -1,0 +1,27 @@
+# RDR-05 + RDR-07 — text size up/down/reset and find in page with match counter.
+appId: com.fjlinde.nomadpocket
+tags: [full, reader, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- runFlow: ../../subflows/open-wikipedia.yaml
+- tapOn: "Tamaño del texto"
+- tapOn: "Texto más grande"
+- tapOn: "Texto más grande"
+- takeScreenshot: 01-text-larger
+- tapOn: "Restablecer"
+- tapOn: "Texto más pequeño"
+- tapOn: "Restablecer"
+- tapOn: "Dismiss"
+- tapOn: "Más"
+- tapOn: "Buscar en la página"
+- inputText: "the"
+- extendedWaitUntil:
+    visible: "1 de \\d+"
+    timeout: 5000
+# The find bar sits under the keyboard (bug), so Enter stands in for "next".
+- pressKey: Enter
+- assertVisible: "2 de \\d+"
+- takeScreenshot: 02-find
+- eraseText: 10
+- inputText: "zzqxvj"
+- assertVisible: "Sin coincidencias"

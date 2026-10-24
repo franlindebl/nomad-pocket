@@ -1,0 +1,12 @@
+# HOME-02 + DL-01 — header buttons open Downloads (empty) and Settings.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, home, downloads]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: "Descargas"
+- assertVisible: "No hay descargas activas"
+- takeScreenshot: 01-downloads-empty
+- swipe: { direction: DOWN }
+- tapOn: "Settings"
+- assertVisible: "Ajustes"
+- assertVisible: "Asistente de configuración"

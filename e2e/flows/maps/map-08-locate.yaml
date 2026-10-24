@@ -1,0 +1,13 @@
+# MAP-08 — "show my location" with permission granted (scripts/e2e.sh) and a simulated position (Madrid).
+appId: com.fjlinde.nomadpocket
+tags: [full, maps]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: "Mostrar mi ubicación"
+    timeout: 20000
+- tapOn: "Mostrar mi ubicación"
+- assertNotVisible: "La ubicación está desactivada"
+- assertNotVisible: "No se ha podido obtener tu ubicación.*"
+- takeScreenshot: 01-located

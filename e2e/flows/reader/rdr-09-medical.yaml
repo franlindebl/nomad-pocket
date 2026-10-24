@@ -1,0 +1,21 @@
+# RDR-09 — a medical archive shows the disclaimer; once dismissed it stays dismissed after reopening.
+appId: com.fjlinde.nomadpocket
+tags: [full, reader, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "books.vertical" }
+- tapOn: ".*NHS.*|.*[Mm]edicines.*"
+- extendedWaitUntil:
+    visible: "Buscar en este libro"
+    timeout: 15000
+- takeScreenshot: 01-disclaimer
+- tapOn: "Cerrar"
+- tapOn: { id: "BackButton" }
+- stopApp
+- launchApp
+- tapOn: { id: "books.vertical" }
+- tapOn: ".*NHS.*|.*[Mm]edicines.*"
+- extendedWaitUntil:
+    visible: "Buscar en este libro"
+    timeout: 15000
+- assertNotVisible: "Cerrar"

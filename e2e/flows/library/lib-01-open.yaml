@@ -1,0 +1,11 @@
+# LIB-01 + RDR-01 — seeded archive is listed on the device and opens in the reader with its toolbar.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, library, reader, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- runFlow: ../../subflows/open-wikipedia.yaml
+- assertVisible: "Atrás"
+- assertVisible: "Guardar"
+- assertVisible: "Tamaño del texto"
+- assertVisible: "Más"
+- takeScreenshot: 01-reader-main

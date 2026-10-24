@@ -1,0 +1,23 @@
+# ONB-02 + ONB-03 — wizard in English; the last content language can't be unselected; reopen from Settings.
+appId: com.fjlinde.nomadpocket
+tags: [full, onboarding]
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Siguiente"
+    timeout: 20000
+- tapOn: "English"
+- assertVisible: "Next"
+- tapOn: "Spanish"
+- tapOn: "English"
+- takeScreenshot: 01-last-language
+- tapOn: "Español"
+- tapOn: "Siguiente"
+- tapOn: "Lo elijo yo.*"
+- tapOn: "Siguiente"
+- tapOn: "Ir a Nomad"
+- tapOn: "Settings"
+- scrollUntilVisible:
+    element: "Asistente de configuración"
+- tapOn: "Asistente de configuración"
+- assertVisible: "Conocimiento que te acompaña sin conexión"

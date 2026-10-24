@@ -1,0 +1,23 @@
+# HOME-01 — storage card counts the seeded items; each module card opens its tab.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, home, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- extendedWaitUntil:
+    visible: "4 elementos.*"
+    timeout: 10000
+- assertNotVisible: "Prepara tu Nomad"
+- takeScreenshot: 01-home-seeded
+- tapOn: { text: "Biblioteca.*", index: 0 }
+- assertVisible: "En tu dispositivo"
+- tapOn: { id: "house" }
+- tapOn: { text: "Mapas.*", index: 0 }
+- extendedWaitUntil:
+    visible: "Mapas que funcionan en cualquier sitio"
+    timeout: 15000
+- tapOn: { id: "house" }
+- tapOn: { text: "Cursos.*", index: 0 }
+- assertVisible: "Mis cursos"
+- tapOn: { id: "house" }
+- tapOn: { text: "Asistente.*", index: 0 }
+- assertVisible: "Elige un modelo para empezar|¿En qué te ayudo\\?"

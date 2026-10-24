@@ -1,0 +1,17 @@
+# SRCH-02 — title search finds an article and opens it in the reader.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, search, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "books.vertical" }
+- tapOn: "Buscar en tu biblioteca"
+- inputText: "Jackson"
+- extendedWaitUntil:
+    visible: "Michael Jackson.*"
+    timeout: 10000
+- takeScreenshot: 01-title-hits
+- tapOn: "Michael Jackson.*"
+- extendedWaitUntil:
+    visible: "Buscar en este libro"
+    timeout: 15000
+- takeScreenshot: 02-reader-jackson

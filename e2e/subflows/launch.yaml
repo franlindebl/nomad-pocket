@@ -1,0 +1,7 @@
+# Launches the app as left by scripts/e2e.sh (fresh install + seeded fixtures)
+# and gets past the setup wizard.
+appId: com.fjlinde.nomadpocket
+---
+- launchApp:
+    stopApp: true
+- runFlow: finish-onboarding.yaml

@@ -1,0 +1,18 @@
+# MAP-01 + MAP-02 — with no maps: assets load, empty card, regions and saved-places sheets.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, maps]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: "Mapas que funcionan en cualquier sitio"
+    timeout: 20000
+- assertVisible: "Descargar mapa del mundo.*"
+- assertVisible: "Elegir una región"
+- takeScreenshot: 01-maps-empty
+- tapOn: "Mapas sin conexión"
+- assertVisible: "Mapa del mundo.*"
+- assertVisible: "Añadir un país o región.*"
+- swipe: { direction: DOWN }
+- tapOn: "Lugares guardados"
+- assertVisible: "No hay lugares guardados.*"

@@ -1,0 +1,26 @@
+# AI-03 + AI-04 — system model (Apple Intelligence, iOS 27 simulator) answers from the library with
+# source chips that open the reader. Asserts structure only: the answer text is not deterministic.
+appId: com.fjlinde.nomadpocket
+tags: [nightly, assistant, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "sparkles" }
+- tapOn: "Usar modelo integrado"
+- assertVisible: "¿En qué te ayudo\\?"
+- tapOn: "Pregunta .*"
+- inputText: "¿Quién fue Michael Jackson?"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: "FUENTES|Fuentes"
+    timeout: 120000
+- extendedWaitUntil:
+    visible: "Enviar"
+    timeout: 120000
+- takeScreenshot: 01-answer
+# First tap on the question bubble only dismisses the keyboard.
+- tapOn: "¿Quién fue Michael Jackson\\?"
+- tapOn: "1\\. .*"
+- extendedWaitUntil:
+    visible: "Buscar en este libro"
+    timeout: 15000
+- takeScreenshot: 02-source-in-reader

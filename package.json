@@ -67,6 +67,8 @@
     "typecheck": "tsc --noEmit",
     "postinstall": "bash modules/nomad-zim/scripts/fetch-ios-libs.sh",
     "test": "node --test --experimental-strip-types \"src/**/*.test.ts\"",
+    "e2e": "scripts/e2e.sh",
+    "e2e:full": "scripts/e2e.sh --tags smoke,full",
     "check:i18n": "node scripts/check-i18n.mjs .",
     "check:catalog": "node scripts/validate-catalog.mjs"
   },

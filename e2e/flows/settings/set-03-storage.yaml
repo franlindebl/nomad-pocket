@@ -1,0 +1,23 @@
+# SET-03 + SET-04 — storage lists installed items and deletes with confirmation; clearing reading history.
+appId: com.fjlinde.nomadpocket
+tags: [full, settings, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- runFlow: ../../subflows/open-wikipedia.yaml
+- tapOn: { id: "BackButton" }
+- tapOn: { id: "house" }
+- assertVisible: "Continuar"
+- tapOn: "Settings"
+- scrollUntilVisible:
+    element: "Documentación de Node.js.*"
+- tapOn: "Documentación de Node.js.*"
+- assertVisible: "¿Eliminar Documentación de Node.js\\?.*"
+- tapOn: "Eliminar"
+- assertNotVisible: "Documentación de Node.js.*"
+- scrollUntilVisible:
+    element: "Borrar historial de lectura"
+- tapOn: "Borrar historial de lectura"
+- assertVisible: "Historial borrado"
+- tapOn: "OK"
+- swipe: { direction: DOWN }
+- assertNotVisible: "Continuar"

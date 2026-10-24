@@ -1,0 +1,14 @@
+# LIB-03 — a collection shows its tiers and confirms before downloading a pack.
+appId: com.fjlinde.nomadpocket
+tags: [full, library]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "books.vertical" }
+- tapOn: "Medicina.*"
+- assertVisible: "Niveles|NIVELES"
+# The pack button is merged into the tier card for accessibility (bug): tap by position.
+- tapOn: { point: "30%,71%" }
+- assertVisible: "¿Descargar .*"
+- takeScreenshot: 01-pack-confirm
+- tapOn: "Cancelar"
+- assertVisible: "Esencial.*Descargar pack · .*"

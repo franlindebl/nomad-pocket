@@ -51,3 +51,7 @@ modules/*/android/build/
 
 # raw simulator captures (inputs of scripts/store-screenshots.py)
 docs/store/screenshots/
+
+# E2E (scripts/e2e.sh): fixtures are re-downloadable content, artifacts are run output
+e2e/fixtures/*.zim
+e2e/artifacts/

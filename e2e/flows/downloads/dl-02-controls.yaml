@@ -1,0 +1,25 @@
+# DL-02 — a running download can be paused, resumed and cancelled from the Downloads sheet (network).
+appId: com.fjlinde.nomadpocket
+tags: [nightly, downloads, network]
+---
+- runFlow: ../../subflows/launch.yaml
+- openLink: nomadpocket:///library/resource/gutenberg_es_all   # 1.8 GB: stays in progress long enough to pause
+- tapOn:
+    text: "Abrir"
+    optional: true
+- tapOn: "Descargar · .*"
+- swipe: { direction: DOWN }
+- tapOn: { id: "house" }
+- tapOn: "Descargas"
+- extendedWaitUntil:
+    visible: "Pausar"
+    timeout: 20000
+- takeScreenshot: 01-downloading
+- tapOn: "Pausar"
+- assertVisible: "Reanudar"
+- tapOn: "Reanudar"
+- assertVisible: "Pausar"
+- tapOn: "Cancelar"
+- extendedWaitUntil:
+    visible: "No hay descargas activas"
+    timeout: 10000

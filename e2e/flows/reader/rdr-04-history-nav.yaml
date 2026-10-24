@@ -1,0 +1,26 @@
+# RDR-04 + RDR-06 + RDR-08 — random article, main page, back/forward, history and table of contents.
+appId: com.fjlinde.nomadpocket
+tags: [full, reader, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- runFlow: ../../subflows/open-wikipedia.yaml
+- tapOn: "Más"
+- tapOn: "Artículo al azar"
+- tapOn: "Más"
+- tapOn: "Artículo al azar"
+# index 1: the toolbar button; index 0 is the header back button (same label)
+- tapOn: { text: "Atrás", index: 1 }
+- tapOn: "Adelante"
+- tapOn: "Más"
+- tapOn: "Índice"
+- assertVisible: "Hecho"
+- takeScreenshot: 01-toc
+- tapOn: "Hecho"
+- tapOn: "Más"
+- tapOn: "Guardados e historial"
+- tapOn: "Historial"
+- assertNotVisible: "Todavía no has leído nada"
+- takeScreenshot: 02-history
+- tapOn: "Hecho"
+- tapOn: "Más"
+- tapOn: "Página principal"

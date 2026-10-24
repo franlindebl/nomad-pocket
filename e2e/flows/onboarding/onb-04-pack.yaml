@@ -1,0 +1,27 @@
+# ONB-04 — choosing the Light pack starts real downloads; the last step reports them. Cancels them after.
+appId: com.fjlinde.nomadpocket
+tags: [nightly, onboarding, network]
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Siguiente"
+    timeout: 20000
+- tapOn: "Siguiente"
+- assertVisible: "Ligero.*"
+- tapOn: "Descargar"
+- extendedWaitUntil:
+    visible: "Hemos empezado a descargar .*"
+    timeout: 20000
+- takeScreenshot: 01-ready-downloads
+- tapOn: "Ir a Nomad"
+- tapOn: "Descargas"
+- assertVisible: "Pausar|Cancelar"
+- takeScreenshot: 02-queue
+- repeat:
+    while:
+      visible: "Cancelar"
+    commands:
+      - tapOn: "Cancelar"
+- extendedWaitUntil:
+    visible: "No hay descargas activas"
+    timeout: 20000

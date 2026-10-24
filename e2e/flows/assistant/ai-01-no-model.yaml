@@ -1,0 +1,13 @@
+# AI-01 + AI-02 — no model chosen: prompt to choose; models screen lists device, system and GGUF models.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, assistant]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "sparkles" }
+- assertVisible: "Elige un modelo para empezar"
+- takeScreenshot: 01-no-model
+- tapOn: "Elegir modelo"
+- assertVisible: "Tu dispositivo"
+- assertVisible: "Modelo integrado"
+- assertVisible: "Descargar un modelo"
+- takeScreenshot: 02-models

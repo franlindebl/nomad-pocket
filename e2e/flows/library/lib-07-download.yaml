@@ -1,0 +1,21 @@
+# LIB-07 — real download of the smallest catalog archive (1 MB): progress, ready, listed, opens.
+appId: com.fjlinde.nomadpocket
+tags: [nightly, library, network]
+---
+- runFlow: ../../subflows/launch.yaml
+- openLink: nomadpocket:///library/resource/devdocs_en_bash
+- tapOn:
+    text: "Abrir"
+    optional: true
+- tapOn: "Descargar · .*"
+- extendedWaitUntil:
+    visible: "Abrir"
+    timeout: 120000
+- takeScreenshot: 01-installed
+- tapOn: "Abrir"
+- extendedWaitUntil:
+    visible: "Buscar en este libro"
+    timeout: 15000
+- tapOn: { id: "BackButton" }
+- tapOn: { id: "books.vertical" }
+- assertVisible: ".*Bash.*"

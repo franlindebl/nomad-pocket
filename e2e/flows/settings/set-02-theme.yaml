@@ -1,0 +1,11 @@
+# SET-02 — light / dark / system appearance.
+appId: com.fjlinde.nomadpocket
+tags: [full, settings]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: "Settings"
+- tapOn: "Oscuro"
+- takeScreenshot: 01-settings-dark
+- tapOn: "Claro"
+- takeScreenshot: 02-settings-light
+- tapOn: "Sistema"

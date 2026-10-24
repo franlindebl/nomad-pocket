@@ -1,0 +1,8 @@
+# SRCH-01 — with nothing installed, search says there is nothing to search.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, search]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "books.vertical" }
+- tapOn: "Buscar en tu biblioteca"
+- assertVisible: "Aún no hay nada que buscar"

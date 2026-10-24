@@ -1,0 +1,12 @@
+# ONB-01 — first launch shows the setup wizard; "Lo elijo yo" ends on Home, empty.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, onboarding]
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Conocimiento que te acompaña sin conexión"
+    timeout: 20000
+- takeScreenshot: 01-welcome
+- runFlow: ../../subflows/finish-onboarding.yaml
+- assertVisible: "Prepara tu Nomad"
+- takeScreenshot: 02-home-empty

@@ -1,0 +1,19 @@
+# LIB-02 + LIB-05 — long-press asks to delete; Cancel keeps it, Delete removes it; empty state at the end.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, library, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "books.vertical" }
+- longPressOn: "Documentación de Node.js.*"
+- assertVisible: "¿Eliminar Documentación de Node.js\\?.*"
+- tapOn: "Cancelar"
+- assertVisible: "Documentación de Node.js.*"
+- longPressOn: "Documentación de Node.js.*"
+- tapOn: "Eliminar"
+- assertNotVisible: "Documentación de Node.js.*"
+- longPressOn: "Wikipedia 100.*"
+- tapOn: "Eliminar"
+- longPressOn: ".*NHS.*|.*[Mm]edicines.*"
+- tapOn: "Eliminar"
+- assertVisible: "Tu biblioteca está vacía"
+- takeScreenshot: 01-library-empty

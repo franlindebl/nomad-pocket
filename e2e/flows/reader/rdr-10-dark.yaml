@@ -1,0 +1,14 @@
+# RDR-10 — reader in dark mode (visual check of the screenshot).
+appId: com.fjlinde.nomadpocket
+tags: [full, reader, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: "Settings"
+- tapOn: "Oscuro"
+- swipe: { direction: DOWN }
+- runFlow: ../../subflows/open-wikipedia.yaml
+- tapOn: "Michael Jackson"
+- extendedWaitUntil:
+    visible: "Born"
+    timeout: 10000
+- takeScreenshot: 01-reader-dark

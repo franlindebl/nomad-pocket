@@ -1,0 +1,39 @@
+# MAP-04 + MAP-09 — the detail level changes the estimate; a small region downloads, shows as installed and is deleted.
+appId: com.fjlinde.nomadpocket
+tags: [nightly, maps, network]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: "Elegir una región"
+    timeout: 20000
+- tapOn: "Elegir una región"
+- tapOn: "Buscar países y regiones"
+- inputText: "Melilla"
+# index 1: index 0 is the search field itself
+- tapOn: { text: "Melilla", index: 1 }
+- extendedWaitUntil:
+    visible: "Descargar · .*"
+    timeout: 30000
+- copyTextFrom: "Descargar · .*"
+- tapOn: "Pueblos"
+- extendedWaitUntil:
+    visible: "Descargar · .*"
+    timeout: 30000
+- assertNotVisible: "${maestro.copiedText}"
+- takeScreenshot: 01-estimate-towns
+- tapOn: "Descargar · .*"
+- extendedWaitUntil:
+    visible: "Descargados|DESCARGADOS"
+    timeout: 10000
+- extendedWaitUntil:
+    visible: "Melilla.*"
+    timeout: 120000
+- extendedWaitUntil:
+    notVisible: "Descargando.*"
+    timeout: 120000
+- takeScreenshot: 02-installed
+# The row's trash button is merged into the row for accessibility (bug): tap by position.
+- tapOn: { point: "88%,92%" }
+- tapOn: "Eliminar"
+- assertVisible: "Aún no tienes regiones.*"

@@ -1,0 +1,13 @@
+# Walks the setup wizard without downloading anything ("Lo elijo yo").
+appId: com.fjlinde.nomadpocket
+---
+- extendedWaitUntil:
+    visible: "Siguiente"
+    timeout: 20000
+- tapOn: "Siguiente"
+- tapOn: "Lo elijo yo.*"   # radio card: label merges name + description
+- tapOn: "Siguiente"
+- tapOn: "Ir a Nomad"
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 10000

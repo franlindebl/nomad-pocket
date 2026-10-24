@@ -1,0 +1,11 @@
+# SET-01 — switching the app language to English translates tabs and screens, and back.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, settings]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: "Settings"
+- tapOn: "English"
+- assertVisible: "Appearance"
+- takeScreenshot: 01-settings-en
+- tapOn: "Español"
+- assertVisible: "Apariencia"
