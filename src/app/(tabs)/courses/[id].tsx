@@ -1,6 +1,6 @@
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { BookOpen, Check, Circle } from 'lucide-react-native';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,7 +10,7 @@ import { getResource, loc } from '@/features/catalog';
 import { startResourceDownload, useResourceState } from '@/features/catalog/DownloadButton';
 import { iconByName } from '@/features/catalog/icons';
 import { subjectOf } from '@/features/courses/CourseCard';
-import { courseProgress, ensureCourse, nextLesson, recordCourseOpen, resetCourse, setLessonDone, useCourses, type CourseState, type Lesson } from '@/features/courses/courses';
+import { courseProgress, ensureCourse, getCourse, nextLesson, recordCourseOpen, resetCourse, setLessonDone, useCourses, type CourseState, type Lesson } from '@/features/courses/courses';
 import { cancelDownload } from '@/features/downloads/manager';
 import { formatMB, formatRelativeDate } from '@/lib/format';
 import { space, useTheme, type Hue } from '@/theme';
@@ -39,8 +39,17 @@ export default function CourseScreen() {
       return () => {
         alive = false;
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [itemId, version]),
+    }, [itemId]),
+  );
+
+  // Progress changes (lesson marks, reset) re-read the stored course state.
+  useEffect(() => {
+    if (itemId && version) setCourse(getCourse(itemId));
+  }, [itemId, version]);
+  useFocusEffect(
+    useCallback(() => {
+      if (itemId) setCourse((c) => (c ? getCourse(itemId) : c));
+    }, [itemId]),
   );
 
   const title = resource ? loc(resource.title) : (installed?.title ?? '');

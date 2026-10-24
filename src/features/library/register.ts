@@ -4,6 +4,7 @@ import { Directory, File, Paths } from 'expo-file-system';
 
 import { db } from '@/db';
 import { registerInit } from '@/features/bootstrap';
+import { getResource, loc } from '@/features/catalog';
 import { getItem, listItems, onItemRemoved, upsertItem, type InstalledItem } from '@/features/content/items';
 import { registerCompletionHandler } from '@/features/downloads/manager';
 import { contentDir, deleteFile, fileSize, resolveContentUri } from '@/lib/storage';
@@ -56,7 +57,9 @@ export async function registerZimFile(fileUri: string, meta?: Record<string, unk
     closeArchive(probeId);
   }
 
-  const id = str(m.catalogId) ?? str(info.name) ?? info.uuid;
+  // Imported/scanned files carry no download meta: recover it from the catalog by book name.
+  const cat = getResource(str(m.catalogId) ?? info.name);
+  const id = str(m.catalogId) ?? cat?.id ?? str(info.name) ?? info.uuid;
   const previous = getItem(id);
   if (previous && previous.fileUri !== fileUri) {
     // Updated version of an installed archive: drop the old file once the new one is in.
@@ -67,24 +70,24 @@ export async function registerZimFile(fileUri: string, meta?: Record<string, unk
   const item: InstalledItem = {
     id,
     kind: 'zim',
-    title: str(m.title) ?? (info.title || info.name || id),
-    description: str(m.description) ?? (info.description || null),
-    language: str(m.language) ?? appLanguage(info.language),
-    category: str(m.category) ?? previous?.category ?? null,
-    isCourse: m.isCourse ?? previous?.isCourse ?? false,
+    title: str(m.title) ?? (cat ? loc(cat.title) : null) ?? (info.title || info.name || id),
+    description: str(m.description) ?? (cat ? loc(cat.description) : null) ?? (info.description || null),
+    language: str(m.language) ?? cat?.language ?? appLanguage(info.language),
+    category: str(m.category) ?? cat?.category ?? previous?.category ?? null,
+    isCourse: m.isCourse ?? cat?.isCourse ?? previous?.isCourse ?? false,
     fileUri,
     sizeBytes: Number(fileSize(fileUri)) || 0,
     version: str(m.version) ?? (info.date ? info.date.slice(0, 7) : null),
     sourceUrl: str(m.sourceUrl) ?? previous?.sourceUrl ?? null,
-    catalogId: str(m.catalogId) ?? previous?.catalogId ?? null,
+    catalogId: str(m.catalogId) ?? cat?.id ?? previous?.catalogId ?? null,
     meta: {
       uuid: info.uuid,
       name: info.name || null,
       articleCount: info.articleCount,
       mainPath: info.mainPath,
       illustration: info.illustration,
-      subject: m.subject ?? (previous?.meta.subject as string | undefined) ?? null,
-      medical: m.medical ?? (previous?.meta.medical as boolean | undefined) ?? false,
+      subject: m.subject ?? cat?.subject ?? (previous?.meta.subject as string | undefined) ?? null,
+      medical: m.medical ?? cat?.medical ?? (previous?.meta.medical as boolean | undefined) ?? false,
     },
     installedAt: previous?.installedAt ?? Date.now(),
   };
@@ -130,6 +133,10 @@ registerInit(async () => {
         } catch (e) {
           console.warn('[zim] cannot register', file.name, e);
         }
+      }
+      // Items registered before their catalog entry was known get its metadata now.
+      for (const item of listItems('zim')) {
+        if (!item.catalogId && getResource(String(item.meta.name ?? item.id))) await registerZimFile(item.fileUri).catch(() => {});
       }
     } catch (e) {
       console.warn('[zim] scan failed', e);
