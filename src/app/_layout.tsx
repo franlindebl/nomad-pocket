@@ -1,6 +1,6 @@
 import '@/i18n';
 
-import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider, useNavigationContainerRef } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -17,18 +17,26 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const { scheme, colors } = useTheme();
   const { t } = useTranslation();
+  const navigation = useNavigationContainerRef();
 
   useEffect(() => {
     bootstrap().finally(() => {
       SplashScreen.hideAsync();
-      // Settings hydrate asynchronously from SQLite: wait before deciding.
+      // Settings hydrate asynchronously from SQLite: wait before deciding. A push before the
+      // root navigator is ready is dropped (the wizard sometimes never showed), so wait for it.
       const decide = () => {
-        if (!useSettings.getState().onboarded) router.push('/onboarding');
+        if (useSettings.getState().onboarded) return;
+        let tries = 0;
+        const open = () => {
+          if (navigation.isReady() || tries++ > 100) router.push('/onboarding');
+          else setTimeout(open, 50);
+        };
+        open();
       };
       if (useSettings.persist.hasHydrated()) decide();
       else useSettings.persist.onFinishHydration(decide);
     });
-  }, []);
+  }, [navigation]);
 
   const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
   const navTheme = {

@@ -6,7 +6,7 @@ import { toNativePath } from '@/lib/storage';
 
 import { NomadZim, isNomadZimAvailable, type NativeZimHit, type NativeZimInfo } from '../../../modules/nomad-zim';
 
-import { decodeEntities, extractHeadings, extractLinks, htmlToText, stripTags, type Heading } from './html';
+import { decodeEntities, extractHeadings, extractLinks, htmlToText, metaRefreshTarget, stripTags, type Heading } from './html';
 
 export type ZimInfo = {
   /** Archive UUID from the ZIM header — stable across devices for the same file. */
@@ -179,21 +179,28 @@ export async function search(itemIds: string[], query: string, limit = 20): Prom
   return interleave(lists, limit);
 }
 
-/** Article as plain text (HTML stripped, whitespace collapsed), truncated to maxChars. */
-export async function getArticleText(itemId: string, path: string, maxChars = 8000): Promise<{ title: string; text: string } | null> {
+/** Article as plain text (HTML stripped, whitespace collapsed), truncated to maxChars. `path` is
+ *  the article actually read, after redirects. */
+export async function getArticleText(itemId: string, path: string, maxChars = 8000): Promise<{ title: string; text: string; path: string } | null> {
   const article = await getArticleHtml(itemId, path);
   if (!article) return null;
   const { title, text } = htmlToText(article.html, maxChars);
-  return { title: decodeEntities(article.title) || title, text };
+  return { title: decodeEntities(article.title) || title, text, path: article.path };
 }
 
-/** Raw HTML of an entry (redirects resolved). */
+/** Raw HTML of an entry, redirects resolved: ZIM redirect entries and HTML (meta refresh) ones. */
 export async function getArticleHtml(itemId: string, path: string): Promise<{ title: string; html: string; path: string } | null> {
   if (!(await ensureOpen(itemId))) return null;
   try {
-    const c = await NomadZim.getContent(itemId, path);
-    if (!c || !c.mimeType.startsWith('text/html')) return null;
-    return { title: c.title, html: c.content, path: c.path };
+    let target = path;
+    for (let hop = 0; hop < 4; hop++) {
+      const c = await NomadZim.getContent(itemId, target);
+      if (!c || !c.mimeType.startsWith('text/html')) return null;
+      const next = metaRefreshTarget(c.content, c.path);
+      if (!next || next === c.path || hop === 3) return { title: c.title, html: c.content, path: c.path };
+      target = next;
+    }
+    return null;
   } catch {
     return null;
   }

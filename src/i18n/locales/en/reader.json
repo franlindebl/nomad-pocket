@@ -1,6 +1,6 @@
 {
-  "back": "Back",
-  "forward": "Forward",
+  "back": "Previous page",
+  "forward": "Next page",
   "searchArchive": "Search in this book",
   "searchArchivePlaceholder": "Search {{title}}",
   "bookmark": "Bookmark",

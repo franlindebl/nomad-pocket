@@ -121,14 +121,22 @@ export function TextSizeControl({ percent, onChange }: { percent: number; onChan
 export function FindBar({
   onFind,
   onClose,
+  page,
 }: {
   onFind: (text: string, backwards: boolean) => Promise<{ found: boolean; matches?: number; active?: number }>;
   onClose: () => void;
+  /** Current page: the match count is dropped when it changes (it was for the previous page). */
+  page?: string;
 }) {
   const { t } = useTranslation('reader');
   const { colors } = useTheme();
   const [text, setText] = useState('');
   const [status, setStatus] = useState<{ found: boolean; matches?: number; active?: number } | null>(null);
+  const [statusPage, setStatusPage] = useState(page);
+  if (page !== statusPage) {
+    setStatusPage(page);
+    setStatus(null);
+  }
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => () => {

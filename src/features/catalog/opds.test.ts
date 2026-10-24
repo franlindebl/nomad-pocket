@@ -5,7 +5,7 @@ import { afterEach, describe, it } from 'node:test';
 
 // Node's type stripping needs the explicit .ts extension; tsconfig doesn't enable
 // allowImportingTsExtensions, so silence TS5097 here (types still resolve).
-import { buildEntriesUrl, decodeEntities, parseOpdsFeed, resolveLatest, searchKiwix } from './opds.ts';
+import { buildEntriesUrl, decodeEntities, parseOpdsFeed, resolveLatest, searchKiwix, shortLanguage } from './opds.ts';
 
 const fixture = (name: string) => readFileSync(new URL(`./__fixtures__/${name}`, import.meta.url), 'utf8');
 
@@ -106,6 +106,16 @@ describe('parseOpdsFeed', () => {
 
   it('returns an empty result for an empty feed', () => {
     assert.deepEqual(parseOpdsFeed(EMPTY), { total: 0, entries: [] });
+  });
+});
+
+describe('shortLanguage', () => {
+  it('maps ISO 639-3 to the codes the app shows', () => {
+    assert.equal(shortLanguage('spa'), 'es');
+    assert.equal(shortLanguage('eng'), 'en');
+    assert.equal(shortLanguage('eng,spa'), 'mul');
+    assert.equal(shortLanguage('xyz'), 'xyz');
+    assert.equal(shortLanguage(''), '');
   });
 });
 

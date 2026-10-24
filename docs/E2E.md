@@ -231,7 +231,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | testID | Control |
   |---|---|
   | `open-downloads`, `open-settings` | Home header buttons |
-  | `reader-back`, `reader-forward`, `reader-search`, `reader-bookmark`, `reader-text`, `reader-more` | reader toolbar (the header's back button is also labelled "Atrás") |
+  | `reader-back`, `reader-forward`, `reader-search`, `reader-bookmark`, `reader-text`, `reader-more` | reader toolbar |
   | `find-previous`, `find-next`, `find-close` | find in page |
   | `popover-dismiss` | backdrop that closes a reader popover |
   | `tier-<slug>`, `pack-download` | collection tier card and its download button |
@@ -248,8 +248,9 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
 - Any screen opens directly with a deep link: `- openLink: nomadpocket:///library/resource/<id>`.
 - iOS alerts keep the screen behind them in the hierarchy: if the alert's button has the
   same text as a control on screen, pick it by position relative to that control
-  (`tapOn: { text: "Eliminar", above: { id: "marker-delete" } }`); `index` follows the
-  position on screen, not the order things appeared.
+  (`tapOn: { text: "Eliminar", above: { id: "marker-delete" } }`), or between the alert's
+  message and "Cancelar" when the title repeats it too; `index` follows the position on
+  screen, not the order things appeared.
 - `hideKeyboard` can tap a link inside the web view; dismiss the keyboard by tapping a
   non-interactive text instead.
 - Assistant flows assert structure (sources, buttons), never the answer text.

@@ -19,7 +19,8 @@ tags: [full, courses, seeded]
 - assertVisible: { id: "lesson-check-2", text: "Marcar como pendiente" }
 - tapOn: "Reiniciar progreso"
 - assertVisible: "Se borrará tu progreso en este curso."
-- tapOn: { text: "Reiniciar progreso", index: 2 }
+# The alert's button: its title and the screen's link have the same text.
+- tapOn: { text: "Reiniciar progreso", below: "Se borrará.*", above: "Cancelar" }
 - assertVisible: { id: "lesson-check-2", text: "Marcar como hecha" }
 - tapOn: "Empezar curso"
 - extendedWaitUntil:

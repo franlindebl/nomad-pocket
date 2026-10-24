@@ -52,6 +52,8 @@
     "eta": "{{time}} restantes",
     "active_one": "{{count}} descarga activa",
     "active_other": "{{count}} descargas activas",
+    "queuedCount_one": "{{count}} en cola",
+    "queuedCount_other": "{{count}} en cola",
     "finished": "{{title}} está listo para usar sin conexión",
     "needsConnection": "Necesitas conexión a internet para descargar."
   },

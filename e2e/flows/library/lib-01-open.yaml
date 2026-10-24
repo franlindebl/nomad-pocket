@@ -4,7 +4,7 @@ tags: [smoke, library, reader, seeded]
 ---
 - runFlow: ../../subflows/launch.yaml
 - runFlow: ../../subflows/open-wikipedia.yaml
-- assertVisible: "Atrás"
+- assertVisible: "Página anterior"
 - assertVisible: "Guardar"
 - assertVisible: "Tamaño del texto"
 - assertVisible: "Más"

@@ -163,10 +163,16 @@ every work block so work can resume after context compaction.
   sat under the keyboard; the bookmarks sheet kept listing a removed bookmark (content
   now remounts on every opening); hardcoded English labels (Settings, Dismiss, OK, Clear).
 - `testID`s on the controls tests need (list in `docs/E2E.md`).
-- Open from the first pass: the assistant retrieved the wrong article for "¿Quién fue
-  Michael Jackson?" and answered wrongly (RAG ranking); stale find count after
-  navigating; JS-app lessons blank for ~5 s with no loader; "3 descargas activas" with
-  one queued; Explore shows "SPA" instead of "ES".
+- Then fixed the rest of the first pass: the assistant cited Wikipedia's HTML redirect
+  pages (`<meta http-equiv="refresh">`, e.g. "Prince Michael Jackson" → "Michael Jackson")
+  as empty sources and answered wrongly — `getArticleHtml` now follows them and RAG
+  counts each article once; find-in-page count dropped on navigation; spinner until the
+  reader's first page loads (JS-app archives); "N en cola" apart from active downloads;
+  toolbar history buttons renamed "Página anterior / siguiente" (the header's is "Atrás");
+  Explore shows "ES" instead of Kiwix's "SPA"; the setup wizard waits for the root
+  navigator (a push before it was ready was dropped, ~1 in 40 fresh installs).
+- Maestro 2.11 (`brew install mobile-dev-inc/tap/maestro`; `maestro@1.38` kept unlinked).
+  `wikipedia_en_100_mini_2026-01.zim` committed: Kiwix removed it from the mirror.
 
 ## Next steps
 

@@ -28,6 +28,8 @@ export type RetrievalResult = {
 };
 
 const HITS_PER_QUERY = 8;
+/** Hits read to find MAX_ARTICLES distinct articles (several hits can redirect to one). */
+const MAX_HITS = 12;
 const MAX_ARTICLES = 6;
 const ARTICLE_CHARS = 9000;
 const CHUNK_SIZE = 650;
@@ -60,19 +62,24 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
 
   const queries = buildSearchQueries(question);
   const lists = await Promise.all(queries.map((q) => search(itemIds, q, HITS_PER_QUERY).catch(() => [] as ZimSearchHit[])));
-  const hits = fuseHits(lists).slice(0, MAX_ARTICLES);
+  const hits = fuseHits(lists).slice(0, MAX_HITS);
 
   const refs = new Map<string, SourceRef>();
   const chunks: Chunk[] = [];
   const articles = await Promise.all(
     hits.map(async (h) => ({ hit: h, article: await getArticleText(h.itemId, h.path, ARTICLE_CHARS).catch(() => null) })),
   );
-  for (const [hitRank, { hit, article }] of articles.entries()) {
+  for (const { hit, article } of articles) {
+    if (refs.size >= MAX_ARTICLES) break;
     const text = article?.text || hit.snippet;
     if (!text) continue;
+    // Redirect pages ("Prince Michael Jackson" → "Michael Jackson") count once, as their target.
+    const path = article?.path ?? hit.path;
+    const key = keyOf(hit.itemId, path);
+    if (refs.has(key)) continue;
     const title = article?.title || hit.title;
-    const key = keyOf(hit.itemId, hit.path);
-    refs.set(key, { itemId: hit.itemId, path: hit.path, title });
+    const hitRank = refs.size;
+    refs.set(key, { itemId: hit.itemId, path, title });
     chunkText(text, CHUNK_SIZE, CHUNK_OVERLAP).forEach((c, index) => chunks.push({ sourceKey: key, title, text: c, index, hitRank }));
   }
 

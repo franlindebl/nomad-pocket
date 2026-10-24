@@ -52,6 +52,8 @@
     "eta": "{{time}} left",
     "active_one": "{{count}} active download",
     "active_other": "{{count}} active downloads",
+    "queuedCount_one": "{{count}} queued",
+    "queuedCount_other": "{{count}} queued",
     "finished": "{{title}} is ready to use offline",
     "needsConnection": "You need an internet connection to download."
   },

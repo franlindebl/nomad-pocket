@@ -64,6 +64,21 @@ const NAMED_ENTITIES: Record<string, string> = {
   nbsp: ' ',
 };
 
+const ISO_639_1: Record<string, string> = {
+  spa: 'es', eng: 'en', fra: 'fr', deu: 'de', ita: 'it', por: 'pt', cat: 'ca', eus: 'eu', glg: 'gl',
+  ara: 'ar', rus: 'ru', zho: 'zh', jpn: 'ja', kor: 'ko', hin: 'hi', ben: 'bn', urd: 'ur', fas: 'fa',
+  tur: 'tr', pol: 'pl', nld: 'nl', swe: 'sv', ukr: 'uk', ell: 'el', heb: 'he', vie: 'vi', ind: 'id',
+  swa: 'sw', amh: 'am', hau: 'ha', yor: 'yo', ibo: 'ig', som: 'so', ful: 'ff', tha: 'th', ron: 'ro',
+};
+
+/** Kiwix language ("spa", "eng,spa") as the app writes it: "es", or "mul" for several. */
+export function shortLanguage(language: string): string {
+  const codes = language.split(',').map((c) => c.trim().toLowerCase()).filter(Boolean);
+  if (codes.length > 1) return 'mul';
+  const code = codes[0] ?? '';
+  return ISO_639_1[code] ?? code;
+}
+
 export function decodeEntities(s: string): string {
   return s.replace(/&(#x[0-9a-fA-F]+|#[0-9]+|[a-zA-Z]+);/g, (match, ent: string) => {
     if (ent[0] === '#') {

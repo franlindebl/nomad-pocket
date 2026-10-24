@@ -54,6 +54,7 @@ export default function ReaderScreen() {
   const [panel, setPanel] = useState<Panel>(null);
   const [sheet, setSheet] = useState<SheetKind>(null);
   const [finding, setFinding] = useState(false);
+  const [firstLoad, setFirstLoad] = useState(true);
   const [dismissedNow, setDismissedNow] = useState(false);
   const web = useRef<ZimWebViewRef>(null);
   const lastRecorded = useRef<string>('');
@@ -188,7 +189,13 @@ export default function ReaderScreen() {
           darkMode={scheme === 'dark'}
           textZoom={textZoom}
           onNavigationChange={onNavigationChange}
+          onLoadEnd={() => setFirstLoad(false)}
         />
+        {firstLoad ? (
+          <View style={[StyleSheet.absoluteFill, styles.center]} pointerEvents="none">
+            <ActivityIndicator color={colors.textSecondary} accessibilityLabel={t('loading')} />
+          </View>
+        ) : null}
         {panel === 'text' ? (
           <Popover onDismiss={() => setPanel(null)}>
             <TextSizeControl percent={textZoom} onChange={(p) => setTextScale(p / 100)} />
@@ -243,6 +250,7 @@ export default function ReaderScreen() {
         ]}>
         {finding ? (
           <FindBar
+            page={nav?.path}
             onFind={(text, backwards) => web.current?.findInPage(text, backwards) ?? Promise.resolve({ found: false })}
             onClose={() => {
               setFinding(false);

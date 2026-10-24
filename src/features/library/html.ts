@@ -195,6 +195,20 @@ export function resolveZimHref(href: string, basePath: string): string | null {
   }
 }
 
+/**
+ * Target of an HTML redirect page (`<meta http-equiv="refresh" content="0;URL='./Foo#bar'">`),
+ * resolved against `basePath`; null for a normal page. Recent Wikipedia ZIMs store many
+ * redirects this way instead of as ZIM redirect entries.
+ */
+export function metaRefreshTarget(html: string, basePath: string): string | null {
+  const head = html.slice(0, 2048);
+  const meta = head.match(/<meta\b[^>]*http-equiv\s*=\s*["']?refresh["']?[^>]*>/i)?.[0];
+  if (!meta) return null;
+  const content = meta.match(/\bcontent\s*=\s*(?:"([^"]*)"|'([^']*)')/i);
+  const url = (content?.[1] ?? content?.[2] ?? '').match(/url\s*=\s*['"]?([^'"]+)['"]?\s*$/i)?.[1];
+  return url ? resolveZimHref(decodeEntities(url), basePath) : null;
+}
+
 /** Internal article links in document order, de-duplicated, chrome and assets excluded. */
 export function extractLinks(html: string, basePath: string): { path: string; title: string }[] {
   const out: { path: string; title: string }[] = [];

@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { decodeEntities, extractHeadings, extractLinks, htmlToText, resolveZimHref, stripTags } from './html.ts';
+import { decodeEntities, extractHeadings, extractLinks, htmlToText, metaRefreshTarget, resolveZimHref, stripTags } from './html.ts';
 
 const ARTICLE = `<!DOCTYPE html><html><head><title>Water &amp; Ice</title><style>p{color:red}</style>
 <script>var x = "<p>nope</p>";</script></head><body>
@@ -50,6 +50,13 @@ test('resolveZimHref resolves relative paths', () => {
   assert.equal(resolveZimHref('./Caf%C3%A9#x', 'Bar'), 'Café');
   assert.equal(resolveZimHref('#top', 'Bar'), null);
   assert.equal(resolveZimHref('https://x.org', 'Bar'), null);
+});
+
+test('metaRefreshTarget follows HTML redirect pages', () => {
+  const page = `<html>\n  <head>\n    <title>Prince Michael Jackson</title>\n    <meta http-equiv="refresh" content="0;URL='./Michael_Jackson#Label_dispute_and_Invincible_(1997\u20132002)'" />\n  </head>\n  <body><a href="./Michael_Jackson">Prince Michael Jackson</a></body>\n</html>`;
+  assert.equal(metaRefreshTarget(page, 'Prince_Michael_Jackson'), 'Michael_Jackson');
+  assert.equal(metaRefreshTarget('<meta content="0; url=../A/Caf%C3%A9" http-equiv="Refresh">', 'B/x'), 'A/Café');
+  assert.equal(metaRefreshTarget(ARTICLE, 'Water'), null);
 });
 
 test('extractLinks returns internal article links in order, deduplicated', () => {

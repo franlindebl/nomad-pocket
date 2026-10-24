@@ -13,4 +13,6 @@ tags: [nightly, library, network]
     visible: ".*Wikipedia.*"
     timeout: 20000
 - assertNotVisible: "Necesitas conexión.*"
+# Languages as the rest of the app shows them ("ES"), not Kiwix's ISO 639-3 ("SPA").
+- assertNotVisible: "SPA|ENG"
 - takeScreenshot: 01-explore-results

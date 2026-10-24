@@ -8,8 +8,8 @@ tags: [full, reader, seeded]
 - tapOn: "Artículo al azar"
 - tapOn: "Más"
 - tapOn: "Artículo al azar"
-- tapOn: { id: "reader-back" }   # the header's back button has the same label
-- tapOn: "Adelante"
+- tapOn: "Página anterior"
+- tapOn: "Página siguiente"
 - tapOn: "Más"
 - tapOn: "Índice"
 - assertVisible: "Hecho"

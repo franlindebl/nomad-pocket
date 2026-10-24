@@ -26,6 +26,15 @@ const MODULES: Module[] = [
   { key: 'assistant', icon: Sparkles, hue: 'ai', href: '/assistant' },
 ];
 
+/** "2 descargas activas · 1 en cola": queued downloads are not counted as active. */
+function downloadsLabel(downloads: { status: string }[], tc: (key: string, options?: Record<string, unknown>) => string) {
+  const queued = downloads.filter((d) => d.status === 'queued').length;
+  const active = downloads.length - queued;
+  return [active ? tc('downloads.active', { count: active }) : '', queued ? tc('downloads.queuedCount', { count: queued }) : '']
+    .filter(Boolean)
+    .join(' · ');
+}
+
 export default function HomeScreen() {
   const { t } = useTranslation('home');
   const { t: tc } = useTranslation();
@@ -94,7 +103,7 @@ export default function HomeScreen() {
           <Row gap={space.md}>
             <IconBadge icon={Download} hue="survival" />
             <View style={{ flex: 1, gap: 6 }}>
-              <Text variant="headline">{tc('downloads.active', { count: downloads.length })}</Text>
+              <Text variant="headline">{downloadsLabel(downloads, tc)}</Text>
               <ProgressBar
                 value={
                   downloads.reduce((s, d) => s + d.bytesWritten, 0) / Math.max(1, downloads.reduce((s, d) => s + d.totalBytes, 0))

@@ -17,8 +17,11 @@ tags: [nightly, assistant, seeded]
     visible: "Enviar"
     timeout: 120000
 - takeScreenshot: 01-answer
-# First tap on the question bubble only dismisses the keyboard.
-- tapOn: "¿Quién fue Michael Jackson\\?"
+# B4: redirect pages ("Prince Michael Jackson" → "Michael Jackson") are one source, the article.
+- assertVisible: "1\\. Michael Jackson"
+- assertNotVisible: ".*Prince Michael Jackson.*"
+# First tap on non-interactive text only dismisses the keyboard.
+- tapOn: "FUENTES|Fuentes"
 - tapOn: "1\\. .*"
 - extendedWaitUntil:
     visible: "Buscar en este libro"

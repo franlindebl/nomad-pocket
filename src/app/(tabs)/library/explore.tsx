@@ -7,7 +7,7 @@ import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 
 import { Chip, EmptyState, PressableScale, ProgressRing, Row, SearchField, Text } from '@/components/ui';
 import { showDownloadError, LanguageTag } from '@/features/catalog/DownloadButton';
-import { searchKiwix, type KiwixEntry } from '@/features/catalog/opds';
+import { searchKiwix, shortLanguage, type KiwixEntry } from '@/features/catalog/opds';
 import { useContent } from '@/features/content/items';
 import { enqueueDownload, useDownload } from '@/features/downloads/manager';
 import { formatBytes } from '@/lib/format';
@@ -103,7 +103,7 @@ function EntryRow({ entry }: { entry: KiwixEntry }) {
           catalogId: entry.name,
           title: entry.title,
           description: entry.description,
-          language: entry.language,
+          language: shortLanguage(entry.language),
           category: entry.category,
           isCourse: false,
           version: entry.version,
@@ -127,7 +127,7 @@ function EntryRow({ entry }: { entry: KiwixEntry }) {
           <Text variant="headline" numberOfLines={1} style={{ flexShrink: 1 }}>
             {entry.title}
           </Text>
-          <LanguageTag language={entry.language.slice(0, 3)} />
+          <LanguageTag language={shortLanguage(entry.language)} />
         </Row>
         <Text variant="footnote" color="textSecondary" numberOfLines={2}>
           {entry.description}
