@@ -112,6 +112,7 @@
         }
       ],
       "@maplibre/maplibre-react-native",
+      ["llama.rn", { "enableOpenCLAndHexagon": true }],
       [
         "expo-build-properties",
         {

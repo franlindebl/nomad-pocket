@@ -148,6 +148,22 @@ minZoom, maxZoom, buildDate, regionId } })`), `markers.ts` (`map_markers`),
 `assets.ts`. Routes: `maps/index` (full-screen map), sheets `regions`, `pick`,
 `download` (zoom 12/14/15 + exact size before confirming), `markers`, `marker`.
 
+### Assistant (`modules/nomad-llm`, `src/features/assistant`, `src/app/(tabs)/assistant`)
+- `modules/nomad-llm`: `getSystemModelStatus()` → `available | notEnabled |
+  deviceNotEligible | modelNotReady | downloadable | unsupportedOS | unsupported`,
+  `generate(requestId, { prompt, system?, temperature?, maxTokens? }, onDelta)`
+  (events `onDelta {requestId, delta, reset?}` / `onDone` / `onError`), `cancel(id)`,
+  `downloadSystemModel()` (Android). iOS weak-links FoundationModels.
+- `models.ts`: curated GGUF list (id, pinned URL, exact bytes, min RAM, context),
+  `recommendModel(ramGB)`. Items are `kind: 'model'`, id = model id;
+  `useSettings.aiModelId` is a model id or `'system'`.
+- `engine.ts`: `withEngine(modelId, engine => engine.generate({ system, messages,
+  onText }))`, `stopGeneration()`, `releaseEngine()`. One engine alive at a time;
+  released on background and after 4 idle minutes.
+- `rag-core.ts` (pure, tested) + `rag.ts`: `retrieve(question, lang, budgetChars)`
+  uses `search`/`getArticleText` from `features/library/zim.ts` only.
+- `chats.ts`: sessions/messages persistence, `sendMessage`, `stopAnswer`, `useChat`.
+
 ### Feature registration
 Each feature exposes `src/features/<name>/register.ts` that calls
 `registerCompletionHandler`, `onItemRemoved` and `registerInit` (from

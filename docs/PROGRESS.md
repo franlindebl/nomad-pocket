@@ -22,7 +22,7 @@ every work block so work can resume after context compaction.
 | 2. ZIM library (native module, reader, search) | done (iOS verified, Android compiles) |
 | 3. Maps (extractor, MapLibre, regions, markers) | done (iOS verified, Android compiles) — merged |
 | 4. Courses | UI + progress done (needs ZIM module for syllabus) |
-| 5. Local AI (system + GGUF, RAG) | pending |
+| 5. Local AI (system + GGUF, RAG) | done — verified on iOS sim (llama.cpp CPU, Apple FM, RAG with citations) |
 | 6. Polish, icon, builds on simulator/emulator | pending |
 
 ## Log
@@ -51,7 +51,6 @@ every work block so work can resume after context compaction.
 ## In flight (parallel agents, git worktrees — merge into main when done)
 
 - ZIM agent (worktree branch): `modules/nomad-zim`, `src/features/library/{zim,register}.ts`, reader + `/search` screens, `reader` i18n ns.
-- AI agent (worktree branch): `modules/nomad-llm`, llama.rn, `src/features/assistant`, assistant tab, `assistant` i18n ns.
 
 ### 2026-10-24 — Maps (phase 3)
 - `src/lib/pmtiles`: PMTiles v3 reader/extractor in TS with node tests (Hilbert ids
@@ -89,6 +88,26 @@ every work block so work can resume after context compaction.
   runtime); media Range path untested with a real video ZIM; iOS find-in-page is a
   JS highlighter (counts), Android uses WebView's native find.
 
+### 2026-10-24 — Local AI assistant (phase 5)
+- `modules/nomad-llm`: Apple Foundation Models (weak-linked, iOS 26+) and Gemini Nano
+  (ML Kit GenAI Prompt API `1.0.0-beta4`) with status, streaming and cancel.
+- `llama.rn` 0.13.0-rc.8 (+ config plugin) for GGUF; curated Qwen3.5 0.8B/2B/4B and
+  Gemma 4 E2B (Q4_K_M, commit-pinned HF URLs, sizes HEAD-checked); RAM-based pick.
+- `src/features/assistant`: engine (lazy load, stream, stop, release on background /
+  4 min idle), RAG (keyword queries → ZIM full-text → BM25 over chunks → packed
+  numbered sources → `[n]` citations), chats in `chat_sessions`/`chat_messages`.
+- UI: chat with streaming Markdown, source chips → reader, stop, "use my library"
+  toggle, starters; conversations sheet; model screen with downloads.
+- Verified on the iOS 27 simulator (Release): Qwen3.5 0.8B downloaded in-app and
+  streamed on the CPU (llama.cpp); Apple Intelligence available and streaming; RAG
+  over `wikipedia_es_top_mini` with Apple FM answers with inline `[n]` citations and
+  source chips that open the reader. Android `assembleDebug` OK (runtime untested).
+  Screenshots: `docs/screenshots/assistant-*.png`.
+- Limits / TODO: Qwen3.5 0.8B rarely emits `[n]` (all retrieved sources are shown
+  then) and is unreliable for health answers — recommend 2B+; keyboard avoidance only
+  checked with the hardware keyboard; Gemini Nano path untested on a real AICore
+  device; `maxOutputTokens` limits of Gemini Nano unverified; no copy/regenerate yet.
+
 ## Next steps
 
 - Merge agent branches (expect small conflicts in package.json, app.json, resources.ts, registry.ts).
@@ -99,6 +118,8 @@ every work block so work can resume after context compaction.
 - Downloads interrupted by app termination restart from zero unless paused first
   (expo-file-system tasks don't survive relaunch).
 - Map extraction runs in the JS thread while the app is in foreground.
+- llama.rn's `stopCompletion()`/`release()` may not return promises — don't chain `.catch`.
+- Gemini Nano path compiled but untested on a real AICore device.
 
 ## Build gotchas
 
