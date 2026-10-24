@@ -35,6 +35,15 @@ type SheetKind = null | 'search' | 'library';
 
 const disclaimerKey = (id: string) => `reader.disclaimerDismissed.${id}`;
 
+/** The WebView reports the file name as title for pages without <title>: ignore those. */
+function pageTitle(title: string | undefined, path: string | undefined): string {
+  const t = (title ?? '').trim();
+  if (!t) return '';
+  const file = (path ?? '').split('/').pop() ?? '';
+  if (t === path || t === file || /\.(html?|php)$/i.test(t)) return '';
+  return t;
+}
+
 export default function ReaderScreen() {
   const { itemId, path } = useLocalSearchParams<{ itemId: string; path?: string }>();
   const { t } = useTranslation('reader');
@@ -105,7 +114,7 @@ export default function ReaderScreen() {
       const n = e.nativeEvent;
       setNav(n);
       setBookmarked(isBookmarked(itemId, n.path));
-      const title = n.title || item?.title || n.path;
+      const title = pageTitle(n.title, n.path) || item?.title || n.path;
       const key = `${n.path}\u0000${title}`;
       if (n.path && key !== lastRecorded.current) {
         lastRecorded.current = key;
@@ -125,7 +134,7 @@ export default function ReaderScreen() {
   const onBookmark = () => {
     if (!nav?.path) return;
     triggerHaptic('selection');
-    setBookmarked(toggleBookmark(itemId, nav.path, nav.title || item?.title || nav.path));
+    setBookmarked(toggleBookmark(itemId, nav.path, pageTitle(nav.title, nav.path) || item?.title || nav.path));
   };
 
   const onRandom = async () => {
@@ -143,7 +152,7 @@ export default function ReaderScreen() {
     }
   };
 
-  const title = nav?.title || item?.title || '';
+  const title = pageTitle(nav?.title, nav?.path) || item?.title || '';
 
   if (!item) {
     return (

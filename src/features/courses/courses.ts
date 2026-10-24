@@ -17,6 +17,7 @@ export type CourseState = {
   lastTitle: string | null;
   lastOpenedAt: number | null;
   completed: Set<string>;
+  syllabusBuilt: boolean;
 };
 
 type CourseRow = {
@@ -52,6 +53,7 @@ export function getCourse(itemId: string): CourseState | null {
     lastTitle: row.last_title,
     lastOpenedAt: row.last_opened_at,
     completed: completedPaths(itemId, syllabus),
+    syllabusBuilt: row.syllabus !== null,
   };
 }
 
@@ -81,7 +83,8 @@ async function buildSyllabus(itemId: string): Promise<Lesson[]> {
 /** Enrol (idempotent) and make sure the syllabus is built. */
 export async function ensureCourse(itemId: string): Promise<CourseState | null> {
   const existing = getCourse(itemId);
-  if (existing && existing.syllabus.length) return existing;
+  // A built syllabus may legitimately be empty (no structured main page): don't rebuild it.
+  if (existing && existing.syllabusBuilt) return existing;
   let syllabus: Lesson[] = [];
   try {
     syllabus = await buildSyllabus(itemId);
