@@ -1,0 +1,25 @@
+docs/PROGRESS.md
+  s_cbd2a9b15986bf::t_ea8c841faf0a7b 25,101-109
+src/features/assistant/rag-core.test.ts
+  s_cbd2a9b15986bf::t_984f6a8a240640 146-154,201-202
+src/features/assistant/rag-core.ts
+  s_cbd2a9b15986bf::t_4cf7ebb7cea6b6 149-150,268-279,282-288,426-431
+src/features/assistant/rag.ts
+  s_cbd2a9b15986bf::t_98e12e8baa2b2d 70,76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e202bc2c4a4fb5947687f01d4f124e588b1c9aef",
+  "prompts": {},
+  "sessions": {
+    "s_cbd2a9b15986bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8fb325cf-e8f4-4b02-a113-0dab7f1f1a40",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
