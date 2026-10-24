@@ -1,8 +1,8 @@
 import { router, Stack } from 'expo-router';
 import { AlertCircle, ChevronDown, Cpu, History, Library, SquarePen, X } from 'lucide-react-native';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
+import { Dimensions, FlatList, ScrollView, StyleSheet, View, type HostInstance } from 'react-native';
 import Animated, { useAnimatedKeyboard, useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -36,8 +36,17 @@ export default function AssistantScreen() {
     return out.reverse();
   }, [messages, sessionStreaming]);
 
-  // Composer rides on top of the keyboard, or of the tab bar when it's closed.
-  const bottomStyle = useAnimatedStyle(() => ({ paddingBottom: Math.max(insets.bottom, keyboard.height.value) + space.sm }));
+  // Composer rides on top of the keyboard, or of the tab bar when it's closed. The keyboard
+  // height is measured from the screen bottom, but on Android the screen ends above the
+  // bottom navigation bar: subtract the gap between this view and the window bottom.
+  const rootRef = useRef<HostInstance>(null);
+  const [bottomGap, setBottomGap] = useState(0);
+  const measureGap = useCallback(() => {
+    rootRef.current?.measureInWindow((_x, y, _w, h) => setBottomGap(Math.max(0, Dimensions.get('screen').height - (y + h))));
+  }, []);
+  const bottomStyle = useAnimatedStyle(() => ({
+    paddingBottom: Math.max(insets.bottom, keyboard.height.value - bottomGap) + space.sm,
+  }));
 
   const renderItem = useCallback(({ item }: { item: Row_ }) => {
     if (item.streaming) {
@@ -52,7 +61,7 @@ export default function AssistantScreen() {
   const noLibrary = useLibrary && libraryItems.length === 0;
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+    <View ref={rootRef} onLayout={measureGap} style={[styles.root, { backgroundColor: colors.bg }]}>
       <Stack.Screen
         options={{
           headerTitle: () => <ModelPill name={model.name} />,

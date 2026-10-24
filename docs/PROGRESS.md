@@ -59,6 +59,12 @@ every work block so work can resume after context compaction.
   syllabus rebuild loop fixed; scanned ZIMs recover catalog metadata; reader ignores
   file-name titles; downloads interrupted during "processing" finish on next launch;
   stored content URIs re-anchored after container moves; `File.move/copy` awaited.
+- Android emulator verified end to end: Qwen3.5 0.8B download → llama.cpp answer with
+  `[n]` citations from WikiRoca (screenshot `assistant-android.png`); composer now sits
+  right above the keyboard (keyboard height minus the bottom-nav gap).
+- Apple Intelligence on the **iOS 26.5 simulator** fails every request with
+  `GenerationError -1` (works on the iOS 27 simulator per the AI agent) — environment,
+  not app; errors now keep the case name to diagnose on a real device.
 
 ### 2026-10-24 — Maps (phase 3)
 - `src/lib/pmtiles`: PMTiles v3 reader/extractor in TS with node tests (Hilbert ids
