@@ -24,6 +24,7 @@ import { ArchiveSearchSheet } from '@/features/library/components/ArchiveSearchS
 import { DisclaimerBanner, FindBar, MenuItem, Popover, ReaderToolbar, TextSizeControl } from '@/features/library/components/ReaderChrome';
 import { ReaderLibrarySheet } from '@/features/library/components/ReaderLibrarySheet';
 import { isBookmarked, recordVisit, toggleBookmark } from '@/features/library/history';
+import { pageTitle } from '@/features/library/titles';
 import { ensureArchive, randomPath } from '@/features/library/zim';
 import { useSettings } from '@/stores/settings';
 import { space, useTheme } from '@/theme';
@@ -34,15 +35,6 @@ type Panel = null | 'text' | 'more';
 type SheetKind = null | 'search' | 'library';
 
 const disclaimerKey = (id: string) => `reader.disclaimerDismissed.${id}`;
-
-/** The WebView reports the file name as title for pages without <title>: ignore those. */
-function pageTitle(title: string | undefined, path: string | undefined): string {
-  const t = (title ?? '').trim();
-  if (!t) return '';
-  const file = (path ?? '').split('/').pop() ?? '';
-  if (t === path || t === file || /\.(html?|php)$/i.test(t)) return '';
-  return t;
-}
 
 export default function ReaderScreen() {
   const { itemId, path } = useLocalSearchParams<{ itemId: string; path?: string }>();

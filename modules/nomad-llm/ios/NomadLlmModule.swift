@@ -155,7 +155,8 @@ public final class NomadLlmModule: Module {
       case .concurrentRequests:
         return ("ERR_BUSY", "The system model is busy with another request")
       default:
-        return ("ERR_GENERATE", e.localizedDescription)
+        // Newer cases (refusal, decodingFailure…): keep the case name for diagnosis.
+        return ("ERR_GENERATE", "\(e)")
       }
     }
     return ("ERR_GENERATE", error.localizedDescription)

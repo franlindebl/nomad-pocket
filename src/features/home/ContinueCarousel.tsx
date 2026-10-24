@@ -7,6 +7,7 @@ import { ScrollView, StyleSheet } from 'react-native';
 import { Card, IconBadge, SectionHeader, Text } from '@/components/ui';
 import { getItem } from '@/features/content/items';
 import { recentHistory, type HistoryEntry } from '@/features/library/history';
+import { pageTitle } from '@/features/library/titles';
 import { formatRelativeDate } from '@/lib/format';
 import { space } from '@/theme';
 
@@ -25,7 +26,10 @@ export function ContinueCarousel() {
           return true;
         })
         .slice(0, 6)
-        .map((h) => ({ ...h, source: getItem(h.itemId)?.title ?? '' }))
+        .map((h) => {
+          const source = getItem(h.itemId)?.title ?? '';
+          return { ...h, title: pageTitle(h.title, h.path) || source, source };
+        })
         .filter((h) => h.source);
       setEntries(list);
     }, []),
