@@ -3,7 +3,7 @@ import type { LucideIcon } from 'lucide-react-native';
 import { ChevronDown, ChevronUp, Minus, Plus, TriangleAlert, X } from 'lucide-react-native';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Keyboard, Platform, StyleSheet, TextInput, View } from 'react-native';
+import { Dimensions, Keyboard, Platform, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { IconButton, PressableScale, Text } from '@/components/ui';
@@ -18,16 +18,18 @@ export type ToolbarAction = {
   active?: boolean;
 };
 
-/** Keyboard height on iOS, where the screen does not resize for it; 0 when hidden and on Android. */
+/** Keyboard height (0 when hidden). Neither iOS nor edge-to-edge Android resize the screen for it. */
 function useKeyboardHeight() {
   const [height, setHeight] = useState(0);
   useEffect(() => {
-    if (Platform.OS !== 'ios') return;
-    const show = Keyboard.addListener('keyboardWillShow', (e) => {
+    // Android only has the did-events.
+    const ios = Platform.OS === 'ios';
+    const show = Keyboard.addListener(ios ? 'keyboardWillShow' : 'keyboardDidShow', (e) => {
       Keyboard.scheduleLayoutAnimation(e);
-      setHeight(e.endCoordinates.height);
+      // Android's height leaves out the gesture-navigation strip the keyboard also covers.
+      setHeight(ios ? e.endCoordinates.height : Math.max(0, Dimensions.get('window').height - e.endCoordinates.screenY));
     });
-    const hide = Keyboard.addListener('keyboardWillHide', (e) => {
+    const hide = Keyboard.addListener(ios ? 'keyboardWillHide' : 'keyboardDidHide', (e) => {
       Keyboard.scheduleLayoutAnimation(e);
       setHeight(0);
     });

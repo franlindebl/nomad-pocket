@@ -1,0 +1,104 @@
+# ANDROID-01 — main screens on Android plus the controls changed for iOS (buttons beside
+# rows, find bar and keyboard, bookmarks list, setup wizard). Real downloads (1 MB + 12 MB):
+# a release build can't be seeded. Run with npm run e2e:android.
+# Tabs are a text bar at the bottom whose labels repeat on Home's cards: tapped by position.
+appId: com.fjlinde.nomadpocket
+tags: [android, network]
+---
+- runFlow: ../../subflows/launch.yaml
+- takeScreenshot: 01-home
+- tapOn: { id: "open-settings" }
+- assertVisible: "Idioma de la app"
+- takeScreenshot: 02-settings
+- back
+
+# Collection tier: the pack button sits beside the tier's button (B1).
+- tapOn: { point: "30%,93%" }   # Biblioteca
+- tapOn: "Medicina.*"
+- tapOn: { id: "pack-download" }
+- assertVisible: "¿Descargar .*"
+- takeScreenshot: 03-pack-confirm
+- tapOn: "(?i)cancelar"
+- back
+
+# Reader: a small archive, bookmarks list (B3), find bar over the keyboard (B2).
+- openLink: nomadpocket:///library/resource/devdocs_en_bash
+- tapOn: "Descargar · .*"
+- tapOn:   # the emulator is on mobile data: "Descargas solo con Wi-Fi"
+    text: "(?i)usar datos móviles"
+    optional: true
+- extendedWaitUntil:
+    visible: "Abrir"
+    timeout: 120000
+- tapOn: "Abrir"
+- extendedWaitUntil:
+    visible: "Buscar en este libro"
+    timeout: 20000
+- takeScreenshot: 04-reader
+- tapOn: "Guardar"
+- assertVisible: "Quitar de guardados"
+- tapOn: "Más"
+- tapOn: "Guardados e historial"
+- assertNotVisible: "Aún no has guardado nada"
+- tapOn: "Hecho"
+- tapOn: "Quitar de guardados"
+- tapOn: "Más"
+- tapOn: "Guardados e historial"
+- assertVisible: "Aún no has guardado nada"
+- tapOn: "Hecho"
+- tapOn: "Más"
+- tapOn: "Buscar en la página"
+- inputText: "bash"
+- extendedWaitUntil:
+    visible: "1 de \\d+"
+    timeout: 5000
+- takeScreenshot: 05-find-keyboard
+- tapOn: "Siguiente coincidencia"
+- assertVisible: "2 de \\d+"
+- tapOn: { id: "find-close" }
+- back
+- back
+
+# Places: the delete button sits beside the row (B1).
+- tapOn: { point: "50%,93%" }   # Mapas
+- extendedWaitUntil:
+    visible: "Mapas sin conexión"
+    timeout: 20000
+- takeScreenshot: 06-maps
+- longPressOn: { point: "50%,30%" }
+- assertVisible: "Nuevo lugar"
+- inputText: "Campamento"
+- tapOn: "Guardar"
+- tapOn: "Lugares guardados"
+- assertVisible: "Campamento.*"
+- takeScreenshot: 07-places
+- tapOn: { id: "marker-delete" }
+- assertVisible: "¿Eliminar «Campamento»\\?"
+- takeScreenshot: 08-delete-confirm
+- tapOn: { text: "(?i)eliminar", below: "¿Eliminar «Campamento»\\?" }
+- assertVisible: "No hay lugares guardados.*"
+- back
+
+# Course: the lesson check sits beside the lesson's button (B1).
+- openLink: nomadpocket:///library/resource/freecodecamp_es_all
+- tapOn: "Descargar · .*"
+- tapOn:   # the emulator is on mobile data: "Descargas solo con Wi-Fi"
+    text: "(?i)usar datos móviles"
+    optional: true
+- extendedWaitUntil:
+    visible: "Abrir"
+    timeout: 180000
+- back
+- tapOn: { point: "70%,93%" }   # Cursos
+- tapOn: "freeCodeCamp en español.*"
+- extendedWaitUntil:
+    visible: { id: "lesson-check-1" }
+    timeout: 30000
+- tapOn: { id: "lesson-check-1" }
+- assertVisible: { id: "lesson-check-1", text: "Marcar como pendiente" }
+- takeScreenshot: 09-course
+- back
+
+- tapOn: { point: "90%,93%" }   # Asistente
+- assertVisible: "Elige un modelo para empezar|¿En qué te ayudo\\?"
+- takeScreenshot: 10-assistant

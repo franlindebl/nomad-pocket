@@ -72,6 +72,7 @@
     "e2e:full": "scripts/e2e.sh --tags smoke,full",
     "e2e:all": "scripts/e2e.sh --tags smoke,full,nightly",
     "e2e:ipad": "DEVICE=NP-e2e-iPad scripts/e2e.sh --tags ipad",
+    "e2e:android": "scripts/e2e-android.sh",
     "e2e:setup": "scripts/e2e-setup.sh",
     "check:i18n": "node scripts/check-i18n.mjs .",
     "check:catalog": "node scripts/validate-catalog.mjs"

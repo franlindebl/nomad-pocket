@@ -185,6 +185,9 @@ every work block so work can resume after context compaction.
   unpack (v2) now writes an empty placeholder for every range not shipped
   (`features/maps/glyphs.ts`), so those characters are just not drawn. Shipping real
   Arabic/Hebrew glyphs would add ~2 MB to the 1.3 MB asset zip.
+- Android pass (emulator, release APK, `npm run e2e:android`): everything shared works;
+  the reader's find bar sat under the keyboard there too (edge-to-edge Android doesn't
+  resize either, and its keyboard height leaves out the gesture strip): fixed.
 - Pre-commit hook (`.githooks/`, set by `npm install`): tsc, lint, unit tests, i18n (~5 s).
   Lint is clean now (two setState-in-effect errors fixed).
   `wikipedia_en_100_mini_2026-01.zim` committed: Kiwix removed it from the mirror.
@@ -192,7 +195,7 @@ every work block so work can resume after context compaction.
 ## Next steps
 
 - Run `npm run e2e` before every TestFlight build (`--build` after code changes).
-- Smoke-test the merged build on the Android emulator (all tabs); the E2E suite is iOS only.
+- Android: `npm run e2e:android` (tour). Not covered there: maps with regions, the AI assistant.
 - Nice to have: reader TOC + auto-hiding toolbar; copy/regenerate in chat; map
   extraction resume after kill; syllabus for SPA course ZIMs (read links from the
   rendered DOM); Gemini Nano test on a real device; store submission assets.

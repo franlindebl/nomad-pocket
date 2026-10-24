@@ -2,7 +2,7 @@
 
 [Maestro](https://maestro.mobile.dev) flows that drive the Release build of the app on an
 iOS simulator, the same way a person would: tapping, typing and reading the screen through
-accessibility. 38 flows cover 53 of the 55 cases in the test plan (Claude doc "Plan de
+accessibility. 39 flows cover 53 of the 55 cases in the test plan (Claude doc "Plan de
 tests funcionales iOS — Nomad App"); the case ids (`RDR-03`, `MAP-06`…) are on the first
 line of each flow.
 
@@ -44,6 +44,7 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 | `npm run e2e:full` | 29 | ~18 min | + P1: secondary features (themes, markers, find in page, courses…) | nothing (offline) |
 | `npm run e2e:all` | 37 | ~25 min | + P2: real downloads and the on-device AI | internet, Apple Intelligence |
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape, light and dark | nothing (offline) |
+| `npm run e2e:android` | 1 | ~4 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check) | internet, Android emulator |
 
 When to run what: smoke before every TestFlight build or after a risky change; full and the
 iPad tour before an App Store release (then look through the iPad screenshots in
@@ -56,6 +57,14 @@ runs the fast checks instead: typecheck, lint, unit tests and i18n keys (~5 s). 
 
 The iPhone flows don't run on iPad: there the tabs are a text bar at the top instead of
 icons. The iPad tour taps them by name (`tapOn: { text: "Mapas", index: 0 }`).
+
+Android has its own tour (`e2e/flows/android/`, `scripts/e2e-android.sh`): it installs the
+release APK on the `Pixel_API_36` emulator (`--build` rebuilds it), gives the app Spanish as
+its per-app language (`cmd locale set-app-locales`) and location, and runs the flows tagged
+`android`. A release build can't be seeded (no `run-as`), so the tour downloads a 1 MB and
+a 12 MB archive; on the emulator's mobile data the app asks first ("Descargas solo con
+Wi-Fi") and the flow accepts. Android tabs show only the active label, so they are tapped
+by position. Results go to `e2e/artifacts/latest-android/`.
 
 ## Running part of the suite
 
@@ -216,6 +225,7 @@ By hand:
 | assistant | `ai-05-conversations` | AI-05 | nightly | Apple Intelligence |
 | downloads | `dl-02-controls` | DL-02 | nightly | network |
 | ipad | `ipad-01-tour` | IPAD-01 | ipad | seeded, seeded-map |
+| android | `android-01-tour` | ANDROID-01 | android | network |
 
 Not automated: LIB-08 (import from Files: the system picker is outside the app) and X-02
 (offline: the simulator has no airplane mode). Check them by hand on a device.
