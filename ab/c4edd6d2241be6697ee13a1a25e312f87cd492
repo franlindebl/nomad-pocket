@@ -1,0 +1,35 @@
+src/app/reader/[itemId].tsx
+  s_cbd2a9b15986bf::t_b8e91f15dd1d48 13,27,37,199-206,256
+src/features/library/components/ReaderTocSheet.tsx
+  s_cbd2a9b15986bf::t_3062a4ba1bf987 1-88
+src/features/library/html.test.ts
+  s_cbd2a9b15986bf::t_9d1bd7ea356b16 5,63-72
+src/features/library/html.ts
+  s_cbd2a9b15986bf::t_f062e0a7b8bd74 233-254
+src/features/library/register.ts
+  s_cbd2a9b15986bf::t_e07e4aefcaf374 47-57,71-72,74-85,161
+src/features/library/titles.ts
+  s_cbd2a9b15986bf::t_3b015c02d8e26d 1-5,10-11
+src/features/library/zim.ts
+  s_cbd2a9b15986bf::t_e8ae1d88e70a59 9,197-202
+src/i18n/locales/en/reader.json
+  s_cbd2a9b15986bf::t_ebe209b5bf9d8e 48-51
+src/i18n/locales/es/reader.json
+  s_cbd2a9b15986bf::t_7f3906af6f7884 48-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "abc4edd6d2241be6697ee13a1a25e312f87cd492",
+  "prompts": {},
+  "sessions": {
+    "s_cbd2a9b15986bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8fb325cf-e8f4-4b02-a113-0dab7f1f1a40",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
