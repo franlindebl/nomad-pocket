@@ -5,8 +5,12 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-DEVICE="${DEVICE:-NP-e2e}"
 RUNTIME=com.apple.CoreSimulator.SimRuntime.iOS-27-0
+# name → device type: the iPhone runs the suite, the iPad the `ipad` tour (npm run e2e:ipad).
+SIMULATORS=(
+  "NP-e2e:com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro"
+  "NP-e2e-iPad:com.apple.CoreSimulator.SimDeviceType.iPad-Air-11-inch-M4"
+)
 MIRROR=https://download.kiwix.org/zim
 # <mirror folder>/<file>. The suite's assertions depend on these exact files.
 # wikipedia_en_100_mini_2026-01.zim is in git: Kiwix removed it from the mirror.
@@ -28,19 +32,23 @@ else
   echo "  ✗ java: brew install openjdk"; problems=1
 fi
 
-echo "Simulator"
-if xcrun simctl list devices available | grep -qE "^ +$DEVICE \("; then
-  echo "  ✓ $DEVICE"
-elif xcrun simctl list runtimes | grep -q "$RUNTIME"; then
-  udid="$(xcrun simctl create "$DEVICE" com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro "$RUNTIME")"
-  xcrun simctl boot "$udid"
-  xcrun simctl spawn "$udid" defaults write "Apple Global Domain" AppleLanguages -array es-ES
-  xcrun simctl spawn "$udid" defaults write "Apple Global Domain" AppleLocale -string es_ES
-  xcrun simctl shutdown "$udid"
-  echo "  ✓ $DEVICE created ($udid, iPhone 17 Pro, iOS 27.0, es-ES)"
-else
-  echo "  ✗ iOS 27.0 simulator runtime missing (Xcode › Settings › Components)"; problems=1
-fi
+echo "Simulators"
+for sim in "${SIMULATORS[@]}"; do
+  name="${sim%%:*}" type="${sim#*:}"
+  if xcrun simctl list devices available | grep -qE "^ +$name \("; then
+    echo "  ✓ $name"
+  elif xcrun simctl list runtimes | grep -q "$RUNTIME"; then
+    udid="$(xcrun simctl create "$name" "$type" "$RUNTIME")"
+    xcrun simctl boot "$udid"
+    xcrun simctl spawn "$udid" defaults write "Apple Global Domain" AppleLanguages -array es-ES
+    xcrun simctl spawn "$udid" defaults write "Apple Global Domain" AppleLocale -string es_ES
+    xcrun simctl shutdown "$udid"
+    echo "  ✓ $name created ($udid, ${type##*.}, iOS 27.0, es-ES)"
+  else
+    echo "  ✗ iOS 27.0 simulator runtime missing (Xcode › Settings › Components)"; problems=1
+    break
+  fi
+done
 
 echo "Fixtures (e2e/fixtures/)"
 mkdir -p "$ROOT/e2e/fixtures"

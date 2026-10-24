@@ -172,6 +172,10 @@ every work block so work can resume after context compaction.
   Explore shows "ES" instead of Kiwix's "SPA"; the setup wizard waits for the root
   navigator (a push before it was ready was dropped, ~1 in 40 fresh installs).
 - Maestro 2.11 (`brew install mobile-dev-inc/tap/maestro`; `maestro@1.38` kept unlinked).
+- Decisions: suite run by hand (no CI, no git hook); Spanish, with `onb-02`/`set-01` for
+  English; iPad covered by a visual tour (`npm run e2e:ipad`). iPad findings, open: wide
+  screens have no max content width (assistant buttons ~800 pt wide); landscape Home wraps
+  the 4 module cards as 3 + 1.
   `wikipedia_en_100_mini_2026-01.zim` committed: Kiwix removed it from the mirror.
 
 ## Next steps

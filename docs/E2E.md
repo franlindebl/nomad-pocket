@@ -42,11 +42,19 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 |---|---|---|---|---|
 | `npm run e2e` | 15 | ~10 min | P0: every screen's main path | nothing (offline) |
 | `npm run e2e:full` | 28 | ~18 min | + P1: secondary features (themes, markers, find in page, courses…) | nothing (offline) |
-| `npm run e2e:all` | 36 | ~23 min | + P2: real downloads and the on-device AI | internet, Apple Intelligence |
+| `npm run e2e:all` | 36 | ~25 min | + P2: real downloads and the on-device AI | internet, Apple Intelligence |
+| `npm run e2e:ipad` | 1 | ~2 min | iPad tour: every main screen, portrait and landscape, light and dark | nothing (offline) |
 
-When to run what: smoke before every TestFlight build or after a risky change; full before
-an App Store release; all occasionally (downloads depend on the Kiwix and Protomaps servers,
-so a failure there can be the network rather than the app).
+When to run what: smoke before every TestFlight build or after a risky change; full and the
+iPad tour before an App Store release (then look through the iPad screenshots in
+`e2e/artifacts/latest/ipad-01-tour/takeScreenshot/`); all occasionally (downloads depend on
+the Kiwix and Protomaps servers, so a failure there can be the network rather than the app).
+
+The suite runs by hand: no CI (a macOS runner or EAS builds cost money) and no git hook
+(smoke takes ~10 min). Flows match Spanish texts; `onb-02` and `set-01` check English.
+
+The iPhone flows don't run on iPad: there the tabs are a text bar at the top instead of
+icons. The iPad tour taps them by name (`tapOn: { text: "Mapas", index: 0 }`).
 
 ## Running part of the suite
 
@@ -135,8 +143,10 @@ By hand:
 - **Maestro CLI** 2.x: `brew install mobile-dev-inc/tap/maestro` (not the `maestro` cask,
   which is a different app). It needs Java: the runner falls back to Homebrew's `openjdk` when
   `java` is not on `PATH`.
-- **Simulator `NP-e2e`**: iPhone 17 Pro, iOS 27.0, language `es-ES`. iOS 27.0 because Apple
-  Intelligence works there (not on 26.5); Spanish because the flows match Spanish texts.
+- **Simulators** `NP-e2e` (iPhone 17 Pro) and `NP-e2e-iPad` (iPad Air 11" M4), iOS 27.0,
+  language `es-ES`. iOS 27.0 because Apple Intelligence works there (not on 26.5); Spanish
+  because the flows match Spanish texts. By hand, for each (iPad type:
+  `com.apple.CoreSimulator.SimDeviceType.iPad-Air-11-inch-M4`):
   ```bash
   U=$(xcrun simctl create NP-e2e com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro com.apple.CoreSimulator.SimRuntime.iOS-27-0)
   xcrun simctl boot $U
@@ -201,6 +211,7 @@ By hand:
 | assistant | `ai-03-chat-sources` | AI-03, AI-04 | nightly | seeded, Apple Intelligence |
 | assistant | `ai-05-conversations` | AI-05 | nightly | Apple Intelligence |
 | downloads | `dl-02-controls` | DL-02 | nightly | network |
+| ipad | `ipad-01-tour` | IPAD-01 | ipad | seeded |
 
 Not automated: LIB-08 (import from Files: the system picker is outside the app) and X-02
 (offline: the simulator has no airplane mode). Check them by hand on a device.

@@ -1,0 +1,57 @@
+# IPAD-01 — every main screen on iPad, portrait and landscape, with the library seeded.
+# Visual check: review the screenshots (layout, truncation, empty space). On iPad the tabs
+# are a text bar at the top, so they are tapped by name (index 0: the top-most match).
+appId: com.fjlinde.nomadpocket
+tags: [ipad, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- extendedWaitUntil:
+    visible: "4 elementos.*"
+    timeout: 10000
+- takeScreenshot: 01-home
+- tapOn: { text: "Biblioteca", index: 0 }
+- assertVisible: "En tu dispositivo"
+- takeScreenshot: 02-library
+- tapOn: "Wikipedia 100.*"
+- extendedWaitUntil:
+    visible: "Buscar en este libro"
+    timeout: 15000
+- takeScreenshot: 03-reader
+- tapOn: "Buscar en este libro"
+- inputText: "Jackson"
+- extendedWaitUntil:
+    visible: "Michael Jackson.*"
+    timeout: 10000
+- takeScreenshot: 04-search-in-book
+- tapOn: "Michael Jackson.*"
+- extendedWaitUntil:
+    notVisible: "Michael Jackson finances.*"
+    timeout: 10000
+- takeScreenshot: 05-article
+- setOrientation: LANDSCAPE_LEFT
+- takeScreenshot: 06-article-landscape
+- setOrientation: PORTRAIT
+- tapOn: { id: "BackButton" }
+- tapOn: { text: "Mapas", index: 0 }
+- extendedWaitUntil:
+    visible: "Mapas sin conexión"
+    timeout: 20000
+- takeScreenshot: 07-maps
+- tapOn: { text: "Cursos", index: 0 }
+- tapOn: "freeCodeCamp en español.*"
+- extendedWaitUntil:
+    visible: { id: "lesson-check-1" }
+    timeout: 30000
+- takeScreenshot: 08-course
+- tapOn: { text: "Asistente", index: 0 }
+- assertVisible: "Elige un modelo para empezar|¿En qué te ayudo\\?"
+- takeScreenshot: 09-assistant
+- tapOn: { text: "Inicio", index: 0 }
+- tapOn: { id: "open-settings" }
+- assertVisible: "Idioma de la app"
+- takeScreenshot: 10-settings
+- tapOn: "Oscuro"
+- swipe: { direction: DOWN }
+- setOrientation: LANDSCAPE_LEFT
+- takeScreenshot: 11-home-dark-landscape
+- setOrientation: PORTRAIT
