@@ -102,6 +102,9 @@ export default function AssistantScreen() {
               </PressableScale>
             ))}
           </View>
+          <Text variant="caption" color="textTertiary" align="center" style={{ maxWidth: 320, alignSelf: 'center' }}>
+            {t('empty.disclaimer')}
+          </Text>
         </ScrollView>
       ) : (
         <FlatList

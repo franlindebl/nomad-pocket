@@ -1,6 +1,7 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { Database, GraduationCap, Map, Sparkles, Trash2, Wand2, type LucideIcon } from 'lucide-react-native';
+import * as WebBrowser from 'expo-web-browser';
+import { Database, GraduationCap, Map, ShieldCheck, Sparkles, Trash2, Wand2, type LucideIcon } from 'lucide-react-native';
 import { Alert, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -13,6 +14,8 @@ import type { ContentKind } from '@/lib/storage';
 import { freeBytes, totalBytes } from '@/lib/storage';
 import { useSettings, type ThemePreference } from '@/stores/settings';
 import { space, useTheme, type Hue } from '@/theme';
+
+const PRIVACY_URL = 'https://franlindebl.github.io/nomad-pocket/privacy.html';
 
 const KIND_META: Record<ContentKind, { icon: LucideIcon; hue: Hue }> = {
   zim: { icon: Database, hue: 'reference' },
@@ -130,6 +133,12 @@ export default function SettingsScreen() {
             clearHistory();
             Alert.alert(t('historyCleared'));
           }}
+        />
+        <ListRow
+          title={t('privacy')}
+          leading={<IconBadge icon={ShieldCheck} hue="reference" size={36} />}
+          chevron
+          onPress={() => WebBrowser.openBrowserAsync(`${PRIVACY_URL}${s.language === 'en' ? '#en' : ''}`)}
         />
         <View style={{ padding: space.lg, gap: space.sm }}>
           <Text variant="footnote" color="textSecondary">

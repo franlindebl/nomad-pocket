@@ -1,0 +1,64 @@
+:root {
+  --bg: #F6F5F2;
+  --surface: #FFFFFF;
+  --border: #E3E0D9;
+  --text: #18171B;
+  --text-2: #6A6760;
+  --accent: #F2643A;
+  --accent-soft: #FDE7DF;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0D0D0F;
+    --surface: #17171A;
+    --border: #2A2A30;
+    --text: #F4F3EF;
+    --text-2: #A3A09A;
+    --accent: #FF7A4F;
+    --accent-soft: #3A1F17;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+main { max-width: 760px; margin: 0 auto; padding: 48px 16px 64px; }
+header.brand { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+header.brand img { width: 64px; height: 64px; border-radius: 15px; }
+header.brand a { color: inherit; text-decoration: none; }
+header.brand .name { font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+header.brand .tag { color: var(--text-2); font-size: 15px; }
+nav.lang { margin-left: auto; font-size: 14px; display: flex; gap: 12px; }
+h1 { font-size: clamp(30px, 6vw, 42px); line-height: 1.1; letter-spacing: -0.03em; margin: 0 0 12px; }
+h2 { font-size: 22px; letter-spacing: -0.01em; margin: 40px 0 8px; }
+h3 { font-size: 17px; margin: 24px 0 4px; }
+p, li { color: var(--text); }
+.lead { font-size: 19px; color: var(--text-2); margin: 0 0 24px; }
+.muted { color: var(--text-2); font-size: 14px; }
+a { color: var(--accent); }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 22px;
+  margin: 16px 0;
+}
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 24px 0; }
+.grid .card { margin: 0; }
+.grid .card strong { display: block; margin-bottom: 4px; }
+.pill {
+  display: inline-block;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+section + section { border-top: 1px solid var(--border); margin-top: 56px; padding-top: 8px; }
+footer { margin-top: 56px; color: var(--text-2); font-size: 14px; }

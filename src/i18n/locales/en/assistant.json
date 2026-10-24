@@ -21,7 +21,8 @@
       "burn": "First aid for a minor burn",
       "fire": "How do I start a fire when everything is wet?",
       "photosynthesis": "Explain photosynthesis simply"
-    }
+    },
+    "disclaimer": "AI can make mistakes. Double-check what matters and, for health questions, consult a professional."
   },
   "noModel": {
     "title": "Choose a model to get started",
