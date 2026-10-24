@@ -29,7 +29,11 @@ const MODULES: Module[] = [
 export default function HomeScreen() {
   const { t } = useTranslation('home');
   const { t: tc } = useTranslation();
-  const { colors } = useTheme();
+  const { colors, scheme } = useTheme();
+  // The hero is ink on paper in light mode; in dark mode a raised surface instead of a white slab.
+  const heroBg = scheme === 'dark' ? colors.surfaceAlt : colors.ink;
+  const heroFg = scheme === 'dark' ? 'text' : 'onInk';
+  const heroFgColor = colors[heroFg];
   const insets = useSafeAreaInsets();
   const items = useItems();
   const downloads = useActiveDownloads();
@@ -53,23 +57,23 @@ export default function HomeScreen() {
         </Row>
       </Row>
 
-      <Card style={styles.hero} background={colors.ink} padded={false}>
+      <Card style={styles.hero} background={heroBg} padded={false}>
         <View style={{ padding: space.xl, gap: space.md }}>
           <Row gap={space.md}>
-            <View style={[styles.heroIcon, { backgroundColor: `${colors.onInk}1A` }]}>
-              <HardDrive size={20} color={colors.onInk} />
+            <View style={[styles.heroIcon, { backgroundColor: `${heroFgColor}1A` }]}>
+              <HardDrive size={20} color={heroFgColor} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text variant="headline" color="onInk">
+              <Text variant="headline" color={heroFg}>
                 {t('storageTitle')}
               </Text>
-              <Text variant="footnote" color="onInk" style={{ opacity: 0.7 }}>
+              <Text variant="footnote" color={heroFg} style={{ opacity: 0.7 }}>
                 {items.length ? t('storageBody', { count: items.length, size: formatBytes(used) }) : t('storageEmpty')}
               </Text>
             </View>
           </Row>
-          <ProgressBar value={total ? (total - free) / total : 0} trackColor={`${colors.onInk}26`} />
-          <Text variant="caption" color="onInk" style={{ opacity: 0.7 }} tabular>
+          <ProgressBar value={total ? (total - free) / total : 0} trackColor={`${heroFgColor}26`} />
+          <Text variant="caption" color={heroFg} style={{ opacity: 0.7 }} tabular>
             {tc('storage.free', { size: formatBytes(free) })}
           </Text>
         </View>
