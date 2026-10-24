@@ -1,0 +1,27 @@
+docs/E2E.md
+  s_7f4d89e27550a2::t_f2ad3df30d942d 45-46,48-57,146-149,214
+docs/PROGRESS.md
+  s_7f4d89e27550a2::t_b0b9fe5cbb0b24 175-178
+package.json
+  s_7f4d89e27550a2::t_1986303344497a 73
+scripts/e2e-setup.sh
+  s_7f4d89e27550a2::t_f9e460af3100e2 9-13,35-51
+e2e/flows/ipad/ipad-01-tour.yaml
+  s_7f4d89e27550a2::t_0ef3787c1b45aa 1-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "68d1ba4f5624be5cf4438522c128911f65cc867f",
+  "prompts": {},
+  "sessions": {
+    "s_7f4d89e27550a2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "99f9ab25-1210-41a5-af44-46d9a81f8ba6",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
