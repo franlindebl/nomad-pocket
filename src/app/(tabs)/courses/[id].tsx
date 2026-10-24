@@ -1,6 +1,6 @@
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { BookOpen, Check, Circle } from 'lucide-react-native';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -43,9 +43,11 @@ export default function CourseScreen() {
   );
 
   // Progress changes (lesson marks, reset) re-read the stored course state.
-  useEffect(() => {
+  const [seenVersion, setSeenVersion] = useState(version);
+  if (version !== seenVersion) {
+    setSeenVersion(version);
     if (itemId && version) setCourse(getCourse(itemId));
-  }, [itemId, version]);
+  }
   useFocusEffect(
     useCallback(() => {
       if (itemId) setCourse((c) => (c ? getCourse(itemId) : c));

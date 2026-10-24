@@ -11,7 +11,7 @@ import { useItems, type InstalledItem } from '@/features/content/items';
 import { HitRow } from '@/features/library/components/HitRow';
 import { useZimSearch, type SearchMode } from '@/features/library/useZimSearch';
 import type { ZimSearchHit } from '@/features/library/zim';
-import { radius, space, useTheme } from '@/theme';
+import { layout, radius, space, useTheme } from '@/theme';
 
 type Section = { item: InstalledItem; data: ZimSearchHit[] };
 
@@ -104,7 +104,7 @@ function ArchiveHeader({ item }: { item: InstalledItem }) {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   header: { gap: space.md, paddingHorizontal: space.gutter, paddingTop: space.md, paddingBottom: space.sm },
-  list: { paddingHorizontal: space.gutter, paddingBottom: space.huge },
+  list: { ...layout.column, paddingHorizontal: space.gutter, paddingBottom: space.huge },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.xl, marginBottom: space.sm, paddingHorizontal: space.xs },
   illustration: { width: 24, height: 24, borderRadius: 6 },
   card: { borderLeftWidth: StyleSheet.hairlineWidth, borderRightWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },

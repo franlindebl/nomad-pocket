@@ -124,3 +124,10 @@ export const motion = {
 } as const;
 
 export const hitSlop = { top: 8, bottom: 8, left: 8, right: 8 } as const;
+
+/** Content column on wide screens (iPad): full width up to this, then centred. */
+export const layout = {
+  maxContentWidth: 720,
+  /** Spread into a container's style to centre it within that width. */
+  column: { width: '100%', maxWidth: 720, alignSelf: 'center' },
+} as const;

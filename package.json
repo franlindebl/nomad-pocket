@@ -66,6 +66,7 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "postinstall": "bash modules/nomad-zim/scripts/fetch-ios-libs.sh",
+    "prepare": "git config core.hooksPath .githooks || true",
     "test": "node --test --experimental-strip-types \"src/**/*.test.ts\"",
     "e2e": "scripts/e2e.sh",
     "e2e:full": "scripts/e2e.sh --tags smoke,full",

@@ -1,0 +1,24 @@
+# MAP-09 offline — a region copied into content/maps (Melilla) is registered at startup,
+# listed as downloaded, shown on the map and deleted with confirmation.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, maps, seeded-map]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: "Mapas sin conexión"
+    timeout: 20000
+- assertNotVisible: "Mapas que funcionan en cualquier sitio"
+- tapOn: "Mapas sin conexión"
+- assertVisible: "Descargados|DESCARGADOS"
+- assertVisible: "Melilla.*"
+- takeScreenshot: 01-regions
+- tapOn: "Melilla.*"
+- waitForAnimationToEnd
+- takeScreenshot: 02-map-melilla
+- tapOn: "Mapas sin conexión"
+- tapOn: { id: "region-delete" }
+- assertVisible: "¿Eliminar Melilla.*"
+# The row's delete button behind the alert has the same label: take the one above it.
+- tapOn: { text: "Eliminar", above: { id: "region-delete" } }
+- assertVisible: "Aún no tienes regiones.*"

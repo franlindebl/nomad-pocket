@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { ListGroup, Screen, SectionHeader, Text } from '@/components/ui';
-import { catalog, getResource, loc } from '@/features/catalog';
+import { catalog, getResource } from '@/features/catalog';
 import { ResourceRow } from '@/features/catalog/ResourceRow';
 import { useSettings } from '@/stores/settings';
 import { space } from '@/theme';

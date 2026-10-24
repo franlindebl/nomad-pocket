@@ -174,8 +174,13 @@ every work block so work can resume after context compaction.
 - Maestro 2.11 (`brew install mobile-dev-inc/tap/maestro`; `maestro@1.38` kept unlinked).
 - Decisions: suite run by hand (no CI, no git hook); Spanish, with `onb-02`/`set-01` for
   English; iPad covered by a visual tour (`npm run e2e:ipad`). iPad findings, open: wide
-  screens have no max content width (assistant buttons ~800 pt wide); landscape Home wraps
-  the 4 module cards as 3 + 1.
+  screens had no max content width (assistant buttons ~800 pt wide) and landscape Home
+  wrapped the 4 module cards as 3 + 1: fixed with a centred 720 pt column (`layout.column`).
+- Loose `.pmtiles` in content/maps are registered at startup (header → bbox/zoom; a region
+  id as file name gives the region's name), like loose ZIMs: maps can be copied in via
+  Finder/Files, and the E2E suite seeds a 0.6 MB Melilla (`seeded-map`) to test maps offline.
+- Pre-commit hook (`.githooks/`, set by `npm install`): tsc, lint, unit tests, i18n (~5 s).
+  Lint is clean now (two setState-in-effect errors fixed).
   `wikipedia_en_100_mini_2026-01.zim` committed: Kiwix removed it from the mirror.
 
 ## Next steps

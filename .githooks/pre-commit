@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Fast checks before every commit (~10 s): types, lint, unit tests, i18n keys.
+# The E2E suite is slower and runs by hand (docs/E2E.md). Skip once: git commit --no-verify
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+run() {
+  local name="$1"; shift
+  local out
+  if ! out="$("$@" 2>&1)"; then
+    echo "pre-commit: $name failed"
+    echo "$out" | tail -40
+    exit 1
+  fi
+}
+
+run "typecheck (tsc)" npx tsc --noEmit
+run "lint" npx expo lint
+run "unit tests" npm test --silent
+run "i18n keys" npm run -s check:i18n

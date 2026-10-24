@@ -8,8 +8,9 @@
 #   --list     print the flows that would run, and exit
 #
 # Every flow runs on a fresh install. Flows tagged `seeded` get the ZIM files in
-# e2e/fixtures/ copied to Documents/content/zim/ (registered at startup by
-# src/features/library/register.ts). Results: e2e/artifacts/<timestamp>/.
+# e2e/fixtures/ copied to Documents/content/zim/, and `seeded-map` the .pmtiles to
+# content/maps/ (registered at startup by src/features/{library,maps}/register.ts).
+# Results: e2e/artifacts/<timestamp>/.
 #
 # Env: DEVICE (simulator name, default NP-e2e), APP (path to a Release simulator
 # .app; built when missing), MAESTRO (binary), JAVA_HOME.
@@ -42,7 +43,7 @@ if [[ ${#TARGETS[@]} -gt 0 ]]; then
 else
   pattern="$(echo "$TAGS" | sed 's/,/|/g')"
   while IFS= read -r f; do
-    grep -qE "^tags:.*\b($pattern)\b" "$f" && FLOWS+=("$f")
+    grep -qE "^tags:.*[[ ,]($pattern)[],]" "$f" && FLOWS+=("$f")
   done < <(find "$ROOT/e2e/flows" -name '*.yaml' | sort)
 fi
 [[ ${#FLOWS[@]} -gt 0 ]] || { echo "No flows match"; exit 1; }
@@ -79,10 +80,15 @@ reset_app() {
   xcrun simctl uninstall "$UDID" "$BUNDLE" 2>/dev/null || true
   xcrun simctl install "$UDID" "$APP"
   xcrun simctl privacy "$UDID" grant location "$BUNDLE" 2>/dev/null || true
-  if grep -qE '^tags:.*\bseeded\b' "$1"; then
-    local zim="$(xcrun simctl get_app_container "$UDID" "$BUNDLE" data)/Documents/content/zim"
-    mkdir -p "$zim"
-    cp -c "$ROOT"/e2e/fixtures/*.zim "$zim/"   # APFS clone: instant
+  local content
+  content="$(xcrun simctl get_app_container "$UDID" "$BUNDLE" data)/Documents/content"
+  # `seeded`: the ZIM fixtures; `seeded-map`: the map fixtures. The app registers loose
+  # files in both folders at startup. APFS clones: instant.
+  if grep -qE '^tags:.*[[ ,]seeded[],]' "$1"; then
+    mkdir -p "$content/zim" && cp -c "$ROOT"/e2e/fixtures/*.zim "$content/zim/"
+  fi
+  if grep -qE '^tags:.*[[ ,]seeded-map[],]' "$1"; then
+    mkdir -p "$content/maps" && cp -c "$ROOT"/e2e/fixtures/*.pmtiles "$content/maps/"
   fi
 }
 

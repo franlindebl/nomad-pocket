@@ -14,7 +14,7 @@ import { Composer } from '@/features/assistant/ui/Composer';
 import { useActiveModel } from '@/features/assistant/useActiveModel';
 import { useItems } from '@/features/content/items';
 import { useSettings } from '@/stores/settings';
-import { radius, space, useTheme } from '@/theme';
+import { layout, radius, space, useTheme } from '@/theme';
 
 type Row_ = { key: string; message?: ChatMessage; streaming?: Streaming };
 
@@ -217,8 +217,8 @@ function ErrorBanner({ code }: { code: string }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  list: { paddingHorizontal: space.gutter, paddingVertical: space.lg, gap: space.xxl },
-  emptyContent: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: space.gutter, paddingVertical: space.xl, gap: space.xl },
+  list: { ...layout.column, paddingHorizontal: space.gutter, paddingVertical: space.lg, gap: space.xxl },
+  emptyContent: { ...layout.column, flexGrow: 1, justifyContent: 'center', paddingHorizontal: space.gutter, paddingVertical: space.xl, gap: space.xl },
   hero: { alignItems: 'center', gap: space.md },
   starters: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },
   starter: {
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     justifyContent: 'center',
   },
-  composer: { paddingHorizontal: space.md, paddingTop: space.sm },
+  composer: { ...layout.column, paddingHorizontal: space.md, paddingTop: space.sm },
   pill: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 30, paddingHorizontal: space.md, borderRadius: radius.pill, maxWidth: 220 },
   error: { flexDirection: 'row', alignItems: 'center', gap: space.sm, padding: space.md, borderRadius: radius.md },
 });

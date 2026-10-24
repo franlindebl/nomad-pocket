@@ -30,11 +30,17 @@ export function ReaderTocSheet({
   const { t } = useTranslation('reader');
   const { t: tc } = useTranslation();
   const [headings, setHeadings] = useState<Heading[] | null>(null);
+  // A new page (or reopening) shows the spinner until its headings arrive.
+  const pageKey = `${visible}\u0000${itemId}\u0000${path}`;
+  const [shownKey, setShownKey] = useState(pageKey);
+  if (pageKey !== shownKey) {
+    setShownKey(pageKey);
+    setHeadings(null);
+  }
 
   useEffect(() => {
     if (!visible || !path) return;
     let alive = true;
-    setHeadings(null);
     getHeadings(itemId, path.split('#')[0])
       .then((h) => alive && setHeadings(h))
       .catch(() => alive && setHeadings([]));

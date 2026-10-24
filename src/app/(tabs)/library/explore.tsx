@@ -12,7 +12,7 @@ import { useContent } from '@/features/content/items';
 import { enqueueDownload, useDownload } from '@/features/downloads/manager';
 import { formatBytes } from '@/lib/format';
 import { useSettings } from '@/stores/settings';
-import { radius, space, useTheme } from '@/theme';
+import { layout, radius, space, useTheme } from '@/theme';
 
 const LANG_CODES: Record<string, string> = { es: 'spa', en: 'eng' };
 
@@ -152,7 +152,7 @@ function EntryRow({ entry }: { entry: KiwixEntry }) {
 }
 
 const styles = StyleSheet.create({
-  list: { paddingHorizontal: space.gutter, paddingTop: space.sm, paddingBottom: 120 },
+  list: { ...layout.column, paddingHorizontal: space.gutter, paddingTop: space.sm, paddingBottom: 120 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

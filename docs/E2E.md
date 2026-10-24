@@ -2,7 +2,7 @@
 
 [Maestro](https://maestro.mobile.dev) flows that drive the Release build of the app on an
 iOS simulator, the same way a person would: tapping, typing and reading the screen through
-accessibility. 36 flows cover 53 of the 55 cases in the test plan (Claude doc "Plan de
+accessibility. 38 flows cover 53 of the 55 cases in the test plan (Claude doc "Plan de
 tests funcionales iOS — Nomad App"); the case ids (`RDR-03`, `MAP-06`…) are on the first
 line of each flow.
 
@@ -40,18 +40,19 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 
 | Command | Flows | Time | Covers | Needs |
 |---|---|---|---|---|
-| `npm run e2e` | 15 | ~10 min | P0: every screen's main path | nothing (offline) |
-| `npm run e2e:full` | 28 | ~18 min | + P1: secondary features (themes, markers, find in page, courses…) | nothing (offline) |
-| `npm run e2e:all` | 36 | ~25 min | + P2: real downloads and the on-device AI | internet, Apple Intelligence |
-| `npm run e2e:ipad` | 1 | ~2 min | iPad tour: every main screen, portrait and landscape, light and dark | nothing (offline) |
+| `npm run e2e` | 16 | ~10 min | P0: every screen's main path | nothing (offline) |
+| `npm run e2e:full` | 29 | ~18 min | + P1: secondary features (themes, markers, find in page, courses…) | nothing (offline) |
+| `npm run e2e:all` | 37 | ~25 min | + P2: real downloads and the on-device AI | internet, Apple Intelligence |
+| `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape, light and dark | nothing (offline) |
 
 When to run what: smoke before every TestFlight build or after a risky change; full and the
 iPad tour before an App Store release (then look through the iPad screenshots in
 `e2e/artifacts/latest/ipad-01-tour/takeScreenshot/`); all occasionally (downloads depend on
 the Kiwix and Protomaps servers, so a failure there can be the network rather than the app).
 
-The suite runs by hand: no CI (a macOS runner or EAS builds cost money) and no git hook
-(smoke takes ~10 min). Flows match Spanish texts; `onb-02` and `set-01` check English.
+The suite runs by hand: no CI (a macOS runner or EAS builds cost money), and it is too
+slow for a git hook. The pre-commit hook (`.githooks/pre-commit`, enabled by `npm install`)
+runs the fast checks instead: typecheck, lint, unit tests and i18n keys (~5 s). Flows match Spanish texts; `onb-02` and `set-01` check English.
 
 The iPhone flows don't run on iPad: there the tabs are a text bar at the top instead of
 icons. The iPad tour taps them by name (`tapOn: { text: "Mapas", index: 0 }`).
@@ -114,7 +115,8 @@ scripts/e2e.sh
      ├─ uninstall + install the app        → fresh state, nothing left from the last flow
      ├─ grant location permission
      ├─ if tagged `seeded`: clone e2e/fixtures/*.zim into the app's Documents/content/zim/
-     │   (the app registers loose ZIM files at startup: src/features/library/register.ts)
+     ├─ if tagged `seeded-map`: clone e2e/fixtures/*.pmtiles into Documents/content/maps/
+     │   (the app registers loose files there at startup: src/features/{library,maps}/register.ts)
      └─ maestro test <flow>
          └─ subflows/launch.yaml: launch, walk the setup wizard with "Lo elijo yo"
             (no downloads) and land on Home; then the flow's own steps
@@ -129,7 +131,7 @@ e2e/
   config.yaml          # Maestro workspace config
   flows/<area>/*.yaml  # one file per test, named after its main case (rdr-03-bookmark)
   subflows/            # shared steps: launch, finish-onboarding, open-wikipedia
-  fixtures/            # ZIM files for `seeded` flows (gitignored, see Setup)
+  fixtures/            # ZIM and map files for `seeded` / `seeded-map` flows (see Setup)
   artifacts/           # results (gitignored)
 scripts/e2e.sh         # runner
 scripts/e2e-setup.sh   # one-time setup
@@ -165,6 +167,7 @@ By hand:
   | `devdocs_en_node_2026-08.zim` | 1 MB | library list and delete |
   | `freecodecamp_es_all_2026-10.zim` | 11 MB | courses |
   | `nhs.uk_en_medicines_2026-09b.zim` | 15 MB | medical disclaimer |
+  | `es-ml.pmtiles` | 0.6 MB | maps: Melilla up to zoom 12 (© OpenStreetMap, Protomaps build), in git |
 
   Kiwix removes old files from the mirror. `wikipedia_en_100_mini_2026-01.zim` is no
   longer there, so it is committed to git; the other three are downloaded by
@@ -200,6 +203,7 @@ By hand:
 | reader | `rdr-09-medical` | RDR-09 | full | seeded |
 | reader | `rdr-10-dark` | RDR-10 | full | seeded |
 | maps | `map-01-empty` | MAP-01, MAP-02 | smoke | — |
+| maps | `map-02-seeded-region` | MAP-09 (offline) | smoke | seeded-map |
 | maps | `map-03-pick-region` | MAP-03 | full | — |
 | maps | `map-04-region` | MAP-04, MAP-09 | nightly | network |
 | maps | `map-05-world` | MAP-05 | nightly | network |
@@ -211,7 +215,7 @@ By hand:
 | assistant | `ai-03-chat-sources` | AI-03, AI-04 | nightly | seeded, Apple Intelligence |
 | assistant | `ai-05-conversations` | AI-05 | nightly | Apple Intelligence |
 | downloads | `dl-02-controls` | DL-02 | nightly | network |
-| ipad | `ipad-01-tour` | IPAD-01 | ipad | seeded |
+| ipad | `ipad-01-tour` | IPAD-01 | ipad | seeded, seeded-map |
 
 Not automated: LIB-08 (import from Files: the system picker is outside the app) and X-02
 (offline: the simulator has no airplane mode). Check them by hand on a device.
@@ -231,7 +235,8 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
 ```
 
 - Put it in `e2e/flows/<area>/`, named after its main case. Tag `seeded` if it needs the
-  fixtures and `network` if it downloads.
+  ZIM fixtures, `seeded-map` for the map one, and `network` if it downloads. A map file
+  named after a region id (`es-ml.pmtiles`) registers as that region.
 - Text matching is a full-string regex: `"Michael Jackson.*"`, and escape `. ( ) ?`.
 - Cards and rows expose one merged accessibility label (`"Lo elijo yo, Empieza vacío…"`):
   match them with a regex (`"Lo elijo yo.*"`).

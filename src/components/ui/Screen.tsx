@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Platform, ScrollView, View, type ScrollViewProps, type StyleProp, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { space, useTheme } from '@/theme';
+import { layout, space, useTheme } from '@/theme';
 
 import { Text } from './Text';
 
@@ -25,7 +25,11 @@ export function Screen({ children, static: isStatic, padded = true, contentStyle
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   if (isStatic) {
-    return <View style={[{ flex: 1, backgroundColor: colors.bg }, padded && { paddingHorizontal: space.gutter }, contentStyle]}>{children}</View>;
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.bg }}>
+        <View style={[{ flex: 1 }, layout.column, padded && { paddingHorizontal: space.gutter }, contentStyle]}>{children}</View>
+      </View>
+    );
   }
   // iOS native tabs already inset their screens below the status bar.
   const titleTop = (Platform.OS === 'ios' ? 0 : insets.top) + space.md;
@@ -37,6 +41,7 @@ export function Screen({ children, static: isStatic, padded = true, contentStyle
       style={{ flex: 1, backgroundColor: colors.bg }}
       {...rest}
       contentContainerStyle={[
+        layout.column,
         padded && { paddingHorizontal: space.gutter },
         { paddingTop: title ? titleTop : space.sm, paddingBottom: insets.bottom + 96 },
         contentStyle,

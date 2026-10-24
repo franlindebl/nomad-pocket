@@ -133,6 +133,9 @@ Numbers that change (sizes, percentages, progress) use `fontVariant: ['tabular-n
 - **Reader:** full-bleed content, minimal floating toolbar (back, search, TOC,
   bookmark, text size), auto-hides on scroll.
 - **Sheets** (`formSheet`) for pickers and confirmations instead of alerts.
+- **Wide screens (iPad):** content is a centred column of `layout.maxContentWidth` (720 pt).
+  `Screen` does it; screens with their own `ScrollView`/`FlatList` spread `layout.column`
+  into the content container style. Full-bleed content (map, reader) stays full width.
 
 ## 9. Voice & copy
 

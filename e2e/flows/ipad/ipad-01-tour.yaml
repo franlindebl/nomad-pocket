@@ -1,12 +1,18 @@
-# IPAD-01 — every main screen on iPad, portrait and landscape, with the library seeded.
+# IPAD-01 — every main screen on iPad, portrait and landscape, with the library and a map seeded.
 # Visual check: review the screenshots (layout, truncation, empty space). On iPad the tabs
 # are a text bar at the top, so they are tapped by name (index 0: the top-most match).
 appId: com.fjlinde.nomadpocket
-tags: [ipad, seeded]
+tags: [ipad, seeded, seeded-map]
 ---
-- runFlow: ../../subflows/launch.yaml
+- launchApp:
+    stopApp: true
 - extendedWaitUntil:
-    visible: "4 elementos.*"
+    visible: "Siguiente"
+    timeout: 20000
+- takeScreenshot: 00-setup-wizard
+- runFlow: ../../subflows/finish-onboarding.yaml
+- extendedWaitUntil:
+    visible: "5 elementos.*"
     timeout: 10000
 - takeScreenshot: 01-home
 - tapOn: { text: "Biblioteca", index: 0 }
@@ -37,6 +43,10 @@ tags: [ipad, seeded]
     visible: "Mapas sin conexión"
     timeout: 20000
 - takeScreenshot: 07-maps
+- tapOn: "Mapas sin conexión"
+- tapOn: "Melilla.*"
+- waitForAnimationToEnd
+- takeScreenshot: 07b-map-region
 - tapOn: { text: "Cursos", index: 0 }
 - tapOn: "freeCodeCamp en español.*"
 - extendedWaitUntil:

@@ -9,7 +9,7 @@ import { categoryHue, categoryIcon } from '@/features/catalog/icons';
 import { removeItem } from '@/features/content/items';
 import { cancelDownload, pauseDownload, resumeDownload } from '@/features/downloads/manager';
 import { formatBytes, formatMB } from '@/lib/format';
-import { space } from '@/theme';
+import { layout, space } from '@/theme';
 
 export default function ResourceSheet() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -98,5 +98,5 @@ export default function ResourceSheet() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: space.xxl, gap: space.lg },
+  content: { ...layout.column, padding: space.xxl, gap: space.lg },
 });

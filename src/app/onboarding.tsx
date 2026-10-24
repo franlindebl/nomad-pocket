@@ -14,7 +14,7 @@ import type { AppLanguage } from '@/i18n';
 import { formatBytes, formatMB } from '@/lib/format';
 import { freeBytes, STORAGE_HEADROOM } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
-import { radius, space, useTheme, type Hue } from '@/theme';
+import { layout, radius, space, useTheme, type Hue } from '@/theme';
 
 const PACKS: { id: PackId; icon: LucideIcon; hue: Hue }[] = [
   { id: 'light', icon: Feather, hue: 'agriculture' },
@@ -227,7 +227,7 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, paddingHorizontal: space.gutter },
+  root: { flex: 1, ...layout.column, paddingHorizontal: space.gutter },
   flex: { flex: 1, gap: space.lg },
   dots: { gap: 6, marginBottom: space.lg },
   dot: { height: 8, borderRadius: 4 },

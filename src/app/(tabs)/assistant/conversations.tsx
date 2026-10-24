@@ -7,7 +7,7 @@ import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, EmptyState, IconButton, ListGroup, ListRow, SectionHeader } from '@/components/ui';
 import { deleteSession, newChat, openSession, refreshSessions, useChat, type ChatSession } from '@/features/assistant/chats';
 import { formatChatDate } from '@/features/assistant/format';
-import { space, useTheme } from '@/theme';
+import { layout, space, useTheme } from '@/theme';
 
 export default function ConversationsScreen() {
   const { t } = useTranslation('assistant');
@@ -83,5 +83,5 @@ export default function ConversationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: space.gutter, paddingBottom: space.huge },
+  content: { ...layout.column, padding: space.gutter, paddingBottom: space.huge },
 });
