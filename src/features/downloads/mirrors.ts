@@ -10,11 +10,11 @@ const PROBE_BYTES = 512 * 1024;
 const META_TIMEOUT_MS = 4000;
 const PROBE_TIMEOUT_MS = 5000;
 
-async function fetchWithTimeout(url: string, ms: number, init?: RequestInit): Promise<Response> {
+async function fetchWithTimeout(url: string, ms: number): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), ms);
   try {
-    return await fetch(url, { ...init, signal: controller.signal });
+    return await fetch(url, { signal: controller.signal });
   } finally {
     clearTimeout(timer);
   }
@@ -37,13 +37,21 @@ export function parseMetalinkUrls(xml: string, filename: string): string[] {
 /** Milliseconds to fetch the first PROBE_BYTES, or Infinity on failure. */
 async function probe(url: string): Promise<number> {
   const start = Date.now();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
   try {
-    const res = await fetchWithTimeout(url, PROBE_TIMEOUT_MS, { headers: { Range: `bytes=0-${PROBE_BYTES - 1}` } });
-    if (res.status !== 206 && res.status !== 200) return Infinity;
+    const res = await fetch(url, { headers: { Range: `bytes=0-${PROBE_BYTES - 1}` }, signal: controller.signal });
+    // A mirror ignoring Range would send the whole (multi-GB) file: drop it unread.
+    if (res.status !== 206) {
+      controller.abort();
+      return Infinity;
+    }
     const body = await res.arrayBuffer();
     return body.byteLength > 0 ? Date.now() - start : Infinity;
   } catch {
     return Infinity;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
