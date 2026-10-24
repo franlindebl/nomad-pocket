@@ -19,11 +19,11 @@ every work block so work can resume after context compaction.
 |---|---|
 | 0. Foundation (project, design system, nav, i18n, db, downloads core) | done — iOS/Android builds OK |
 | 1. Catalog + downloads UI + onboarding | done |
-| 2. ZIM library (native module, reader, search) | done (iOS verified, Android compiles) |
-| 3. Maps (extractor, MapLibre, regions, markers) | done (iOS verified, Android compiles) — merged |
-| 4. Courses | UI + progress done (needs ZIM module for syllabus) |
+| 2. ZIM library (native module, reader, search) | done — iOS + Android verified |
+| 3. Maps (extractor, MapLibre, regions, markers) | done — iOS + Android verified |
+| 4. Courses | done (syllabus from static main-page links; SPA courses fall back to free exploration) |
 | 5. Local AI (system + GGUF, RAG) | done — verified on iOS sim (llama.cpp CPU, Apple FM, RAG with citations) |
-| 6. Polish, icon, builds on simulator/emulator | pending |
+| 6. Polish, icon, builds on simulator/emulator | in progress |
 
 ## Log
 
@@ -48,9 +48,17 @@ every work block so work can resume after context compaction.
   (`headerLargeTitleEnabled`); home double top inset on iOS; Wi‑Fi-only prompt now
   offers "use mobile data"; lighter starter packs.
 
-## In flight (parallel agents, git worktrees — merge into main when done)
-
-- ZIM agent (worktree branch): `modules/nomad-zim`, `src/features/library/{zim,register}.ts`, reader + `/search` screens, `reader` i18n ns.
+### 2026-10-24 — Integration (lead)
+- All agent branches merged into main (catalog, maps, ZIM, AI). 70 tests pass.
+- Android runtime fixes: R8 stripped `org.kiwix.libzim.Archive.nativeHandle` used by
+  JNI → `modules/nomad-zim/android/consumer-rules.pro` keeps `org.kiwix.**`; WebView
+  fits desktop pages (`useWideViewPort`); tab bar themed. Verified on the emulator:
+  download → register → reader (WikiRoca), world basemap extraction + rendering.
+- iOS: native large title renders blank inside native tabs on iOS 26 → tab roots draw
+  their own title (`<Screen title>`); onboarding waits for settings hydration; course
+  syllabus rebuild loop fixed; scanned ZIMs recover catalog metadata; reader ignores
+  file-name titles; downloads interrupted during "processing" finish on next launch;
+  stored content URIs re-anchored after container moves; `File.move/copy` awaited.
 
 ### 2026-10-24 — Maps (phase 3)
 - `src/lib/pmtiles`: PMTiles v3 reader/extractor in TS with node tests (Hilbert ids
@@ -110,8 +118,10 @@ every work block so work can resume after context compaction.
 
 ## Next steps
 
-- Merge agent branches (expect small conflicts in package.json, app.json, resources.ts, registry.ts).
-- Full iOS + Android builds after merge; run on simulator + emulator; screenshots.
+- Smoke-test the merged build on iOS simulator + Android emulator (all tabs).
+- Nice to have: reader TOC + auto-hiding toolbar; copy/regenerate in chat; map
+  extraction resume after kill; syllabus for SPA course ZIMs (read links from the
+  rendered DOM); Gemini Nano test on a real device; store submission assets.
 
 ## Known issues / risks
 
