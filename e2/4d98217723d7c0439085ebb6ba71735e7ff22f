@@ -1,0 +1,27 @@
+docs/ARCHITECTURE.md
+  s_7f4d89e27550a2::t_02aeb991392763 134-138
+docs/PROGRESS.md
+  s_7f4d89e27550a2::t_3608e01cda7d44 186-191
+scripts/maps/dl-assets.mjs
+  s_7f4d89e27550a2::t_0a0b4a275e748c 1-2,6,8-17,29
+scripts/maps/make-zip.py
+  s_7f4d89e27550a2::t_9970554fbb0d4a 9,15-24,29-31,36-37
+src/features/maps/assets.ts
+  s_7f4d89e27550a2::t_8dc43ee21329b2 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e24d98217723d7c0439085ebb6ba71735e7ff22f",
+  "prompts": {},
+  "sessions": {
+    "s_7f4d89e27550a2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "99f9ab25-1210-41a5-af44-46d9a81f8ba6",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
