@@ -2,8 +2,17 @@
 // The `items` table is the source of truth; `useContent` mirrors it for React.
 import { create } from 'zustand';
 
+import rawCatalog from '@/data/catalog.json';
 import { db, parseJson } from '@/db';
+import i18n from '@/i18n';
 import { deleteFile, resolveContentUri, type ContentKind } from '@/lib/storage';
+
+// Catalog texts are bilingual; the row keeps the language it was registered in, so
+// catalog items get their title/description in the current app language when read.
+// (Raw JSON rather than '@/features/catalog', which imports the download manager.)
+type CatalogText = { es: string; en: string };
+const catalogResources = (rawCatalog as unknown as { resources: Record<string, { title?: CatalogText; description?: CatalogText }> }).resources;
+const localized = (v: CatalogText | undefined) => (v ? (i18n.language === 'es' ? v.es : v.en) || null : null);
 
 export type InstalledItem = {
   id: string;
@@ -44,8 +53,8 @@ type Row = {
 const fromRow = (r: Row): InstalledItem => ({
   id: r.id,
   kind: r.kind,
-  title: r.title,
-  description: r.description,
+  title: (r.kind === 'zim' && localized(catalogResources[r.catalog_id ?? '']?.title)) || r.title,
+  description: (r.kind === 'zim' && localized(catalogResources[r.catalog_id ?? '']?.description)) || r.description,
   language: r.language,
   category: r.category,
   isCourse: !!r.is_course,
@@ -127,6 +136,8 @@ export const useContent = create<ContentState>((set) => ({
   items: [],
   refresh: () => set({ items: listItems() }),
 }));
+
+i18n.on('languageChanged', () => useContent.getState().refresh());
 
 export function useItems(kind?: ContentKind): InstalledItem[] {
   const items = useContent((s) => s.items);

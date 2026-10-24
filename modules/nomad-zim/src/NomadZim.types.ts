@@ -41,6 +41,8 @@ export type NomadZimNativeModule = {
   getContent(id: string, path: string): Promise<NativeZimContent | null>;
   getMainPath(id: string): Promise<string | null>;
   randomPath(id: string): Promise<string | null>;
+  /** HTML articles in title order (redirects skipped), at most `limit`. */
+  listArticles(id: string, limit: number): Promise<NativeZimHit[]>;
   /** iOS: sets NSURLIsExcludedFromBackupKey. Android: no-op (returns false). */
   excludeFromBackup(path: string): Promise<boolean>;
 };

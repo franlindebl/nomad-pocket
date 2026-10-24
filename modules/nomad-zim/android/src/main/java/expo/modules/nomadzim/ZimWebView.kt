@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.view.ContextThemeWrapper
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -27,7 +28,9 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
   val onNavigationChange by EventDispatcher()
   val onLoadEnd by EventDispatcher()
 
-  val webView = WebView(context)
+  // Light theme context: pages always get prefers-color-scheme: light, our invert CSS is the only
+  // dark mode (pages with their own dark rules would otherwise be inverted back to light).
+  val webView = WebView(ContextThemeWrapper(context, android.R.style.Theme_DeviceDefault_Light))
 
   var archiveId: String? = null
   var requestedPath: String? = null
@@ -231,6 +234,7 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
     }
 
     override fun onPageFinished(view: WebView, url: String?) {
+      if (darkMode) view.evaluateJavascript(NATIVE_DARK_JS, null)
       emitNavigation(url)
       onLoadEnd(mapOf("path" to (currentPath(url) ?: ""), "title" to (lastPayload["title"] ?: "")))
     }
@@ -268,13 +272,30 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
     private const val MAX_RANGE_CHUNK = 4L * 1024 * 1024
     private const val STREAM_CHUNK = 2L * 1024 * 1024
 
+    // Pages that are dark by design get data-nomad-native-dark (see NATIVE_DARK_JS) and are left alone.
     private const val DARK_CSS =
-      "html{filter:invert(1) hue-rotate(180deg)!important;background:#fff!important}" +
-        "img:not(.mwe-math-fallback-image-inline):not(.mwe-math-fallback-image-display),picture,video,canvas,iframe,embed,object,svg image,[style*=\"background-image\"]{filter:invert(1) hue-rotate(180deg)!important}"
+      "html:not([data-nomad-native-dark]){filter:invert(1) hue-rotate(180deg)!important;background:#fff!important}" +
+        "html:not([data-nomad-native-dark]) :is(img:not(.mwe-math-fallback-image-inline):not(.mwe-math-fallback-image-display),picture,video,canvas,iframe,embed,object,svg image,[style*=\"background-image\"]){filter:invert(1) hue-rotate(180deg)!important}"
+
+    /** Marks pages whose authored background (our style off) is already dark. */
+    private const val NATIVE_DARK_JS = """(function(){
+      var el = document.getElementById('nomad-dark'); if (!el || !document.body) return;
+      el.disabled = true;
+      var bg = [document.body, document.documentElement].map(function(n){ return getComputedStyle(n).backgroundColor; })
+        .map(function(c){ return (c.match(/[\d.]+/g) || []).map(Number); })
+        .filter(function(v){ return v.length >= 3 && (v.length < 4 || v[3] > 0.5); })[0];
+      el.disabled = false;
+      var lum = 1;
+      if (bg) {
+        var lin = bg.slice(0, 3).map(function(v){ v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+        lum = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+      }
+      document.documentElement.toggleAttribute('data-nomad-native-dark', lum < 0.2);
+    })();"""
 
     private const val ENABLE_DARK_JS =
       "(function(){if(document.getElementById('nomad-dark'))return;var s=document.createElement('style');s.id='nomad-dark';" +
-        "s.textContent=" + "'" + DARK_CSS + "'" + ";(document.head||document.documentElement).appendChild(s);})();"
+        "s.textContent=" + "'" + DARK_CSS + "'" + ";(document.head||document.documentElement).appendChild(s);})();" + NATIVE_DARK_JS
 
     private const val DISABLE_DARK_JS = "(function(){var s=document.getElementById('nomad-dark');if(s)s.remove();})();"
 

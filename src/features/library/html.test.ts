@@ -61,6 +61,12 @@ test('extractLinks returns internal article links in order, deduplicated', () =>
   ]);
 });
 
+test('extractLinks keeps portal-style page layouts but drops Wikipedia portal boxes', () => {
+  const html = `<body><div class="portal-columna-izquierda"><a href="Física">Física</a></div>
+    <div class="portal"><a href="Portal:Ciencia">Ciencia</a></div><div class="portal-bar-content"><a href="Portal:X">X</a></div></body>`;
+  assert.deepEqual(extractLinks(html, 'Portada'), [{ path: 'Física', title: 'Física' }]);
+});
+
 test('extractHeadings: ids on headings or inner mw-headline spans, deduped, in order', () => {
   const html = `<h2 id="Historia">Historia</h2><p>x</p>
 <h3><span class="mw-headline" id="Origen">Or&iacute;gen</span><span class="edit">[editar]</span></h3>

@@ -76,6 +76,26 @@ class ZimHandle(val id: String, val filePath: String, val archive: Archive) {
 
   fun randomPath(): String? = runCatching { archive.randomEntry.getItem(true).path }.getOrNull()
 
+  /** HTML articles in title order (redirects skipped), at most [limit]. */
+  fun listArticles(limit: Int): List<ZimHit> {
+    if (limit <= 0) return emptyList()
+    val out = ArrayList<ZimHit>()
+    runCatching {
+      val it = archive.iterByTitle()
+      try {
+        while (it.hasNext() && out.size < limit) {
+          val entry = it.next()
+          if (entry.isRedirect) continue
+          val item = entry.getItem(false)
+          if (item.mimetype.startsWith("text/html")) out.add(ZimHit(item.path, item.title, null, null))
+        }
+      } finally {
+        it.dispose()
+      }
+    }
+    return out
+  }
+
   fun suggest(query: String, limit: Int): List<ZimHit> {
     if (query.isEmpty() || limit <= 0) return emptyList()
     synchronized(suggestLock) {

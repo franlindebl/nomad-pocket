@@ -134,6 +134,25 @@ every work block so work can resume after context compaction.
   file name (ZIM `Name` lacks the flavour) and their ids migrate with history intact.
 - Verified again on both platforms; Android background → foreground resumes downloads.
 
+### 2026-10-24 — App Store 1.0.1
+- Store listing (ASC app 6826502392): privacy/support site in `site/` (GitHub Pages),
+  Settings links to the privacy policy, assistant shows an AI/health disclaimer,
+  screenshots composed by `scripts/store-screenshots.py` into `docs/store/marketing`.
+- Courses: syllabus fell back to nothing for JS-app ZIMs and for Wikiversity. Now: main
+  page links → freeCodeCamp `content/curriculum/index.json` → HTML articles in title order
+  (new native `listArticles`, iOS + Android). `portal\S*` chrome filter narrowed (it hid
+  Wikiversity's `portal-columna-*` layout). Opening a lesson from the syllabus records a
+  visit (JS apps navigate away from the lesson path). Empty stored syllabi retry once per launch.
+- Reader dark mode: the web view always gets `prefers-color-scheme: light` (recent
+  MediaWiki dumps darkened themselves and were inverted back to light); pages dark by
+  design (Based.Cooking) get `data-nomad-native-dark` and are not inverted.
+- iOS reader uses a persistent website data store: the ephemeral one can't store Blobs in
+  IndexedDB on `zim://`, which hung PouchDB-based (nautilus/zimgit) archives forever.
+- Catalog item titles/descriptions follow the app language (read from the catalog).
+- Kiwix downloads pick the fastest of the first metalink mirrors (`downloads/mirrors.ts`):
+  the default mirror served ~300 KB/s per connection while others gave 4–20 MB/s.
+- Verified on the iOS 27 simulator (Release). Android: nomad-zim compiles (runtime untested).
+
 ## Next steps
 
 - Smoke-test the merged build on iOS simulator + Android emulator (all tabs).

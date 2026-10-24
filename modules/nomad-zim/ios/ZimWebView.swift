@@ -7,6 +7,9 @@ final class ZimWebView: ExpoView, WKNavigationDelegate, WKUIDelegate {
   let onNavigationChange = EventDispatcher()
   let onLoadEnd = EventDispatcher()
 
+  /// Website data (IndexedDB, localStorage) of ZIM pages, kept apart from other web views.
+  private static let dataStoreID = UUID(uuidString: "6E0D7A1C-3B2F-4C55-9A61-5F2E8B9D4C01")!
+
   let webView: WKWebView
   private let schemeHandler = ZimSchemeHandler()
   private var observations: [NSKeyValueObservation] = []
@@ -25,13 +28,23 @@ final class ZimWebView: ExpoView, WKNavigationDelegate, WKUIDelegate {
     config.allowsInlineMediaPlayback = true
     config.mediaTypesRequiringUserActionForPlayback = .all
     config.dataDetectorTypes = []
-    config.websiteDataStore = .nonPersistent()
+    // Persistent store: on custom-scheme origins the ephemeral store can't put Blobs in
+    // IndexedDB (UnknownError), which hangs PouchDB-based archives (nautilus/zimgit).
+    if #available(iOS 17.0, *) {
+      config.websiteDataStore = WKWebsiteDataStore(forIdentifier: Self.dataStoreID)
+    } else {
+      config.websiteDataStore = .default()
+    }
     webView = WKWebView(frame: .zero, configuration: config)
     super.init(appContext: appContext)
 
     webView.navigationDelegate = self
     webView.uiDelegate = self
     webView.allowsBackForwardNavigationGestures = true
+    // Pages always render in their light scheme; our invert CSS is the only dark mode.
+    // Otherwise pages with prefers-color-scheme rules (recent MediaWiki dumps) go dark
+    // by themselves and the inversion turns them light again.
+    webView.overrideUserInterfaceStyle = .light
     webView.isOpaque = false
     webView.backgroundColor = .clear
     webView.scrollView.backgroundColor = .clear
@@ -246,9 +259,10 @@ final class ZimWebView: ExpoView, WKNavigationDelegate, WKUIDelegate {
 enum ZimWebScripts {
   /// CSS for dark mode: invert the page, then re-invert media so photos look right.
   /// Math formulas (black glyph images) stay inverted so they remain readable.
+  /// Pages that are dark by design get `data-nomad-native-dark` and are left alone.
   static let darkCSS = """
-  html{filter:invert(1) hue-rotate(180deg)!important;background:#fff!important}
-  img:not(.mwe-math-fallback-image-inline):not(.mwe-math-fallback-image-display),picture,video,canvas,iframe,embed,object,svg image,[style*="background-image"]{filter:invert(1) hue-rotate(180deg)!important}
+  html:not([data-nomad-native-dark]){filter:invert(1) hue-rotate(180deg)!important;background:#fff!important}
+  html:not([data-nomad-native-dark]) :is(img:not(.mwe-math-fallback-image-inline):not(.mwe-math-fallback-image-display),picture,video,canvas,iframe,embed,object,svg image,[style*="background-image"]){filter:invert(1) hue-rotate(180deg)!important}
   """
 
   static func bootstrap(dark: Bool, zoom: Int) -> String {
@@ -257,10 +271,24 @@ enum ZimWebScripts {
     (function(){
       var state = { dark: \(dark), zoom: \(zoom) };
       var css = `\(css)`;
+      // Background luminance of the page as authored (our style off), or null when unknown.
+      function pageLuminance(el){
+        if (!document.body) return null;
+        if (el) el.disabled = true;
+        var bg = [document.body, document.documentElement].map(function(n){ return getComputedStyle(n).backgroundColor; })
+          .map(function(c){ return (c.match(/[\\d.]+/g) || []).map(Number); })
+          .filter(function(v){ return v.length >= 3 && (v.length < 4 || v[3] > 0.5); })[0];
+        if (el) el.disabled = false;
+        if (!bg) return 1; // transparent: the browser default, white
+        var lin = bg.slice(0, 3).map(function(v){ v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+        return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+      }
       function applyDark(){
         var el = document.getElementById('nomad-dark');
         if (state.dark) {
           if (!el) { el = document.createElement('style'); el.id = 'nomad-dark'; el.textContent = css; (document.head || document.documentElement).appendChild(el); }
+          var lum = pageLuminance(el);
+          if (lum !== null) document.documentElement.toggleAttribute('data-nomad-native-dark', lum < 0.2);
         } else if (el) { el.remove(); }
       }
       function applyZoom(){
@@ -272,6 +300,8 @@ enum ZimWebScripts {
       window.__nomadSetDark = function(on){ state.dark = !!on; applyDark(); };
       window.__nomadSetZoom = function(z){ state.zoom = z; applyZoom(); };
       window.__nomadApply();
+      // Stylesheets may finish after DOMContentLoaded: check the page background again.
+      window.addEventListener('load', applyDark);
 
       // Find in page: wrap matches in <mark>, keep an active index.
       var find = { q: '', marks: [], i: -1 };

@@ -185,6 +185,22 @@ static inline std::string NZStd(NSString *s) {
   }
 }
 
+- (NSArray<NZSearchHit *> *)listArticles:(NSInteger)limit {
+  NSMutableArray<NZSearchHit *> *out = [NSMutableArray array];
+  if (limit <= 0) return out;
+  try {
+    for (const zim::Entry &entry : _archive->iterByTitle()) {
+      if (entry.isRedirect()) continue;
+      zim::Item item = entry.getItem(false);
+      if (item.getMimetype().rfind("text/html", 0) != 0) continue;
+      [out addObject:[[NZSearchHit alloc] initWithPath:NZString(item.getPath()) title:NZString(item.getTitle()) snippet:nil wordCount:-1]];
+      if ((NSInteger)out.count >= limit) break;
+    }
+  } catch (...) {
+  }
+  return out;
+}
+
 - (NSArray<NZSearchHit *> *)suggest:(NSString *)query limit:(NSInteger)limit {
   NSMutableArray<NZSearchHit *> *out = [NSMutableArray array];
   if (query.length == 0 || limit <= 0) return out;

@@ -83,6 +83,10 @@ class NomadZimModule : Module() {
       }
     }
 
+    AsyncFunction("listArticles") Coroutine { id: String, limit: Int ->
+      withContext(Dispatchers.IO) { handle(id).listArticles(limit).map(::hit) }
+    }
+
     // iOS-only concept (iCloud backup). Android auto-backup excludes large files anyway.
     AsyncFunction("excludeFromBackup") { _: String -> false }
 

@@ -1,11 +1,14 @@
 // Courses = educational ZIM archives plus an app-side progress layer.
-// The syllabus is built from the archive's main page links (document order);
-// a lesson counts as done once it was opened in the reader or marked manually.
+// The syllabus is built from the archive's main page links (document order). Main
+// pages that are JS apps (freeCodeCamp, PhET…) have no links: freeCodeCamp ships its
+// curriculum as JSON, anything else falls back to its HTML articles in title order.
+// A lesson counts as done once it was opened (reader or syllabus) or marked manually.
 import { create } from 'zustand';
 
 import { db, parseJson } from '@/db';
 import { getItem } from '@/features/content/items';
-import { getLinks, getMainPath, type ZimLink } from '@/features/library/zim';
+import { recordVisit } from '@/features/library/history';
+import { getJson, getLinks, getMainPath, listArticles, type ZimLink } from '@/features/library/zim';
 
 export type Lesson = ZimLink;
 
@@ -62,11 +65,32 @@ export function listCourses(): CourseState[] {
   return rows.map((r) => getCourse(r.item_id)).filter((c): c is CourseState => !!c && !!getItem(c.itemId));
 }
 
+// freeCodeCamp ZIMs (fcc2zim): superblock → block → challenges, in curriculum order.
+const FCC_CURRICULUM = 'content/curriculum/index.json';
+type FccCurriculum = Record<string, Record<string, { title: string; slug: string }[]>>;
+
+async function fccLessons(itemId: string): Promise<ZimLink[]> {
+  const curriculum = await getJson<FccCurriculum>(itemId, FCC_CURRICULUM);
+  if (!curriculum || typeof curriculum !== 'object') return [];
+  const out: ZimLink[] = [];
+  for (const [superblock, blocks] of Object.entries(curriculum)) {
+    for (const [block, challenges] of Object.entries(blocks ?? {})) {
+      if (!Array.isArray(challenges)) continue;
+      for (const c of challenges) {
+        if (c?.slug && c.title) out.push({ path: `index/${superblock}/${block}/${c.slug}.html`, title: c.title });
+      }
+    }
+  }
+  return out;
+}
+
 async function buildSyllabus(itemId: string): Promise<Lesson[]> {
   const main = await getMainPath(itemId);
   // Unreadable right now (not open yet, file missing): don't persist an empty syllabus.
   if (!main) throw new Error('ARCHIVE_UNAVAILABLE');
-  const links = await getLinks(itemId, main);
+  let links = await getLinks(itemId, main);
+  if (!links.length) links = await fccLessons(itemId);
+  if (!links.length) links = await listArticles(itemId, MAX_LESSONS + 1);
   const seen = new Set<string>([main]);
   const lessons: Lesson[] = [];
   for (const l of links) {
@@ -81,11 +105,15 @@ async function buildSyllabus(itemId: string): Promise<Lesson[]> {
   return lessons;
 }
 
+// Empty syllabi are retried once per launch (older versions stored [] for JS-app archives).
+const retriedEmpty = new Set<string>();
+
 /** Enrol (idempotent) and make sure the syllabus is built. */
 export async function ensureCourse(itemId: string): Promise<CourseState | null> {
   const existing = getCourse(itemId);
-  // A built syllabus may legitimately be empty (no structured main page): don't rebuild it.
-  if (existing && existing.syllabusBuilt) return existing;
+  // A built syllabus may legitimately be empty (no structured main page): don't rebuild it in a loop.
+  if (existing && existing.syllabusBuilt && (existing.syllabus.length || retriedEmpty.has(itemId))) return existing;
+  retriedEmpty.add(itemId);
   let syllabus: Lesson[] | null;
   try {
     syllabus = await buildSyllabus(itemId);
@@ -104,6 +132,8 @@ export async function ensureCourse(itemId: string): Promise<CourseState | null> 
 }
 
 export function recordCourseOpen(itemId: string, path: string, title: string) {
+  // JS-app archives navigate away from the lesson path, so the reader alone wouldn't record it.
+  recordVisit(itemId, path, title);
   db().runSync('UPDATE courses SET last_path = ?, last_title = ?, last_opened_at = ? WHERE item_id = ?', path, title, Date.now(), itemId);
   useCourses.getState().bump();
 }

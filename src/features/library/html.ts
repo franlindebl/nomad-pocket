@@ -41,7 +41,7 @@ const SKIP_TAGS = new Set([
   'button', 'select', 'textarea', 'form', 'iframe', 'object', 'video', 'audio', 'canvas', 'head', 'title',
 ]);
 // Class/id fragments of chrome to drop (Wikipedia, mwoffliner, StackExchange, Gutenberg…).
-const SKIP_CLASS = /(?:^|\s)(?:navbox\S*|vertical-navbox|infobox\S*|taxobox|mw-editsection|reflist|references|mw-references-wrap|reference|noprint|metadata|ambox\S*|mbox-\S+|hatnote|toc|mw-empty-elt|printfooter|catlinks|sistersitebox|authority-control|mw-jump-link|mw-cite-backlink|navigation-not-searchable|shortdescription|mw-kartographer\S*|portal\S*|sidebar)(?:\s|$)/i;
+const SKIP_CLASS = /(?:^|\s)(?:navbox\S*|vertical-navbox|infobox\S*|taxobox|mw-editsection|reflist|references|mw-references-wrap|reference|noprint|metadata|ambox\S*|mbox-\S+|hatnote|toc|mw-empty-elt|printfooter|catlinks|sistersitebox|authority-control|mw-jump-link|mw-cite-backlink|navigation-not-searchable|shortdescription|mw-kartographer\S*|portal(?:box|-bar\S*)?|sidebar)(?:\s|$)/i;
 const SKIP_ID = /^(?:toc|references|mw-navigation|footer|catlinks|siteSub|contentSub|jump-to-nav)$/i;
 const VOID_TAGS = new Set(['br', 'hr', 'img', 'input', 'meta', 'link', 'wbr', 'source', 'track', 'area', 'base', 'col', 'embed', 'param']);
 const BLOCK_TAGS = new Set([

@@ -15,6 +15,8 @@ import { create } from 'zustand';
 import { db, parseJson } from '@/db';
 import { contentFile, deleteFile, hasRoomFor, partialDir, resolveContentUri, type ContentKind } from '@/lib/storage';
 
+import { fastestMirror } from './mirrors';
+
 export type DownloadStatus = 'queued' | 'running' | 'paused' | 'processing' | 'failed' | 'done' | 'cancelled';
 
 export type DownloadRecord = {
@@ -349,9 +351,12 @@ async function run(id: string) {
       tasks.set(id, task);
       file = await task.resumeAsync();
     } else {
+      const url = await fastestMirror(rec.url);
+      // Paused or cancelled while mirrors were being probed.
+      if (useDownloads.getState().records[id]?.status !== 'running') return;
       const part = partialFile(id);
       if (part.exists) part.delete();
-      task = new DownloadTask(rec.url, part, options);
+      task = new DownloadTask(url, part, options);
       tasks.set(id, task);
       file = await task.downloadAsync();
     }

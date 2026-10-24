@@ -206,6 +206,27 @@ export async function getLinks(itemId: string, path: string): Promise<ZimLink[]>
   return extractLinks(article.html, article.path);
 }
 
+/** HTML articles in title order, for archives whose main page is a JS app without links. */
+export async function listArticles(itemId: string, limit: number): Promise<ZimLink[]> {
+  if (!(await ensureOpen(itemId))) return [];
+  try {
+    return (await NomadZim.listArticles(itemId, limit)).map((h) => ({ path: h.path, title: h.title }));
+  } catch {
+    return [];
+  }
+}
+
+/** Parsed JSON entry, or null when missing or invalid. */
+export async function getJson<T>(itemId: string, path: string): Promise<T | null> {
+  if (!(await ensureOpen(itemId))) return null;
+  try {
+    const c = await NomadZim.getContent(itemId, path);
+    return c ? (JSON.parse(c.content) as T) : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Linkable section headings of an article (table of contents). */
 export async function getHeadings(itemId: string, path: string): Promise<Heading[]> {
   const article = await getArticleHtml(itemId, path);

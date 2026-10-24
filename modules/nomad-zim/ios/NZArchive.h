@@ -59,6 +59,9 @@ NS_ASSUME_NONNULL_BEGIN
 /** Path of a random article, or nil. */
 - (nullable NSString *)randomPath;
 
+/** HTML articles in title order (redirects skipped), at most `limit`. `snippet` is unused. */
+- (NSArray<NZSearchHit *> *)listArticles:(NSInteger)limit;
+
 /** Title suggestions (title index, or title-ordered fallback). */
 - (NSArray<NZSearchHit *> *)suggest:(NSString *)query limit:(NSInteger)limit;
 /** Full-text search with snippets. Empty when the archive has no full-text index. */

@@ -74,6 +74,11 @@ public final class NomadZimModule: Module {
       return archive.randomPath()
     }.runOnQueue(zimWorkQueue)
 
+    AsyncFunction("listArticles") { (id: String, limit: Int) -> [[String: Any?]] in
+      let archive = try Self.archive(id)
+      return archive.listArticles(limit).map(Self.hit)
+    }.runOnQueue(zimWorkQueue)
+
     /// Marks a file or directory as excluded from iCloud/iTunes backup.
     AsyncFunction("excludeFromBackup") { (path: String) -> Bool in
       var url = URL(fileURLWithPath: Self.plainPath(path))

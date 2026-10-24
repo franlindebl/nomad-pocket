@@ -68,7 +68,7 @@ export default function HomeScreen() {
                 {t('storageTitle')}
               </Text>
               <Text variant="footnote" color={heroFg} style={{ opacity: 0.7 }}>
-                {items.length ? t('storageBody', { count: items.length, size: formatBytes(used) }) : t('storageEmpty')}
+                {items.length ? t('storageBody', { count: items.length, size: formatBytes(used) }) : downloads.length ? t('downloadsActive') : t('storageEmpty')}
               </Text>
             </View>
           </Row>
@@ -79,7 +79,7 @@ export default function HomeScreen() {
         </View>
       </Card>
 
-      {items.length === 0 ? (
+      {items.length === 0 && downloads.length === 0 ? (
         <Card style={{ marginTop: space.md, gap: space.md }}>
           <Text variant="title3">{t('getStarted.title')}</Text>
           <Text variant="callout" color="textSecondary">
