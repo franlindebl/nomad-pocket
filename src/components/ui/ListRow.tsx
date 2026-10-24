@@ -12,6 +12,9 @@ type Props = {
   subtitle?: string;
   leading?: ReactNode;
   trailing?: ReactNode;
+  /** Interactive control at the end (e.g. a delete button). Rendered beside the row's
+   *  button, not inside it, so VoiceOver (and UI tests) can reach both. */
+  trailingAction?: ReactNode;
   chevron?: boolean;
   onPress?: () => void;
   onLongPress?: () => void;
@@ -19,6 +22,7 @@ type Props = {
   style?: StyleProp<ViewStyle>;
   titleLines?: number;
   subtitleLines?: number;
+  testID?: string;
 };
 
 export function ListRow({
@@ -26,6 +30,7 @@ export function ListRow({
   subtitle,
   leading,
   trailing,
+  trailingAction,
   chevron,
   onPress,
   onLongPress,
@@ -33,6 +38,7 @@ export function ListRow({
   style,
   titleLines = 1,
   subtitleLines = 2,
+  testID,
 }: Props) {
   const { colors } = useTheme();
   const content = (
@@ -52,11 +58,32 @@ export function ListRow({
       {chevron ? <ChevronRight size={18} color={colors.textTertiary} /> : null}
     </>
   );
-  if (!onPress && !onLongPress) return <View style={[styles.row, style]}>{content}</View>;
-  return (
-    <PressableScale accessibilityRole="button" onPress={onPress} onLongPress={onLongPress} pressedScale={0.99} style={[styles.row, style]}>
+  const action = trailingAction ? <View style={styles.trailing}>{trailingAction}</View> : null;
+  if (!onPress && !onLongPress) {
+    return (
+      <View testID={testID} style={[styles.row, style]}>
+        {content}
+        {action}
+      </View>
+    );
+  }
+  const button = (
+    <PressableScale
+      testID={testID}
+      accessibilityRole="button"
+      onPress={onPress}
+      onLongPress={onLongPress}
+      pressedScale={0.99}
+      style={action ? [styles.row, styles.rowWithAction] : [styles.row, style]}>
       {content}
     </PressableScale>
+  );
+  if (!action) return button;
+  return (
+    <View style={[styles.actionRow, style]}>
+      {button}
+      {action}
+    </View>
   );
 }
 
@@ -93,6 +120,8 @@ const styles = StyleSheet.create({
   leading: { alignItems: 'center', justifyContent: 'center' },
   body: { flex: 1, gap: 2 },
   trailing: { alignItems: 'flex-end', justifyContent: 'center' },
+  rowWithAction: { flex: 1, paddingRight: 0 },
+  actionRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingRight: space.lg },
   group: {
     borderRadius: 18,
     borderCurve: 'continuous',

@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react-native';
 import { Search, X } from 'lucide-react-native';
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, TextInput, View, type StyleProp, type TextInputProps, type ViewStyle } from 'react-native';
 
 import { fontFamily, radius, space, typography, useTheme, type Hue } from '@/theme';
@@ -66,6 +67,7 @@ export function Badge({ label, tone = 'neutral', icon: Icon }: { label: string; 
 }
 
 export function SearchField({ style, onClear, value, ...rest }: TextInputProps & { onClear?: () => void }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   return (
     <View style={[styles.search, { backgroundColor: colors.surfaceAlt }, style]}>
@@ -80,7 +82,7 @@ export function SearchField({ style, onClear, value, ...rest }: TextInputProps &
         style={[styles.searchInput, { color: colors.text, fontFamily }]}
       />
       {value && onClear ? (
-        <Pressable onPress={onClear} hitSlop={10} accessibilityLabel="Clear">
+        <Pressable onPress={onClear} hitSlop={10} accessibilityLabel={t('actions.clear')}>
           <X size={16} color={colors.textTertiary} />
         </Pressable>
       ) : null}

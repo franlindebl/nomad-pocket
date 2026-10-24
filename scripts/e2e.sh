@@ -57,7 +57,7 @@ if ! java -version >/dev/null 2>&1; then
 fi
 
 if [[ $BUILD -eq 1 || ! -d "$APP" ]]; then
-  echo "Building $APP…"
+  echo "Building ${APP}…"
   xcodebuild -workspace "$ROOT/ios/NomadPocket.xcworkspace" -scheme NomadPocket \
     -configuration Release -sdk iphonesimulator -derivedDataPath "$ROOT/ios/build/sim" \
     -packageAuthorizationProvider netrc build | tail -3

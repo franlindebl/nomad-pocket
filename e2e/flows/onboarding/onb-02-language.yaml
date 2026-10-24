@@ -16,7 +16,7 @@ tags: [full, onboarding]
 - tapOn: "Lo elijo yo.*"
 - tapOn: "Siguiente"
 - tapOn: "Ir a Nomad"
-- tapOn: "Settings"
+- tapOn: { id: "open-settings" }
 - scrollUntilVisible:
     element: "Asistente de configuración"
 - tapOn: "Asistente de configuración"

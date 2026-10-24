@@ -33,7 +33,8 @@ tags: [nightly, maps, network]
     notVisible: "Descargando.*"
     timeout: 120000
 - takeScreenshot: 02-installed
-# The row's trash button is merged into the row for accessibility (bug): tap by position.
-- tapOn: { point: "88%,92%" }
-- tapOn: "Eliminar"
+- tapOn: { id: "region-delete" }
+- assertVisible: "¿Eliminar Melilla.*"
+# The row's delete button behind the alert has the same label: take the one above it.
+- tapOn: { text: "Eliminar", above: { id: "region-delete" } }
 - assertVisible: "Aún no tienes regiones.*"

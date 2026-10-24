@@ -7,7 +7,7 @@ tags: [full, settings, seeded]
 - tapOn: { id: "BackButton" }
 - tapOn: { id: "house" }
 - assertVisible: "Continuar"
-- tapOn: "Settings"
+- tapOn: { id: "open-settings" }
 - scrollUntilVisible:
     element: "Documentación de Node.js.*"
 - tapOn: "Documentación de Node.js.*"

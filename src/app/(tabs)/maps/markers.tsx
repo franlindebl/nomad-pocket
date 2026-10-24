@@ -43,7 +43,7 @@ export default function MarkersSheet() {
             subtitle={m.note ? `${m.note}\n${formatCoords(m.lat, m.lon)}` : formatCoords(m.lat, m.lon)}
             onPress={() => flyTo(m)}
             onLongPress={() => router.push({ pathname: '/maps/marker', params: { id: String(m.id) } })}
-            trailing={<IconButton icon={Trash2} size={36} variant="plain" color={colors.danger} accessibilityLabel={t('common:actions.delete')} onPress={() => confirmDelete(m)} />}
+            trailingAction={<IconButton testID="marker-delete" icon={Trash2} size={36} variant="plain" color={colors.danger} accessibilityLabel={t('common:actions.delete')} onPress={() => confirmDelete(m)} />}
           />
         ))}
       </ListGroup>

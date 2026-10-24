@@ -135,13 +135,18 @@ function TierCard({
     );
   };
 
+  // The pack button sits beside the card's button, not inside it, so VoiceOver can reach it.
+  const action =
+    selected && resources.length ? (
+      done ? (
+        <Badge label={t('packInstalled')} tone="success" icon={Check} />
+      ) : missing.length ? (
+        <Button testID="pack-download" title={t('downloadPack', { size: formatMB(sumMB(missing)) })} onPress={downloadPack} size="md" />
+      ) : null
+    ) : null;
+
   return (
-    <PressableScale
-      onPress={onSelect}
-      haptic="selection"
-      pressedScale={0.99}
-      accessibilityRole="button"
-      accessibilityState={{ selected }}
+    <View
       style={[
         styles.tier,
         {
@@ -150,38 +155,39 @@ function TierCard({
           borderWidth: selected ? 2 : StyleSheet.hairlineWidth,
         },
       ]}>
-      <Row style={{ justifyContent: 'space-between' }}>
-        <Row gap={space.sm}>
-          <Text variant="title3">{loc(tier.name)}</Text>
-          {tier.recommended ? <Badge label={t('recommended')} tone="accent" /> : null}
+      <PressableScale
+        testID={`tier-${tier.slug}`}
+        onPress={onSelect}
+        haptic="selection"
+        pressedScale={0.99}
+        accessibilityRole="button"
+        accessibilityState={{ selected }}
+        style={[styles.tierBody, action && styles.tierBodyWithAction]}>
+        <Row style={{ justifyContent: 'space-between' }}>
+          <Row gap={space.sm}>
+            <Text variant="title3">{loc(tier.name)}</Text>
+            {tier.recommended ? <Badge label={t('recommended')} tone="accent" /> : null}
+          </Row>
+          <Text variant="headline" tabular>
+            {formatMB(sumMB(resources))}
+          </Text>
         </Row>
-        <Text variant="headline" tabular>
-          {formatMB(sumMB(resources))}
+        <Text variant="footnote" color="textSecondary">
+          {loc(tier.description)}
         </Text>
-      </Row>
-      <Text variant="footnote" color="textSecondary">
-        {loc(tier.description)}
-      </Text>
-      <Text variant="caption" color="textTertiary">
-        {t('resources', { count: resources.length })}
-      </Text>
-      {selected && resources.length ? (
-        done ? (
-          <Badge label={t('packInstalled')} tone="success" icon={Check} />
-        ) : missing.length ? (
-          <Button
-            title={t('downloadPack', { size: formatMB(sumMB(missing)) })}
-            onPress={downloadPack}
-            size="md"
-            style={{ alignSelf: 'flex-start', marginTop: space.xs }}
-          />
-        ) : null
-      ) : null}
-    </PressableScale>
+        <Text variant="caption" color="textTertiary">
+          {t('resources', { count: resources.length })}
+        </Text>
+      </PressableScale>
+      {action ? <View style={styles.tierAction}>{action}</View> : null}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   hero: { gap: space.md, paddingTop: space.lg },
-  tier: { borderRadius: radius.lg, borderCurve: 'continuous', padding: space.lg, gap: space.sm },
+  tier: { borderRadius: radius.lg, borderCurve: 'continuous', overflow: 'hidden' },
+  tierBody: { padding: space.lg, gap: space.sm },
+  tierBodyWithAction: { paddingBottom: space.sm },
+  tierAction: { paddingHorizontal: space.lg, paddingBottom: space.lg, paddingTop: space.xs, alignItems: 'flex-start' },
 });

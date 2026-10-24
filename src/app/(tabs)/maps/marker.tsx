@@ -49,6 +49,7 @@ export default function MarkerSheet() {
           {t('markers.name')}
         </Text>
         <TextInput
+          testID="marker-name"
           value={name}
           onChangeText={setName}
           placeholder={t('markers.namePlaceholder')}
@@ -65,6 +66,7 @@ export default function MarkerSheet() {
           {t('markers.note')}
         </Text>
         <TextInput
+          testID="marker-note"
           value={note}
           onChangeText={setNote}
           placeholder={t('markers.notePlaceholder')}

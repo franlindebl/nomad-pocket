@@ -210,7 +210,7 @@ function ErrorBanner({ code }: { code: string }) {
       <Text variant="footnote" color="danger" style={{ flex: 1 }}>
         {known ? t(`errors.${code}`) : t('errors.generic', { message: code })}
       </Text>
-      <IconButton icon={X} size={28} variant="plain" color={colors.danger} accessibilityLabel="OK" onPress={dismissError} />
+      <IconButton icon={X} size={28} variant="plain" color={colors.danger} accessibilityLabel={t('common:actions.close')} onPress={dismissError} />
     </View>
   );
 }

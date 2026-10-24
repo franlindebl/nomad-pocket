@@ -21,6 +21,7 @@ type Props = {
   fullWidth?: boolean;
   style?: StyleProp<ViewStyle>;
   accessibilityLabel?: string;
+  testID?: string;
 };
 
 const SIZES = {
@@ -41,6 +42,7 @@ export function Button({
   fullWidth,
   style,
   accessibilityLabel,
+  testID,
 }: Props) {
   const { colors } = useTheme();
   const s = SIZES[size];
@@ -56,6 +58,7 @@ export function Button({
 
   return (
     <PressableScale
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? title}
       accessibilityState={{ disabled: !!disabled, busy: !!loading }}
@@ -92,14 +95,16 @@ type IconButtonProps = {
   color?: string;
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
+  testID?: string;
 };
 
-export function IconButton({ icon: Icon, onPress, accessibilityLabel, size = 40, variant = 'filled', color, style, disabled }: IconButtonProps) {
+export function IconButton({ icon: Icon, onPress, accessibilityLabel, size = 40, variant = 'filled', color, style, disabled, testID }: IconButtonProps) {
   const { colors } = useTheme();
   const bg = variant === 'filled' ? colors.surfaceAlt : variant === 'ink' ? colors.ink : 'transparent';
   const fg = color ?? (variant === 'ink' ? colors.onInk : colors.text);
   return (
     <PressableScale
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}

@@ -11,15 +11,14 @@ tags: [full, reader, seeded]
 - tapOn: "Restablecer"
 - tapOn: "Texto más pequeño"
 - tapOn: "Restablecer"
-- tapOn: "Dismiss"
+- tapOn: { id: "popover-dismiss" }
 - tapOn: "Más"
 - tapOn: "Buscar en la página"
 - inputText: "the"
 - extendedWaitUntil:
     visible: "1 de \\d+"
     timeout: 5000
-# The find bar sits under the keyboard (bug), so Enter stands in for "next".
-- pressKey: Enter
+- tapOn: "Siguiente coincidencia"
 - assertVisible: "2 de \\d+"
 - takeScreenshot: 02-find
 - eraseText: 10

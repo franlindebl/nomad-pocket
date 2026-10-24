@@ -3,7 +3,7 @@ appId: com.fjlinde.nomadpocket
 tags: [full, settings]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: "Settings"
+- tapOn: { id: "open-settings" }
 - tapOn: "Oscuro"
 - takeScreenshot: 01-settings-dark
 - tapOn: "Claro"

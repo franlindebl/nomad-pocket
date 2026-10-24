@@ -14,9 +14,10 @@ type Props = {
   /** Background override (e.g. a tinted hero card). */
   background?: string;
   accessibilityLabel?: string;
+  testID?: string;
 };
 
-export function Card({ children, onPress, onLongPress, style, padded = true, background, accessibilityLabel }: Props) {
+export function Card({ children, onPress, onLongPress, style, padded = true, background, accessibilityLabel, testID }: Props) {
   const { colors, scheme } = useTheme();
   const base = [
     styles.card,
@@ -27,9 +28,16 @@ export function Card({ children, onPress, onLongPress, style, padded = true, bac
     padded && styles.padded,
     style,
   ];
-  if (!onPress && !onLongPress) return <View style={base}>{children}</View>;
+  if (!onPress && !onLongPress) {
+    return (
+      <View testID={testID} style={base}>
+        {children}
+      </View>
+    );
+  }
   return (
     <PressableScale
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}

@@ -7,6 +7,6 @@ tags: [smoke, home, downloads]
 - assertVisible: "No hay descargas activas"
 - takeScreenshot: 01-downloads-empty
 - swipe: { direction: DOWN }
-- tapOn: "Settings"
+- tapOn: { id: "open-settings" }
 - assertVisible: "Ajustes"
 - assertVisible: "Asistente de configuración"

@@ -12,24 +12,43 @@ import { Sheet } from './Sheet';
 
 type Tab = 'bookmarks' | 'history';
 
+type Props = { itemId: string; onClose: () => void; onOpen: (path: string) => void };
+
 /** Bookmarks and reading history of one archive. */
-export function ReaderLibrarySheet({ visible, itemId, onClose, onOpen }: { visible: boolean; itemId: string; onClose: () => void; onOpen: (path: string) => void }) {
+export function ReaderLibrarySheet({ visible, ...props }: Props & { visible: boolean }) {
+  // Each opening mounts the content afresh, so it lists what is in the database now: a
+  // bookmark removed after the sheet was last open used to stay listed.
+  const [opened, setOpened] = useState(0);
+  const [wasVisible, setWasVisible] = useState(visible);
+  if (visible !== wasVisible) {
+    setWasVisible(visible);
+    if (visible) setOpened(opened + 1);
+  }
+  return (
+    <Sheet visible={visible} onClose={props.onClose}>
+      <LibraryContent key={opened} {...props} />
+    </Sheet>
+  );
+}
+
+function LibraryContent({ itemId, onClose, onOpen }: Props) {
   const { t, i18n } = useTranslation('reader');
   const { t: tc } = useTranslation();
   const { colors } = useTheme();
   const [tab, setTab] = useState<Tab>('bookmarks');
 
-  const rows = useMemo(() => {
-    if (!visible) return [];
-    return tab === 'bookmarks'
-      ? listBookmarks(itemId).map((b) => ({ key: `b${b.id}`, path: b.path, title: b.title, at: b.createdAt }))
-      : recentHistory(100, itemId).map((h) => ({ key: `h${h.id}`, path: h.path, title: h.title, at: h.visitedAt }));
-  }, [visible, tab, itemId]);
+  const rows = useMemo(
+    () =>
+      tab === 'bookmarks'
+        ? listBookmarks(itemId).map((b) => ({ key: `b${b.id}`, path: b.path, title: b.title, at: b.createdAt }))
+        : recentHistory(100, itemId).map((h) => ({ key: `h${h.id}`, path: h.path, title: h.title, at: h.visitedAt })),
+    [tab, itemId],
+  );
 
   const fmt = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium', timeStyle: 'short' });
 
   return (
-    <Sheet visible={visible} onClose={onClose}>
+    <>
       <View style={styles.header}>
         <Text variant="title3">{t('bookmarksHistory')}</Text>
         <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button">
@@ -67,7 +86,7 @@ export function ReaderLibrarySheet({ visible, itemId, onClose, onOpen }: { visib
           )
         }
       />
-    </Sheet>
+    </>
   );
 }
 

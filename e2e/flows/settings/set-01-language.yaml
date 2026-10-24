@@ -3,7 +3,7 @@ appId: com.fjlinde.nomadpocket
 tags: [smoke, settings]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: "Settings"
+- tapOn: { id: "open-settings" }
 - tapOn: "English"
 - assertVisible: "Appearance"
 - takeScreenshot: 01-settings-en

@@ -52,8 +52,8 @@ export default function HomeScreen() {
           <Text variant="display">{tc('appName')}</Text>
         </View>
         <Row gap={space.sm}>
-          <IconButton icon={Download} accessibilityLabel={tc('downloads.title')} onPress={() => router.push('/downloads')} />
-          <IconButton icon={Settings} accessibilityLabel="Settings" onPress={() => router.push('/settings')} />
+          <IconButton testID="open-downloads" icon={Download} accessibilityLabel={tc('downloads.title')} onPress={() => router.push('/downloads')} />
+          <IconButton testID="open-settings" icon={Settings} accessibilityLabel={tc('settings:title')} onPress={() => router.push('/settings')} />
         </Row>
       </Row>
 

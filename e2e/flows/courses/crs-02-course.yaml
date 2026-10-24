@@ -7,19 +7,20 @@ tags: [full, courses, seeded]
 - assertVisible: "freeCodeCamp en español.*"
 - tapOn: "freeCodeCamp en español.*"
 - extendedWaitUntil:
-    visible: "Marcar como hecha, 1, .*"
+    visible: { id: "lesson-check-1" }
     timeout: 30000
 - takeScreenshot: 01-syllabus
-# The check button is merged into the lesson row for accessibility; long-press toggles it.
-- longPressOn: "Marcar como hecha, 1, .*"
-- assertVisible: "Marcar como pendiente, 1, .*"
-- longPressOn: "Marcar como pendiente, 1, .*"
-- assertVisible: "Marcar como hecha, 1, .*"
-- longPressOn: "Marcar como hecha, 2, .*"
+- tapOn: { id: "lesson-check-1" }
+- assertVisible: { id: "lesson-check-1", text: "Marcar como pendiente" }
+- tapOn: { id: "lesson-check-1" }
+- assertVisible: { id: "lesson-check-1", text: "Marcar como hecha" }
+# Long-press on the lesson toggles it too.
+- longPressOn: { id: "lesson-2" }
+- assertVisible: { id: "lesson-check-2", text: "Marcar como pendiente" }
 - tapOn: "Reiniciar progreso"
 - assertVisible: "Se borrará tu progreso en este curso."
 - tapOn: { text: "Reiniciar progreso", index: 2 }
-- assertVisible: "Marcar como hecha, 2, .*"
+- assertVisible: { id: "lesson-check-2", text: "Marcar como hecha" }
 - tapOn: "Empezar curso"
 - extendedWaitUntil:
     visible: "Buscar en este libro"

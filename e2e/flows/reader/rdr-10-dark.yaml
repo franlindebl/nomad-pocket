@@ -3,7 +3,7 @@ appId: com.fjlinde.nomadpocket
 tags: [full, reader, seeded]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: "Settings"
+- tapOn: { id: "open-settings" }
 - tapOn: "Oscuro"
 - swipe: { direction: DOWN }
 - runFlow: ../../subflows/open-wikipedia.yaml

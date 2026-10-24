@@ -153,9 +153,25 @@ every work block so work can resume after context compaction.
   the default mirror served ~300 KB/s per connection while others gave 4–20 MB/s.
 - Verified on the iOS 27 simulator (Release). Android: nomad-zim compiles (runtime untested).
 
+### 2026-10-24 — Functional E2E suite (Maestro, iOS simulator)
+- 36 Maestro flows cover 53 of the 55 cases of the functional test plan (Claude doc
+  "Plan de tests funcionales iOS — Nomad App"). How to run and write them: `docs/E2E.md`
+  (`npm run e2e:setup` once, then `npm run e2e` / `e2e:full` / `e2e:all`).
+- Fixed from the first pass: buttons nested in another button were unreachable by
+  VoiceOver (pack download, catalog row download, lesson check, delete in places /
+  regions / conversations; `ListRow` gained `trailingAction`); the reader's find bar
+  sat under the keyboard; the bookmarks sheet kept listing a removed bookmark (content
+  now remounts on every opening); hardcoded English labels (Settings, Dismiss, OK, Clear).
+- `testID`s on the controls tests need (list in `docs/E2E.md`).
+- Open from the first pass: the assistant retrieved the wrong article for "¿Quién fue
+  Michael Jackson?" and answered wrongly (RAG ranking); stale find count after
+  navigating; JS-app lessons blank for ~5 s with no loader; "3 descargas activas" with
+  one queued; Explore shows "SPA" instead of "ES".
+
 ## Next steps
 
-- Smoke-test the merged build on iOS simulator + Android emulator (all tabs).
+- Run `npm run e2e` before every TestFlight build (`--build` after code changes).
+- Smoke-test the merged build on the Android emulator (all tabs); the E2E suite is iOS only.
 - Nice to have: reader TOC + auto-hiding toolbar; copy/regenerate in chat; map
   extraction resume after kill; syllabus for SPA course ZIMs (read links from the
   rendered DOM); Gemini Nano test on a real device; store submission assets.
@@ -175,6 +191,6 @@ every work block so work can resume after context compaction.
   macOS Keychain prompt for github.com credentials. Always pass
   `-packageAuthorizationProvider netrc`; for `swift package` use `--disable-keychain`.
 - Android builds need `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`.
-- UI automation: `axe` (brew cameroncooke/axe) for the iOS simulator; `adb shell uiautomator dump` + `input tap` on Android.
+- UI automation: Maestro flows in `e2e/` (docs/E2E.md) for the iOS simulator; `adb shell uiautomator dump` + `input tap` on Android.
 - Tests: `npm test` (node --test with type stripping; import with `.ts` extensions, no `@/` aliases).
 - Catalog check: `node scripts/validate-catalog.mjs` (`--offline` to skip URL checks).

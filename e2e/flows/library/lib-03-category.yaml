@@ -6,9 +6,8 @@ tags: [full, library]
 - tapOn: { id: "books.vertical" }
 - tapOn: "Medicina.*"
 - assertVisible: "Niveles|NIVELES"
-# The pack button is merged into the tier card for accessibility (bug): tap by position.
-- tapOn: { point: "30%,71%" }
+- tapOn: { id: "pack-download" }
 - assertVisible: "¿Descargar .*"
 - takeScreenshot: 01-pack-confirm
 - tapOn: "Cancelar"
-- assertVisible: "Esencial.*Descargar pack · .*"
+- assertVisible: "Descargar pack · .*"

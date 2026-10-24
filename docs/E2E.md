@@ -32,6 +32,8 @@ The run ends with a summary; exit code 0 means everything passed.
   ✗ rdr-03-bookmark  (Assertion is false: "Aún no has guardado nada" is visible)
 ```
 
+(That failure was a real bug: the bookmarks list kept a removed bookmark.)
+
 ## Suites
 
 Each flow is tagged with one suite. Bigger suites include the smaller ones.
@@ -218,15 +220,35 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
 - Text matching is a full-string regex: `"Michael Jackson.*"`, and escape `. ( ) ?`.
 - Cards and rows expose one merged accessibility label (`"Lo elijo yo, Empieza vacío…"`):
   match them with a regex (`"Lo elijo yo.*"`).
-- Tabs are matched by their SF Symbol id: `house`, `books.vertical`, `map`,
-  `graduationcap`, `sparkles`.
+- Prefer visible text, as a person would. Use a `testID` (`tapOn: { id: "…" }`) when the
+  text is ambiguous or there is none (icon buttons). `testID` is supported by `Button`,
+  `IconButton`, `Card` and `ListRow`; the ones in use:
+
+  | testID | Control |
+  |---|---|
+  | `open-downloads`, `open-settings` | Home header buttons |
+  | `reader-back`, `reader-forward`, `reader-search`, `reader-bookmark`, `reader-text`, `reader-more` | reader toolbar (the header's back button is also labelled "Atrás") |
+  | `find-previous`, `find-next`, `find-close` | find in page |
+  | `popover-dismiss` | backdrop that closes a reader popover |
+  | `tier-<slug>`, `pack-download` | collection tier card and its download button |
+  | `resource-<id>`, `download-<id>` | catalog row and its download / open / pause button |
+  | `lesson-<n>`, `lesson-check-<n>` | course lesson (1-based) and its done check |
+  | `marker-name`, `marker-note` | fields of the place sheet |
+| `marker-delete`, `region-delete`, `conversation-delete` | delete buttons in lists |
+  | `house`, `books.vertical`, `map`, `graduationcap`, `sparkles` | tabs (SF Symbol ids, set by iOS) |
+  | `BackButton` | the native header's back button |
+
+- A control inside another button is invisible to VoiceOver and to Maestro (iOS merges it
+  into the outer button). Put it beside the button instead: `ListRow` has
+  `trailingAction` for that.
 - Any screen opens directly with a deep link: `- openLink: nomadpocket:///library/resource/<id>`.
-- The reader has two "Atrás" buttons: index 0 is the header, index 1 the history toolbar.
+- iOS alerts keep the screen behind them in the hierarchy: if the alert's button has the
+  same text as a control on screen, pick it by position relative to that control
+  (`tapOn: { text: "Eliminar", above: { id: "marker-delete" } }`); `index` follows the
+  position on screen, not the order things appeared.
 - `hideKeyboard` can tap a link inside the web view; dismiss the keyboard by tapping a
   non-interactive text instead.
 - Assistant flows assert structure (sources, buttons), never the answer text.
-- A few steps tap by position (`point:`) because nested buttons are not reachable through
-  accessibility; they are marked in the flow and go away once those controls get `testID`s.
 
 ## Troubleshooting
 

@@ -97,7 +97,7 @@ export default function RegionsSheet() {
               title={item.title}
               subtitle={t('regions.detail', { zoom: item.meta.maxZoom, size: formatBytes(item.sizeBytes), date: buildDate(item.meta.buildDate, i18n.language) })}
               onPress={() => show(item)}
-              trailing={<IconButton icon={Trash2} size={36} variant="plain" color={colors.danger} accessibilityLabel={t('common:actions.delete')} onPress={() => confirmDelete(item)} />}
+              trailingAction={<IconButton testID="region-delete" icon={Trash2} size={36} variant="plain" color={colors.danger} accessibilityLabel={t('common:actions.delete')} onPress={() => confirmDelete(item)} />}
             />
           ))}
         </ListGroup>

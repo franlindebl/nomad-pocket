@@ -3,7 +3,7 @@ import type { LucideIcon } from 'lucide-react-native';
 import { ChevronDown, ChevronUp, Minus, Plus, TriangleAlert, X } from 'lucide-react-native';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { Keyboard, Platform, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { IconButton, PressableScale, Text } from '@/components/ui';
@@ -18,17 +18,42 @@ export type ToolbarAction = {
   active?: boolean;
 };
 
-/** Docked bottom toolbar: evenly spaced icon buttons, safe-area aware. */
+/** Keyboard height on iOS, where the screen does not resize for it; 0 when hidden and on Android. */
+function useKeyboardHeight() {
+  const [height, setHeight] = useState(0);
+  useEffect(() => {
+    if (Platform.OS !== 'ios') return;
+    const show = Keyboard.addListener('keyboardWillShow', (e) => {
+      Keyboard.scheduleLayoutAnimation(e);
+      setHeight(e.endCoordinates.height);
+    });
+    const hide = Keyboard.addListener('keyboardWillHide', (e) => {
+      Keyboard.scheduleLayoutAnimation(e);
+      setHeight(0);
+    });
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+  return height;
+}
+
+/** Docked bottom toolbar: evenly spaced icon buttons, safe-area aware. With `children`
+ *  (the find bar) it rises above the keyboard. */
 export function ReaderToolbar({ actions, children }: { actions: ToolbarAction[]; children?: ReactNode }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const keyboard = useKeyboardHeight();
+  const paddingBottom = children && keyboard ? keyboard + space.xs : Math.max(insets.bottom - space.md, space.sm);
   return (
-    <View style={[styles.toolbar, { backgroundColor: colors.bg, borderTopColor: colors.border, paddingBottom: Math.max(insets.bottom - space.md, space.sm) }]}>
+    <View style={[styles.toolbar, { backgroundColor: colors.bg, borderTopColor: colors.border, paddingBottom }]}>
       {children ?? (
         <View style={styles.toolbarRow}>
           {actions.map((a) => (
             <IconButton
               key={a.key}
+              testID={`reader-${a.key}`}
               icon={a.icon}
               accessibilityLabel={a.label}
               onPress={a.onPress}
@@ -46,10 +71,11 @@ export function ReaderToolbar({ actions, children }: { actions: ToolbarAction[];
 
 /** Small floating card anchored above the toolbar. */
 export function Popover({ children, onDismiss }: { children: ReactNode; onDismiss: () => void }) {
+  const { t } = useTranslation('reader');
   const { colors, scheme } = useTheme();
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-      <PressableScale style={StyleSheet.absoluteFill} onPress={onDismiss} pressedScale={1} accessibilityLabel="Dismiss" />
+      <PressableScale testID="popover-dismiss" style={StyleSheet.absoluteFill} onPress={onDismiss} pressedScale={1} accessibilityLabel={t('dismiss')} />
       <View
         style={[
           styles.popover,
@@ -154,9 +180,9 @@ export function FindBar({
           </Text>
         ) : null}
       </View>
-      <IconButton icon={ChevronUp} variant="plain" accessibilityLabel={t('findPrevious')} onPress={() => run(text, true)} disabled={!text} />
-      <IconButton icon={ChevronDown} variant="plain" accessibilityLabel={t('findNext')} onPress={() => run(text)} disabled={!text} />
-      <IconButton icon={X} variant="plain" accessibilityLabel={t('dismiss')} onPress={onClose} />
+      <IconButton testID="find-previous" icon={ChevronUp} variant="plain" accessibilityLabel={t('findPrevious')} onPress={() => run(text, true)} disabled={!text} />
+      <IconButton testID="find-next" icon={ChevronDown} variant="plain" accessibilityLabel={t('findNext')} onPress={() => run(text)} disabled={!text} />
+      <IconButton testID="find-close" icon={X} variant="plain" accessibilityLabel={t('dismiss')} onPress={onClose} />
     </View>
   );
 }

@@ -3,7 +3,7 @@ appId: com.fjlinde.nomadpocket
 tags: [smoke, cross, seeded]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: "Settings"
+- tapOn: { id: "open-settings" }
 - tapOn: "Oscuro"
 - swipe: { direction: DOWN }
 - runFlow: ../../subflows/open-wikipedia.yaml
@@ -12,9 +12,9 @@ tags: [smoke, cross, seeded]
 - tapOn: { id: "graduationcap" }
 - tapOn: "freeCodeCamp en español.*"
 - extendedWaitUntil:
-    visible: "Marcar como hecha, 1, .*"
+    visible: { id: "lesson-check-1" }
     timeout: 30000
-- longPressOn: "Marcar como hecha, 1, .*"
+- tapOn: { id: "lesson-check-1" }
 - tapOn: { id: "map" }
 - extendedWaitUntil:
     visible: "Mapas sin conexión"
@@ -32,6 +32,6 @@ tags: [smoke, cross, seeded]
 - swipe: { direction: DOWN }
 - tapOn: { id: "graduationcap" }
 - tapOn: "freeCodeCamp en español.*"
-- assertVisible: "Marcar como pendiente, 1, .*"
+- assertVisible: { id: "lesson-check-1", text: "Marcar como pendiente" }
 - runFlow: ../../subflows/open-wikipedia.yaml
 - assertVisible: "Quitar de guardados"

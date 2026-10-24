@@ -45,7 +45,7 @@ export default function ConversationsScreen() {
       style={s.id === activeId ? { backgroundColor: colors.surfaceAlt } : undefined}
       onPress={() => open(s.id)}
       onLongPress={() => confirmDelete(s)}
-      trailing={<IconButton icon={Trash2} size={32} variant="plain" color={colors.textTertiary} accessibilityLabel={t('conversations.delete')} onPress={() => confirmDelete(s)} />}
+      trailingAction={<IconButton testID="conversation-delete" icon={Trash2} size={32} variant="plain" color={colors.textTertiary} accessibilityLabel={t('conversations.delete')} onPress={() => confirmDelete(s)} />}
     />
   );
 

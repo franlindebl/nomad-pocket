@@ -169,17 +169,14 @@ export default function CourseScreen() {
               {course.syllabus.map((lesson, index) => {
                 const done = course.completed.has(lesson.path);
                 return (
-                  <PressableScale
-                    key={lesson.path}
-                    pressedScale={0.99}
-                    onPress={() => open(lesson)}
-                    onLongPress={() => setLessonDone(installed.id, lesson.path, !done)}
-                    style={styles.lesson}
-                    accessibilityHint={done ? t('markUndone') : t('markDone')}>
+                  // The check is a sibling of the lesson button, not inside it, so VoiceOver can reach it.
+                  <View key={lesson.path} style={styles.lesson}>
                     <PressableScale
+                      testID={`lesson-check-${index + 1}`}
                       haptic="selection"
                       onPress={() => setLessonDone(installed.id, lesson.path, !done)}
                       hitSlop={8}
+                      accessibilityRole="button"
                       accessibilityLabel={done ? t('markUndone') : t('markDone')}>
                       {done ? (
                         <View style={[styles.check, { backgroundColor: h.fg }]}>
@@ -189,13 +186,22 @@ export default function CourseScreen() {
                         <Circle size={24} color={colors.border} strokeWidth={2} />
                       )}
                     </PressableScale>
-                    <Text variant="caption" color="textTertiary" tabular style={{ width: 26 }}>
-                      {index + 1}
-                    </Text>
-                    <Text variant="callout" color={done ? 'textSecondary' : 'text'} numberOfLines={2} style={{ flex: 1 }}>
-                      {lesson.title}
-                    </Text>
-                  </PressableScale>
+                    <PressableScale
+                      testID={`lesson-${index + 1}`}
+                      pressedScale={0.99}
+                      onPress={() => open(lesson)}
+                      onLongPress={() => setLessonDone(installed.id, lesson.path, !done)}
+                      style={styles.lessonBody}
+                      accessibilityRole="button"
+                      accessibilityHint={done ? t('markUndone') : t('markDone')}>
+                      <Text variant="caption" color="textTertiary" tabular style={{ width: 26 }}>
+                        {index + 1}
+                      </Text>
+                      <Text variant="callout" color={done ? 'textSecondary' : 'text'} numberOfLines={2} style={{ flex: 1 }}>
+                        {lesson.title}
+                      </Text>
+                    </PressableScale>
+                  </View>
                 );
               })}
             </ListGroup>
@@ -214,6 +220,7 @@ export default function CourseScreen() {
 }
 
 const styles = StyleSheet.create({
-  lesson: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: space.lg, paddingVertical: 14 },
+  lesson: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingLeft: space.lg },
+  lessonBody: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space.md, paddingRight: space.lg, paddingVertical: 14 },
   check: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
 });

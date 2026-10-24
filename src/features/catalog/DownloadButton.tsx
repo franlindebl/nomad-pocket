@@ -62,6 +62,7 @@ export function DownloadButton({ resource, onOpen }: { resource: CatalogResource
   if (installed) {
     return (
       <PressableScale
+        testID={`download-${resource.id}`}
         haptic="light"
         accessibilityRole="button"
         onPress={onOpen ?? (() => router.push({ pathname: '/reader/[itemId]', params: { itemId: installed.id } }))}
@@ -80,6 +81,7 @@ export function DownloadButton({ resource, onOpen }: { resource: CatalogResource
     const paused = download.status === 'paused';
     return (
       <PressableScale
+        testID={`download-${resource.id}`}
         haptic="selection"
         accessibilityRole="button"
         accessibilityLabel={paused ? t('actions.resume') : t('actions.pause')}
@@ -94,6 +96,7 @@ export function DownloadButton({ resource, onOpen }: { resource: CatalogResource
 
   return (
     <PressableScale
+      testID={`download-${resource.id}`}
       haptic="light"
       accessibilityRole="button"
       accessibilityLabel={t('actions.downloadSize', { size: formatMB(resource.sizeMB) })}

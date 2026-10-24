@@ -12,7 +12,6 @@ tags: [nightly, assistant]
 - tapOn: "Conversaciones"
 - assertVisible: "Hoy|HOY"
 - takeScreenshot: 01-conversations
-# The row's trash button is merged into the row for accessibility (bug): long-press instead.
-- longPressOn: "¿Cómo enciendo fuego.*"
+- tapOn: { id: "conversation-delete" }
 - tapOn: "Eliminar"
 - assertVisible: "Aún no hay conversaciones"
