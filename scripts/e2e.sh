@@ -4,6 +4,8 @@
 #   scripts/e2e.sh                    # smoke (P0)
 #   scripts/e2e.sh --tags full        # any tag: smoke, full, nightly, reader, maps…
 #   scripts/e2e.sh e2e/flows/reader   # specific flows or folders
+#   --build    rebuild the Release .app first (needed after any app code change)
+#   --list     print the flows that would run, and exit
 #
 # Every flow runs on a fresh install. Flows tagged `seeded` get the ZIM files in
 # e2e/fixtures/ copied to Documents/content/zim/ (registered at startup by
@@ -20,31 +22,18 @@ APP="${APP:-$ROOT/ios/build/sim/Build/Products/Release-iphonesimulator/NomadPock
 MAESTRO="${MAESTRO:-maestro}"
 TAGS=smoke
 TARGETS=()
+BUILD=0
+LIST=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --tags) TAGS="$2"; shift 2 ;;
+    --build) BUILD=1; shift ;;
+    --list) LIST=1; shift ;;
+    -h|--help) sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) TARGETS+=("$1"); TAGS=""; shift ;;
   esac
 done
-
-if ! java -version >/dev/null 2>&1; then
-  export JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk}"
-  export PATH="$JAVA_HOME/bin:$PATH"
-fi
-
-if [[ ! -d "$APP" ]]; then
-  echo "Building $APP…"
-  xcodebuild -workspace "$ROOT/ios/NomadPocket.xcworkspace" -scheme NomadPocket \
-    -configuration Release -sdk iphonesimulator -derivedDataPath "$ROOT/ios/build/sim" \
-    -packageAuthorizationProvider netrc build | tail -3
-fi
-
-UDID="$(xcrun simctl list devices available | grep -E "^ +$DEVICE \(" | head -1 | grep -oE '[0-9A-F-]{36}')"
-[[ -n "$UDID" ]] || { echo "Simulator '$DEVICE' not found"; exit 1; }
-xcrun simctl boot "$UDID" 2>/dev/null || true
-xcrun simctl bootstatus "$UDID" -b >/dev/null
-xcrun simctl location "$UDID" set 40.4168,-3.7038
 
 # Flow files to run: explicit targets, or every flow carrying one of $TAGS.
 FLOWS=()
@@ -57,9 +46,32 @@ else
   done < <(find "$ROOT/e2e/flows" -name '*.yaml' | sort)
 fi
 [[ ${#FLOWS[@]} -gt 0 ]] || { echo "No flows match"; exit 1; }
+if [[ $LIST -eq 1 ]]; then
+  for f in "${FLOWS[@]}"; do echo "${f#"$ROOT"/}"; done
+  echo "${#FLOWS[@]} flows"; exit 0
+fi
+
+if ! java -version >/dev/null 2>&1; then
+  export JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk}"
+  export PATH="$JAVA_HOME/bin:$PATH"
+fi
+
+if [[ $BUILD -eq 1 || ! -d "$APP" ]]; then
+  echo "Building $APP…"
+  xcodebuild -workspace "$ROOT/ios/NomadPocket.xcworkspace" -scheme NomadPocket \
+    -configuration Release -sdk iphonesimulator -derivedDataPath "$ROOT/ios/build/sim" \
+    -packageAuthorizationProvider netrc build | tail -3
+fi
+
+UDID="$(xcrun simctl list devices available | grep -E "^ +$DEVICE \(" | head -1 | grep -oE '[0-9A-F-]{36}')"
+[[ -n "$UDID" ]] || { echo "Simulator '$DEVICE' not found: run scripts/e2e-setup.sh"; exit 1; }
+xcrun simctl boot "$UDID" 2>/dev/null || true
+xcrun simctl bootstatus "$UDID" -b >/dev/null
+xcrun simctl location "$UDID" set 40.4168,-3.7038
 
 OUT="$ROOT/e2e/artifacts/$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$OUT"
+ln -sfn "$OUT" "$ROOT/e2e/artifacts/latest"
 passed=0; failed=()
 
 reset_app() {
@@ -86,10 +98,14 @@ for flow in "${FLOWS[@]}"; do
       --flatten-debug-output > "$OUT/$name/maestro.log" 2>&1); then
     passed=$((passed + 1)); echo "  ✓"
   else
-    failed+=("$name"); echo "  ✗ (see $OUT/$name)"
+    # Maestro's last result line: "[Failed] <flow> (46s) (<reason>)".
+    reason="$(grep -m1 '^\[Failed\]' "$OUT/$name/maestro.log" | sed -E 's/^\[Failed\] [^ ]+ \([^)]*\) //')"
+    failed+=("$name  ${reason:-see maestro.log}"); echo "  ✗ ${reason:-}"
   fi
 done
 
-echo
-echo "$passed passed, ${#failed[@]} failed — $OUT"
-[[ ${#failed[@]} -eq 0 ]] || { printf '  ✗ %s\n' "${failed[@]}"; exit 1; }
+{
+  echo "$passed passed, ${#failed[@]} failed — $OUT"
+  [[ ${#failed[@]} -eq 0 ]] || printf '  ✗ %s\n' "${failed[@]}"
+} | tee "$OUT/summary.txt"
+[[ ${#failed[@]} -eq 0 ]]

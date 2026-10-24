@@ -69,6 +69,8 @@
     "test": "node --test --experimental-strip-types \"src/**/*.test.ts\"",
     "e2e": "scripts/e2e.sh",
     "e2e:full": "scripts/e2e.sh --tags smoke,full",
+    "e2e:all": "scripts/e2e.sh --tags smoke,full,nightly",
+    "e2e:setup": "scripts/e2e-setup.sh",
     "check:i18n": "node scripts/check-i18n.mjs .",
     "check:catalog": "node scripts/validate-catalog.mjs"
   },
