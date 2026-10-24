@@ -6,8 +6,10 @@ import { Asset } from 'expo-asset';
 import { Directory, File, Paths } from 'expo-file-system';
 import { unzipSync } from 'fflate';
 
+import { emptyGlyphRange, FONTSTACKS, glyphRanges } from './glyphs';
+
 // Bump when the zip contents change so devices unpack the new set.
-const VERSION = 'v1';
+const VERSION = 'v2';
 
 export type MapAssets = {
   /** Glyph URL template for the style. */
@@ -62,6 +64,17 @@ async function unpack(): Promise<MapAssets> {
     const f = new File(parent, name);
     f.create({ overwrite: true });
     f.writeSync(bytes);
+  }
+  // The zip ships the common ranges only: fill the rest with empty ones (see glyphs.ts).
+  for (const stack of FONTSTACKS) {
+    const fontDir = new Directory(dir, 'fonts', stack);
+    if (!fontDir.exists) fontDir.create({ intermediates: true, idempotent: true });
+    for (const range of glyphRanges()) {
+      const f = new File(fontDir, `${range}.pbf`);
+      if (f.exists) continue;
+      f.create();
+      f.writeSync(emptyGlyphRange(stack, range));
+    }
   }
   marker.create({ overwrite: true });
 

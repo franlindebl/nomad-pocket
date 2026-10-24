@@ -179,6 +179,12 @@ every work block so work can resume after context compaction.
 - Loose `.pmtiles` in content/maps are registered at startup (header → bbox/zoom; a region
   id as file name gives the region's name), like loose ZIMs: maps can be copied in via
   Finder/Files, and the E2E suite seeds a 0.6 MB Melilla (`seeded-map`) to test maps offline.
+- Maps showed no detail (only a stretched low-zoom coastline) wherever labels used a script
+  the bundled glyphs lack (Arabic names around Melilla; also Hebrew, Devanagari, CJK…):
+  MapLibre Native does not draw a tile while a glyph range it needs fails to load. The asset
+  unpack (v2) now writes an empty placeholder for every range not shipped
+  (`features/maps/glyphs.ts`), so those characters are just not drawn. Shipping real
+  Arabic/Hebrew glyphs would add ~2 MB to the 1.3 MB asset zip.
 - Pre-commit hook (`.githooks/`, set by `npm install`): tsc, lint, unit tests, i18n (~5 s).
   Lint is clean now (two setState-in-effect errors fixed).
   `wikipedia_en_100_mini_2026-01.zim` committed: Kiwix removed it from the mirror.
