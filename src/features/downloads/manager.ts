@@ -170,6 +170,7 @@ export function initDownloads() {
     records[rec.id] = rec;
   }
   useDownloads.setState({ records });
+  sweepPartials(Object.keys(records));
   for (const rec of Object.values(records)) {
     if (rec.status !== 'processing') continue;
     finalize(rec.id, new File(rec.destUri)).catch((e) =>
@@ -182,8 +183,29 @@ export function initDownloads() {
   // stops with the process. iOS keeps going in its background session.
   if (Platform.OS === 'android') {
     AppState.addEventListener('change', (state) => {
-      if (state === 'background') snapshotRunning();
+      if (state === 'background') {
+        backgrounded = true;
+        snapshotRunning();
+      } else if (state === 'active' && backgrounded) {
+        backgrounded = false;
+        pump();
+      }
     });
+  }
+}
+
+/** Android only: no new transfers start while the app is in the background. */
+let backgrounded = false;
+
+/** Delete leftover `.part` files of URL downloads that no longer exist (map jobs clean their own). */
+function sweepPartials(activeIds: string[]) {
+  const keep = new Set(activeIds.map((id) => partialFile(id).name));
+  try {
+    for (const entry of partialDir().list()) {
+      if (entry instanceof File && entry.name.endsWith('.part') && !entry.name.startsWith('map-') && !keep.has(entry.name)) entry.delete();
+    }
+  } catch (e) {
+    console.warn('[downloads] sweep failed', e);
   }
 }
 
@@ -203,7 +225,11 @@ async function snapshotRunning() {
 export function enqueueDownload(input: EnqueueInput): DownloadRecord {
   const existing = useDownloads.getState().records[input.id];
   if (existing && !['failed', 'cancelled', 'done'].includes(existing.status)) return existing;
-  if (!hasRoomFor(input.expectedBytes)) throw new NotEnoughStorageError(input.expectedBytes);
+  // Other queued/running downloads will need their remaining bytes too.
+  const pending = Object.values(useDownloads.getState().records)
+    .filter((r) => !r.external && ['queued', 'running', 'paused'].includes(r.status))
+    .reduce((sum, r) => sum + Math.max(0, r.totalBytes - r.bytesWritten), 0);
+  if (!hasRoomFor(input.expectedBytes + pending)) throw new NotEnoughStorageError(input.expectedBytes);
 
   const now = Date.now();
   const dest = contentFile(input.kind, input.filename);
@@ -244,6 +270,7 @@ function activeCount() {
 }
 
 function pump() {
+  if (backgrounded) return;
   const queued = Object.values(useDownloads.getState().records)
     .filter((r) => r.status === 'queued' && !r.external)
     .sort((a, b) => a.createdAt - b.createdAt);
@@ -280,7 +307,11 @@ function onProgress(id: string, bytesWritten: number, totalBytes: number) {
 /** Hand the finished file to its feature and mark the download done. */
 async function finalize(id: string, dest: File) {
   const current = useDownloads.getState().records[id];
-  if (!current) return;
+  if (!current || current.status === 'cancelled') {
+    // Cancelled while the file was being moved into place.
+    deleteFile(dest.uri);
+    return;
+  }
   const size = Number(dest.size ?? current.totalBytes);
   await handlers[current.kind]?.(dest, { ...current, bytesWritten: size, totalBytes: size });
   setStatus(id, 'done', { bytesWritten: size, totalBytes: size }, { bytes_written: size, total_bytes: size });
@@ -369,10 +400,11 @@ export async function pauseDownload(id: string) {
     await task.pauseAsync();
     persist(id, { pause_state: JSON.stringify(task.savable()) });
   } catch {
-    // Not pausable (already finished) — nothing to do.
+    // Not pausable: it finished (or failed) meanwhile and run() handles that.
+    return;
   }
   tasks.delete(id);
-  setStatus(id, 'paused');
+  if (useDownloads.getState().records[id]?.status === 'running') setStatus(id, 'paused');
   pump();
 }
 
@@ -465,6 +497,7 @@ export function startExternalJob(input: {
 }
 
 export function dismissDownload(id: string) {
+  deleteFile(partialFile(id).uri);
   db().runSync('DELETE FROM downloads WHERE id = ?', id);
   useDownloads.getState().remove(id);
 }

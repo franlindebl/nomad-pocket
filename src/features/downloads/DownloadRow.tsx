@@ -18,7 +18,11 @@ export function DownloadRow({ record }: { record: DownloadRecord }) {
   let detail = `${formatBytes(bytesWritten)} / ${formatBytes(totalBytes)}`;
   if (status === 'running' && eta) detail += ` · ${t('downloads.eta', { time: formatDuration(eta) })}`;
   if (status !== 'running') detail = `${t(`status.${status}`)} · ${detail}`;
-  if (status === 'failed' && record.error) detail = `${t('status.failed')} · ${record.error}`;
+  if (status === 'failed' && record.error) {
+    // Known error codes get a translated message; anything else is shown as reported.
+    const message = record.error === 'NOT_ENOUGH_STORAGE' ? t('storage.notEnoughShort') : record.error;
+    detail = `${t('status.failed')} · ${message}`;
+  }
 
   return (
     <View style={styles.row}>

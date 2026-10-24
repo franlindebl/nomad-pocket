@@ -23,18 +23,24 @@ final class ZimRegistry: @unchecked Sendable {
 
     lock.lock()
     defer { lock.unlock() }
-    if let old = byId[id] { byUuid.removeValue(forKey: old.uuid) }
+    if let old = byId[id] { removeUuid(of: old) }
     byId[id] = archive
-    byUuid[archive.uuid] = archive
+    // Metadata probes (registerZimFile) must not take over the UUID the reader uses.
+    if !id.hasPrefix(Self.probePrefix) { byUuid[archive.uuid] = archive }
     return archive
   }
 
   func close(id: String) {
     lock.lock()
     defer { lock.unlock() }
-    if let old = byId.removeValue(forKey: id) {
-      byUuid.removeValue(forKey: old.uuid)
-    }
+    if let old = byId.removeValue(forKey: id) { removeUuid(of: old) }
+  }
+
+  static let probePrefix = "__probe_"
+
+  /// Caller holds the lock. Only drops the UUID entry if it still points at `archive`.
+  private func removeUuid(of archive: NZArchive) {
+    if byUuid[archive.uuid] === archive { byUuid.removeValue(forKey: archive.uuid) }
   }
 
   func archive(id: String) -> NZArchive? {

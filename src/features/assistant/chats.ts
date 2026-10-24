@@ -102,7 +102,10 @@ export function deleteSession(id: string) {
   d.runSync('DELETE FROM chat_messages WHERE session_id = ?', id);
   d.runSync('DELETE FROM chat_sessions WHERE id = ?', id);
   const st = useChat.getState();
-  if (st.streaming?.sessionId === id) stopGeneration().catch(() => {});
+  if (st.streaming?.sessionId === id) {
+    cancelledAnswers.add(st.streaming.messageId);
+    stopGeneration().catch(() => {});
+  }
   useChat.setState({
     sessions: listSessions(),
     ...(st.activeSessionId === id ? { activeSessionId: null, messages: [], error: null } : {}),
@@ -231,7 +234,10 @@ export async function sendMessage(question: string) {
         patchStreaming({ sources, phase: 'loading' });
       }
 
+      // Stop pressed while searching or loading: the engine has nothing to stop yet.
+      if (cancelledAnswers.has(streaming.messageId)) return;
       await engine.load((p) => patchStreaming({ loadProgress: p }));
+      if (cancelledAnswers.has(streaming.messageId)) return;
       patchStreaming({ phase: 'generating' });
 
       let last = 0;
@@ -256,9 +262,12 @@ export async function sendMessage(question: string) {
     else failed = String((e as Error)?.message ?? e);
   }
 
+  cancelledAnswers.delete(streaming.messageId);
   const cur = useChat.getState();
   const finalText = answer.trim();
-  if (finalText) {
+  // The conversation may have been deleted while answering.
+  const sessionAlive = !!db().getFirstSync('SELECT 1 FROM chat_sessions WHERE id = ?', sessionId);
+  if (finalText && sessionAlive) {
     const msg: ChatMessage = {
       id: streaming.messageId,
       sessionId,
@@ -284,7 +293,12 @@ function systemFor(sys: string, hasSources: boolean): string {
   return hasSources ? sys : sys.split('\n\n')[0];
 }
 
+/** Answers stopped before generation started (ids of their streaming messages). */
+const cancelledAnswers = new Set<string>();
+
 export async function stopAnswer() {
+  const id = useChat.getState().streaming?.messageId;
+  if (id) cancelledAnswers.add(id);
   await stopGeneration();
 }
 

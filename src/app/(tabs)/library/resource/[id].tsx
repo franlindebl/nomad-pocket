@@ -59,7 +59,9 @@ export default function ResourceSheet() {
             ) : (
               <Button title={tc('actions.pause')} variant="secondary" onPress={() => pauseDownload(id)} />
             )}
-            <Button title={tc('actions.cancel')} variant="ghost" onPress={() => cancelDownload(id)} />
+            {download.status !== 'processing' ? (
+              <Button title={tc('actions.cancel')} variant="ghost" onPress={() => cancelDownload(id)} />
+            ) : null}
           </Row>
         </View>
       ) : installed ? (

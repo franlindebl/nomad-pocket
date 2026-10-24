@@ -64,7 +64,8 @@ export function listCourses(): CourseState[] {
 
 async function buildSyllabus(itemId: string): Promise<Lesson[]> {
   const main = await getMainPath(itemId);
-  if (!main) return [];
+  // Unreadable right now (not open yet, file missing): don't persist an empty syllabus.
+  if (!main) throw new Error('ARCHIVE_UNAVAILABLE');
   const links = await getLinks(itemId, main);
   const seen = new Set<string>([main]);
   const lessons: Lesson[] = [];
@@ -85,17 +86,17 @@ export async function ensureCourse(itemId: string): Promise<CourseState | null> 
   const existing = getCourse(itemId);
   // A built syllabus may legitimately be empty (no structured main page): don't rebuild it.
   if (existing && existing.syllabusBuilt) return existing;
-  let syllabus: Lesson[] = [];
+  let syllabus: Lesson[] | null;
   try {
     syllabus = await buildSyllabus(itemId);
   } catch {
-    syllabus = [];
+    syllabus = null; // retried next time
   }
   db().runSync(
     `INSERT INTO courses (item_id, syllabus, enrolled_at) VALUES (?, ?, ?)
-     ON CONFLICT(item_id) DO UPDATE SET syllabus = excluded.syllabus`,
+     ON CONFLICT(item_id) DO UPDATE SET syllabus = COALESCE(excluded.syllabus, courses.syllabus)`,
     itemId,
-    JSON.stringify(syllabus),
+    syllabus ? JSON.stringify(syllabus) : null,
     Date.now(),
   );
   useCourses.getState().bump();

@@ -11,12 +11,44 @@ import { Card, IconBadge, ListGroup, ListRow, PressableScale, Screen, SearchFiel
 import { catalog, loc, matchesLanguages, sumMB, tierResources } from '@/features/catalog';
 import { categoryHue, iconByName } from '@/features/catalog/icons';
 import { removeItem, useItems, type InstalledItem } from '@/features/content/items';
+import { NotEnoughStorageError } from '@/features/downloads/manager';
 import { registerZimFile } from '@/features/library/register';
 import { formatBytes, formatMB } from '@/lib/format';
-import { contentDir } from '@/lib/storage';
+import { contentDir, deleteFile, freeBytes, hasRoomFor, partialDir } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
 import { radius, space, useTheme } from '@/theme';
 
+
+/**
+ * Copy a picked file into content/zim and register it. Files already inside
+ * content/zim (visible through the Files app) are registered in place; existing
+ * archives are never overwritten, and a failed import leaves nothing behind.
+ */
+async function importZimFile(asset: DocumentPicker.DocumentPickerAsset) {
+  const dir = contentDir('zim');
+  const norm = (u: string) => decodeURIComponent(u.replace(/^file:\/\//, ''));
+  if (norm(asset.uri).startsWith(norm(dir.uri))) {
+    await registerZimFile(asset.uri);
+    return;
+  }
+  const size = Number(asset.size ?? 0);
+  if (size && !hasRoomFor(size)) throw new NotEnoughStorageError(size);
+
+  const base = asset.name.replace(/\.zim$/i, '').replace(/[^\w.-]+/g, '_') || 'import';
+  let dest = new File(dir, `${base}.zim`);
+  for (let n = 1; dest.exists; n++) dest = new File(dir, `${base}-${n}.zim`);
+
+  const tmp = new File(partialDir(), `import-${Date.now()}.zim.part`);
+  try {
+    await new File(asset.uri).copy(tmp);
+    await tmp.move(dest);
+    await registerZimFile(dest.uri);
+  } catch (e) {
+    deleteFile(tmp.uri);
+    deleteFile(dest.uri);
+    throw e;
+  }
+}
 
 export default function LibraryScreen() {
   const { t } = useTranslation('library');
@@ -28,16 +60,11 @@ export default function LibraryScreen() {
   const importZim = async () => {
     const res = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: false, multiple: false });
     if (res.canceled || !res.assets?.[0]) return;
-    const asset = res.assets[0];
     setImporting(true);
     try {
-      const src = new File(asset.uri);
-      const dest = new File(contentDir('zim'), asset.name.endsWith('.zim') ? asset.name : `${asset.name}.zim`);
-      if (dest.exists) dest.delete();
-      await src.copy(dest);
-      await registerZimFile(dest.uri);
+      await importZimFile(res.assets[0]);
     } catch (e) {
-      Alert.alert(t('importFailed'), String((e as Error)?.message ?? e));
+      Alert.alert(t('importFailed'), e instanceof NotEnoughStorageError ? tc('storage.notEnough', { needed: formatBytes(e.needed), free: formatBytes(freeBytes()) }) : String((e as Error)?.message ?? e));
     } finally {
       setImporting(false);
     }

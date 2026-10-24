@@ -66,7 +66,9 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "postinstall": "bash modules/nomad-zim/scripts/fetch-ios-libs.sh",
-    "test": "node --test --experimental-strip-types \"src/**/*.test.ts\""
+    "test": "node --test --experimental-strip-types \"src/**/*.test.ts\"",
+    "check:i18n": "node scripts/check-i18n.mjs .",
+    "check:catalog": "node scripts/validate-catalog.mjs"
   },
   "private": true,
   "license": "GPL-3.0-or-later"

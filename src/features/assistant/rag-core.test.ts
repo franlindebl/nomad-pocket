@@ -14,6 +14,7 @@ import {
   normalize,
   packContext,
   rankChunks,
+  splitSentences,
   stem,
   stripThinking,
   systemPrompt,
@@ -248,4 +249,16 @@ describe('system prompt', () => {
     assert.doesNotMatch(systemPrompt('es', false, false), /consejo médico/);
     assert.match(systemPrompt('en', true), /\[1\]/);
   });
+});
+
+test('splitSentences keeps decimals and Spanish opening marks', () => {
+  assert.deepEqual(splitSentences('La dosis es 0.5 mg/kg. ¿Y si la fiebre supera 39.5 °C? ¡Acude al médico!'), [
+    'La dosis es 0.5 mg/kg.',
+    '¿Y si la fiebre supera 39.5 °C?',
+    '¡Acude al médico!',
+  ]);
+});
+
+test('citedNumbers expands ranges', () => {
+  assert.deepEqual(citedNumbers('Ver [1-3] y [5, 7].'), [1, 2, 3, 5, 7]);
 });

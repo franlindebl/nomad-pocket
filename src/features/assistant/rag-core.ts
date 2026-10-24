@@ -150,9 +150,13 @@ export type Chunk = {
   hitRank?: number;
 };
 
-/** Split into sentences, keeping the terminator. */
+/**
+ * Split into sentences, keeping the terminator. A terminator only ends a sentence
+ * when followed by whitespace or the end ("0.5 mg", "39.5 °C" stay intact), and
+ * Spanish opening marks (¿ ¡) are kept.
+ */
 export function splitSentences(text: string): string[] {
-  const parts = text.match(/[^.!?¡¿\n]+(?:[.!?]+|\n+|$)/g) ?? [];
+  const parts = text.match(/[^\n]+?(?:[.!?…]+(?=\s|$)|\n+|$)/g) ?? [];
   return parts.map((s) => s.trim()).filter(Boolean);
 }
 
@@ -435,7 +439,12 @@ export function buildRagUserMessage(question: string, sources: PackedSource[], l
 export function citedNumbers(answer: string): number[] {
   const out = new Set<number>();
   for (const m of answer.matchAll(/\[(\d{1,2}(?:\s*[,–-]\s*\d{1,2})*)\]/g)) {
-    for (const n of m[1].split(/[,–-]/)) out.add(Number(n.trim()));
+    for (const part of m[1].split(',')) {
+      // "1-3" / "1–3" is a range: every source in it was cited.
+      const [a, b] = part.split(/[–-]/).map((x) => Number(x.trim()));
+      if (b && b >= a && b - a < 20) for (let n = a; n <= b; n++) out.add(n);
+      else out.add(a);
+    }
   }
   return [...out].filter((n) => n > 0).sort((a, b) => a - b);
 }

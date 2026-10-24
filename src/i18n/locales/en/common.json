@@ -41,7 +41,8 @@
   "storage": {
     "free": "{{size}} free",
     "of": "{{used}} of {{total}}",
-    "notEnough": "Not enough space. You need {{needed}} and have {{free}} free."
+    "notEnough": "Not enough space. You need {{needed}} and have {{free}} free.",
+    "notEnoughShort": "Not enough storage"
   },
   "downloads": {
     "title": "Downloads",

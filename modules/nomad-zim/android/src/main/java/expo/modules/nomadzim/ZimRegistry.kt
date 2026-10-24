@@ -8,6 +8,8 @@ import org.kiwix.libzim.Searcher
 import org.kiwix.libzim.SuggestionSearcher
 import java.io.RandomAccessFile
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 data class ZimEntryInfo(
   val path: String,
@@ -136,23 +138,33 @@ object ZimRegistry {
     }
   }
 
+  private const val PROBE_PREFIX = "__probe_"
+
+  /**
+   * WebView requests, media streams and IO coroutines may still be reading a handle
+   * when it is closed; disposing it right away frees native memory under them (a
+   * SIGSEGV runCatching can't catch). Dispose after a grace period instead.
+   */
+  private const val DISPOSE_DELAY_MS = 120_000L
+  private val reaper = Executors.newSingleThreadScheduledExecutor { r -> Thread(r, "zim-reaper").apply { isDaemon = true } }
+
+  private fun retire(handle: ZimHandle) {
+    byUuid.remove(handle.uuid, handle)
+    reaper.schedule({ handle.dispose() }, DISPOSE_DELAY_MS, TimeUnit.MILLISECONDS)
+  }
+
   fun open(context: Context, id: String, path: String): ZimHandle {
     ensureLoaded(context)
     byId[id]?.let { if (it.filePath == path) return it }
     val handle = ZimHandle(id, path, Archive(path))
-    byId.put(id, handle)?.let { old ->
-      byUuid.remove(old.uuid)
-      old.dispose()
-    }
-    byUuid[handle.uuid] = handle
+    byId.put(id, handle)?.let { old -> retire(old) }
+    // Metadata probes (registerZimFile) must not take over the UUID the reader uses.
+    if (!id.startsWith(PROBE_PREFIX)) byUuid[handle.uuid] = handle
     return handle
   }
 
   fun close(id: String) {
-    byId.remove(id)?.let {
-      byUuid.remove(it.uuid)
-      it.dispose()
-    }
+    byId.remove(id)?.let { retire(it) }
   }
 
   fun get(id: String): ZimHandle? = byId[id]

@@ -44,6 +44,8 @@ export type ZimLink = { path: string; title: string };
 
 const infos = new Map<string, ZimInfo>();
 const opening = new Map<string, Promise<ZimInfo>>();
+/** Bumped on close so opens that finish afterwards know they are stale. */
+const generation = new Map<string, number>();
 
 function toInfo(n: NativeZimInfo): ZimInfo {
   return {
@@ -70,18 +72,28 @@ export async function openArchive(itemId: string, fileUri: string): Promise<ZimI
   if (cached && NomadZim.isOpen(itemId)) return cached;
   const pending = opening.get(itemId);
   if (pending) return pending;
+  const gen = generation.get(itemId) ?? 0;
   const p = NomadZim.openArchive(itemId, toNativePath(fileUri))
     .then((n) => {
+      // Closed (e.g. deleted) while it was opening: don't leave it open behind our back.
+      if ((generation.get(itemId) ?? 0) !== gen) {
+        NomadZim.closeArchive(itemId);
+        throw new Error('ARCHIVE_CLOSED');
+      }
       const info = toInfo(n);
       infos.set(itemId, info);
       return info;
     })
-    .finally(() => opening.delete(itemId));
+    .finally(() => {
+      if (opening.get(itemId) === p) opening.delete(itemId);
+    });
   opening.set(itemId, p);
   return p;
 }
 
 export function closeArchive(itemId: string): void {
+  generation.set(itemId, (generation.get(itemId) ?? 0) + 1);
+  opening.delete(itemId);
   infos.delete(itemId);
   if (isNomadZimAvailable()) NomadZim.closeArchive(itemId);
 }

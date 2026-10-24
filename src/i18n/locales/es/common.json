@@ -41,7 +41,8 @@
   "storage": {
     "free": "{{size}} libres",
     "of": "{{used}} de {{total}}",
-    "notEnough": "No hay espacio suficiente. Necesitas {{needed}} y tienes {{free}} libres."
+    "notEnough": "No hay espacio suficiente. Necesitas {{needed}} y tienes {{free}} libres.",
+    "notEnoughShort": "No hay espacio suficiente"
   },
   "downloads": {
     "title": "Descargas",

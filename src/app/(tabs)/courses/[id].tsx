@@ -125,7 +125,9 @@ export default function CourseScreen() {
               <Text variant="caption" color="textSecondary">
                 {tc(`status.${download.status}`)}
               </Text>
-              <Button title={tc('actions.cancel')} variant="ghost" size="sm" onPress={() => cancelDownload(id)} />
+              {download.status !== 'processing' ? (
+                <Button title={tc('actions.cancel')} variant="ghost" size="sm" onPress={() => cancelDownload(id)} />
+              ) : null}
             </Row>
           </Card>
         ) : resource ? (
