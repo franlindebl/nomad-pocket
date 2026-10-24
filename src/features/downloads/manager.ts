@@ -158,6 +158,11 @@ export function initDownloads() {
     const rec = fromRow(r);
     // The JS task does not survive a relaunch. Paused tasks keep resume data;
     // interrupted running/processing ones go back to the queue.
+    // A crash while processing leaves the finished file in place: finish it instead of re-downloading.
+    if (rec.status === 'processing' && new File(rec.destUri).exists) {
+      records[rec.id] = rec;
+      continue;
+    }
     if (rec.status === 'running' || rec.status === 'processing') {
       rec.status = r.pause_state ? 'paused' : 'queued';
       persist(rec.id, { status: rec.status });
@@ -165,6 +170,12 @@ export function initDownloads() {
     records[rec.id] = rec;
   }
   useDownloads.setState({ records });
+  for (const rec of Object.values(records)) {
+    if (rec.status !== 'processing') continue;
+    finalize(rec.id, new File(rec.destUri)).catch((e) =>
+      setStatus(rec.id, 'failed', { error: String((e as Error)?.message ?? e) }, { error: String((e as Error)?.message ?? e) }),
+    );
+  }
   pump();
 
   // Persist resume data when going to background on Android, where the transfer
@@ -266,6 +277,19 @@ function onProgress(id: string, bytesWritten: number, totalBytes: number) {
   }
 }
 
+/** Hand the finished file to its feature and mark the download done. */
+async function finalize(id: string, dest: File) {
+  const current = useDownloads.getState().records[id];
+  if (!current) return;
+  const size = Number(dest.size ?? current.totalBytes);
+  await handlers[current.kind]?.(dest, { ...current, bytesWritten: size, totalBytes: size });
+  setStatus(id, 'done', { bytesWritten: size, totalBytes: size }, { bytes_written: size, total_bytes: size });
+  const done = useDownloads.getState().records[id];
+  if (done) listeners.forEach((l) => l(done));
+  // Finished downloads leave the active list after a moment.
+  setTimeout(() => useDownloads.getState().remove(id), 4000);
+}
+
 async function run(id: string) {
   const rec = useDownloads.getState().records[id];
   if (!rec) return;
@@ -328,14 +352,7 @@ async function run(id: string) {
     const dest = new File(rec.destUri);
     if (dest.exists) dest.delete();
     await file.move(dest);
-    const current = useDownloads.getState().records[id] ?? rec;
-    const size = Number(dest.size ?? current.totalBytes);
-    await handlers[rec.kind]?.(dest, { ...current, bytesWritten: size, totalBytes: size });
-    setStatus(id, 'done', { bytesWritten: size, totalBytes: size }, { bytes_written: size, total_bytes: size });
-    const done = useDownloads.getState().records[id];
-    if (done) listeners.forEach((l) => l(done));
-    // Finished downloads leave the active list after a moment.
-    setTimeout(() => useDownloads.getState().remove(id), 4000);
+    await finalize(id, dest);
   } catch (e) {
     setStatus(id, 'failed', { error: String((e as Error)?.message ?? e) }, { error: String((e as Error)?.message ?? e) });
   }

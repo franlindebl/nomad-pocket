@@ -53,6 +53,9 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
       allowFileAccess = false
       allowContentAccess = false
       mediaPlaybackRequiresUserGesture = true
+      // Desktop-layout pages without a viewport meta fit the screen, like WKWebView does.
+      useWideViewPort = true
+      loadWithOverviewMode = true
       builtInZoomControls = true
       displayZoomControls = false
       setSupportMultipleWindows(false)
