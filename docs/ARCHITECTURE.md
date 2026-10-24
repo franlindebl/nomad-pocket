@@ -131,9 +131,11 @@ app opens no network sockets while rendering). Style = `@protomaps/basemaps`
 the world basemap (`map-world`, z0–5) is the bottom source and each region gets its
 own layer stack on top, so the map is never empty outside a region (duplicate
 labels collapse through symbol collision). Glyphs (Noto Sans Regular/Medium/Italic:
-Latin, Latin Ext, Greek, Cyrillic, Hebrew, Arabic and their presentation forms,
-punctuation) and v4 sprites ship as `assets/maps/basemap-assets.zip` (2.2 MB), unpacked
-once to `Documents/map-assets/v3/`; every other range gets an empty placeholder there
+Latin, Latin Ext, Greek, Cyrillic, Hebrew, Arabic and their presentation forms, Thai,
+Georgian, Ethiopic, punctuation; plus Protomaps' pre-shaped Noto Sans Devanagari) and v4
+sprites ship as `assets/maps/basemap-assets.zip` (3 MB), unpacked once to
+`Documents/map-assets/v4/`. Chinese, Japanese and Korean are drawn by MapLibre with the
+system font (no glyphs needed). Every other range gets an empty placeholder there
 (`features/maps/glyphs.ts`: MapLibre Native doesn't draw a tile while a glyph range it
 needs fails to load). The style references them with `file://` URLs (MapLibre
 percent-decodes the `Noto%20Sans%20Regular` fontstack path). `regions.json` and
