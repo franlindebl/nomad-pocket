@@ -45,5 +45,8 @@
   "noArchivesBody": "Descarga un libro desde la biblioteca y búscalo aquí, sin conexión.",
   "noFullTextIndex": "Este libro no tiene índice de texto completo; se muestran coincidencias de título.",
   "articles_one": "{{count}} artículo",
-  "articles_other": "{{count}} artículos"
+  "articles_other": "{{count}} artículos",
+  "toc": "Índice",
+  "tocEmpty": "Esta página no tiene secciones",
+  "tocEmptyBody": "Las páginas cortas o las portadas no suelen tener índice."
 }

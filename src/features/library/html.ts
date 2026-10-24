@@ -230,3 +230,25 @@ export function extractLinks(html: string, basePath: string): { path: string; ti
   flush();
   return out;
 }
+
+export type Heading = { id: string; title: string; level: 2 | 3 };
+
+/**
+ * Section headings (h2/h3) that can be linked to with `#id`, in document order.
+ * MediaWiki dumps put the anchor either on the heading or on an inner
+ * `<span class="mw-headline" id=…>`.
+ */
+export function extractHeadings(html: string): Heading[] {
+  const out: Heading[] = [];
+  const seen = new Set<string>();
+  const re = /<h([23])\b([^>]*)>([\s\S]*?)<\/h\1>/gi;
+  for (let m = re.exec(html); m; m = re.exec(html)) {
+    const level = Number(m[1]) as 2 | 3;
+    const id = /\bid\s*=\s*["']([^"']+)["']/i.exec(m[2])?.[1] ?? /\bid\s*=\s*["']([^"']+)["']/i.exec(m[3])?.[1];
+    const title = decodeEntities(stripTags(m[3]).replace(/\[\s*(edit|editar)\s*\]/gi, '')).trim();
+    if (!id || !title || seen.has(id)) continue;
+    seen.add(id);
+    out.push({ id, title, level });
+  }
+  return out;
+}

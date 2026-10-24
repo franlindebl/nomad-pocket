@@ -6,7 +6,7 @@ import { toNativePath } from '@/lib/storage';
 
 import { NomadZim, isNomadZimAvailable, type NativeZimHit, type NativeZimInfo } from '../../../modules/nomad-zim';
 
-import { decodeEntities, extractLinks, htmlToText, stripTags } from './html';
+import { decodeEntities, extractHeadings, extractLinks, htmlToText, stripTags, type Heading } from './html';
 
 export type ZimInfo = {
   /** Archive UUID from the ZIM header — stable across devices for the same file. */
@@ -192,6 +192,12 @@ export async function getLinks(itemId: string, path: string): Promise<ZimLink[]>
   const article = await getArticleHtml(itemId, path);
   if (!article) return [];
   return extractLinks(article.html, article.path);
+}
+
+/** Linkable section headings of an article (table of contents). */
+export async function getHeadings(itemId: string, path: string): Promise<Heading[]> {
+  const article = await getArticleHtml(itemId, path);
+  return article ? extractHeadings(article.html) : [];
 }
 
 export async function getMainPath(itemId: string): Promise<string | null> {

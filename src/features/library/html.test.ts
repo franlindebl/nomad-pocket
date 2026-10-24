@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { decodeEntities, extractLinks, htmlToText, resolveZimHref, stripTags } from './html.ts';
+import { decodeEntities, extractHeadings, extractLinks, htmlToText, resolveZimHref, stripTags } from './html.ts';
 
 const ARTICLE = `<!DOCTYPE html><html><head><title>Water &amp; Ice</title><style>p{color:red}</style>
 <script>var x = "<p>nope</p>";</script></head><body>
@@ -58,5 +58,15 @@ test('extractLinks returns internal article links in order, deduplicated', () =>
     { path: 'Life', title: 'all known forms of life' },
     { path: 'Ice', title: 'ice' },
     { path: 'Ocean', title: 'Ocean' },
+  ]);
+});
+
+test('extractHeadings: ids on headings or inner mw-headline spans, deduped, in order', () => {
+  const html = `<h2 id="Historia">Historia</h2><p>x</p>
+<h3><span class="mw-headline" id="Origen">Or&iacute;gen</span><span class="edit">[editar]</span></h3>
+<h4 id="deep">Too deep</h4><h2>No id</h2><h2 id="Historia">Dup</h2>`;
+  assert.deepEqual(extractHeadings(html), [
+    { id: 'Historia', title: 'Historia', level: 2 },
+    { id: 'Origen', title: 'Orígen', level: 3 },
   ]);
 });

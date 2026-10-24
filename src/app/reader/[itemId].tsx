@@ -10,6 +10,7 @@ import {
   Ellipsis,
   History,
   House,
+  ListTree,
   Search,
   Shuffle,
   TextSearch,
@@ -23,6 +24,7 @@ import { useItems } from '@/features/content/items';
 import { ArchiveSearchSheet } from '@/features/library/components/ArchiveSearchSheet';
 import { DisclaimerBanner, FindBar, MenuItem, Popover, ReaderToolbar, TextSizeControl } from '@/features/library/components/ReaderChrome';
 import { ReaderLibrarySheet } from '@/features/library/components/ReaderLibrarySheet';
+import { ReaderTocSheet } from '@/features/library/components/ReaderTocSheet';
 import { isBookmarked, recordVisit, toggleBookmark } from '@/features/library/history';
 import { pageTitle } from '@/features/library/titles';
 import { ensureArchive, randomPath } from '@/features/library/zim';
@@ -32,7 +34,7 @@ import { space, useTheme } from '@/theme';
 import { ZimWebView, type ZimNavigationEvent, type ZimWebViewRef } from '../../../modules/nomad-zim';
 
 type Panel = null | 'text' | 'more';
-type SheetKind = null | 'search' | 'library';
+type SheetKind = null | 'search' | 'library' | 'toc';
 
 const disclaimerKey = (id: string) => `reader.disclaimerDismissed.${id}`;
 
@@ -194,6 +196,14 @@ export default function ReaderScreen() {
         ) : null}
         {panel === 'more' ? (
           <Popover onDismiss={() => setPanel(null)}>
+            <MenuItem
+              icon={ListTree}
+              label={t('toc')}
+              onPress={() => {
+                setPanel(null);
+                setSheet('toc');
+              }}
+            />
             <MenuItem icon={House} label={t('mainPage')} onPress={() => go('')} />
             <MenuItem icon={Shuffle} label={t('random')} onPress={onRandom} />
             <MenuItem
@@ -243,6 +253,7 @@ export default function ReaderScreen() {
       </ReaderToolbar>
 
       <ArchiveSearchSheet visible={sheet === 'search'} itemId={itemId} title={item.title} onClose={() => setSheet(null)} onOpen={go} />
+      <ReaderTocSheet visible={sheet === 'toc'} itemId={itemId} path={nav?.path ?? null} title={title} onClose={() => setSheet(null)} onOpen={go} />
       <ReaderLibrarySheet visible={sheet === 'library'} itemId={itemId} onClose={() => setSheet(null)} onOpen={go} />
     </View>
   );

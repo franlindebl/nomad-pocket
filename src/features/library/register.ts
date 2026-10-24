@@ -44,6 +44,17 @@ const str = (v: unknown): string | null => (typeof v === 'string' && v.trim() ? 
 
 let probeCounter = 0;
 
+/**
+ * Catalog entry for a ZIM file. Catalog ids include the flavour
+ * ("wikipedia_es_medicine_nopic") while the ZIM `Name` metadata does not, so also
+ * try the file name without its date suffix ("…_nopic_2026-10.zim").
+ */
+function catalogMatch(name: string | null | undefined, fileUri: string) {
+  const file = decodeURIComponent(fileUri.split('/').pop() ?? '').replace(/\.zim$/i, '');
+  const fromFile = file.replace(/_\d{4}-\d{2}[a-z]?$/i, '');
+  return getResource(fromFile) ?? (name ? getResource(name) : undefined);
+}
+
 /** Open a ZIM file already inside content/zim, read its metadata and register it. */
 export async function registerZimFile(fileUri: string, meta?: Record<string, unknown>): Promise<InstalledItem> {
   const m = (meta ?? {}) as ZimDownloadMeta;
@@ -57,10 +68,21 @@ export async function registerZimFile(fileUri: string, meta?: Record<string, unk
     closeArchive(probeId);
   }
 
-  // Imported/scanned files carry no download meta: recover it from the catalog by book name.
-  const cat = getResource(str(m.catalogId) ?? info.name);
+  // Imported/scanned files carry no download meta: recover it from the catalog.
+  const cat = getResource(str(m.catalogId) ?? '') ?? catalogMatch(info.name, fileUri);
   const id = str(m.catalogId) ?? cat?.id ?? str(info.name) ?? info.uuid;
-  const previous = getItem(id);
+  // Same file registered earlier under another id (before its catalog entry was known):
+  // move its reading state to the new id and drop the old row.
+  const stale = listItems('zim').find((i) => i.id !== id && i.fileUri === fileUri);
+  if (stale) {
+    closeArchive(stale.id);
+    const d = db();
+    for (const table of ['history', 'bookmarks', 'courses', 'course_progress']) {
+      d.runSync(`UPDATE OR IGNORE ${table} SET item_id = ? WHERE item_id = ?`, id, stale.id);
+    }
+    d.runSync('DELETE FROM items WHERE id = ?', stale.id);
+  }
+  const previous = getItem(id) ?? (stale ? { ...stale, id } : null);
   if (previous && previous.fileUri !== fileUri) {
     // Updated version of an installed archive: drop the old file once the new one is in.
     closeArchive(id);
@@ -136,7 +158,7 @@ registerInit(async () => {
       }
       // Items registered before their catalog entry was known get its metadata now.
       for (const item of listItems('zim')) {
-        if (!item.catalogId && getResource(String(item.meta.name ?? item.id))) await registerZimFile(item.fileUri).catch(() => {});
+        if (!item.catalogId && catalogMatch(String(item.meta.name ?? ''), item.fileUri)) await registerZimFile(item.fileUri).catch(() => {});
       }
     } catch (e) {
       console.warn('[zim] scan failed', e);

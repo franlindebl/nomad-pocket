@@ -45,5 +45,8 @@
   "noArchivesBody": "Download a book from the library and search it here, offline.",
   "noFullTextIndex": "This book has no full-text index; showing title matches.",
   "articles_one": "{{count}} article",
-  "articles_other": "{{count}} articles"
+  "articles_other": "{{count}} articles",
+  "toc": "Contents",
+  "tocEmpty": "This page has no sections",
+  "tocEmptyBody": "Short pages and front pages usually have no contents list."
 }
