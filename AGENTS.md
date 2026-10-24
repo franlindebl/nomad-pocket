@@ -40,9 +40,11 @@ Docs: https://docs.expo.dev/eas/index.md
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
 
-## Nomad Pocket project docs
+## Nomad Pocket project guide
 
-Read before working: `docs/ARCHITECTURE.md` (module contracts, layout),
-`docs/STYLE_GUIDE.md` (UI rules — use `src/components/ui`, never hard-code colors),
-`docs/PROGRESS.md` (status and next steps; update it when you finish a block).
+The project guide for agents is `CLAUDE.md` (stack, commands, conventions, pitfalls);
+read it first. It points to `docs/PROGRESS.md` (status and next steps; update it when
+you finish a block), `docs/ARCHITECTURE.md`, `docs/DEVELOPMENT.md`,
+`docs/STYLE_GUIDE.md`, `docs/E2E.md` and `docs/RELEASE.md`.
+This project uses npm (`package-lock.json`): use `npx`, not `bunx`.
 All user-facing strings go through i18n (es + en).

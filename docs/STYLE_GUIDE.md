@@ -45,11 +45,16 @@ Warm neutrals ("paper" and "ink") with a single brand accent.
 | `success` | `#2F9E5B` | `#46C47A` | Installed, done |
 | `warning` | `#D68A00` | `#F5B02E` | Low storage, metered network |
 | `danger` | `#D93D42` | `#FF6369` | Delete, errors |
+| `surfacePressed` | `#E6E3DD` | `#28282D` | Pressed rows, Android tab ripple |
+| `onAccent` | `#FFFFFF` | `#FFFFFF` | Text/icons on accent fills |
+| `successSoft` / `warningSoft` / `dangerSoft` | `#DDF3E5` / `#FCEFD3` / `#FBE1E1` | `#12301F` / `#33260C` / `#3A1517` | Status tint backgrounds (banners, badges) |
+| `overlay` | `rgba(24,23,27,.45)` | `rgba(0,0,0,.6)` | Scrims behind popovers |
+| `shadow` | `rgba(24,23,27,.12)` | `rgba(0,0,0,.5)` | Floating elements |
 
 **Category hues** (icon badges and subtle tints only — never large fills):
 medicine `#E5484D`, survival `#F76B15`, education `#3E63DD`, diy `#12A594`,
 agriculture `#46A758`, computing `#8E4EC6`, reference `#0090FF`, maps `#0B8A8A`,
-ai `#7C5CFF`. The tint is the hue at 12% (light) / 20% (dark) opacity.
+ai `#7C5CFF`, courses `#3E63DD`, neutral `#6A6760` (`hues` in `tokens.ts`). The tint is the hue at 12% (light) / 20% (dark) opacity.
 
 Primary buttons are **ink** (black in light mode, white in dark mode), not orange:
 it keeps contrast AA-compliant and lets Ember stay meaningful.
@@ -77,12 +82,13 @@ Numbers that change (sizes, percentages, progress) use `fontVariant: ['tabular-n
 ## 4. Space, shape, depth
 
 - **4-pt grid.** Spacing tokens: `xxs 2, xs 4, sm 8, md 12, lg 16, xl 20, xxl 24, xxxl 32, huge 48`.
-- **Screen gutter:** 20. **Card padding:** 16. **Gap between cards:** 12.
+- **Screen gutter:** 20 (`space.gutter`). **Card padding:** 16. **Gap between cards:** 12.
 - **Radii:** `sm 8` (chips, small buttons), `md 12` (inputs, rows), `lg 18` (cards),
   `xl 26` (hero cards, sheets), `pill 999`.
 - **Depth:** flat by default. Cards use a 1-px `border` hairline in light mode and a
-  slightly lighter `surface` in dark mode. Only floating elements (mini-player,
-  download pill, FAB) get a soft shadow (`0 8 24 rgba(0,0,0,0.12)`).
+  slightly lighter `surface` in dark mode. Only floating elements (map buttons,
+  toasts, popovers) get a soft shadow in the `shadow` token
+  (offset 4, radius 12 for map buttons; 8 / 24 for the chat composer).
 - Use `borderCurve: 'continuous'` on iOS for squircle corners.
 
 ## 5. Iconography
@@ -96,22 +102,32 @@ Numbers that change (sizes, percentages, progress) use `fontVariant: ['tabular-n
 
 ## 6. Components (src/components/ui)
 
+All exported from `@/components/ui` (`src/components/ui/index.ts`).
+
 | Component | Notes |
 |---|---|
-| `Text` | Only way to render text. `variant`, `color` (token), `numberOfLines`. |
-| `Screen` | Safe-area aware scroll container with large title header and gutter. |
-| `Button` | `primary` (ink), `accent` (ember, rare), `secondary` (surfaceAlt), `ghost`, `danger`. Sizes `sm`/`md`/`lg`. Pill shape. Haptic on press. |
-| `IconButton` | 40×40 circular, surfaceAlt fill. |
+| `Text` | Only way to render text. `variant`, `color` (token), `tabular` (tabular numbers), `numberOfLines`. |
+| `Screen` | Scroll container: gutter, 720 pt column, room for the tab bar. `title` (+ `headerRight`) draws the in-content large title used by tab roots (the native large title renders blank inside native tabs on iOS 26). `static` for non-scrolling screens. |
+| `Button` | `primary` (ink), `accent` (ember, rare), `secondary` (surfaceAlt), `ghost`, `danger`. Sizes `sm`/`md`/`lg`, optional icon, `fullWidth`. Pill shape. Haptic on press. |
+| `IconButton` | Circular icon control (default 40×40; variants `filled` (surfaceAlt), `plain`, `ink`). Needs `accessibilityLabel`. |
 | `Card` | surface + hairline + radius lg; optional `onPress` with scale-down press feedback (0.98). |
-| `ListRow` | Leading IconBadge/icon, title, subtitle, trailing accessory (chevron, size, switch). |
+| `ListRow` / `ListGroup` | Row with leading IconBadge/icon, title, subtitle, `trailing` accessory (chevron, size, switch). `trailingAction` puts a separate button beside the row (a button inside the row's pressable would be unreachable by VoiceOver). `ListGroup` groups rows in one card. |
 | `SectionHeader` | `overline` label + optional action link. |
-| `Chip` | Filter/segment chip; selected = ink fill. |
+| `Chip` | Filter/segment chip with optional icon; selected = ink fill. |
+| `Segmented`, `Switch` | Segmented control (theme, text size…) and themed switch. |
 | `ProgressBar` | 6-px track (surfaceAlt), ember fill, rounded, animated. |
-| `ProgressRing` | For course and download progress in compact spots. |
-| `StorageMeter` | Stacked bar per content type + legend. |
+| `ProgressRing` | Course and download progress in compact spots. |
+| `IconBadge` | Category icon in a tinted rounded square (`hue`, `size`). |
 | `SearchField` | surfaceAlt fill, radius md, leading magnifier, clear button. |
-| `EmptyState` | Large soft icon badge, title2, body, primary action. |
+| `EmptyState` | Large soft icon badge, title, body, primary action. |
 | `Badge` | Small pill: "Installed", "Update", sizes. |
+| `Divider`, `Row` | Hairline separator; horizontal flex row with `gap`/`align`. |
+| `PressableScale`, `triggerHaptic` | Base pressable with press scale + haptic; haptic helper. |
+
+Outside the kit: `components/Toast.tsx` (`showToast`, e.g. "download finished") and
+`components/navigation.ts` (`useStackOptions`, `largeTitle`). Feature-specific pieces live
+in their feature (`features/catalog/DownloadButton`, `features/courses/CourseCard`,
+`features/library/components/*`, `features/assistant/ui/*`, `features/maps/MapFab`).
 
 ## 7. Motion & haptics
 
@@ -124,14 +140,14 @@ Numbers that change (sizes, percentages, progress) use `fontVariant: ['tabular-n
 
 ## 8. Layout patterns
 
-- **Home:** greeting + storage summary hero card, "Continue" carousel (last article,
-  course, map), quick-access grid of modules, active downloads.
+- **Home:** greeting + storage summary hero card, "Continue" carousel (last pages read
+  across archives), quick-access grid of modules, active downloads.
 - **Catalog:** category hero → tier cards (Essential / Standard / Comprehensive) with
   size, item count and a one-tap "Download pack".
 - **Detail:** title, publisher, language, size, date, description, single primary CTA
   that becomes a progress bar while downloading.
-- **Reader:** full-bleed content, minimal floating toolbar (back, search, TOC,
-  bookmark, text size), auto-hides on scroll.
+- **Reader:** full-bleed content, minimal toolbar (back, forward, search,
+  bookmark, text size, more — the table of contents lives in More). Auto-hiding on scroll is planned, not built yet.
 - **Sheets** (`formSheet`) for pickers and confirmations instead of alerts.
 - **Wide screens (iPad):** content is a centred column of `layout.maxContentWidth` (720 pt).
   `Screen` does it; screens with their own `ScrollView`/`FlatList` spread `layout.column`
@@ -139,8 +155,9 @@ Numbers that change (sizes, percentages, progress) use `fontVariant: ['tabular-n
 
 ## 9. Voice & copy
 
-- Spanish and English are both first-class. Strings live in `src/i18n/{es,en}.json`;
-  no literal strings in components.
+- Spanish and English are both first-class. Strings live in `src/i18n/locales/<lang>/<namespace>.json`
+  (one namespace per feature, registered in `src/i18n/resources.ts`); no literal strings in
+  components. `npm run check:i18n` catches missing keys.
 - Short, direct, friendly: "Descargar · 1,2 GB", not "Pulse aquí para iniciar la descarga".
 - Sizes in decimal units (MB/GB) with locale formatting.
 - Health content always carries the "información, no consejo médico" disclaimer.
@@ -151,4 +168,6 @@ Numbers that change (sizes, percentages, progress) use `fontVariant: ['tabular-n
 - Support Dynamic Type / font scaling up to 1.3× without clipping (`allowFontScaling`
   stays on; layouts wrap).
 - Every icon-only control has `accessibilityLabel`.
+- Never nest a pressable inside another one (iOS merges them for VoiceOver); use
+  `ListRow`'s `trailingAction`. Controls E2E flows need get a `testID` (`docs/E2E.md`).
 - Don't use color alone to signal state — pair with an icon or text.

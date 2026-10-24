@@ -1,29 +1,81 @@
-# Progress log
+# Progress
 
-Living document: current status, decisions and next steps. Update at the end of
-every work block so work can resume after context compaction.
+Living document: current status, backlog, known issues and a dated log. Update it at
+the end of every work block (status table, a log entry, next steps) so the next session
+can pick up without re-deriving anything.
 
-## Decisions (kickoff 2026-10-24)
+## Current state (2026-10-24)
+
+- **Version 1.0.2 (iOS build 4)** prepared for TestFlight; **1.0.1 (build 3)** submitted
+  to App Review. Release process and version table: `docs/RELEASE.md`.
+- All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
+  Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
+  tour). Not yet run on a physical device by the agent.
+- Checks: 80 unit tests (79 pass, 1 network test skipped), `tsc` clean, lint clean, i18n keys complete. E2E: 40 Maestro flows (16 smoke,
+  13 full, 8 nightly, iPad tour, 2 Android flows) covering 53 of 55 test-plan cases.
+
+| Area | Status |
+|---|---|
+| Foundation (design system, nav, i18n, db, downloads core) | done |
+| Catalog (101 resources, 6 categories, Wikipedia picker, Kiwix OPDS explore, Files import) | done |
+| Downloads (queue, pause/resume, iOS background, fastest Kiwix mirror, Wi-Fi-only) | done |
+| Onboarding (language → starter pack → tips) | done |
+| ZIM library + reader (search, TOC, bookmarks, history, find, text size, dark mode) | done — iOS + Android |
+| Courses (14 courses, syllabus with fallbacks, progress) | done |
+| Maps (in-app PMTiles extraction, regions, visible area, world basemap, markers, GPS, multi-script labels) | done — iOS + Android |
+| Assistant (Apple Intelligence / Gemini Nano / 4 GGUF models, RAG with citations) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp); Gemini Nano untested |
+| Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
+| E2E suite (Maestro) + pre-commit hook | done |
+
+## Decisions (kickoff 2026-10-24, by the owner)
 
 - Standalone app (no NOMAD server), React Native + Expo, iOS + Android.
 - MVP: ZIM library, offline maps, courses, local AI. UI + content in ES and EN.
 - GPL-3.0 open source (libkiwix). Public GitHub repo `franlindebl/nomad-pocket`.
-- Maps: in-app extraction from Protomaps daily build (bbox/country).
+- Maps: in-app extraction from the Protomaps daily build (bbox/country).
 - AI: system models (Apple FM / Gemini Nano) + downloadable GGUF via llama.rn.
 - Courses: educational ZIMs + progress layer (Kolibri not in MVP).
 - Name "Nomad Pocket", bundle id `com.fjlinde.nomadpocket`, iOS 16.4+ / Android 8+.
+- Later: E2E suite run by hand (no CI, no E2E git hook), flows in Spanish; iPad covered
+  by a visual tour; release builds uploaded locally with xcodebuild (no EAS).
 
-## Phase status
+## Next steps / backlog
 
-| Phase | Status |
-|---|---|
-| 0. Foundation (project, design system, nav, i18n, db, downloads core) | done — iOS/Android builds OK |
-| 1. Catalog + downloads UI + onboarding | done |
-| 2. ZIM library (native module, reader, search) | done — iOS + Android verified |
-| 3. Maps (extractor, MapLibre, regions, markers) | done — iOS + Android verified |
-| 4. Courses | done (syllabus from static main-page links; SPA courses fall back to free exploration) |
-| 5. Local AI (system + GGUF, RAG) | done — verified on iOS sim (llama.cpp CPU, Apple FM, RAG with citations) |
-| 6. Polish, icon, builds on simulator/emulator | done for MVP (see Next steps) |
+Roughly by value. None is started.
+
+1. Watch App Review for 1.0.1; upload 1.0.2 (build 4) to TestFlight if not done
+   (`docs/RELEASE.md`), test it on a real iPhone (GPU llama.cpp, Apple Intelligence,
+   background downloads, Files import, airplane mode).
+2. Resume downloads after the app is killed on iOS: reattach the background URLSession
+   (small native module) instead of restarting from zero.
+3. Map extraction: resume after a kill (persist the plan + written ranges) and move it off
+   the JS thread.
+4. Android release: upload keystore, Play listing + data safety;
+   test Gemini Nano on an AICore device.
+5. Reader: auto-hiding toolbar on scroll (style guide), syllabus for SPA course ZIMs read
+   from the rendered DOM.
+6. Assistant: copy / regenerate an answer; better small-model citations.
+
+
+## Known issues / limitations
+
+- Downloads interrupted by app termination restart from zero unless paused first
+  (expo-file-system tasks don't survive relaunch).
+- Map extraction runs on the JS thread in the foreground (screen kept awake) and does
+  not resume after the app is killed.
+- Gemini Nano path compiled but untested on a real AICore device; its output-token limits
+  are unverified.
+- Qwen3.5 0.8B rarely emits `[n]` (all retrieved sources are shown then) and is
+  unreliable for health answers — the app recommends 2B+ where RAM allows.
+- Apple Intelligence fails on the iOS 26.5 simulator (works on iOS 27).
+- Map labels in Bengali, Tamil and other Indic scripts, Myanmar and Khmer are not drawn
+  (MapLibre Native can't shape them); country bboxes skip far-flung territories.
+- ZIM media Range path untested with a real video archive.
+- Not automated: importing a ZIM from Files (system picker) and true offline mode
+  (simulator has no airplane mode); the Android tour covers visible-area map downloads but
+  not the named-region picker or the assistant (both checked by hand on the emulator).
+
+Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
@@ -196,29 +248,14 @@ every work block so work can resume after context compaction.
   Lint is clean now (two setState-in-effect errors fixed).
   `wikipedia_en_100_mini_2026-01.zim` committed: Kiwix removed it from the mirror.
 
-## Next steps
-
-- Run `npm run e2e` before every TestFlight build (`--build` after code changes).
-- Android: `npm run e2e:android` (tour). Not covered there: maps with regions, the AI assistant.
-- Nice to have: reader TOC + auto-hiding toolbar; copy/regenerate in chat; map
-  extraction resume after kill; syllabus for SPA course ZIMs (read links from the
-  rendered DOM); Gemini Nano test on a real device; store submission assets.
-
-## Known issues / risks
-
-- Downloads interrupted by app termination restart from zero unless paused first
-  (expo-file-system tasks don't survive relaunch; reattaching the iOS background
-  URLSession would need a small native module).
-- Map extraction runs in the JS thread while the app is in foreground.
-- llama.rn's `stopCompletion()`/`release()` may not return promises — don't chain `.catch`.
-- Gemini Nano path compiled but untested on a real AICore device.
-
-## Build gotchas
-
-- **xcodebuild hangs at "Resolve packages"** (MapLibre SPM binary): SwiftPM waits on a
-  macOS Keychain prompt for github.com credentials. Always pass
-  `-packageAuthorizationProvider netrc`; for `swift package` use `--disable-keychain`.
-- Android builds need `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`.
-- UI automation: Maestro flows in `e2e/` (docs/E2E.md) for the iOS simulator; `adb shell uiautomator dump` + `input tap` on Android.
-- Tests: `npm test` (node --test with type stripping; import with `.ts` extensions, no `@/` aliases).
-- Catalog check: `node scripts/validate-catalog.mjs` (`--offline` to skip URL checks).
+### 2026-10-24 — Documentation pass
+- `CLAUDE.md` (agent guide: stack, commands, conventions, pitfalls) and `AGENTS.md`
+  pointing to it. New `docs/DEVELOPMENT.md` (setup, builds, checks, debugging, build
+  gotchas) and `docs/RELEASE.md` (versions, xcodebuild upload, TestFlight, listing,
+  screenshots, site). `ARCHITECTURE.md` rewritten against the code (startup, storage,
+  every contract); this file restructured (current state, backlog, known issues);
+  STYLE_GUIDE and README corrected (i18n paths, components, in-content titles).
+- Fixed what the pass turned up: build numbers now live in `app.json` (`ios.buildNumber`
+  "4", `android.versionCode` 4) instead of the generated `Info.plist`; `package.json` at
+  1.0.2; native projects regenerated (Android had `versionName 0.1.0`); lint warnings in
+  `src/i18n/index.ts` and the i18n checker's unresolved `tc` binding on Home fixed.

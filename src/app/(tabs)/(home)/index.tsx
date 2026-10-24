@@ -27,7 +27,7 @@ const MODULES: Module[] = [
 ];
 
 /** "2 descargas activas · 1 en cola": queued downloads are not counted as active. */
-function downloadsLabel(downloads: { status: string }[], tc: (key: string, options?: Record<string, unknown>) => string) {
+function downloadsLabel(downloads: { status: string }[], tc: (k: string, options?: Record<string, unknown>) => string) {
   const queued = downloads.filter((d) => d.status === 'queued').length;
   const active = downloads.length - queued;
   return [active ? tc('downloads.active', { count: active }) : '', queued ? tc('downloads.queuedCount', { count: queued }) : '']

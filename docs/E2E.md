@@ -53,7 +53,7 @@ the Kiwix and Protomaps servers, so a failure there can be the network rather th
 
 The suite runs by hand: no CI (a macOS runner or EAS builds cost money), and it is too
 slow for a git hook. The pre-commit hook (`.githooks/pre-commit`, enabled by `npm install`)
-runs the fast checks instead: typecheck, lint, unit tests and i18n keys (~5 s). Flows match Spanish texts; `onb-02` and `set-01` check English.
+runs the fast checks instead: typecheck, lint, unit tests and i18n keys (~5–10 s). Flows match Spanish texts; `onb-02` and `set-01` check English.
 
 The iPhone flows don't run on iPad: there the tabs are a text bar at the top instead of
 icons. The iPad tour taps them by name (`tapOn: { text: "Mapas", index: 0 }`).
@@ -268,7 +268,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `resource-<id>`, `download-<id>` | catalog row and its download / open / pause button |
   | `lesson-<n>`, `lesson-check-<n>` | course lesson (1-based) and its done check |
   | `marker-name`, `marker-note` | fields of the place sheet |
-| `marker-delete`, `region-delete`, `conversation-delete` | delete buttons in lists |
+  | `marker-delete`, `region-delete`, `conversation-delete` | delete buttons in lists |
   | `house`, `books.vertical`, `map`, `graduationcap`, `sparkles` | tabs (SF Symbol ids, set by iOS) |
   | `BackButton` | the native header's back button |
 

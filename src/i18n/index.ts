@@ -1,7 +1,7 @@
 // i18n setup. Strings are split into one namespace per feature
 // (src/i18n/locales/<lang>/<namespace>.json) so features can evolve independently.
 import { getLocales } from 'expo-localization';
-import i18n from 'i18next';
+import i18n, { changeLanguage, use as addPlugin } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import { resources, type Namespace } from './resources';
@@ -16,7 +16,7 @@ export function deviceLanguage(): AppLanguage {
 
 const namespaces = Object.keys(resources.es) as Namespace[];
 
-i18n.use(initReactI18next).init({
+addPlugin(initReactI18next).init({
   resources,
   lng: deviceLanguage(),
   fallbackLng: 'en',
@@ -27,7 +27,7 @@ i18n.use(initReactI18next).init({
 });
 
 export function setLanguage(lang: AppLanguage) {
-  i18n.changeLanguage(lang);
+  changeLanguage(lang);
 }
 
 export default i18n;
