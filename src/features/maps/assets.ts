@@ -9,7 +9,7 @@ import { unzipSync } from 'fflate';
 import { emptyGlyphRange, FONTSTACKS, glyphRanges } from './glyphs';
 
 // Bump when the zip contents change so devices unpack the new set.
-const VERSION = 'v2';
+const VERSION = 'v3';
 
 export type MapAssets = {
   /** Glyph URL template for the style. */

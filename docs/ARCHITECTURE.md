@@ -130,10 +130,12 @@ app opens no network sockets while rendering). Style = `@protomaps/basemaps`
 `layers()` per source (light/dark from the app theme, labels in the app language);
 the world basemap (`map-world`, z0–5) is the bottom source and each region gets its
 own layer stack on top, so the map is never empty outside a region (duplicate
-labels collapse through symbol collision). Glyphs (Noto Sans Regular/Medium/Italic,
-ranges 0–1279, 7680–8703: Latin, Latin Ext, Greek, Cyrillic, punctuation) and v4
-sprites ship as `assets/maps/basemap-assets.zip` (1.4 MB), unpacked once to
-`Documents/map-assets/v1/` and referenced with `file://` URLs (MapLibre
+labels collapse through symbol collision). Glyphs (Noto Sans Regular/Medium/Italic:
+Latin, Latin Ext, Greek, Cyrillic, Hebrew, Arabic and their presentation forms,
+punctuation) and v4 sprites ship as `assets/maps/basemap-assets.zip` (2.2 MB), unpacked
+once to `Documents/map-assets/v3/`; every other range gets an empty placeholder there
+(`features/maps/glyphs.ts`: MapLibre Native doesn't draw a tile while a glyph range it
+needs fails to load). The style references them with `file://` URLs (MapLibre
 percent-decodes the `Noto%20Sans%20Regular` fontstack path). `regions.json` and
 the zip are regenerated with the scripts in `scripts/maps/` (Natural Earth +
 basemaps-assets downloads). Screenshots: `docs/screenshots/maps-*.png`.

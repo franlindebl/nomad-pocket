@@ -183,8 +183,8 @@ every work block so work can resume after context compaction.
   the bundled glyphs lack (Arabic names around Melilla; also Hebrew, Devanagari, CJK…):
   MapLibre Native does not draw a tile while a glyph range it needs fails to load. The asset
   unpack (v2) now writes an empty placeholder for every range not shipped
-  (`features/maps/glyphs.ts`), so those characters are just not drawn. Shipping real
-  Arabic/Hebrew glyphs would add ~2 MB to the 1.3 MB asset zip.
+  (`features/maps/glyphs.ts`), so those characters are just not drawn. Hebrew and Arabic
+  ship as real glyphs (asset zip 1.4 → 2.2 MB, `scripts/maps/make-zip.py`).
 - Android pass (emulator, release APK, `npm run e2e:android`): everything shared works;
   the reader's find bar sat under the keyboard there too (edge-to-edge Android doesn't
   resize either, and its keyboard height leaves out the gesture strip): fixed.
