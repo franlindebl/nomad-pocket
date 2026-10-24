@@ -31,8 +31,8 @@ export default function CoursesScreen() {
   const notInstalled = filtered.filter((r) => !installed.some((i) => i.catalogId === r.id));
 
   return (
-    <Screen>
-      <SectionHeader title={t('myCourses')} style={{ marginTop: space.sm }} />
+    <Screen title={t('common:tabs.courses')}>
+      <SectionHeader title={t('myCourses')} style={{ marginTop: 0 }} />
       {installed.length ? (
         <View style={{ gap: space.md }}>
           {installed.map((item) => {

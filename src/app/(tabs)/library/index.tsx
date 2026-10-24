@@ -50,7 +50,7 @@ export default function LibraryScreen() {
     ]);
 
   return (
-    <Screen>
+    <Screen title={tc('tabs.library')}>
       <PressableScale onPress={() => router.push('/search')} pressedScale={0.99} accessibilityRole="search">
         <View pointerEvents="none">
           <SearchField placeholder={t('searchPlaceholder')} editable={false} />

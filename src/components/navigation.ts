@@ -1,5 +1,4 @@
 import type { NativeStackNavigationOptions } from 'expo-router';
-import { Platform } from 'react-native';
 
 import { fontFamily, useTheme } from '@/theme';
 
@@ -8,7 +7,7 @@ export function useStackOptions(): NativeStackNavigationOptions {
   const { colors } = useTheme();
   return {
     headerTitleStyle: { fontFamily, fontWeight: '600', color: colors.text },
-    headerLargeTitleStyle: { fontFamily, fontWeight: '800', color: colors.text },
+    headerLargeTitleStyle: { color: colors.text },
     headerBackButtonDisplayMode: 'minimal',
     headerShadowVisible: false,
     headerLargeTitleShadowVisible: false,
@@ -18,12 +17,11 @@ export function useStackOptions(): NativeStackNavigationOptions {
   };
 }
 
-/** Options for the root screen of a tab: large collapsing title on iOS. */
+/**
+ * Options for the root screen of a tab. The native large title renders blank
+ * inside native tabs on iOS 26, so tab roots draw their own title with
+ * `<Screen title=…>` and hide the native header; `title` still names the screen.
+ */
 export function largeTitle(title: string): NativeStackNavigationOptions {
-  return {
-    title,
-    headerLargeTitleEnabled: true,
-    headerTransparent: Platform.OS === 'ios',
-    headerBlurEffect: Platform.OS === 'ios' ? 'systemMaterial' : undefined,
-  };
+  return { title, headerShown: false };
 }
