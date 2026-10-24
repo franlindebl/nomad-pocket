@@ -296,3 +296,4 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
 | Many flows fail at random steps | close other simulators and heavy apps, and run again: Maestro waits for a calm screen, and a slow Mac makes it time out |
 | `seeded` flows show an empty library | a fixture is missing: `npm run e2e:setup` |
 | A `network` flow fails | check the server first (download.kiwix.org, build.protomaps.com) before suspecting the app |
+| `map-05-world` times out on "Instalado" | another suite was downloading at the same time (e.g. `e2e:android`): run the network suites one at a time |
