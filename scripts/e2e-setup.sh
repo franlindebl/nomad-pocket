@@ -9,8 +9,8 @@ DEVICE="${DEVICE:-NP-e2e}"
 RUNTIME=com.apple.CoreSimulator.SimRuntime.iOS-27-0
 MIRROR=https://download.kiwix.org/zim
 # <mirror folder>/<file>. The suite's assertions depend on these exact files.
+# wikipedia_en_100_mini_2026-01.zim is in git: Kiwix removed it from the mirror.
 FIXTURES=(
-  wikipedia/wikipedia_en_100_mini_2026-01.zim
   devdocs/devdocs_en_node_2026-08.zim
   freecodecamp/freecodecamp_es_all_2026-10.zim
   zimit/nhs.uk_en_medicines_2026-09b.zim

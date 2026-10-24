@@ -52,6 +52,8 @@ modules/*/android/build/
 # raw simulator captures (inputs of scripts/store-screenshots.py)
 docs/store/screenshots/
 
-# E2E (scripts/e2e.sh): fixtures are re-downloadable content, artifacts are run output
+# E2E (scripts/e2e.sh): fixtures are re-downloadable content (scripts/e2e-setup.sh), artifacts are run output
 e2e/fixtures/*.zim
+# No longer on the Kiwix mirror: kept in git (4 MB).
+!e2e/fixtures/wikipedia_en_100_mini_2026-01.zim
 e2e/artifacts/

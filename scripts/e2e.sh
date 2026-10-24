@@ -86,22 +86,31 @@ reset_app() {
   fi
 }
 
+# Maestro writes <dir>/<timestamp>/<flow>/{takeScreenshot,screenshots,…}: lift it to <dir>.
+lift_output() {
+  local inner
+  for inner in "$1"/*/"$2"; do
+    [[ -d "$inner" ]] || continue
+    mv "$inner"/* "$1"/ && rm -r "$(dirname "$inner")"
+  done
+}
+
 for flow in "${FLOWS[@]}"; do
   name="$(basename "$flow" .yaml)"
   abs="$(cd "$(dirname "$flow")" && pwd)/$(basename "$flow")"
   echo "▶ $name"
   reset_app "$flow"
   mkdir -p "$OUT/$name"
-  # takeScreenshot writes to the working directory.
-  if (cd "$OUT/$name" && "$MAESTRO" --device "$UDID" test "$abs" \
-      --format junit --output "$OUT/$name/report.xml" --debug-output "$OUT/$name/debug" \
-      --flatten-debug-output > "$OUT/$name/maestro.log" 2>&1); then
+  if "$MAESTRO" --device "$UDID" test "$abs" --test-output-dir "$OUT/$name" \
+      --format junit --output "$OUT/$name/report.xml" \
+      > "$OUT/$name/maestro.log" 2>&1; then
     passed=$((passed + 1)); echo "  ✓"
   else
     # Maestro's last result line: "[Failed] <flow> (46s) (<reason>)".
     reason="$(grep -m1 '^\[Failed\]' "$OUT/$name/maestro.log" | sed -E 's/^\[Failed\] [^ ]+ \([^)]*\) //')"
     failed+=("$name  ${reason:-see maestro.log}"); echo "  ✗ ${reason:-}"
   fi
+  lift_output "$OUT/$name" "$name"
 done
 
 {

@@ -80,18 +80,20 @@ e2e/artifacts/latest/
   rdr-03-bookmark/
     maestro.log            # Maestro's output: each step and why it failed
     report.xml             # JUnit, for CI
-    rdr-03-01-…png         # screenshots the flow takes on purpose
-    debug/                 # commands-*.json (every step, its status and timing)
-                           # and screenshot-❌-*.png: the screen when it failed
+    takeScreenshot/        # screenshots the flow takes on purpose (01-bookmarks.png…)
+    screenshots/           # the screen at the failing step
+    screen-hierarchy/      # what Maestro could see at the failing step (labels, ids, bounds)
+    commands.json          # every step with its status and timing
+    logs/                  # Maestro and simulator logs
 ```
 
 To look into a failure:
 
-1. Read the reason in the summary, then open `debug/screenshot-❌-*.png` to see the screen.
+1. Read the reason in the summary, then open `screenshots/` to see the screen and
+   `screen-hierarchy/` to see which labels and ids were there.
 2. Re-run only that flow: `scripts/e2e.sh e2e/flows/<area>/<flow>.yaml`.
-3. To see what Maestro can find on the current screen (labels, ids, positions), leave the
-   app on that screen and run `maestro --device <udid> hierarchy`, or open
-   `maestro studio` for an interactive inspector.
+3. To inspect a screen live, leave the app on it and run `maestro --device <udid> hierarchy`,
+   or `maestro studio` for an interactive inspector.
 
 ## How a run works
 
@@ -130,8 +132,8 @@ scripts/e2e-setup.sh   # one-time setup
 `npm run e2e:setup` checks and prepares everything below, and only does what is missing.
 By hand:
 
-- **Maestro CLI**: `brew install mobile-dev-inc/tap/maestro` (not the `maestro` cask, which
-  is a different app). It needs Java: the runner falls back to Homebrew's `openjdk` when
+- **Maestro CLI** 2.x: `brew install mobile-dev-inc/tap/maestro` (not the `maestro` cask,
+  which is a different app). It needs Java: the runner falls back to Homebrew's `openjdk` when
   `java` is not on `PATH`.
 - **Simulator `NP-e2e`**: iPhone 17 Pro, iOS 27.0, language `es-ES`. iOS 27.0 because Apple
   Intelligence works there (not on 26.5); Spanish because the flows match Spanish texts.
@@ -154,8 +156,10 @@ By hand:
   | `freecodecamp_es_all_2026-10.zim` | 11 MB | courses |
   | `nhs.uk_en_medicines_2026-09b.zim` | 15 MB | medical disclaimer |
 
-  Kiwix removes old files from the mirror: `wikipedia_en_100_mini_2026-01.zim` is no
-  longer there, so keep a copy of `e2e/fixtures/` and copy it to a new machine by hand.
+  Kiwix removes old files from the mirror. `wikipedia_en_100_mini_2026-01.zim` is no
+  longer there, so it is committed to git; the other three are downloaded by
+  `npm run e2e:setup`. When one of them disappears too, commit it the same way
+  (`.gitignore` has the exception).
 
 ## Flow catalog
 
