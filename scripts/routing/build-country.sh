@@ -1,21 +1,20 @@
 #!/usr/bin/env bash
-# Builds the offline routing packs of one country (docs/MAPS_NAVIGATION_PLAN.md, phase 2):
-# Geofabrik extract + admin boundaries from Overpass → Valhalla tiles (one build per
-# country) → the country pack and, with "slices", one pack per subdivision cut from that
-# build → emergency points per pack → parts of at most 1900 MiB (GitHub Release assets
-# stop at 2 GiB) and a JSON fragment for the manifest (manifest.py).
+# Builds the offline routing pack of one country (docs/MAPS_NAVIGATION_PLAN.md, phase 2):
+# Geofabrik extract(s) + admin boundaries from Overpass → Valhalla tiles → the pack, its
+# emergency points and its street names (search) → parts of at most 1900 MiB (GitHub
+# Release assets stop at 2 GiB) and a JSON fragment for the manifest (manifest.py).
 #
 # Usage: scripts/routing/build-country.sh <country id from packs.json> <work dir>
 # Needs curl, python3 with pyosmium and osmium-tool, and the Valhalla tools: run inside
 # ghcr.io/valhalla/valhalla (CI does: apt-get install osmium-tool python3-pyosmium), or
 # on a host with docker, which then runs each Valhalla tool in that image.
-# Output: <work dir>/out/<pack>.tar[.partNN], <pack>.pois.tsv, <country>.packs.json
+# Output: <work dir>/out/<pack>.tar[.partNN], <pack>.pois.tsv, <pack>.streets.tsv,
+# <country>.packs.json
 set -euo pipefail
 
 COUNTRY="$1"
 WORK="$(mkdir -p "$2" && cd "$2" && pwd)"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT="$HERE/../.."
 # Keep in step with the engine the app embeds (modules/nomad-route: valhalla-mobile 0.6.4).
 IMAGE="${VALHALLA_IMAGE:-ghcr.io/valhalla/valhalla:3.9.1}"
 CONC="${CONC:-4}"
@@ -23,10 +22,12 @@ PART_BYTES=$((1900 * 1024 * 1024))
 OVERPASS=(https://overpass-api.de/api/interpreter https://overpass.private.coffee/api/interpreter https://maps.mail.ru/osm/tools/overpass/api/interpreter)
 UA="NomadPocket-routing/1.0 (+https://github.com/franlindebl/nomad-pocket)"
 
-read -r GEOFABRIK ISO SLICES < <(python3 -I - "$HERE/packs.json" "$COUNTRY" <<'PY'
+# geofabrik: one extract path, or a list merged into one build (Spain + Canary Islands).
+read -r ISO GEOFABRIK < <(python3 -I - "$HERE/packs.json" "$COUNTRY" <<'PY'
 import json, sys
 c = json.load(open(sys.argv[1]))["countries"][sys.argv[2]]
-print(c["geofabrik"], c["iso"], "1" if c.get("slices") else "0")
+g = c["geofabrik"]
+print(c["iso"], *(g if isinstance(g, list) else [g]))
 PY
 )
 
@@ -42,14 +43,28 @@ else
   valhalla() { docker run --rm --user "$(id -u):$(id -g)" -v "$WORK:/w" "$IMAGE" "$@"; }
 fi
 
-# 1. Extract (Geofabrik publishes an .md5 next to each file).
-URL="https://download.geofabrik.de/${GEOFABRIK}-latest.osm.pbf"
-log "downloading $URL"
-curl -fsSL --retry 3 -A "$UA" -o "$PBF" "$URL"
-EXPECTED="$(curl -fsSL --retry 3 -A "$UA" "$URL.md5" | cut -d' ' -f1)"
-ACTUAL="$( (md5sum "$PBF" 2>/dev/null || md5 -r "$PBF") | cut -d' ' -f1)"
-[[ "$EXPECTED" == "$ACTUAL" ]] || { log "md5 mismatch"; exit 1; }
-STAMP="$(osmium fileinfo -g header.option.osmosis_replication_timestamp "$PBF" || true)"
+# 1. Extracts (Geofabrik publishes an .md5 next to each file), merged when several.
+SRCS=()
+STAMP=""
+for G in $GEOFABRIK; do
+  URL="https://download.geofabrik.de/${G}-latest.osm.pbf"
+  F="$WORK/src/$(basename "$G").osm.pbf"
+  log "downloading $URL"
+  curl -fsSL --retry 3 -A "$UA" -o "$F" "$URL"
+  EXPECTED="$(curl -fsSL --retry 3 -A "$UA" "$URL.md5" | cut -d' ' -f1)"
+  ACTUAL="$( (md5sum "$F" 2>/dev/null || md5 -r "$F") | cut -d' ' -f1)"
+  [[ "$EXPECTED" == "$ACTUAL" ]] || { log "md5 mismatch"; exit 1; }
+  # The oldest extract dates the pack.
+  S="$(osmium fileinfo -g header.option.osmosis_replication_timestamp "$F" || true)"
+  [[ -z "$STAMP" || ( -n "$S" && "$S" < "$STAMP" ) ]] && STAMP="$S"
+  SRCS+=("$F")
+done
+if (( ${#SRCS[@]} > 1 )); then
+  osmium merge --overwrite "${SRCS[@]}" -o "$PBF"
+  rm "${SRCS[@]}"
+elif [[ "${SRCS[0]}" != "$PBF" ]]; then
+  mv "${SRCS[0]}" "$PBF"
+fi
 BUILD_DATE="$(echo "${STAMP:-$(date -u +%Y-%m-%d)}" | cut -c1-10 | tr -d -)"
 log "data of $BUILD_DATE"
 
@@ -91,7 +106,7 @@ for attempt in 1 2 3; do
 done
 [[ $built == 1 ]] || { log "valhalla_build_tiles failed"; exit 1; }
 
-# 4. Packs: the country, then its subdivisions as tile subsets of the same build.
+# 4. The pack: a tile extract (one tar, mmapped by the app).
 extract() { # <tile dir under WORK> <pack id>
   valhalla bash -c "valhalla_build_config --mjolnir-tile-dir /w/$1 --mjolnir-tile-extract /w/out/$2.tar \
     --mjolnir-admin /w/nonexistent --mjolnir-timezone /w/nonexistent > /tmp/v.json && valhalla_build_extract -c /tmp/v.json" \
@@ -99,26 +114,6 @@ extract() { # <tile dir under WORK> <pack id>
   log "pack $2: $(wc -c < "$OUT/$2.tar") bytes"
 }
 extract tiles "$COUNTRY"
-POI_OUTS=("/w/out/$COUNTRY.pois.tsv")
-SLICE_IDS=()
-if [[ $SLICES == 1 ]]; then
-  while read -r ID W S E N; do
-    rm -rf "$WORK/slice"
-    python3 -I "$HERE/slice.py" "$WORK/tiles" "$WORK/slice" "$W" "$S" "$E" "$N"
-    extract slice "$ID"
-    POI_OUTS+=("/w/out/$ID.pois.tsv=$W,$S,$E,$N")
-    SLICE_IDS+=("$ID")
-  done < <(python3 -I - "$ROOT/src/features/maps/regions.json" "$HERE/packs.json" "$COUNTRY" <<'PY'
-import json, sys
-own = json.load(open(sys.argv[2]))["countries"]
-for r in json.load(open(sys.argv[1]))["regions"]:
-    # A subdivision with its own packs.json entry is built from its own extract.
-    if r.get("parent") == sys.argv[3] and r["id"] not in own:
-        print(r["id"], *r["bbox"])
-PY
-)
-  rm -rf "$WORK/slice"
-fi
 
 # 5. Emergency points per pack (same filters as the app's Overpass query).
 osmium tags-filter --overwrite "$PBF" \
@@ -126,9 +121,13 @@ osmium tags-filter --overwrite "$PBF" \
   nwr/healthcare=hospital,centre,clinic nwr/emergency=ambulance_station,defibrillator,assembly_point \
   nwr/military=barracks,base nwr/natural=spring nwr/shop=supermarket,hardware,doityourself nwr/office=diplomatic \
   -o "$WORK/src/pois.osm.pbf"
-python3 -I "$HERE/emergency-points.py" "$WORK/src/pois.osm.pbf" "${POI_OUTS[@]//\/w\//$WORK/}"
+python3 -I "$HERE/emergency-points.py" "$WORK/src/pois.osm.pbf" "$OUT/$COUNTRY.pois.tsv"
 
-# 6. Parts for GitHub's 2 GiB asset limit (the app appends them back together).
+# 6. Street and locality names for the app's search.
+osmium tags-filter --overwrite "$PBF" w/highway n/place -o "$WORK/src/streets.osm.pbf"
+python3 -I "$HERE/streets.py" "$WORK/src/streets.osm.pbf" "$OUT/$COUNTRY.streets.tsv"
+
+# 7. Parts for GitHub's 2 GiB asset limit (the app appends them back together).
 for tar in "$OUT"/*.tar; do
   if (( $(wc -c < "$tar") > PART_BYTES )); then
     split -b "$PART_BYTES" -d -a 2 "$tar" "$tar.part"
@@ -137,5 +136,5 @@ for tar in "$OUT"/*.tar; do
   fi
 done
 
-python3 -I "$HERE/manifest.py" fragment "$OUT" "$COUNTRY" "$BUILD_DATE" "${SLICE_IDS[@]}" > "$OUT/$COUNTRY.packs.json"
+python3 -I "$HERE/manifest.py" fragment "$OUT" "$COUNTRY" "$BUILD_DATE" > "$OUT/$COUNTRY.packs.json"
 log "done: $(ls "$OUT" | wc -l) files"

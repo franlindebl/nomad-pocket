@@ -1,8 +1,8 @@
 name: Routing packs
 
-# Offline routing packs (docs/MAPS_NAVIGATION_PLAN.md, phase 2): one Valhalla build per
-# country of scripts/routing/packs.json, region packs cut from it, emergency points per
-# pack, published as assets of a release `routing-YYYYMMDD-N`. The app reads the catalog
+# Offline routing packs (docs/MAPS_NAVIGATION_PLAN.md, phase 2): one Valhalla build and
+# one pack per country of scripts/routing/packs.json, with its emergency points and street
+# names, published as assets of a release `routing-YYYYMMDD-N`. The app reads the catalog
 # from the fixed release `routing-index` (routing-manifest.json), updated last, so it
 # only ever points at a complete release; releases no manifest points at are then pruned.
 
@@ -80,7 +80,7 @@ jobs:
         run: |
           cd /mnt/routing/build/out
           # Exactly the files the fragment lists (it drops empty packs and point files).
-          python3 -I -c 'import json, sys; [print(f["name"]) for p in json.load(open(sys.argv[1])) for f in p["parts"] + ([p["pois"]] if p["pois"] else [])]' \
+          python3 -I -c 'import json, sys; [print(f["name"]) for p in json.load(open(sys.argv[1])) for f in p["parts"] + [x for x in (p["pois"], p.get("streets")) if x]]' \
             "${{ matrix.country }}.packs.json" | xargs gh release upload "$TAG" --clobber --repo "$GITHUB_REPOSITORY"
       - uses: actions/upload-artifact@v4
         with:
@@ -113,7 +113,7 @@ jobs:
           fi
           python3 -I scripts/routing/manifest.py merge "$TAG" fragments/*.packs.json > routing-manifest.json
           if [ -f previous/routing-manifest.json ]; then
-            python3 -I scripts/routing/manifest.py carry previous/routing-manifest.json routing-manifest.json > merged.json
+            python3 -I scripts/routing/manifest.py carry previous/routing-manifest.json routing-manifest.json scripts/routing/packs.json > merged.json
             mv merged.json routing-manifest.json
           fi
           # Coverage within each extract's polygon (ferry lines leave it), carried packs too.

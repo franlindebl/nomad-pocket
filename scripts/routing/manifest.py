@@ -1,7 +1,8 @@
 """Describes built routing packs for the app (src/features/maps/routing-catalog.ts).
-  fragment <out dir> <country> <YYYYMMDD> [slice ids...]  → JSON list of this country's packs
+  fragment <out dir> <country> <YYYYMMDD>                → JSON list of this country's packs
   merge <release tag> <fragment.json...>                 → routing-manifest.json
-  carry <previous manifest> <new manifest>               → new + previous packs of countries not rebuilt
+  carry <previous manifest> <new manifest> <packs.json>  → new + previous packs of countries not rebuilt
+                                                           (and still listed in packs.json)
   clip <manifest> <packs.json>                           → cells limited to each extract's .poly
 A pack is one tar (Valhalla tile extract) in one or more parts; the app downloads the
 parts in order and appends them. bbox comes from the tile names, like tileBBox() in
@@ -79,40 +80,27 @@ def tile_bbox(names):
     return [w, s, e, n], sorted(cells)
 
 
-def clip(coverage, region):
-    """Limits a subdivision's coverage to its bbox (regions.json). An extract also holds the
-    ferry lines out of it (the Canary Islands' reach Cádiz): without this the pack would
-    claim cells where it can't route. Not for countries: their bboxes leave out
-    territories (Spain's: Ceuta, Melilla, the Canary Islands)."""
-    (w, s, e, n), cells = coverage
-    rw, rs, re, rn = region
-    kept = [c for c in cells if rs - 1 < c // 360 - 90 < rn and rw - 1 < c % 360 - 180 < re]  # 1° cell meets bbox
-    return [max(w, rw), max(s, rs), min(e, re), min(n, rn)], kept
+def described(path):
+    """A side file of a pack (points, streets), or None when missing or empty (GitHub
+    refuses empty assets, and there is nothing to import)."""
+    if not os.path.exists(path):
+        return None
+    if os.path.getsize(path) == 0:
+        os.remove(path)
+        return None
+    return {"name": os.path.basename(path), "size": os.path.getsize(path), "sha256": sha256(path)}
 
 
-def fragment(out_dir, country, build_date, slice_ids):
-    regions_json = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../src/features/maps/regions.json")
-    regions = {r["id"]: r["bbox"] for r in json.load(open(regions_json))["regions"] if r["type"] == "subdivision"}
+def fragment(out_dir, country, build_date):
     packs = []
-    for pid in [country] + slice_ids:
+    for pid in [country]:
         whole = os.path.join(out_dir, f"{pid}.tar")
         parts = [whole] if os.path.exists(whole) else sorted(glob.glob(os.path.join(out_dir, f"{pid}.tar.part*")))
         if not parts:
             raise SystemExit(f"no tar for {pid}")
-        pois = os.path.join(out_dir, f"{pid}.pois.tsv")
         coverage = tile_bbox(tar_names(parts))
         if coverage is None:
-            # A slice with no road tiles: drop it, so the release doesn't carry it either.
-            print(f"skipping {pid}: no tiles", file=sys.stderr)
-            for f in parts + [pois]:
-                if os.path.exists(f):
-                    os.remove(f)
-            continue
-        if pid in regions:
-            coverage = clip(coverage, regions[pid])
-        # GitHub refuses empty assets (and there is nothing to import).
-        if os.path.exists(pois) and os.path.getsize(pois) == 0:
-            os.remove(pois)
+            raise SystemExit(f"no road tiles in {pid}")
         packs.append({
             "id": pid,
             "country": country,
@@ -122,8 +110,8 @@ def fragment(out_dir, country, build_date, slice_ids):
             "cells": coverage[1],
             "size": sum(os.path.getsize(p) for p in parts),
             "parts": [{"name": os.path.basename(p), "size": os.path.getsize(p), "sha256": sha256(p)} for p in parts],
-            "pois": {"name": os.path.basename(pois), "size": os.path.getsize(pois), "sha256": sha256(pois)}
-            if os.path.exists(pois) else None,
+            "pois": described(os.path.join(out_dir, f"{pid}.pois.tsv")),
+            "streets": described(os.path.join(out_dir, f"{pid}.streets.tsv")),
         })
     json.dump(packs, sys.stdout, indent=1)
 
@@ -141,10 +129,14 @@ def merge(release, files):
     }, sys.stdout, indent=1)
 
 
-def carry(previous, current):
+def carry(previous, current, packs_json):
     prev, cur = json.load(open(previous)), json.load(open(current))
+    listed = set(json.load(open(packs_json))["countries"])
     rebuilt = {p["country"] for p in cur["packs"]}
-    kept = [dict(p, release=p.get("release", prev["release"])) for p in prev["packs"] if p["country"] not in rebuilt]
+    # A country's packs are replaced as a whole (the region packs Spain had are gone with
+    # its first country-only build); countries dropped from packs.json go too.
+    kept = [dict(p, release=p.get("release", prev["release"])) for p in prev["packs"]
+            if p["country"] not in rebuilt and p["country"] in listed]
     cur["packs"] = sorted(cur["packs"] + kept, key=lambda p: p["id"])
     json.dump(cur, sys.stdout, indent=1)
 
@@ -219,9 +211,12 @@ def clip_polys(manifest_path, packs_json):
         if not src or not p.get("cells"):
             continue
         if p["country"] not in polys:
-            url = f"https://download.geofabrik.de/{src['geofabrik']}.poly"
-            req = urllib.request.Request(url, headers={"User-Agent": "NomadPocket-routing/1.0 (+https://github.com/franlindebl/nomad-pocket)"})
-            polys[p["country"]] = read_poly(urllib.request.urlopen(req, timeout=60).read().decode())
+            rings = []
+            for g in src["geofabrik"] if isinstance(src["geofabrik"], list) else [src["geofabrik"]]:
+                url = f"https://download.geofabrik.de/{g}.poly"
+                req = urllib.request.Request(url, headers={"User-Agent": "NomadPocket-routing/1.0 (+https://github.com/franlindebl/nomad-pocket)"})
+                rings += read_poly(urllib.request.urlopen(req, timeout=60).read().decode())
+            polys[p["country"]] = rings
         rings = polys[p["country"]]
         kept = [c for c in p["cells"] if cell_meets_poly(c, rings)]
         if not kept:
@@ -237,11 +232,11 @@ def clip_polys(manifest_path, packs_json):
 
 
 if sys.argv[1] == "fragment":
-    fragment(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5:])
+    fragment(sys.argv[2], sys.argv[3], sys.argv[4])
 elif sys.argv[1] == "merge":
     merge(sys.argv[2], sys.argv[3:])
 elif sys.argv[1] == "carry":
-    carry(sys.argv[2], sys.argv[3])
+    carry(sys.argv[2], sys.argv[3], sys.argv[4])
 elif sys.argv[1] == "clip":
     clip_polys(sys.argv[2], sys.argv[3])
 else:
