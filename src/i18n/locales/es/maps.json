@@ -6,7 +6,9 @@
     "north": "Orientar al norte",
     "locate": "Mostrar mi ubicación",
     "search": "Buscar",
-    "emergency": "Emergencias"
+    "emergency": "Emergencias",
+    "recenter": "Recentrar",
+    "overview": "Ver toda la ruta"
   },
   "empty": {
     "title": "Mapas que funcionan en cualquier sitio",
@@ -114,6 +116,7 @@
     "away": "a {{distance}}"
   },
   "guidance": {
+    "start": "Iniciar",
     "toward": "Hacia {{name}}",
     "straightLine": "En línea recta: no sigue calles ni caminos",
     "arrived": "Has llegado",
@@ -282,6 +285,7 @@
       "bicycle": "Bici"
     },
     "remaining": "{{distance}} · {{time}} · llegada {{eta}}",
+    "left": "{{distance}} · llegada {{eta}}",
     "steps": "Indicaciones",
     "stepsTitle": "Indicaciones",
     "computing": "Calculando la ruta…",

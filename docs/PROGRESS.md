@@ -124,6 +124,19 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-25 — Maps: navigation view
+
+- Owner asked for Google Maps / Waze driving view, then (seeing the half-screen card)
+  for an "Iniciar" button and a smaller panel. Guidance now opens as a preview (card +
+  "Iniciar", whole route framed above the card); started, a maneuver banner at the top
+  and a slim bar (time, km · arrival, directions, stop). `FollowCamera.tsx`: the
+  map follows the user, tilted, the way ahead up (the route's direction, else GPS course,
+  else compass on foot), user low on the screen above the panel, an arrow instead of the
+  dot. Pan → "Recentrar"; route button → whole trip. Pure `follow-core.ts` (+ tests),
+  `RouteProgress.aheadBearing`, `pointAlong`. New flow `map-17-follow` (drives the CG-1
+  in Andorra with Maestro `travel`).
+- Build 7 (stronger beam) on TestFlight with notes.
+
 ### 2026-10-25 — Maps: compass beam
 
 - Owner asked for Google Maps' "flashlight": `HeadingBeam.tsx` draws a fan under the

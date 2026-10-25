@@ -15,7 +15,8 @@ export type GuidanceTarget = LatLon & { name: string };
 /** none: no pack covers the trip (straight line). error: the engine found no way. */
 export type RoutingStatus = 'none' | 'loading' | 'ready' | 'error';
 
-type Position = LatLon & { accuracy: number | null };
+/** course: GPS direction of travel while moving (degrees), else null. speed: m/s. */
+type Position = LatLon & { accuracy: number | null; course?: number | null; speed?: number | null };
 
 type GuidanceState = {
   target: GuidanceTarget | null;
@@ -28,7 +29,10 @@ type GuidanceState = {
   /** Why routing failed (RoutingError kind), for the panel's message. */
   routeError: string | null;
   progress: RouteProgress | null;
+  /** "Iniciar" pressed: the navigation view (compact panel, camera following). */
+  navigating: boolean;
   start: (target: GuidanceTarget) => Promise<boolean>;
+  startNavigation: () => void;
   setCosting: (costing: Costing) => void;
   /** A routing pack was installed: try roads again if guidance is on a straight line. */
   retryRoute: () => void;
@@ -123,6 +127,7 @@ export const useGuidance = create<GuidanceState>((set, get) => {
     route: null,
     routeError: null,
     progress: null,
+    navigating: false,
     start: async (target) => {
       let perm = await Location.getForegroundPermissionsAsync();
       if (!perm.granted && perm.canAskAgain) perm = await Location.requestForegroundPermissionsAsync();
@@ -133,7 +138,7 @@ export const useGuidance = create<GuidanceState>((set, get) => {
       cumulative = [];
       lastRouteAt = 0;
       // Never start from the previous session's fix or route.
-      set({ target, position: null, heading: null, route: null, progress: null, routing: 'loading', routeError: null });
+      set({ target, position: null, heading: null, route: null, progress: null, routing: 'loading', routeError: null, navigating: false });
       activateKeepAwakeAsync(KEEP_AWAKE_TAG).catch(() => {});
       let routed = false;
       const firstFix = (p: Position) => {
@@ -151,8 +156,9 @@ export const useGuidance = create<GuidanceState>((set, get) => {
         subs.push(
           await Location.watchPositionAsync({ accuracy: Location.Accuracy.BestForNavigation, distanceInterval: 3, timeInterval: 2000 }, (p) => {
             if (session !== mine) return;
-            const fix = { lat: p.coords.latitude, lon: p.coords.longitude, accuracy: p.coords.accuracy };
             course = (p.coords.speed ?? 0) > 2 && (p.coords.heading ?? -1) >= 0 ? p.coords.heading : null;
+            const speed = p.coords.speed !== null && p.coords.speed >= 0 ? p.coords.speed : null;
+            const fix = { lat: p.coords.latitude, lon: p.coords.longitude, accuracy: p.coords.accuracy, course, speed };
             if (!routed) firstFix(fix);
             else onPosition(fix);
           }),
@@ -171,6 +177,9 @@ export const useGuidance = create<GuidanceState>((set, get) => {
       if (session === mine) subscriptions = subs;
       else remove(subs);
       return true;
+    },
+    startNavigation: () => {
+      if (get().target) set({ navigating: true });
     },
     setCosting: (costing) => {
       if (costing === get().costing) return;
@@ -194,7 +203,7 @@ export const useGuidance = create<GuidanceState>((set, get) => {
       unsubscribe();
       deactivateKeepAwake(KEEP_AWAKE_TAG);
       cumulative = [];
-      set({ target: null, position: null, heading: null, route: null, progress: null, routing: 'none', routeError: null });
+      set({ target: null, position: null, heading: null, route: null, progress: null, routing: 'none', routeError: null, navigating: false });
     },
   };
 });

@@ -2,7 +2,7 @@
 // (modules/nomad-route) takes, reading its answers, choosing a routing pack, and
 // following a route from GPS fixes. Pure TypeScript (no `@/` aliases) so node's test
 // runner loads it.
-import { distanceMeters, type LatLon } from './geo.ts';
+import { bearingDegrees, distanceMeters, type LatLon } from './geo.ts';
 
 export const COSTINGS = ['auto', 'pedestrian', 'bicycle'] as const;
 export type Costing = (typeof COSTINGS)[number];
@@ -391,6 +391,8 @@ export type RouteProgress = {
   next: number;
   /** Along the route to that maneuver's start, metres. */
   toNextM: number;
+  /** Which way the route goes from here (degrees from north, over the next ~30 m). */
+  aheadBearing: number | null;
 };
 
 /** Cumulative distance along a shape (metres from its start to each vertex). */
@@ -429,6 +431,8 @@ export function routeProgress(route: Route, cumulative: number[], p: LatLon, fro
   const segLen = (cumulative[best.segment + 1] ?? cumulative[best.segment]) - cumulative[best.segment];
   const along = cumulative[best.segment] + best.t * segLen;
   const total = cumulative[cumulative.length - 1] ?? 0;
+  const here = pointAlong(shape, cumulative, along);
+  const ahead = pointAlong(shape, cumulative, Math.min(total, along + AHEAD_M));
   let next = route.maneuvers.findIndex((m) => cumulative[m.begin] > along + 1);
   if (next < 0) next = route.maneuvers.length - 1;
   return {
@@ -437,7 +441,23 @@ export function routeProgress(route: Route, cumulative: number[], p: LatLon, fro
     remainingM: Math.max(0, total - along),
     next,
     toNextM: Math.max(0, cumulative[route.maneuvers[next]?.begin ?? last] - along),
+    aheadBearing: here && ahead && distanceMeters(here, ahead) > 2 ? bearingDegrees(here, ahead) : null,
   };
+}
+
+/** Looking this far along the route for its direction: past GPS noise, short of the next corner. */
+const AHEAD_M = 30;
+
+/** The point `d` metres along a shape. */
+export function pointAlong(shape: [number, number][], cumulative: number[], d: number): LatLon | null {
+  if (!shape.length) return null;
+  let i = 0;
+  while (i < shape.length - 2 && cumulative[i + 1] < d) i++;
+  const a = shape[i];
+  const b = shape[Math.min(i + 1, shape.length - 1)];
+  const len = (cumulative[i + 1] ?? cumulative[i]) - cumulative[i];
+  const t = len > 0 ? Math.min(1, Math.max(0, (d - cumulative[i]) / len)) : 0;
+  return { lat: a[1] + (b[1] - a[1]) * t, lon: a[0] + (b[0] - a[0]) * t };
 }
 
 /** Remaining time, scaled from Valhalla's estimate by the distance still to go. */

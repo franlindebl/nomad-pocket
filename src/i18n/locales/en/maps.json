@@ -6,7 +6,9 @@
     "north": "Reset to north",
     "locate": "Show my location",
     "search": "Search",
-    "emergency": "Emergency"
+    "emergency": "Emergency",
+    "recenter": "Re-centre",
+    "overview": "Route overview"
   },
   "empty": {
     "title": "Maps that work anywhere",
@@ -114,6 +116,7 @@
     "away": "{{distance}} away"
   },
   "guidance": {
+    "start": "Start",
     "toward": "To {{name}}",
     "straightLine": "As the crow flies: it doesn’t follow roads or paths",
     "arrived": "You have arrived",
@@ -282,6 +285,7 @@
       "bicycle": "Bike"
     },
     "remaining": "{{distance}} · {{time}} · arrive {{eta}}",
+    "left": "{{distance}} · arrive {{eta}}",
     "steps": "Directions",
     "stepsTitle": "Directions",
     "computing": "Finding a route…",

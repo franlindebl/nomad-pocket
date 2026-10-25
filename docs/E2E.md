@@ -2,8 +2,8 @@
 
 [Maestro](https://maestro.mobile.dev) flows that drive the Release build of the app on an
 iOS simulator, the same way a person would: tapping, typing and reading the screen through
-accessibility. 55 flows cover 53 of the 55 cases in the test plan (Claude doc "Plan de
-tests funcionales iOS — Nomad App"), plus AI-06 and AI-07 added after it; the case ids (`RDR-03`, `MAP-06`…) are on the first
+accessibility. 56 flows cover 53 of the 55 cases in the test plan (Claude doc "Plan de
+tests funcionales iOS — Nomad App"), plus AI-06, AI-07 and MAP-17 (navigation view) added after it; the case ids (`RDR-03`, `MAP-06`…) are on the first
 line of each flow. Preparedness (`PREP-01`…`PREP-04`) came after the plan and has its own
 flows.
 
@@ -238,6 +238,7 @@ By hand:
 | maps | `map-14-route` | MAP-14 | smoke | seeded-route (Andorra pack, location set by the flow) |
 | maps | `map-15-routing-download` | MAP-15 | full | routing-server (local pack server; also searches a street from the pack's names) |
 | maps | `map-16-routing-github` | MAP-16 | nightly | routing-live (published catalog, Andorra pack from GitHub, 3 MB) |
+| maps | `map-17-follow` | MAP-17 | full | seeded-route (navigation view; drives the CG-1 with Maestro `travel`) |
 | courses | `crs-01-empty` | CRS-01 | smoke | — |
 | courses | `crs-02-course` | CRS-02, CRS-03, CRS-04 | full | seeded |
 | assistant | `ai-01-no-model` | AI-01, AI-02 | smoke | — |
@@ -304,6 +305,8 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `guidance-panel`, `guidance-distance`, `guidance-stop` | guidance panel: remaining distance (route) or distance + direction (straight line), stop |
   | `guidance-costing-<auto\|pedestrian\|bicycle>`, `guidance-next`, `guidance-next-distance`, `guidance-steps` | mode chips, next maneuver and its distance, directions button |
   | `guidance-note`, `guidance-get-routing` | straight-line note and its "Descargar rutas" button |
+  | `guidance-start`, `guidance-banner`, `guidance-remaining` | "Iniciar" (trip preview); navigation view: maneuver banner, remaining distance/time in the bottom bar |
+  | `map-recenter`, `map-overview` | navigation view: "Recentrar" pill (not following) and whole-route button (following) |
   | `route-summary`, `route-step` | directions sheet: distance · time, maneuver rows |
   | `pack-row`, `pack-download`, `pack-installed`, `pack-delete`, `packs-retry`, `regions-routing` | routing packs sheet and its entry in Regiones |
   | `home-emergency` | Emergencias card on Home |

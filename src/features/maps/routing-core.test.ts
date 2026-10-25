@@ -13,6 +13,7 @@ import {
   parseTarHeader,
   parseRoute,
   pickPack,
+  pointAlong,
   remainingSeconds,
   routeProgress,
   routeRequest,
@@ -24,6 +25,7 @@ import {
   cellOf,
   valhallaConfig,
 } from './routing-core.ts';
+import { bearingDegrees } from './geo.ts';
 
 const near = (a: number, b: number, eps: number, msg?: string) => assert.ok(Math.abs(a - b) <= eps, `${msg ?? ''} ${a} ≉ ${b}`);
 
@@ -144,6 +146,29 @@ test('routeProgress follows the route and spots leaving it', () => {
   const end = routeProgress(r, cum, { lat: r.shape[r.shape.length - 1][1], lon: r.shape[r.shape.length - 1][0] }, mid.segment);
   near(end.remainingM, 0, 1);
   assert.equal(end.next, r.maneuvers.length - 1);
+  assert.equal(end.aheadBearing, null, 'nothing ahead at the end');
+
+  // The way ahead: towards the point 30 m further along.
+  const here = { lat: r.shape[0][1], lon: r.shape[0][0] };
+  near(start.aheadBearing ?? -1, bearingDegrees(here, pointAlong(r.shape, cum, 30)!), 0.5);
+});
+
+test('pointAlong interpolates and clamps', () => {
+  const shape: [number, number][] = [
+    [0, 0],
+    [0.001, 0],
+    [0.001, 0.001],
+  ];
+  const cum = cumulativeDistances(shape);
+  const half = pointAlong(shape, cum, cum[1] / 2)!;
+  near(half.lon, 0.0005, 1e-9);
+  near(half.lat, 0, 1e-9);
+  const corner = pointAlong(shape, cum, cum[1] + (cum[2] - cum[1]) / 2)!;
+  near(corner.lon, 0.001, 1e-9);
+  near(corner.lat, 0.0005, 1e-9);
+  assert.deepEqual(pointAlong(shape, cum, 1e9), { lat: 0.001, lon: 0.001 });
+  assert.deepEqual(pointAlong(shape, cum, -5), { lat: 0, lon: 0 });
+  assert.equal(pointAlong([], [], 0), null);
 });
 
 test('tileBBox from the Comunidad de Madrid pack tile names', () => {

@@ -1,7 +1,7 @@
 import { Camera, GeoJSONSource, Layer, Map, NativeUserLocation, type CameraRef, type InitialViewState } from '@maplibre/maplibre-react-native';
 import * as Location from 'expo-location';
 import { router, useNavigation } from 'expo-router';
-import { Layers, LocateFixed, MapPin, Navigation2, Search, Siren } from 'lucide-react-native';
+import { Layers, LocateFixed, MapPin, Navigation, Navigation2, Route, Search, Siren } from 'lucide-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Linking, StyleSheet, View } from 'react-native';
@@ -11,6 +11,7 @@ import { Button, Card, PressableScale, Text } from '@/components/ui';
 import { ensureMapAssets, type MapAssets } from '@/features/maps/assets';
 import { emergencyPlacesIn, usePoiSync } from '@/features/maps/emergency';
 import { WORLD_ID } from '@/features/maps/extraction';
+import { FollowArrow, useFollowCamera } from '@/features/maps/FollowCamera';
 import { GuidancePanel } from '@/features/maps/GuidancePanel';
 import { HeadingBeam } from '@/features/maps/HeadingBeam';
 import { useGuidance } from '@/features/maps/guidance';
@@ -52,6 +53,7 @@ export default function MapScreen() {
   const target = useGuidance((s) => s.target);
   const position = useGuidance((s) => s.position);
   const route = useGuidance((s) => s.route);
+  const navigating = useGuidance((s) => s.navigating);
   const cameraRef = useRef<CameraRef>(null);
   const [assets, setAssets] = useState<MapAssets | null>(null);
   const [bearing, setBearing] = useState(0);
@@ -65,6 +67,14 @@ export default function MapScreen() {
     return () => unsubscribe.forEach((u) => u());
   }, [navigation]);
   const [locating, setLocating] = useState(false);
+  // Navigation view ("Iniciar"): the camera follows the user, the way ahead up
+  // (FollowCamera), until the user pans the map. Per trip: it holds the target.
+  const [touchedFor, setTouchedFor] = useState<typeof target>(null);
+  const following = navigating && !!target && touchedFor !== target;
+  const followingRef = useRef(false);
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const [panelHeight, setPanelHeight] = useState(0);
+  const [bannerHeight, setBannerHeight] = useState(0);
 
   useEffect(() => {
     ensureMapAssets()
@@ -169,6 +179,19 @@ export default function MapScreen() {
     [route],
   );
 
+  const top = insets.top + space.sm;
+  const cardBottom = insets.bottom + 72;
+  // Following: the user three quarters down the map between the search bar and the
+  // panel, so most of the screen shows the road ahead. The camera's padding centres
+  // the user there; the arrow is drawn at the same point.
+  const freeTop = navigating ? top + bannerHeight + space.md : top + 46 + space.md;
+  const freeBottom = cardBottom + panelHeight + space.md;
+  const userY = freeTop + Math.max(0, size.height - freeTop - freeBottom) * 0.75;
+  const shift = 2 * userY - size.height;
+  // Framing the trip: the free map between the top bar / banner and the panel (and the
+  // "Recentrar" pill, there whenever navigating without following).
+  const tripPadding = { top: freeTop + space.lg, bottom: freeBottom + space.lg + (navigating ? 44 + space.md : 0), left: 48, right: 48 + 46 };
+
   // Frame the whole route when the first one arrives and when the mode changes;
   // a reroute keeps the user's framing.
   const framedKey = useRef<string | null>(null);
@@ -177,7 +200,9 @@ export default function MapScreen() {
     const key = `${target.lat},${target.lon},${route.costing}`;
     if (framedKey.current === key) return;
     framedKey.current = key;
-    cameraRef.current?.fitBounds(route.bbox, { padding: { top: 140, bottom: 360, left: 60, right: 60 }, duration: 900 });
+    if (!followingRef.current) cameraRef.current?.fitBounds(route.bbox, { padding: tripPadding, duration: 900 });
+    // Only when a route arrives, not when the padding changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route, target]);
 
   // Frame start and target once when guidance starts.
@@ -197,9 +222,31 @@ export default function MapScreen() {
         Math.max(position.lon, target.lon),
         Math.max(position.lat, target.lat),
       ],
-      { padding: { top: 140, bottom: 320, left: 60, right: 60 }, duration: 900 },
+      { padding: tripPadding, duration: 900 },
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target, position]);
+
+  useEffect(() => {
+    // Guidance ended while following: flat map again.
+    if (!target && followingRef.current) cameraRef.current?.setStop({ pitch: 0, duration: 400, easing: 'ease' });
+    followingRef.current = following;
+  }, [following, target]);
+
+  /** The whole trip, flat and north up. */
+  async function overview() {
+    setTouchedFor(target);
+    const box =
+      route?.bbox ??
+      (target && position
+        ? ([Math.min(position.lon, target.lon), Math.min(position.lat, target.lat), Math.max(position.lon, target.lon), Math.max(position.lat, target.lat)] as const)
+        : null);
+    if (!box) return;
+    // fitBounds fits at the current pitch and bearing and only then applies new ones
+    // (MapLibre iOS): flatten and turn north first, or a tilted route doesn't fit.
+    await cameraRef.current?.setStop({ pitch: 0, bearing: 0, duration: 0 }).catch(() => {});
+    cameraRef.current?.fitBounds([...box], { padding: tripPadding, duration: 700 });
+  }
 
   async function locate() {
     let perm = await Location.getForegroundPermissionsAsync();
@@ -226,11 +273,12 @@ export default function MapScreen() {
     }
   }
 
-  const top = insets.top + space.sm;
-  const cardBottom = insets.bottom + 72;
+  useFollowCamera(cameraRef, following && tabFocused && size.height > 0, Math.max(0, shift), Math.max(0, -shift));
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+    <View
+      style={[styles.root, { backgroundColor: colors.bg }]}
+      onLayout={(e) => setSize({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })}>
       {style ? (
         <Map
           style={StyleSheet.absoluteFill}
@@ -239,6 +287,11 @@ export default function MapScreen() {
           compass={false}
           attributionPosition={{ bottom: space.sm, left: space.sm }}
           tintColor={colors.location}
+          onRegionWillChange={safe((e) => {
+            // A pan or a pinch: the user wants to look around, stop following.
+            if (!e.nativeEvent.userInteraction || !navigating) return;
+            setTouchedFor(target);
+          })}
           onRegionIsChanging={safe((e) => setBearing(Number(e.nativeEvent.bearing)))}
           onRegionDidChange={safe((e) => {
             const { center, zoom, bounds, bearing: b } = e.nativeEvent;
@@ -250,8 +303,9 @@ export default function MapScreen() {
             router.push({ pathname: '/maps/marker', params: { lat: String(lat), lon: String(lon) } });
           })}>
           <Camera ref={cameraRef} initialViewState={initialView} maxZoom={19} />
-          {showUser ? <NativeUserLocation /> : null}
-          {showUser && tabFocused ? <HeadingBeam /> : null}
+          {/* Following: the arrow (FollowArrow) stands for the user. */}
+          {showUser && !following ? <NativeUserLocation /> : null}
+          {showUser && tabFocused && !following ? <HeadingBeam /> : null}
           <GeoJSONSource
             id="markers"
             data={markerData}
@@ -387,7 +441,9 @@ export default function MapScreen() {
         </View>
       )}
 
-      {style ? (
+      {style && following ? <FollowArrow x={size.width / 2} y={userY} /> : null}
+
+      {style && !navigating ? (
         <PressableScale
           testID="map-search"
           accessibilityRole="search"
@@ -403,13 +459,18 @@ export default function MapScreen() {
         </PressableScale>
       ) : null}
 
-      <View style={[styles.controls, { top }]} pointerEvents="box-none">
+      {/* Navigating: under the maneuver banner, only what matters on the road. */}
+      <View style={[styles.controls, { top: navigating ? freeTop : top }]} pointerEvents="box-none">
         <MapFab testID="map-emergency" accessibilityLabel={t('controls.emergency')} onPress={() => router.push('/maps/emergency')}>
           <Siren size={21} color={colors.danger} strokeWidth={2} />
         </MapFab>
-        <MapFab icon={Layers} accessibilityLabel={t('controls.regions')} onPress={() => router.push('/maps/regions')} />
-        <MapFab icon={MapPin} accessibilityLabel={t('controls.markers')} onPress={() => router.push('/maps/markers')} />
-        {Math.abs(bearing) > 1 ? (
+        {!navigating ? (
+          <>
+            <MapFab icon={Layers} accessibilityLabel={t('controls.regions')} onPress={() => router.push('/maps/regions')} />
+            <MapFab icon={MapPin} accessibilityLabel={t('controls.markers')} onPress={() => router.push('/maps/markers')} />
+          </>
+        ) : null}
+        {Math.abs(bearing) > 1 && !following ? (
           <MapFab
             accessibilityLabel={t('controls.north')}
             onPress={() => cameraRef.current?.setStop({ bearing: 0, duration: 400, easing: 'ease' })}>
@@ -418,13 +479,33 @@ export default function MapScreen() {
             </View>
           </MapFab>
         ) : null}
-        <MapFab accessibilityLabel={t('controls.locate')} onPress={locate} active={showUser}>
-          {locating ? <ActivityIndicator color={colors.accent} /> : <LocateFixed size={21} color={showUser ? colors.accent : colors.text} />}
-        </MapFab>
+        {following ? (
+          <MapFab testID="map-overview" icon={Route} accessibilityLabel={t('controls.overview')} onPress={overview} />
+        ) : (
+          <MapFab accessibilityLabel={t('controls.locate')} onPress={locate} active={showUser}>
+            {locating ? <ActivityIndicator color={colors.accent} /> : <LocateFixed size={21} color={showUser ? colors.accent : colors.text} />}
+          </MapFab>
+        )}
       </View>
 
+      {navigating && !following ? (
+        <PressableScale
+          testID="map-recenter"
+          accessibilityRole="button"
+          accessibilityLabel={t('controls.recenter')}
+          onPress={() => setTouchedFor(null)}
+          haptic="selection"
+          style={[
+            styles.recenter,
+            { bottom: freeBottom, backgroundColor: colors.surface, shadowColor: colors.shadow, borderColor: colors.border },
+          ]}>
+          <Navigation size={18} color={colors.location} fill={colors.location} />
+          <Text variant="callout">{t('controls.recenter')}</Text>
+        </PressableScale>
+      ) : null}
+
       {target ? (
-        <GuidancePanel bottom={cardBottom} mapBearing={bearing} />
+        <GuidancePanel bottom={cardBottom} top={top} mapBearing={bearing} onHeight={setPanelHeight} onBannerHeight={setBannerHeight} />
       ) : selected ? (
         <PlaceCard key={`${selected.lat},${selected.lon}`} place={selected} bottom={cardBottom} />
       ) : null}
@@ -473,4 +554,19 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   bottom: { position: 'absolute', left: space.lg, right: space.lg },
+  recenter: {
+    position: 'absolute',
+    left: space.lg,
+    height: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    paddingHorizontal: space.lg,
+    borderRadius: radius.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
 });

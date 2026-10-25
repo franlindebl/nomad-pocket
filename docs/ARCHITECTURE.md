@@ -415,6 +415,27 @@ from MapLibre's `LocationManager` (the puck's engine), heading from
 `expo-location` (`watchHeadingAsync`, redrawn every ≥ 2°). No compass, no beam (the iOS
 simulator; the Android emulator has no rotation-vector sensor).
 
+**Navigation view** (`FollowCamera.tsx`, `follow-core.ts`), Google Maps / Waze style:
+guidance opens as a trip preview (the card: mode chips, first maneuver, whole route
+framed above it, "Iniciar"). `startNavigation()` (store `navigating`, reset by
+start/stop) switches `GuidancePanel` to a maneuver banner at the top (replacing the
+search pill; regions/markers FABs hide) and a slim bar at the bottom (time left,
+distance · arrival, directions, stop), and the camera follows the user, tilted 45°, the way ahead up, zoom by mode and speed, with the user
+three quarters down the map between the search pill and the guidance panel (camera
+padding from the panel's measured height). Every GPS fix is an `easeTo` lasting about the
+gap since the last fix (linear), so the map glides; compass turns between fixes (foot,
+bike) re-ease when ≥ 4°. Bearing (`followBearing`): the route's direction 30 m ahead of
+the snapped point (`RouteProgress.aheadBearing`) while on it, else the GPS course, else
+the compass on foot/bike. `fitBounds` on MapLibre iOS fits at the current pitch and
+bearing, then applies the new ones: the overview flattens first (`setStop`, 0 ms). Not MapLibre's `trackUserLocation`: on iOS it ignores the
+padding (the user would sit under the panel) and turns by the raw course. The user is a
+plain arrow view at the padded centre (`FollowArrow`); the native puck and the beam hide
+meanwhile. A pan/pinch (`onRegionWillChange` with `userInteraction`) stops following for
+that trip (`Recentrar` pill brings it back); the route button in the FAB column
+(replacing "my location") shows the whole trip flat and north-up. Stopping guidance
+flattens the map. Following = `navigating` and not panned on this trip (`touchedFor`
+holds the target).
+
 **Guidance** (`guidance.ts`, `GuidancePanel.tsx`): a zustand store watches GPS
 (`BestForNavigation`, 3 m) and the compass while a target is set and keeps the screen
 awake. With a pack covering both ends it asks for a route (car / foot / bike chips) and

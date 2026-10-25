@@ -1,0 +1,87 @@
+# MAP-17 offline — navigation view (Google Maps / Waze style), Andorra pack seeded: the
+# trip preview has "Iniciar"; then the next maneuver moves to a banner at the top, the
+# rest to a slim bar, and the map follows the user (way ahead up, tilted, an arrow instead
+# of the dot) while driving along the road; panning the map stops it ("Recentrar" brings
+# it back) and the route button shows the whole trip.
+appId: com.fjlinde.nomadpocket
+tags: [full, maps, seeded-route]
+---
+- setLocation:
+    latitude: 42.5075
+    longitude: 1.5218
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: { id: "map-search" }
+    timeout: 20000
+- tapOn: { id: "map-search" }
+- inputText: "42.4637, 1.4913"
+- tapOn: { id: "search-coordinates" }
+- extendedWaitUntil:
+    visible: { id: "place-card" }
+    timeout: 10000
+- tapOn: { id: "place-guide" }
+- extendedWaitUntil:
+    visible: { id: "guidance-next" }
+    timeout: 30000
+# The whole trip first (preview), then the navigation view.
+- assertVisible: { id: "guidance-costing-auto" }
+- assertNotVisible: { id: "map-overview" }
+- takeScreenshot: 00-preview
+- tapOn: { id: "guidance-start" }
+- extendedWaitUntil:
+    visible: { id: "map-overview" }
+    timeout: 5000
+- assertVisible: { id: "guidance-banner" }
+- assertVisible: { id: "guidance-next" }
+- assertVisible: { id: "guidance-remaining" }
+- assertNotVisible: { id: "map-search" }
+- assertNotVisible: { id: "guidance-costing-auto" }
+- assertNotVisible: { id: "map-recenter" }
+- takeScreenshot: 01-following
+# Driving the first stretch of the CG-1 (OSRM's geometry of the same trip).
+- travel:
+    points:
+      - "42.50749,1.52181"
+      - "42.50754,1.52243"
+      - "42.50712,1.52246"
+      - "42.50666,1.52163"
+      - "42.50630,1.52158"
+      - "42.50618,1.52159"
+      - "42.50547,1.52190"
+      - "42.50473,1.52198"
+      - "42.50445,1.52145"
+      - "42.50378,1.51959"
+      - "42.50380,1.51937"
+      - "42.50376,1.51922"
+      - "42.50367,1.51909"
+      - "42.50364,1.51646"
+      - "42.50301,1.51545"
+      - "42.50232,1.51404"
+      - "42.50100,1.51285"
+      - "42.49846,1.51091"
+      - "42.49794,1.51025"
+      - "42.49650,1.50739"
+    speed: 14
+- assertVisible: { id: "map-overview" }
+- assertVisible: { id: "guidance-next" }
+- takeScreenshot: 02-driving
+- swipe:
+    start: 50%, 45%
+    end: 15%, 55%
+    duration: 400
+- extendedWaitUntil:
+    visible: { id: "map-recenter" }
+    timeout: 5000
+- takeScreenshot: 03-looking-around
+- tapOn: { id: "map-recenter" }
+- extendedWaitUntil:
+    visible: { id: "map-overview" }
+    timeout: 5000
+- tapOn: { id: "map-overview" }
+- extendedWaitUntil:
+    visible: { id: "map-recenter" }
+    timeout: 5000
+- takeScreenshot: 04-overview
+- tapOn: { id: "guidance-stop" }
+- assertNotVisible: { id: "map-recenter" }
