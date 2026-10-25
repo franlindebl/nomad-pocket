@@ -24,7 +24,7 @@ can pick up without re-deriving anything.
 | Courses (14 courses, syllabus with fallbacks, progress) | done |
 | Maps (in-app PMTiles extraction, regions, visible area, world basemap, markers, GPS, multi-script labels) | done — iOS + Android |
 | Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
-| Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); **packs not published yet** (push + run the workflow) |
+| Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); first packs publishing (run 40186942180, 2026-10-25); coverage roadmap in MAPS_NAVIGATION_PLAN |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
 | Assistant (Apple Intelligence / Gemini Nano / 4 GGUF models, RAG with citations, conversational: the model decides when to search) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change); Gemini Nano untested |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
@@ -44,12 +44,15 @@ can pick up without re-deriving anything.
 
 ## Next steps / backlog
 
-Roughly by value. None is started.
+Roughly by value. Item 0 is in progress; the rest are not started.
 
-0. Publish the first routing packs: push, then Actions → "Routing packs" → Run (Spain,
-   Portugal, Andorra in `scripts/routing/packs.json`); check the release and the sheet.
-   Then measure on a real phone: route time/memory, assembling Spain (2.2 GB, JS copy),
-   mmap of a 2 GB tar on iOS (may need `com.apple.developer.kernel.extended-virtual-addressing`).
+0. Routing packs: the first run (2026-10-25, run 40186942180: Spain + regions, Portugal,
+   Andorra) was launched after pushing `bc6ba8f`; check it finished and the sheet lists
+   the packs. Then follow the coverage roadmap in `docs/MAPS_NAVIGATION_PLAN.md` ("Pack
+   coverage roadmap"): calibrate with Spain → prune old releases in the workflow →
+   Europe + Latin America → rest of the world (big countries per sub-extract).
+   Measure on a real phone: route time/memory, assembling Spain (2.2 GB, JS copy), mmap of
+   a 2 GB tar on iOS (may need `com.apple.developer.kernel.extended-virtual-addressing`).
    Then phase 3 (turn-by-turn: voice with expo-speech, background location).
 1. Watch App Review for 1.0.1; upload 1.0.2 (build 4) to TestFlight if not done
    (`docs/RELEASE.md`), test it on a real iPhone (GPU llama.cpp, Apple Intelligence,

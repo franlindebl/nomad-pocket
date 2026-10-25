@@ -46,7 +46,7 @@ Finding during testing: the main Overpass server was **at capacity** for several
 ("this public endpoint is intended for browser-based and human-operated tools"). The app
 copes (3 servers, timeouts, tile fallback), but see phase 2.
 
-## Phase 2 — road routing on the device (built 2026-10-25, packs not published yet)
+## Phase 2 — road routing on the device (built 2026-10-25, first packs being published)
 
 Status: engine, packs, catalog and downloads work end to end on the iOS simulator and the
 Android emulator (Andorra pack; E2E `map-14-route`, `map-15-routing-download`). What it
@@ -56,9 +56,10 @@ the route, straight-line fallback with "Descargar rutas", packs with their emerg
 points (no Overpass needed where a pack is installed). How: `ARCHITECTURE.md` (Maps →
 Routing). Pending:
 
-- **Publish the first packs**: push, then run `.github/workflows/routing-packs.yml`
-  (Actions → Routing packs → Run). Until `routing-index/routing-manifest.json` exists the
-  sheet says the catalog can't be loaded. Spain's country tar will be split in two parts.
+- **First packs**: pushed in `bc6ba8f` and the workflow was run on 2026-10-25 (run
+  40186942180: Spain + its regions, Portugal, Andorra). Check that it finished, that
+  release `routing-index` holds `routing-manifest.json`, and that the sheet lists the packs.
+  Note Spain's build time and size there (it calibrates the coverage roadmap below).
 - Not measured on a phone: route time and memory, assembling a 2 GB pack (JS copy).
 - Isochrones: neither valhalla-mobile wrapper exposes them (iOS would need Valhalla
   headers in our code, which broke tile reading: see CLAUDE.md pitfalls).
@@ -84,6 +85,37 @@ Routing). Pending:
   contraction-hierarchy graph built in CI is the fallback if embedding Valhalla fails.
 
 Spike results (2026-10-25): viable — see "Valhalla spike" below.
+
+## Pack coverage roadmap (agreed 2026-10-25)
+
+Today only `es`, `pt`, `ad` have packs (`scripts/routing/packs.json`); everywhere else
+"take me there" stays on the straight line (maps, search and Emergencias work worldwide).
+Adding a country is one entry in `packs.json` (Geofabrik path + ISO code); the app picks it
+up from the manifest with no app release. Order the owner agreed:
+
+1. **Calibrate** with the first run: Spain's build time, peak disk/RAM, pack sizes.
+2. **Prune old releases** before growing: every run creates `routing-YYYYMMDD-N` and none
+   is deleted yet. Keep the release the manifest points at plus the previous one (a phone
+   may be mid-download from it); delete older `routing-*` releases and tags in the
+   `publish` job, after `routing-index` is updated.
+3. **Europe + Latin America** (Spanish-speaking audience first).
+4. **Rest of the world**, with big countries built from Geofabrik sub-extracts.
+
+Limits to design around:
+
+- GitHub-hosted runner: 4 vCPU, 16 GB RAM, ~14 GB on `/` + `/mnt`; job timeout is 300 min
+  (GitHub's cap is 6 h). USA, Russia, Canada, Brazil, Germany, France, likely India and
+  China won't fit as one build: build per sub-extract (US states, Länder, French regions…).
+  `build-country.sh` fetches admins by country ISO, so a sub-extract entry needs an
+  extract path distinct from its ISO (small script change) and a `regionId` that exists
+  in `src/features/maps/regions.json`.
+- Release assets: 2 GiB per file (already split, ≤1900 MiB parts) and 1000 assets per
+  release. A world run (tar parts + `.pois.tsv` per pack) gets close: publish one release
+  per continent (the manifest already stores a `release` per pack).
+- Matrix: `max-parallel: 3` today; raise it for the world run (free runners allow ~20
+  concurrent jobs on a public repo). Monthly cron is `0 3 5 * *`.
+- Routes across a border need both ends in one pack (region packs are tile subsets of
+  their country; there are no cross-country packs).
 
 ## Phase 3 — turn-by-turn navigation
 
