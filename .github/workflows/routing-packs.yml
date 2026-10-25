@@ -116,6 +116,9 @@ jobs:
             python3 -I scripts/routing/manifest.py carry previous/routing-manifest.json routing-manifest.json > merged.json
             mv merged.json routing-manifest.json
           fi
+          # Coverage within each extract's polygon (ferry lines leave it), carried packs too.
+          python3 -I scripts/routing/manifest.py clip routing-manifest.json scripts/routing/packs.json > clipped.json
+          mv clipped.json routing-manifest.json
           gh release upload "$TAG" --clobber routing-manifest.json
           gh release view routing-index >/dev/null 2>&1 || gh release create routing-index --prerelease \
             --title "Routing catalog" --notes "routing-manifest.json: the current offline routing packs (read by the app)."

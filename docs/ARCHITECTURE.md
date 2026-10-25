@@ -391,7 +391,10 @@ region bbox for subdivisions —, parts with sha256; drops empty packs and point
 Each run gets its own tag (`routing-YYYYMMDD-<run>`) and each pack records its release,
 so countries not rebuilt in a run keep their previous files; `routing-index` is updated
 last, and the run fails rather than drop countries if the previous manifest can't be
-read. Then releases that neither the new nor the previous manifest points at are deleted.
+read. Before publishing, every pack's cells are clipped to its Geofabrik extract's
+`.poly` (`manifest.py clip`: extracts keep whole ways that leave them, ferry lines above
+all, which would make Ireland's pack "cover" Bilbao). Then releases that neither the new
+nor the previous manifest points at are deleted.
 
 **Guidance** (`guidance.ts`, `GuidancePanel.tsx`): a zustand store watches GPS
 (`BestForNavigation`, 3 m) and the compass while a target is set and keeps the screen

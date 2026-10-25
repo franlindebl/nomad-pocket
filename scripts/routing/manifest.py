@@ -2,10 +2,11 @@
   fragment <out dir> <country> <YYYYMMDD> [slice ids...]  → JSON list of this country's packs
   merge <release tag> <fragment.json...>                 → routing-manifest.json
   carry <previous manifest> <new manifest>               → new + previous packs of countries not rebuilt
+  clip <manifest> <packs.json>                           → cells limited to each extract's .poly
 A pack is one tar (Valhalla tile extract) in one or more parts; the app downloads the
 parts in order and appends them. bbox comes from the tile names, like tileBBox() in
 src/features/maps/routing-core.ts."""
-import glob, hashlib, json, math, os, sys, time
+import glob, hashlib, json, math, os, sys, time, urllib.request
 
 LEVEL_DEGREES = {0: 4.0, 1: 1.0, 2: 0.25}
 
@@ -148,11 +149,100 @@ def carry(previous, current):
     json.dump(cur, sys.stdout, indent=1)
 
 
+def read_poly(text):
+    """Rings of an Osmosis .poly file (holes, marked with '!', are kept as rings: a cell
+    inside a hole is rare and only means an extra pack offered there)."""
+    rings, ring = [], None
+    for line in text.splitlines()[1:]:
+        line = line.strip()
+        if line == "END":
+            if ring is None:
+                break
+            rings.append(ring)
+            ring = None
+        elif ring is None:
+            ring = []
+        elif line:
+            x, y = map(float, line.split()[:2])
+            ring.append((x, y))
+    return rings
+
+
+def segment_meets_box(x0, y0, x1, y1, w, s, e, n):
+    """Liang–Barsky: does the segment cross the box?"""
+    t0, t1, dx, dy = 0.0, 1.0, x1 - x0, y1 - y0
+    for p, q in ((-dx, x0 - w), (dx, e - x0), (-dy, y0 - s), (dy, n - y0)):
+        if p == 0:
+            if q < 0:
+                return False
+        else:
+            t = q / p
+            if p < 0:
+                t0 = max(t0, t)
+            else:
+                t1 = min(t1, t)
+            if t0 > t1:
+                return False
+    return True
+
+
+def inside(x, y, ring):
+    hit = False
+    for (x0, y0), (x1, y1) in zip(ring, ring[1:] + ring[:1]):
+        if (y0 > y) != (y1 > y) and x < x0 + (y - y0) * (x1 - x0) / (y1 - y0):
+            hit = not hit
+    return hit
+
+
+def cell_meets_poly(cell, rings):
+    lat, lon = cell // 360 - 90, cell % 360 - 180
+    w, s, e, n = lon, lat, lon + 1, lat + 1
+    for ring in rings:
+        if inside(w + 0.5, s + 0.5, ring):
+            return True
+        for (x0, y0), (x1, y1) in zip(ring, ring[1:] + ring[:1]):
+            if max(x0, x1) >= w and min(x0, x1) <= e and max(y0, y1) >= s and min(y0, y1) <= n \
+                    and segment_meets_box(x0, y0, x1, y1, w, s, e, n):
+                return True
+    return False
+
+
+def clip_polys(manifest_path, packs_json):
+    """Geofabrik extracts carry whole ways that leave them, ferry lines above all (Ireland's
+    reach Bilbao): limit every pack's cells to its extract's polygon, so the app doesn't
+    offer it where it can't route. Packs carried over from older runs get it too."""
+    manifest = json.load(open(manifest_path))
+    countries = json.load(open(packs_json))["countries"]
+    polys = {}
+    for p in manifest["packs"]:
+        src = countries.get(p["country"])
+        if not src or not p.get("cells"):
+            continue
+        if p["country"] not in polys:
+            url = f"https://download.geofabrik.de/{src['geofabrik']}.poly"
+            req = urllib.request.Request(url, headers={"User-Agent": "NomadPocket-routing/1.0 (+https://github.com/franlindebl/nomad-pocket)"})
+            polys[p["country"]] = read_poly(urllib.request.urlopen(req, timeout=60).read().decode())
+        rings = polys[p["country"]]
+        kept = [c for c in p["cells"] if cell_meets_poly(c, rings)]
+        if not kept:
+            continue  # never empty a pack's coverage on a bad polygon
+        if len(kept) < len(p["cells"]):
+            print(f"{p['id']}: {len(p['cells'])} → {len(kept)} cells", file=sys.stderr)
+        xs = [x for r in rings for x, _ in r]
+        ys = [y for r in rings for _, y in r]
+        w, s, e, n = p["bbox"]
+        p["cells"] = kept
+        p["bbox"] = [max(w, min(xs)), max(s, min(ys)), min(e, max(xs)), min(n, max(ys))]
+    json.dump(manifest, sys.stdout, indent=1)
+
+
 if sys.argv[1] == "fragment":
     fragment(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5:])
 elif sys.argv[1] == "merge":
     merge(sys.argv[2], sys.argv[3:])
 elif sys.argv[1] == "carry":
     carry(sys.argv[2], sys.argv[3])
+elif sys.argv[1] == "clip":
+    clip_polys(sys.argv[2], sys.argv[3])
 else:
     raise SystemExit(__doc__)

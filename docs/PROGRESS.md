@@ -24,7 +24,7 @@ can pick up without re-deriving anything.
 | Courses (14 courses, syllabus with fallbacks, progress) | done |
 | Maps (in-app PMTiles extraction, regions, visible area, world basemap, markers, GPS, multi-script labels) | done — iOS + Android |
 | Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
-| Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); packs published 2026-10-25 (es + 17 regions, pt, ad); coverage roadmap in MAPS_NAVIGATION_PLAN |
+| Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 79 packs live 2026-10-25 (Europe + Latin America up to Spain's size); E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
 | Assistant (Apple Intelligence / Gemini Nano / 4 GGUF models, RAG with citations, conversational: the model decides when to search) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change); Gemini Nano untested |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
@@ -48,12 +48,13 @@ can pick up without re-deriving anything.
 Roughly by value. Item 0 is in progress; the rest are not started. (Preparedness was added
 on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
 
-0. Routing packs: published 2026-10-25 — 22 packs in the live catalog (Spain + 17
-   regions incl. Canarias from `routing-20261025-2`, Portugal + Andorra from
-   `routing-20261025-1`). Next, the coverage roadmap in `docs/MAPS_NAVIGATION_PLAN.md`
-   ("Pack coverage roadmap"; calibrate and pruning done): Europe + Latin America → rest
-   of the world (big countries per sub-extract). Check the real catalog in the app
-   (Release build without `EXPO_PUBLIC_ROUTING_MANIFEST_URL`): download a pack from GitHub.
+0. Routing packs: 79 packs live since 2026-10-25 (24.9 GB): Spain + 17 regions,
+   Canarias, Portugal, Andorra and 57 more countries of Europe and Latin America (every
+   one whose Geofabrik extract is ≤ Spain's). E2E against the live catalog passes on iOS
+   (`map-16-routing-github`) and Android (`android-05-routing`). Next, step 4 of the
+   coverage roadmap in `docs/MAPS_NAVIGATION_PLAN.md`: Brazil, Poland, Italy, UK,
+   Germany, France, Russia need sub-country packs (no subdivisions in `regions.json`
+   except Spain and the USA), then the rest of the world.
    Measure on a real phone: route time/memory, assembling Spain (2.2 GB, JS copy), mmap of
    a 2 GB tar on iOS (may need `com.apple.developer.kernel.extended-virtual-addressing`).
    Then phase 3 (turn-by-turn: voice with expo-speech, background location).
@@ -122,6 +123,21 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-25 — Routing packs: Europe and Latin America, E2E against GitHub
+
+- `packs.json` +57 countries (all of Europe / Latin America with a Geofabrik extract ≤
+  Spain's 1.4 GB): run 40200828250, 57/57 built in 57 min (8 in parallel; slowest 17 min,
+  Austria and the Netherlands). Biggest packs: Mexico 1.9 GB, Ukraine 1.0 GB. `iso` may list
+  several countries (`DO,HT`, `IE,GB`) for extracts that span them.
+- Coverage clipped to each extract's `.poly` in the publish job (`manifest.py clip`):
+  the ferry lines in the extracts made Ireland "cover" Cherbourg and Roscoff, Denmark
+  Tallinn, Albania Slovenia; Spain went from 182 to 101 cells, and Ceuta, Melilla,
+  Baleares, Madeira, the Azores and Galápagos stay covered.
+- E2E against the published catalog: `map-16-routing-github` (iOS, nightly; the suite's
+  local server serves a copy of the live manifest, packs come from GitHub) and
+  `android-05-routing` (the release APK reads GitHub). iOS map-15 + map-16 pass; Android
+  5/5 on the merged code (incl. Preparedness, after `npx expo prebuild --clean`).
 
 ### 2026-10-25 — Routing packs: first publish
 
