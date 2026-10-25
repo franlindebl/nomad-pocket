@@ -1,0 +1,33 @@
+# PREP-04 — a map place becomes the meeting point, opens on the map and survives a restart.
+appId: com.fjlinde.nomadpocket
+tags: [full, prepare, maps, seeded-map]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: "Mapas sin conexión"
+    timeout: 20000
+- longPressOn: { point: "50%,25%" }
+- inputText: "Refugio"
+- tapOn: "Guardar"
+- tapOn: { id: "house" }
+- tapOn: { id: "open-prepare" }
+- tapOn: { id: "prepare-plan" }
+- tapOn: { id: "meeting-secondary" }
+- tapOn: "Refugio.*"
+- tapOn: { id: "meeting-save" }
+- assertVisible: ".*Refugio.*"
+- takeScreenshot: 01-meeting-pin
+- stopApp
+- launchApp
+- tapOn: { id: "open-prepare" }
+- tapOn: { id: "prepare-plan" }
+- assertVisible: ".*Refugio.*"
+- tapOn: { id: "meeting-secondary" }
+- tapOn: "Ver en el mapa"
+- extendedWaitUntil:
+    visible: "Mapas sin conexión"
+    timeout: 20000
+- waitForAnimationToEnd
+# Map labels are not in the accessibility tree: check 02-on-map (zoomed in on the pin).
+- takeScreenshot: 02-on-map

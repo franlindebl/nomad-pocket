@@ -1,0 +1,39 @@
+# ANDROID-04 — Preparedness on Android: plan entry from the sheet's header Save, kit maths,
+# an expiry reminder (Android 13+ asks for notifications) and the PDF share sheet. Offline.
+appId: com.fjlinde.nomadpocket
+tags: [android]
+---
+- runFlow: ../../subflows/launch.yaml
+- scrollUntilVisible:
+    element: { id: "open-prepare" }
+- tapOn: { id: "open-prepare" }
+- tapOn: { id: "prepare-plan" }
+- tapOn: { id: "add-contact" }
+- inputText: "Ana López"
+- tapOn: { id: "entry-phone" }
+- inputText: "600123456"
+- tapOn: { id: "entry-save" }
+- assertVisible: "Ana López"
+- assertVisible: { id: "call-contact-0" }
+- takeScreenshot: 01-plan
+- back
+- tapOn: { id: "prepare-kit" }
+- assertVisible: "24 L"
+- tapOn: { id: "adults-plus" }
+- assertVisible: "36 L"
+- takeScreenshot: 02-kit
+- tapOn: { id: "kit-water" }
+- tapOn: { id: "kit-water-details" }
+- tapOn: { id: "item-add-expiry" }
+- tapOn: { id: "item-save" }
+- tapOn:
+    text: "(?i)permitir|allow"
+    optional: true
+- assertVisible: ".*Caduca en .*"
+- takeScreenshot: 03-kit-expiry
+- back
+- tapOn: { id: "prepare-export" }
+- extendedWaitUntil:
+    visible: ".*(Plan de emergencia|PDF|Compartir).*"
+    timeout: 20000
+- takeScreenshot: 04-share

@@ -11,8 +11,8 @@ can pick up without re-deriving anything.
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
   tour). Not yet run on a physical device by the agent.
-- Checks: 122 unit tests (121 pass, 1 network test skipped), `tsc` clean, lint clean, i18n keys complete. E2E: 48 Maestro flows (19 smoke,
-  14 full, 11 nightly, iPad tour, 3 Android flows) covering 53 of 55 test-plan cases plus the new maps cases and AI-06/07.
+- Checks: 132 unit tests (131 pass, 1 network test skipped), `tsc` clean, lint clean, i18n keys complete. E2E: 53 Maestro flows (21 smoke,
+  16 full, 11 nightly, iPad tour, 4 Android flows) covering 53 of 55 test-plan cases plus the new maps cases, AI-06/07 and PREP-01…04.
 
 | Area | Status |
 |---|---|
@@ -28,6 +28,7 @@ can pick up without re-deriving anything.
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
 | Assistant (Apple Intelligence / Gemini Nano / 4 GGUF models, RAG with citations, conversational: the model decides when to search) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change); Gemini Nano untested |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
+| Preparedness (family plan, emergency kit with expiry reminders, printable PDF, offline guides) | done — iOS sim + Android emulator (E2E) |
 | E2E suite (Maestro) + pre-commit hook | done |
 
 ## Decisions (kickoff 2026-10-24, by the owner)
@@ -44,7 +45,8 @@ can pick up without re-deriving anything.
 
 ## Next steps / backlog
 
-Roughly by value. Item 0 is in progress; the rest are not started.
+Roughly by value. Item 0 is in progress; the rest are not started. (Preparedness was added
+on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
 
 0. Routing packs: the first run (2026-10-25, run 40186942180: Spain + regions, Portugal,
    Andorra) was launched after pushing `bc6ba8f`; check it finished and the sheet lists
@@ -68,6 +70,11 @@ Roughly by value. Item 0 is in progress; the rest are not started.
 6. Assistant: copy / regenerate an answer; better small-model citations; check the
    conversational flow on Android (llama.cpp tools + Gemini Nano heuristics) and on a
    real iPhone (tool-call latency with Metal).
+7. Preparedness follow-ups: share ZIMs/maps phone to phone (share sheet export, import
+   exists); "Ready.gov"-style quick cards bundled in the app (radio frequencies, first aid)
+   that need no download; optional Face ID lock for the plan; cold-start notification tap
+   (only a warm tap opens the kit now); link the plan's meeting points to maps' Llévame
+   guidance and the hub to the Emergencias sheet (both landed on main in parallel).
 
 
 ## Known issues / limitations
@@ -101,6 +108,9 @@ Roughly by value. Item 0 is in progress; the rest are not started.
   photosynthesis?"); the "Buscar en mi biblioteca" button covers it. Apple FM tends to
   open every answer with "¡Hola!" once the chat started with a greeting.
 - Apple Intelligence fails on the iOS 26.5 simulator (works on iOS 27).
+- E2E: the setup wizard occasionally doesn't show on a fresh install (`lib-03` failed once
+  in a full run on 2026-10-25, then passed 3/3): the onboarding push race, not new code.
+- Kit reminder texts are written in the language active when the expiry was saved.
 - Map labels in Bengali, Tamil and other Indic scripts, Myanmar and Khmer are not drawn
   (MapLibre Native can't shape them); country bboxes skip far-flung territories.
 - ZIM media Range path untested with a real video archive.
@@ -380,3 +390,29 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   flows pass, including new `ai-06-conversation` (Apple FM: greeting without sources →
   question with sources → follow-up with sources) and `ai-07-gguf-tools` (Qwen 0.8B:
   greeting → button → tool call with sources); smoke suite 16/16.
+
+### 2026-10-25 — Preparedness (worktree `preparedness`)
+- New Home card → `/prepare`: family plan (two meeting points, one of them can be a map
+  pin; contacts with call button; important numbers; health per person; home notes),
+  emergency kit (household steppers + 72 h / 1 week / 2 weeks → water, kcal, medication
+  days; 29-item checklist in 8 categories, children/pet items only when they apply;
+  custom items; expiry month per item with a local reminder the month before), PDF export
+  (A4, blank rows to fill by hand) through the share sheet, and the catalog's offline
+  guides (Ready.gov, post-disaster, medicine, water, food) with download buttons.
+- Data: one kv-store document (`prepare`), no SQL migration, nothing leaves the device;
+  privacy policy updated. New deps: `expo-print`, `expo-sharing`, `expo-notifications`
+  (plugin with `enableRemoteNotifications: false`: no push entitlement; Android
+  notification icon `assets/images/notification-icon.png`).
+- Android: form sheets show no native header, so `SheetHeader` draws title + Save in the
+  content there (native header on iOS). `android-04-prepare` passes on the emulator
+  (API 36, release APK); the reminder alarm is set for the 1st of the month before expiry.
+- `ListRow` takes `accessibilityRole` / `accessibilityState` (checkbox rows).
+- Found by E2E and fixed: the keyboard covered the sheets' bottom Save button (Save moved
+  to the top: native header on iOS, `SheetHeader` row on Android); cards hid their status from accessibility; "Show on map" didn't move a
+  map in a hidden tab (viewport seeded + focus after the tab shows); kit quantities
+  printed `{{days}}`.
+- Verified on the iOS 27 simulator (Release, `NP-prepare`): PREP-01…04 pass; smoke + full
+  32/33 (the flaky `lib-03`, then 3/3). PDF checked by eye (2 pages).
+- Rebased on main after the maps search/Emergencias, road routing and conversational
+  assistant work (docs-only conflicts; Home card moved under Emergencias): smoke + full
+  36/37 on the merged Release build (`ai-01` hit the onboarding race, then 3/3).

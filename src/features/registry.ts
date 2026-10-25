@@ -3,3 +3,4 @@
 import './library/register';
 import './maps/register';
 import './assistant/register';
+import './prepare/register';

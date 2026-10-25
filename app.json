@@ -125,6 +125,15 @@
             "minSdkVersion": 26
           }
         }
+      ],
+      "expo-sharing",
+      [
+        "expo-notifications",
+        {
+          "enableRemoteNotifications": false,
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#F2643A"
+        }
       ]
     ],
     "experiments": {

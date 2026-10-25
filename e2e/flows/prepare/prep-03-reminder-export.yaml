@@ -1,0 +1,27 @@
+# PREP-03 — an expiry a year ahead asks for notifications and schedules a reminder; the plan exports as a PDF.
+appId: com.fjlinde.nomadpocket
+tags: [full, prepare]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "open-prepare" }
+- tapOn: { id: "prepare-kit" }
+- scrollUntilVisible:
+    element: { id: "kit-batteries-details" }
+- tapOn: { id: "kit-batteries-details" }
+- tapOn: { id: "item-add-expiry" }
+- assertVisible: "Te avisaremos a principios de .*"
+- tapOn: { id: "item-save" }
+# First reminder: iOS asks for permission (the simulator runs in Spanish).
+- extendedWaitUntil:
+    visible: "Permitir"
+    timeout: 10000
+- tapOn: "Permitir"
+- assertVisible: ".*Caduca en .*"
+- assertNotVisible: "Las notificaciones están desactivadas.*"
+- tapOn: { id: "BackButton" }
+- tapOn: { id: "prepare-export" }
+# The system share sheet, titled with the PDF's name.
+- extendedWaitUntil:
+    visible: "Plan de emergencia.*"
+    timeout: 20000
+- takeScreenshot: 01-share-sheet

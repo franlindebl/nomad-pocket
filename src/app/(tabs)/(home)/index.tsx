@@ -8,6 +8,7 @@ import { Button, Card, IconBadge, IconButton, ProgressBar, Row, Screen, SectionH
 import { ContinueCarousel } from '@/features/home/ContinueCarousel';
 import { useItems } from '@/features/content/items';
 import { useActiveDownloads } from '@/features/downloads/manager';
+import { PrepareHomeCard } from '@/features/prepare/HomeCard';
 import { formatBytes } from '@/lib/format';
 import { freeBytes, totalBytes } from '@/lib/storage';
 import { radius, space, useTheme, type Hue } from '@/theme';
@@ -126,6 +127,8 @@ export default function HomeScreen() {
           <ChevronRight size={18} color={colors.textTertiary} />
         </Row>
       </Card>
+
+      <PrepareHomeCard />
 
       <ContinueCarousel />
 

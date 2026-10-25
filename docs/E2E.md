@@ -2,9 +2,10 @@
 
 [Maestro](https://maestro.mobile.dev) flows that drive the Release build of the app on an
 iOS simulator, the same way a person would: tapping, typing and reading the screen through
-accessibility. 48 flows cover 53 of the 55 cases in the test plan (Claude doc "Plan de
+accessibility. 53 flows cover 53 of the 55 cases in the test plan (Claude doc "Plan de
 tests funcionales iOS — Nomad App"), plus AI-06 and AI-07 added after it; the case ids (`RDR-03`, `MAP-06`…) are on the first
-line of each flow.
+line of each flow. Preparedness (`PREP-01`…`PREP-04`) came after the plan and has its own
+flows.
 
 ## Quick start
 
@@ -40,11 +41,11 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 
 | Command | Flows | Time | Covers | Needs |
 |---|---|---|---|---|
-| `npm run e2e` | 19 | ~13 min | P0: every screen's main path (incl. map search, Emergencias and road routing) | nothing (offline) |
-| `npm run e2e:full` | 33 | ~22 min | + P1: secondary features (themes, markers, find in page, courses…) | nothing (offline) |
-| `npm run e2e:all` | 43 | ~32 min | + P2: real downloads, OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
+| `npm run e2e` | 21 | ~14 min | P0: every screen's main path (incl. map search, Emergencias, road routing and Preparedness) | nothing (offline) |
+| `npm run e2e:full` | 37 | ~24 min | + P1: secondary features (themes, markers, find in page, courses, reminders, PDF…) | nothing (offline) |
+| `npm run e2e:all` | 48 | ~34 min | + P2: real downloads, OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape, light and dark | nothing (offline) |
-| `npm run e2e:android` | 3 | ~12 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias | internet, Android emulator |
+| `npm run e2e:android` | 4 | ~14 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness | internet, Android emulator |
 
 When to run what: smoke before every TestFlight build or after a risky change; full and the
 iPad tour before an App Store release (then look through the iPad screenshots in
@@ -242,10 +243,15 @@ By hand:
 | assistant | `ai-06-conversation` | AI-06 | nightly | seeded, Apple Intelligence |
 | assistant | `ai-07-gguf-tools` | AI-07 | nightly | seeded, seeded-model |
 | downloads | `dl-02-controls` | DL-02 | nightly | network |
+| prepare | `prep-01-plan` | PREP-01 | smoke | — |
+| prepare | `prep-02-kit` | PREP-02 | smoke | — |
+| prepare | `prep-03-reminder-export` | PREP-03 | full | taps the system notifications alert |
+| prepare | `prep-04-meeting-pin` | PREP-04 | full | seeded-map |
 | ipad | `ipad-01-tour` | IPAD-01 | ipad | seeded, seeded-map |
 | android | `android-01-tour` | ANDROID-01 | android | network |
 | android | `android-02-map-scripts` | ANDROID-02 | android | network (~15 MB) |
 | android | `android-03-search-emergency` | ANDROID-03 | android | network (visible-area map + Overpass) |
+| android | `android-04-prepare` | ANDROID-04 | android | — (offline) |
 
 Not automated: LIB-08 (import from Files: the system picker is outside the app) and X-02
 (offline: the simulator has no airplane mode). Check them by hand on a device.
@@ -301,6 +307,12 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `emergency-fetch-top`, `emergency-region`, `emergency-fetch` | download OSM points (top card), per-region rows and their refresh button |
   | `marker-guide` | Llévame in a saved place's sheet |
   | `search-library` | "Buscar en mi biblioteca" under an answer given without the library |
+  | `open-prepare`, `prepare-plan`, `prepare-kit`, `prepare-export` | Home card and Preparedness hub |
+  | `meeting-primary`, `meeting-secondary`, `add-contact`, `add-number`, `add-person`, `call-contact-<n>`, `home-notes` | family plan (n 0-based) |
+  | `entry-<field>`, `entry-save` | plan entry sheet (`entry-name`, `entry-phone`…) |
+  | `meeting-place`, `meeting-details`, `meeting-pin-<id>`, `meeting-save` | meeting point sheet |
+  | `adults-plus`/`-minus`/`-value` (also `children-`, `pets-`), `kit-progress`, `kit-<item>`, `kit-<item>-details`, `kit-add` | kit screen |
+  | `item-name`, `item-add-expiry`, `expiry-month`, `item-save` | kit item sheet |
   | `house`, `books.vertical`, `map`, `graduationcap`, `sparkles` | tabs (SF Symbol ids, set by iOS) |
   | `BackButton` | the native header's back button |
 

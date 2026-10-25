@@ -1,6 +1,6 @@
 import { ChevronRight } from 'lucide-react-native';
 import type { ReactNode } from 'react';
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type AccessibilityRole, type AccessibilityState, type StyleProp, type ViewStyle } from 'react-native';
 
 import { space, useTheme } from '@/theme';
 
@@ -23,6 +23,9 @@ type Props = {
   titleLines?: number;
   subtitleLines?: number;
   testID?: string;
+  /** E.g. 'checkbox' + { checked } for a row that toggles. */
+  accessibilityRole?: AccessibilityRole;
+  accessibilityState?: AccessibilityState;
 };
 
 export function ListRow({
@@ -39,6 +42,8 @@ export function ListRow({
   titleLines = 1,
   subtitleLines = 2,
   testID,
+  accessibilityRole = 'button',
+  accessibilityState,
 }: Props) {
   const { colors } = useTheme();
   const content = (
@@ -70,7 +75,8 @@ export function ListRow({
   const button = (
     <PressableScale
       testID={testID}
-      accessibilityRole="button"
+      accessibilityRole={accessibilityRole}
+      accessibilityState={accessibilityState}
       onPress={onPress}
       onLongPress={onLongPress}
       pressedScale={0.99}
@@ -93,11 +99,7 @@ export function ListGroup({ children, style }: { children: ReactNode; style?: St
   const items = (Array.isArray(children) ? children : [children]).flat().filter(Boolean);
   return (
     <View
-      style={[
-        styles.group,
-        { backgroundColor: colors.surface, borderColor: scheme === 'light' ? colors.border : 'transparent' },
-        style,
-      ]}>
+      style={[styles.group, { backgroundColor: colors.surface, borderColor: scheme === 'light' ? colors.border : 'transparent' }, style]}>
       {items.map((child, i) => (
         <View key={i}>
           {i > 0 ? <View style={[styles.separator, { backgroundColor: colors.border }]} /> : null}

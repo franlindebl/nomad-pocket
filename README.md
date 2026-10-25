@@ -12,6 +12,7 @@ internet at all.
 - 🗺️ **Offline maps** — cut any region from the OpenStreetMap/Protomaps planet, GPS and pins
 - 🎓 **Courses** — educational content with progress tracking
 - ✨ **Local AI assistant** — on-device model that answers from your library, with sources
+- 🛟 **Preparedness** — family emergency plan, kit checklist sized to your household with expiry reminders, printable PDF
 - 🌍 Spanish and English, light and dark themes
 
 ![Nomad Pocket screens](docs/screenshots/overview.png)

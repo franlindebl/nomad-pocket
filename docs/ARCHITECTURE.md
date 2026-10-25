@@ -25,7 +25,7 @@ downloading.
 - Expo Router (`src/app`), native tabs (`expo-router/native-tabs`) and native stacks;
   pickers and confirmations are `formSheet`s.
 - State: `zustand`. Persistence: `expo-sqlite` (tables) + `expo-sqlite/kv-store`
-  (settings, map viewport).
+  (settings, map viewport, preparedness plan).
 - Files: `expo-file-system` 58 (`File`, `Directory`, `FileHandle`, `DownloadTask`).
 - i18n: `i18next` + `react-i18next`, one namespace per feature.
 - Icons: `lucide-react-native`; tab bar uses SF Symbols / Material Symbols.
@@ -34,7 +34,8 @@ downloading.
   ML Kit `genai-prompt` 1.0.0-beta4 (Android), FoundationModels (iOS 26+, weak-linked).
 - Other: `fflate` (gzip/zip), `@protomaps/basemaps` (style layers), `expo-network`
   (Wi-Fi checks), `expo-keep-awake` (map extraction), `expo-document-picker` (ZIM import),
-  `expo-location`, `expo-device` (RAM for model choice), `expo-haptics`.
+  `expo-location`, `expo-device` (RAM for model choice), `expo-haptics`, `expo-print` +
+  `expo-sharing` (plan PDF), `expo-notifications` (local kit reminders only).
 - Min OS: iOS 16.4 (Expo 58 floor), Android 8.0 (API 26). License: GPL-3.0-or-later
   (required by libkiwix/libzim).
 
@@ -45,7 +46,9 @@ src/
   app/                       routes (Expo Router). Only screens here.
     _layout.tsx              root Stack, bootstrap(), onboarding trigger, ToastHost
     (tabs)/_layout.tsx       NativeTabs: (home) library maps courses assistant
-    (tabs)/(home)/index      Home: storage hero, continue carousel, modules, downloads
+    (tabs)/(home)/index      Home: storage hero, continue carousel, preparedness card, modules, downloads
+    (tabs)/(home)/prepare/   index (hub, PDF export, offline guides), plan, kit; sheets:
+                             entry (contact/number/person), meeting, item
     (tabs)/library/          index (installed + categories + import), category/[slug]
                              (tiers), resource/[id] (sheet), wikipedia (size picker),
                              explore (Kiwix OPDS search)
@@ -79,6 +82,7 @@ src/
     maps/                    regions, extraction jobs, style, assets/glyphs, markers, map UI state
     assistant/               models, engines, RAG, chats, markdown, chat UI
     home/ContinueCarousel    recent reading
+    prepare/                 emergency plan + kit: store, kit maths, reminders, PDF, HomeCard
 modules/
   nomad-zim/                 libkiwix bridge + ZimWebView (Swift/Obj-C++ · Kotlin)
   nomad-llm/                 Apple Foundation Models + Gemini Nano bridge
@@ -103,6 +107,7 @@ assets/                      fonts, icons, splash, maps/basemap-assets.zip
    - maps: load markers, delete stale extraction `.part` files, register loose `.pmtiles`.
    - assistant: engine lifecycle (release on background), system-model status watcher,
      chat sessions, forget a selected model whose file is gone.
+   - prepare: notification handler (foreground banners) and tap → `/prepare/kit`.
 4. The splash hides. Settings hydrate asynchronously from the kv-store; once hydrated,
    if `onboarded` is false the root pushes `/onboarding`, waiting until the navigator
    is ready (an early push is dropped).
@@ -126,8 +131,9 @@ WAL mode, two migrations (`v1`; `v2` adds the map search and emergency tables). 
 `MIGRATIONS`; `PRAGMA user_version` tracks what ran. Never edit an old one.
 
 Key-value store (`expo-sqlite/kv-store`): `settings` (zustand persist: `language`,
-`contentLanguages`, `theme`, `wifiOnly`, `readerTextScale`, `onboarded`, `aiModelId`) and
-`maps.viewport`.
+`contentLanguages`, `theme`, `wifiOnly`, `readerTextScale`, `onboarded`, `aiModelId`),
+`maps.viewport` and `prepare` (zustand persist, version 1: the whole emergency plan and
+kit, see Preparedness below).
 
 ## Storage layout
 
@@ -481,6 +487,35 @@ Routes: `maps/index` (map, locate-me, compass, long-press to add a pin), sheets
   → reader, stop, "use my library" toggle, starters, AI/health disclaimer; conversations
   sheet; models screen (system model status, downloads, fit badges).
 
+### Preparedness (`src/features/prepare`, `src/app/(tabs)/(home)/prepare`)
+
+Emergency plan and kit, inspired by "if the internet goes down" checklists: things a
+downloaded library can't hold because they are the user's own. Entry: a card on Home
+(`PrepareHomeCard`: kit progress, contacts, items expiring) → `/prepare`.
+
+- Data (`types.ts`, `store.ts`): one JSON document in the kv-store key `prepare` —
+  contacts, important numbers, people (medication, allergies, blood type), two meeting
+  points (`primary`, `secondary`), home notes, household (adults ≥ 1, children, pets,
+  days 3/7/14), kit entries by item id (`have`, `expires` "YYYY-MM", `note`,
+  `reminderId`) and custom items (`custom-<uid>`). Nothing leaves the device except the
+  PDF the user shares. No SQL tables (no migration to coordinate).
+- Meeting points can link a map pin (`useMarkers` read-only); its lat/lon are copied so
+  the plan keeps the place if the pin is deleted. "Show on map" uses `useMapUi.focus`.
+- Kit (`kit.ts`, pure, tested): 29 template items in 8 categories (ids are stable keys —
+  never rename), children/pet items only when the household has them. Quantities: water
+  4 L/person/day + 1 L/pet/day, food 2000 kcal/adult and 1400/child per day, medication
+  max(days, 30). Expiry: `soon` = this or next month, `expired` = earlier.
+  `rows.ts` turns template + entries into translated groups and a summary.
+- Reminders (`reminders.ts`): local notification at 10:00 on the 1st of the month before
+  expiry (none if that moment has passed); permission asked the first time an expiry is
+  saved; Android channel `reminders`. The expo-notifications plugin has
+  `enableRemoteNotifications: false`, so there is no push entitlement.
+- PDF (`document.ts` pure + `share.ts`): A4 HTML (blank rows to fill by hand when a
+  section is empty, then the kit checklist) → `Print.printToFileAsync` → renamed
+  to "Plan de emergencia.pdf" in the cache → `Sharing.shareAsync` (print, Files, AirDrop).
+- The hub also lists offline guides from the catalog (Ready.gov es/en, post-disaster,
+  medicine, water, food preparation) filtered by content languages, with download buttons.
+
 ## External services (all optional at runtime, none receive user data)
 
 | Service | Used for |
@@ -495,9 +530,10 @@ Routes: `maps/index` (map, locate-me, compass, long-press to add a pin), sheets
 
 ## Testing
 
-- Unit (`npm test`, 80 tests): pmtiles (Hilbert ids vs. the official `pmtiles` package,
+- Unit (`npm test`, 132 tests): pmtiles (Hilbert ids vs. the official `pmtiles` package,
   directory round-trips, extracts validated with the official reader, a real planet
   fixture; `PMTILES_NETWORK=1` for a live test), OPDS parsing, RAG core, markdown, model
-  fit, HTML helpers, metalink parsing, glyph placeholders.
-- Functional (Maestro, `docs/E2E.md`): 40 flows — 38 on the iOS simulator (smoke / full /
-  nightly / iPad tour) and 2 on the Android emulator.
+  fit, HTML helpers, metalink parsing, glyph placeholders, map geometry / search / emergency points,
+  preparedness kit maths and PDF.
+- Functional (Maestro, `docs/E2E.md`): 53 flows — 49 on the iOS simulator (smoke / full /
+  nightly / iPad tour) and 4 on the Android emulator.

@@ -111,7 +111,7 @@ All exported from `@/components/ui` (`src/components/ui/index.ts`).
 | `Button` | `primary` (ink), `accent` (ember, rare), `secondary` (surfaceAlt), `ghost`, `danger`. Sizes `sm`/`md`/`lg`, optional icon, `fullWidth`. Pill shape. Haptic on press. |
 | `IconButton` | Circular icon control (default 40×40; variants `filled` (surfaceAlt), `plain`, `ink`). Needs `accessibilityLabel`. |
 | `Card` | surface + hairline + radius lg; optional `onPress` with scale-down press feedback (0.98). |
-| `ListRow` / `ListGroup` | Row with leading IconBadge/icon, title, subtitle, `trailing` accessory (chevron, size, switch). `trailingAction` puts a separate button beside the row (a button inside the row's pressable would be unreachable by VoiceOver). `ListGroup` groups rows in one card. |
+| `ListRow` / `ListGroup` | Row with leading IconBadge/icon, title, subtitle, `trailing` accessory (chevron, size, switch). `trailingAction` puts a separate button beside the row (a button inside the row's pressable would be unreachable by VoiceOver). A row that toggles (kit checklist) passes `accessibilityRole="checkbox"` + `accessibilityState={{ checked }}`. `ListGroup` groups rows in one card. |
 | `SectionHeader` | `overline` label + optional action link. |
 | `Chip` | Filter/segment chip with optional icon; selected = ink fill. |
 | `Segmented`, `Switch` | Segmented control (theme, text size…) and themed switch. |

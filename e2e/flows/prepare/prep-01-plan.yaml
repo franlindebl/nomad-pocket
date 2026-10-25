@@ -1,0 +1,56 @@
+# PREP-01 — Home opens Preparedness; the family plan keeps contacts, a meeting point, health and home notes.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, prepare]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "open-prepare" }
+- assertVisible: "Plan familiar.*"
+- assertVisible: "Kit de emergencia.*"
+- takeScreenshot: 01-hub-empty
+- tapOn: { id: "prepare-plan" }
+- assertVisible: "Puntos de encuentro"
+- tapOn: { id: "add-contact" }
+- assertVisible: "Nuevo contacto"
+- inputText: "Ana López"
+- tapOn: { id: "entry-relation" }
+- inputText: "Hermana"
+- tapOn: { id: "entry-phone" }
+- inputText: "600123456"
+- tapOn: { id: "entry-save" }
+- assertVisible: "Ana López.*"
+- assertVisible: ".*Hermana · 600123456.*"
+- assertVisible: { id: "call-contact-0" }
+- tapOn: { id: "meeting-primary" }
+- tapOn: { id: "meeting-place" }
+- inputText: "Puerta del colegio"
+- tapOn: { id: "meeting-details" }
+- inputText: "A las 18:00"
+- tapOn: { id: "meeting-save" }
+- assertVisible: ".*Puerta del colegio · A las 18:00.*"
+- scrollUntilVisible:
+    element: { id: "add-person" }
+- tapOn: { id: "add-person" }
+- inputText: "Lucas"
+- tapOn: { id: "entry-allergies" }
+- inputText: "Penicilina"
+- tapOn: { id: "entry-save" }
+- assertVisible: "Lucas.*"
+- assertVisible: ".*Penicilina.*"
+- scrollUntilVisible:
+    element: { id: "home-notes" }
+- tapOn: { id: "home-notes" }
+- inputText: "Llave de paso bajo el fregadero"
+- hideKeyboard
+- takeScreenshot: 02-plan-filled
+# Edit and delete: the contact sheet opens with its values.
+- scrollUntilVisible:
+    element: "Ana López.*"
+    direction: UP
+- tapOn: "Ana López.*"
+- assertVisible: "Editar contacto"
+- tapOn: "Eliminar"
+- assertNotVisible: "Ana López.*"
+- tapOn: { id: "BackButton" }
+- assertVisible: ".*Puerta del colegio.*"
+- tapOn: { id: "BackButton" }
+- assertVisible: { id: "open-prepare" }

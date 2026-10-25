@@ -1,0 +1,56 @@
+# PREP-02 — the kit scales water with the household and days, ticks items, tracks an expiry and adds own items.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, prepare]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "open-prepare" }
+- tapOn: { id: "prepare-kit" }
+- assertVisible: "Tu hogar"
+# 2 adults × 4 L × 3 days
+- assertVisible: "24 L"
+- tapOn: { id: "adults-plus" }
+- assertVisible: "36 L"
+- tapOn: "1 semana"
+- assertVisible: "84 L"
+- tapOn: { id: "children-plus" }
+- assertVisible: "112 L"
+- assertVisible: "0 de 28 listos"
+- takeScreenshot: 01-kit
+# Quantities in the rows: 3 adults + 1 child for a week.
+- scrollUntilVisible:
+    element: ".*7 días · 51.800 kcal.*"
+- scrollUntilVisible:
+    element: { id: "kit-water" }
+- tapOn: { id: "kit-water" }
+- scrollUntilVisible:
+    element: { id: "kit-progress" }
+    direction: UP
+- assertVisible: "1 de 28 listos"
+# Expiry this month: the reminder moment has passed (none scheduled) and the row shows "soon".
+- scrollUntilVisible:
+    element: { id: "kit-water-details" }
+- tapOn: { id: "kit-water-details" }
+- assertVisible: "Embotellada, en lugar fresco y oscuro"
+- tapOn: { id: "item-add-expiry" }
+- repeat:
+    times: 12
+    commands:
+      - tapOn: "Mes anterior"
+- tapOn: { id: "item-save" }
+- assertVisible: ".*Caduca pronto.*"
+# A custom item.
+- scrollUntilVisible:
+    element: { id: "kit-add" }
+- tapOn: { id: "kit-add" }
+- inputText: "Gafas de repuesto"
+- tapOn: { id: "item-save" }
+- scrollUntilVisible:
+    element: "Gafas de repuesto.*"
+- assertVisible: "Mis artículos"
+- takeScreenshot: 02-kit-custom
+- tapOn: { id: "BackButton" }
+- assertVisible: ".*2 de 29 listos.*"
+- assertVisible: ".*1 caduca pronto.*"
+- tapOn: { id: "BackButton" }
+- assertVisible: ".*Kit: 2 de 29.*"
+- takeScreenshot: 03-home-card

@@ -5,6 +5,7 @@ import enCourses from './locales/en/courses.json';
 import enHome from './locales/en/home.json';
 import enLibrary from './locales/en/library.json';
 import enMaps from './locales/en/maps.json';
+import enPrepare from './locales/en/prepare.json';
 import enReader from './locales/en/reader.json';
 import enSettings from './locales/en/settings.json';
 import esAssistant from './locales/es/assistant.json';
@@ -13,6 +14,7 @@ import esCourses from './locales/es/courses.json';
 import esHome from './locales/es/home.json';
 import esLibrary from './locales/es/library.json';
 import esMaps from './locales/es/maps.json';
+import esPrepare from './locales/es/prepare.json';
 import esReader from './locales/es/reader.json';
 import esSettings from './locales/es/settings.json';
 
@@ -26,6 +28,7 @@ export const resources = {
     assistant: esAssistant,
     settings: esSettings,
     reader: esReader,
+    prepare: esPrepare,
   },
   en: {
     common: enCommon,
@@ -36,6 +39,7 @@ export const resources = {
     assistant: enAssistant,
     settings: enSettings,
     reader: enReader,
+    prepare: enPrepare,
   },
 } as const;
 
