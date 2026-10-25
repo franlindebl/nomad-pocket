@@ -1,7 +1,8 @@
 # MAP-15 — download a routing pack (Andorra, two parts, from the local pack server that
 # scripts/e2e.sh starts for `routing-server` flows): guidance on a straight line offers
 # "Descargar rutas", the sheet lists the pack for this area, the download assembles the
-# parts, guidance switches to roads, and the pack's emergency points reach Emergencias.
+# parts, guidance switches to roads, the pack's emergency points reach Emergencias and
+# its street names the search (no map installed).
 appId: com.fjlinde.nomadpocket
 tags: [full, maps, routing-server]
 ---
@@ -54,3 +55,18 @@ tags: [full, maps, routing-server]
     visible: "(?s).*Mitjavila.*"
     timeout: 15000
 - takeScreenshot: 04-emergency
+- repeat:
+    while:
+      visible: { id: "emergency-place" }
+    times: 6
+    commands:
+      - swipe:
+          start: 50%, 40%
+          end: 50%, 98%
+          duration: 300
+- tapOn: { id: "map-search" }
+- inputText: "Bonaventura Armengol"
+- extendedWaitUntil:
+    visible: "(?s).*Carrer Bonaventura Armengol.*"
+    timeout: 15000
+- takeScreenshot: 05-street-search

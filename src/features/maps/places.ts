@@ -116,6 +116,36 @@ export function indexEmergencyPoints(itemId: string, rows: PlaceRow[]) {
   bumpVersion();
 }
 
+/** Whether a routing pack's street names are in the index. */
+export function hasPackStreets(itemId: string): boolean {
+  return !!db().getFirstSync('SELECT 1 FROM map_sources WHERE item_id = ? AND index_version IS NOT NULL', itemId);
+}
+
+/**
+ * A routing pack's street and locality names (hundreds of thousands for a country):
+ * inserted in batches with a yield in between, so the UI stays responsive. Counted as
+ * a search index (hasSearchIndex) even without a map installed.
+ */
+export async function indexPackStreets(itemId: string, rows: PlaceRow[]) {
+  deletePlaceRows(itemId);
+  for (let i = 0; i < rows.length && getItem(itemId); i += 5000) {
+    insertRows(itemId, rows.slice(i, i + 5000));
+    await yieldToUi();
+  }
+  if (!getItem(itemId)) {
+    deletePlaceRows(itemId); // removed meanwhile
+    return;
+  }
+  db().runSync(
+    `INSERT INTO map_sources (item_id, index_version, indexed_at) VALUES (?, ?, ?)
+     ON CONFLICT(item_id) DO UPDATE SET index_version = excluded.index_version, indexed_at = excluded.indexed_at`,
+    itemId,
+    INDEX_VERSION,
+    Date.now(),
+  );
+  bumpVersion();
+}
+
 /**
  * Emergency points found in the map's own tiles, stored as an offline fallback
  * (ids 't…') until Overpass points replace them (emergency.ts deletes the source's
@@ -260,12 +290,29 @@ export function searchPlaces(text: string, near: LatLon | null, limit = 40): Sea
   const match = ftsQuery(text);
   if (!match) return [];
   let rows: HitRow[];
+  const columns = 'rowid AS id, name, layer, kind, CAST(lat AS REAL) AS lat, CAST(lon AS REAL) AS lon, CAST(importance AS INTEGER) AS importance';
   try {
     rows = db().getAllSync<HitRow>(
-      `SELECT rowid AS id, name, layer, kind, CAST(lat AS REAL) AS lat, CAST(lon AS REAL) AS lon, CAST(importance AS INTEGER) AS importance
-       FROM map_places WHERE map_places MATCH ? ORDER BY CAST(importance AS INTEGER) LIMIT 600`,
+      `SELECT ${columns} FROM map_places WHERE map_places MATCH ? ORDER BY CAST(importance AS INTEGER) LIMIT 600`,
       match,
     );
+    // A common street name ("Calle Mayor") matches thousands of rows across a country:
+    // the ones around the user too, else the nearest may not be among the first 600.
+    if (near) {
+      const [w, s, e, n] = bboxAround(near, 30_000);
+      const seen = new Set(rows.map((r) => r.id));
+      for (const r of db().getAllSync<HitRow>(
+        `SELECT ${columns} FROM map_places WHERE map_places MATCH ?
+         AND CAST(lat AS REAL) BETWEEN ? AND ? AND CAST(lon AS REAL) BETWEEN ? AND ? LIMIT 600`,
+        match,
+        s,
+        n,
+        w,
+        e,
+      )) {
+        if (!seen.has(r.id)) rows.push(r);
+      }
+    }
   } catch (e) {
     console.warn('[maps] search failed', e);
     return [];

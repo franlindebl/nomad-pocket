@@ -363,33 +363,43 @@ errors come back as `valhalla <code>: <message>` (`routingErrorKind`: 171 no roa
 (`meta.bbox` + `meta.cells`, the 1° cells holding its local-road tiles — a bbox
 over-claims: Spain's covers Portugal) comes from the manifest or, for loose files, from the
 tile names in the tar (`tileCoverage`). `computeRoute(from, to, costing)` tries the packs
-covering both ends, smallest first, moving on after "no road" / "no path" (a region
-pack can lack the roads a trip needs at its edge; region packs are tile subsets of one
-country build, so the country pack covers cross-region trips). Engine calls are
+covering both ends, smallest first, moving on after "no road" / "no path" (packs are
+whole countries; packs installed from the first catalogs may be Spanish regions, tile
+subsets of the country build, which lack the roads a trip needs past their edge). Engine calls are
 serialized in JS (open + route never interleave with another request or a close). **Catalog**: `routing-manifest.json` in the
 fixed release `routing-index` (override: `EXPO_PUBLIC_ROUTING_MANIFEST_URL`, set by
 `scripts/e2e.sh` for its local pack server), cached in kv-store; each pack lists its tar
-parts (≤ 1900 MiB, GitHub's asset limit is 2 GiB) and a `.pois.tsv`. `downloadPack`
-checks the room needed up front and queues the parts and POIs not on disk yet (a retry
+parts (≤ 1900 MiB, GitHub's asset limit is 2 GiB), a `.pois.tsv` and a `.streets.tsv`
+(street and locality names: kind, name, lat, lon). `downloadPack` checks the room needed
+up front and queues the parts, POIs and street names not on disk yet (a retry
 only fetches what is missing) through the download manager (kind `route`). The
 completion handler fails a file whose size differs from the manifest; when every part is
 there it appends them into `<id>.tar.tmp`, checks the size, renames it, registers the
 item, then deletes the parts and imports the POIs into `map_pois` / the search index
-under `route-<id>` (`storeEmergencyPoints`, batched, shared with the Overpass sync). A
+under `route-<id>` (`storeEmergencyPoints`, batched, shared with the Overpass sync), then
+the street names into `map_places` / `map_localities` (`indexPackStreets`, batches of
+5000 with a yield; source `route-<id>`, and a `map_sources` row with `index_version` so
+search works with no map installed). The map index reads one zoom level under a tile
+budget, which for a big map holds only the main roads: the pack's names fill that in.
+Packs installed before the catalog had street names fetch just that file
+(`fetchMissingStreets`, after each catalog refresh; the catalog refreshes 4 s after
+startup when a pack is installed). Search also runs the match restricted to 30 km
+around the user, so a common street name nearby isn't lost among thousands. A
 kill mid-assembly is recovered by the manager re-finalizing the last part (all parts are
-still on disk); 4 s after startup `sweepRoutingFiles` deletes temp files and parts/POI
-files no active download belongs to. sha256 is in the manifest but not verified yet. Removing a pack closes the router
+still on disk); 4 s after startup `sweepRoutingFiles` deletes temp files and parts/POI/
+street files no active download belongs to. sha256 is in the manifest but not verified yet. Removing a pack closes the router
 and drops its POIs. **Packs are built** by `.github/workflows/routing-packs.yml` (monthly
 + manual): `scripts/routing/build-country.sh` per country of `packs.json` inside
-`ghcr.io/valhalla/valhalla:3.9.1` — Geofabrik PBF (md5-checked) + admin boundaries
-(levels 2/4) from Overpass → `valhalla_build_admins` → `valhalla_build_tiles` (retried:
-3.9.1 segfaults now and then) → country tar + one tar per subdivision in `regions.json`
-(`slice.py`; a subdivision with its own `packs.json` entry, like Canarias, is built from
-its own extract instead) → emergency points (`osmium tags-filter` + `emergency-points.py`, same
-columns as the Overpass TSV) → split → `manifest.py` (bbox, cells — clipped to the
-region bbox for subdivisions —, parts with sha256; drops empty packs and point files).
+`ghcr.io/valhalla/valhalla:3.9.1` — Geofabrik PBF(s) (md5-checked; several are
+`osmium merge`d: Spain + Canary Islands) + admin boundaries (levels 2/4) from Overpass →
+`valhalla_build_admins` → `valhalla_build_tiles` (retried: 3.9.1 segfaults now and then)
+→ one tar per country (the owner wants whole-country packs only) → emergency points
+(`osmium tags-filter` + `emergency-points.py`, same columns as the Overpass TSV) → street
+names (`streets.py`, one row per name per ~1 km) → split → `manifest.py` (bbox, cells,
+parts with sha256; empty side files dropped).
 Each run gets its own tag (`routing-YYYYMMDD-<run>`) and each pack records its release,
-so countries not rebuilt in a run keep their previous files; `routing-index` is updated
+so countries not rebuilt in a run keep their previous files (a rebuilt country replaces
+all its packs; countries no longer in `packs.json` are dropped); `routing-index` is updated
 last, and the run fails rather than drop countries if the previous manifest can't be
 read. Before publishing, every pack's cells are clipped to its Geofabrik extract's
 `.poly` (`manifest.py clip`: extracts keep whole ways that leave them, ferry lines above

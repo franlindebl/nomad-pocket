@@ -235,6 +235,8 @@ export type ManifestPack = {
   parts: ManifestFile[];
   /** Emergency points of the pack's area (Overpass TSV columns). */
   pois: ManifestFile | null;
+  /** Street and locality names for search (parseStreetsTsv); packs before 2026-10-26 have none. */
+  streets?: ManifestFile | null;
 };
 
 export type RoutingManifest = {
@@ -270,7 +272,8 @@ export function parseManifest(json: string): RoutingManifest | null {
       Array.isArray(p.parts) &&
       p.parts.length > 0 &&
       p.parts.every(isFile) &&
-      (p.pois == null || isFile(p.pois)),
+      (p.pois == null || isFile(p.pois)) &&
+      (p.streets == null || isFile(p.streets)),
   );
   return {
     version: 1,

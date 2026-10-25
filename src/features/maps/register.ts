@@ -15,7 +15,7 @@ import { useMarkers } from './markers';
 import { forgetMapSource, indexStaleMaps, invalidateIndex } from './places';
 import { getRegion, regionName } from './regions';
 import { closeRouter, listRoutePacks, registerLoosePack, resolvePackFile } from './routing';
-import { onRouteFileDownloaded, sweepRoutingFiles } from './routing-packs';
+import { onRouteFileDownloaded, refreshRoutingCatalog, sweepRoutingFiles } from './routing-packs';
 import { resolveMapFile, type MapItem } from './useMapSources';
 
 /** YYYYMMDD of a timestamp, the format map items keep their build date in. */
@@ -112,6 +112,8 @@ registerInit(() => {
     } catch (e) {
       console.warn('[maps] cannot sweep routing files', e);
     }
+    // Installed packs pick up what the catalog added since (street names for search).
+    if (listRoutePacks().length) refreshRoutingCatalog();
   }, 4000);
 });
 

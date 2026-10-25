@@ -1,7 +1,7 @@
 // Downloadable routing packs: the catalog (routing-manifest.json, published with the
 // packs on GitHub Releases by .github/workflows/routing-packs.yml), downloads through
-// the download manager (one per tar part plus the pack's emergency points), and
-// assembling the parts into content/routing/<id>.tar.
+// the download manager (one per tar part plus the pack's emergency points and street
+// names), and assembling the parts into content/routing/<id>.tar.
 //
 // Crash safety: parts are appended into <id>.tar.tmp, checked against the manifest size
 // and renamed; only then is the item registered and are the parts deleted. A launch
@@ -19,6 +19,8 @@ import { contentDir, contentFile, deleteFile, hasRoomFor } from '@/lib/storage';
 import { parseOverpassTsv } from './emergency-core';
 import { storeEmergencyPoints } from './emergency';
 import { useGuidance } from './guidance';
+import { parseStreetsTsv } from './places-core';
+import { hasPackStreets, indexPackStreets } from './places';
 import { getRegion, regionName } from './regions';
 import { routePackId, type RoutePackMeta } from './routing';
 import { assetUrl, parseManifest, type ManifestPack, type RoutingManifest } from './routing-core';
@@ -56,6 +58,7 @@ export async function refreshRoutingCatalog(): Promise<void> {
     if (!manifest) throw new Error('bad manifest');
     Storage.setItemSync(CACHE_KEY, text);
     useRoutingCatalog.setState({ manifest, status: 'idle' });
+    fetchMissingStreets(manifest);
   } catch (e) {
     console.warn('[maps] routing catalog', e);
     useRoutingCatalog.setState({ status: 'error' });
@@ -69,8 +72,10 @@ export function packTitle(pack: Pick<ManifestPack, 'id' | 'regionId'>): string {
 
 const partId = (pack: string, i: number) => `route-${pack}-p${i}`;
 const poisId = (pack: string) => `route-${pack}-pois`;
+const streetsId = (pack: string) => `route-${pack}-streets`;
 const partName = (pack: string, i: number) => `${pack}.tar.part${String(i).padStart(2, '0')}`;
 const poisFile = (pack: string) => contentFile('route', `${pack}.pois.tsv`);
+const streetsFile = (pack: string) => contentFile('route', `${pack}.streets.tsv`);
 
 const sizeOf = (f: File) => (f.exists ? Number(f.size ?? 0) : -1);
 const partOnDisk = (pack: ManifestPack, i: number) => sizeOf(contentFile('route', partName(pack.id, i))) === pack.parts[i].size;
@@ -82,9 +87,13 @@ const partOnDisk = (pack: ManifestPack, i: number) => sizeOf(contentFile('route'
 export function downloadPack(manifest: RoutingManifest, pack: ManifestPack) {
   const missing = pack.parts.map((_, i) => i).filter((i) => !partOnDisk(pack, i));
   const wantPois = !!pack.pois && sizeOf(poisFile(pack.id)) !== pack.pois.size;
+  const wantStreets = !!pack.streets && sizeOf(streetsFile(pack.id)) !== pack.streets.size;
   // Room for the parts still to come, and for the assembled tar while the parts exist.
   const needed =
-    missing.reduce((sum, i) => sum + pack.parts[i].size, 0) + (pack.parts.length > 1 ? pack.size : 0) + (wantPois ? pack.pois!.size : 0);
+    missing.reduce((sum, i) => sum + pack.parts[i].size, 0) +
+    (pack.parts.length > 1 ? pack.size : 0) +
+    (wantPois ? pack.pois!.size : 0) +
+    (wantStreets ? pack.streets!.size : 0);
   if (!hasRoomFor(needed)) throw new NotEnoughStorageError(needed);
   const title = packTitle(pack);
   for (const i of missing) {
@@ -109,8 +118,39 @@ export function downloadPack(manifest: RoutingManifest, pack: ManifestPack) {
       meta: { pack, role: 'pois' },
     });
   }
+  if (wantStreets) queueStreets(manifest, pack);
   // Everything was already on disk (a retry after the assembly itself failed).
   if (!missing.length) assemblePack(pack).catch((e) => console.warn('[maps] routing pack', pack.id, e));
+}
+
+function queueStreets(manifest: RoutingManifest, pack: ManifestPack) {
+  enqueueDownload({
+    id: streetsId(pack.id),
+    kind: 'route',
+    title: packTitle(pack),
+    url: assetUrl(manifest, pack, pack.streets!.name, REPO),
+    filename: `${pack.id}.streets.tsv`,
+    expectedBytes: pack.streets!.size,
+    meta: { pack, role: 'streets' },
+  });
+}
+
+/**
+ * Packs installed before the catalog had street names (or whose import was cut short)
+ * fetch just that file, not the pack again.
+ */
+export function fetchMissingStreets(manifest: RoutingManifest) {
+  const records = useDownloads.getState().records;
+  for (const pack of manifest.packs) {
+    if (!pack.streets || !isPackInstalled(pack.id) || hasPackStreets(routePackId(pack.id))) continue;
+    const rec = records[streetsId(pack.id)];
+    if (rec && ACTIVE.has(rec.status)) continue;
+    try {
+      queueStreets(manifest, pack);
+    } catch (e) {
+      console.warn('[maps] street names', pack.id, e); // no room: next catalog refresh
+    }
+  }
 }
 
 export type PackState = { progress: number | null; failed: boolean };
@@ -118,7 +158,10 @@ export type PackState = { progress: number | null; failed: boolean };
 /** Progress of a pack being downloaded (from what is on disk plus the running parts). */
 export function usePackState(pack: ManifestPack): PackState {
   const records = useDownloads((s) => s.records);
-  const mine = Object.values(records).filter((r) => r.kind === 'route' && (r.meta.pack as ManifestPack | undefined)?.id === pack.id);
+  // Street names are a side file: fetched later for installed packs, never a pack's progress.
+  const mine = Object.values(records).filter(
+    (r) => r.kind === 'route' && r.meta.role !== 'streets' && (r.meta.pack as ManifestPack | undefined)?.id === pack.id,
+  );
   const active = mine.filter((r) => ACTIVE.has(r.status));
   const failed = !active.length && mine.some((r) => r.status === 'failed');
   if (!active.length) return { progress: null, failed };
@@ -132,6 +175,16 @@ export function usePackState(pack: ManifestPack): PackState {
 
 export function isPackInstalled(packId: string): boolean {
   return !!getItem(routePackId(packId));
+}
+
+async function importStreets(pack: ManifestPack) {
+  const file = streetsFile(pack.id);
+  if (!file.exists || !getItem(routePackId(pack.id))) return;
+  try {
+    await indexPackStreets(routePackId(pack.id), parseStreetsTsv(await file.text()));
+  } finally {
+    deleteFile(file.uri);
+  }
 }
 
 async function importPois(pack: ManifestPack) {
@@ -204,6 +257,7 @@ async function assemblePack(pack: ManifestPack) {
     for (const part of parts) deleteFile(part.uri);
     await importPois(pack);
     useGuidance.getState().retryRoute();
+    await importStreets(pack);
   } catch (e) {
     deleteFile(tmp.uri);
     throw e;
@@ -216,13 +270,15 @@ async function assemblePack(pack: ManifestPack) {
 export async function onRouteFileDownloaded(file: File, record: DownloadRecord) {
   const pack = record.meta.pack as ManifestPack | undefined;
   if (!pack) return;
-  const expected = record.meta.role === 'pois' ? pack.pois?.size : pack.parts[record.meta.index as number]?.size;
+  const role = record.meta.role;
+  const expected = role === 'pois' ? pack.pois?.size : role === 'streets' ? pack.streets?.size : pack.parts[record.meta.index as number]?.size;
   // A truncated or replaced file: fail the download (the sheet offers a retry).
   if (expected !== undefined && sizeOf(file) !== expected) {
     deleteFile(file.uri);
     throw new Error(`${file.name}: ${sizeOf(file)} bytes, expected ${expected}`);
   }
-  if (record.meta.role === 'pois') await importPois(pack);
+  if (role === 'pois') await importPois(pack);
+  else if (role === 'streets') await importStreets(pack);
   else await assemblePack(pack);
 }
 
@@ -238,7 +294,7 @@ export function sweepRoutingFiles() {
   );
   for (const entry of contentDir('route').list()) {
     if (!(entry instanceof File)) continue;
-    const m = /^(.+?)\.(tar\.tmp|tar\.part\d+|pois\.tsv)$/.exec(entry.name);
+    const m = /^(.+?)\.(tar\.tmp|tar\.part\d+|pois\.tsv|streets\.tsv)$/.exec(entry.name);
     if (!m) continue;
     if (m[2] === 'tar.tmp' ? !assembling.has(m[1]) : !active.has(m[1])) deleteFile(entry.uri);
   }

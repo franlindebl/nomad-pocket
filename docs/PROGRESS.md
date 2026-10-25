@@ -124,6 +124,22 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-25 — Whole-country packs; street search from the packs
+
+- Owner feedback on build 5: no region packs, whole countries only (very large ones may
+  be split coarsely later). Spain's 17 region packs are gone; Spain merges Geofabrik's
+  Spain + Canary Islands extracts (`geofabrik` may be a list, `osmium merge`); `carry`
+  drops packs of rebuilt countries and of countries no longer listed. `slice.py` removed.
+- A Madrid side street wasn't found: a big map is indexed at a low zoom
+  (40 000-tile budget) where only main roads exist. Packs now carry `<id>.streets.tsv`
+  (`streets.py`: every named street per ~1 km + localities), imported into the search
+  index (`indexPackStreets`, batched), also for packs installed earlier
+  (`fetchMissingStreets` after each catalog refresh, which now also runs 4 s after
+  startup). Search also matches within 30 km of the user (a common name nearby was lost
+  among the first 600 hits of a country).
+- Local pipeline test (Andorra + Monaco merged): 548 points, 1736 names. iOS maps flows
+  13/13 (map-08 passed on rerun: onboarding race); map-15 now also finds a pack street.
+
 ### 2026-10-25 — Routing packs: Europe and Latin America, E2E against GitHub
 
 - `packs.json` +57 countries (all of Europe / Latin America with a Geofabrik extract ≤

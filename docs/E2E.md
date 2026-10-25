@@ -189,7 +189,7 @@ By hand:
   | `freecodecamp_es_all_2026-10.zim` | 11 MB | courses |
   | `nhs.uk_en_medicines_2026-09b.zim` | 15 MB | medical disclaimer |
   | `es-ml.pmtiles` | 0.6 MB | maps: Melilla up to zoom 12 (© OpenStreetMap, Protomaps build), in git |
-  | `routing/ad.tar`, `routing/ad.pois.tsv` | 3 MB | routing: Andorra pack + emergency points built by `scripts/routing/build-country.sh ad` (Valhalla 3.9.1, Geofabrik 2026-10-24, © OpenStreetMap), in git |
+  | `routing/ad.tar`, `routing/ad.pois.tsv`, `routing/ad.streets.tsv` | 3 MB | routing: Andorra pack + emergency points + street names built by `scripts/routing/build-country.sh ad` (Valhalla 3.9.1, Geofabrik 2026-10-24, © OpenStreetMap), in git |
   | `models/Qwen3.5-0.8B-Q4_K_M.gguf` | 533 MB | assistant with a llama.cpp model (`seeded-model`), from Hugging Face |
 
   Kiwix removes old files from the mirror. `wikipedia_en_100_mini_2026-01.zim` is no
@@ -236,7 +236,7 @@ By hand:
 | maps | `map-12-emergency-empty` | MAP-12 | smoke | — |
 | maps | `map-13-emergency-points` | MAP-13 | nightly | network, seeded-map |
 | maps | `map-14-route` | MAP-14 | smoke | seeded-route (Andorra pack, location set by the flow) |
-| maps | `map-15-routing-download` | MAP-15 | full | routing-server (local pack server) |
+| maps | `map-15-routing-download` | MAP-15 | full | routing-server (local pack server; also searches a street from the pack's names) |
 | maps | `map-16-routing-github` | MAP-16 | nightly | routing-live (published catalog, Andorra pack from GitHub, 3 MB) |
 | courses | `crs-01-empty` | CRS-01 | smoke | — |
 | courses | `crs-02-course` | CRS-02, CRS-03, CRS-04 | full | seeded |

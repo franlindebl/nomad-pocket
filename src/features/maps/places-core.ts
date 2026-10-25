@@ -1,6 +1,7 @@
 // Offline place search, the pure part: which features of an installed map's
-// tiles go into the search index (places, named POIs, named streets), the
-// FTS5 query for what the user typed, and ranking/deduplicating the hits.
+// tiles go into the search index (places, named POIs, named streets), the street
+// names a routing pack brings, the FTS5 query for what the user typed, and
+// ranking/deduplicating the hits.
 // Pure TypeScript (no `@/` aliases) so node's test runner loads it.
 import { tilePointToLonLat, type MvtLayer } from '../../lib/mvt/decode.ts';
 
@@ -105,6 +106,35 @@ export function tileRows(
       seen.set(n.name, { layer: 'road', kind: kind === 'path' ? 'path' : 'street', ...n, ...point(roads, f.x, f.y), rank });
     }
     rows.push(...seen.values());
+  }
+  return rows;
+}
+
+/** Protomaps-like min_zoom of a routing pack's place kinds (lower ranks first). */
+const PLACE_RANK: Record<string, number> = { city: 4, town: 7, village: 10, suburb: 11, borough: 11, isolated_dwelling: 14 };
+
+/**
+ * Rows of a routing pack's street index (scripts/routing/streets.py: kind, name, lat,
+ * lon per line). Map tiles only hold the main roads of a big area at the zoom the phone
+ * can index; the pack has every named street.
+ */
+export function parseStreetsTsv(text: string): PlaceRow[] {
+  const rows: PlaceRow[] = [];
+  for (const line of text.split('\n')) {
+    const [kind, name, lat, lon] = line.split('\t');
+    const y = Number(lat);
+    const x = Number(lon);
+    if (!kind || !name || !lat || !lon || !Number.isFinite(y) || !Number.isFinite(x)) continue;
+    const road = kind === 'street' || kind === 'path';
+    rows.push({
+      layer: road ? 'road' : 'place',
+      kind,
+      name,
+      names: name,
+      lat: y,
+      lon: x,
+      rank: road ? (kind === 'path' ? 15 : 14) : (PLACE_RANK[kind] ?? 12),
+    });
   }
   return rows;
 }

@@ -12,6 +12,7 @@ import {
   INDEX_LAYERS,
   nearestLocality,
   normalizeName,
+  parseStreetsTsv,
   pickIndexZoom,
   rankHits,
   tileRows,
@@ -106,4 +107,21 @@ test('nearestLocality', () => {
   ];
   assert.equal(nearestLocality({ lat: 41.08, lon: -2 }, towns)?.name, 'B');
   assert.equal(nearestLocality({ lat: 45, lon: -2 }, towns), null);
+});
+
+test('routing pack street names become road and place rows', () => {
+  const rows = parseStreetsTsv(
+    'street\tCalle Mayor\t40.415234\t-3.709345\npath\tCamí de la Rabassa\t42.48\t1.49\n' +
+      'town\tAndorra la Vella\t42.506939\t1.521247\nhamlet\tAixàs\t42.4826\t1.4641\nbroken line\nstreet\t\t1\t2\n',
+  );
+  assert.deepEqual(
+    rows.map((r) => [r.layer, r.kind, r.name, r.rank]),
+    [
+      ['road', 'street', 'Calle Mayor', 14],
+      ['road', 'path', 'Camí de la Rabassa', 15],
+      ['place', 'town', 'Andorra la Vella', 7],
+      ['place', 'hamlet', 'Aixàs', 12],
+    ],
+  );
+  assert.equal(rows[0].lat, 40.415234);
 });

@@ -61,11 +61,13 @@ Routing). Pending:
   out the Canary Islands, so that slice was empty). Fixed: Canarias is its own
   `packs.json` entry (`africa/canary-islands`), empty slices and point files are dropped,
   and subdivision coverage is clipped to the region's bbox (ferry lines). Re-run
-  40198385548 published Spain, its 16 slices and Canarias: 22 packs live.
+  40198385548 published Spain, its 16 slices and Canarias: 22 packs live. Superseded the
+  same day: whole-country packs only (Spain includes Canarias), see the roadmap.
+- **Street search from the packs** (2026-10-25): a search for a Madrid side street got nothing — the map index of a big map holds only main roads. Packs now
+  carry `<id>.streets.tsv` (every named street + localities), indexed for search.
 - Not measured on a phone: route time and memory, assembling a 2 GB pack (JS copy).
 - Isochrones: neither valhalla-mobile wrapper exposes them (iOS would need Valhalla
   headers in our code, which broke tile reading: see CLAUDE.md pitfalls).
-- Routes between two packs need the country pack (region packs are tile subsets).
 - Overpass still runs after each map download, even where a pack already brought the points.
 
 
@@ -90,8 +92,14 @@ Spike results (2026-10-25): viable — see "Valhalla spike" below.
 
 ## Pack coverage roadmap (agreed 2026-10-25)
 
-Packs are listed in `scripts/routing/packs.json` (Spain + regions, Canarias, Portugal,
-Andorra published first; Europe + Latin America added next); everywhere else
+**Owner decision (2026-10-25, after trying build 5): one pack per whole country.** No
+region packs (Spain had 17, built as tile slices of the country build: too many
+entries, and the data twice). Only very large countries may be split, coarsely
+(north / south / east / west), never finer. Spain's pack merges Geofabrik's Spain and
+Canary Islands extracts.
+
+Packs are listed in `scripts/routing/packs.json` (Spain, Portugal, Andorra first, then
+Europe + Latin America); everywhere else
 "take me there" stays on the straight line (maps, search and Emergencias work worldwide).
 Adding a country is one entry in `packs.json` (Geofabrik path + ISO code); the app picks it
 up from the manifest with no app release. Order the owner agreed:
@@ -107,28 +115,28 @@ up from the manifest with no app release. Order the owner agreed:
    America / the Caribbean. `do` is Geofabrik's haiti-and-domrep (also covers Haiti) and
    `ie` ireland-and-northern-ireland: `iso` lists both countries for their admin
    boundaries. Left for step 4: Brazil, Poland, Italy, United Kingdom (~2 GB PBF, ~3.5 GB
-   packs), Germany, France, Russia (4–5 GB PBF) — they need sub-country packs, and
-   `regions.json` has subdivisions only for Spain and the USA; Puerto Rico and the US
+   packs), Germany, France, Russia (4–5 GB PBF); Puerto Rico and the US
    Virgin Islands (their OSM boundaries are admin level 4 of the USA: no level-2 admins);
    territories without a Geofabrik extract of their own (Kosovo, Vatican, San Marino,
    small Caribbean islands).
-4. **Rest of the world**, with big countries built from Geofabrik sub-extracts.
+4. **Rest of the world**, with the big countries as whole packs where they fit (Italy,
+   UK, Poland, Brazil ~3.5 GB; Germany, France ~7.5 GB) and the huge ones (USA, Russia,
+   Canada) split coarsely: a few Geofabrik sub-extracts merged per quarter (e.g. US
+   West/Central/East from its state extracts), as `geofabrik` lists in `packs.json` and
+   a pack name in the manifest (the app titles packs by `regionId` today).
 
 Limits to design around:
 
 - GitHub-hosted runner: 4 vCPU, 16 GB RAM, ~14 GB on `/` + `/mnt`; job timeout is 300 min
   (GitHub's cap is 6 h). USA, Russia, Canada, Brazil, Germany, France, likely India and
   China won't fit as one build: build per sub-extract (US states, Länder, French regions…).
-  A sub-extract is a `packs.json` entry whose id is a subdivision of
-  `src/features/maps/regions.json` (like `es-cn`): `geofabrik` is its own extract, `iso`
-  the country's (for admin boundaries), and the country's build skips that slice.
+  `geofabrik` may list several extracts, merged into one build (`osmium merge`).
 - Release assets: 2 GiB per file (already split, ≤1900 MiB parts) and 1000 assets per
   release. A world run (tar parts + `.pois.tsv` per pack) gets close: publish one release
   per continent (the manifest already stores a `release` per pack).
 - Matrix: `max-parallel: 8` (each job queries the public Overpass servers once; free
   runners allow ~20 concurrent jobs on a public repo). Monthly cron is `0 3 5 * *`.
-- Routes across a border need both ends in one pack (region packs are tile subsets of
-  their country; there are no cross-country packs).
+- Routes across a border need both ends in one pack (there are no cross-country packs).
 
 ## Phase 3 — turn-by-turn navigation
 
