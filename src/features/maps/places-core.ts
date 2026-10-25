@@ -159,7 +159,47 @@ export function normalizeName(s: string): string {
   return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 }
 
-/** FTS5 MATCH expression: every word as a prefix, all required. Null when nothing searchable. */
+/**
+ * Street-type and title abbreviations of addresses ("Avda.", "Pº", "C/", "Dr."),
+ * Spanish first, then English. Only those that aren't already a prefix of the word
+ * (every query word is matched as a prefix: "av" finds "avenida" by itself).
+ */
+const ABBREVIATIONS: Record<string, string[]> = {
+  avda: ['avenida'],
+  avd: ['avenida'],
+  cl: ['calle'],
+  pº: ['paseo'],
+  pso: ['paseo'],
+  pza: ['plaza'],
+  plza: ['plaza'],
+  ctra: ['carretera'],
+  crta: ['carretera'],
+  gta: ['glorieta'],
+  glta: ['glorieta'],
+  cno: ['camino'],
+  rda: ['ronda'],
+  trva: ['travesia'],
+  pje: ['pasaje'],
+  psje: ['pasaje'],
+  cjon: ['callejon'],
+  bº: ['barrio'],
+  sta: ['santa'],
+  sto: ['santo'],
+  ntra: ['nuestra'],
+  ntro: ['nuestro'],
+  sra: ['senora'],
+  dr: ['doctor', 'drive'],
+  dra: ['doctora'],
+  rd: ['road'],
+  blvd: ['boulevard'],
+  hwy: ['highway'],
+  ln: ['lane'],
+};
+
+/**
+ * FTS5 MATCH expression: every word as a prefix, all required; an abbreviation also
+ * matches its full word. Null when nothing searchable.
+ */
 export function ftsQuery(text: string): string | null {
   const words = text
     .split(/[^\p{L}\p{N}]+/u)
@@ -167,22 +207,53 @@ export function ftsQuery(text: string): string | null {
     .filter(Boolean)
     .slice(0, 8);
   if (!words.length) return null;
-  return words.map((w) => `"${w.replace(/"/g, '')}"*`).join(' ');
+  return words
+    .map((w) => {
+      const term = `"${w.replace(/"/g, '')}"*`;
+      const full = ABBREVIATIONS[normalizeName(w)];
+      return full ? `(${[term, ...full.map((f) => `"${f}"*`)].join(' OR ')})` : term;
+    })
+    .join(' AND ');
+}
+
+/**
+ * A street address typed as "Calle Alcalá 50", "Alcalá, 50", "C/ Alcalá nº 50 bis" or
+ * "50 Alcalá": the street part (searched among street names) and the house number.
+ * Null without a number, or when what is left has no letters to search.
+ */
+export function parseAddress(text: string): { street: string; number: string } | null {
+  const t = text.trim().replace(/\s+/g, ' ');
+  const num = String.raw`(\d{1,5}(?: ?[a-zA-Z](?![\p{L}]))?)(?: bis)?`;
+  const after = new RegExp(String.raw`^(.*?\p{L}.*?)[ ,]+(?:(?:n[º°o]|num|número|numero)\.? ?)?${num}$`, 'iu').exec(t);
+  const before = after ? null : new RegExp(String.raw`^${num},? (.*\p{L}.*)$`, 'iu').exec(t);
+  const street = (after ? after[1] : before?.[2])?.replace(/[ ,]+$/, '');
+  const number = after ? after[2] : before?.[1];
+  if (!street || !number || (street.match(/\p{L}/gu) ?? []).length < 2) return null;
+  return { street, number: number.replace(/ /g, '').toUpperCase() };
 }
 
 export type Hit = PlaceRow & { id: number };
 
 const LAYER_WEIGHT: Record<PlaceLayer, number> = { place: 0, poi: 1, road: 1.5 };
 
+/** Words left out when comparing a name with the query: "Calle Alcalá" is "Calle de Alcalá". */
+const LINK_WORDS = new Set(['de', 'del', 'la', 'las', 'los', 'el', 'd', 'l', 'of', 'the']);
+
+const nameKey = (s: string) =>
+  normalizeName(s)
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((w) => w && !LINK_WORDS.has(w))
+    .join(' ');
+
 /**
- * Orders hits: exact name, then name starting with the query, then word matches;
- * within each, more important features and nearer ones first. Streets of the same
+ * Orders hits: exact name, then name starting with the query, then word matches
+ * ("de", "la"… left out); within each, more important features and nearer ones first. Streets of the same
  * name less than 1.5 km apart are one street (one row per tile in the index).
  */
 export function rankHits(hits: Hit[], query: string, near: LatLon | null, limit = 40): Hit[] {
-  const q = normalizeName(query);
+  const q = nameKey(query);
   const scored = hits.map((h) => {
-    const n = normalizeName(h.name);
+    const n = nameKey(h.name);
     const text = n === q ? 0 : n.startsWith(q) ? 1 : 2;
     const km = near ? distanceMeters(near, h) / 1000 : 0;
     // Distance matters on a log scale: 1 km vs 10 km is one step, 10 vs 100 another.

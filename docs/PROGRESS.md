@@ -61,18 +61,23 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
 1. Watch App Review for 1.0.1; test 1.1.0 (build 9, TestFlight) on a real iPhone: navigation view (driving and on foot), compass beam, street search, routing
    packs (download Spain 2.2 GB, route time/memory), Preparedness reminders, GPU
    llama.cpp, Apple Intelligence, background downloads, Files import, airplane mode.
-2. Resume downloads after the app is killed on iOS: reattach the background URLSession
+2. Search, from the routing packs (analysis 2026-10-25): every named POI of the country
+   (schools, shops… not just emergency kinds) and an address file (OSM
+   `addr:street`+`addr:housenumber`, grouped per street; Madrid city has ~135k in OSM)
+   so "Calle Alcalá 50" lands on the door, interpolating between neighbours. Measure the
+   size for Spain first; maybe an optional download.
+3. Resume downloads after the app is killed on iOS: reattach the background URLSession
    (small native module) instead of restarting from zero.
-3. Map extraction: resume after a kill (persist the plan + written ranges) and move it off
+4. Map extraction: resume after a kill (persist the plan + written ranges) and move it off
    the JS thread.
-4. Android release: upload keystore, Play listing + data safety;
+5. Android release: upload keystore, Play listing + data safety;
    test Gemini Nano on an AICore device.
-5. Reader: auto-hiding toolbar on scroll (style guide), syllabus for SPA course ZIMs read
+6. Reader: auto-hiding toolbar on scroll (style guide), syllabus for SPA course ZIMs read
    from the rendered DOM.
-6. Assistant: copy / regenerate an answer; better small-model citations; check the
+7. Assistant: copy / regenerate an answer; better small-model citations; check the
    conversational flow on Android (llama.cpp tools + Gemini Nano heuristics) and on a
    real iPhone (tool-call latency with Metal).
-7. Preparedness follow-ups: share ZIMs/maps phone to phone (share sheet export, import
+8. Preparedness follow-ups: share ZIMs/maps phone to phone (share sheet export, import
    exists); "Ready.gov"-style quick cards bundled in the app (radio frequencies, first aid)
    that need no download; optional Face ID lock for the plan; cold-start notification tap
    (only a warm tap opens the kit now); link the plan's meeting points to maps' Llévame
@@ -81,9 +86,11 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
 
 ## Known issues / limitations
 
-- Map search: no house numbers (Protomaps tiles have none); big regions are indexed at a
-  lower zoom (≤ 40k tiles: Spain z14 → z12, minor streets missing); indexing runs on the JS
-  thread in batches (minutes for a country on a phone, not yet measured on a device).
+- Map search: no house numbers (Protomaps tiles have none: "Calle Alcalá 50" finds the
+  street); big regions are indexed at a lower zoom (≤ 40k tiles: Spain z14 → z12) with full
+  detail only within ~25 km of the user or the searched area, and even there a z14 map lacks
+  the POIs Protomaps keeps for z15+ (a school mapped as a small area); indexing runs on the
+  JS thread in batches (minutes for a country on a phone, not yet measured on a device).
 - Emergency points depend on public Overpass servers (best effort; they can be at capacity
   for minutes). Fallback: the POIs in the map's own tiles (complete only at z15).
 - OSM data quality shows through: a garage mapped without `access=private`/`tunnel=yes`
@@ -126,6 +133,21 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-25 — Maps: search finds nearby schools; addresses and abbreviations
+
+- Owner on build 9 (Spain map): schools near a Madrid test spot not found; "Calle Alcalá 50" found nothing. Cause: Spain's map is indexed at z12, where
+  Protomaps keeps no schools (they are in z14/z15 tiles); a number in the query was a word
+  that had to match.
+- Detail index: the map's max zoom (≤ 15) over a 50 km square around the user / the
+  searched area, besides the whole-map index (`listZoomTiles` takes a bbox). Checked on
+  the live planet around that spot: z14 finds one school's grounds and a sports centre; the school building itself only at z15. On the simulator
+  (a z15 Madrid extract, index budget forced down on a throwaway build): all three found.
+  A fresh install has no last known position: startup takes one coarse fix instead.
+- Addresses: "Calle Alcalá 50", "C/ Mayor 1", "Dr Fleming 10" find the street;
+  abbreviations (Avda., Pº, C/, Dr., Sta., Ntra. Sra.…) match the full word; "de/la/…"
+  don't count when ranking ("Calle Alcalá" ranks "Calle de Alcalá" first). House numbers
+  and every POI of the country from the routing packs: backlog item 2.
 
 ### 2026-10-25 — Maps: garages, tunnels and mountain trails
 

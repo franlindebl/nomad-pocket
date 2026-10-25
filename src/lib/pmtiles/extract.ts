@@ -21,7 +21,7 @@ import {
   type Header,
 } from './format.ts';
 import { AbortError, throwIfAborted, type RangeSource, type Sink } from './io.ts';
-import { bboxTileRanges, type BBox, type TileRange } from './tileid.ts';
+import { bboxTileRanges, firstRangeAfter, intersects, type BBox } from './tileid.ts';
 
 export type ExtractProgress = {
   phase: 'directories' | 'tiles';
@@ -81,7 +81,13 @@ export class EmptyExtractError extends Error {
 
 const DEFAULTS = { overfetch: 0.05, maxRequestBytes: 4 * 1024 * 1024, concurrency: 4 };
 
-export type ArchiveInfo = { header: Header; metadata: Record<string, unknown>; rootEntries: Entry[]; metadataRaw: Uint8Array; bytesRead: number };
+export type ArchiveInfo = {
+  header: Header;
+  metadata: Record<string, unknown>;
+  rootEntries: Entry[];
+  metadataRaw: Uint8Array;
+  bytesRead: number;
+};
 
 /** Reads header, metadata and root directory (one or two requests). */
 export async function readArchiveInfo(source: RangeSource, signal?: AbortSignal): Promise<ArchiveInfo> {
@@ -113,23 +119,6 @@ export async function readArchiveInfo(source: RangeSource, signal?: AbortSignal)
   return { header, metadata, rootEntries, metadataRaw, bytesRead };
 }
 
-/** Index of the first range whose end is > id (ranges sorted, disjoint). */
-function firstRangeAfter(ranges: TileRange[], id: number): number {
-  let lo = 0;
-  let hi = ranges.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >> 1;
-    if (ranges[mid][1] <= id) lo = mid + 1;
-    else hi = mid;
-  }
-  return lo;
-}
-
-function intersects(ranges: TileRange[], start: number, end: number): boolean {
-  const i = firstRangeAfter(ranges, start);
-  return i < ranges.length && ranges[i][0] < end;
-}
-
 type Span = { offset: number; length: number };
 
 /**
@@ -137,7 +126,11 @@ type Span = { offset: number; length: number };
  * wasted bytes stay within `overfetch` × total; requests never exceed `maxBytes`
  * unless a single span is larger.
  */
-export function coalesce<T extends Span>(spans: T[], overfetch: number, maxBytes: number): { offset: number; length: number; items: T[] }[] {
+export function coalesce<T extends Span>(
+  spans: T[],
+  overfetch: number,
+  maxBytes: number,
+): { offset: number; length: number; items: T[] }[] {
   const n = spans.length;
   if (!n) return [];
   let total = 0;
@@ -257,7 +250,9 @@ export async function planExtract(source: RangeSource, opts: PlanOptions): Promi
       async ({ g, i }) => {
         const data = await source.getBytes(g.offset, g.length, signal);
         fetched[i] = g.items.map((ref) =>
-          deserializeDirectory(decompress(data.subarray(ref.offset - g.offset, ref.offset - g.offset + ref.length), src.internalCompression)),
+          deserializeDirectory(
+            decompress(data.subarray(ref.offset - g.offset, ref.offset - g.offset + ref.length), src.internalCompression),
+          ),
         );
         dirBytes += g.length;
         onProgress?.({ phase: 'directories', bytes: dirBytes, totalBytes: dirTotal });

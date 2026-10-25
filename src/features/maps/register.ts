@@ -1,6 +1,7 @@
 // Maps feature wiring: startup init, item-removal hooks (maps, routing packs), and the search index /
 // emergency points that follow every installed map.
 import { File, FileMode } from 'expo-file-system';
+import * as Location from 'expo-location';
 
 import i18n from '@/i18n';
 import { registerInit } from '@/features/bootstrap';
@@ -12,7 +13,7 @@ import { contentDir, deleteFile, partialDir } from '@/lib/storage';
 import { cancelEmergencySync, syncEmergencyPoints } from './emergency';
 import { forgetEstimates, mapItemId, onMapInstalled, WORLD_ID, type MapItemMeta } from './extraction';
 import { useMarkers } from './markers';
-import { forgetMapSource, indexStaleMaps, invalidateIndex } from './places';
+import { forgetMapSource, indexDetailAround, indexDetailAroundView, indexStaleMaps, invalidateIndex } from './places';
 import { getRegion, regionName } from './regions';
 import { closeRouter, listRoutePacks, registerLoosePack, resolvePackFile } from './routing';
 import { onRouteFileDownloaded, refreshRoutingCatalog, sweepRoutingFiles } from './routing-packs';
@@ -106,6 +107,7 @@ registerInit(() => {
     } catch (e) {
       console.warn('[maps] cannot schedule indexing', e);
     }
+    indexDetailAroundUser();
     // By now the download manager has restored its queue (what is still in flight).
     try {
       sweepRoutingFiles();
@@ -117,10 +119,30 @@ registerInit(() => {
   }, 4000);
 });
 
+/**
+ * The map detail around the user (where they are, else where the map was left), so search
+ * finds nearby schools and shops on a big map. Never asks for permission. A fresh install
+ * has no last known position yet: then one coarse fix.
+ */
+function indexDetailAroundUser() {
+  Location.getForegroundPermissionsAsync()
+    .then(async (p) => {
+      if (!p.granted) return null;
+      return (await Location.getLastKnownPositionAsync()) ?? (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low }));
+    })
+    .catch(() => null)
+    .then((pos) => {
+      if (pos) indexDetailAround({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+      else indexDetailAroundView();
+    })
+    .catch((e) => console.warn('[maps] cannot index the detail around the user', e));
+}
+
 onMapInstalled((id) => {
   const item = getItem(id) as MapItem | null;
   if (!item) return;
   invalidateIndex(item);
+  indexDetailAroundUser();
   // The new region's emergency points (needs the connection the download just used).
   syncEmergencyPoints(item).catch((e) => console.warn('[maps] emergency points', e));
 });

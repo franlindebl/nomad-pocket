@@ -3,19 +3,21 @@
 // time, in small batches so the JS thread stays responsive. Emergency points
 // fetched from Overpass (emergency.ts) are added to the same index.
 import { File, FileMode } from 'expo-file-system';
+import Storage from 'expo-sqlite/kv-store';
 import { create } from 'zustand';
 
 import { db } from '@/db';
 import { getItem, listItems } from '@/features/content/items';
 import { decodeTile } from '@/lib/mvt/decode';
-import { countBBoxTiles, listZoomTiles, readTile, type RangeSource } from '@/lib/pmtiles';
+import { countBBoxTiles, listZoomTiles, readTile, type Header, type RangeSource, type TileEntry } from '@/lib/pmtiles';
 
 import { kindCategory, tileEmergencyKind } from './emergency-core';
-import { bboxAround, type LatLon } from './geo';
+import { bboxAround, distanceMeters, type LatLon } from './geo';
 import {
   ftsQuery,
   INDEX_LAYERS,
   nearestLocality,
+  parseAddress,
   pickIndexZoom,
   rankHits,
   tileRows,
@@ -23,6 +25,7 @@ import {
   type PlaceLayer,
   type PlaceRow,
 } from './places-core';
+import { useMapUi } from './store';
 import { resolveMapFile, type MapItem } from './useMapSources';
 
 /** Bump to rebuild every index after changing what tileRows extracts. */
@@ -178,43 +181,61 @@ const cancelled = new Set<string>();
 let queue: Promise<void> = Promise.resolve();
 const queued = new Set<string>();
 
+/** Zoom the whole map is indexed at (big maps: a low one, see pickIndexZoom). */
+function indexZoomOf(meta: MapItem['meta']): number {
+  return meta.role === 'world'
+    ? Math.min(meta.maxZoom, 5)
+    : pickIndexZoom(meta.maxZoom, meta.minZoom, (zz) => countBBoxTiles(meta.bbox, zz, zz));
+}
+
+/**
+ * Decodes `tiles` into the index under `source`, replacing its rows, in batches with a
+ * yield in between (progress shows under the map's id). False when the map was removed
+ * meanwhile (nothing is left behind).
+ */
+async function indexTiles(
+  item: MapItem,
+  file: LocalFileSource,
+  header: Header,
+  tiles: TileEntry[],
+  source: string,
+  onRows?: (rows: PlaceRow[]) => void,
+) {
+  deletePlaceRows(source);
+  setProgress(item.id, 0);
+  for (let i = 0; i < tiles.length; i += BATCH_TILES) {
+    if (cancelled.has(item.id)) break;
+    const rows: PlaceRow[] = [];
+    for (const t of tiles.slice(i, i + BATCH_TILES)) {
+      try {
+        rows.push(...tileRows(decodeTile(await readTile(file, header, t), INDEX_LAYERS), t.z, t.x, t.y, keepUnnamedEmergency));
+      } catch (e) {
+        console.warn('[maps] cannot index tile', t.z, t.x, t.y, e);
+      }
+    }
+    insertRows(source, rows);
+    onRows?.(rows);
+    setProgress(item.id, Math.min(1, (i + BATCH_TILES) / Math.max(1, tiles.length)));
+    await yieldToUi();
+  }
+  // Removed during a batch or the last batch's yield: don't record anything for it.
+  if (!cancelled.has(item.id)) return true;
+  deletePlaceRows(source);
+  return false;
+}
+
 async function indexItem(item: MapItem) {
   const file = new File(resolveMapFile(item));
   if (!file.exists) return;
-  const meta = item.meta;
   const source = new LocalFileSource(file);
   try {
-    const z =
-      meta.role === 'world'
-        ? Math.min(meta.maxZoom, 5)
-        : pickIndexZoom(meta.maxZoom, meta.minZoom, (zz) => countBBoxTiles(meta.bbox, zz, zz));
+    const z = indexZoomOf(item.meta);
     const { header, tiles } = await listZoomTiles(source, z);
-    deletePlaceRows(item.id);
-    setProgress(item.id, 0);
     const emergencyRows: PlaceRow[] = [];
-    for (let i = 0; i < tiles.length; i += BATCH_TILES) {
-      if (cancelled.has(item.id)) {
-        deletePlaceRows(item.id);
-        return;
-      }
-      const rows: PlaceRow[] = [];
-      for (const t of tiles.slice(i, i + BATCH_TILES)) {
-        try {
-          rows.push(...tileRows(decodeTile(await readTile(source, header, t), INDEX_LAYERS), t.z, t.x, t.y, keepUnnamedEmergency));
-        } catch (e) {
-          console.warn('[maps] cannot index tile', t.z, t.x, t.y, e);
-        }
-      }
-      insertRows(item.id, rows);
+    const done = await indexTiles(item, source, header, tiles, item.id, (rows) => {
       for (const r of rows) if (r.layer === 'poi' && tileEmergencyKind(r.kind)) emergencyRows.push(r);
-      setProgress(item.id, Math.min(1, (i + BATCH_TILES) / Math.max(1, tiles.length)));
-      await yieldToUi();
-    }
-    // Removed during the last batch's yield: don't record anything for it.
-    if (cancelled.has(item.id)) {
-      deletePlaceRows(item.id);
-      return;
-    }
+    });
+    if (!done) return;
     db().runSync(
       `INSERT INTO map_sources (item_id, index_version, index_zoom, indexed_at) VALUES (?, ?, ?, ?)
        ON CONFLICT(item_id) DO UPDATE SET index_version = excluded.index_version, index_zoom = excluded.index_zoom, indexed_at = excluded.indexed_at`,
@@ -267,6 +288,7 @@ export function indexStaleMaps() {
 /** A map item's file changed (re-downloaded): rebuild its index. */
 export function invalidateIndex(item: MapItem) {
   db().runSync('UPDATE map_sources SET index_version = NULL WHERE item_id = ?', item.id);
+  forgetDetail(item.id);
   scheduleIndex(item);
 }
 
@@ -276,8 +298,105 @@ export function forgetMapSource(itemId: string) {
   again.delete(itemId);
   deletePlaceRows(itemId);
   deletePlaceRows(`pois:${itemId}`);
+  forgetDetail(itemId);
   db().runSync('DELETE FROM map_pois WHERE source = ?', itemId);
   db().runSync('DELETE FROM map_sources WHERE item_id = ?', itemId);
+}
+
+// --- Detail around the user ---------------------------------------------------
+// A big map is indexed at a low zoom (Spain at z12), where Protomaps keeps only the
+// important POIs: no schools, shops or most streets. Around where the user is (at
+// startup) or looks (opening search), the map's own max zoom (at most 15) is indexed
+// too, under 'near:<item id>': a 50 km square is ~700 tiles at z14, ~2900 at z15.
+// Duplicates of the whole-map rows are merged by rankHits.
+
+const DETAIL_RADIUS = 25_000;
+/** This far from the last detail centre, the new surroundings are indexed instead. */
+const DETAIL_MOVE = 10_000;
+const DETAIL_KEY = 'maps.detailIndex';
+/** Lowest map zoom whose centre is taken as where the user looks. */
+const DETAIL_VIEW_ZOOM = 9;
+
+/** Centre of the indexed detail and the zoom done for each map item. */
+type DetailState = { version: number; lat: number; lon: number; zooms: Record<string, number> };
+
+const detailSource = (itemId: string) => `near:${itemId}`;
+let detailWanted: LatLon | null = null;
+
+function readDetail(): DetailState | null {
+  try {
+    const raw = Storage.getItemSync(DETAIL_KEY);
+    return raw ? (JSON.parse(raw) as DetailState) : null;
+  } catch {
+    return null;
+  }
+}
+
+function forgetDetail(itemId: string) {
+  deletePlaceRows(detailSource(itemId));
+  const state = readDetail();
+  if (state?.zooms[itemId] === undefined) return;
+  delete state.zooms[itemId];
+  Storage.setItemSync(DETAIL_KEY, JSON.stringify(state));
+}
+
+/** Indexes the map detail around `p` unless it is already there. Cheap to call often. */
+export function indexDetailAround(p: LatLon) {
+  const pending = detailWanted !== null;
+  detailWanted = p;
+  if (pending) return;
+  queue = queue
+    .then(() => {
+      const next = detailWanted;
+      detailWanted = null;
+      return next ? refreshDetail(next) : undefined;
+    })
+    .catch((e) => console.warn('[maps] detail indexing failed', e));
+}
+
+/** Same around what the map shows, when zoomed in on a place rather than a country or the world. */
+export function indexDetailAroundView() {
+  const v = useMapUi.getState().viewport;
+  if (v && v.zoom >= DETAIL_VIEW_ZOOM) indexDetailAround({ lon: v.center[0], lat: v.center[1] });
+}
+
+async function refreshDetail(p: LatLon) {
+  const state = readDetail();
+  const fresh = state?.version === INDEX_VERSION && distanceMeters(state, p) < DETAIL_MOVE;
+  const centre = fresh ? state : p;
+  const box = bboxAround(centre, DETAIL_RADIUS);
+  const [w, s, e, n] = box;
+  const around = (listItems('map') as MapItem[]).filter((i) => {
+    const [iw, is, ie, inn] = i.meta.bbox;
+    return i.meta.role === 'region' && iw < e && ie > w && is < n && inn > s;
+  });
+  const zooms: Record<string, number> = {};
+  for (const id of Object.keys(state?.zooms ?? {})) {
+    if (!around.some((i) => i.id === id)) deletePlaceRows(detailSource(id));
+  }
+  for (const item of around) {
+    const z = Math.min(15, item.meta.maxZoom);
+    if (z <= indexZoomOf(item.meta)) continue;
+    if (fresh && state.zooms[item.id] === z) {
+      zooms[item.id] = z;
+      continue;
+    }
+    const file = new File(resolveMapFile(item));
+    if (!file.exists) continue;
+    const source = new LocalFileSource(file);
+    try {
+      const { header, tiles } = await listZoomTiles(source, z, { bbox: box });
+      if (await indexTiles(item, source, header, tiles, detailSource(item.id))) zooms[item.id] = z;
+    } finally {
+      source.close();
+      setProgress(item.id, null);
+      bumpVersion();
+    }
+  }
+  Storage.setItemSync(
+    DETAIL_KEY,
+    JSON.stringify({ version: INDEX_VERSION, lat: centre.lat, lon: centre.lon, zooms } satisfies DetailState),
+  );
 }
 
 // --- Search -----------------------------------------------------------------
@@ -286,15 +405,34 @@ export type SearchResult = Hit & { context: string | null };
 
 type HitRow = { id: number; name: string; layer: PlaceLayer; kind: string; lat: number; lon: number; importance: number };
 
+/**
+ * Places, POIs and streets matching what the user typed, best first. An address
+ * ("Calle Alcalá 50") also brings the streets matching its street part: no house
+ * numbers are indexed, so it leads to the street.
+ */
 export function searchPlaces(text: string, near: LatLon | null, limit = 40): SearchResult[] {
+  const hits = matchPlaces(text, near, limit);
+  const address = parseAddress(text);
+  if (address) {
+    const seen = new Set(hits.map((h) => h.id));
+    for (const h of matchPlaces(address.street, near, limit, 'road')) if (!seen.has(h.id)) hits.push(h);
+  }
+  return hits.slice(0, limit).map((h) => ({ ...h, context: h.layer === 'place' ? null : localityNear(h) }));
+}
+
+function matchPlaces(text: string, near: LatLon | null, limit: number, layer?: PlaceLayer): Hit[] {
   const match = ftsQuery(text);
   if (!match) return [];
   let rows: HitRow[];
-  const columns = 'rowid AS id, name, layer, kind, CAST(lat AS REAL) AS lat, CAST(lon AS REAL) AS lon, CAST(importance AS INTEGER) AS importance';
+  const columns =
+    'rowid AS id, name, layer, kind, CAST(lat AS REAL) AS lat, CAST(lon AS REAL) AS lon, CAST(importance AS INTEGER) AS importance';
+  const onLayer = layer ? 'AND layer = ?' : '';
+  const layerArg = layer ? [layer] : [];
   try {
     rows = db().getAllSync<HitRow>(
-      `SELECT ${columns} FROM map_places WHERE map_places MATCH ? ORDER BY CAST(importance AS INTEGER) LIMIT 600`,
+      `SELECT ${columns} FROM map_places WHERE map_places MATCH ? ${onLayer} ORDER BY CAST(importance AS INTEGER) LIMIT 600`,
       match,
+      ...layerArg,
     );
     // A common street name ("Calle Mayor") matches thousands of rows across a country:
     // the ones around the user too, else the nearest may not be among the first 600.
@@ -302,9 +440,10 @@ export function searchPlaces(text: string, near: LatLon | null, limit = 40): Sea
       const [w, s, e, n] = bboxAround(near, 30_000);
       const seen = new Set(rows.map((r) => r.id));
       for (const r of db().getAllSync<HitRow>(
-        `SELECT ${columns} FROM map_places WHERE map_places MATCH ?
+        `SELECT ${columns} FROM map_places WHERE map_places MATCH ? ${onLayer}
          AND CAST(lat AS REAL) BETWEEN ? AND ? AND CAST(lon AS REAL) BETWEEN ? AND ? LIMIT 600`,
         match,
+        ...layerArg,
         s,
         n,
         w,
@@ -317,13 +456,12 @@ export function searchPlaces(text: string, near: LatLon | null, limit = 40): Sea
     console.warn('[maps] search failed', e);
     return [];
   }
-  const hits = rankHits(
+  return rankHits(
     rows.map((r) => ({ id: r.id, name: r.name, names: '', layer: r.layer, kind: r.kind, lat: r.lat, lon: r.lon, rank: r.importance })),
     text,
     near,
     limit,
   );
-  return hits.map((h) => ({ ...h, context: h.layer === 'place' ? null : localityNear(h) }));
 }
 
 function localityNear(p: LatLon): string | null {

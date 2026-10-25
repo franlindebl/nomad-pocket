@@ -12,6 +12,7 @@ import {
   INDEX_LAYERS,
   nearestLocality,
   normalizeName,
+  parseAddress,
   parseStreetsTsv,
   pickIndexZoom,
   rankHits,
@@ -22,6 +23,21 @@ import {
 
 // Real Protomaps z14–15 extract of central Soria.
 const soria = new BytesSource(new Uint8Array(readFileSync(new URL('../../lib/pmtiles/fixtures/soria-z14-15.pmtiles', import.meta.url))));
+
+test('listZoomTiles with a bbox lists only the tiles over it', async () => {
+  // The fixture holds two z15 tiles, one above the other (y 12192 and 12193).
+  const all = (await listZoomTiles(soria, 15)).tiles;
+  assert.equal(all.length, 2);
+  const north = (await listZoomTiles(soria, 15, { bbox: [-2.47, 41.765, -2.465, 41.77] })).tiles;
+  assert.deepEqual(
+    north.map((t) => [t.z, t.y]),
+    [[15, 12192]],
+  );
+  assert.deepEqual(
+    (await listZoomTiles(soria, 15, { bbox: [-3, 41, -2, 42] })).tiles.map((t) => t.tileId),
+    all.map((t) => t.tileId),
+  );
+});
 
 async function rowsAt(z: number, keepUnnamed?: (kind: string) => boolean): Promise<PlaceRow[]> {
   const { header, tiles } = await listZoomTiles(soria, z);
@@ -72,14 +88,45 @@ test('pickIndexZoom stays within the tile budget', () => {
 });
 
 test('ftsQuery turns words into required prefixes', () => {
-  assert.equal(ftsQuery('  calle   mayor '), '"calle"* "mayor"*');
-  assert.equal(ftsQuery('Hospital "La Paz"'), '"Hospital"* "La"* "Paz"*');
-  assert.equal(ftsQuery('Ñandú-12'), '"Ñandú"* "12"*');
+  assert.equal(ftsQuery('  calle   mayor '), '"calle"* AND "mayor"*');
+  assert.equal(ftsQuery('Hospital "La Paz"'), '"Hospital"* AND "La"* AND "Paz"*');
+  assert.equal(ftsQuery('Ñandú-12'), '"Ñandú"* AND "12"*');
   assert.equal(ftsQuery(' -- '), null);
+});
+
+test('ftsQuery: an abbreviation also matches its full word', () => {
+  assert.equal(ftsQuery('Avda. Meritxell'), '("Avda"* OR "avenida"*) AND "Meritxell"*');
+  assert.equal(ftsQuery('Pº Castellana'), '("Pº"* OR "paseo"*) AND "Castellana"*');
+  assert.equal(ftsQuery('C/ Dr. Fleming'), '"C"* AND ("Dr"* OR "doctor"* OR "drive"*) AND "Fleming"*');
+  assert.equal(ftsQuery('Ntra Sra de Atocha'), '("Ntra"* OR "nuestra"*) AND ("Sra"* OR "senora"*) AND "de"* AND "Atocha"*');
+});
+
+test('parseAddress splits the street from the house number', () => {
+  assert.deepEqual(parseAddress('Calle Alcalá 50'), { street: 'Calle Alcalá', number: '50' });
+  assert.deepEqual(parseAddress('Alcalá, 50'), { street: 'Alcalá', number: '50' });
+  assert.deepEqual(parseAddress('C/ Alcalá nº 50 bis'), { street: 'C/ Alcalá', number: '50' });
+  assert.deepEqual(parseAddress('Avda. de América 12 b'), { street: 'Avda. de América', number: '12B' });
+  assert.deepEqual(parseAddress('221B Baker Street'), { street: 'Baker Street', number: '221B' });
+  assert.equal(parseAddress('Calle Alcalá'), null);
+  assert.equal(parseAddress('M-30'), null);
+  assert.equal(parseAddress('50'), null);
+  assert.equal(parseAddress('Hotel 7 Islas'), null);
 });
 
 test('normalizeName drops accents and case', () => {
   assert.equal(normalizeName('  Policía Municipal '), 'policia municipal');
+});
+
+test('rankHits leaves out "de", "la"… when comparing names', () => {
+  const base = { names: '', rank: 14, layer: 'road' as const, kind: 'street', lat: 40.42, lon: -3.69 };
+  const hits: Hit[] = [
+    { id: 1, name: 'Calle Alcalá de Guadaira', ...base },
+    { id: 2, name: 'Calle de Alcalá', ...base, lat: 40.43 },
+  ];
+  assert.deepEqual(
+    rankHits(hits, 'Calle Alcalá', null).map((h) => h.id),
+    [2, 1],
+  );
 });
 
 test('rankHits: exact before prefix, near before far, one row per street', () => {

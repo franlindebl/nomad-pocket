@@ -3,7 +3,7 @@
 // (the extractor only copies tiles; this reads what is inside them).
 import { decompress, deserializeDirectory, type Header } from './format.ts';
 import { throwIfAborted, type RangeSource } from './io.ts';
-import { tileIdToZxy, zoomBase } from './tileid.ts';
+import { bboxTileRanges, firstRangeAfter, intersects, tileIdToZxy, zoomBase, type BBox, type TileRange } from './tileid.ts';
 import { readArchiveInfo } from './extract.ts';
 
 export type TileEntry = {
@@ -17,15 +17,19 @@ export type TileEntry = {
 };
 
 /**
- * Tile entries of zoom `z`, in tile-id order. Run-length entries (repeated
- * content, i.e. empty ocean or land tiles) yield only their first tile: indexing
- * the same payload twice would only add duplicates.
+ * Tile entries of zoom `z` (only those over `bbox` when given), in tile-id order.
+ * Run-length entries (repeated content, i.e. empty ocean or land tiles) yield only
+ * their first tile: indexing the same payload twice would only add duplicates.
  */
-export async function listZoomTiles(source: RangeSource, z: number, signal?: AbortSignal): Promise<{ header: Header; tiles: TileEntry[] }> {
+export async function listZoomTiles(
+  source: RangeSource,
+  z: number,
+  opts: { bbox?: BBox; signal?: AbortSignal } = {},
+): Promise<{ header: Header; tiles: TileEntry[] }> {
+  const { bbox, signal } = opts;
   const info = await readArchiveInfo(source, signal);
   const header = info.header;
-  const lo = zoomBase(z);
-  const hi = zoomBase(z + 1);
+  const ranges: TileRange[] = bbox ? bboxTileRanges(bbox, z, z) : [[zoomBase(z), zoomBase(z + 1)]];
   const tiles: TileEntry[] = [];
   const seenOffsets = new Set<number>();
 
@@ -33,12 +37,14 @@ export async function listZoomTiles(source: RangeSource, z: number, signal?: Abo
     for (let i = 0; i < entries.length; i++) {
       const en = entries[i];
       const end = en.runLength > 0 ? en.tileId + en.runLength : i + 1 < entries.length ? entries[i + 1].tileId : endBound;
-      if (end <= lo || en.tileId >= hi) continue;
+      if (!intersects(ranges, en.tileId, end)) continue;
       if (en.runLength > 0) {
-        if (en.tileId < lo || seenOffsets.has(en.offset)) continue;
+        if (seenOffsets.has(en.offset)) continue;
         seenOffsets.add(en.offset);
-        const [tz, x, y] = tileIdToZxy(en.tileId);
-        tiles.push({ tileId: en.tileId, z: tz, x, y, offset: header.tileDataOffset + en.offset, length: en.length });
+        // The first tile of the run that is wanted (a run may start at the zoom below).
+        const id = Math.max(en.tileId, ranges[firstRangeAfter(ranges, en.tileId)][0]);
+        const [tz, x, y] = tileIdToZxy(id);
+        tiles.push({ tileId: id, z: tz, x, y, offset: header.tileDataOffset + en.offset, length: en.length });
       } else {
         throwIfAborted(signal);
         const raw = await source.getBytes(header.leafDirectoryOffset + en.offset, en.length, signal);

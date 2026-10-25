@@ -325,11 +325,24 @@ the world basemap at z5. A queue indexes one map at a time, 24 tiles per batch w
 `setTimeout(0)` between batches (JS thread stays responsive; ~1–6 ms per dense tile in
 V8, more in Hermes). Triggers: 4 s after startup for maps whose `map_sources.index_version`
 ≠ `INDEX_VERSION` (bump it when `tileRows` changes), and `onMapInstalled` after a download
-(re-index). Removing a map cancels its job and deletes its rows. `searchPlaces(text, near)`
-= FTS prefix match (`"word"*` per word) → `rankHits` (exact > prefix > word match, place >
-POI > street, importance, log-distance from the map centre) → nearest locality as context.
-The search sheet also matches saved places and parses coordinates (`geo.ts`: decimal,
-DMS with N/S/E/W/O, UTM with band letter). No house numbers: Protomaps tiles carry none.
+(re-index). Removing a map cancels its job and deletes its rows. **Detail around the
+user**: at the indexed zoom a big map has only its important POIs (Spain at z12: no
+schools or shops), so the map's own max zoom (≤ 15) is also indexed over a 50 km square
+(`listZoomTiles(…, { bbox })` walks only the leaf directories over it; ~700 tiles at z14)
+under `near:<item id>`: around the user 4 s after startup and after a map install (last
+known position, or one coarse fix on a fresh install; only with permission already
+granted, else the last viewport) and around the map centre when the search sheet opens
+(viewports at zoom ≥ 9 only: a world view says nothing about where the user looks). It is redone when that point is ≥ 10 km from the last centre
+(kv-store `maps.detailIndex`); duplicates of the whole-map rows merge in `rankHits`.
+`searchPlaces(text, near)` = FTS prefix match (`"word"*` per word, ANDed; address
+abbreviations also match their word: `("avda"* OR "avenida"*)`, `ABBREVIATIONS`) →
+`rankHits` (exact > prefix > word match with "de/la/…" left out, place > POI > street,
+importance, log-distance from the map centre) → nearest locality as context. A query that
+reads as an address (`parseAddress`: "Calle Alcalá 50", "Alcalá, 50", "50 Alcalá") also
+brings the streets matching its street part, after the full-text hits. The search sheet
+also matches saved places and parses coordinates (`geo.ts`: decimal, DMS with N/S/E/W/O,
+UTM with band letter). No house numbers yet: Protomaps tiles carry none (planned: an
+address file in the routing pack, docs/PROGRESS.md).
 
 **Emergency points** (`emergency.ts`, pure parts in `emergency-core.ts`): 17 kinds in 5
 categories (health, security, water & shelter, supplies, institutions) from OSM tags.

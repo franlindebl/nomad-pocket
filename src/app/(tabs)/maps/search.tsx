@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { Crosshair, MapPin } from 'lucide-react-native';
-import { useDeferredValue, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
@@ -10,7 +10,7 @@ import { distanceMeters, formatLatLon, formatUtm, parseCoordinates, toUtm, type 
 import { distanceWithDirection, kindColor, kindIcon, kindLabel } from '@/features/maps/labels';
 import { useMarkers } from '@/features/maps/markers';
 import { normalizeName } from '@/features/maps/places-core';
-import { hasSearchIndex, searchPlaces, usePlaceIndex } from '@/features/maps/places';
+import { hasSearchIndex, indexDetailAroundView, searchPlaces, usePlaceIndex } from '@/features/maps/places';
 import { showPlace, useMapUi, type SelectedPlace } from '@/features/maps/store';
 import { space, useTheme } from '@/theme';
 
@@ -30,6 +30,8 @@ export default function SearchSheet() {
     const c = useMapUi.getState().viewport?.center;
     return c ? { lon: c[0], lat: c[1] } : null;
   }, []);
+  // Big maps are indexed coarsely: add the detail (schools, shops…) of the area shown.
+  useEffect(() => indexDetailAroundView(), []);
 
   const coords = useMemo(() => parseCoordinates(deferred), [deferred]);
   const results = useMemo(

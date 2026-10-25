@@ -168,3 +168,20 @@ export function rangesTileCount(ranges: TileRange[]): number {
   for (const [a, b] of ranges) n += b - a;
   return n;
 }
+
+/** Index of the first range whose end is > id (ranges sorted, disjoint). */
+export function firstRangeAfter(ranges: TileRange[], id: number): number {
+  let lo = 0;
+  let hi = ranges.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (ranges[mid][1] <= id) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
+export function intersects(ranges: TileRange[], start: number, end: number): boolean {
+  const i = firstRangeAfter(ranges, start);
+  return i < ranges.length && ranges[i][0] < end;
+}
