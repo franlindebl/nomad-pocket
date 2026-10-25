@@ -48,9 +48,9 @@ can pick up without re-deriving anything.
 Roughly by value. Item 0 is in progress; the rest are not started. (Preparedness was added
 on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
 
-0. Routing packs: 79 packs live since 2026-10-25 (24.9 GB): Spain + 17 regions,
-   Canarias, Portugal, Andorra and 57 more countries of Europe and Latin America (every
-   one whose Geofabrik extract is ≤ Spain's). E2E against the live catalog passes on iOS
+0. Routing packs: 60 whole-country packs live since 2026-10-25 (20.6 GB, with street
+   names for search): Spain (incl. Canarias), Portugal, Andorra and 57 more countries of
+   Europe and Latin America (every one whose Geofabrik extract is ≤ Spain's). E2E against the live catalog passes on iOS
    (`map-16-routing-github`) and Android (`android-05-routing`). Next, step 4 of the
    coverage roadmap in `docs/MAPS_NAVIGATION_PLAN.md`: Brazil, Poland, Italy, UK,
    Germany, France, Russia need sub-country packs (no subdivisions in `regions.json`
@@ -148,6 +148,9 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   (`fetchMissingStreets` after each catalog refresh, which now also runs 4 s after
   startup). Search also matches within 30 km of the user (a common name nearby was lost
   among the first 600 hits of a country).
+- Run 40210737248 rebuilt every country (61 jobs, all green): catalog `routing-20261025-5`,
+  60 packs, 20.6 GB, no region packs, every pack with street names. Spain 2.27 GB (2
+  parts, Canarias covered) + 73.6 MB of street names; Mexico 60.7 MB of names.
 - Local pipeline test (Andorra + Monaco merged): 548 points, 1736 names. iOS maps flows
   13/13 (map-08 passed on rerun: onboarding race); map-15 now also finds a pack street.
 
