@@ -39,6 +39,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.1.0 | 5 | TestFlight 2026-10-25: map search, Emergencias, offline road routing, Preparedness, conversational assistant |
 | 1.1.0 | 6 | TestFlight 2026-10-25: whole-country routing packs, street search from the packs, compass beam |
 | 1.1.0 | 7 | TestFlight 2026-10-25: stronger compass beam |
+| 1.1.0 | 8 | TestFlight 2026-10-25: navigation view ("Iniciar", map follows the user) |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.
