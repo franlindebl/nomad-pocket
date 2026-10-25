@@ -1,16 +1,19 @@
-// Maps feature wiring: startup init and item-removal hook.
+// Maps feature wiring: startup init, item-removal hook, and the search index /
+// emergency points that follow every installed map.
 import { File, FileMode } from 'expo-file-system';
 
 import i18n from '@/i18n';
 import { registerInit } from '@/features/bootstrap';
-import { listItems, onItemRemoved, upsertItem } from '@/features/content/items';
+import { getItem, listItems, onItemRemoved, upsertItem } from '@/features/content/items';
 import { HEADER_SIZE, parseHeader } from '@/lib/pmtiles/format';
 import { contentDir, deleteFile, partialDir } from '@/lib/storage';
 
-import { forgetEstimates, mapItemId, WORLD_ID, type MapItemMeta } from './extraction';
+import { cancelEmergencySync, syncEmergencyPoints } from './emergency';
+import { forgetEstimates, mapItemId, onMapInstalled, WORLD_ID, type MapItemMeta } from './extraction';
 import { useMarkers } from './markers';
+import { forgetMapSource, indexStaleMaps, invalidateIndex } from './places';
 import { getRegion, regionName } from './regions';
-import { resolveMapFile } from './useMapSources';
+import { resolveMapFile, type MapItem } from './useMapSources';
 
 /** YYYYMMDD of a timestamp, the format map items keep their build date in. */
 function yyyymmdd(ms: number): string {
@@ -82,6 +85,23 @@ registerInit(() => {
       console.warn('[maps] cannot register', entry.name, e);
     }
   }
+  // Index maps installed before search existed, or whose indexing was interrupted.
+  // Delayed so the first screens render before the JS thread starts decoding tiles.
+  setTimeout(() => {
+    try {
+      indexStaleMaps();
+    } catch (e) {
+      console.warn('[maps] cannot schedule indexing', e);
+    }
+  }, 4000);
+});
+
+onMapInstalled((id) => {
+  const item = getItem(id) as MapItem | null;
+  if (!item) return;
+  invalidateIndex(item);
+  // The new region's emergency points (needs the connection the download just used).
+  syncEmergencyPoints(item).catch((e) => console.warn('[maps] emergency points', e));
 });
 
 // The map screen drops the source from its style as soon as the items list
@@ -89,5 +109,7 @@ registerInit(() => {
 // the data container, so also delete the file where it lives now.
 onItemRemoved('map', (item) => {
   forgetEstimates();
+  cancelEmergencySync(item.id);
+  forgetMapSource(item.id);
   deleteFile(resolveMapFile(item));
 });

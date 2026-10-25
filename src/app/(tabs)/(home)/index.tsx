@@ -1,5 +1,5 @@
 import { router, type Href } from 'expo-router';
-import { BookOpen, Download, GraduationCap, HardDrive, Map, Settings, Sparkles, type LucideIcon } from 'lucide-react-native';
+import { BookOpen, ChevronRight, Download, GraduationCap, HardDrive, Map, Settings, Siren, Sparkles, type LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Platform, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -113,6 +113,19 @@ export default function HomeScreen() {
           </Row>
         </Card>
       ) : null}
+
+      <Card testID="home-emergency" style={{ marginTop: space.md }} onPress={() => router.navigate('/maps/emergency')} accessibilityLabel={t('emergency.title')}>
+        <Row gap={space.md}>
+          <IconBadge icon={Siren} hue="medicine" />
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text variant="headline">{t('emergency.title')}</Text>
+            <Text variant="footnote" color="textSecondary" numberOfLines={2}>
+              {t('emergency.body')}
+            </Text>
+          </View>
+          <ChevronRight size={18} color={colors.textTertiary} />
+        </Row>
+      </Card>
 
       <ContinueCarousel />
 

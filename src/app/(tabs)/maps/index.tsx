@@ -1,21 +1,30 @@
 import { Camera, GeoJSONSource, Layer, Map, NativeUserLocation, type CameraRef, type InitialViewState } from '@maplibre/maplibre-react-native';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
-import { Layers, LocateFixed, MapPin, Navigation2 } from 'lucide-react-native';
+import { Layers, LocateFixed, MapPin, Navigation2, Search, Siren } from 'lucide-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Linking, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, Card, Text } from '@/components/ui';
+import { Button, Card, PressableScale, Text } from '@/components/ui';
 import { ensureMapAssets, type MapAssets } from '@/features/maps/assets';
+import { emergencyPlacesIn, usePoiSync } from '@/features/maps/emergency';
 import { WORLD_ID } from '@/features/maps/extraction';
+import { GuidancePanel } from '@/features/maps/GuidancePanel';
+import { useGuidance } from '@/features/maps/guidance';
+import { CATEGORY_COLORS } from '@/features/maps/labels';
 import { MapFab } from '@/features/maps/MapFab';
 import { markersGeoJSON, useMarkers } from '@/features/maps/markers';
-import { useMapUi } from '@/features/maps/store';
+import { PlaceCard } from '@/features/maps/PlaceCard';
+import { showPlace, useMapUi } from '@/features/maps/store';
 import { buildMapStyle } from '@/features/maps/style';
 import { useMapItems } from '@/features/maps/useMapSources';
-import { hues, space, useTheme } from '@/theme';
+import { hues, radius, space, useTheme } from '@/theme';
+
+/** Emergency points are drawn from this zoom on (fewer would be a cloud of dots). */
+const POI_MIN_ZOOM = 11;
+const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
 
 /** Exceptions thrown inside native event callbacks crash Release builds: log instead. */
 function safe<A extends unknown[]>(fn: (...args: A) => void) {
@@ -35,7 +44,12 @@ export default function MapScreen() {
   const { all, world, regions } = useMapItems();
   const markers = useMarkers((s) => s.markers);
   const request = useMapUi((s) => s.request);
+  const selected = useMapUi((s) => s.selected);
+  const viewport = useMapUi((s) => s.viewport);
   const setViewport = useMapUi((s) => s.setViewport);
+  const poiVersion = usePoiSync((s) => s.version);
+  const target = useGuidance((s) => s.target);
+  const position = useGuidance((s) => s.position);
   const cameraRef = useRef<CameraRef>(null);
   const [assets, setAssets] = useState<MapAssets | null>(null);
   const [bearing, setBearing] = useState(0);
@@ -78,6 +92,85 @@ export default function MapScreen() {
 
   const markerData = useMemo(() => markersGeoJSON(markers), [markers]);
 
+  // Emergency points in view, straight from SQLite (indexed bbox query, a few ms).
+  const poiData = useMemo<GeoJSON.FeatureCollection>(() => {
+    if (!viewport || viewport.zoom < POI_MIN_ZOOM) return EMPTY;
+    try {
+      const places = emergencyPlacesIn(viewport.bounds);
+      return {
+        type: 'FeatureCollection',
+        features: places.map((p) => ({
+          type: 'Feature',
+          properties: { osmId: p.osmId, name: p.name ?? '', kind: p.kind, category: p.category },
+          geometry: { type: 'Point', coordinates: [p.lon, p.lat] },
+        })),
+      };
+    } catch {
+      return EMPTY;
+    }
+    // poiVersion: refetch after a region's points finish downloading.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewport, poiVersion]);
+
+  const selectedData = useMemo<GeoJSON.FeatureCollection>(
+    () =>
+      selected
+        ? {
+            type: 'FeatureCollection',
+            features: [{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [selected.lon, selected.lat] } }],
+          }
+        : EMPTY,
+    [selected],
+  );
+
+  const guidanceData = useMemo<GeoJSON.FeatureCollection>(() => {
+    if (!target) return EMPTY;
+    const end: GeoJSON.Feature = {
+      type: 'Feature',
+      properties: { end: true },
+      geometry: { type: 'Point', coordinates: [target.lon, target.lat] },
+    };
+    if (!position) return { type: 'FeatureCollection', features: [end] };
+    return {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates: [
+              [position.lon, position.lat],
+              [target.lon, target.lat],
+            ],
+          },
+        },
+        end,
+      ],
+    };
+  }, [target, position]);
+
+  // Frame start and target once when guidance starts.
+  const framedFor = useRef<typeof target>(null);
+  useEffect(() => {
+    if (!target) {
+      framedFor.current = null;
+      return;
+    }
+    if (!position || framedFor.current === target) return;
+    framedFor.current = target;
+    setShowUser(true);
+    cameraRef.current?.fitBounds(
+      [
+        Math.min(position.lon, target.lon),
+        Math.min(position.lat, target.lat),
+        Math.max(position.lon, target.lon),
+        Math.max(position.lat, target.lat),
+      ],
+      { padding: { top: 140, bottom: 320, left: 60, right: 60 }, duration: 900 },
+    );
+  }, [target, position]);
+
   async function locate() {
     let perm = await Location.getForegroundPermissionsAsync();
     if (!perm.granted && perm.canAskAgain) perm = await Location.requestForegroundPermissionsAsync();
@@ -104,6 +197,7 @@ export default function MapScreen() {
   }
 
   const top = insets.top + space.sm;
+  const cardBottom = insets.bottom + 72;
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
@@ -158,6 +252,86 @@ export default function MapScreen() {
               paint={{ 'text-color': colors.text, 'text-halo-color': colors.surface, 'text-halo-width': 1.6 }}
             />
           </GeoJSONSource>
+          <GeoJSONSource
+            id="emergency"
+            data={poiData}
+            onPress={safe((e) => {
+              const f = e.nativeEvent.features[0];
+              const props = f?.properties as { osmId?: string; name?: string; kind?: string } | undefined;
+              if (!f || f.geometry.type !== 'Point' || !props?.osmId) return;
+              const [lon, lat] = f.geometry.coordinates;
+              showPlace(
+                {
+                  name: props.name || t(`kind.${props.kind}`, { defaultValue: t('kind.place') }),
+                  lat,
+                  lon,
+                  kind: props.kind,
+                  layer: 'poi',
+                  osmId: props.osmId,
+                },
+                0,
+              );
+            })}>
+            <Layer
+              type="circle"
+              id="emergency-dot"
+              paint={{
+                'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 4, 15, 7],
+                'circle-color': [
+                  'match',
+                  ['get', 'category'],
+                  'health',
+                  CATEGORY_COLORS.health,
+                  'security',
+                  CATEGORY_COLORS.security,
+                  'water',
+                  CATEGORY_COLORS.water,
+                  'supplies',
+                  CATEGORY_COLORS.supplies,
+                  CATEGORY_COLORS.official,
+                ],
+                'circle-stroke-color': colors.surface,
+                'circle-stroke-width': 2,
+              }}
+            />
+            <Layer
+              type="symbol"
+              id="emergency-label"
+              minzoom={15}
+              layout={{
+                'text-field': ['get', 'name'],
+                'text-font': ['Noto Sans Regular'],
+                'text-size': 11,
+                'text-anchor': 'top',
+                'text-offset': [0, 0.8],
+                'text-optional': true,
+              }}
+              paint={{ 'text-color': colors.textSecondary, 'text-halo-color': colors.surface, 'text-halo-width': 1.4 }}
+            />
+          </GeoJSONSource>
+          <GeoJSONSource id="guidance" data={guidanceData}>
+            <Layer
+              type="line"
+              id="guidance-line"
+              filter={['==', ['geometry-type'], 'LineString']}
+              layout={{ 'line-cap': 'round' }}
+              paint={{ 'line-color': colors.accent, 'line-width': 4, 'line-dasharray': [1, 1.6] }}
+            />
+            <Layer
+              type="circle"
+              id="guidance-end"
+              filter={['==', ['geometry-type'], 'Point']}
+              paint={{ 'circle-radius': 9, 'circle-color': colors.accent, 'circle-stroke-color': colors.surface, 'circle-stroke-width': 3 }}
+            />
+          </GeoJSONSource>
+          <GeoJSONSource id="selected" data={selectedData}>
+            <Layer
+              type="circle"
+              id="selected-dot"
+              // A ring, so the basemap label of the place stays readable inside it.
+              paint={{ 'circle-radius': 16, 'circle-opacity': 0, 'circle-stroke-color': colors.accent, 'circle-stroke-width': 3 }}
+            />
+          </GeoJSONSource>
         </Map>
       ) : (
         <View style={styles.center}>
@@ -168,7 +342,26 @@ export default function MapScreen() {
         </View>
       )}
 
+      {style ? (
+        <PressableScale
+          testID="map-search"
+          accessibilityRole="search"
+          accessibilityLabel={t('controls.search')}
+          onPress={() => router.push('/maps/search')}
+          haptic="selection"
+          pressedScale={0.98}
+          style={[styles.search, { top, backgroundColor: colors.surface, shadowColor: colors.shadow, borderColor: colors.border }]}>
+          <Search size={18} color={colors.textTertiary} />
+          <Text variant="callout" color="textTertiary" numberOfLines={1} style={{ flex: 1 }}>
+            {t('search.placeholder')}
+          </Text>
+        </PressableScale>
+      ) : null}
+
       <View style={[styles.controls, { top }]} pointerEvents="box-none">
+        <MapFab testID="map-emergency" accessibilityLabel={t('controls.emergency')} onPress={() => router.push('/maps/emergency')}>
+          <Siren size={21} color={colors.danger} strokeWidth={2} />
+        </MapFab>
         <MapFab icon={Layers} accessibilityLabel={t('controls.regions')} onPress={() => router.push('/maps/regions')} />
         <MapFab icon={MapPin} accessibilityLabel={t('controls.markers')} onPress={() => router.push('/maps/markers')} />
         {Math.abs(bearing) > 1 ? (
@@ -185,8 +378,14 @@ export default function MapScreen() {
         </MapFab>
       </View>
 
-      {style && !all.length ? (
-        <View style={[styles.bottom, { bottom: insets.bottom + 72 }]} pointerEvents="box-none">
+      {target ? (
+        <GuidancePanel bottom={cardBottom} mapBearing={bearing} />
+      ) : selected ? (
+        <PlaceCard key={`${selected.lat},${selected.lon}`} place={selected} bottom={cardBottom} />
+      ) : null}
+
+      {style && !all.length && !target && !selected ? (
+        <View style={[styles.bottom, { bottom: cardBottom }]} pointerEvents="box-none">
           <Card style={{ gap: space.md }}>
             <Text variant="title3">{t('empty.title')}</Text>
             <Text variant="callout" color="textSecondary">
@@ -209,5 +408,24 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.sm },
   controls: { position: 'absolute', right: space.lg, gap: space.md, alignItems: 'center' },
+  // Leaves room for the control column on the right (46 pt FABs).
+  search: {
+    position: 'absolute',
+    left: space.lg,
+    right: space.lg + 46 + space.md,
+    // iPad: a search box, not a banner across the map.
+    maxWidth: 520,
+    height: 46,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    paddingHorizontal: space.lg,
+    borderRadius: radius.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+    shadowOpacity: 1,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
   bottom: { position: 'absolute', left: space.lg, right: space.lg },
 });

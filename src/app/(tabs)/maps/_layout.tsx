@@ -3,6 +3,9 @@ import { useTranslation } from 'react-i18next';
 
 import { useStackOptions } from '@/components/navigation';
 
+// Deep links into a sheet (Home → Emergencias) keep the map underneath.
+export const unstable_settings = { initialRouteName: 'index' };
+
 export default function Layout() {
   const { t } = useTranslation('maps');
   const sheet = { presentation: 'formSheet', sheetGrabberVisible: true, headerShown: true } as const;
@@ -15,6 +18,8 @@ export default function Layout() {
       <Stack.Screen name="download" options={{ ...sheet, headerShown: false, sheetAllowedDetents: 'fitToContents' }} />
       <Stack.Screen name="markers" options={{ ...sheet, title: t('markers.title'), sheetAllowedDetents: [0.5, 1] }} />
       <Stack.Screen name="marker" options={{ ...sheet, headerShown: false, sheetAllowedDetents: 'fitToContents' }} />
+      <Stack.Screen name="search" options={{ ...sheet, title: t('controls.search'), sheetAllowedDetents: [1] }} />
+      <Stack.Screen name="emergency" options={{ ...sheet, title: t('emergency.title'), sheetAllowedDetents: [0.75, 1] }} />
     </Stack>
   );
 }

@@ -64,5 +64,9 @@
     "next": "Next",
     "start": "Get started",
     "finish": "Go to Nomad"
+  },
+  "emergency": {
+    "title": "Emergency",
+    "body": "Hospitals, police, water and shelters near you, offline"
   }
 }

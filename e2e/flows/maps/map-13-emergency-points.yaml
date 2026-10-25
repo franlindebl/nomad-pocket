@@ -1,0 +1,41 @@
+# MAP-13 — emergency points: an installed map gives a few from its own tiles (offline
+# fallback); the region's full set downloads from OpenStreetMap (Overpass), lists by
+# category and distance, opens on the map and starts guidance.
+appId: com.fjlinde.nomadpocket
+tags: [nightly, maps, network, seeded-map]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: { id: "map-emergency" }
+    timeout: 20000
+- tapOn: { id: "map-emergency" }
+# The startup indexing (4 s after launch) stores the hospitals in the seeded Melilla tiles.
+- extendedWaitUntil:
+    visible: "Solo tienes los puntos que trae el mapa.*"
+    timeout: 30000
+- assertVisible: { id: "emergency-place" }
+- takeScreenshot: 01-from-tiles
+- tapOn: { id: "emergency-fetch-top" }
+# Pharmacies are not in the z12 tiles: they arrive with the OpenStreetMap points.
+- extendedWaitUntil:
+    visible: "(?s).*Farmacia\\n.*"
+    timeout: 240000
+- assertNotVisible: "Solo tienes los puntos que trae el mapa.*"
+- takeScreenshot: 02-health
+- tapOn: { id: "emergency-cat-security" }
+- assertVisible: { id: "emergency-place" }
+- assertVisible: "(?s).*(Policía|Guardia Civil|Bomberos).*"
+- takeScreenshot: 03-security
+- tapOn: { id: "emergency-place", index: 0 }
+- extendedWaitUntil:
+    visible: { id: "place-card" }
+    timeout: 10000
+- takeScreenshot: 04-place-on-map
+- tapOn: { id: "map-emergency" }
+- tapOn: { id: "emergency-cat-security" }
+- tapOn: { id: "emergency-guide", index: 0 }
+- extendedWaitUntil:
+    visible: { id: "guidance-panel" }
+    timeout: 15000
+- takeScreenshot: 05-guidance

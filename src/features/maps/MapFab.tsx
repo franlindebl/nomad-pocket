@@ -15,6 +15,7 @@ export function MapFab({
   active,
   children,
   style,
+  testID,
 }: {
   icon?: LucideIcon;
   onPress: () => void;
@@ -22,10 +23,12 @@ export function MapFab({
   active?: boolean;
   children?: ReactNode;
   style?: StyleProp<ViewStyle>;
+  testID?: string;
 }) {
   const { colors } = useTheme();
   return (
     <PressableScale
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}

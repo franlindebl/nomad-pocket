@@ -4,4 +4,5 @@
 export * from './extract.ts';
 export * from './format.ts';
 export * from './io.ts';
+export * from './reader.ts';
 export * from './tileid.ts';

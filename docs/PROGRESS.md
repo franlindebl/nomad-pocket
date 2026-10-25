@@ -4,15 +4,15 @@ Living document: current status, backlog, known issues and a dated log. Update i
 the end of every work block (status table, a log entry, next steps) so the next session
 can pick up without re-deriving anything.
 
-## Current state (2026-10-24)
+## Current state (2026-10-25)
 
 - **Version 1.0.2 (iOS build 4)** prepared for TestFlight; **1.0.1 (build 3)** submitted
   to App Review. Release process and version table: `docs/RELEASE.md`.
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
   tour). Not yet run on a physical device by the agent.
-- Checks: 93 unit tests (92 pass, 1 network test skipped), `tsc` clean, lint clean, i18n keys complete. E2E: 42 Maestro flows (16 smoke,
-  13 full, 10 nightly, iPad tour, 2 Android flows) covering 53 of 55 test-plan cases plus AI-06/07.
+- Checks: 110 unit tests (109 pass, 1 network test skipped), `tsc` clean, lint clean, i18n keys complete. E2E: 46 Maestro flows (18 smoke,
+  13 full, 11 nightly, iPad tour, 3 Android flows) covering 53 of 55 test-plan cases plus the new maps cases and AI-06/07.
 
 | Area | Status |
 |---|---|
@@ -23,6 +23,8 @@ can pick up without re-deriving anything.
 | ZIM library + reader (search, TOC, bookmarks, history, find, text size, dark mode) | done — iOS + Android |
 | Courses (14 courses, syllabus with fallbacks, progress) | done |
 | Maps (in-app PMTiles extraction, regions, visible area, world basemap, markers, GPS, multi-script labels) | done — iOS + Android |
+| Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
+| Maps road routing (Valhalla) and turn-by-turn (plan phases 2–3) | planned; Valhalla spike done: viable (numbers in the plan) |
 | Assistant (Apple Intelligence / Gemini Nano / 4 GGUF models, RAG with citations, conversational: the model decides when to search) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change); Gemini Nano untested |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
 | E2E suite (Maestro) + pre-commit hook | done |
@@ -43,6 +45,9 @@ can pick up without re-deriving anything.
 
 Roughly by value. None is started.
 
+0. Maps plan phases 2–3 (`docs/MAPS_NAVIGATION_PLAN.md`): routing packs built in CI and
+   hosted on GitHub Releases (owner approved), on-device Valhalla, then turn-by-turn. Move
+   emergency points into the same packs (public Overpass is often at capacity).
 1. Watch App Review for 1.0.1; upload 1.0.2 (build 4) to TestFlight if not done
    (`docs/RELEASE.md`), test it on a real iPhone (GPU llama.cpp, Apple Intelligence,
    background downloads, Files import, airplane mode).
@@ -60,6 +65,18 @@ Roughly by value. None is started.
 
 
 ## Known issues / limitations
+
+- Map search: no house numbers (Protomaps tiles have none); big regions are indexed at a
+  lower zoom (≤ 40k tiles: Spain z14 → z12, minor streets missing); indexing runs on the JS
+  thread in batches (minutes for a country on a phone, not yet measured on a device).
+- Emergency points depend on public Overpass servers (best effort; they can be at capacity
+  for minutes). Fallback: the POIs in the map's own tiles (complete only at z15).
+- "Llévame" is a straight line (compass + distance), not a route.
+- Bbox queries (map dots, locality context) don't handle regions across the antimeridian.
+- Map screen first opens on the world when a region is registered after the first render
+  (seeded/loose maps): pre-existing, cosmetic.
+- `app.json` location purpose string changed (distances/guidance): needs `npx expo prebuild`
+  before the next store build.
 
 - Downloads interrupted by app termination restart from zero unless paused first
   (expo-file-system tasks don't survive relaunch).
@@ -85,6 +102,34 @@ Roughly by value. None is started.
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-25 — Maps: search, Emergencias, straight-line guidance
+- Owner approved the maps plan (`docs/MAPS_NAVIGATION_PLAN.md`): phase 1 now, routing packs
+  on GitHub Releases later, Overpass at download time, military sites shown.
+- `src/lib/mvt/decode.ts` (minimal MVT decoder: wanted layers only, one point per feature)
+  and `src/lib/pmtiles/reader.ts` (tiles of one zoom from a local archive), with tests on
+  the real Soria fixture.
+- Search: FTS5 index of places/POIs/streets per installed map (migration v2), background
+  queue, ranking by match/importance/distance, locality context, saved places, coordinates
+  in decimal/DMS/UTM (`geo.ts`, tested against UTM reference points).
+- Emergencias: sheet from the map (red button) and Home — call 112/911, share position
+  (decimal + UTM + OSM link), position card, 5 categories by distance, police force from
+  `operator` (Guardia Civil / Nacional / Local / autonómica), ER badge, phone; points from
+  Overpass per region (cells ≤ 3°, TSV, 3 servers, per-request timeout) with the tiles'
+  own POIs as offline fallback; map layer with category colours.
+- Place card (Llévame / Guardar / Llamar) and straight-line guidance panel (GPS + compass,
+  keep-awake, arrival haptic); Llévame also in saved places.
+- Privacy page: Overpass and "share my position" added (not deployed: push needed).
+- E2E: `map-10-search`, `map-12-emergency-empty` (smoke), `map-13-emergency-points`
+  (nightly, Overpass) pass on the iOS 27 simulator (Release); `android-03-search-emergency`
+  passes on the Android emulator (API 36, release APK) with the rest of the Android tour.
+- Independent review fixed: Overpass retries ignoring a removed map (abortable sleep,
+  re-check before storing), re-downloaded maps not re-indexed / re-fetched while a job was
+  queued (run-again flag), map dots dropping hospitals in dense areas (priority ORDER BY
+  before LIMIT), search ranking only an arbitrary 600 rows (ORDER BY importance), "arrived"
+  with a coarse fix (accuracy capped at 50 m), guidance starting from a stale position;
+  Overpass CSV-quoted names ("Acuartelamiento ""Capitán…""") unquoted.
+- Valhalla spike: viable (numbers and pack design in the plan).
 
 ### 2026-10-24
 - Analysed Project NOMAD source (admin/ AdonisJS app + collections JSON).

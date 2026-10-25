@@ -1,0 +1,19 @@
+# MAP-12 — Emergencias from Home with no maps: emergency call button, the user's position
+# (decimal + UTM, simulated Madrid) and a prompt to download a region first.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, maps]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "home-emergency" }
+- extendedWaitUntil:
+    visible: "Llamar al 112"
+    timeout: 15000
+- extendedWaitUntil:
+    visible: { id: "emergency-position" }
+    timeout: 20000
+- assertVisible: "40\\.4.*"
+- assertVisible: "UTM 30T.*"
+- assertVisible: "Primero descarga el mapa de tu región.*"
+- takeScreenshot: 01-emergency-empty
+- tapOn: "Elegir una región"
+- assertVisible: "Buscar países y regiones"

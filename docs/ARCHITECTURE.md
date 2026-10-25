@@ -115,9 +115,13 @@ assets/                      fonts, icons, splash, maps/basemap-assets.zip
 | `history`, `bookmarks` | Reader state per (item, path) |
 | `courses`, `course_progress` | Enrolled courses (syllabus JSON, last lesson) and manually completed lessons |
 | `map_markers` | User pins (name, lat/lon, color, note) |
+| `map_places` (FTS5) | Offline search index: `names` (indexed, `unicode61 remove_diacritics 2`), name, layer (place/poi/road), kind, lat/lon, `importance` (Protomaps min_zoom; `rank` is reserved by FTS5), `source` (map item id or `pois:<item id>`) |
+| `map_localities` | Towns/neighbourhoods of the index (lat-indexed) for "Calle Mayor · Soria" context lines |
+| `map_pois` | Emergency points per map item: OSM id (`n…`/`w…`/`r…`, or `t<lat>,<lon>` when taken from the tiles), kind, category, name, operator, phone, opening hours, emergency (ER yes/no) |
+| `map_sources` | Per map item: search index version/zoom/date, emergency points fetch date/count |
 | `chat_sessions`, `chat_messages` | Assistant conversations, messages with cited `sources` JSON |
 
-WAL mode, one migration (`v1`). Add a migration by appending a SQL string to
+WAL mode, two migrations (`v1`; `v2` adds the map search and emergency tables). Add a migration by appending a SQL string to
 `MIGRATIONS`; `PRAGMA user_version` tracks what ran. Never edit an old one.
 
 Key-value store (`expo-sqlite/kv-store`): `settings` (zustand persist: `language`,
@@ -303,6 +307,53 @@ scripts, Myanmar and Khmer stay placeholders (MapLibre Native can't shape them).
 style references the files with `file://` URLs. Regenerate with `scripts/maps/`
 (`dl-assets.mjs` + `make-zip.py`; `dl-ne.mjs` + `make-regions.mjs` for regions).
 
+**Search index** (`places.ts`, pure parts in `places-core.ts`, `src/lib/mvt/decode.ts`,
+`src/lib/pmtiles/reader.ts`): every installed map is decoded once into `map_places`
+(FTS5) — `places` (towns, neighbourhoods, countries), named `pois` (except street
+furniture) and named `roads` (one row per name and tile; deduped within 1.5 km at query
+time). Reads one zoom: the archive's max zoom capped at 15, lowered until ≤ 40 000 tiles
+(`pickIndexZoom`; Spain at z14 is indexed at z12, so minor streets are missing there);
+the world basemap at z5. A queue indexes one map at a time, 24 tiles per batch with a
+`setTimeout(0)` between batches (JS thread stays responsive; ~1–6 ms per dense tile in
+V8, more in Hermes). Triggers: 4 s after startup for maps whose `map_sources.index_version`
+≠ `INDEX_VERSION` (bump it when `tileRows` changes), and `onMapInstalled` after a download
+(re-index). Removing a map cancels its job and deletes its rows. `searchPlaces(text, near)`
+= FTS prefix match (`"word"*` per word) → `rankHits` (exact > prefix > word match, place >
+POI > street, importance, log-distance from the map centre) → nearest locality as context.
+The search sheet also matches saved places and parses coordinates (`geo.ts`: decimal,
+DMS with N/S/E/W/O, UTM with band letter). No house numbers: Protomaps tiles carry none.
+
+**Emergency points** (`emergency.ts`, pure parts in `emergency-core.ts`): 17 kinds in 5
+categories (health, security, water & shelter, supplies, institutions) from OSM tags.
+After a region download (and from the Emergencias sheet) the app POSTs an Overpass query
+for the region's bbox, split into ≤ 3° cells (a 3° cell over central Spain: ~60 s, 25k
+points; Comunidad de Madrid: 15k points, 1.2 MB TSV), to three public servers in turn,
+with a per-request timeout (query timeout + 30 s; servers that are at capacity hold the
+connection). TSV output (`[out:csv]`) keeps it small. Rows replace the region's
+`map_pois` and go into the search index under `pois:<item id>`. Offline fallback: while
+indexing, emergency-kind POIs found in the tiles (named or not, e.g. drinking water) are
+stored as `t…` rows unless the region already has Overpass points — at z15 that is most
+of them, at z12/14 only the important ones (Protomaps gives most POIs min_zoom 15–17).
+Queries: `nearestEmergencyPlaces(category, from)` (equirectangular ORDER BY, GROUP BY
+osm_id across overlapping regions), `emergencyPlacesIn(bbox)` for the map layer (zoom ≥ 11).
+`emergencyNumber()`: 911 for the device region in most of the Americas, else 112.
+
+**Guidance** (`guidance.ts`, `GuidancePanel.tsx`): "Llévame" in a straight line — no
+routing. A zustand store watches GPS (`BestForNavigation`, 3 m) and the compass
+(`watchHeadingAsync`, true north when available) while a target is set, keeps the
+screen awake, and the panel rotates an arrow by bearing − heading (map bearing without a
+compass), shows distance + 8-point direction, walking time (1.25 m/s) and accuracy;
+arrival ≤ max(20 m, accuracy) with a haptic. A session counter makes a superseded start
+remove its own watchers. Road routing and turn-by-turn are the plan's phases 2–3
+(`docs/MAPS_NAVIGATION_PLAN.md`).
+
+**Map screen extras**: search pill (opens `maps/search`), red Emergencias FAB
+(`maps/emergency`, also from a Home card via `unstable_settings.initialRouteName`), GeoJSON
+layers for emergency points (category colours, labels from z15, tap → place card), the
+selected place (ring) and the guidance line; bottom `PlaceCard` (kind, operator/police
+force, ER badge, hours, distance, decimal + UTM, Llévame / Guardar / Llamar) or
+`GuidancePanel`.
+
 **Regions** (`regions.json`, 312): Natural Earth countries with far-flung overseas
 territories trimmed from the bbox, 19 Spanish autonomous communities, 51 US states;
 ES/EN names, continent. **UI state** (`store.ts`): persisted viewport + one-shot camera
@@ -379,6 +430,7 @@ Routes: `maps/index` (map, locate-me, compass, long-press to add a pin), sheets
 | `opds.library.kiwix.org/catalog/v2` | newest ZIM versions, Explore search |
 | `build-metadata.protomaps.dev/builds.json`, `build.protomaps.com` | daily planet build, HTTP Range extraction |
 | `huggingface.co` | GGUF models |
+| `overpass-api.de`, `overpass.private.coffee`, `maps.mail.ru/osm/tools/overpass` | emergency points per region (only the region bbox is sent; public servers, best effort) |
 | `franlindebl.github.io/nomad-pocket` | privacy policy / support page (`site/`) |
 
 ## Testing

@@ -98,6 +98,14 @@ export type StartMapDownload = {
 
 const running = new Set<string>();
 
+type InstalledListener = (itemId: string) => void;
+const installedListeners: InstalledListener[] = [];
+
+/** Called after a region or the world basemap finishes downloading (register.ts indexes it). */
+export function onMapInstalled(fn: InstalledListener) {
+  installedListeners.push(fn);
+}
+
 export function isMapJobRunning(key: string) {
   return running.has(key);
 }
@@ -176,6 +184,13 @@ export function startMapDownload(input: StartMapDownload) {
         meta,
       });
       job.finish();
+      for (const fn of installedListeners) {
+        try {
+          fn(mapItemId(input.key));
+        } catch (e) {
+          console.warn('[maps] installed listener failed', e);
+        }
+      }
     } catch (e) {
       try {
         handle?.close();

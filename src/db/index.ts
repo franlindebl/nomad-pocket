@@ -102,6 +102,60 @@ const MIGRATIONS: string[] = [
   );
   CREATE INDEX IF NOT EXISTS chat_messages_session ON chat_messages(session_id, created_at);
   `,
+  // v2: offline map search and emergency points
+  `
+  -- Search index built from installed maps' tiles (and the emergency points).
+  -- 'rank' is reserved by FTS5, hence 'importance' (lower = more important).
+  CREATE VIRTUAL TABLE IF NOT EXISTS map_places USING fts5(
+    names,
+    name UNINDEXED,
+    layer UNINDEXED,               -- place | poi | road
+    kind UNINDEXED,
+    lat UNINDEXED,
+    lon UNINDEXED,
+    importance UNINDEXED,
+    source UNINDEXED,              -- map item id, or 'pois:<map item id>'
+    tokenize = 'unicode61 remove_diacritics 2'
+  );
+
+  -- Towns and neighbourhoods of the index, for "Calle Mayor · Soria" context lines.
+  CREATE TABLE IF NOT EXISTS map_localities (
+    source TEXT NOT NULL,
+    name TEXT NOT NULL,
+    lat REAL NOT NULL,
+    lon REAL NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS map_localities_lat ON map_localities(lat);
+  CREATE INDEX IF NOT EXISTS map_localities_source ON map_localities(source);
+
+  -- OpenStreetMap emergency points fetched (Overpass) for each map region.
+  CREATE TABLE IF NOT EXISTS map_pois (
+    source TEXT NOT NULL,          -- map item id
+    osm_id TEXT NOT NULL,          -- n123 | w456 | r789
+    kind TEXT NOT NULL,
+    category TEXT NOT NULL,
+    name TEXT,
+    operator TEXT,
+    phone TEXT,
+    opening_hours TEXT,
+    emergency INTEGER,
+    lat REAL NOT NULL,
+    lon REAL NOT NULL,
+    PRIMARY KEY (source, osm_id)
+  );
+  CREATE INDEX IF NOT EXISTS map_pois_category ON map_pois(category);
+  CREATE INDEX IF NOT EXISTS map_pois_lat ON map_pois(lat);
+
+  -- Per map item: search index and emergency point state.
+  CREATE TABLE IF NOT EXISTS map_sources (
+    item_id TEXT PRIMARY KEY NOT NULL,
+    index_version INTEGER,         -- NULL until indexed
+    index_zoom INTEGER,
+    indexed_at INTEGER,
+    pois_at INTEGER,               -- last successful emergency point fetch
+    pois_count INTEGER
+  );
+  `,
 ];
 
 let instance: SQLiteDatabase | null = null;

@@ -28,10 +28,23 @@ export function SectionHeader({ title, action, onAction, style }: { title: strin
   );
 }
 
-export function Chip({ label, selected, onPress, icon: Icon }: { label: string; selected?: boolean; onPress?: () => void; icon?: LucideIcon }) {
+export function Chip({
+  label,
+  selected,
+  onPress,
+  icon: Icon,
+  testID,
+}: {
+  label: string;
+  selected?: boolean;
+  onPress?: () => void;
+  icon?: LucideIcon;
+  testID?: string;
+}) {
   const { colors } = useTheme();
   return (
     <PressableScale
+      testID={testID}
       accessibilityRole="button"
       accessibilityState={{ selected: !!selected }}
       onPress={onPress}

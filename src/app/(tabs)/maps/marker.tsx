@@ -1,9 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { Navigation } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, TextInput, View } from 'react-native';
 
 import { Button, Row, Text } from '@/components/ui';
+import { useGuidance } from '@/features/maps/guidance';
 import { addMarker, deleteMarker, formatCoords, getMarker, updateMarker, useMarkers } from '@/features/maps/markers';
 import { useMapUi } from '@/features/maps/store';
 import { fontFamily, radius, space, typography, useTheme } from '@/theme';
@@ -77,6 +79,18 @@ export default function MarkerSheet() {
         />
       </View>
       <Button title={t('common:actions.save')} onPress={save} size="lg" fullWidth />
+      {existing ? (
+        <Button
+          testID="marker-guide"
+          title={t('markers.takeMeThere')}
+          icon={Navigation}
+          variant="secondary"
+          fullWidth
+          onPress={async () => {
+            if (await useGuidance.getState().start({ name: existing.name, lat: existing.lat, lon: existing.lon })) router.back();
+          }}
+        />
+      ) : null}
       {existing ? (
         <Row gap={space.sm}>
           <Button

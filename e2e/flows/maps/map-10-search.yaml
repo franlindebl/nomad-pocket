@@ -1,0 +1,50 @@
+# MAP-10 + MAP-11 offline — search finds a place in an installed map (Melilla, indexed at
+# startup), the card shows it, "Llévame" starts straight-line guidance; pasted coordinates
+# open a card that saves a place.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, maps, seeded-map]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: { id: "map-search" }
+    timeout: 20000
+- tapOn: { id: "map-search" }
+- inputText: "Rostrogordo"
+# The index is built a few seconds after launch; results appear when it is ready.
+- extendedWaitUntil:
+    visible: { id: "search-result" }
+    timeout: 40000
+- assertVisible: "(?s).*Localidad.*"
+- takeScreenshot: 01-results
+- tapOn: { id: "search-result", index: 0 }
+- extendedWaitUntil:
+    visible: { id: "place-card" }
+    timeout: 10000
+- assertVisible: "Rostrogordo"
+- assertVisible: "(?s).*UTM 30S.*"
+- takeScreenshot: 02-place-card
+- tapOn: { id: "place-guide" }
+- extendedWaitUntil:
+    visible: "Hacia Rostrogordo"
+    timeout: 15000
+# The simulator is in Madrid: hundreds of km to the south.
+- extendedWaitUntil:
+    visible: { id: "guidance-distance" }
+    timeout: 20000
+- assertVisible: "(?s).*km S.*"
+- assertVisible: "En línea recta.*"
+- takeScreenshot: 03-guidance
+- tapOn: { id: "guidance-stop" }
+- assertNotVisible: { id: "guidance-panel" }
+- tapOn: { id: "map-search" }
+- inputText: "35.2919, -2.9407"
+- tapOn: { id: "search-coordinates" }
+- extendedWaitUntil:
+    visible: { id: "place-card" }
+    timeout: 10000
+- tapOn: { id: "place-save" }
+- assertVisible: "Guardado"
+- tapOn: { id: "place-close" }
+- tapOn: "Lugares guardados"
+- assertVisible: "35.29190, -2.94070.*"

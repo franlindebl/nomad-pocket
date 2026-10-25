@@ -110,7 +110,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Nomad Pocket usa tu ubicación para mostrarte en los mapas sin conexión."
+          "locationWhenInUsePermission": "Nomad Pocket usa tu ubicación para mostrarte en los mapas sin conexión, medir distancias y guiarte hasta lugares y puntos de emergencia."
         }
       ],
       "@maplibre/maplibre-react-native",

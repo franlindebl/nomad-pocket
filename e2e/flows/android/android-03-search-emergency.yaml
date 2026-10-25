@@ -1,0 +1,65 @@
+# ANDROID-03 — map search, place card, straight-line guidance and Emergencias on Android:
+# downloads the visible area around Melilla (its emergency points follow from Overpass).
+appId: com.fjlinde.nomadpocket
+tags: [android, network]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { point: "50%,93%" }   # Mapas
+- extendedWaitUntil:
+    visible: "Mapas sin conexión"
+    timeout: 20000
+- setLocation: { latitude: 35.2937, longitude: -2.9383 }
+- tapOn: "Mostrar mi ubicación"
+- extendedWaitUntil:
+    visible: "NoExiste"
+    timeout: 3000
+    optional: true
+- tapOn: "Mapas sin conexión"
+- tapOn: "Descargar la zona visible.*"
+- extendedWaitUntil:
+    visible: "Descargar · .*"
+    timeout: 60000
+- tapOn: "Descargar · .*"
+- tapOn:
+    text: "(?i)usar datos móviles"
+    optional: true
+- extendedWaitUntil:
+    notVisible: "Descargando.*|Preparando.*"
+    timeout: 300000
+- back
+- tapOn: { id: "map-search" }
+- inputText: "Melilla"
+- extendedWaitUntil:
+    visible: { id: "search-result" }
+    timeout: 60000
+- takeScreenshot: 01-search
+- tapOn: { id: "search-result", index: 0 }
+- extendedWaitUntil:
+    visible: { id: "place-card" }
+    timeout: 10000
+- takeScreenshot: 02-place-card
+- tapOn: { id: "place-guide" }
+- extendedWaitUntil:
+    visible: { id: "guidance-panel" }
+    timeout: 15000
+- extendedWaitUntil:
+    visible: "NoExiste"
+    timeout: 4000
+    optional: true
+- takeScreenshot: 03-guidance
+- tapOn: { id: "guidance-stop" }
+- tapOn: { id: "map-emergency" }
+- extendedWaitUntil:
+    visible: "Llamar al 112"
+    timeout: 15000
+# Overpass runs right after the download; give it time (public servers can be slow).
+- extendedWaitUntil:
+    visible: { id: "emergency-place" }
+    timeout: 240000
+- takeScreenshot: 04-emergency
+- tapOn: { id: "emergency-cat-security" }
+- extendedWaitUntil:
+    visible: "NoExiste"
+    timeout: 2000
+    optional: true
+- takeScreenshot: 05-security
