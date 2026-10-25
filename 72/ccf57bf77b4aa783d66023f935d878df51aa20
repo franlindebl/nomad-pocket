@@ -1,0 +1,47 @@
+CLAUDE.md
+  s_838c9370c44bfa::t_028f641dab2d68 117
+docs/ARCHITECTURE.md
+  s_838c9370c44bfa::t_66e06e44b2cd21 418-438
+docs/E2E.md
+  s_838c9370c44bfa::t_1eeb4128f711f8 5-6,241,308-309
+docs/PROGRESS.md
+  s_838c9370c44bfa::t_4ef2d50b9bc063 127-139
+e2e/flows/maps/map-17-follow.yaml
+  s_838c9370c44bfa::t_f5c2cfef461862 1-87
+src/app/(tabs)/maps/index.tsx
+  s_838c9370c44bfa::t_5cf958953ad548 4,14,56,70-77,182-194,203-205,225,227,230-250,276,279-281,290-294,306-308,444-446,462-463,467-473,482-488,491-506,508,557-571
+src/features/maps/GuidancePanel.tsx
+  s_838c9370c44bfa::t_f3aad677757762 5-7,70-82,93,104-108,120-236,239,245,261-264,266,278-289,299
+src/features/maps/follow-core.test.ts
+  s_838c9370c44bfa::t_4946414d366000 1-30
+src/features/maps/follow-core.ts
+  s_838c9370c44bfa::t_e8d9363694b8d2 1-44
+src/features/maps/guidance.ts
+  s_838c9370c44bfa::t_b0b6ced0d738d8 18-19,32-33,35,130,141,160-161,181-183,206
+src/features/maps/routing-core.test.ts
+  s_838c9370c44bfa::t_06837ec25727da 16,28,149-171
+src/features/maps/routing-core.ts
+  s_838c9370c44bfa::t_c48edc20f7c06d 5,394-395,434-435,444,448-462
+src/i18n/locales/en/maps.json
+  s_838c9370c44bfa::t_a81f0aa939c5b1 9-11,119,288
+src/i18n/locales/es/maps.json
+  s_838c9370c44bfa::t_eafde935f1cf64 9-11,119,288
+src/features/maps/FollowCamera.tsx
+  s_838c9370c44bfa::t_dd8c96641b9c50 1-84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "72ccf57bf77b4aa783d66023f935d878df51aa20",
+  "prompts": {},
+  "sessions": {
+    "s_838c9370c44bfa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65e8c9ca-b49f-4076-9462-02635ce8b6df",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
