@@ -22,20 +22,21 @@ the owner's local Claude memory, never in git. Ask the owner if they're missing.
 
 Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo prebuild`.
 
-- Marketing version: `expo.version` (currently **1.0.2**). Keep `package.json`'s
+- Marketing version: `expo.version` (currently **1.1.0**). Keep `package.json`'s
   `version` equal (not used by the build, but it's what people read).
-- iOS build number: `expo.ios.buildNumber` (currently **"4"**) → `CFBundleVersion`. Bump it
+- iOS build number: `expo.ios.buildNumber` (currently **"5"**) → `CFBundleVersion`. Bump it
   for every upload: App Store Connect rejects a build number it has already seen.
-- Android: `expo.android.versionCode` (currently **4**, nothing published yet). Must grow
+- Android: `expo.android.versionCode` (currently **5**, nothing published yet). Must grow
   with every Play upload.
 - After changing any of them, run `npx expo prebuild` (it can regenerate `ios/` and
   `android/` from scratch: then `cd ios && pod install`).
 
-| Version | Build | State (2026-10-24) |
+| Version | Build | State (2026-10-25) |
 |---|---|---|
 | 1.0.0 | — | prepared, superseded by 1.0.1 |
 | 1.0.1 | 3 | submitted to App Review (auto-release after approval) |
-| 1.0.2 | 4 | prepared for TestFlight (`51fbe2a`) |
+| 1.0.2 | 4 | uploaded to TestFlight 2026-10-24 (`51fbe2a`) |
+| 1.1.0 | 5 | TestFlight 2026-10-25: map search, Emergencias, offline road routing, Preparedness, conversational assistant |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.
@@ -69,6 +70,9 @@ cat > ios/build/ExportOptions.plist <<'EOF'
   <key>method</key><string>app-store-connect</string>
   <key>destination</key><string>upload</string>
   <key>teamID</key><string>F3VY6C7GKX</string>
+  <key>signingStyle</key><string>automatic</string>
+  <key>uploadSymbols</key><true/>
+  <key>manageAppVersionAndBuildNumber</key><false/>
 </dict></plist>
 EOF
 
@@ -76,7 +80,9 @@ xcodebuild -exportArchive -archivePath ios/build/NomadPocket.xcarchive \
   -exportOptionsPlist ios/build/ExportOptions.plist -exportPath ios/build/export "${AUTH[@]}"
 ```
 
-Everything goes under `ios/build/` (gitignored with `ios/`). After processing (~10–30 min) the build
+`signingStyle automatic` matters: there is no distribution certificate in the keychain,
+and without it the export fails with `No "iOS Distribution" signing certificate`; with it
+the API key gets a cloud-managed one. Everything goes under `ios/build/` (gitignored with `ios/`). After processing (~10–30 min) the build
 appears in TestFlight. Export compliance is answered by `ITSAppUsesNonExemptEncryption =
 false` in `app.json`.
 

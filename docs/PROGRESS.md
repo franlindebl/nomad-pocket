@@ -6,8 +6,8 @@ can pick up without re-deriving anything.
 
 ## Current state (2026-10-25)
 
-- **Version 1.0.2 (iOS build 4)** prepared for TestFlight; **1.0.1 (build 3)** submitted
-  to App Review. Release process and version table: `docs/RELEASE.md`.
+- **Version 1.1.0 (iOS build 5)** on TestFlight 2026-10-25 (1.0.2 build 4 before it);
+  **1.0.1 (build 3)** waiting for App Review. Release process and version table: `docs/RELEASE.md`.
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
   tour). Not yet run on a physical device by the agent.
@@ -58,9 +58,9 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
    Measure on a real phone: route time/memory, assembling Spain (2.2 GB, JS copy), mmap of
    a 2 GB tar on iOS (may need `com.apple.developer.kernel.extended-virtual-addressing`).
    Then phase 3 (turn-by-turn: voice with expo-speech, background location).
-1. Watch App Review for 1.0.1; upload 1.0.2 (build 4) to TestFlight if not done
-   (`docs/RELEASE.md`), test it on a real iPhone (GPU llama.cpp, Apple Intelligence,
-   background downloads, Files import, airplane mode).
+1. Watch App Review for 1.0.1; test 1.1.0 (build 5, TestFlight) on a real iPhone: routing
+   packs (download Spain 2.2 GB, route time/memory), Preparedness reminders, GPU
+   llama.cpp, Apple Intelligence, background downloads, Files import, airplane mode.
 2. Resume downloads after the app is killed on iOS: reattach the background URLSession
    (small native module) instead of restarting from zero.
 3. Map extraction: resume after a kill (persist the plan + written ranges) and move it off
