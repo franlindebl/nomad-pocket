@@ -107,10 +107,12 @@ if [[ $SLICES == 1 ]]; then
     extract slice "$ID"
     POI_OUTS+=("/w/out/$ID.pois.tsv=$W,$S,$E,$N")
     SLICE_IDS+=("$ID")
-  done < <(python3 -I - "$ROOT/src/features/maps/regions.json" "$COUNTRY" <<'PY'
+  done < <(python3 -I - "$ROOT/src/features/maps/regions.json" "$HERE/packs.json" "$COUNTRY" <<'PY'
 import json, sys
+own = json.load(open(sys.argv[2]))["countries"]
 for r in json.load(open(sys.argv[1]))["regions"]:
-    if r.get("parent") == sys.argv[2]:
+    # A subdivision with its own packs.json entry is built from its own extract.
+    if r.get("parent") == sys.argv[3] and r["id"] not in own:
         print(r["id"], *r["bbox"])
 PY
 )

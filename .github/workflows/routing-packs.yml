@@ -2,9 +2,9 @@ name: Routing packs
 
 # Offline routing packs (docs/MAPS_NAVIGATION_PLAN.md, phase 2): one Valhalla build per
 # country of scripts/routing/packs.json, region packs cut from it, emergency points per
-# pack, published as assets of a release `routing-YYYYMMDD`. The app reads the catalog
+# pack, published as assets of a release `routing-YYYYMMDD-N`. The app reads the catalog
 # from the fixed release `routing-index` (routing-manifest.json), updated last, so it
-# only ever points at a complete release.
+# only ever points at a complete release; releases no manifest points at are then pruned.
 
 on:
   workflow_dispatch:
@@ -78,7 +78,9 @@ jobs:
           TAG: ${{ needs.plan.outputs.release }}
         run: |
           cd /mnt/routing/build/out
-          gh release upload "$TAG" --clobber --repo "$GITHUB_REPOSITORY" *.tar* *.pois.tsv
+          # Exactly the files the fragment lists (it drops empty packs and point files).
+          python3 -I -c 'import json, sys; [print(f["name"]) for p in json.load(open(sys.argv[1])) for f in p["parts"] + ([p["pois"]] if p["pois"] else [])]' \
+            "${{ matrix.country }}.packs.json" | xargs gh release upload "$TAG" --clobber --repo "$GITHUB_REPOSITORY"
       - uses: actions/upload-artifact@v4
         with:
           name: packs-${{ matrix.country }}
@@ -117,3 +119,16 @@ jobs:
           gh release view routing-index >/dev/null 2>&1 || gh release create routing-index --prerelease \
             --title "Routing catalog" --notes "routing-manifest.json: the current offline routing packs (read by the app)."
           gh release upload routing-index --clobber routing-manifest.json
+      - name: Prune old releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Keep every release the new manifest points at, plus those of the previous one
+          # (a phone may still be downloading with the catalog it cached); runs that never
+          # reached the manifest go too.
+          keep=$(python3 -I -c 'import json, sys; print("\n".join(sorted({p["release"] for f in sys.argv[1:] for p in json.load(open(f))["packs"]})))' \
+            routing-manifest.json $(ls previous/routing-manifest.json 2>/dev/null))
+          echo "keeping: $keep"
+          gh release list --limit 500 --json tagName --jq '.[].tagName' | grep -E '^routing-[0-9]{8}-[0-9]+$' | while read -r tag; do
+            grep -qxF "$tag" <<<"$keep" || { echo "deleting $tag"; gh release delete "$tag" --yes --cleanup-tag; }
+          done

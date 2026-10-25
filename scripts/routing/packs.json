@@ -1,8 +1,9 @@
 {
-  "//": "Countries built by .github/workflows/routing-packs.yml. geofabrik: extract path; iso: ISO 3166-1 code for the admin boundaries; slices: also cut one pack per subdivision of src/features/maps/regions.json.",
+  "//": "Countries built by .github/workflows/routing-packs.yml. geofabrik: extract path; iso: ISO 3166-1 code for the admin boundaries; slices: also cut one pack per subdivision of src/features/maps/regions.json, except subdivisions with an entry of their own here (an id from regions.json built from its own extract: Geofabrik's Spain leaves out the Canary Islands).",
   "countries": {
     "es": { "geofabrik": "europe/spain", "iso": "ES", "slices": true },
     "pt": { "geofabrik": "europe/portugal", "iso": "PT", "slices": false },
-    "ad": { "geofabrik": "europe/andorra", "iso": "AD", "slices": false }
+    "ad": { "geofabrik": "europe/andorra", "iso": "AD", "slices": false },
+    "es-cn": { "geofabrik": "africa/canary-islands", "iso": "ES", "slices": false }
   }
 }

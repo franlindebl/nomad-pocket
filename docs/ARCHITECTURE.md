@@ -384,12 +384,14 @@ and drops its POIs. **Packs are built** by `.github/workflows/routing-packs.yml`
 `ghcr.io/valhalla/valhalla:3.9.1` — Geofabrik PBF (md5-checked) + admin boundaries
 (levels 2/4) from Overpass → `valhalla_build_admins` → `valhalla_build_tiles` (retried:
 3.9.1 segfaults now and then) → country tar + one tar per subdivision in `regions.json`
-(`slice.py`) → emergency points (`osmium tags-filter` + `emergency-points.py`, same
-columns as the Overpass TSV) → split → `manifest.py` (bbox, cells, parts with sha256).
+(`slice.py`; a subdivision with its own `packs.json` entry, like Canarias, is built from
+its own extract instead) → emergency points (`osmium tags-filter` + `emergency-points.py`, same
+columns as the Overpass TSV) → split → `manifest.py` (bbox, cells — clipped to the
+region bbox for subdivisions —, parts with sha256; drops empty packs and point files).
 Each run gets its own tag (`routing-YYYYMMDD-<run>`) and each pack records its release,
 so countries not rebuilt in a run keep their previous files; `routing-index` is updated
 last, and the run fails rather than drop countries if the previous manifest can't be
-read.
+read. Then releases that neither the new nor the previous manifest points at are deleted.
 
 **Guidance** (`guidance.ts`, `GuidancePanel.tsx`): a zustand store watches GPS
 (`BestForNavigation`, 3 m) and the compass while a target is set and keeps the screen

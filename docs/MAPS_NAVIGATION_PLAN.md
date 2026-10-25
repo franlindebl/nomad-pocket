@@ -56,10 +56,12 @@ the route, straight-line fallback with "Descargar rutas", packs with their emerg
 points (no Overpass needed where a pack is installed). How: `ARCHITECTURE.md` (Maps →
 Routing). Pending:
 
-- **First packs**: pushed in `bc6ba8f` and the workflow was run on 2026-10-25 (run
-  40186942180: Spain + its regions, Portugal, Andorra). Check that it finished, that
-  release `routing-index` holds `routing-manifest.json`, and that the sheet lists the packs.
-  Note Spain's build time and size there (it calibrates the coverage roadmap below).
+- **First packs** (2026-10-25, run 40186942180): Portugal and Andorra published; Spain
+  built fine but its upload failed on an empty `es-cn.pois.tsv` (Geofabrik's Spain leaves
+  out the Canary Islands, so that slice was empty). Fixed: Canarias is its own
+  `packs.json` entry (`africa/canary-islands`), empty slices and point files are dropped,
+  and subdivision coverage is clipped to the region's bbox (ferry lines). Spain and
+  Canarias re-run afterwards (see `docs/PROGRESS.md`).
 - Not measured on a phone: route time and memory, assembling a 2 GB pack (JS copy).
 - Isochrones: neither valhalla-mobile wrapper exposes them (iOS would need Valhalla
   headers in our code, which broke tile reading: see CLAUDE.md pitfalls).
@@ -88,16 +90,17 @@ Spike results (2026-10-25): viable — see "Valhalla spike" below.
 
 ## Pack coverage roadmap (agreed 2026-10-25)
 
-Today only `es`, `pt`, `ad` have packs (`scripts/routing/packs.json`); everywhere else
+Today only `es` (+ regions), `es-cn`, `pt`, `ad` have packs (`scripts/routing/packs.json`); everywhere else
 "take me there" stays on the straight line (maps, search and Emergencias work worldwide).
 Adding a country is one entry in `packs.json` (Geofabrik path + ISO code); the app picks it
 up from the manifest with no app release. Order the owner agreed:
 
-1. **Calibrate** with the first run: Spain's build time, peak disk/RAM, pack sizes.
-2. **Prune old releases** before growing: every run creates `routing-YYYYMMDD-N` and none
-   is deleted yet. Keep the release the manifest points at plus the previous one (a phone
-   may be mid-download from it); delete older `routing-*` releases and tags in the
-   `publish` job, after `routing-index` is updated.
+1. **Calibrate** — done with the first run (GitHub runner, `CONC=4`): Spain 25 min for
+   the whole job (build + 17 slices + points), country tar 2.19 GB (2 parts), slices 8 MB
+   (Ceuta) to 745 MB (Castilla y León); Portugal 10 min, 582 MB; Andorra 3 min, 3 MB;
+   Canarias (local) 77 MB. Plenty of headroom for most European countries.
+2. **Prune old releases** — done: the `publish` job deletes every `routing-YYYYMMDD-N`
+   release that neither the new manifest nor the previous one points at.
 3. **Europe + Latin America** (Spanish-speaking audience first).
 4. **Rest of the world**, with big countries built from Geofabrik sub-extracts.
 
@@ -106,9 +109,9 @@ Limits to design around:
 - GitHub-hosted runner: 4 vCPU, 16 GB RAM, ~14 GB on `/` + `/mnt`; job timeout is 300 min
   (GitHub's cap is 6 h). USA, Russia, Canada, Brazil, Germany, France, likely India and
   China won't fit as one build: build per sub-extract (US states, Länder, French regions…).
-  `build-country.sh` fetches admins by country ISO, so a sub-extract entry needs an
-  extract path distinct from its ISO (small script change) and a `regionId` that exists
-  in `src/features/maps/regions.json`.
+  A sub-extract is a `packs.json` entry whose id is a subdivision of
+  `src/features/maps/regions.json` (like `es-cn`): `geofabrik` is its own extract, `iso`
+  the country's (for admin boundaries), and the country's build skips that slice.
 - Release assets: 2 GiB per file (already split, ≤1900 MiB parts) and 1000 assets per
   release. A world run (tar parts + `.pois.tsv` per pack) gets close: publish one release
   per continent (the manifest already stores a `release` per pack).

@@ -78,7 +78,20 @@ def tile_bbox(names):
     return [w, s, e, n], sorted(cells)
 
 
+def clip(coverage, region):
+    """Limits a subdivision's coverage to its bbox (regions.json). An extract also holds the
+    ferry lines out of it (the Canary Islands' reach Cádiz): without this the pack would
+    claim cells where it can't route. Not for countries: their bboxes leave out
+    territories (Spain's: Ceuta, Melilla, the Canary Islands)."""
+    (w, s, e, n), cells = coverage
+    rw, rs, re, rn = region
+    kept = [c for c in cells if rs - 1 < c // 360 - 90 < rn and rw - 1 < c % 360 - 180 < re]  # 1° cell meets bbox
+    return [max(w, rw), max(s, rs), min(e, re), min(n, rn)], kept
+
+
 def fragment(out_dir, country, build_date, slice_ids):
+    regions_json = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../src/features/maps/regions.json")
+    regions = {r["id"]: r["bbox"] for r in json.load(open(regions_json))["regions"] if r["type"] == "subdivision"}
     packs = []
     for pid in [country] + slice_ids:
         whole = os.path.join(out_dir, f"{pid}.tar")
@@ -87,6 +100,18 @@ def fragment(out_dir, country, build_date, slice_ids):
             raise SystemExit(f"no tar for {pid}")
         pois = os.path.join(out_dir, f"{pid}.pois.tsv")
         coverage = tile_bbox(tar_names(parts))
+        if coverage is None:
+            # A slice with no road tiles: drop it, so the release doesn't carry it either.
+            print(f"skipping {pid}: no tiles", file=sys.stderr)
+            for f in parts + [pois]:
+                if os.path.exists(f):
+                    os.remove(f)
+            continue
+        if pid in regions:
+            coverage = clip(coverage, regions[pid])
+        # GitHub refuses empty assets (and there is nothing to import).
+        if os.path.exists(pois) and os.path.getsize(pois) == 0:
+            os.remove(pois)
         packs.append({
             "id": pid,
             "country": country,

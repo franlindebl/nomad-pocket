@@ -24,7 +24,7 @@ can pick up without re-deriving anything.
 | Courses (14 courses, syllabus with fallbacks, progress) | done |
 | Maps (in-app PMTiles extraction, regions, visible area, world basemap, markers, GPS, multi-script labels) | done — iOS + Android |
 | Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
-| Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); first packs publishing (run 40186942180, 2026-10-25); coverage roadmap in MAPS_NAVIGATION_PLAN |
+| Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); Portugal + Andorra packs published; Spain + Canarias re-running; coverage roadmap in MAPS_NAVIGATION_PLAN |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
 | Assistant (Apple Intelligence / Gemini Nano / 4 GGUF models, RAG with citations, conversational: the model decides when to search) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change); Gemini Nano untested |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
@@ -48,10 +48,10 @@ can pick up without re-deriving anything.
 Roughly by value. Item 0 is in progress; the rest are not started. (Preparedness was added
 on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
 
-0. Routing packs: the first run (2026-10-25, run 40186942180: Spain + regions, Portugal,
-   Andorra) was launched after pushing `bc6ba8f`; check it finished and the sheet lists
-   the packs. Then follow the coverage roadmap in `docs/MAPS_NAVIGATION_PLAN.md` ("Pack
-   coverage roadmap"): calibrate with Spain → prune old releases in the workflow →
+0. Routing packs: first run (2026-10-25) published Portugal and Andorra; Spain failed on
+   the empty Canarias slice (fixed, see the log) and is re-run with Canarias
+   (`countries: es es-cn`). Check that run, then follow the coverage roadmap in
+   `docs/MAPS_NAVIGATION_PLAN.md` ("Pack coverage roadmap"): calibrate and pruning done →
    Europe + Latin America → rest of the world (big countries per sub-extract).
    Measure on a real phone: route time/memory, assembling Spain (2.2 GB, JS copy), mmap of
    a 2 GB tar on iOS (may need `com.apple.developer.kernel.extended-virtual-addressing`).
@@ -121,6 +121,19 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-25 — Routing packs: first publish
+
+- First workflow run (40186942180): Portugal (10 min, 582 MB) and Andorra published in
+  `routing-20261025-1`; Spain built in 25 min (2.19 GB in 2 parts, 17 region packs) but
+  `gh release upload` refused the 0-byte `es-cn.pois.tsv`: Geofabrik's Spain has no
+  Canary Islands, so the slice was empty.
+- Fixes: Canarias is its own `packs.json` entry (`africa/canary-islands`, ISO ES; the
+  country build skips subdivisions with their own entry); `manifest.py` drops packs with
+  no tiles and empty point files and clips subdivision coverage to the region bbox (the
+  Canary extract's ferry lines reached Cádiz); the upload step sends exactly the files
+  the fragment lists; the publish job prunes releases no manifest points at.
+- Canarias built locally with the CI recipe: 77 MB, 377 KB of points, 13 cells.
 
 ### 2026-10-25 — Maps: offline road routing (plan phase 2)
 - Owner: commit phase 1 and start phase 2. `modules/nomad-route`: Valhalla 3.9.1 via
