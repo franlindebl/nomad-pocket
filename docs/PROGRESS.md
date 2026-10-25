@@ -11,8 +11,8 @@ can pick up without re-deriving anything.
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
   tour). Not yet run on a physical device by the agent.
-- Checks: 132 unit tests (131 pass, 1 network test skipped), `tsc` clean, lint clean, i18n keys complete. E2E: 53 Maestro flows (21 smoke,
-  16 full, 11 nightly, iPad tour, 4 Android flows) covering 53 of 55 test-plan cases plus the new maps cases, AI-06/07 and PREP-01…04.
+- Checks: 132 unit tests (131 pass, 1 network test skipped), `tsc` clean, lint clean, i18n keys complete. E2E: 55 Maestro flows (21 smoke,
+  16 full, 12 nightly, iPad tour, 5 Android flows) covering 53 of 55 test-plan cases plus the new maps cases, AI-06/07 and PREP-01…04.
 
 | Area | Status |
 |---|---|

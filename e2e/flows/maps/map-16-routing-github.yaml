@@ -1,0 +1,57 @@
+# MAP-16 — download a published routing pack: the same path as MAP-15, but the catalog is
+# a copy of the live routing-manifest.json and the Andorra pack (3 MB, built by
+# .github/workflows/routing-packs.yml) downloads from GitHub Releases. Catches a broken
+# release, a manifest the app can't read, or a CI-built pack the on-device engine rejects.
+appId: com.fjlinde.nomadpocket
+tags: [nightly, maps, routing-live]
+---
+- setLocation:
+    latitude: 42.5075
+    longitude: 1.5218
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: { id: "map-search" }
+    timeout: 20000
+- tapOn: { id: "map-search" }
+- inputText: "42.4637, 1.4913"
+- tapOn: { id: "search-coordinates" }
+- extendedWaitUntil:
+    visible: { id: "place-card" }
+    timeout: 10000
+- tapOn: { id: "place-guide" }
+- extendedWaitUntil:
+    visible: { id: "guidance-get-routing" }
+    timeout: 30000
+- tapOn: { id: "guidance-get-routing" }
+- extendedWaitUntil:
+    visible: "Para esta zona"
+    timeout: 20000
+# Smallest first: Andorra, then Cataluña and España, which also reach this cell.
+- assertVisible: "(?s).*Andorra.*"
+- takeScreenshot: 01-packs
+- tapOn: { id: "pack-download", index: 0 }
+- extendedWaitUntil:
+    visible: { id: "pack-installed" }
+    timeout: 120000
+- takeScreenshot: 02-installed
+- repeat:
+    while:
+      visible: { id: "pack-installed" }
+    times: 6
+    commands:
+      - swipe:
+          start: 50%, 40%
+          end: 50%, 98%
+          duration: 300
+- extendedWaitUntil:
+    visible: { id: "guidance-next" }
+    timeout: 30000
+- takeScreenshot: 03-route
+- tapOn: { id: "guidance-stop" }
+- tapOn: { id: "map-emergency" }
+- tapOn: { id: "emergency-cat-health" }
+- extendedWaitUntil:
+    visible: { id: "emergency-place" }
+    timeout: 15000
+- takeScreenshot: 04-emergency

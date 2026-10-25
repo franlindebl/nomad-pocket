@@ -90,7 +90,8 @@ Spike results (2026-10-25): viable — see "Valhalla spike" below.
 
 ## Pack coverage roadmap (agreed 2026-10-25)
 
-Today only `es` (+ regions), `es-cn`, `pt`, `ad` have packs (`scripts/routing/packs.json`); everywhere else
+Packs are listed in `scripts/routing/packs.json` (Spain + regions, Canarias, Portugal,
+Andorra published first; Europe + Latin America added next); everywhere else
 "take me there" stays on the straight line (maps, search and Emergencias work worldwide).
 Adding a country is one entry in `packs.json` (Geofabrik path + ISO code); the app picks it
 up from the manifest with no app release. Order the owner agreed:
@@ -101,7 +102,16 @@ up from the manifest with no app release. Order the owner agreed:
    Canarias (local) 77 MB. Plenty of headroom for most European countries.
 2. **Prune old releases** — done: the `publish` job deletes every `routing-YYYYMMDD-N`
    release that neither the new manifest nor the previous one points at.
-3. **Europe + Latin America** (Spanish-speaking audience first).
+3. **Europe + Latin America** — added to `packs.json` 2026-10-25: every country whose
+   Geofabrik extract is at most Spain's size (≤ ~1.4 GB PBF), 33 in Europe and 23 in Latin
+   America / the Caribbean. `do` is Geofabrik's haiti-and-domrep (also covers Haiti) and
+   `ie` ireland-and-northern-ireland: `iso` lists both countries for their admin
+   boundaries. Left for step 4: Brazil, Poland, Italy, United Kingdom (~2 GB PBF, ~3.5 GB
+   packs), Germany, France, Russia (4–5 GB PBF) — they need sub-country packs, and
+   `regions.json` has subdivisions only for Spain and the USA; Puerto Rico and the US
+   Virgin Islands (their OSM boundaries are admin level 4 of the USA: no level-2 admins);
+   territories without a Geofabrik extract of their own (Kosovo, Vatican, San Marino,
+   small Caribbean islands).
 4. **Rest of the world**, with big countries built from Geofabrik sub-extracts.
 
 Limits to design around:
@@ -115,8 +125,8 @@ Limits to design around:
 - Release assets: 2 GiB per file (already split, ≤1900 MiB parts) and 1000 assets per
   release. A world run (tar parts + `.pois.tsv` per pack) gets close: publish one release
   per continent (the manifest already stores a `release` per pack).
-- Matrix: `max-parallel: 3` today; raise it for the world run (free runners allow ~20
-  concurrent jobs on a public repo). Monthly cron is `0 3 5 * *`.
+- Matrix: `max-parallel: 8` (each job queries the public Overpass servers once; free
+  runners allow ~20 concurrent jobs on a public repo). Monthly cron is `0 3 5 * *`.
 - Routes across a border need both ends in one pack (region packs are tile subsets of
   their country; there are no cross-country packs).
 

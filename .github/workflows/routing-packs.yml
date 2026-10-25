@@ -57,7 +57,8 @@ jobs:
     timeout-minutes: 300
     strategy:
       fail-fast: false
-      max-parallel: 3
+      # Each job asks the public Overpass servers for admin boundaries once: keep it polite.
+      max-parallel: 8
       matrix:
         country: ${{ fromJson(needs.plan.outputs.countries) }}
     steps:

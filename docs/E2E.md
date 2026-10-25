@@ -2,7 +2,7 @@
 
 [Maestro](https://maestro.mobile.dev) flows that drive the Release build of the app on an
 iOS simulator, the same way a person would: tapping, typing and reading the screen through
-accessibility. 53 flows cover 53 of the 55 cases in the test plan (Claude doc "Plan de
+accessibility. 55 flows cover 53 of the 55 cases in the test plan (Claude doc "Plan de
 tests funcionales iOS — Nomad App"), plus AI-06 and AI-07 added after it; the case ids (`RDR-03`, `MAP-06`…) are on the first
 line of each flow. Preparedness (`PREP-01`…`PREP-04`) came after the plan and has its own
 flows.
@@ -43,9 +43,9 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 |---|---|---|---|---|
 | `npm run e2e` | 21 | ~14 min | P0: every screen's main path (incl. map search, Emergencias, road routing and Preparedness) | nothing (offline) |
 | `npm run e2e:full` | 37 | ~24 min | + P1: secondary features (themes, markers, find in page, courses, reminders, PDF…) | nothing (offline) |
-| `npm run e2e:all` | 48 | ~34 min | + P2: real downloads, OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
+| `npm run e2e:all` | 49 | ~35 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape, light and dark | nothing (offline) |
-| `npm run e2e:android` | 4 | ~14 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness | internet, Android emulator |
+| `npm run e2e:android` | 5 | ~15 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack | internet, Android emulator |
 
 When to run what: smoke before every TestFlight build or after a risky change; full and the
 iPad tour before an App Store release (then look through the iPad screenshots in
@@ -124,8 +124,10 @@ scripts/e2e.sh
  ├─ pick flows by tag (the `tags:` line of each e2e/flows/**/*.yaml)
  ├─ build the Release .app if missing or --build (with EXPO_PUBLIC_ROUTING_MANIFEST_URL
  │   pointing at the local pack server below)
- ├─ if any flow is tagged `routing-server`: serve the Andorra routing pack split in two
- │   parts + its emergency points + a manifest on http://localhost:8765
+ ├─ if any flow is tagged `routing-server` or `routing-live`: serve the Andorra routing
+ │   pack split in two parts + its emergency points + a manifest on http://localhost:8765;
+ │   before each `routing-live` flow the manifest is swapped for a copy of the published
+ │   one (GitHub's routing-index), so that flow downloads a real pack from GitHub Releases
  ├─ boot NP-e2e, set its location to Madrid
  └─ for each flow
      ├─ uninstall + install the app        → fresh state, nothing left from the last flow
@@ -235,6 +237,7 @@ By hand:
 | maps | `map-13-emergency-points` | MAP-13 | nightly | network, seeded-map |
 | maps | `map-14-route` | MAP-14 | smoke | seeded-route (Andorra pack, location set by the flow) |
 | maps | `map-15-routing-download` | MAP-15 | full | routing-server (local pack server) |
+| maps | `map-16-routing-github` | MAP-16 | nightly | routing-live (published catalog, Andorra pack from GitHub, 3 MB) |
 | courses | `crs-01-empty` | CRS-01 | smoke | — |
 | courses | `crs-02-course` | CRS-02, CRS-03, CRS-04 | full | seeded |
 | assistant | `ai-01-no-model` | AI-01, AI-02 | smoke | — |
@@ -252,6 +255,7 @@ By hand:
 | android | `android-02-map-scripts` | ANDROID-02 | android | network (~15 MB) |
 | android | `android-03-search-emergency` | ANDROID-03 | android | network (visible-area map + Overpass) |
 | android | `android-04-prepare` | ANDROID-04 | android | — (offline) |
+| android | `android-05-routing` | ANDROID-05 | android | network (published catalog + Andorra pack from GitHub) |
 
 Not automated: LIB-08 (import from Files: the system picker is outside the app) and X-02
 (offline: the simulator has no airplane mode). Check them by hand on a device.
@@ -272,7 +276,8 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
 
 - Put it in `e2e/flows/<area>/`, named after its main case. Tag `seeded` if it needs the
   ZIM fixtures, `seeded-map` for the map one, `seeded-route` for the routing pack,
-  `routing-server` if it downloads a routing pack from the local server, `seeded-model`
+  `routing-server` if it downloads a routing pack from the local server, `routing-live`
+  if it downloads a published one (needs internet and the live catalog), `seeded-model`
   for the GGUF model, and `network` if it downloads from the internet. A map file
   named after a region id (`es-ml.pmtiles`) registers as that region.
 - Text matching is a full-string regex: `"Michael Jackson.*"`, and escape `. ( ) ?`.

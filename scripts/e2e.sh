@@ -77,9 +77,14 @@ xcrun simctl location "$UDID" set 40.4168,-3.7038
 
 # `routing-server` flows download a routing pack: the Andorra fixture split in two
 # parts (exercises reassembly) plus its emergency points, served from localhost.
+# `routing-live` flows get the published catalog instead (a copy of GitHub's
+# routing-manifest.json, whose packs download from GitHub Releases), swapped in per flow.
 SERVER_PID=""
-if printf '%s\n' "${FLOWS[@]}" | xargs grep -lE '^tags:.*[[ ,]routing-server[],]' >/dev/null 2>&1; then
+if printf '%s\n' "${FLOWS[@]}" | xargs grep -lE '^tags:.*[[ ,]routing-(server|live)[],]' >/dev/null 2>&1; then
   SERVE="$(mktemp -d)"
+  if printf '%s\n' "${FLOWS[@]}" | xargs grep -lE '^tags:.*[[ ,]routing-live[],]' >/dev/null 2>&1; then
+    curl -fsSL -o "$SERVE/live.json" "https://github.com/franlindebl/nomad-pocket/releases/download/routing-index/routing-manifest.json"
+  fi
   split -b 2000000 -d -a 2 "$ROOT/e2e/fixtures/routing/ad.tar" "$SERVE/ad.tar.part"
   cp "$ROOT/e2e/fixtures/routing/ad.pois.tsv" "$SERVE/"
   python3 -I - "$SERVE" "$ROUTING_PORT" <<'PY'
@@ -92,7 +97,7 @@ parts = [f(n) for n in sorted(os.listdir(d)) if n.startswith("ad.tar.part")]
 pack = {"id": "ad", "country": "ad", "regionId": "ad", "buildDate": "20261024", "bbox": [1.25, 42.25, 2.0, 42.75],
         "size": sum(p["size"] for p in parts), "parts": parts, "pois": f("ad.pois.tsv")}
 json.dump({"version": 1, "release": "e2e", "baseUrl": f"http://localhost:{port}", "valhalla": "3.9.1", "packs": [pack]},
-          open(os.path.join(d, "routing-manifest.json"), "w"))
+          open(os.path.join(d, "fixture.json"), "w"))
 PY
   python3 -m http.server "$ROUTING_PORT" --bind 127.0.0.1 --directory "$SERVE" >/dev/null 2>&1 &
   SERVER_PID=$!
@@ -125,6 +130,10 @@ reset_app() {
   fi
   if grep -qE '^tags:.*[[ ,]seeded-model[],]' "$1"; then
     mkdir -p "$content/models" && cp -c "$ROOT"/e2e/fixtures/models/*.gguf "$content/models/"
+  fi
+  if [[ -n "$SERVER_PID" ]]; then
+    if grep -qE '^tags:.*[[ ,]routing-live[],]' "$1"; then cp "$SERVE/live.json" "$SERVE/routing-manifest.json"
+    else cp "$SERVE/fixture.json" "$SERVE/routing-manifest.json"; fi
   fi
 }
 

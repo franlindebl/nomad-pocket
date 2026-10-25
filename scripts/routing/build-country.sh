@@ -55,9 +55,10 @@ log "data of $BUILD_DATE"
 
 # 2. Admin boundaries: country (level 2) and regions (level 4) as complete relations.
 #    Geofabrik's are clipped at the extract edge, so Valhalla can't build areas from them,
-#    and without them it gets driving side and country access rules wrong.
+#    and without them it gets driving side and country access rules wrong. ISO may list
+#    several countries ("DO,HT") for an extract that spans them.
 QUERY="[out:xml][timeout:900];
-relation[\"boundary\"=\"administrative\"][\"admin_level\"=\"2\"][\"ISO3166-1\"=\"$ISO\"]->.c;
+relation[\"boundary\"=\"administrative\"][\"admin_level\"=\"2\"][\"ISO3166-1\"~\"^(${ISO//,/|})\$\"]->.c;
 .c map_to_area->.a;
 (.c; relation(area.a)[\"boundary\"=\"administrative\"][\"admin_level\"=\"4\"];);
 (._;>;);
