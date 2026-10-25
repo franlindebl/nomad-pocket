@@ -1,20 +1,25 @@
 // Retrieval-augmented generation over the installed ZIM library.
-// question → keyword queries → libzim full-text search across archives →
-// fetch top articles → chunk → BM25 over chunks → pack best chunks within the
-// model's context budget → numbered-source prompt asking for [n] citations.
+// question (or the model's own query) → keyword queries → libzim full-text search
+// across archives → fetch top articles → chunk → BM25 over chunks → drop chunks
+// that barely share terms with the question → pack the best within the model's
+// context budget → numbered sources, cited as [n].
 import { listItems } from '@/features/content/items';
 import { getArticleText, search, type ZimSearchHit } from '@/features/library/zim';
 
 import {
+  buildConversationQueries,
   buildRagUserMessage,
   buildSearchQueries,
   chunkText,
+  followUpTopic,
   packContext,
   rankChunks,
+  relevantChunks,
   type Chunk,
   type Lang,
   type PackedSource,
   type SourceRef,
+  type Turn,
 } from './rag-core';
 
 export type RagSource = SourceRef;
@@ -57,10 +62,24 @@ function fuseHits(lists: ZimSearchHit[][]): ZimSearchHit[] {
   return [...score.values()].sort((a, b) => b.s - a.s).map((x) => x.hit);
 }
 
-export async function retrieve(question: string, lang: Lang, budgetChars: number, itemIds = libraryItemIds()): Promise<RetrievalResult> {
+export type RetrieveOptions = {
+  /** Earlier turns, to fill in the topic of a follow-up question. */
+  history?: Turn[];
+  /** Search keywords chosen by the model (tool call / router); replaces the question's. */
+  query?: string;
+  itemIds?: string[];
+};
+
+export async function retrieve(question: string, lang: Lang, budgetChars: number, opts: RetrieveOptions = {}): Promise<RetrievalResult> {
+  const itemIds = opts.itemIds ?? libraryItemIds();
   if (!itemIds.length) return { noLibrary: true, sources: [], userMessage: buildRagUserMessage(question, [], lang) };
 
-  const queries = buildSearchQueries(question);
+  const history = opts.history ?? [];
+  const query = opts.query?.trim();
+  const queries = query ? buildSearchQueries(query) : buildConversationQueries(question, history);
+  // What chunks are ranked and filtered against: the model's query already carries the
+  // topic; a follow-up question gets the previous question's keywords.
+  const rankText = query || [...followUpTopic(question, history), question].join(' ');
   const lists = await Promise.all(queries.map((q) => search(itemIds, q, HITS_PER_QUERY).catch(() => [] as ZimSearchHit[])));
   const hits = fuseHits(lists).slice(0, MAX_HITS);
 
@@ -83,10 +102,13 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
     chunkText(text, CHUNK_SIZE, CHUNK_OVERLAP).forEach((c, index) => chunks.push({ sourceKey: key, title, text: c, index, hitRank }));
   }
 
-  let ranked = rankChunks(question, chunks, 16);
-  // The search engine matched (stemming, synonyms, other language) but no chunk
-  // shares a term with the question: fall back to the article leads, in hit order.
-  if (!ranked.length && chunks.length) {
+  let ranked = rankChunks(rankText, chunks, 16);
+  if (ranked.length) {
+    // Chunks that only share a word or two with a longer question are about something else.
+    ranked = relevantChunks(rankText, ranked);
+  } else if (chunks.length) {
+    // The search engine matched (stemming, synonyms, other language) but no chunk
+    // shares a term with the question: fall back to the article leads, in hit order.
     ranked = chunks.filter((c) => c.index === 0).map((c, i) => ({ item: c, score: 1 / (i + 1) }));
   }
   const { sources } = packContext(ranked, (k) => refs.get(k), budgetChars, 3);

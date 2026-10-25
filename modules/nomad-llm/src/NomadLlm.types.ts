@@ -25,6 +25,9 @@ export type GenerateOptions = {
   maxTokens?: number;
 };
 
+/** The model's call on whether a chat message needs a library search, and with what keywords. */
+export type RouteDecision = { search: boolean; query: string };
+
 export type DeltaEvent = {
   requestId: string;
   delta: string;

@@ -14,7 +14,15 @@ import { contentFile, toNativePath } from '@/lib/storage';
 
 import * as SystemLLM from '../../../modules/nomad-llm';
 import { getModel, SYSTEM_MODEL_ID } from './models';
-import { stripThinking, type Turn } from './rag-core';
+import { parseToolQuery, SEARCH_TOOL_NAME, stripThinking, type Turn } from './rag-core';
+
+/** The library search offered to a model that calls tools. */
+export type SearchTool = {
+  /** OpenAI-style function definition (`searchToolSpec`). */
+  spec: object;
+  /** Runs the search and returns the text handed back to the model. */
+  run: (query: string) => Promise<string>;
+};
 
 export type GenerateRequest = {
   system: string;
@@ -22,19 +30,35 @@ export type GenerateRequest = {
   messages: Turn[];
   temperature?: number;
   maxTokens?: number;
+  /** Lets the model search the library itself (engines with `decides === 'tools'`). */
+  tool?: SearchTool;
   /** Called with the whole answer so far (already cleaned) on every update. */
   onText: (text: string) => void;
 };
 
-export type GenerateResult = { text: string; stopped: boolean };
+export type GenerateResult = {
+  text: string;
+  stopped: boolean;
+  /** The query of the library search the model made, if it made one. */
+  toolQuery?: string;
+};
+
+export type RouteDecision = { search: boolean; query: string };
 
 export interface Engine {
   readonly modelId: string;
   readonly kind: 'system' | 'gguf';
   /** Total context window in tokens (prompt + answer). */
   readonly contextTokens: number;
+  /**
+   * How the model decides whether to search the library (known after `load`):
+   * `tools` calls search_library while answering, `router` answers a short structured
+   * "search or not" question first (`route`), null can't decide (heuristics instead).
+   */
+  readonly decides: 'tools' | 'router' | null;
   load(onProgress?: (p: number) => void): Promise<void>;
   generate(req: GenerateRequest): Promise<GenerateResult>;
+  route?(instructions: string, prompt: string): Promise<RouteDecision>;
   stop(): Promise<void>;
   release(): Promise<void>;
 }
@@ -55,11 +79,18 @@ class SystemEngine implements Engine {
   readonly kind = 'system' as const;
   // Apple FM and Gemini Nano both have ~4k-token windows.
   readonly contextTokens = 4000;
+  decides: 'router' | null = null;
   private current: string | null = null;
 
   async load() {
     const info = await SystemLLM.getSystemModelStatus();
     if (info.status !== 'available') throw new EngineUnavailableError('systemUnavailable');
+    // Apple FM has guided generation; ML Kit's Gemini Nano prompt API has neither tools nor schemas.
+    this.decides = info.provider === 'apple' ? 'router' : null;
+  }
+
+  async route(instructions: string, prompt: string): Promise<RouteDecision> {
+    return SystemLLM.route(prompt, instructions);
   }
 
   async generate(req: GenerateRequest): Promise<GenerateResult> {
@@ -112,9 +143,21 @@ async function quietly(fn: () => unknown): Promise<void> {
   }
 }
 
+type LlamaMessage = Record<string, unknown> & { role: string; content: string };
+type LlamaToolCall = { id?: string; type: 'function'; function: { name: string; arguments: string } };
+
+// Reasoning allowed before a tool decision. Qwen3.5 only calls tools with thinking on
+// (with it off it answers everything from memory); it then mostly closes the think
+// block at once, the 0.8B model reasons ~80 tokens. The budget caps the odd ramble.
+const DECISION_THINKING_TOKENS = 256;
+
+type ToolStyle = 'thinking' | 'direct' | null;
+
 class LlamaEngine implements Engine {
   readonly kind = 'gguf' as const;
   readonly contextTokens: number;
+  readonly decides: 'tools' | null;
+  private readonly toolThinking: boolean;
   private ctx: LlamaContext | null = null;
   private loading: Promise<void> | null = null;
   private stopRequested = false;
@@ -123,8 +166,11 @@ class LlamaEngine implements Engine {
     readonly modelId: string,
     private readonly path: string,
     contextTokens: number,
+    tools: ToolStyle,
   ) {
     this.contextTokens = contextTokens;
+    this.decides = tools ? 'tools' : null;
+    this.toolThinking = tools === 'thinking';
   }
 
   load(onProgress?: (p: number) => void): Promise<void> {
@@ -160,13 +206,53 @@ class LlamaEngine implements Engine {
 
   async generate(req: GenerateRequest): Promise<GenerateResult> {
     await this.load();
-    const ctx = this.ctx!;
     this.stopRequested = false;
+    const messages: LlamaMessage[] = [{ role: 'system', content: req.system }, ...req.messages];
+    const tool = this.decides === 'tools' ? req.tool : undefined;
+    if (!tool) return this.complete(req, messages, {});
+
+    // Pass 1: the model answers directly or calls search_library.
+    const first = await this.complete(req, messages, {
+      tools: [tool.spec],
+      tool_choice: 'auto',
+      ...(this.toolThinking ? { enable_thinking: true, thinking_budget_tokens: DECISION_THINKING_TOKENS } : {}),
+    });
+    const call = first.toolCalls?.find((c) => c.function?.name === SEARCH_TOOL_NAME);
+    if (!call || first.stopped) return { text: first.text, stopped: first.stopped };
+
+    // Pass 2: answer from the search results. Tools stay declared so the chat template
+    // renders the call the same way; tool_choice "none" keeps the model from searching again.
+    req.onText('');
+    const query = parseToolQuery(call.function.arguments);
+    const result = await tool.run(query);
+    if (this.stopRequested) return { text: '', stopped: true, toolQuery: query };
+    const id = call.id || 'call_0';
+    const second = await this.complete(
+      req,
+      [
+        ...messages,
+        { role: 'assistant', content: '', tool_calls: [{ id, type: 'function', function: { name: call.function.name, arguments: call.function.arguments } }] },
+        { role: 'tool', tool_call_id: id, name: call.function.name, content: result },
+      ],
+      { tools: [tool.spec], tool_choice: 'none' },
+    );
+    return { text: second.text, stopped: second.stopped, toolQuery: query };
+  }
+
+  /** One streamed completion; text updates go to `req.onText` until a tool call shows up. */
+  private async complete(
+    req: GenerateRequest,
+    messages: LlamaMessage[],
+    extra: { tools?: object[]; tool_choice?: string; enable_thinking?: boolean; thinking_budget_tokens?: number },
+  ): Promise<{ text: string; stopped: boolean; toolCalls?: LlamaToolCall[] }> {
+    const ctx = this.ctx!;
     let raw = '';
     let text = '';
+    let calling = false;
     const result = await ctx.completion(
       {
-        messages: [{ role: 'system', content: req.system }, ...req.messages],
+        // llama.rn's message type omits tool_calls / tool_call_id; the native side reads them.
+        messages: messages as { role: string; content: string }[],
         jinja: true,
         enable_thinking: false,
         reasoning_format: 'auto',
@@ -176,10 +262,15 @@ class LlamaEngine implements Engine {
         top_k: 40,
         min_p: 0.05,
         penalty_repeat: 1.05,
+        ...extra,
       },
       (data) => {
         // Runs inside a native callback: an exception here would crash Release builds.
         try {
+          if (calling || data.tool_calls?.length) {
+            calling = true;
+            return;
+          }
           // `content` is the parsed answer so far (reasoning separated); fall back
           // to accumulating raw tokens for templates without a parser.
           if (typeof data.content === 'string') {
@@ -198,7 +289,8 @@ class LlamaEngine implements Engine {
       },
     );
     const final = stripThinking(result.content ?? result.text ?? raw).trim() || text;
-    return { text: final, stopped: this.stopRequested || !!result.interrupted };
+    const toolCalls = (result.tool_calls ?? []) as LlamaToolCall[];
+    return { text: final, stopped: this.stopRequested || !!result.interrupted, toolCalls: toolCalls.length ? toolCalls : undefined };
   }
 
   async stop() {
@@ -255,7 +347,7 @@ function createEngine(modelId: string): Engine {
   const item = getItem(modelId);
   if (!item || item.kind !== 'model') throw new EngineUnavailableError('notInstalled');
   const def = getModel(item.catalogId ?? item.id);
-  return new LlamaEngine(modelId, modelPath(item, def?.filename), def?.contextTokens ?? 4096);
+  return new LlamaEngine(modelId, modelPath(item, def?.filename), def?.contextTokens ?? 4096, def?.tools ?? null);
 }
 
 /** Returns the (lazily created) engine for a model id, releasing any other one. */

@@ -7,7 +7,7 @@ import Animated, { useAnimatedKeyboard, useAnimatedStyle } from 'react-native-re
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Card, IconBadge, IconButton, PressableScale, Row, Text } from '@/components/ui';
-import { dismissError, newChat, sendMessage, stopAnswer, useChat, type ChatMessage, type Streaming } from '@/features/assistant/chats';
+import { dismissError, newChat, searchLibraryFor, sendMessage, stopAnswer, useChat, type ChatMessage, type Streaming } from '@/features/assistant/chats';
 import { SYSTEM_MODEL_ID } from '@/features/assistant/models';
 import { AssistantMessage, UserMessage } from '@/features/assistant/ui/Message';
 import { Composer } from '@/features/assistant/ui/Composer';
@@ -48,14 +48,24 @@ export default function AssistantScreen() {
     paddingBottom: Math.max(insets.bottom, keyboard.height.value - bottomGap) + space.sm,
   }));
 
-  const renderItem = useCallback(({ item }: { item: Row_ }) => {
-    if (item.streaming) {
-      const s = item.streaming;
-      return <AssistantMessage text={s.text} sources={s.sources} streaming phase={s.phase} loadProgress={s.loadProgress} />;
-    }
-    const m = item.message!;
-    return m.role === 'user' ? <UserMessage message={m} /> : <AssistantMessage text={m.content} sources={m.sources} />;
-  }, []);
+  // The latest answer, if it was given without the library, offers to search it.
+  const last = messages[messages.length - 1];
+  const searchableId = !streaming && useLibrary && libraryItems.length && last?.role === 'assistant' && last.searched === false ? last.id : null;
+
+  const renderItem = useCallback(
+    ({ item }: { item: Row_ }) => {
+      if (item.streaming) {
+        const s = item.streaming;
+        return <AssistantMessage text={s.text} sources={s.sources} streaming phase={s.phase} loadProgress={s.loadProgress} />;
+      }
+      const m = item.message!;
+      if (m.role === 'user') return <UserMessage message={m} />;
+      return (
+        <AssistantMessage text={m.content} sources={m.sources} onSearchLibrary={m.id === searchableId ? () => searchLibraryFor(m.id) : undefined} />
+      );
+    },
+    [searchableId],
+  );
 
   const empty = rows.length === 0;
   const noLibrary = useLibrary && libraryItems.length === 0;

@@ -11,8 +11,8 @@ can pick up without re-deriving anything.
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
   tour). Not yet run on a physical device by the agent.
-- Checks: 80 unit tests (79 pass, 1 network test skipped), `tsc` clean, lint clean, i18n keys complete. E2E: 40 Maestro flows (16 smoke,
-  13 full, 8 nightly, iPad tour, 2 Android flows) covering 53 of 55 test-plan cases.
+- Checks: 93 unit tests (92 pass, 1 network test skipped), `tsc` clean, lint clean, i18n keys complete. E2E: 42 Maestro flows (16 smoke,
+  13 full, 10 nightly, iPad tour, 2 Android flows) covering 53 of 55 test-plan cases plus AI-06/07.
 
 | Area | Status |
 |---|---|
@@ -23,7 +23,7 @@ can pick up without re-deriving anything.
 | ZIM library + reader (search, TOC, bookmarks, history, find, text size, dark mode) | done — iOS + Android |
 | Courses (14 courses, syllabus with fallbacks, progress) | done |
 | Maps (in-app PMTiles extraction, regions, visible area, world basemap, markers, GPS, multi-script labels) | done — iOS + Android |
-| Assistant (Apple Intelligence / Gemini Nano / 4 GGUF models, RAG with citations) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp); Gemini Nano untested |
+| Assistant (Apple Intelligence / Gemini Nano / 4 GGUF models, RAG with citations, conversational: the model decides when to search) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change); Gemini Nano untested |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
 | E2E suite (Maestro) + pre-commit hook | done |
 
@@ -54,7 +54,9 @@ Roughly by value. None is started.
    test Gemini Nano on an AICore device.
 5. Reader: auto-hiding toolbar on scroll (style guide), syllabus for SPA course ZIMs read
    from the rendered DOM.
-6. Assistant: copy / regenerate an answer; better small-model citations.
+6. Assistant: copy / regenerate an answer; better small-model citations; check the
+   conversational flow on Android (llama.cpp tools + Gemini Nano heuristics) and on a
+   real iPhone (tool-call latency with Metal).
 
 
 ## Known issues / limitations
@@ -66,7 +68,12 @@ Roughly by value. None is started.
 - Gemini Nano path compiled but untested on a real AICore device; its output-token limits
   are unverified.
 - Qwen3.5 0.8B rarely emits `[n]` (all retrieved sources are shown then) and is
-  unreliable for health answers — the app recommends 2B+ where RAM allows.
+  unreliable for health answers — the app recommends 2B+ where RAM allows. In small talk
+  it sometimes rambles or echoes its instructions, and it searches some chit-chat
+  ("¿te gusta la música?") on its own.
+- The models still answer some famous facts from memory instead of searching ("What is
+  photosynthesis?"); the "Buscar en mi biblioteca" button covers it. Apple FM tends to
+  open every answer with "¡Hola!" once the chat started with a greeting.
 - Apple Intelligence fails on the iOS 26.5 simulator (works on iOS 27).
 - Map labels in Bengali, Tamil and other Indic scripts, Myanmar and Khmer are not drawn
   (MapLibre Native can't shape them); country bboxes skip far-flung territories.
@@ -259,3 +266,38 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   "4", `android.versionCode` 4) instead of the generated `Info.plist`; `package.json` at
   1.0.2; native projects regenerated (Android had `versionName 0.1.0`); lint warnings in
   `src/i18n/index.ts` and the i18n checker's unresolved `tc` binding on Home fixed.
+
+### 2026-10-25 — Conversational assistant
+- The owner's report: "hola" made the assistant search the library for "hola". Now it
+  chats, and searches only when it helps. `chats.ts` `answer()` decides per message:
+  library off → chat; `guessIntent` (rag-core, deterministic: greetings, thanks, "who are
+  you", jokes, laughter, and requests about the previous answer like "resúmelo" / "más
+  simple") → chat; otherwise the model decides when it can, and a question is searched
+  when it can't (Gemini Nano).
+- GGUF models call a `search_library` tool (llama.rn `tools`, two passes: decide/answer,
+  then answer from the results with `tool_choice: 'none'`). Qwen3.5 only calls tools with
+  thinking on (budget 256 tokens; it mostly closes the block at once), Gemma 4 without
+  (with thinking it reasons ~350 tokens first): `models.ts` `tools: 'thinking' | 'direct'`.
+- Apple FM ignores tools most of the time (7–11 of 14), so it routes instead: native
+  `route()` asks for a `@Generable { search, query }` with greedy sampling (~0.7 s), with
+  English few-shot instructions from `ROUTER_INSTRUCTIONS`. With `guessIntent` first it
+  got every question right and 8 of 10 chatty messages the heuristic missed.
+- Prompts tuned on the Mac (llama-server from Homebrew with the same GGUFs, Foundation
+  Models via swiftc): 32–34 of 36 for Qwen 0.8B/2B/4B and Gemma 4 on a chat/search
+  bench. Findings in the comments: spelling out small talk makes models stop calling
+  the tool (tools mode keeps the tone short); "search even if you know" fixed famous
+  facts answered from memory; wording about "the user's library" got echoed back.
+- Retrieval: follow-ups ("¿y cómo se trata?", "¿Y cuándo murió?") borrow the previous
+  question's keywords (`followUpTopic`); queries drop one word at a time so a word the
+  library lacks doesn't sink them (the router's "Michael Jackson fallecimiento" found
+  nothing in an English Wikipedia); greetings are left out of queries; chunks sharing
+  too few question terms are dropped (`relevantChunks`).
+- UI: "Buscar en mi biblioteca" under the latest answer given without the library
+  (answers again with a forced search; in memory only, not stored), phase "Pensando…",
+  conversational copy ("Pregunta o charla…").
+- Catalog GGUFs copied into `content/models` register at startup (Files/Finder, and
+  the new `seeded-model` E2E tag; fixture fetched by `e2e:setup`).
+- Verified on the iOS 27 simulator (Release, new `NP-chat` simulator): all 5 assistant
+  flows pass, including new `ai-06-conversation` (Apple FM: greeting without sources →
+  question with sources → follow-up with sources) and `ai-07-gguf-tools` (Qwen 0.8B:
+  greeting → button → tool call with sources); smoke suite 16/16.

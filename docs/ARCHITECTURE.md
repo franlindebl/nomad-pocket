@@ -316,8 +316,10 @@ Routes: `maps/index` (map, locate-me, compass, long-press to add a pin), sheets
   deviceNotEligible | modelNotReady | downloadable | unsupportedOS | unsupported,
   provider: 'apple' | 'gemini' | null }`, `generate(requestId, { prompt, system?,
   temperature?, maxTokens? }, onDelta)` (events `onDelta {requestId, delta, reset?}` /
-  `onDone` / `onError`), `cancel(id)`, `downloadSystemModel()` (Android). iOS weak-links
-  FoundationModels (iOS 26+); Android uses ML Kit GenAI Prompt (Gemini Nano on AICore).
+  `onDone` / `onError`), `cancel(id)`, `downloadSystemModel()` (Android), `route(prompt,
+  instructions)` → `{ search, query }` (iOS: guided generation with a `@Generable`
+  struct, greedy). iOS weak-links FoundationModels (iOS 26+); Android uses ML Kit GenAI
+  Prompt (Gemini Nano on AICore).
 - `models.ts`: curated GGUF list, URLs pinned to a Hugging Face commit with exact sizes:
 
   | id | Size | Min RAM | Context |
@@ -329,23 +331,42 @@ Routes: `maps/index` (map, locate-me, compass, long-press to add a pin), sheets
 
   `modelFit(model, ramGB)` and `recommendModel(ram)` (largest Qwen that fits). Items are
   `kind: 'model'`, id = model id; `useSettings.aiModelId` is a model id or `'system'`.
-  The first downloaded model becomes the active one.
+  The first downloaded model becomes the active one. `tools`: how the model calls
+  search_library (`thinking` for Qwen3.5, which only calls tools with reasoning on;
+  `direct` for Gemma 4). Catalog GGUF files copied into `content/models` by hand (exact
+  name and size) are registered at startup, which is also how E2E seeds a model.
 - `engine.ts`: one `Engine` interface over `SystemEngine` (~4k-token window) and
   `LlamaEngine` (llama.rn, chat template from the GGUF via `jinja`, thinking disabled,
-  GPU layers on real iOS devices, CPU elsewhere). `withEngine(modelId, fn)`,
+  GPU layers on real iOS devices, CPU elsewhere). `engine.decides` says how the model
+  chooses to search: `tools` (GGUF: pass 1 offers search_library — Qwen with thinking
+  on, budget 256 tokens — and either answers or calls it; pass 2 answers from the tool
+  result with `tool_choice: 'none'`), `router` (Apple FM: `route()`), or null (Gemini
+  Nano: heuristics). `withEngine(modelId, fn)`,
   `stopGeneration()`, `releaseEngine()`, `releaseIfModel()`. One engine alive at a time;
   released on background and after 4 idle minutes.
-- RAG (`rag-core.ts` pure + tested, `rag.ts`): question → language detection and keyword
-  queries (stopwords, light stemming, es/en) → libzim full-text search across archives
-  (reciprocal-rank fusion) → up to 6 distinct articles (redirects counted once) → chunks
-  of 650 chars → BM25 (with title and search-rank boosts) → pack the best chunks into the
-  model's budget as numbered sources → prompt asking for `[n]` citations. Health
-  questions get an extra caution rule.
+- Chat or search (`chats.ts` `answer()`, rules in `rag-core.ts`): library off or empty →
+  plain chat. Otherwise `guessIntent` (small talk, thanks, "who are you", and requests
+  about the previous answer such as "resúmelo" → chat) runs first on every engine; then
+  the model decides when it can (`tools` / `router`, which also writes the query), and
+  an engine that can't searches every question. The "Buscar en mi biblioteca" button
+  forces a search (`searchLibraryFor`). The prompts were tuned on llama.cpp and Apple FM
+  with a chat/search bench; the numbers are in the comments next to them.
+- RAG (`rag-core.ts` pure + tested, `rag.ts`): question (or the model's query) → language
+  detection and keyword queries (stopwords, light stemming, es/en; a follow-up such as
+  "¿y cómo se trata?" gets the previous question's keywords, `followUpTopic`) → libzim
+  full-text search across archives (reciprocal-rank fusion) → up to 6 distinct articles
+  (redirects counted once) → chunks of 650 chars → BM25 (with title and search-rank
+  boosts) → drop chunks sharing too few question terms (`relevantChunks`) → pack the
+  best chunks into the model's budget as numbered sources → `[n]` citations, in the user
+  turn (`sources` prompt) or as the tool result. Health questions get an extra caution
+  rule.
 - `chats.ts`: sessions/messages in SQLite, `useChat` store, `sendMessage` (token budget:
   answer 768 tokens for GGUF / 600 for system, ~25 % of the rest for history, the rest for
-  sources; phases searching → loading → generating; throttled streaming), `stopAnswer`
+  sources; phases loading → thinking (router / tool decision) → searching → generating;
+  throttled streaming), `stopAnswer`
   (also during search/load), only cited sources are kept on the message (all if none
-  cited), answers to a deleted conversation are dropped.
+  cited), answers to a deleted conversation are dropped. `searched` (in memory only) marks
+  answers given without the library: the latest one shows "Buscar en mi biblioteca".
 - UI: chat with streaming Markdown (`markdown.ts` parser, `ui/Markdown.tsx`), source chips
   → reader, stop, "use my library" toggle, starters, AI/health disclaimer; conversations
   sheet; models screen (system model status, downloads, fit badges).

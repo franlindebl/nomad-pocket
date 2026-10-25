@@ -4,16 +4,25 @@ import { describe, test } from 'node:test';
 
 import {
   BM25,
+  buildConversationQueries,
   buildRagUserMessage,
+  buildRouterPrompt,
   buildSearchQueries,
+  buildToolResult,
   chunkText,
   citedNumbers,
   detectLanguage,
   extractKeywords,
+  followUpTopic,
+  guessIntent,
   isHealthQuestion,
   normalize,
   packContext,
+  parseToolQuery,
   rankChunks,
+  relevantChunks,
+  SEARCH_TOOL_NAME,
+  searchToolSpec,
   splitSentences,
   stem,
   stripThinking,
@@ -22,6 +31,7 @@ import {
   trimHistory,
   type Chunk,
   type SourceRef,
+  type Turn,
 } from './rag-core.ts';
 
 describe('tokenizer', () => {
@@ -65,7 +75,16 @@ describe('search queries', () => {
     const qs = buildSearchQueries('¿Cuáles son los síntomas de la hipotermia en niños pequeños?');
     assert.equal(qs[0], 'síntomas hipotermia niños pequeños');
     assert.ok(qs.includes('hipotermia'));
-    assert.ok(qs.length <= 3);
+    assert.ok(qs.length <= 4);
+  });
+
+  test('buildSearchQueries survives a word the library lacks', () => {
+    assert.deepEqual(buildSearchQueries('Michael Jackson fallecimiento'), [
+      'michael jackson fallecimiento',
+      'michael jackson',
+      'michael fallecimiento',
+      'fallecimiento',
+    ]);
   });
 
   test('buildSearchQueries falls back to the raw question', () => {
@@ -204,7 +223,7 @@ describe('context packing', () => {
     assert.match(msg, /\[1\] Quemadura/);
     assert.match(msg, /Pregunta: ¿Cómo curo una quemadura\?/);
     const none = buildRagUserMessage('What is X?', [], 'en');
-    assert.match(none, /found no relevant articles/);
+    assert.match(none, /no articles about this/);
     assert.match(none, /Question: What is X\?/);
   });
 });
@@ -245,9 +264,120 @@ describe('system prompt', () => {
     assert.equal(isHealthQuestion('What should I do after a snake bite?'), true);
     assert.equal(isHealthQuestion('Explícame la fotosíntesis'), false);
     assert.equal(isHealthQuestion('An interesting fact about Spain'), false);
-    assert.match(systemPrompt('es', false, true), /no consejo médico/);
-    assert.doesNotMatch(systemPrompt('es', false, false), /consejo médico/);
-    assert.match(systemPrompt('en', true), /\[1\]/);
+    assert.match(systemPrompt('es', 'chat', { health: true }), /no consejo médico/);
+    assert.doesNotMatch(systemPrompt('es', 'chat'), /consejo médico/);
+    assert.match(systemPrompt('en', 'sources'), /\[1\]/);
+  });
+
+  test('modes: chat talks naturally, tools explains when to search', () => {
+    const chat = systemPrompt('es', 'chat', { library: true });
+    assert.match(chat, /natural/);
+    assert.match(chat, /biblioteca/);
+    assert.doesNotMatch(systemPrompt('es', 'chat'), /biblioteca/);
+    assert.doesNotMatch(chat, /\[1\]/);
+    const tools = systemPrompt('en', 'tools');
+    assert.match(tools, /search_library/);
+    assert.match(tools, /follow-up/);
+    assert.match(tools, /\[1\]/);
+  });
+});
+
+describe('chat or search', () => {
+  const H: Turn[] = [
+    { role: 'user', content: '¿Qué es la hipotermia?' },
+    { role: 'assistant', content: 'Una bajada peligrosa de la temperatura corporal [1].' },
+  ];
+
+  test('small talk is chat', () => {
+    for (const m of ['hola', '¡Buenas! ¿Qué tal estás?', 'Hola, buenos días', 'gracias!', 'muchas gracias', 'vale, perfecto', 'ok', 'jajaja', 'adiós, hasta luego', '¿Quién eres?', '¿Qué puedes hacer?', 'cuéntame un chiste', 'Hi there!', 'thanks a lot', 'How are you?', 'What can you do?', '👍', '']) {
+      assert.equal(guessIntent(m), 'chat', m);
+    }
+  });
+
+  test('questions are search, also when they start with a greeting', () => {
+    for (const m of ['¿Quién fue Michael Jackson?', '¿Cómo purifico agua en el campo?', 'hola, ¿cómo se cura una quemadura?', '¿Cuál es la capital de Australia?', 'What is photosynthesis?', 'fotosíntesis', 'cuéntame sobre Roma', 'Can you help me with burns?']) {
+      assert.equal(guessIntent(m), 'search', m);
+    }
+  });
+
+  test('requests about the previous answer are chat, only in a conversation', () => {
+    for (const m of ['resúmelo', 'explícamelo más simple', 'más corto, por favor', 'otra vez', 'tradúcelo al inglés', 'make it shorter', 'explain it again']) {
+      assert.equal(guessIntent(m, H), 'chat', m);
+    }
+    assert.equal(guessIntent('¿y cómo se trata?', H), 'search');
+    assert.equal(guessIntent('resúmelo'), 'search');
+  });
+
+  test('followUpTopic fills in the topic a follow-up leaves out', () => {
+    assert.deepEqual(followUpTopic('¿y cómo se trata?', H), ['hipotermia']);
+    assert.deepEqual(followUpTopic('¿Y en niños es distinto?', H), ['hipotermia']);
+    assert.deepEqual(followUpTopic('¿Cuáles son los síntomas?', H), ['hipotermia']);
+    assert.deepEqual(followUpTopic('¿Qué es la fotosíntesis?', H), []);
+    assert.deepEqual(followUpTopic('¿Quién fue Michael Jackson?', H), []);
+    assert.deepEqual(followUpTopic('¿y cómo se trata?', []), []);
+  });
+
+  test('buildConversationQueries searches the combined topic first', () => {
+    assert.deepEqual(buildConversationQueries('¿y cómo se trata?', H), ['hipotermia trata', 'hipotermia', 'trata']);
+    assert.ok(buildConversationQueries('¿Y en niños es distinto?', H).includes('hipotermia niños'));
+    assert.deepEqual(buildConversationQueries('¿Qué es la fotosíntesis?', H), buildSearchQueries('¿Qué es la fotosíntesis?'));
+  });
+
+  test('router prompt carries recent turns, shortened', () => {
+    assert.equal(buildRouterPrompt('hola', []), 'Latest user message: hola');
+    const p = buildRouterPrompt('¿y cómo se trata?', [...H, { role: 'user', content: 'x'.repeat(500) }]);
+    assert.match(p, /^Conversation:\nUser: ¿Qué es la hipotermia\?\nAssistant: Una bajada/);
+    assert.match(p, /Latest user message: ¿y cómo se trata\?$/);
+    assert.ok(!p.includes('x'.repeat(301)));
+  });
+});
+
+describe('relevance', () => {
+  const c = (title: string, text: string): Chunk => ({ sourceKey: title, title, text, index: 0 });
+  const s = (item: Chunk) => ({ item, score: 1 });
+
+  test('drops chunks that share too few terms with the question', () => {
+    const ranked = [s(c('Fuego', 'El fuego es la oxidación rápida de un material combustible.')), s(c('Leña', 'Para encender leña mojada usa yesca seca y ramitas finas; el fuego prende mejor.'))];
+    // enciend, fueg, mojad: 2 of 3 needed; "Fuego" only mentions fire.
+    assert.deepEqual(
+      relevantChunks('¿Cómo enciendo fuego si todo está mojado?', ranked).map((r) => r.item.title),
+      ['Leña'],
+    );
+    assert.deepEqual(
+      relevantChunks('¿Cómo se apaga un fuego de aceite en la cocina?', ranked).map((r) => r.item.title),
+      [],
+    );
+  });
+
+  test('one or two terms need a single match, the title counts', () => {
+    const ranked = [s(c('Michael Jackson', 'Cantante estadounidense.')), s(c('Otro', 'Nada que ver.'))];
+    assert.deepEqual(
+      relevantChunks('¿Quién fue Michael Jackson?', ranked).map((r) => r.item.title),
+      ['Michael Jackson'],
+    );
+  });
+});
+
+describe('tool calls', () => {
+  test('searchToolSpec describes search_library with a query', () => {
+    const spec = searchToolSpec('es');
+    assert.equal(spec.function.name, SEARCH_TOOL_NAME);
+    assert.deepEqual(spec.function.parameters.required, ['query']);
+  });
+
+  test('parseToolQuery reads JSON arguments, bare strings and junk', () => {
+    assert.equal(parseToolQuery('{"query":"tratamiento hipotermia"}'), 'tratamiento hipotermia');
+    assert.equal(parseToolQuery('"Michael Jackson"'), 'Michael Jackson');
+    assert.equal(parseToolQuery('capital de Australia'), 'capital de Australia');
+    assert.equal(parseToolQuery('{"q":1}'), '{"q":1}');
+    assert.equal(parseToolQuery(undefined), '');
+  });
+
+  test('buildToolResult numbers sources or explains there are none', () => {
+    const sources = [{ itemId: 'w', path: 'A/X', title: 'Hipotermia', n: 1, passages: ['Temperatura por debajo de 35 °C.'] }];
+    assert.match(buildToolResult(sources, 'es'), /^\[1\] Hipotermia\nTemperatura/);
+    assert.match(buildToolResult(sources, 'es'), /Cita cada dato/);
+    assert.match(buildToolResult([], 'en'), /No results/);
   });
 });
 

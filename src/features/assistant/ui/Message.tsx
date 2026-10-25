@@ -1,10 +1,10 @@
 import { router } from 'expo-router';
-import { BookOpen, Sparkles } from 'lucide-react-native';
+import { BookOpen, Library, Sparkles } from 'lucide-react-native';
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 
-import { PressableScale, Text } from '@/components/ui';
+import { Button, PressableScale, Text } from '@/components/ui';
 import { formatPercent } from '../format';
 import { radius, space, useTheme } from '@/theme';
 
@@ -76,9 +76,11 @@ type AssistantProps = {
   streaming?: boolean;
   phase?: Phase;
   loadProgress?: number;
+  /** Shown under an answer given without the library: answer it again searching it. */
+  onSearchLibrary?: () => void;
 };
 
-export const AssistantMessage = memo(function AssistantMessage({ text, sources, streaming, phase, loadProgress }: AssistantProps) {
+export const AssistantMessage = memo(function AssistantMessage({ text, sources, streaming, phase, loadProgress, onSearchLibrary }: AssistantProps) {
   const { t } = useTranslation('assistant');
   const { colors } = useTheme();
   const byN = useMemo(() => new Map(sources.map((s) => [s.n, s])), [sources]);
@@ -112,6 +114,18 @@ export const AssistantMessage = memo(function AssistantMessage({ text, sources, 
           <Markdown text={text} onCite={onCite} citable={citable} caret={streaming} />
         )}
         {!waiting && sources.length ? <SourceChips sources={sources} /> : null}
+        {onSearchLibrary ? (
+          <Button
+            title={t('searchLibrary')}
+            accessibilityLabel={t('searchLibraryHint')}
+            icon={Library}
+            variant="secondary"
+            size="sm"
+            onPress={onSearchLibrary}
+            style={styles.searchLibrary}
+            testID="search-library"
+          />
+        ) : null}
       </View>
     </View>
   );
@@ -131,6 +145,7 @@ const styles = StyleSheet.create({
   assistantBody: { flex: 1, gap: space.md, paddingTop: 2 },
   avatar: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginTop: 0 },
   status: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 24 },
+  searchLibrary: { alignSelf: 'flex-start' },
   chipsScroll: { flexGrow: 0, marginRight: -space.gutter },
   chips: { gap: space.sm, paddingRight: space.gutter },
   chip: {

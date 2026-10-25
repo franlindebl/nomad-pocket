@@ -104,6 +104,9 @@ export function detectLanguage(text: string, fallback: Lang = 'en'): Lang {
 // ---------------------------------------------------------------------------
 // Search queries
 
+// Courtesy words that would only add noise to a search ("hola, ¿cómo se cura…?").
+const COURTESY = new Set(['hola', 'buenas', 'buenos', 'hey', 'hello', 'gracias', 'thanks', 'thank', 'please', 'porfa', 'favor']);
+
 /** Keywords of a question in their original spelling (lowercase, accents kept). */
 export function extractKeywords(question: string): string[] {
   const seen = new Set<string>();
@@ -111,7 +114,7 @@ export function extractKeywords(question: string): string[] {
   for (const raw of question.toLowerCase().match(WORD_RE) ?? []) {
     const n = normalize(raw);
     if (n.length < 3 && !/^\d+$/.test(n)) continue;
-    if (isStopword(n) || seen.has(n)) continue;
+    if (isStopword(n) || COURTESY.has(n) || seen.has(n)) continue;
     seen.add(n);
     out.push(raw);
   }
@@ -119,11 +122,13 @@ export function extractKeywords(question: string): string[] {
 }
 
 /**
- * Full-text queries for the ZIM search engine, most specific first:
- * all keywords, then the longest few (more discriminative), then the single
- * longest keyword as a broad fallback.
+ * Full-text queries for the ZIM search engine, most specific first: all keywords,
+ * then (short queries) the keywords without the last one or the one before it, or
+ * (long ones) the longest few, then the single longest keyword as a broad fallback.
+ * The engine wants every word, and one word the library doesn't have ("Michael
+ * Jackson fallecimiento" in an English Wikipedia) would sink the whole query.
  */
-export function buildSearchQueries(question: string, max = 3): string[] {
+export function buildSearchQueries(question: string, max = 4): string[] {
   const kw = extractKeywords(question);
   if (!kw.length) {
     const q = question.trim();
@@ -131,9 +136,117 @@ export function buildSearchQueries(question: string, max = 3): string[] {
   }
   const queries: string[] = [kw.slice(0, 8).join(' ')];
   const byLength = [...kw].sort((a, b) => b.length - a.length);
-  if (kw.length > 3) queries.push(byLength.slice(0, 3).join(' '));
+  if (kw.length > 4) queries.push(byLength.slice(0, 3).join(' '));
+  else if (kw.length > 1) {
+    for (const drop of [kw.length - 1, kw.length - 2]) queries.push(kw.filter((_, i) => i !== drop).join(' '));
+  }
   if (kw.length > 1) queries.push(byLength[0]);
   return [...new Set(queries)].slice(0, max);
+}
+
+const FOLLOW_UP_START = new Set(['y', 'e', 'and', 'pero', 'but', 'entonces', 'so', 'tambien', 'also', 'ademas', 'besides']);
+const ANAPHORA = new Set(['eso', 'esto', 'ello', 'it', 'that', 'this', 'them', 'they', 'those', 'these']);
+// Facets of a topic that make no sense on their own: "¿cómo se trata?", "what are the symptoms?".
+const FACET_PREFIXES = [
+  'trat', 'cura', 'curar', 'sintom', 'caus', 'preven', 'evit', 'funcion', 'dura', 'tipo', 'riesg', 'peligr', 'grav', 'signific', 'diagnost',
+  'origen', 'efect', 'dosis', 'mortal', 'contagi', 'ejempl', 'historia', 'ventaj', 'desventaj',
+  'symptom', 'treat', 'cure', 'cause', 'prevent', 'avoid', 'work', 'risk', 'danger', 'type', 'effect', 'sign', 'diagnos', 'origin',
+  'example', 'history', 'advantage', 'disadvantage',
+];
+
+/**
+ * The topic a follow-up question leaves implicit ("¿y cómo se trata?" after asking
+ * about hypothermia): keywords of the previous user turn when the new question opens
+ * with a conjunction, points back ("eso"), or only names facets of a topic. Empty
+ * when the question stands alone.
+ */
+export function followUpTopic(question: string, history: Turn[]): string[] {
+  const prev = [...history].reverse().find((t) => t.role === 'user');
+  if (!prev) return [];
+  const own = extractKeywords(question);
+  const ws = words(question);
+  const followUp =
+    FOLLOW_UP_START.has(ws[0] ?? '') ||
+    ws.some((w) => ANAPHORA.has(w)) ||
+    own.every((k) => FACET_PREFIXES.some((p) => normalize(k).startsWith(p)));
+  if (!followUp) return [];
+  const ownSet = new Set(own.map(normalize));
+  return extractKeywords(prev.content)
+    .filter((k) => !ownSet.has(normalize(k)))
+    .slice(0, 4);
+}
+
+/** Search queries for a question in a conversation: the implicit topic goes first. */
+export function buildConversationQueries(question: string, history: Turn[], max = 4): string[] {
+  const topic = followUpTopic(question, history);
+  if (!topic.length) return buildSearchQueries(question, max);
+  return buildSearchQueries([...topic, ...extractKeywords(question)].join(' '), max);
+}
+
+// ---------------------------------------------------------------------------
+// Intent: chat or search
+
+// Words that make up small talk: greetings, thanks, acknowledgements, farewells,
+// "how are you", questions about the assistant itself, jokes and laughter.
+const CHAT_WORDS = new Set(
+  (
+    'hola holi holaa buenas buenos dia dias tardes noches hey hi hello hiya saludos good morning afternoon evening night ' +
+    'gracias muchas muchisimas mil thanks thank thx ty cheers lot favor please porfa plz ' +
+    'ok okay okey vale genial perfecto perfect great cool nice bien guay entendido claro acuerdo estupendo excelente fantastico ' +
+    'awesome fine sure yes si yep nope vaya wow guau ah oh eh uh vamos venga dale got it alright right ' +
+    'adios chao chau bye goodbye hasta luego pronto manana see later vemos nos cuidate ' +
+    'tal estas estoy va vas andas how are you doing going what up whats sup ' +
+    'interesante increible curioso alucinante bonito precioso interesting amazing incredible wonderful lovely ' +
+    'quien eres who llamas nombre name puedes can do hacer haces sabes ayudar ayudarme help capable funcionas work works yourself ti ' +
+    'chiste chistes joke jokes cuentame tell gracioso funny ' +
+    'jaja jajaja jajajaja jeje haha hahaha lol xd'
+  ).split(' '),
+);
+
+// Requests about the previous answer: rewrite it, don't look anything up.
+const META_PREFIXES = [
+  'resum', 'simplif', 'sencill', 'facil', 'corto', 'cort', 'larg', 'breve', 'aclar', 'explic', 'tradu', 'repit', 'repet', 'continu', 'sigu',
+  'otra', 'vez', 'detall', 'ejempl', 'ingles', 'espanol', 'lista', 'puntos', 'tabla', 'frase', 'palabra', 'parrafo',
+  'dame', 'ponlo', 'ponerlo', 'hazlo', 'escribelo', 'dimelo', 'cuentamelo',
+  'summar', 'simpl', 'short', 'long', 'brief', 'clarif', 'explain', 'translat', 'rephras', 'repeat', 'again', 'continu', 'elaborat',
+  'expand', 'detail', 'exampl', 'english', 'spanish', 'list', 'bullet', 'table', 'easier', 'more', 'less', 'menos',
+  'sentence', 'word', 'paragraph', 'give', 'make', 'put', 'write', 'it',
+];
+
+export type Intent = 'chat' | 'search';
+
+/**
+ * Cheap, deterministic guess of whether a message needs the library: small talk and
+ * requests about the previous answer ("resúmelo", "más simple") don't. Everything
+ * else is treated as a question worth searching for.
+ */
+export function guessIntent(message: string, history: Turn[] = []): Intent {
+  const ws = words(message);
+  if (!ws.length) return 'chat';
+  if (ws.length > 12) return 'search';
+  const hasHistory = history.some((t) => t.role === 'assistant');
+  const content = ws.filter((w) => !isStopword(w));
+  const chatty = (w: string) =>
+    CHAT_WORDS.has(w) || /^(?:ja|je|ha){2,}h?$/.test(w) || (hasHistory && META_PREFIXES.some((p) => w.startsWith(p)));
+  return content.every(chatty) ? 'chat' : 'search';
+}
+
+// ---------------------------------------------------------------------------
+// Relevance
+
+/**
+ * Drops ranked chunks that share too few terms with the question: a library
+ * without the topic still returns articles that mention one of its words. A chunk
+ * needs 1 of 1–2 question terms, 2 of 3–5, 40 % of longer questions.
+ */
+export function relevantChunks<T extends Chunk>(question: string, ranked: Scored<T>[]): Scored<T>[] {
+  const q = [...new Set(tokenize(question))];
+  if (!q.length) return ranked;
+  const need = q.length <= 2 ? 1 : Math.max(2, Math.ceil(q.length * 0.4));
+  return ranked.filter(({ item }) => {
+    const have = new Set([...tokenize(item.title), ...tokenize(item.text)]);
+    return q.filter((t) => have.has(t)).length >= need;
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -360,35 +473,153 @@ export function tokensToChars(tokens: number): number {
 // ---------------------------------------------------------------------------
 // Prompt
 
-const SYSTEM: Record<Lang, string> = {
+const SYSTEM: Record<Lang, [intro: string, tone: string, smallTalk: string, style: string]> = {
   es: [
     'Eres Nomad, un asistente que funciona sin conexión dentro de la app Nomad Pocket.',
+    'Conversa de forma natural y cercana: saluda, responde a las gracias, charla, cuenta chistes y habla de ti con naturalidad.',
+    'En la charla contesta con una o dos frases, sin listas, y no inventes datos sobre ti ni sobre la app.',
     'Responde siempre en español, de forma clara, práctica y breve. Usa Markdown sencillo (negritas, listas) cuando ayude.',
-  ].join(' '),
+  ],
   en: [
     'You are Nomad, an assistant that runs offline inside the Nomad Pocket app.',
+    'Talk naturally and warmly: greet back, answer thanks, chat, tell jokes and talk about yourself freely.',
+    "In small talk reply in one or two sentences, without lists, and don't make up facts about yourself or the app.",
     'Always answer in English, clearly, practically and concisely. Use simple Markdown (bold, lists) when it helps.',
-  ].join(' '),
+  ],
+};
+
+// Spelling out the small talk makes models chattier, and then they stop calling the
+// tool (Gemma 4 searched 4 of 10 questions with it, 9 of 10 without): tools mode
+// keeps the tone short.
+const TOOLS_TONE: Record<Lang, string> = {
+  es: 'Conversa de forma natural y cercana.',
+  en: 'Talk naturally and warmly.',
+};
+
+/** What the assistant can lean on, so "what can you do?" gets a true answer. */
+const LIBRARY_NOTE: Record<Lang, string> = {
+  es: 'El usuario tiene en este dispositivo una biblioteca sin conexión (Wikipedia, medicina, supervivencia, bricolaje y más) en la que buscas cuando hace falta información.',
+  en: "The user has an offline library on this device (Wikipedia, medicine, survival, DIY and more) that you search when information is needed.",
 };
 
 const RAG_RULES: Record<Lang, string> = {
   es: [
-    'Te daré fragmentos numerados de la biblioteca sin conexión del usuario.',
-    'Básate en esos fragmentos y cita la fuente de cada dato con su número entre corchetes, por ejemplo [1] o [2].',
+    'Cuando el mensaje del usuario traiga fragmentos numerados de su biblioteca, básate en ellos y cita la fuente de cada dato con su número entre corchetes, por ejemplo [1] o [2].',
     'No inventes citas ni números de fuente que no existan.',
     'Si los fragmentos no contienen la respuesta, dilo con honestidad ("No lo he encontrado en tu biblioteca") y, si puedes, añade lo que sepas por tu cuenta indicando que no procede de la biblioteca.',
   ].join(' '),
   en: [
-    "I will give you numbered excerpts from the user's offline library.",
-    'Base your answer on those excerpts and cite the source of each fact with its number in square brackets, e.g. [1] or [2].',
+    "When the user's message comes with numbered excerpts from their library, base your answer on them and cite the source of each fact with its number in square brackets, e.g. [1] or [2].",
     'Never invent citations or source numbers that do not exist.',
     'If the excerpts do not contain the answer, say so honestly ("I couldn\'t find this in your library") and, if you can, add what you know yourself, making clear it does not come from the library.',
   ].join(' '),
 };
 
+// Tuned with llama.cpp on Qwen3.5 0.8B/2B/4B and Gemma 4 E2B: 32–34 of 36 right on a
+// chat/search bench with guessIntent first. Naming the follow-up case, the "don't
+// search" list and "search even if you know" each fixed misses; the rest are mostly
+// harmless extra searches on small talk (0.8B) or famous facts answered from memory.
+const TOOL_RULES: Record<Lang, string> = {
+  es: [
+    'El usuario tiene una biblioteca sin conexión (Wikipedia, medicina, supervivencia, bricolaje y más) donde puedes buscar con la herramienta search_library.',
+    'Busca siempre que el usuario pida información nueva: hechos, personas, lugares, historia, ciencia, salud, técnicas o cómo hacer algo, también en preguntas de seguimiento como "¿y cómo se trata?" (busca el tema completo).',
+    'Busca aunque creas saber la respuesta: la biblioteca es la fuente fiable.',
+    'No busques para saludos, agradecimientos, chistes, charla o peticiones sobre tu respuesta anterior (resumir, aclarar, simplificar, traducir): responde directamente.',
+    'Cuando busques, básate en los resultados y cita cada dato con su número entre corchetes, por ejemplo [1]. No inventes citas.',
+    'Si los resultados no responden, dilo y añade lo que sepas indicando que no viene de la biblioteca.',
+  ].join(' '),
+  en: [
+    "The user has an offline library (Wikipedia, medicine, survival, DIY and more) that you can search with the search_library tool.",
+    'Search whenever the user asks for new information: facts, people, places, history, science, health, techniques or how to do something, also in follow-up questions like "and how is it treated?" (search the full topic).',
+    'Search even if you think you know the answer: the library is the trusted source.',
+    "Don't search for greetings, thanks, jokes, small talk or requests about your previous answer (summarize, clarify, simplify, translate): reply directly.",
+    'When you search, base your answer on the results and cite each fact with its number in square brackets, e.g. [1]. Never invent citations.',
+    "If the results don't answer the question, say so and add what you know, making clear it doesn't come from the library.",
+  ].join(' '),
+};
+
+export const SEARCH_TOOL_NAME = 'search_library';
+
+/** OpenAI-style function definition of the library search, for chat templates with tools. */
+export function searchToolSpec(lang: Lang) {
+  const t =
+    lang === 'es'
+      ? {
+          d: 'Busca en la biblioteca sin conexión del usuario (Wikipedia, medicina, supervivencia…) y devuelve fragmentos numerados de artículos.',
+          q: 'Palabras clave del tema, completas aunque la pregunta dependa de la conversación (ej. "tratamiento hipotermia").',
+        }
+      : {
+          d: "Searches the user's offline library (Wikipedia, medicine, survival…) and returns numbered article excerpts.",
+          q: 'Keywords for the topic, self-contained even when the question depends on the conversation (e.g. "hypothermia treatment").',
+        };
+  return {
+    type: 'function',
+    function: {
+      name: SEARCH_TOOL_NAME,
+      description: t.d,
+      parameters: { type: 'object', properties: { query: { type: 'string', description: t.q } }, required: ['query'] },
+    },
+  };
+}
+
+/** The search query in a tool call's JSON arguments (models sometimes send a bare string). */
+export function parseToolQuery(args: string | undefined): string {
+  if (!args) return '';
+  try {
+    const v: unknown = JSON.parse(args);
+    if (typeof v === 'string') return v.trim();
+    if (v && typeof v === 'object' && typeof (v as { query?: unknown }).query === 'string') return (v as { query: string }).query.trim();
+  } catch {
+    // not JSON: use as is
+  }
+  return args.trim();
+}
+
+/** The tool result handed back to the model: numbered sources, or what to do without them. */
+export function buildToolResult(sources: PackedSource[], lang: Lang): string {
+  if (!sources.length) return NO_RESULTS[lang];
+  const cite = lang === 'es' ? 'Cita cada dato con su número entre corchetes, por ejemplo [1].' : 'Cite each fact with its number in square brackets, e.g. [1].';
+  return `${formatSources(sources)}\n\n${cite}`;
+}
+
+const NO_RESULTS: Record<Lang, string> = {
+  es: 'Sin resultados: la biblioteca no tiene artículos sobre esto. Empieza diciendo brevemente «No lo he encontrado en tu biblioteca» y responde con lo que sepas, avisando de que puede no ser exacto.',
+  en: "No results: the library has no articles about this. Start by briefly saying \"I couldn't find this in your library\" and answer from what you know, warning that it may not be accurate.",
+};
+
+// Apple's on-device model rarely calls tools on its own (7–11 of 14 on the bench,
+// worse with Spanish instructions), but classifies well with guided generation once
+// guessIntent has filtered out small talk (all questions right, 8 of 10 chatty
+// messages the heuristic missed): it decides search/chat in a short structured pass
+// (~0.7 s) instead, and writes a better query. English instructions work best.
+export const ROUTER_INSTRUCTIONS = [
+  "You route messages for an offline assistant. The assistant can search the user's offline library (Wikipedia, medicine, survival, DIY) before answering.",
+  'Set search to true only when the latest message asks for information the assistant should look up: facts, people, places, history, science, health, techniques or how to do something. Follow-up questions about a topic ("¿y cómo se trata?", "¿y en niños?") also need a search.',
+  'Set search to false for everything else: greetings, how are you, thanks, okay/great, goodbye, jokes, small talk, questions about the assistant itself, and requests to rephrase, simplify, shorten, summarize, translate or continue the previous answer.',
+  '',
+  'Examples:',
+  '"hola" → false',
+  '"¿qué tal estás?" → false',
+  '"gracias!" → false',
+  '"¿quién eres?" → false',
+  '"cuéntame un chiste" → false',
+  '"explícamelo más fácil" → false',
+  '"¿Quién fue Cervantes?" → true, "Miguel de Cervantes"',
+  '"¿cómo hago un nudo as de guía?" → true, "nudo as de guía"',
+  '"¿y cuáles son los síntomas?" (after talking about scurvy) → true, "síntomas escorbuto"',
+].join('\n');
+
+/** The router's prompt: recent turns (shortened) and the message to classify. */
+export function buildRouterPrompt(question: string, history: Turn[]): string {
+  const recent = history.slice(-4).map((t) => `${t.role === 'user' ? 'User' : 'Assistant'}: ${t.content.replace(/\s+/g, ' ').slice(0, 300)}`);
+  return recent.length ? `Conversation:\n${recent.join('\n')}\n\nLatest user message: ${question}` : `Latest user message: ${question}`;
+}
+
+// Phrased as a note inside the user's turn: wording about "the user's library" got
+// echoed back verbatim ("no lo he encontrado en la biblioteca del usuario").
 const NO_HITS: Record<Lang, string> = {
-  es: 'He buscado en la biblioteca sin conexión del usuario y no hay artículos relevantes para esta pregunta. Empieza diciendo brevemente que no lo has encontrado en su biblioteca y después responde con lo que sepas, avisando de que puede no ser exacto.',
-  en: "I searched the user's offline library and found no relevant articles for this question. Start by briefly saying you couldn't find it in their library, then answer from your own knowledge, warning that it may not be accurate.",
+  es: '(Nota: mi biblioteca sin conexión no tiene artículos sobre esto. Empieza diciendo brevemente «No lo he encontrado en tu biblioteca» y después responde con lo que sepas, avisando de que puede no ser exacto.)',
+  en: "(Note: my offline library has no articles about this. Start by briefly saying \"I couldn't find this in your library\", then answer from what you know, warning that it may not be accurate.)",
 };
 
 const HEALTH_NOTE: Record<Lang, string> = {
@@ -411,9 +642,20 @@ export function isHealthQuestion(question: string): boolean {
   return HEALTH_TERMS.some((t) => (t.includes(' ') ? q.includes(t) : ws.some((w) => w.startsWith(t))));
 }
 
-export function systemPrompt(lang: Lang, rag: boolean, health = false): string {
-  const base = health ? `${SYSTEM[lang]} ${HEALTH_NOTE[lang]}` : SYSTEM[lang];
-  return rag ? `${base}\n\n${RAG_RULES[lang]}` : base;
+/**
+ * How the model meets the library: `chat` none (library off, or small talk), `sources`
+ * excerpts arrive inside the user turn, `tools` the model calls search_library itself.
+ */
+export type PromptMode = 'chat' | 'sources' | 'tools';
+
+export function systemPrompt(lang: Lang, mode: PromptMode, opts: { health?: boolean; library?: boolean } = {}): string {
+  const [intro, tone, smallTalk, style] = SYSTEM[lang];
+  const parts = mode === 'tools' ? [intro, TOOLS_TONE[lang], style] : [intro, tone, smallTalk, style];
+  if (opts.health) parts.push(HEALTH_NOTE[lang]);
+  const base = parts.join(' ');
+  if (mode === 'tools') return `${base}\n\n${TOOL_RULES[lang]}`;
+  if (mode === 'sources') return `${base}\n\n${RAG_RULES[lang]}`;
+  return opts.library ? `${base}\n\n${LIBRARY_NOTE[lang]}` : base;
 }
 
 /** Renders packed sources as the numbered context block. */

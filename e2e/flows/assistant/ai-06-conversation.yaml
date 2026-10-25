@@ -1,0 +1,36 @@
+# AI-06 — natural conversation with the system model (Apple Intelligence, iOS 27 simulator): a
+# greeting is answered without searching the library (no sources, "Buscar en mi biblioteca"
+# offered); a question is answered from the library, and so is a follow-up that leaves its
+# topic out. Asserts structure only: the answer text is not deterministic.
+appId: com.fjlinde.nomadpocket
+tags: [nightly, assistant, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "sparkles" }
+- tapOn: "Usar modelo integrado"
+- tapOn: "Pregunta .*"
+- inputText: "hola"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: { id: "search-library" }
+    timeout: 120000
+- assertNotVisible: "FUENTES|Fuentes"
+- takeScreenshot: 01-greeting
+- tapOn: "Pregunta .*"
+- inputText: "¿Quién fue Michael Jackson?"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: "Enviar"
+    timeout: 120000
+- assertVisible: "1\\. Michael Jackson"
+# Only the latest answer offers the search, and this one already searched.
+- assertNotVisible: { id: "search-library" }
+- takeScreenshot: 02-question
+- tapOn: "Pregunta .*"
+- inputText: "¿Y cuándo murió?"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: "Enviar"
+    timeout: 120000
+- assertNotVisible: { id: "search-library" }
+- takeScreenshot: 03-follow-up

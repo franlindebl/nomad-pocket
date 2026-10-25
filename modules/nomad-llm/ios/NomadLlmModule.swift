@@ -13,6 +13,19 @@ struct GenerateOptions: Record {
   @Field var maxTokens: Int?
 }
 
+#if canImport(FoundationModels)
+/// Whether a chat message needs a library search, decided by the model with guided
+/// generation (the instructions and few-shot examples come from JS, rag-core.ts).
+@available(iOS 26.0, *)
+@Generable
+struct SearchDecision {
+  @Guide(description: "true if answering needs facts or information (people, places, history, science, health, techniques, how to do something), including follow-up questions; false for greetings, thanks, jokes, small talk, questions about the assistant, or requests to rephrase, simplify, summarize or translate the previous answer")
+  var search: Bool
+  @Guide(description: "If search is true: self-contained search keywords in the user's language, including the conversation topic when the message omits it (e.g. \"tratamiento hipotermia\"). Otherwise empty.")
+  var query: String
+}
+#endif
+
 public final class NomadLlmModule: Module {
   private let lock = NSLock()
   private var tasks: [String: Task<Void, Never>] = [:]
@@ -32,6 +45,10 @@ public final class NomadLlmModule: Module {
 
     Function("cancel") { (requestId: String) in
       self.takeTask(requestId)?.cancel()
+    }
+
+    AsyncFunction("route") { (prompt: String, instructions: String, promise: Promise) in
+      self.route(prompt: prompt, instructions: instructions, promise: promise)
     }
 
     // Apple manages model assets itself; nothing to download from the app.
@@ -131,6 +148,25 @@ public final class NomadLlmModule: Module {
         }
       }
       store(requestId, task)
+      return
+    }
+    #endif
+    promise.reject("ERR_UNSUPPORTED", "The system language model requires iOS 26 or later")
+  }
+
+  private func route(prompt: String, instructions: String, promise: Promise) {
+    #if canImport(FoundationModels)
+    if #available(iOS 26.0, *) {
+      Task {
+        do {
+          let session = LanguageModelSession(model: SystemLanguageModel.default, instructions: instructions)
+          let response = try await session.respond(to: prompt, generating: SearchDecision.self, options: GenerationOptions(samplingMode: .greedy))
+          promise.resolve(["search": response.content.search, "query": response.content.query])
+        } catch {
+          let (code, message) = Self.describe(error)
+          promise.reject(code, message)
+        }
+      }
       return
     }
     #endif

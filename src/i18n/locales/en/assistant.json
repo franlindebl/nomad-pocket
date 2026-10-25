@@ -5,17 +5,17 @@
   "model": "Model",
   "composer": {
     "placeholder": "Ask anything…",
-    "placeholderLibrary": "Ask your library…",
+    "placeholderLibrary": "Ask or chat…",
     "send": "Send",
     "stop": "Stop",
     "useLibrary": "Use my library",
-    "useLibraryOn": "Answers cite your offline library",
+    "useLibraryOn": "Searches your offline library when needed and cites the sources",
     "useLibraryOff": "Answers come from the model only"
   },
   "empty": {
     "title": "How can I help?",
     "body": "Everything runs on your device. Nothing leaves your phone.",
-    "bodyLibrary": "I'll search your offline library and cite where each answer comes from.",
+    "bodyLibrary": "Chat with me or ask me anything. When it helps, I'll search your offline library and tell you where each fact comes from.",
     "starters": {
       "water": "How do I make water safe to drink without boiling it?",
       "burn": "First aid for a minor burn",
@@ -40,11 +40,14 @@
     "searching": "Searching your library…",
     "loading": "Loading model…",
     "loadingProgress": "Loading model · {{percent}}",
+    "thinking": "Thinking…",
     "generating": "Writing…"
   },
   "sources": "Sources",
   "sourcesCount_one": "{{count}} source",
   "sourcesCount_other": "{{count}} sources",
+  "searchLibrary": "Search my library",
+  "searchLibraryHint": "Answer again searching your offline library",
   "stopped": "Stopped",
   "copy": "Copy",
   "copied": "Copied",

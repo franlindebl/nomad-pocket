@@ -1,6 +1,6 @@
 // JS API of the system-model bridge (Apple Foundation Models / Gemini Nano).
 import NomadLlm from './src/NomadLlmModule';
-import type { GenerateOptions, SystemModelInfo } from './src/NomadLlm.types';
+import type { GenerateOptions, RouteDecision, SystemModelInfo } from './src/NomadLlm.types';
 
 export * from './src/NomadLlm.types';
 
@@ -51,6 +51,13 @@ export function generate(requestId: string, options: GenerateOptions, onDelta: (
       reject(e);
     });
   });
+}
+
+/** Apple Foundation Models only: whether a message needs a library search (guided generation). */
+export async function route(prompt: string, instructions: string): Promise<RouteDecision> {
+  if (!NomadLlm) throw new Error('System model not available');
+  const r = await NomadLlm.route(prompt, instructions);
+  return { search: !!r.search, query: String(r.query ?? '') };
 }
 
 export function cancel(requestId: string) {

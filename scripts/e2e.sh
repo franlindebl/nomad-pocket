@@ -82,13 +82,16 @@ reset_app() {
   xcrun simctl privacy "$UDID" grant location "$BUNDLE" 2>/dev/null || true
   local content
   content="$(xcrun simctl get_app_container "$UDID" "$BUNDLE" data)/Documents/content"
-  # `seeded`: the ZIM fixtures; `seeded-map`: the map fixtures. The app registers loose
-  # files in both folders at startup. APFS clones: instant.
+  # `seeded`: the ZIM fixtures; `seeded-map`: the map fixtures; `seeded-model`: the GGUF
+  # model. The app registers loose files in these folders at startup. APFS clones: instant.
   if grep -qE '^tags:.*[[ ,]seeded[],]' "$1"; then
     mkdir -p "$content/zim" && cp -c "$ROOT"/e2e/fixtures/*.zim "$content/zim/"
   fi
   if grep -qE '^tags:.*[[ ,]seeded-map[],]' "$1"; then
     mkdir -p "$content/maps" && cp -c "$ROOT"/e2e/fixtures/*.pmtiles "$content/maps/"
+  fi
+  if grep -qE '^tags:.*[[ ,]seeded-model[],]' "$1"; then
+    mkdir -p "$content/models" && cp -c "$ROOT"/e2e/fixtures/models/*.gguf "$content/models/"
   fi
 }
 

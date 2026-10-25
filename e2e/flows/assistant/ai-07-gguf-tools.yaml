@@ -1,0 +1,33 @@
+# AI-07 — a llama.cpp model (Qwen3.5 0.8B, seeded into content/models and registered at startup)
+# decides by itself when to search: a greeting gets a reply without sources and the
+# "Buscar en mi biblioteca" button, which answers again searching; a question calls the
+# search_library tool and cites sources. Asserts structure only.
+appId: com.fjlinde.nomadpocket
+tags: [nightly, assistant, seeded, seeded-model]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "sparkles" }
+# The seeded model became the active one: the chat opens directly.
+- assertVisible: ".*Qwen3\\.5 0\\.8B"
+- tapOn: "Pregunta .*"
+- inputText: "hola"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: { id: "search-library" }
+    timeout: 180000
+- assertNotVisible: "FUENTES|Fuentes"
+- takeScreenshot: 01-greeting
+- tapOn: { id: "search-library" }
+- extendedWaitUntil:
+    visible: "Enviar"
+    timeout: 180000
+- assertNotVisible: { id: "search-library" }
+- takeScreenshot: 02-searched-again
+- tapOn: "Pregunta .*"
+- inputText: "¿Quién fue Michael Jackson?"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: "Enviar"
+    timeout: 180000
+- assertVisible: "1\\. Michael Jackson"
+- takeScreenshot: 03-tool-sources

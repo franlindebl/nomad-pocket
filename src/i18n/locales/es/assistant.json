@@ -5,17 +5,17 @@
   "model": "Modelo",
   "composer": {
     "placeholder": "Pregunta lo que quieras…",
-    "placeholderLibrary": "Pregunta a tu biblioteca…",
+    "placeholderLibrary": "Pregunta o charla…",
     "send": "Enviar",
     "stop": "Detener",
     "useLibrary": "Usar mi biblioteca",
-    "useLibraryOn": "Las respuestas citan tu biblioteca sin conexión",
+    "useLibraryOn": "Busca en tu biblioteca sin conexión cuando haga falta y cita las fuentes",
     "useLibraryOff": "Las respuestas salen solo del modelo"
   },
   "empty": {
     "title": "¿En qué te ayudo?",
     "body": "Todo funciona en tu dispositivo. Nada sale de tu teléfono.",
-    "bodyLibrary": "Buscaré en tu biblioteca sin conexión y te diré de dónde sale cada respuesta.",
+    "bodyLibrary": "Charla conmigo o pregúntame lo que quieras. Cuando haga falta buscaré en tu biblioteca sin conexión y te diré de dónde sale cada dato.",
     "starters": {
       "water": "¿Cómo potabilizo agua sin hervirla?",
       "burn": "Primeros auxilios para una quemadura leve",
@@ -40,11 +40,14 @@
     "searching": "Buscando en tu biblioteca…",
     "loading": "Cargando el modelo…",
     "loadingProgress": "Cargando el modelo · {{percent}}",
+    "thinking": "Pensando…",
     "generating": "Escribiendo…"
   },
   "sources": "Fuentes",
   "sourcesCount_one": "{{count}} fuente",
   "sourcesCount_other": "{{count}} fuentes",
+  "searchLibrary": "Buscar en mi biblioteca",
+  "searchLibraryHint": "Volver a responder buscando en tu biblioteca sin conexión",
   "stopped": "Detenido",
   "copy": "Copiar",
   "copied": "Copiado",

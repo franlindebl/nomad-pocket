@@ -17,6 +17,12 @@ export type GgufModel = {
   minRamGB: number;
   /** Context window used at load time (tokens). */
   contextTokens: number;
+  /**
+   * Decides by itself when to search the library (tool calling, see engine.ts):
+   * `thinking` the model only calls tools with reasoning on (Qwen3.5), `direct` it
+   * calls them without (Gemma 4, which reasons ~350 tokens when allowed), null never.
+   */
+  tools: 'thinking' | 'direct' | null;
   license: string;
   licenseUrl: string;
   /** Strengths blurb key in the `assistant` namespace (`models.blurb.<id>`). */
@@ -37,6 +43,7 @@ export const GGUF_MODELS: GgufModel[] = [
     sizeBytes: 532_517_120,
     minRamGB: 3,
     contextTokens: 4096,
+    tools: 'thinking',
     license: 'Apache-2.0',
     licenseUrl: 'https://huggingface.co/Qwen/Qwen3.5-0.8B',
     blurbKey: 'tiny',
@@ -52,6 +59,7 @@ export const GGUF_MODELS: GgufModel[] = [
     sizeBytes: 1_280_835_840,
     minRamGB: 4,
     contextTokens: 4096,
+    tools: 'thinking',
     license: 'Apache-2.0',
     licenseUrl: 'https://huggingface.co/Qwen/Qwen3.5-2B',
     blurbKey: 'balanced',
@@ -67,6 +75,7 @@ export const GGUF_MODELS: GgufModel[] = [
     sizeBytes: 2_740_937_888,
     minRamGB: 7,
     contextTokens: 6144,
+    tools: 'thinking',
     license: 'Apache-2.0',
     licenseUrl: 'https://huggingface.co/Qwen/Qwen3.5-4B',
     blurbKey: 'smart',
@@ -82,6 +91,7 @@ export const GGUF_MODELS: GgufModel[] = [
     sizeBytes: 3_106_738_272,
     minRamGB: 8,
     contextTokens: 6144,
+    tools: 'direct',
     license: 'Apache-2.0',
     licenseUrl: 'https://huggingface.co/google/gemma-4-E2B-it',
     blurbKey: 'multilingual',

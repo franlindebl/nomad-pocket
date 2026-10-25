@@ -9,9 +9,24 @@ import i18n from '@/i18n';
 import { uid } from '@/lib/format';
 import { useSettings } from '@/stores/settings';
 
-import { EngineUnavailableError, stopGeneration, withEngine } from './engine';
-import { retrieve } from './rag';
-import { citedNumbers, detectLanguage, isHealthQuestion, estimateTokens, systemPrompt, tokensToChars, trimHistory, type Lang, type Turn } from './rag-core';
+import { EngineUnavailableError, stopGeneration, withEngine, type SearchTool } from './engine';
+import { libraryItemIds, retrieve } from './rag';
+import {
+  buildRouterPrompt,
+  buildToolResult,
+  citedNumbers,
+  detectLanguage,
+  estimateTokens,
+  guessIntent,
+  isHealthQuestion,
+  ROUTER_INSTRUCTIONS,
+  searchToolSpec,
+  systemPrompt,
+  tokensToChars,
+  trimHistory,
+  type Lang,
+  type Turn,
+} from './rag-core';
 
 export type MessageSource = { n: number; itemId: string; path: string; title: string };
 
@@ -22,6 +37,11 @@ export type ChatMessage = {
   content: string;
   sources: MessageSource[];
   createdAt: number;
+  /**
+   * Whether the library was searched for this answer. Only known for answers given in
+   * this session (not stored): an answer without it gets a "Search my library" button.
+   */
+  searched?: boolean;
 };
 
 export type ChatSession = {
@@ -34,7 +54,7 @@ export type ChatSession = {
   preview?: string;
 };
 
-export type Phase = 'searching' | 'loading' | 'generating';
+export type Phase = 'loading' | 'thinking' | 'searching' | 'generating';
 
 export type Streaming = {
   sessionId: string;
@@ -170,10 +190,18 @@ export function newChat() {
 const MAX_ANSWER_TOKENS = 768;
 const SYSTEM_ANSWER_TOKENS = 600;
 const UI_THROTTLE_MS = 60;
+// What declaring search_library costs in the prompt: the JSON schema plus the
+// template's own tool instructions (~250 tokens in Qwen's).
+const TOOL_PROMPT_TOKENS = 380;
 
-function languageFor(question: string): Lang {
+/** Language of the message; short ones ("ok", "gracias") follow the conversation. */
+function languageFor(question: string, history: Turn[]): Lang {
   const ui = (i18n.language === 'es' ? 'es' : 'en') as Lang;
-  return detectLanguage(question, ui);
+  const earlier = history
+    .filter((t) => t.role === 'user')
+    .map((t) => t.content)
+    .join(' ');
+  return detectLanguage(question, earlier ? detectLanguage(earlier, ui) : ui);
 }
 
 function patchStreaming(patch: Partial<Streaming>) {
@@ -198,64 +226,136 @@ export async function sendMessage(question: string) {
   if (!sessionId) {
     sessionId = createSession(titleFrom(text), modelId).id;
   }
-  const history: Turn[] = (sessionId === st.activeSessionId ? st.messages : []).map((m) => ({ role: m.role, content: m.content }));
+  const earlier = sessionId === st.activeSessionId ? st.messages : [];
   const userMsg: ChatMessage = { id: uid(), sessionId, role: 'user', content: text, sources: [], createdAt: Date.now() };
   insertMessage(userMsg);
+  useChat.setState({ activeSessionId: sessionId, messages: [...earlier, userMsg], error: null, sessions: listSessions() });
+  await answer(sessionId, text, toTurns(earlier), false);
+}
 
-  const streaming: Streaming = { sessionId, messageId: uid(), text: '', phase: st.useLibrary ? 'searching' : 'loading', loadProgress: 0, sources: [] };
-  useChat.setState({
-    activeSessionId: sessionId,
-    messages: [...(sessionId === st.activeSessionId ? st.messages : []), userMsg],
-    streaming,
-    error: null,
-    sessions: listSessions(),
-  });
+/**
+ * Answers the question behind `messageId` (an answer given without the library) again,
+ * this time searching the library: the "Search my library" button under it.
+ */
+export async function searchLibraryFor(messageId: string) {
+  const st = useChat.getState();
+  if (st.streaming || !st.activeSessionId) return;
+  const i = st.messages.findIndex((m) => m.id === messageId);
+  const question = st.messages[i - 1];
+  if (i < 1 || st.messages[i].role !== 'assistant' || question?.role !== 'user') return;
+  db().runSync('DELETE FROM chat_messages WHERE id = ?', messageId);
+  useChat.setState({ messages: st.messages.slice(0, i), error: null });
+  await answer(st.activeSessionId, question.content, toTurns(st.messages.slice(0, i - 1)), true);
+}
 
-  const lang = languageFor(text);
-  let answer = '';
+function toTurns(messages: ChatMessage[]): Turn[] {
+  return messages.map((m) => ({ role: m.role, content: m.content }));
+}
+
+/**
+ * Generates the assistant's reply to `text`. Whether the library is searched:
+ * library off or small talk → no; `forceSearch` → yes; otherwise the model decides
+ * when it can (tool call or router), and a question is searched when it can't.
+ */
+async function answer(sessionId: string, text: string, history: Turn[], forceSearch: boolean) {
+  const st = useChat.getState();
+  const modelId = useSettings.getState().aiModelId;
+  const library = st.useLibrary && libraryItemIds().length > 0;
+  const streaming: Streaming = { sessionId, messageId: uid(), text: '', phase: 'loading', loadProgress: 0, sources: [] };
+  useChat.setState({ streaming });
+
+  const lang = languageFor(text, history);
+  const health = isHealthQuestion(text);
+  let answerText = '';
   let sources: MessageSource[] = [];
+  let searched = false;
   let failed: string | null = null;
+  const cancelled = () => cancelledAnswers.has(streaming.messageId);
 
   try {
     await withEngine(modelId, async (engine) => {
+      await engine.load((p) => patchStreaming({ loadProgress: p }));
+      if (cancelled()) return;
+
+      // Decide whether to search.
+      let mode: 'chat' | 'search' | 'tools' = 'chat';
+      let query: string | undefined;
+      if (library) {
+        if (forceSearch) mode = 'search';
+        else if (guessIntent(text, history) === 'chat') mode = 'chat';
+        else if (engine.decides === 'tools') mode = 'tools';
+        else if (engine.decides === 'router' && engine.route) {
+          patchStreaming({ phase: 'thinking' });
+          try {
+            const d = await engine.route(ROUTER_INSTRUCTIONS, buildRouterPrompt(text, history));
+            mode = d.search ? 'search' : 'chat';
+            query = d.query.trim() || undefined;
+          } catch (e) {
+            console.warn('[assistant] router failed, searching', e);
+            mode = 'search';
+          }
+          if (cancelled()) return;
+        } else mode = 'search';
+      }
+
       // Token budget: system + history + sources + answer must fit the window.
       const answerTokens = engine.kind === 'system' ? SYSTEM_ANSWER_TOKENS : MAX_ANSWER_TOKENS;
-      const sys = systemPrompt(lang, st.useLibrary, isHealthQuestion(text));
-      const free = engine.contextTokens - answerTokens - estimateTokens(sys) - estimateTokens(text) - 120;
+      let sys = systemPrompt(lang, mode === 'tools' ? 'tools' : mode === 'search' ? 'sources' : 'chat', { health, library });
+      const toolTokens = mode === 'tools' ? TOOL_PROMPT_TOKENS : 0;
+      const free = engine.contextTokens - answerTokens - estimateTokens(sys) - estimateTokens(text) - toolTokens - 120;
       const historyBudget = tokensToChars(Math.max(0, Math.floor(free * 0.25)));
       const turns = trimHistory(history, historyBudget);
       const contextBudget = Math.max(800, tokensToChars(free) - turns.reduce((s, t) => s + t.content.length + 16, 0));
+      const keep = (r: { sources: { n: number; itemId: string; path: string; title: string }[] }) => {
+        sources = r.sources.map(({ n, itemId, path, title }) => ({ n, itemId, path, title }));
+        searched = true;
+        patchStreaming({ sources });
+      };
 
       let userTurn = text;
-      if (st.useLibrary) {
-        const r = await retrieve(text, lang, contextBudget);
-        sources = r.sources.map(({ n, itemId, path, title }) => ({ n, itemId, path, title }));
+      if (mode === 'search') {
+        patchStreaming({ phase: 'searching' });
+        const r = await retrieve(text, lang, contextBudget, { history, query });
+        keep(r);
         userTurn = r.noLibrary ? text : r.userMessage;
-        patchStreaming({ sources, phase: 'loading' });
+        // Without sources the citation rules would only confuse the model.
+        if (!sources.length) sys = systemPrompt(lang, 'chat', { health, library });
       }
+      if (cancelled()) return;
 
-      // Stop pressed while searching or loading: the engine has nothing to stop yet.
-      if (cancelledAnswers.has(streaming.messageId)) return;
-      await engine.load((p) => patchStreaming({ loadProgress: p }));
-      if (cancelledAnswers.has(streaming.messageId)) return;
-      patchStreaming({ phase: 'generating' });
+      const tool: SearchTool | undefined =
+        mode === 'tools'
+          ? {
+              spec: searchToolSpec(lang),
+              run: async (q) => {
+                patchStreaming({ phase: 'searching', text: '' });
+                const r = await retrieve(text, lang, contextBudget, { history, query: q || undefined });
+                keep(r);
+                patchStreaming({ phase: 'generating' });
+                return buildToolResult(r.sources, lang);
+              },
+            }
+          : undefined;
+      patchStreaming({ phase: mode === 'tools' ? 'thinking' : 'generating' });
 
       let last = 0;
       const res = await engine.generate({
-        system: systemFor(sys, st.useLibrary && !!sources.length),
+        system: sys,
         messages: [...turns, { role: 'user', content: userTurn }],
         maxTokens: answerTokens,
         temperature: 0.5,
+        tool,
         onText: (t) => {
-          answer = t;
+          answerText = t;
           const now = Date.now();
-          if (now - last >= UI_THROTTLE_MS) {
+          // An empty text resets the bubble (a tool call replaced a preamble): never throttle it.
+          if (!t || now - last >= UI_THROTTLE_MS) {
             last = now;
             patchStreaming({ text: t });
           }
         },
       });
-      answer = res.text || answer;
+      answerText = res.text || answerText;
     });
   } catch (e) {
     if (e instanceof EngineUnavailableError) failed = e.reason;
@@ -264,7 +364,7 @@ export async function sendMessage(question: string) {
 
   cancelledAnswers.delete(streaming.messageId);
   const cur = useChat.getState();
-  const finalText = answer.trim();
+  const finalText = answerText.trim();
   // The conversation may have been deleted while answering.
   const sessionAlive = !!db().getFirstSync('SELECT 1 FROM chat_sessions WHERE id = ?', sessionId);
   if (finalText && sessionAlive) {
@@ -275,6 +375,7 @@ export async function sendMessage(question: string) {
       content: finalText,
       sources: citedSources(finalText, sources),
       createdAt: Date.now(),
+      searched,
     };
     insertMessage(msg);
     useChat.setState({
@@ -286,11 +387,6 @@ export async function sendMessage(question: string) {
   } else {
     useChat.setState({ streaming: null, error: failed, sessions: listSessions() });
   }
-}
-
-/** Without sources the RAG rules (cite [n]) would only confuse the model. */
-function systemFor(sys: string, hasSources: boolean): string {
-  return hasSources ? sys : sys.split('\n\n')[0];
 }
 
 /** Answers stopped before generation started (ids of their streaming messages). */

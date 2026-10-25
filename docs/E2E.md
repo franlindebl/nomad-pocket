@@ -2,8 +2,8 @@
 
 [Maestro](https://maestro.mobile.dev) flows that drive the Release build of the app on an
 iOS simulator, the same way a person would: tapping, typing and reading the screen through
-accessibility. 40 flows cover 53 of the 55 cases in the test plan (Claude doc "Plan de
-tests funcionales iOS — Nomad App"); the case ids (`RDR-03`, `MAP-06`…) are on the first
+accessibility. 42 flows cover 53 of the 55 cases in the test plan (Claude doc "Plan de
+tests funcionales iOS — Nomad App"), plus AI-06 and AI-07 added after it; the case ids (`RDR-03`, `MAP-06`…) are on the first
 line of each flow.
 
 ## Quick start
@@ -42,7 +42,7 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 |---|---|---|---|---|
 | `npm run e2e` | 16 | ~10 min | P0: every screen's main path | nothing (offline) |
 | `npm run e2e:full` | 29 | ~18 min | + P1: secondary features (themes, markers, find in page, courses…) | nothing (offline) |
-| `npm run e2e:all` | 37 | ~25 min | + P2: real downloads and the on-device AI | internet, Apple Intelligence |
+| `npm run e2e:all` | 39 | ~30 min | + P2: real downloads and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape, light and dark | nothing (offline) |
 | `npm run e2e:android` | 2 | ~8 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check) | internet, Android emulator |
 
@@ -128,7 +128,9 @@ scripts/e2e.sh
      ├─ grant location permission
      ├─ if tagged `seeded`: clone e2e/fixtures/*.zim into the app's Documents/content/zim/
      ├─ if tagged `seeded-map`: clone e2e/fixtures/*.pmtiles into Documents/content/maps/
-     │   (the app registers loose files there at startup: src/features/{library,maps}/register.ts)
+     ├─ if tagged `seeded-model`: clone e2e/fixtures/models/*.gguf into Documents/content/models/
+     │   (the app registers loose files there at startup:
+     │    src/features/{library,maps,assistant}/register.ts)
      └─ maestro test <flow>
          └─ subflows/launch.yaml: launch, walk the setup wizard with "Lo elijo yo"
             (no downloads) and land on Home; then the flow's own steps
@@ -180,6 +182,7 @@ By hand:
   | `freecodecamp_es_all_2026-10.zim` | 11 MB | courses |
   | `nhs.uk_en_medicines_2026-09b.zim` | 15 MB | medical disclaimer |
   | `es-ml.pmtiles` | 0.6 MB | maps: Melilla up to zoom 12 (© OpenStreetMap, Protomaps build), in git |
+  | `models/Qwen3.5-0.8B-Q4_K_M.gguf` | 533 MB | assistant with a llama.cpp model (`seeded-model`), from Hugging Face |
 
   Kiwix removes old files from the mirror. `wikipedia_en_100_mini_2026-01.zim` is no
   longer there, so it is committed to git; the other three are downloaded by
@@ -226,6 +229,8 @@ By hand:
 | assistant | `ai-01-no-model` | AI-01, AI-02 | smoke | — |
 | assistant | `ai-03-chat-sources` | AI-03, AI-04 | nightly | seeded, Apple Intelligence |
 | assistant | `ai-05-conversations` | AI-05 | nightly | Apple Intelligence |
+| assistant | `ai-06-conversation` | AI-06 | nightly | seeded, Apple Intelligence |
+| assistant | `ai-07-gguf-tools` | AI-07 | nightly | seeded, seeded-model |
 | downloads | `dl-02-controls` | DL-02 | nightly | network |
 | ipad | `ipad-01-tour` | IPAD-01 | ipad | seeded, seeded-map |
 | android | `android-01-tour` | ANDROID-01 | android | network |
@@ -249,7 +254,8 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
 ```
 
 - Put it in `e2e/flows/<area>/`, named after its main case. Tag `seeded` if it needs the
-  ZIM fixtures, `seeded-map` for the map one, and `network` if it downloads. A map file
+  ZIM fixtures, `seeded-map` for the map one, `seeded-model` for the GGUF model, and
+  `network` if it downloads. A map file
   named after a region id (`es-ml.pmtiles`) registers as that region.
 - Text matching is a full-string regex: `"Michael Jackson.*"`, and escape `. ( ) ?`.
 - Cards and rows expose one merged accessibility label (`"Lo elijo yo, Empieza vacío…"`):
@@ -269,6 +275,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `lesson-<n>`, `lesson-check-<n>` | course lesson (1-based) and its done check |
   | `marker-name`, `marker-note` | fields of the place sheet |
   | `marker-delete`, `region-delete`, `conversation-delete` | delete buttons in lists |
+  | `search-library` | "Buscar en mi biblioteca" under an answer given without the library |
   | `house`, `books.vertical`, `map`, `graduationcap`, `sparkles` | tabs (SF Symbol ids, set by iOS) |
   | `BackButton` | the native header's back button |
 

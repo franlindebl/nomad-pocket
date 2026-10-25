@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # One-time setup for the E2E suite (docs/E2E.md): checks the tools, creates the
-# NP-e2e simulator and downloads the ZIM fixtures. Safe to re-run: it only does
+# NP-e2e simulator and downloads the ZIM and model fixtures. Safe to re-run: it only does
 # what is missing.
 set -euo pipefail
 
@@ -19,6 +19,9 @@ FIXTURES=(
   freecodecamp/freecodecamp_es_all_2026-10.zim
   zimit/nhs.uk_en_medicines_2026-09b.zim
 )
+# GGUF for `seeded-model` flows (the assistant with a llama.cpp model): the smallest
+# catalog model, pinned like src/features/assistant/models.ts (same URL, same size).
+MODEL_URL=https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/6ab461498e2023f6e3c1baea90a8f0fe38ab64d0/Qwen3.5-0.8B-Q4_K_M.gguf
 problems=0
 
 echo "Tools"
@@ -64,6 +67,15 @@ for f in "${FIXTURES[@]}"; do
     problems=1
   fi
 done
+mkdir -p "$ROOT/e2e/fixtures/models"
+model="$ROOT/e2e/fixtures/models/$(basename "$MODEL_URL")"
+if [[ -s "$model" ]]; then
+  echo "  ✓ models/$(basename "$model")"
+elif curl -fsSL -o "$model.part" "$MODEL_URL"; then
+  mv "$model.part" "$model"; echo "  ✓ models/$(basename "$model") (downloaded, 533 MB)"
+else
+  rm -f "$model.part"; echo "  ✗ models/$(basename "$model"): download failed"; problems=1
+fi
 
 echo
 if [[ $problems -eq 0 ]]; then
