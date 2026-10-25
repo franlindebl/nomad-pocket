@@ -46,7 +46,7 @@ Finding during testing: the main Overpass server was **at capacity** for several
 ("this public endpoint is intended for browser-based and human-operated tools"). The app
 copes (3 servers, timeouts, tile fallback), but see phase 2.
 
-## Phase 2 — road routing on the device (built 2026-10-25, first packs being published)
+## Phase 2 — road routing on the device (built and packs published 2026-10-25)
 
 Status: engine, packs, catalog and downloads work end to end on the iOS simulator and the
 Android emulator (Andorra pack; E2E `map-14-route`, `map-15-routing-download`). What it
@@ -60,8 +60,8 @@ Routing). Pending:
   built fine but its upload failed on an empty `es-cn.pois.tsv` (Geofabrik's Spain leaves
   out the Canary Islands, so that slice was empty). Fixed: Canarias is its own
   `packs.json` entry (`africa/canary-islands`), empty slices and point files are dropped,
-  and subdivision coverage is clipped to the region's bbox (ferry lines). Spain and
-  Canarias re-run afterwards (see `docs/PROGRESS.md`).
+  and subdivision coverage is clipped to the region's bbox (ferry lines). Re-run
+  40198385548 published Spain, its 16 slices and Canarias: 22 packs live.
 - Not measured on a phone: route time and memory, assembling a 2 GB pack (JS copy).
 - Isochrones: neither valhalla-mobile wrapper exposes them (iOS would need Valhalla
   headers in our code, which broke tile reading: see CLAUDE.md pitfalls).

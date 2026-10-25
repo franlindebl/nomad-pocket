@@ -24,7 +24,7 @@ can pick up without re-deriving anything.
 | Courses (14 courses, syllabus with fallbacks, progress) | done |
 | Maps (in-app PMTiles extraction, regions, visible area, world basemap, markers, GPS, multi-script labels) | done — iOS + Android |
 | Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
-| Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); Portugal + Andorra packs published; Spain + Canarias re-running; coverage roadmap in MAPS_NAVIGATION_PLAN |
+| Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); packs published 2026-10-25 (es + 17 regions, pt, ad); coverage roadmap in MAPS_NAVIGATION_PLAN |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
 | Assistant (Apple Intelligence / Gemini Nano / 4 GGUF models, RAG with citations, conversational: the model decides when to search) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change); Gemini Nano untested |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
@@ -48,11 +48,12 @@ can pick up without re-deriving anything.
 Roughly by value. Item 0 is in progress; the rest are not started. (Preparedness was added
 on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
 
-0. Routing packs: first run (2026-10-25) published Portugal and Andorra; Spain failed on
-   the empty Canarias slice (fixed, see the log) and is re-run with Canarias
-   (`countries: es es-cn`). Check that run, then follow the coverage roadmap in
-   `docs/MAPS_NAVIGATION_PLAN.md` ("Pack coverage roadmap"): calibrate and pruning done →
-   Europe + Latin America → rest of the world (big countries per sub-extract).
+0. Routing packs: published 2026-10-25 — 22 packs in the live catalog (Spain + 17
+   regions incl. Canarias from `routing-20261025-2`, Portugal + Andorra from
+   `routing-20261025-1`). Next, the coverage roadmap in `docs/MAPS_NAVIGATION_PLAN.md`
+   ("Pack coverage roadmap"; calibrate and pruning done): Europe + Latin America → rest
+   of the world (big countries per sub-extract). Check the real catalog in the app
+   (Release build without `EXPO_PUBLIC_ROUTING_MANIFEST_URL`): download a pack from GitHub.
    Measure on a real phone: route time/memory, assembling Spain (2.2 GB, JS copy), mmap of
    a 2 GB tar on iOS (may need `com.apple.developer.kernel.extended-virtual-addressing`).
    Then phase 3 (turn-by-turn: voice with expo-speech, background location).
@@ -134,6 +135,8 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   Canary extract's ferry lines reached Cádiz); the upload step sends exactly the files
   the fragment lists; the publish job prunes releases no manifest points at.
 - Canarias built locally with the CI recipe: 77 MB, 377 KB of points, 13 cells.
+- Re-run 40198385548 (`es es-cn`, 14 min): `routing-index` now lists 22 packs; pruning
+  kept `-1` (Portugal, Andorra) and `-2`. Asset URLs answer 200 with the manifest sizes.
 
 ### 2026-10-25 — Maps: offline road routing (plan phase 2)
 - Owner: commit phase 1 and start phase 2. `modules/nomad-route`: Valhalla 3.9.1 via
