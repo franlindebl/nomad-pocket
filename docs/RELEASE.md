@@ -41,6 +41,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.1.0 | 7 | TestFlight 2026-10-25: stronger compass beam |
 | 1.1.0 | 8 | TestFlight 2026-10-25: navigation view ("Iniciar", map follows the user) |
 | 1.1.0 | 9 | TestFlight 2026-10-25: routes never start in garages or tunnels, mountain trails on foot, thinner service roads |
+| 1.1.0 | 10 | TestFlight 2026-10-25: search finds nearby schools and shops, street addresses ("Calle Alcalá 50") and abbreviations |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.
