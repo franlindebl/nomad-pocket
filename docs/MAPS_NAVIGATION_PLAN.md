@@ -145,7 +145,58 @@ more than ~30 m off the route, voice with `expo-speech` (system voices work offl
 background location (iOS `UIBackgroundModes: location` with an App Review purpose string;
 Android foreground service). Navigation logic either as a pure, tested TypeScript module or
 Ferrostar (BSD-3, Rust core with Valhalla support) — decided after phase 2. Out of scope:
-CarPlay / Android Auto, live traffic.
+CarPlay / Android Auto (analysis below), live traffic.
+
+Done so far (2026-10-25): maneuver banner, distance and ETA, offline rerouting, and the
+navigation view (`FollowCamera.tsx`: "Iniciar", camera following the route's direction,
+"Recentrar"). Still to do: voice and background location.
+
+## CarPlay — analysis (2026-10-25, not planned)
+
+The owner asked how hard CarPlay would be; decision: **not now**, keep the analysis.
+
+- **The gate is Apple, not code.** A CarPlay navigation app needs the CarPlay Navigation
+  entitlement (`com.apple.developer.carplay-maps`): requested by the owner at
+  developer.apple.com/carplay, plus the CarPlay Entitlement Addendum, then Apple's review.
+  The wait is unpredictable (forum reports of long or unanswered requests). Risk: Apple
+  wants the app to be *primarily* about the category, and Nomad Pocket is an offline
+  knowledge app with maps; the request should stress offline navigation with no signal
+  and routes to emergency services. Without it there is no TestFlight / App Store build;
+  the Xcode simulator's CarPlay display works without it, so development can start first.
+- **Prerequisites = the rest of phase 3.** In a car the phone is locked: background
+  location (`UIBackgroundModes: location`, today absent) and voice prompts (CarPlay
+  navigation apps are expected to speak; spoken prompts go through an audio session in
+  voice-prompt mode so the car ducks its audio). Both are worth doing for the phone anyway.
+- **Architecture.** The app already runs on the UIScene lifecycle (`SceneDelegate`), which
+  CarPlay needs: add a `CPTemplateApplicationSceneSessionRoleApplication` scene and the
+  entitlement with a config plugin (never by hand in `ios/`). In a navigation app the app
+  draws the map itself in the car's `CPWindow`; the system draws `CPMapTemplate` on top
+  (map buttons, maneuver panel from `CPNavigationSession` / `CPManeuver`, travel estimates,
+  trip preview with `CPTrip` / `CPRouteChoice`); everything else is fixed templates
+  (`CPListTemplate`, `CPSearchTemplate`, alerts). Pan and zoom buttons are mandatory.
+- **Recommended shape:** our own local Expo module `modules/nomad-carplay` (Swift), like
+  `nomad-route`: a native `MLNMapView` in the CarPlay window with the same style JSON
+  (`buildMapStyle`) and the route GeoJSON sent from JS; camera following natively (the
+  `CPWindow` safe area as content inset). Routing, progress and rerouting stay in JS
+  (`guidance.ts`); CarPlay only receives "next maneuver, distance, ETA, route shape".
+  Third-party wrappers exist (`react-native-carplay` and forks such as
+  `@g4rb4g3/react-native-carplay`, `@bradford-tech/expo-carplay`), but none was confirmed
+  on Expo 58 / RN 0.88 New Architecture, and an extra native dependency has cost us before.
+- **What the car would show:** the offline map following the user with the route and the
+  maneuver panel; destinations as lists (saved places, recents, and "Emergencias cerca":
+  hospitals, pharmacies, police, water, from the POI index); search with the CarPlay
+  search template over the offline FTS index (streets and places).
+- **Rough size (an estimate, not measured):** phase 3 voice + background, medium; CarPlay
+  scene + native map + following, medium-large; navigation session (maneuvers,
+  estimates, trip preview), medium; lists and search, small-medium; then testing in the
+  CarPlay simulator and in a real car. Several sessions of work in all.
+- **Order if it comes back:** (1) the owner requests the entitlement (the slow part),
+  (2) finish phase 3, (3) build CarPlay against the simulator, (4) TestFlight in a real car
+  once the entitlement is granted. Android Auto would be the same story with the Android
+  for Cars App Library (`NavigationTemplate`) and Google Play's navigation category review.
+- Sources: Apple, [Requesting CarPlay entitlements](https://developer.apple.com/documentation/carplay/requesting-carplay-entitlements),
+  [CarPlay App Programming Guide](https://developer.apple.com/carplay/documentation/CarPlay-App-Programming-Guide.pdf),
+  [CPMapTemplate](https://developer.apple.com/documentation/carplay/cpmaptemplate).
 
 ## Valhalla spike (2026-10-25, desktop measurements)
 

@@ -136,6 +136,9 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   `RouteProgress.aheadBearing`, `pointAlong`. New flow `map-17-follow` (drives the CG-1
   in Andorra with Maestro `travel`).
 - Build 7 (stronger beam) on TestFlight with notes; build 8 with the navigation view.
+- CarPlay analysed at the owner's request (not planned for now): Apple's navigation
+  entitlement is the gate, background location and voice come first; analysis in
+  `docs/MAPS_NAVIGATION_PLAN.md` ("CarPlay — analysis").
 
 ### 2026-10-25 — Maps: compass beam
 
