@@ -87,7 +87,7 @@ if printf '%s\n' "${FLOWS[@]}" | xargs grep -lE '^tags:.*[[ ,]routing-(server|li
     curl -fsSL -o "$SERVE/live.json" "https://github.com/franlindebl/nomad-pocket/releases/download/routing-index/routing-manifest.json"
   fi
   split -b 2000000 -d -a 2 "$ROOT/e2e/fixtures/routing/ad.tar" "$SERVE/ad.tar.part"
-  cp "$ROOT/e2e/fixtures/routing/ad.pois.tsv" "$ROOT/e2e/fixtures/routing/ad.streets.tsv" "$SERVE/"
+  cp "$ROOT"/e2e/fixtures/routing/ad.{pois,streets,places,addresses}.tsv "$SERVE/"
   python3 -I - "$SERVE" "$ROUTING_PORT" <<'PY'
 import hashlib, json, os, sys
 d, port = sys.argv[1], sys.argv[2]
@@ -96,7 +96,8 @@ def f(n):
     return {"name": n, "size": os.path.getsize(p), "sha256": hashlib.sha256(open(p, "rb").read()).hexdigest()}
 parts = [f(n) for n in sorted(os.listdir(d)) if n.startswith("ad.tar.part")]
 pack = {"id": "ad", "country": "ad", "regionId": "ad", "buildDate": "20261024", "bbox": [1.25, 42.25, 2.0, 42.75],
-        "size": sum(p["size"] for p in parts), "parts": parts, "pois": f("ad.pois.tsv"), "streets": f("ad.streets.tsv")}
+        "size": sum(p["size"] for p in parts), "parts": parts, "pois": f("ad.pois.tsv"), "streets": f("ad.streets.tsv"),
+        "places": f("ad.places.tsv"), "addresses": f("ad.addresses.tsv")}
 json.dump({"version": 1, "release": "e2e", "baseUrl": f"http://localhost:{port}", "valhalla": "3.9.1", "packs": [pack]},
           open(os.path.join(d, "fixture.json"), "w"))
 PY

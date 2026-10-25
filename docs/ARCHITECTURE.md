@@ -121,13 +121,14 @@ assets/                      fonts, icons, splash, maps/basemap-assets.zip
 | `history`, `bookmarks` | Reader state per (item, path) |
 | `courses`, `course_progress` | Enrolled courses (syllabus JSON, last lesson) and manually completed lessons |
 | `map_markers` | User pins (name, lat/lon, color, note) |
-| `map_places` (FTS5) | Offline search index: `names` (indexed, `unicode61 remove_diacritics 2`), name, layer (place/poi/road), kind, lat/lon, `importance` (Protomaps min_zoom; `rank` is reserved by FTS5), `source` (map item id or `pois:<item id>`) |
+| `map_places` (FTS5) | Offline search index: `names` (indexed, `unicode61 remove_diacritics 2`), name, layer (place/poi/road), kind, lat/lon, `importance` (Protomaps min_zoom; `rank` is reserved by FTS5), `source` (map item id, `pois:<item id>`, `near:<item id>` (detail around the user), `places:<item id>` (a pack's named places)) |
 | `map_localities` | Towns/neighbourhoods of the index (lat-indexed) for "Calle Mayor · Soria" context lines |
 | `map_pois` | Emergency points per map item: OSM id (`n…`/`w…`/`r…`, or `t<lat>,<lon>` when taken from the tiles), kind, category, name, operator, phone, opening hours, emergency (ER yes/no) |
-| `map_sources` | Per map item: search index version/zoom/date, emergency points fetch date/count |
+| `map_sources` | Per map item: search index version/zoom/date, emergency points fetch date/count; rows `places:<id>` / `addresses:<id>` mark a pack's imported side files |
+| `map_address_streets`, `map_addresses` | House numbers from a pack: one row per street name key (`nameKey`) and source, one `WITHOUT ROWID` row per door (street, lat/lon in 1e-5°, number); ~22 B per door |
 | `chat_sessions`, `chat_messages` | Assistant conversations, messages with cited `sources` JSON |
 
-WAL mode, two migrations (`v1`; `v2` adds the map search and emergency tables). Add a migration by appending a SQL string to
+WAL mode, three migrations (`v1`; `v2` adds the map search and emergency tables; `v3` the house numbers). Add a migration by appending a SQL string to
 `MIGRATIONS`; `PRAGMA user_version` tracks what ran. Never edit an old one.
 
 Key-value store (`expo-sqlite/kv-store`): `settings` (zustand persist: `language`,
@@ -339,10 +340,13 @@ abbreviations also match their word: `("avda"* OR "avenida"*)`, `ABBREVIATIONS`)
 `rankHits` (exact > prefix > word match with "de/la/…" left out, place > POI > street,
 importance, log-distance from the map centre) → nearest locality as context. A query that
 reads as an address (`parseAddress`: "Calle Alcalá 50", "Alcalá, 50", "50 Alcalá") also
-brings the streets matching its street part, after the full-text hits. The search sheet
+brings the streets matching its street part, after the full-text hits, and before them
+the door itself on the best 8 of those streets (`doorHits`: the pack's house numbers of
+that street name within 3 km; `locateHouseNumber`: the door, else between the nearest
+numbers on the same side, else the nearest number ≤ 10 away; kind `address` /
+`address_approx`). The search sheet
 also matches saved places and parses coordinates (`geo.ts`: decimal, DMS with N/S/E/W/O,
-UTM with band letter). No house numbers yet: Protomaps tiles carry none (planned: an
-address file in the routing pack, docs/PROGRESS.md).
+UTM with band letter). House numbers come only from a pack (Protomaps tiles carry none).
 
 **Emergency points** (`emergency.ts`, pure parts in `emergency-core.ts`): 17 kinds in 5
 categories (health, security, water & shelter, supplies, institutions) from OSM tags.
@@ -392,9 +396,12 @@ subsets of the country build, which lack the roads a trip needs past their edge)
 serialized in JS (open + route never interleave with another request or a close). **Catalog**: `routing-manifest.json` in the
 fixed release `routing-index` (override: `EXPO_PUBLIC_ROUTING_MANIFEST_URL`, set by
 `scripts/e2e.sh` for its local pack server), cached in kv-store; each pack lists its tar
-parts (≤ 1900 MiB, GitHub's asset limit is 2 GiB), a `.pois.tsv` and a `.streets.tsv`
-(street and locality names: kind, name, lat, lon). `downloadPack` checks the room needed
-up front and queues the parts, POIs and street names not on disk yet (a retry
+parts (≤ 1900 MiB, GitHub's asset limit is 2 GiB), a `.pois.tsv` and the search side
+files: `.streets.tsv` (street and locality names: kind, name, lat, lon), `.places.tsv`
+(every named POI whatever the map zoom: kind, name, other names, lat, lon) and
+`.addresses.tsv` (house numbers: street, number, lat, lon), both from
+`scripts/routing/places.py` (packs built before 2026-10-26 lack them). `downloadPack` checks the room needed
+up front and queues the parts, POIs and side files not on disk yet (a retry
 only fetches what is missing) through the download manager (kind `route`). The
 completion handler fails a file whose size differs from the manifest; when every part is
 there it appends them into `<id>.tar.tmp`, checks the size, renames it, registers the
@@ -402,11 +409,13 @@ item, then deletes the parts and imports the POIs into `map_pois` / the search i
 under `route-<id>` (`storeEmergencyPoints`, batched, shared with the Overpass sync), then
 the street names into `map_places` / `map_localities` (`indexPackStreets`, batches of
 5000 with a yield; source `route-<id>`, and a `map_sources` row with `index_version` so
-search works with no map installed). The map index reads one zoom level under a tile
-budget, which for a big map holds only the main roads: the pack's names fill that in.
-Packs installed before the catalog had street names fetch just that file
-(`fetchMissingStreets`, after each catalog refresh; the catalog refreshes 4 s after
-startup when a pack is installed). Search also runs the match restricted to 30 km
+search works with no map installed), the places (`indexPackPlaces`, source
+`places:route-<id>`) and the house numbers (`indexPackAddresses`); the last two are read
+from the file in 4 MB blocks of whole lines (Spain's are ~60 + ~160 MB of text). The map
+index reads one zoom level under a tile budget, which for a big map holds only the main
+roads and important POIs: the pack's files fill that in. Packs installed before the
+catalog had a side file fetch just that file (`fetchMissingSideFiles`, after each catalog
+refresh; the catalog refreshes 4 s after startup when a pack is installed). Search also runs the match restricted to 30 km
 around the user, so a common street name nearby isn't lost among thousands. A
 kill mid-assembly is recovered by the manager re-finalizing the last part (all parts are
 still on disk); 4 s after startup `sweepRoutingFiles` deletes temp files and parts/POI/

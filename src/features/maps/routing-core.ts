@@ -269,6 +269,10 @@ export type ManifestPack = {
   pois: ManifestFile | null;
   /** Street and locality names for search (parseStreetsTsv); packs before 2026-10-26 have none. */
   streets?: ManifestFile | null;
+  /** Every named place of the country (parsePlacesTsv); packs before 2026-10-26 have none. */
+  places?: ManifestFile | null;
+  /** House numbers (parseAddressesTsv); packs before 2026-10-26 have none. */
+  addresses?: ManifestFile | null;
 };
 
 export type RoutingManifest = {
@@ -282,7 +286,10 @@ export type RoutingManifest = {
 };
 
 const isFile = (f: unknown): f is ManifestFile =>
-  !!f && typeof (f as ManifestFile).name === 'string' && /^[\w.-]+$/.test((f as ManifestFile).name) && Number.isFinite((f as ManifestFile).size);
+  !!f &&
+  typeof (f as ManifestFile).name === 'string' &&
+  /^[\w.-]+$/.test((f as ManifestFile).name) &&
+  Number.isFinite((f as ManifestFile).size);
 
 /** Validates a downloaded manifest; packs that don't look right are dropped. */
 export function parseManifest(json: string): RoutingManifest | null {
@@ -305,7 +312,9 @@ export function parseManifest(json: string): RoutingManifest | null {
       p.parts.length > 0 &&
       p.parts.every(isFile) &&
       (p.pois == null || isFile(p.pois)) &&
-      (p.streets == null || isFile(p.streets)),
+      (p.streets == null || isFile(p.streets)) &&
+      (p.places == null || isFile(p.places)) &&
+      (p.addresses == null || isFile(p.addresses)),
   );
   return {
     version: 1,
@@ -459,7 +468,8 @@ export function routeProgress(route: Route, cumulative: number[], p: LatLon, fro
     const all = scan(0, last);
     if (all.offRoute < best.offRoute) best = all;
   }
-  if (!Number.isFinite(best.offRoute)) best = { segment: 0, t: 0, offRoute: shape.length ? distanceMeters(p, { lat: shape[0][1], lon: shape[0][0] }) : 0 };
+  if (!Number.isFinite(best.offRoute))
+    best = { segment: 0, t: 0, offRoute: shape.length ? distanceMeters(p, { lat: shape[0][1], lon: shape[0][0] }) : 0 };
   const segLen = (cumulative[best.segment + 1] ?? cumulative[best.segment]) - cumulative[best.segment];
   const along = cumulative[best.segment] + best.t * segLen;
   const total = cumulative[cumulative.length - 1] ?? 0;

@@ -276,7 +276,9 @@
     "nursing_home": "Care home",
     "administrative": "Administrative area",
     "residential": "Residential area",
-    "industrial": "Industrial area"
+    "industrial": "Industrial area",
+    "address": "Address",
+    "address_approx": "Approximate address"
   },
   "route": {
     "costing": {

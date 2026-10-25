@@ -139,6 +139,105 @@ export function parseStreetsTsv(text: string): PlaceRow[] {
   return rows;
 }
 
+/** Protomaps-like min_zoom of a pack's POI kinds: what people look up from afar ranks first. */
+const POI_RANK: Record<string, number> = {
+  aerodrome: 10,
+  hospital: 12,
+  station: 12,
+  university: 13,
+  stadium: 13,
+  museum: 13,
+  peak: 13,
+  castle: 13,
+  cathedral: 13,
+  townhall: 13,
+  college: 14,
+  school: 14,
+  mall: 14,
+  attraction: 14,
+  park: 14,
+  beach: 14,
+};
+
+/**
+ * Rows of a pack's places file (scripts/routing/places.py: kind, name, other names, lat,
+ * lon per line): every named POI of the country, whatever the map's zoom.
+ */
+export function parsePlacesTsv(text: string): PlaceRow[] {
+  const rows: PlaceRow[] = [];
+  for (const line of text.split('\n')) {
+    const [kind, name, other, lat, lon] = line.split('\t');
+    const y = Number(lat);
+    const x = Number(lon);
+    if (!kind || !name || !lat || !lon || !Number.isFinite(y) || !Number.isFinite(x)) continue;
+    rows.push({ layer: 'poi', kind, name, names: other ? `${name} ${other}` : name, lat: y, lon: x, rank: POI_RANK[kind] ?? 16 });
+  }
+  return rows;
+}
+
+export type AddressRow = { street: string; number: string; lat: number; lon: number };
+
+/** House numbers compare without spaces and case: "12 b" is "12B". */
+export const houseNumberKey = (n: string) => n.replace(/\s+/g, '').toUpperCase();
+
+/** Rows of a pack's addresses file (places.py: street, house number, lat, lon per line). */
+export function parseAddressesTsv(text: string): AddressRow[] {
+  const rows: AddressRow[] = [];
+  for (const line of text.split('\n')) {
+    const [street, number, lat, lon] = line.split('\t');
+    const y = Number(lat);
+    const x = Number(lon);
+    if (!street || !number || !lat || !lon || !Number.isFinite(y) || !Number.isFinite(x)) continue;
+    rows.push({ street, number: houseNumberKey(number), lat: y, lon: x });
+  }
+  return rows;
+}
+
+const NEAREST_NUMBERS = 10;
+
+const numericPart = (n: string) => {
+  const m = /^\d+/.exec(n);
+  return m ? Number(m[0]) : null;
+};
+
+/**
+ * Where a house number is on a street, from the doors of that street name near `near` (a
+ * street hit): the door itself, else between the nearest lower and higher numbers on the
+ * same side (same parity), else the nearest number on that side up to NEAREST_NUMBERS away
+ * (OSM often has only some doors), else null. `exact` false when not the door itself.
+ */
+export function locateHouseNumber(
+  doors: AddressRow[],
+  number: string,
+  near: LatLon,
+  maxMeters = 3000,
+): { lat: number; lon: number; exact: boolean } | null {
+  const want = houseNumberKey(number);
+  const close = doors.filter((d) => distanceMeters(near, d) <= maxMeters);
+  const exact = close.filter((d) => d.number === want).sort((a, b) => distanceMeters(near, a) - distanceMeters(near, b))[0];
+  if (exact) return { lat: exact.lat, lon: exact.lon, exact: true };
+  const n = numericPart(want);
+  if (n === null) return null;
+  let below: AddressRow | null = null;
+  let above: AddressRow | null = null;
+  for (const d of close) {
+    const m = numericPart(d.number);
+    if (m === null || m % 2 !== n % 2) continue;
+    if (m < n && (!below || m > numericPart(below.number)!)) below = d;
+    if (m > n && (!above || m < numericPart(above.number)!)) above = d;
+  }
+  // Too far apart to be one stretch of the street (two streets of the same name).
+  if (!below || !above || distanceMeters(below, above) > 1000) {
+    // Only one side known (or a gap): the nearest number on the same side, if close.
+    const gap = (d: AddressRow | null) => (d ? Math.abs(numericPart(d.number)! - n) : Infinity);
+    const best = gap(below) <= gap(above) ? below : above;
+    return best && gap(best) <= NEAREST_NUMBERS ? { lat: best.lat, lon: best.lon, exact: false } : null;
+  }
+  const lo = numericPart(below.number)!;
+  const t = (n - lo) / (numericPart(above.number)! - lo);
+  return { lat: below.lat + (above.lat - below.lat) * t, lon: below.lon + (above.lon - below.lon) * t, exact: false };
+}
+
 /**
  * Zoom level to read for the index: the archive's max zoom (capped at 15, where
  * Protomaps keeps every POI) unless that means too many tiles to decode on the
@@ -161,16 +260,17 @@ export function normalizeName(s: string): string {
 
 /**
  * Street-type and title abbreviations of addresses ("Avda.", "Pº", "C/", "Dr."),
- * Spanish first, then English. Only those that aren't already a prefix of the word
+ * Spanish (with the Catalan word where it differs: "Avinguda"), then English. Only those that aren't already a prefix of the word
  * (every query word is matched as a prefix: "av" finds "avenida" by itself).
  */
 const ABBREVIATIONS: Record<string, string[]> = {
-  avda: ['avenida'],
-  avd: ['avenida'],
-  cl: ['calle'],
-  pº: ['paseo'],
+  avda: ['avenida', 'avinguda'],
+  avd: ['avenida', 'avinguda'],
+  cl: ['calle', 'carrer'],
+  pº: ['paseo', 'passeig'],
   pso: ['paseo'],
-  pza: ['plaza'],
+  pg: ['passeig'],
+  pza: ['plaza', 'placa'],
   plza: ['plaza'],
   ctra: ['carretera'],
   crta: ['carretera'],
@@ -239,7 +339,8 @@ const LAYER_WEIGHT: Record<PlaceLayer, number> = { place: 0, poi: 1, road: 1.5 }
 /** Words left out when comparing a name with the query: "Calle Alcalá" is "Calle de Alcalá". */
 const LINK_WORDS = new Set(['de', 'del', 'la', 'las', 'los', 'el', 'd', 'l', 'of', 'the']);
 
-const nameKey = (s: string) =>
+/** A name as compared: no accents, case or link words ("Calle de Alcalá" → "calle alcala"). */
+export const nameKey = (s: string) =>
   normalizeName(s)
     .split(/[^\p{L}\p{N}]+/u)
     .filter((w) => w && !LINK_WORDS.has(w))

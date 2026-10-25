@@ -276,7 +276,9 @@
     "nursing_home": "Residencia",
     "administrative": "Zona administrativa",
     "residential": "Zona residencial",
-    "industrial": "Zona industrial"
+    "industrial": "Zona industrial",
+    "address": "Portal",
+    "address_approx": "Portal aproximado"
   },
   "route": {
     "costing": {

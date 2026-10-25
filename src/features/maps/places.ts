@@ -17,10 +17,16 @@ import {
   ftsQuery,
   INDEX_LAYERS,
   nearestLocality,
+  houseNumberKey,
+  locateHouseNumber,
+  nameKey,
   parseAddress,
+  parseAddressesTsv,
+  parsePlacesTsv,
   pickIndexZoom,
   rankHits,
   tileRows,
+  type AddressRow,
   type Hit,
   type PlaceLayer,
   type PlaceRow,
@@ -147,6 +153,165 @@ export async function indexPackStreets(itemId: string, rows: PlaceRow[]) {
     Date.now(),
   );
   bumpVersion();
+}
+
+// --- Every named place of a country (pack side files) ---------------------------
+
+const placesSource = (itemId: string) => `places:${itemId}`;
+const LINE_BLOCK = 4 * 1024 * 1024;
+
+/**
+ * Calls `onBlock` with the text of a big TSV file a few MB of whole lines at a time: a
+ * country's places file (~100 MB) read in one string would be several hundred MB in Hermes.
+ */
+async function forEachLineBlock(file: File, onBlock: (text: string) => Promise<boolean>) {
+  const handle = file.open(FileMode.ReadOnly);
+  const decoder = new TextDecoder('utf-8');
+  let carry = new Uint8Array(0);
+  try {
+    for (;;) {
+      const chunk = await handle.readBytes(LINE_BLOCK);
+      let data = chunk;
+      if (carry.length) {
+        data = new Uint8Array(carry.length + chunk.length);
+        data.set(carry);
+        data.set(chunk, carry.length);
+      }
+      if (!chunk.length) {
+        if (data.length) await onBlock(decoder.decode(data));
+        return;
+      }
+      const cut = data.lastIndexOf(10);
+      if (cut < 0) {
+        carry = data;
+        continue;
+      }
+      if (!(await onBlock(decoder.decode(data.subarray(0, cut))))) return;
+      carry = data.slice(cut + 1);
+    }
+  } finally {
+    handle.close();
+  }
+}
+
+/** Whether a country's places file was imported for this item. */
+export function hasPackPlaces(itemId: string): boolean {
+  return !!db().getFirstSync('SELECT 1 FROM map_sources WHERE item_id = ? AND index_version IS NOT NULL', placesSource(itemId));
+}
+
+/**
+ * Imports a country's places file (scripts/routing/places.py) for `itemId`, the routing
+ * pack or map item it came with: every named POI, so a school is found from the other end
+ * of the country whatever the map's zoom. Batches with a yield in between; replaces an
+ * earlier import; stops (leaving nothing) when the item is removed meanwhile.
+ */
+export async function indexPackPlaces(itemId: string, file: File) {
+  const source = placesSource(itemId);
+  deletePlaceRows(source);
+  db().runSync('DELETE FROM map_sources WHERE item_id = ?', source);
+  await forEachLineBlock(file, async (text) => {
+    const rows = parsePlacesTsv(text);
+    for (let i = 0; i < rows.length && getItem(itemId); i += 5000) {
+      insertRows(source, rows.slice(i, i + 5000));
+      await yieldToUi();
+    }
+    return !!getItem(itemId);
+  });
+  if (!getItem(itemId)) {
+    deletePlaceRows(source); // removed meanwhile
+    return;
+  }
+  // Its own map_sources row: counts as a search index, and never as the item's tile index.
+  db().runSync(
+    'INSERT OR REPLACE INTO map_sources (item_id, index_version, indexed_at) VALUES (?, ?, ?)',
+    source,
+    INDEX_VERSION,
+    Date.now(),
+  );
+  bumpVersion();
+}
+
+// --- House numbers (pack side file) ------------------------------------------
+
+const addressesSource = (itemId: string) => `addresses:${itemId}`;
+/** Coordinates are stored in 1e-5 degrees. */
+const E5 = 1e5;
+
+function deleteAddresses(itemId: string) {
+  db().runSync('DELETE FROM map_addresses WHERE street IN (SELECT id FROM map_address_streets WHERE source = ?)', itemId);
+  db().runSync('DELETE FROM map_address_streets WHERE source = ?', itemId);
+}
+
+/** Whether a country's addresses file was imported for this item. */
+export function hasPackAddresses(itemId: string): boolean {
+  return !!db().getFirstSync('SELECT 1 FROM map_sources WHERE item_id = ? AND index_version IS NOT NULL', addressesSource(itemId));
+}
+
+/**
+ * Imports a country's house numbers (scripts/routing/places.py) for `itemId`, the routing
+ * pack or map item they came with, replacing an earlier import. Millions of rows for a
+ * big country: read in blocks, inserted in transactions of 5000 with a yield in between;
+ * stops (leaving nothing) when the item is removed meanwhile.
+ */
+export async function indexPackAddresses(itemId: string, file: File) {
+  const d = db();
+  deleteAddresses(itemId);
+  d.runSync('DELETE FROM map_sources WHERE item_id = ?', addressesSource(itemId));
+  const streets = new Map<string, number>();
+  const street = d.prepareSync('INSERT INTO map_address_streets (source, key) VALUES (?, ?)');
+  // A door mapped twice (building + entrance node at the same spot) is kept once.
+  const door = d.prepareSync('INSERT OR IGNORE INTO map_addresses (street, lat, lon, number) VALUES (?, ?, ?, ?)');
+  try {
+    await forEachLineBlock(file, async (text) => {
+      const rows = parseAddressesTsv(text);
+      for (let i = 0; i < rows.length && getItem(itemId); i += 5000) {
+        d.withTransactionSync(() => {
+          for (const r of rows.slice(i, i + 5000)) {
+            const key = nameKey(r.street);
+            if (!key) continue;
+            let id = streets.get(key);
+            if (id === undefined) {
+              id = street.executeSync(itemId, key).lastInsertRowId;
+              streets.set(key, id);
+            }
+            door.executeSync(id, Math.round(r.lat * E5), Math.round(r.lon * E5), r.number);
+          }
+        });
+        await yieldToUi();
+      }
+      return !!getItem(itemId);
+    });
+  } finally {
+    street.finalizeSync();
+    door.finalizeSync();
+  }
+  if (!getItem(itemId)) {
+    deleteAddresses(itemId); // removed meanwhile
+    return;
+  }
+  d.runSync(
+    'INSERT OR REPLACE INTO map_sources (item_id, index_version, indexed_at) VALUES (?, ?, ?)',
+    addressesSource(itemId),
+    INDEX_VERSION,
+    Date.now(),
+  );
+  bumpVersion();
+}
+
+/** The doors of streets named like `streetName` within `meters` of `near`. */
+function doorsNear(streetName: string, near: LatLon, meters: number): AddressRow[] {
+  const [w, s, e, n] = bboxAround(near, meters);
+  return db()
+    .getAllSync<{ number: string; lat: number; lon: number }>(
+      `SELECT a.number, a.lat, a.lon FROM map_address_streets st JOIN map_addresses a ON a.street = st.id
+       WHERE st.key = ? AND a.lat BETWEEN ? AND ? AND a.lon BETWEEN ? AND ? LIMIT 5000`,
+      nameKey(streetName),
+      Math.floor(s * E5),
+      Math.ceil(n * E5),
+      Math.floor(w * E5),
+      Math.ceil(e * E5),
+    )
+    .map((r) => ({ street: streetName, number: r.number, lat: r.lat / E5, lon: r.lon / E5 }));
 }
 
 /**
@@ -298,9 +463,11 @@ export function forgetMapSource(itemId: string) {
   again.delete(itemId);
   deletePlaceRows(itemId);
   deletePlaceRows(`pois:${itemId}`);
+  deletePlaceRows(placesSource(itemId));
+  deleteAddresses(itemId);
   forgetDetail(itemId);
   db().runSync('DELETE FROM map_pois WHERE source = ?', itemId);
-  db().runSync('DELETE FROM map_sources WHERE item_id = ?', itemId);
+  db().runSync('DELETE FROM map_sources WHERE item_id IN (?, ?, ?)', itemId, placesSource(itemId), addressesSource(itemId));
 }
 
 // --- Detail around the user ---------------------------------------------------
@@ -411,13 +578,29 @@ type HitRow = { id: number; name: string; layer: PlaceLayer; kind: string; lat: 
  * numbers are indexed, so it leads to the street.
  */
 export function searchPlaces(text: string, near: LatLon | null, limit = 40): SearchResult[] {
-  const hits = matchPlaces(text, near, limit);
+  let hits = matchPlaces(text, near, limit);
   const address = parseAddress(text);
   if (address) {
+    const streets = matchPlaces(address.street, near, limit, 'road');
     const seen = new Set(hits.map((h) => h.id));
-    for (const h of matchPlaces(address.street, near, limit, 'road')) if (!seen.has(h.id)) hits.push(h);
+    // The door on the best streets of that name (from a pack's house numbers), first.
+    hits = [...doorHits(streets.slice(0, 8), address.number), ...hits, ...streets.filter((h) => !seen.has(h.id))];
   }
   return hits.slice(0, limit).map((h) => ({ ...h, context: h.layer === 'place' ? null : localityNear(h) }));
+}
+
+/** "Calle de Alcalá, 52" on each street hit that has doors (exact or approximate). */
+function doorHits(streets: Hit[], number: string): Hit[] {
+  const out: Hit[] = [];
+  for (const st of streets) {
+    const at = locateHouseNumber(doorsNear(st.name, st, DOOR_SEARCH), number, st, DOOR_SEARCH);
+    if (!at) continue;
+    const name = `${st.name}, ${houseNumberKey(number)}`;
+    // Two index rows of the same street (one per tile) find the same door.
+    if (out.some((o) => o.name === name && distanceMeters(o, at) < 300)) continue;
+    out.push({ ...st, id: -1 - out.length, name, kind: at.exact ? 'address' : 'address_approx', lat: at.lat, lon: at.lon });
+  }
+  return out;
 }
 
 function matchPlaces(text: string, near: LatLon | null, limit: number, layer?: PlaceLayer): Hit[] {
@@ -475,6 +658,9 @@ function localityNear(p: LatLon): string | null {
   );
   return nearestLocality(p, candidates)?.name ?? null;
 }
+
+/** How far from a street hit its doors are looked up (a street row stands for ~1.5 km of it). */
+const DOOR_SEARCH = 3000;
 
 /** Whether any installed map has a finished search index (else the sheet explains why results are empty). */
 export function hasSearchIndex(): boolean {

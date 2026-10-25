@@ -80,7 +80,7 @@ jobs:
         run: |
           cd /mnt/routing/build/out
           # Exactly the files the fragment lists (it drops empty packs and point files).
-          python3 -I -c 'import json, sys; [print(f["name"]) for p in json.load(open(sys.argv[1])) for f in p["parts"] + [x for x in (p["pois"], p.get("streets")) if x]]' \
+          python3 -I -c 'import json, sys; [print(f["name"]) for p in json.load(open(sys.argv[1])) for f in p["parts"] + [x for x in (p["pois"], p.get("streets"), p.get("places"), p.get("addresses")) if x]]' \
             "${{ matrix.country }}.packs.json" | xargs gh release upload "$TAG" --clobber --repo "$GITHUB_REPOSITORY"
       - uses: actions/upload-artifact@v4
         with:

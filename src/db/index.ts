@@ -156,6 +156,26 @@ const MIGRATIONS: string[] = [
     pois_count INTEGER
   );
   `,
+  // v3: house numbers for map search (a country pack's addresses file)
+  `
+  -- One row per street name and source; key = nameKey ("Calle de Alcalá" → "calle alcala").
+  CREATE TABLE IF NOT EXISTS map_address_streets (
+    id INTEGER PRIMARY KEY,
+    source TEXT NOT NULL,          -- routing pack or map item id
+    key TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS map_address_streets_key ON map_address_streets(key);
+  CREATE INDEX IF NOT EXISTS map_address_streets_source ON map_address_streets(source);
+
+  -- One row per door, millions for a country: no rowid, coordinates in 1e-5 degrees (~1 m).
+  CREATE TABLE IF NOT EXISTS map_addresses (
+    street INTEGER NOT NULL,       -- map_address_streets.id
+    lat INTEGER NOT NULL,
+    lon INTEGER NOT NULL,
+    number TEXT NOT NULL,          -- houseNumberKey: "12B"
+    PRIMARY KEY (street, lat, lon, number)
+  ) WITHOUT ROWID;
+  `,
 ];
 
 let instance: SQLiteDatabase | null = null;

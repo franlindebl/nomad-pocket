@@ -61,11 +61,11 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
 1. Watch App Review for 1.0.1; test 1.1.0 (build 10, TestFlight) on a real iPhone: navigation view (driving and on foot), compass beam, street and school search, routing
    packs (download Spain 2.2 GB, route time/memory), Preparedness reminders, GPU
    llama.cpp, Apple Intelligence, background downloads, Files import, airplane mode.
-2. Search, from the routing packs (analysis 2026-10-25): every named POI of the country
-   (schools, shops… not just emergency kinds) and an address file (OSM
-   `addr:street`+`addr:housenumber`, grouped per street; Madrid city has ~135k in OSM)
-   so "Calle Alcalá 50" lands on the door, interpolating between neighbours. Measure the
-   size for Spain first; maybe an optional download.
+2. Publish packs with the search side files: the next routing-packs build (monthly or
+   manual dispatch) adds `.places.tsv` / `.addresses.tsv` to every pack (code landed
+   2026-10-26; the published packs don't have them yet). The country packages of the
+   redesign (`ux-survival`) call the same scripts and index functions. Measure the import
+   on a real phone (Spain: 1.0 M places + 2.2 M doors).
 3. Resume downloads after the app is killed on iOS: reattach the background URLSession
    (small native module) instead of restarting from zero.
 4. Map extraction: resume after a kill (persist the plan + written ranges) and move it off
@@ -86,11 +86,12 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
 
 ## Known issues / limitations
 
-- Map search: no house numbers (Protomaps tiles have none: "Calle Alcalá 50" finds the
-  street); big regions are indexed at a lower zoom (≤ 40k tiles: Spain z14 → z12) with full
-  detail only within ~25 km of the user or the searched area, and even there a z14 map lacks
-  the POIs Protomaps keeps for z15+ (a school mapped as a small area); indexing runs on the
-  JS thread in batches (minutes for a country on a phone, not yet measured on a device).
+- Map search: house numbers and far-away POIs need a pack built with the side files
+  (none published yet). Without one, big regions are indexed at a lower zoom (≤ 40k tiles:
+  Spain z14 → z12) with full detail only within ~25 km of the user or the searched area.
+  House numbers are as complete as OSM (Spain: 2.2 M doors; "Calle de Alcalá 50" isn't
+  mapped, so it lands between 48 and 52, marked approximate). Indexing and imports run on
+  the JS thread in batches (not yet measured on a device).
 - Emergency points depend on public Overpass servers (best effort; they can be at capacity
   for minutes). Fallback: the POIs in the map's own tiles (complete only at z15).
 - OSM data quality shows through: a garage mapped without `access=private`/`tunnel=yes`
@@ -133,6 +134,27 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-26 — Maps: every named place and house number in the packs
+
+- Owner decision: a country download holds everything, more storage is fine. Every named
+  place of the country (whatever the map zoom) and every house number now come from the
+  pack: `scripts/routing/places.py` (one osmium filter `nwr/name nwr/addr:housenumber`,
+  two pyosmium passes for relation centres) → `<pack>.places.tsv`, `<pack>.addresses.tsv`,
+  in the manifest as `places` / `addresses`, downloaded and imported like the street names.
+- Spain (Geofabrik 2026-10-25): 1,001,318 places (50 MB) and 2,237,121 doors (97 MB),
+  4 min in the build. On the phone: ~137 MB FTS rows and ~49 MB of doors (migration v3:
+  streets keyed by `nameKey`, `WITHOUT ROWID` doors with 1e-5° integer coordinates,
+  ~22 B each); Mac import 17 s, phone not measured.
+- Search: an address shows the door first ("Calle Mayor, 1" · Portal), else an
+  approximate one between neighbours or the nearest number on that side ("Calle de Alcalá,
+  50" · Portal aproximado: OSM has 48 and 52 but not 50).
+- Abbreviations also match the Catalan word ("Avda" → avinguda, "Pº" → passeig, "Pza" →
+  plaça). With only a routing pack (no map), an empty search said "download a map": fixed.
+- E2E: map-15 now also searches a place ("Comapedrosa") and an address ("Avda Meritxell
+  86" → Portal) from the pack's new side files (Andorra fixtures); all 15 maps flows pass.
+- Shared with the redesign session, which wires the same files into its country packages
+  (maps without a routing pack call places.py from `build-country-map.sh`).
 
 ### 2026-10-25 — Maps: search finds nearby schools; addresses and abbreviations
 

@@ -13,6 +13,7 @@ import {
   Hammer,
   HeartPulse,
   Hospital,
+  House,
   Landmark,
   MapPin,
   Pill,
@@ -72,6 +73,7 @@ export function isEmergencyKind(kind: string | null | undefined): kind is Emerge
 
 export function kindIcon(kind: string | null | undefined, layer?: string): LucideIcon {
   if (isEmergencyKind(kind)) return KIND_ICONS[kind];
+  if (kind === 'address' || kind === 'address_approx') return House;
   if (layer === 'road') return Route;
   if (layer === 'place') return Building;
   return MapPin;

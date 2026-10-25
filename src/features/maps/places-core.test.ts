@@ -12,7 +12,10 @@ import {
   INDEX_LAYERS,
   nearestLocality,
   normalizeName,
+  locateHouseNumber,
   parseAddress,
+  parseAddressesTsv,
+  parsePlacesTsv,
   parseStreetsTsv,
   pickIndexZoom,
   rankHits,
@@ -95,8 +98,8 @@ test('ftsQuery turns words into required prefixes', () => {
 });
 
 test('ftsQuery: an abbreviation also matches its full word', () => {
-  assert.equal(ftsQuery('Avda. Meritxell'), '("Avda"* OR "avenida"*) AND "Meritxell"*');
-  assert.equal(ftsQuery('Pº Castellana'), '("Pº"* OR "paseo"*) AND "Castellana"*');
+  assert.equal(ftsQuery('Avda. Meritxell'), '("Avda"* OR "avenida"* OR "avinguda"*) AND "Meritxell"*');
+  assert.equal(ftsQuery('Pº Castellana'), '("Pº"* OR "paseo"* OR "passeig"*) AND "Castellana"*');
   assert.equal(ftsQuery('C/ Dr. Fleming'), '"C"* AND ("Dr"* OR "doctor"* OR "drive"*) AND "Fleming"*');
   assert.equal(ftsQuery('Ntra Sra de Atocha'), '("Ntra"* OR "nuestra"*) AND ("Sra"* OR "senora"*) AND "de"* AND "Atocha"*');
 });
@@ -171,4 +174,43 @@ test('routing pack street names become road and place rows', () => {
     ],
   );
   assert.equal(rows[0].lat, 40.415234);
+});
+
+test('parsePlacesTsv: every named POI, other names searchable', () => {
+  const rows = parsePlacesTsv(
+    'school\tInstituto San Isidro Madrid\tSan Isidro\t40.412500\t-3.706900\nhospital\tHospital Clínico San Carlos\t\t40.441\t-3.719\nbad line\n',
+  );
+  assert.equal(rows.length, 2);
+  assert.deepEqual(rows[0], {
+    layer: 'poi',
+    kind: 'school',
+    name: 'Instituto San Isidro Madrid',
+    names: 'Instituto San Isidro Madrid San Isidro',
+    lat: 40.4125,
+    lon: -3.7069,
+    rank: 14,
+  });
+  assert.equal(rows[1].names, 'Hospital Clínico San Carlos');
+  assert.ok(rows[1].rank < rows[0].rank);
+});
+
+test('parseAddressesTsv normalizes house numbers', () => {
+  assert.deepEqual(parseAddressesTsv('Calle de Alcalá\t12 b\t40.42\t-3.69\n\tx\t1\t2\n'), [
+    { street: 'Calle de Alcalá', number: '12B', lat: 40.42, lon: -3.69 },
+  ]);
+});
+
+test('locateHouseNumber: the door, else between neighbours on the same side', () => {
+  const at = (number: string, lat: number) => ({ street: 'Calle de Alcalá', number, lat, lon: -3.69 });
+  const doors = [at('46', 40.42), at('48', 40.421), at('52', 40.423), at('51', 40.4225), at('50', 40.5)];
+  const near = { lat: 40.4215, lon: -3.69 };
+  // An exact door far away (another stretch beyond maxMeters) doesn't count: interpolated.
+  const fifty = locateHouseNumber(doors, '50', near);
+  assert.ok(fifty && !fifty.exact);
+  assert.ok(Math.abs(fifty.lat - 40.422) < 1e-9);
+  assert.deepEqual(locateHouseNumber(doors, '48', near), { lat: 40.421, lon: -3.69, exact: true });
+  // Only a lower neighbour: the nearest number on the same side, when close.
+  assert.deepEqual(locateHouseNumber(doors, '56', near), { lat: 40.423, lon: -3.69, exact: false });
+  assert.equal(locateHouseNumber(doors, '80', near), null);
+  assert.equal(locateHouseNumber(doors, 's/n', near), null);
 });

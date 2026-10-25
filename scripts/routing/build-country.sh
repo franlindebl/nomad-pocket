@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 # Builds the offline routing pack of one country (docs/MAPS_NAVIGATION_PLAN.md, phase 2):
 # Geofabrik extract(s) + admin boundaries from Overpass → Valhalla tiles → the pack, its
-# emergency points and its street names (search) → parts of at most 1900 MiB (GitHub
-# Release assets stop at 2 GiB) and a JSON fragment for the manifest (manifest.py).
+# emergency points, and its street names, named places and house numbers (search) → parts
+# of at most 1900 MiB (GitHub Release assets stop at 2 GiB) and a JSON fragment for the
+# manifest (manifest.py).
 #
 # Usage: scripts/routing/build-country.sh <country id from packs.json> <work dir>
 # Needs curl, python3 with pyosmium and osmium-tool, and the Valhalla tools: run inside
 # ghcr.io/valhalla/valhalla (CI does: apt-get install osmium-tool python3-pyosmium), or
 # on a host with docker, which then runs each Valhalla tool in that image.
 # Output: <work dir>/out/<pack>.tar[.partNN], <pack>.pois.tsv, <pack>.streets.tsv,
-# <country>.packs.json
+# <pack>.places.tsv, <pack>.addresses.tsv, <country>.packs.json
 set -euo pipefail
 
 COUNTRY="$1"
@@ -126,6 +127,11 @@ python3 -I "$HERE/emergency-points.py" "$WORK/src/pois.osm.pbf" "$OUT/$COUNTRY.p
 # 6. Street and locality names for the app's search.
 osmium tags-filter --overwrite "$PBF" w/highway n/place -o "$WORK/src/streets.osm.pbf"
 python3 -I "$HERE/streets.py" "$WORK/src/streets.osm.pbf" "$OUT/$COUNTRY.streets.tsv"
+
+# 6b. Every named place (any zoom) and every house number, for the same search.
+osmium tags-filter --overwrite "$PBF" nwr/name nwr/addr:housenumber -o "$WORK/src/places.osm.pbf"
+python3 -I "$HERE/places.py" "$WORK/src/places.osm.pbf" "$OUT/$COUNTRY.places.tsv" "$OUT/$COUNTRY.addresses.tsv"
+rm -f "$WORK/src/places.osm.pbf"
 
 # 7. Parts for GitHub's 2 GiB asset limit (the app appends them back together).
 for tar in "$OUT"/*.tar; do

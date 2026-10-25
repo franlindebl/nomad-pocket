@@ -125,7 +125,7 @@ export default function SearchSheet() {
 
       {!results.length && !coords && !savedHits.length ? (
         <Text variant="callout" color="textSecondary" align="center" style={{ marginTop: space.xxl, paddingHorizontal: space.lg }}>
-          {!maps.length
+          {!maps.length && !hasSearchIndex()
             ? t('search.noMaps')
             : deferred.length >= 2 && hasSearchIndex()
               ? t('search.noResults', { query: deferred })
