@@ -1,0 +1,93 @@
+# MAP-14 offline — road routing with an installed routing pack (Andorra, seeded): from
+# Andorra la Vella to coordinates in Sant Julià de Lòria the panel follows the roads (next
+# maneuver, remaining distance), the directions sheet lists the maneuvers, switching to
+# "A pie" routes again, and coordinates outside the pack fall back to a straight line.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, maps, seeded-route]
+---
+- setLocation:
+    latitude: 42.5075
+    longitude: 1.5218
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: { id: "map-search" }
+    timeout: 20000
+- tapOn: { id: "map-search" }
+- inputText: "42.4637, 1.4913"
+- tapOn: { id: "search-coordinates" }
+- extendedWaitUntil:
+    visible: { id: "place-card" }
+    timeout: 10000
+- tapOn: { id: "place-guide" }
+- extendedWaitUntil:
+    visible: { id: "guidance-next" }
+    timeout: 30000
+- assertVisible: { id: "guidance-costing-auto", selected: true }
+- assertVisible: "(?s).*km · .*min · llegada.*"
+- assertNotVisible: "En línea recta.*"
+- takeScreenshot: 01-route-car
+- tapOn: { id: "guidance-steps" }
+- extendedWaitUntil:
+    visible: { id: "route-summary" }
+    timeout: 10000
+- assertVisible: "(?s).*Conduzca.*"
+- takeScreenshot: 02-directions
+- repeat:
+    times: 3
+    commands:
+      - swipe:
+          start: 50%, 85%
+          end: 50%, 25%
+          duration: 300
+- assertVisible: "(?s).*Ha llegado a su destino.*"
+# Dragging down scrolls the list back to the top, then closes the sheet.
+- repeat:
+    while:
+      visible: { id: "route-step" }
+    times: 6
+    commands:
+      - swipe:
+          start: 50%, 40%
+          end: 50%, 98%
+          duration: 300
+- extendedWaitUntil:
+    notVisible: { id: "route-summary" }
+    timeout: 10000
+- tapOn: { id: "guidance-costing-pedestrian" }
+- extendedWaitUntil:
+    visible: { id: "guidance-costing-pedestrian", selected: true }
+    timeout: 10000
+- extendedWaitUntil:
+    visible: { id: "guidance-next" }
+    timeout: 30000
+- tapOn: { id: "guidance-steps" }
+- extendedWaitUntil:
+    visible: "(?s).*Camine.*"
+    timeout: 10000
+- takeScreenshot: 03-directions-foot
+# Dragging down scrolls the list back to the top, then closes the sheet.
+- repeat:
+    while:
+      visible: { id: "route-step" }
+    times: 6
+    commands:
+      - swipe:
+          start: 50%, 40%
+          end: 50%, 98%
+          duration: 300
+- tapOn: { id: "guidance-stop" }
+- assertNotVisible: { id: "guidance-panel" }
+# Outside the pack (Madrid): straight line, and a hint to download routing.
+- tapOn: { id: "map-search" }
+- inputText: "40.4168, -3.7038"
+- tapOn: { id: "search-coordinates" }
+- extendedWaitUntil:
+    visible: { id: "place-card" }
+    timeout: 10000
+- tapOn: { id: "place-guide" }
+- extendedWaitUntil:
+    visible: { id: "guidance-note" }
+    timeout: 30000
+- assertVisible: "(?s)En línea recta.*Descarga las rutas.*"
+- takeScreenshot: 04-no-pack

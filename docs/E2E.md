@@ -2,7 +2,7 @@
 
 [Maestro](https://maestro.mobile.dev) flows that drive the Release build of the app on an
 iOS simulator, the same way a person would: tapping, typing and reading the screen through
-accessibility. 46 flows cover 53 of the 55 cases in the test plan (Claude doc "Plan de
+accessibility. 48 flows cover 53 of the 55 cases in the test plan (Claude doc "Plan de
 tests funcionales iOS — Nomad App"), plus AI-06 and AI-07 added after it; the case ids (`RDR-03`, `MAP-06`…) are on the first
 line of each flow.
 
@@ -40,9 +40,9 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 
 | Command | Flows | Time | Covers | Needs |
 |---|---|---|---|---|
-| `npm run e2e` | 18 | ~12 min | P0: every screen's main path (incl. map search and Emergencias) | nothing (offline) |
-| `npm run e2e:full` | 31 | ~20 min | + P1: secondary features (themes, markers, find in page, courses…) | nothing (offline) |
-| `npm run e2e:all` | 41 | ~30 min | + P2: real downloads, OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
+| `npm run e2e` | 19 | ~13 min | P0: every screen's main path (incl. map search, Emergencias and road routing) | nothing (offline) |
+| `npm run e2e:full` | 33 | ~22 min | + P1: secondary features (themes, markers, find in page, courses…) | nothing (offline) |
+| `npm run e2e:all` | 43 | ~32 min | + P2: real downloads, OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape, light and dark | nothing (offline) |
 | `npm run e2e:android` | 3 | ~12 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias | internet, Android emulator |
 
@@ -121,13 +121,17 @@ To look into a failure:
 ```
 scripts/e2e.sh
  ├─ pick flows by tag (the `tags:` line of each e2e/flows/**/*.yaml)
- ├─ build the Release .app if missing or --build
+ ├─ build the Release .app if missing or --build (with EXPO_PUBLIC_ROUTING_MANIFEST_URL
+ │   pointing at the local pack server below)
+ ├─ if any flow is tagged `routing-server`: serve the Andorra routing pack split in two
+ │   parts + its emergency points + a manifest on http://localhost:8765
  ├─ boot NP-e2e, set its location to Madrid
  └─ for each flow
      ├─ uninstall + install the app        → fresh state, nothing left from the last flow
      ├─ grant location permission
      ├─ if tagged `seeded`: clone e2e/fixtures/*.zim into the app's Documents/content/zim/
      ├─ if tagged `seeded-map`: clone e2e/fixtures/*.pmtiles into Documents/content/maps/
+     ├─ if tagged `seeded-route`: clone e2e/fixtures/routing/*.tar into Documents/content/routing/
      ├─ if tagged `seeded-model`: clone e2e/fixtures/models/*.gguf into Documents/content/models/
      │   (the app registers loose files there at startup:
      │    src/features/{library,maps,assistant}/register.ts)
@@ -145,7 +149,7 @@ e2e/
   config.yaml          # Maestro workspace config
   flows/<area>/*.yaml  # one file per test, named after its main case (rdr-03-bookmark)
   subflows/            # shared steps: launch, finish-onboarding, open-wikipedia
-  fixtures/            # ZIM and map files for `seeded` / `seeded-map` flows (see Setup)
+  fixtures/            # ZIM, map and routing files for `seeded` / `seeded-map` / `seeded-route` flows (see Setup)
   artifacts/           # results (gitignored)
 scripts/e2e.sh         # runner
 scripts/e2e-setup.sh   # one-time setup
@@ -182,6 +186,7 @@ By hand:
   | `freecodecamp_es_all_2026-10.zim` | 11 MB | courses |
   | `nhs.uk_en_medicines_2026-09b.zim` | 15 MB | medical disclaimer |
   | `es-ml.pmtiles` | 0.6 MB | maps: Melilla up to zoom 12 (© OpenStreetMap, Protomaps build), in git |
+  | `routing/ad.tar`, `routing/ad.pois.tsv` | 3 MB | routing: Andorra pack + emergency points built by `scripts/routing/build-country.sh ad` (Valhalla 3.9.1, Geofabrik 2026-10-24, © OpenStreetMap), in git |
   | `models/Qwen3.5-0.8B-Q4_K_M.gguf` | 533 MB | assistant with a llama.cpp model (`seeded-model`), from Hugging Face |
 
   Kiwix removes old files from the mirror. `wikipedia_en_100_mini_2026-01.zim` is no
@@ -227,6 +232,8 @@ By hand:
 | maps | `map-10-search` | MAP-10, MAP-11 | smoke | seeded-map |
 | maps | `map-12-emergency-empty` | MAP-12 | smoke | — |
 | maps | `map-13-emergency-points` | MAP-13 | nightly | network, seeded-map |
+| maps | `map-14-route` | MAP-14 | smoke | seeded-route (Andorra pack, location set by the flow) |
+| maps | `map-15-routing-download` | MAP-15 | full | routing-server (local pack server) |
 | courses | `crs-01-empty` | CRS-01 | smoke | — |
 | courses | `crs-02-course` | CRS-02, CRS-03, CRS-04 | full | seeded |
 | assistant | `ai-01-no-model` | AI-01, AI-02 | smoke | — |
@@ -258,8 +265,9 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
 ```
 
 - Put it in `e2e/flows/<area>/`, named after its main case. Tag `seeded` if it needs the
-  ZIM fixtures, `seeded-map` for the map one, `seeded-model` for the GGUF model, and
-  `network` if it downloads. A map file
+  ZIM fixtures, `seeded-map` for the map one, `seeded-route` for the routing pack,
+  `routing-server` if it downloads a routing pack from the local server, `seeded-model`
+  for the GGUF model, and `network` if it downloads from the internet. A map file
   named after a region id (`es-ml.pmtiles`) registers as that region.
 - Text matching is a full-string regex: `"Michael Jackson.*"`, and escape `. ( ) ?`.
 - Cards and rows expose one merged accessibility label (`"Lo elijo yo, Empieza vacío…"`):
@@ -282,7 +290,11 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `map-search`, `map-emergency` | map search pill and Emergencias button |
   | `search-input`, `search-result`, `search-coordinates` | search sheet field, result rows, "go to coordinates" row |
   | `place-card`, `place-guide`, `place-save`, `place-close` | selected place card and its actions |
-  | `guidance-panel`, `guidance-distance`, `guidance-stop` | straight-line guidance panel |
+  | `guidance-panel`, `guidance-distance`, `guidance-stop` | guidance panel: remaining distance (route) or distance + direction (straight line), stop |
+  | `guidance-costing-<auto\|pedestrian\|bicycle>`, `guidance-next`, `guidance-next-distance`, `guidance-steps` | mode chips, next maneuver and its distance, directions button |
+  | `guidance-note`, `guidance-get-routing` | straight-line note and its "Descargar rutas" button |
+  | `route-summary`, `route-step` | directions sheet: distance · time, maneuver rows |
+  | `pack-row`, `pack-download`, `pack-installed`, `pack-delete`, `packs-retry`, `regions-routing` | routing packs sheet and its entry in Regiones |
   | `home-emergency` | Emergencias card on Home |
   | `emergency-call`, `emergency-share`, `emergency-position` | Emergencias sheet: call, share position, position text |
   | `emergency-cat-<category>`, `emergency-place`, `emergency-guide` | category chips (health, security, water, supplies, official), rows and their Llévame button |

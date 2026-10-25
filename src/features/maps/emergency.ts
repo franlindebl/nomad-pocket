@@ -121,6 +121,47 @@ const controllers = new Map<string, AbortController>();
 const again = new Set<string>();
 
 /** Fetches (or refreshes) the emergency points of a map region. Needs a connection. */
+/** Rows per transaction: a country's points (300k for Spain) must not freeze the UI. */
+const STORE_BATCH = 5000;
+
+/**
+ * Replaces the emergency points of a source (a map item from Overpass, or a routing
+ * pack's own file) and adds the named ones to the search index.
+ */
+export async function storeEmergencyPoints(source: string, pois: EmergencyPoi[]) {
+  const d = db();
+  const insert = d.prepareSync(
+    'INSERT OR REPLACE INTO map_pois (source, osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+  );
+  try {
+    d.runSync('DELETE FROM map_pois WHERE source = ?', source);
+    for (let i = 0; i < pois.length; i += STORE_BATCH) {
+      d.withTransactionSync(() => {
+        for (const p of pois.slice(i, i + STORE_BATCH)) {
+          insert.executeSync(source, p.osmId, p.kind, kindCategory(p.kind), p.name, p.operator, p.phone, p.openingHours, p.emergency, p.lat, p.lon);
+        }
+      });
+      await new Promise<void>((r) => setTimeout(r, 0));
+    }
+  } finally {
+    insert.finalizeSync();
+  }
+  indexEmergencyPoints(
+    source,
+    pois
+      .filter((p) => p.name)
+      .map((p) => ({ layer: 'poi', kind: p.kind, name: p.name!, names: p.name!, lat: p.lat, lon: p.lon, rank: 13 })),
+  );
+  d.runSync(
+    `INSERT INTO map_sources (item_id, pois_at, pois_count) VALUES (?, ?, ?)
+     ON CONFLICT(item_id) DO UPDATE SET pois_at = excluded.pois_at, pois_count = excluded.pois_count`,
+    source,
+    Date.now(),
+    pois.length,
+  );
+  usePoiSync.setState((st) => ({ version: st.version + 1 }));
+}
+
 export async function syncEmergencyPoints(item: MapItem): Promise<void> {
   if (item.meta.role === 'world') return;
   if (controllers.has(item.id)) {
@@ -139,46 +180,7 @@ export async function syncEmergencyPoints(item: MapItem): Promise<void> {
     }
     // Removed while the last cell was in flight: store nothing for it.
     if (ctrl.signal.aborted) throw new AbortedError();
-    const pois = [...byId.values()];
-    const d = db();
-    const insert = d.prepareSync(
-      'INSERT OR REPLACE INTO map_pois (source, osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    );
-    try {
-      d.withTransactionSync(() => {
-        d.runSync('DELETE FROM map_pois WHERE source = ?', item.id);
-        for (const p of pois) {
-          insert.executeSync(
-            item.id,
-            p.osmId,
-            p.kind,
-            kindCategory(p.kind),
-            p.name,
-            p.operator,
-            p.phone,
-            p.openingHours,
-            p.emergency,
-            p.lat,
-            p.lon,
-          );
-        }
-      });
-    } finally {
-      insert.finalizeSync();
-    }
-    indexEmergencyPoints(
-      item.id,
-      pois
-        .filter((p) => p.name)
-        .map((p) => ({ layer: 'poi', kind: p.kind, name: p.name!, names: p.name!, lat: p.lat, lon: p.lon, rank: 13 })),
-    );
-    d.runSync(
-      `INSERT INTO map_sources (item_id, pois_at, pois_count) VALUES (?, ?, ?)
-       ON CONFLICT(item_id) DO UPDATE SET pois_at = excluded.pois_at, pois_count = excluded.pois_count`,
-      item.id,
-      Date.now(),
-      pois.length,
-    );
+    await storeEmergencyPoints(item.id, [...byId.values()]);
     setState(item.id, null);
   } catch (e) {
     if (ctrl.signal.aborted) setState(item.id, null);

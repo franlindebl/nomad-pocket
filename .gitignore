@@ -47,6 +47,7 @@ example
 
 # nomad-zim: prebuilt libkiwix binaries (fetched by modules/nomad-zim/scripts/fetch-ios-libs.sh)
 modules/nomad-zim/ios/Frameworks/
+modules/nomad-route/ios/Frameworks/
 modules/*/android/build/
 
 # raw simulator captures (inputs of scripts/store-screenshots.py)

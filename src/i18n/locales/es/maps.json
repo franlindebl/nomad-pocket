@@ -116,14 +116,18 @@
   "guidance": {
     "toward": "Hacia {{name}}",
     "straightLine": "En línea recta: no sigue calles ni caminos",
-    "walk": "{{time}} a pie",
     "arrived": "Has llegado",
     "stop": "Terminar",
     "waiting": "Buscando señal GPS…",
     "accuracy": "Precisión ± {{meters}} m",
     "noCompass": "Sin brújula: la flecha apunta respecto al norte del mapa",
     "deniedTitle": "La ubicación está desactivada",
-    "deniedBody": "Para guiarte necesito tu ubicación. Funciona sin conexión gracias al GPS."
+    "deniedBody": "Para guiarte necesito tu ubicación. Funciona sin conexión gracias al GPS.",
+    "time": {
+      "auto": "{{time}} en coche",
+      "pedestrian": "{{time}} a pie",
+      "bicycle": "{{time}} en bici"
+    }
   },
   "emergency": {
     "title": "Emergencias",
@@ -270,5 +274,44 @@
     "administrative": "Zona administrativa",
     "residential": "Zona residencial",
     "industrial": "Zona industrial"
+  },
+  "route": {
+    "costing": {
+      "auto": "Coche",
+      "pedestrian": "A pie",
+      "bicycle": "Bici"
+    },
+    "remaining": "{{distance}} · {{time}} · llegada {{eta}}",
+    "steps": "Indicaciones",
+    "stepsTitle": "Indicaciones",
+    "computing": "Calculando la ruta…",
+    "noPack": "Descarga las rutas de esta zona para ir por carreteras y caminos.",
+    "summary": "{{distance}} · {{time}}",
+    "toll": "Con peajes",
+    "ferry": "Con ferri",
+    "noRoute": "No hay ninguna ruta en curso.",
+    "error": {
+      "noRoad": "No hay ninguna carretera ni camino cerca del origen o del destino.",
+      "noPath": "No se encontró un camino entre los dos puntos con este medio.",
+      "tooFar": "Demasiado lejos para este medio de transporte.",
+      "other": "No se pudo calcular la ruta.",
+      "unavailable": "Las rutas no están disponibles en esta versión."
+    },
+    "lastStretch": "La ruta termina aquí: sigue la flecha hasta el destino."
+  },
+  "packs": {
+    "title": "Rutas sin conexión",
+    "rowBody": "Para ir por carreteras y caminos sin cobertura",
+    "intro": "Cada paquete permite calcular rutas en coche, a pie y en bici sin conexión, y trae los puntos de emergencia de la zona (hospitales, policía, agua…). Datos de OpenStreetMap.",
+    "detail": "{{size}} · datos de {{date}}",
+    "nearby": "Para esta zona",
+    "all": "Todos",
+    "loading": "Cargando el catálogo…",
+    "offline": "No se pudo cargar el catálogo de rutas. Necesitas conexión a internet.",
+    "retry": "Reintentar",
+    "deleteTitle": "¿Eliminar las rutas de {{name}}?",
+    "download": "Descargar rutas",
+    "failed": "Error",
+    "section": "Rutas"
   }
 }

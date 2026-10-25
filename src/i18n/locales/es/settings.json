@@ -17,7 +17,8 @@
   "kind": {
     "zim": "Biblioteca y cursos",
     "map": "Mapas",
-    "model": "Modelos de IA"
+    "model": "Modelos de IA",
+    "route": "Rutas sin conexión"
   },
   "manageContent": "Gestionar contenido",
   "deleteConfirm": "¿Eliminar {{title}}? Liberarás {{size}}.",

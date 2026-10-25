@@ -17,7 +17,8 @@
   "kind": {
     "zim": "Library & courses",
     "map": "Maps",
-    "model": "AI models"
+    "model": "AI models",
+    "route": "Offline routing"
   },
   "manageContent": "Manage content",
   "deleteConfirm": "Delete {{title}}? This frees {{size}}.",

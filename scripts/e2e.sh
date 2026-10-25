@@ -8,8 +8,9 @@
 #   --list     print the flows that would run, and exit
 #
 # Every flow runs on a fresh install. Flows tagged `seeded` get the ZIM files in
-# e2e/fixtures/ copied to Documents/content/zim/, and `seeded-map` the .pmtiles to
-# content/maps/ (registered at startup by src/features/{library,maps}/register.ts).
+# e2e/fixtures/ copied to Documents/content/zim/, `seeded-map` the .pmtiles to
+# content/maps/ and `seeded-route` the routing pack (fixtures/routing/*.tar) to
+# content/routing/ (registered at startup by src/features/{library,maps}/register.ts).
 # Results: e2e/artifacts/<timestamp>/.
 #
 # Env: DEVICE (simulator name, default NP-e2e), APP (path to a Release simulator
@@ -57,6 +58,10 @@ if ! java -version >/dev/null 2>&1; then
   export PATH="$JAVA_HOME/bin:$PATH"
 fi
 
+# The suite's app reads the routing catalog from the local pack server below.
+ROUTING_PORT=8765
+export EXPO_PUBLIC_ROUTING_MANIFEST_URL="http://localhost:$ROUTING_PORT/routing-manifest.json"
+
 if [[ $BUILD -eq 1 || ! -d "$APP" ]]; then
   echo "Building ${APP}…"
   xcodebuild -workspace "$ROOT/ios/NomadPocket.xcworkspace" -scheme NomadPocket \
@@ -70,6 +75,30 @@ xcrun simctl boot "$UDID" 2>/dev/null || true
 xcrun simctl bootstatus "$UDID" -b >/dev/null
 xcrun simctl location "$UDID" set 40.4168,-3.7038
 
+# `routing-server` flows download a routing pack: the Andorra fixture split in two
+# parts (exercises reassembly) plus its emergency points, served from localhost.
+SERVER_PID=""
+if printf '%s\n' "${FLOWS[@]}" | xargs grep -lE '^tags:.*[[ ,]routing-server[],]' >/dev/null 2>&1; then
+  SERVE="$(mktemp -d)"
+  split -b 2000000 -d -a 2 "$ROOT/e2e/fixtures/routing/ad.tar" "$SERVE/ad.tar.part"
+  cp "$ROOT/e2e/fixtures/routing/ad.pois.tsv" "$SERVE/"
+  python3 -I - "$SERVE" "$ROUTING_PORT" <<'PY'
+import hashlib, json, os, sys
+d, port = sys.argv[1], sys.argv[2]
+def f(n):
+    p = os.path.join(d, n)
+    return {"name": n, "size": os.path.getsize(p), "sha256": hashlib.sha256(open(p, "rb").read()).hexdigest()}
+parts = [f(n) for n in sorted(os.listdir(d)) if n.startswith("ad.tar.part")]
+pack = {"id": "ad", "country": "ad", "regionId": "ad", "buildDate": "20261024", "bbox": [1.25, 42.25, 2.0, 42.75],
+        "size": sum(p["size"] for p in parts), "parts": parts, "pois": f("ad.pois.tsv")}
+json.dump({"version": 1, "release": "e2e", "baseUrl": f"http://localhost:{port}", "valhalla": "3.9.1", "packs": [pack]},
+          open(os.path.join(d, "routing-manifest.json"), "w"))
+PY
+  python3 -m http.server "$ROUTING_PORT" --bind 127.0.0.1 --directory "$SERVE" >/dev/null 2>&1 &
+  SERVER_PID=$!
+  trap '[[ -n "$SERVER_PID" ]] && kill "$SERVER_PID" 2>/dev/null' EXIT
+fi
+
 OUT="$ROOT/e2e/artifacts/$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$OUT"
 ln -sfn "$OUT" "$ROOT/e2e/artifacts/latest"
@@ -82,13 +111,17 @@ reset_app() {
   xcrun simctl privacy "$UDID" grant location "$BUNDLE" 2>/dev/null || true
   local content
   content="$(xcrun simctl get_app_container "$UDID" "$BUNDLE" data)/Documents/content"
-  # `seeded`: the ZIM fixtures; `seeded-map`: the map fixtures; `seeded-model`: the GGUF
-  # model. The app registers loose files in these folders at startup. APFS clones: instant.
+  # `seeded`: the ZIM fixtures; `seeded-map`: the map fixtures; `seeded-route`: the routing
+  # pack; `seeded-model`: the GGUF model. The app registers loose files in these folders at
+  # startup. APFS clones: instant.
   if grep -qE '^tags:.*[[ ,]seeded[],]' "$1"; then
     mkdir -p "$content/zim" && cp -c "$ROOT"/e2e/fixtures/*.zim "$content/zim/"
   fi
   if grep -qE '^tags:.*[[ ,]seeded-map[],]' "$1"; then
     mkdir -p "$content/maps" && cp -c "$ROOT"/e2e/fixtures/*.pmtiles "$content/maps/"
+  fi
+  if grep -qE '^tags:.*[[ ,]seeded-route[],]' "$1"; then
+    mkdir -p "$content/routing" && cp -c "$ROOT"/e2e/fixtures/routing/*.tar "$content/routing/"
   fi
   if grep -qE '^tags:.*[[ ,]seeded-model[],]' "$1"; then
     mkdir -p "$content/models" && cp -c "$ROOT"/e2e/fixtures/models/*.gguf "$content/models/"

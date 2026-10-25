@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Crop, Globe, Map as MapIcon, Plus, Trash2 } from 'lucide-react-native';
+import { Crop, Globe, Map as MapIcon, Plus, Route as RouteIcon, Trash2 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Alert } from 'react-native';
 
@@ -106,6 +106,18 @@ export default function RegionsSheet() {
           {t('regions.none')}
         </Text>
       )}
+
+      <SectionHeader title={t('packs.section')} />
+      <ListGroup>
+        <ListRow
+          testID="regions-routing"
+          leading={<IconBadge icon={RouteIcon} hue="maps" />}
+          title={t('packs.title')}
+          subtitle={t('packs.rowBody')}
+          chevron
+          onPress={() => router.push('/maps/routing-packs')}
+        />
+      </ListGroup>
     </Screen>
   );
 }

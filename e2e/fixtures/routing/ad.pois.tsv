@@ -1,0 +1,408 @@
+node	271939031	42.5795800	1.6400616	fuel							BP	BP				
+node	292503717	42.5466649	1.7306629	fuel								Gasopas			Mo-Su 07:00-19:00	
+node	521143390	42.5716368	1.4845445						supermarket		Supermercat Saint Moritz					
+node	521144650	42.5713942	1.4859614						supermarket		Supermercat Moles				Mo-Su 09:00-21:00	
+node	522787974	42.5731928	1.4703799	hospital	hospital											
+node	590463655	42.5717761	1.4844043	pharmacy	pharmacy											
+node	666793601	42.5489957	1.6468331	hospital	hospital											
+node	666793602	42.5527445	1.6281598	hospital	hospital											
+node	666793607	42.5425660	1.6608472	hospital	hospital											
+node	666793610	42.5544735	1.6533601	hospital	hospital											
+node	690708548	42.5423906	1.7339056	pharmacy	pharmacy						Farmàcia del Pas	Farmàcia del Pas				
+node	690708590	42.5435615	1.7327092						supermarket		Maxi Mercat		+376 855 338			
+node	690708612	42.5432120	1.7354792						supermarket		Hiper Pas IV				Mo-Sa 08:00-20:00; Su 08:00-19:00	
+node	690708653	42.5413859	1.7338899	pharmacy	pharmacy						Farmàcia de les Pistes					
+node	690734633	42.5416228	1.7321279						supermarket		Spar					
+node	899526022	42.5813680	1.4468050	shelter							Cabana de la Comapedrosa					
+node	899526219	42.5110695	1.6089534	shelter												
+node	899526271	42.4822694	1.6293964	shelter							Cabana del Serrat de la Barracota					
+node	963678499	42.5665150	1.7578450	shelter							Cabanes Pla de la Vaca Morta					
+node	1367752249	42.5557786	1.5623002					spring			Font de la Navina					
+node	1386872680	42.5220951	1.5595241	fuel							BP	BP				
+node	1386872681	42.5216523	1.5594823	fuel							Cepsa					
+node	1407160092	42.4573600	1.4868083	fuel							Sant Eloi	Sant Eloi				
+node	1499266441	42.5465247	1.5137320						supermarket		Garralla					
+node	1568150507	42.5801855	1.6514365						supermarket		el mercat		+376 720 358		Mo-Sa 08:00-22:00; Su 08:00-21:00	
+node	1579330426	42.5087003	1.5347141						supermarket		Caprabo		+376 870 310		Mo-Sa 10:00-21:00; Su 10:00-19:00	
+node	1607001077	42.5818347	1.6619984	fuel							Esso					
+node	1803703337	42.5473240	1.5144977						supermarket		Carrefour					
+node	1922592322	42.4536015	1.4873853	fuel							Riberola	Sant Eloi				
+node	1922592407	42.4551036	1.4863617	fuel												
+node	1922592536	42.4529563	1.4867788	fuel												
+node	2050272761	42.4685510	1.4924823	fuel												
+node	2050364490	42.4692950	1.4928644	hospital	hospital											
+node	2050466659	42.4622203	1.4905657	pharmacy	pharmacy											
+node	2287024653	42.5669913	1.6008296	fuel							Total					
+node	2294035697	42.5083285	1.5450527	fuel							Repsol					
+node	2402832670	42.5082520	1.5339584	pharmacy	pharmacy						Farmàcia Rocamora					
+node	2411239913	42.5079632	1.5304282						supermarket		Super U				Mo-Sa 09:30-21:00; Su 09:00-20:00	
+node	2482295087	42.5399678	1.7195088	fuel							Elf					
+node	2482295088	42.5398500	1.7199721	fuel							BP					
+node	2482295114	42.5394951	1.7207305	fuel							Total					
+node	2482295115	42.5400810	1.7202476	fuel							Total					
+node	2548471583	42.5111439	1.5389709	drinking_water												
+node	2797792644	42.5334885	1.5847079	fuel							Repsol					
+node	2899149615	42.5091060	1.5251214							diplomatic	Ambaixada de França		+376 736 700		Mo-Th 08:30-13:00,14:30-18:00; Fr 08:00-13:00,14:30-16:30	
+node	2931435926	42.5089308	1.5285239	pharmacy	pharmacy											
+node	2939289858	42.5088326	1.5300156							diplomatic	Consol Honorari de la República Federal d’Alemamya		+376 874 900			
+node	2963116020	42.5084733	1.5319874	pharmacy	pharmacy								+376 828 717			
+node	2966749076	42.5464466	1.5141083	pharmacy	pharmacy						Farmacia Garalla					
+node	2966849035	42.5447948	1.5155766	police							Circulació Urbanos	Comú de La Massana				
+node	2966866997	42.5451142	1.5151179	pharmacy	pharmacy											
+node	2967432224	42.5458356	1.5177013						hardware							
+node	3141318196	42.5157266	1.5703738					spring			Font de les Ordigues					
+node	3378343157	42.5377566	1.7207945	fuel												
+node	3459407907	42.4655197	1.4913109						supermarket		Dia Market				09:00-21:00	
+node	3653106604	42.6003124	1.5334023	drinking_water												
+node	3670518493	42.6152549	1.6241903	drinking_water							Font dels Clots de la Llosa					
+node	3749171182	42.4318844	1.5263305					spring			Font dels Traginers					
+node	3808706622	42.4353347	1.4728822	police							Duana andorrana				24/7	
+node	3870497791	42.5097292	1.5406185	pharmacy	pharmacy						Farmàcia de les Escoles					
+node	3885835732	42.5918410	1.6694971					spring			Font de Ferrossins					yes
+node	3885835733	42.5932179	1.6738458					spring			Font					
+node	3900723306	42.5865081	1.6666243					spring			Cóm de l'Obac d'Incles					
+node	3908084973	42.5539210	1.5882889					spring			Font					
+node	3928793749	42.5661311	1.5986420						supermarket		Carrefour City				Mo-Sa 09:00-21:00; Su 09:00-14:00,16:30-20:00; PH off	
+node	3928793751	42.5667268	1.5997116	police							Policia					
+node	3928793762	42.5666923	1.5997644	drinking_water												
+node	3965381764	42.5421978	1.5914215	fuel							BP					
+node	3979472494	42.4990721	1.5548059					spring			font Boigot					
+node	4052478315	42.4355855	1.4733675	police							Duana Andorra					
+node	4073381657	42.5301921	1.5990632	drinking_water												
+node	4078431648	42.5996672	1.6374913					spring			Font					
+node	4097094865	42.6434876	1.5604904	shelter												
+node	4173227326	42.4892862	1.5184159					spring			La Font de Sansa					
+node	4235379090	42.4784897	1.4901873					spring			Font de l'Àrtic					
+node	4235417076	42.4755066	1.4960933					spring			Font Roja					
+node	4235462231	42.4815668	1.4882890	shelter							Cova Balma de la Margineda					
+node	4240956911	42.4714438	1.5009306					spring			Font					
+node	4314606232	42.4870217	1.4861099					spring			Font de l'Esquerola					
+node	4359859793	42.5463970	1.5218296						supermarket		Andora					
+node	4427697891	42.4849395	1.4923252	fuel							Repsol				24/7	
+node	4456947590	42.5335165	1.5858200	fuel							BP					
+node	4456948192	42.5173281	1.5552836						hardware		Mauco		+376 821 557			
+node	4463164817	42.5087352	1.5398243	doctors	doctor						Centre de rehabilitació funcional Lourdes Guardia		+376 800 690			
+node	4470034393	42.4649967	1.4904690	doctors	doctor						Centre mèdic laurèdia					
+node	4470051391	42.4653478	1.4905876	drinking_water							Font					
+node	4511962338	42.5062496	1.5293281						supermarket		BonÀrea	Grup Alimentari Guissona				
+node	4512004201	42.5063496	1.5300827	pharmacy	pharmacy						Farmàcia Edelweiss					
+node	4677742610	42.4975526	1.5034689	fuel							Total				Mo-Su 07:00-23:00+	
+node	4689658601	42.4979723	1.5038249	fuel							Estació Juli				24/7	
+node	4697188689	42.5073178	1.5220939	townhall							Comú d'Andorra la Vella		+376 730 000			
+node	4698722692	42.5073560	1.5217879	drinking_water							Font					
+node	4699170492	42.5077429	1.5220419	pharmacy	pharmacy						Mitjavila		+376 820 224			
+node	4744532621	42.4972566	1.5020632	fuel												
+node	4780410437	42.5087263	1.5408389	drinking_water							1954					
+node	4780414828	42.5080578	1.5223343	drinking_water							Cap del Carrer					
+node	4780414829	42.5090729	1.5428563	drinking_water							1951					
+node	4780988121	42.5074720	1.5276360	drinking_water												
+node	4810135732	42.5108298	1.5370864	drinking_water												
+node	4810135733	42.5108022	1.5371484	drinking_water												
+node	4874439753	42.4960731	1.4995659						supermarket		Express					
+node	4874445164	42.5566629	1.5328646	drinking_water												
+node	4874445625	42.5050486	1.5147417						supermarket		Eco Supermacats				Mo-Fr 08:30-14:00,16:00-20:30; Sa 08:30-14:00,16:00-21:00; Su 08:30-14:00,16:00-20:00	
+node	4890701726	42.5057141	1.5291971						supermarket		Andorra 2000					
+node	4927139325	42.4588333	1.4880615	fuel							BP					
+node	4927139521	42.4601162	1.4890890	fuel							Cepsa				24/7	
+node	4931838121	42.5085424	1.5362728	doctors	doctor						Bio-Centre					
+node	4942543822	42.5454392	1.7305619	hospital							Urgències del Pas					
+node	4955512821	42.5602964	1.6842980	fuel							Cepsa					
+node	4984632724	42.5362656	1.5825936	pharmacy	pharmacy						Farmàcia Manresa					
+node	4984643122	42.5062257	1.5228292	pharmacy	pharmacy						Guitart					
+node	4984739288	42.5361764	1.5822831						hardware		Ferreteria Principat					
+node	4984739292	42.5360825	1.5821345						supermarket							
+node	4984739294	42.5367021	1.5830445	pharmacy	pharmacy											
+node	5043815483	42.5666148	1.5990650	drinking_water												
+node	5167171640	42.5868725	1.4676508					spring			Font de la Coruvilla					
+node	5288596525	42.5434038	1.5169972						supermarket		BonÀrea					
+node	5292726211	42.4352481	1.4726644	police							Duana espanyola				24/7	
+node	5325449420	42.5424683	1.7328958						supermarket		Intermercat HP					
+node	5325452691	42.5430107	1.7335190						supermarket		Hiperchamp					
+node	5325452700	42.5424050	1.7345185						supermarket		Carrefour				Mo-Fr 08:30-20:30; Su 08:30-14:00,16:30-20:00	
+node	5344481944	42.4324124	1.5525847					spring			Font Bullidora					
+node	5513810921	42.5067166	1.5336637							diplomatic	Honorary Consulate of the Czech Republic			+376 862 800	Tu 17:00-19:30	
+node	5515898122	42.5091798	1.5421613	drinking_water												
+node	5706417299	42.4962353	1.5066243	fuel							L'Obac de Santa Coloma	CEPSA				
+node	5723978577	42.5087827	1.5342651	pharmacy	pharmacy						Galeno					
+node	5734184036	42.5081056	1.5291926	pharmacy	pharmacy						Farmacia Pasteur					
+node	5734184037	42.5084629	1.5350342	pharmacy	pharmacy											
+node	5734184038	42.5088247	1.5356696	pharmacy	pharmacy						Farmacia Pirineus					
+node	5734184039	42.5085366	1.5361153	pharmacy	pharmacy						Farmàcia Europa					
+node	5734184040	42.5086569	1.5376578	pharmacy	pharmacy						Farmacia Carlemany					
+node	5734184041	42.5086226	1.5397790	pharmacy	pharmacy						Farmacia Guerrero					
+node	5734184042	42.5087100	1.5364172			defibrillator										
+node	5734184044	42.5071181	1.5266591	pharmacy	pharmacy						Valira					
+node	5734184045	42.5080866	1.5256307	pharmacy	pharmacy						Farmacia del Pont					
+node	5734220130	42.5087401	1.5395136			defibrillator					Desfibrilador					
+node	5734220131	42.5071572	1.5247525							diplomatic	Ambaixada d'Espanya		+376 800 030		Mo-Fr 09:30-14:00	
+node	5734220132	42.5078070	1.5246432	pharmacy	pharmacy						González-Adrio					
+node	5734220133	42.5063244	1.5211465	drinking_water												
+node	5734220247	42.5073253	1.5328032	pharmacy	pharmacy						Roser Miró					
+node	5734220428	42.5085881	1.5336527	pharmacy	pharmacy						Farmacia Galeno 3					
+node	5734220430	42.5085599	1.5266738	pharmacy	pharmacy						Farmacia Gerrero					
+node	5734236535	42.5077734	1.5307045	pharmacy	pharmacy						Farmacia Pasteur					
+node	5764355409	42.4390310	1.4918613		hospital	no										
+node	5803912359	42.5062584	1.5231895							diplomatic	Consolat Honorari Portugal					
+node	5848415524	42.5731615	1.4837432	drinking_water							Font d'Arinsal					
+node	5899806609	42.5088743	1.5321630						supermarket		E. Leclerc				Mo-Fr 09:00-21:00; Sa 09:00-21:30; Su 09:00-20:30	
+node	5908941785	42.5353172	1.5814803	drinking_water												
+node	5922797586	42.5081169	1.5397268	fuel							Artal					
+node	5924690187	42.5087034	1.5224595	water_point							Font de la Llacuna					
+node	5940458485	42.5098579	1.5368837	drinking_water												
+node	6255379663	42.5074383	1.5101414					spring			Font de Ferrús					
+node	6299349685	42.5318209	1.5770042	fuel							Cepsa					
+node	6306288007	42.5376928	1.5865377						supermarket		Comerç les Bons					
+node	6307053770	42.5367097	1.5892203	fuel							BP					
+node	6389095185	42.5105506	1.5482638	fuel							Artal 2					
+node	6564773287	42.5360336	1.5820588						supermarket		ECO River				Mo-Sa 09:00-20:30, Su 09:00-20:00	
+node	6564773288	42.5358795	1.5820830	doctors	doctor						Osteopata Blanchon		+376 728 148		Mo-Sa 09:00-13:00, 14:00-20:00	
+node	6570415785	42.5066868	1.5234295						supermarket		Caprabo				Mo-Sa 09:30-21:00; Su 09:00-20:00	
+node	6586256079	42.5467385	1.5515895	drinking_water							Font de Mallol					
+node	6627687586	42.5083371	1.5326721	drinking_water							Font d' Aigua					
+node	6627687985	42.5083413	1.5305252	drinking_water							Font d'Aigua					
+node	6641688796	42.4986694	1.5300506	drinking_water												
+node	6641689001	42.4999287	1.5300572	drinking_water												
+node	6641689288	42.5832216	1.4722620					spring			Font del Moixó					
+node	6641690285	42.5801075	1.4760177					spring			Font del Riu Pollós					
+node	6641690286	42.5979428	1.5309612					spring								
+node	6642714848	42.5366509	1.4794164					spring								
+node	6643291575	42.5576114	1.4332600					spring			Font					
+node	6643291576	42.5600790	1.4407089					spring								
+node	6673894286	42.5074651	1.5326484	drinking_water							Font d'Aigua					
+node	6733504652	42.5091025	1.5440218	drinking_water				hot_spring			Font del Metge					
+node	6774364141	42.6016501	1.6982846					spring			Font del Travenc					yes
+node	7118124127	42.4352805	1.4726153	police							Duana espanyola					
+node	7118124129	42.4352937	1.4729388	police							Duana andorrana					
+node	7282465469	42.5421984	1.7324737						supermarket		Fran per					
+node	7282470378	42.5422262	1.7326016						supermarket		Hiper pas					
+node	7282474834	42.5423243	1.7321299						supermarket		Hiper pas					
+node	7292159745	42.5095470	1.5404725	drinking_water												
+node	7296539985	42.5091958	1.5408665						supermarket		E.Leclerc Express				Mo-Fr 08:30-21:00; Sa 09:00-21:00; Su 09:30-19:00	
+node	7296670777	42.5417783	1.7325436						supermarket							
+node	7494373832	42.5094124	1.5701744					spring			Font de Corralets					
+node	7518763095	42.5650503	1.5279546	drinking_water												
+node	8114224917	42.5110422	1.5399199	police							Servei de Circulació i Atenció Ciutadana del Comú d'Escaldes-Engordany		+376 870 210		Mo-Fr 08:00-16:00	
+node	8154715417	42.5101112	1.5370743	water_point												
+node	8410227818	42.5818796	1.6620442	fuel							BP					
+node	8514836683	42.5413922	1.4569864					spring			Font del Bisbe					
+node	8725480923	42.5086954	1.5290988	drinking_water												
+node	8824671056	42.5962598	1.5265897					spring								yes
+node	8897207074	42.4282186	1.5173058	drinking_water												
+node	9019115342	42.4920272	1.5253606					spring			Font del Bosc Negre					yes
+node	9019395596	42.5462528	1.5082297					spring								
+node	9042427850	42.5658493	1.5979435						supermarket		Petit Mercat de Canillo		+376 744 888		Mo-Sa 08:30-14:00, 16:45-20:00; Su 08:30-14:00	
+node	9049986894	42.4783781	1.5503812	drinking_water												
+node	9050017756	42.4913439	1.5418035					spring			Font de la Tartera Gran					
+node	9050019174	42.5010146	1.5211183					spring			Font del Ribal					yes
+node	9091526828	42.5284388	1.7357218					spring			Font Negra					
+node	9137691097	42.5455739	1.4746593	drinking_water												
+node	9170377217	42.5217500	1.5591687	shelter												
+node	9202662521	42.4879858	1.5181342					spring			font de l'Astrell					yes
+node	9202662619	42.5086536	1.5358120			defibrillator									24/7	
+node	9202662920	42.5688122	1.5218530	drinking_water												
+node	9208010522	42.6249877	1.5284991	drinking_water												
+node	9208010529	42.5464693	1.5143214			defibrillator										
+node	9208010540	42.5275292	1.5205333	drinking_water							Font de l'Oratori de St. Antoni					
+node	9208013025	42.5689057	1.5879160			defibrillator										
+node	9208013035	42.5200550	1.5234664	drinking_water							Font de la Grella					yes
+node	9208013821	42.5018434	1.5122112			defibrillator										
+node	9215725525	42.5070453	1.5226797			defibrillator										
+node	9599286217	42.5062135	1.5347735					spring								
+node	9708305973	42.4756624	1.5506230					spring			Font de Prat Primer					
+node	9721456171	42.5058616	1.5257710	drinking_water												
+node	9810962438	42.5662634	1.5992685			defibrillator										
+node	9811057659	42.5669116	1.5978724	drinking_water												
+node	9811057660	42.5674743	1.5979056	drinking_water												
+node	9811057661	42.5670763	1.6004585	drinking_water												
+node	9811057664	42.5671837	1.5985962	drinking_water												
+node	9812518306	42.5660778	1.6000135	water_point												yes
+node	9812543333	42.5656271	1.5972618	pharmacy	pharmacy										Mo-Sa 09:00-14:00,16:00-20:00; Su 09:30-13:15,13:30-20:00; Sa 09:00-17:00; PH closed	
+node	9812543336	42.5659552	1.5961466	fuel												
+node	9856957783	42.5118242	1.5687919					spring			Font de les Molleres					
+node	9979809634	42.5117559	1.5686912					spring								
+node	9990115297	42.5055011	1.5158775	pharmacy	pharmacy											
+node	9990115724	42.5070860	1.5189227	pharmacy	pharmacy											
+node	10049577624	42.5367216	1.4808651	drinking_water							Font del Besurt					
+node	10094939543	42.5467357	1.5517584					spring								
+node	10094939655	42.5380844	1.5862612	drinking_water												
+node	10096400429	42.4386079	1.5553911					spring								
+node	10115266551	42.5358218	1.5822472	pharmacy							Farmàcia Baixench					
+node	10304378109	42.5062961	1.5214853	police							Servei de Circulació d’Andorra la Vella		+376 730 011		24/7	
+node	10900341957	42.5087466	1.5407839			defibrillator						SUM			24/7	
+node	10900417840	42.4747895	1.4853387	drinking_water												
+node	10903330656	42.4689373	1.4926171			defibrillator										
+node	10903381705	42.5097408	1.5396348			defibrillator										
+node	10903381806	42.5088530	1.5394440	drinking_water												
+node	10903381809	42.5060152	1.5208531			defibrillator										
+node	10903381811	42.5084355	1.5220950			defibrillator										
+node	10903392513	42.4666264	1.4926265			defibrillator										
+node	10906007316	42.5071895	1.5208643			defibrillator										
+node	10908160811	42.5149379	1.5315156	clinic	clinic						Centre d'atenció primaria La Llanterna					
+node	10909384485	42.4650454	1.4903735			defibrillator										
+node	10909417011	42.5384714	1.5859095	drinking_water												
+node	10909417105	42.5330895	1.5784467			defibrillator										
+node	10909417211	42.5384081	1.5873612	drinking_water												
+node	10909418805	42.5379550	1.5835462	drinking_water												
+node	10912581428	42.5091143	1.5427078	drinking_water												
+node	10916454659	42.4605528	1.4896681			defibrillator										
+node	10940422582	42.5064575	1.5233232							diplomatic	Honorary Consulate of Poland		+376 885 288			
+node	11066577115	42.5097813	1.5347466	clinic	clinic						IMO Andorra		+376 885 544			
+node	11066577116	42.5096389	1.5347278	clinic	clinic						Centre Mèdic i Quirúrgic	CMQ	+376 801 222			
+node	11071058817	42.5215529	1.5955798	drinking_water												
+node	11071059014	42.5564180	1.5340339						supermarket		Comerç Babi		+376847280		Mo-Su 08:30-20:30	
+node	11168177166	42.4447058	1.4938569					spring			Font Comabella					
+node	11168197484	42.5801533	1.4760600					spring								
+node	11232156961	42.5354993	1.5818351	drinking_water							Font					
+node	11327981880	42.4353733	1.4728354	police							Duana andorrana					
+node	11327981881	42.4354091	1.4727910	police							Duana andorrana					
+node	11327981882	42.4352118	1.4727142	police							Duana espanyola					
+node	11327981883	42.4351671	1.4727659	police							Duana espanyola					
+node	12849551578	42.4945133	1.4997143			defibrillator										
+node	12849551579	42.4959125	1.5000723			defibrillator										
+node	12849551580	42.4972118	1.5026332			defibrillator										
+node	12849571938	42.5102746	1.5419604			defibrillator										
+node	12849576473	42.5116072	1.5374865			defibrillator										
+node	12849576474	42.5102855	1.5422031			defibrillator										
+node	12849580944	42.5067091	1.5230324			defibrillator										
+node	12849580945	42.5043931	1.5226552			defibrillator										
+node	12849587744	42.5087877	1.5389054			defibrillator										
+node	12849587745	42.5107659	1.5357913			defibrillator										
+node	12849587746	42.5113255	1.5346970			defibrillator										
+node	12849587747	42.5125473	1.5355419			defibrillator										
+node	12849593912	42.5087521	1.5344086			defibrillator										
+node	12849594615	42.5061376	1.5262701			defibrillator										
+node	12849594616	42.5088777	1.5273759			defibrillator										
+node	12849594617	42.5072959	1.5269320			defibrillator										
+node	12849594618	42.5086612	1.5285540			defibrillator										
+node	12849594619	42.5085984	1.5294331			defibrillator										
+node	12849594620	42.5081392	1.5304886			defibrillator										
+node	12849594621	42.5085336	1.5322052			defibrillator										
+node	12849600186	42.5055983	1.5174638			defibrillator										
+node	12849600187	42.5046175	1.5186185			defibrillator										
+node	12849600188	42.5072879	1.5200132			defibrillator										
+node	12849600189	42.5072079	1.5205517			defibrillator										
+node	12849600190	42.5079039	1.5243477			defibrillator										
+node	12849620469	42.5074026	1.5221000			defibrillator										
+node	12849620470	42.5066938	1.5225432			defibrillator										
+node	12849620471	42.5065558	1.5219618			defibrillator										
+node	12849629054	42.5016741	1.5136738			defibrillator										
+node	12849629055	42.4995295	1.5186131			defibrillator										
+node	12926148901	42.5073279	1.5347106						supermarket		biocoop				Mo-Sa 09:00-21:00; Su 09:30-19:30	
+node	12926382801	42.5122969	1.5424314			defibrillator										
+node	12941386601	42.5091482	1.5440217			defibrillator										
+node	12944423203	42.5080059	1.5290408						supermarket		veritas					
+node	12944423303	42.5071338	1.5200232			defibrillator										
+node	12944423305	42.5084104	1.5318273	drinking_water												
+node	12944424002	42.5065502	1.5247442						supermarket		Carrefour Express				24/7	
+node	12944424401	42.5086783	1.5384666			defibrillator										
+node	12944424403	42.5126854	1.5351092	pharmacy							Pasteur					
+node	12944424501	42.5093828	1.5408788						supermarket		Carrefour city					
+node	12953171205	42.5901964	1.4790381	drinking_water							Aigua no tractada					
+node	12953172102	42.5940030	1.4604513	drinking_water							Aigua no tractada					
+node	12981820534	42.5430905	1.7344281						supermarket		La Cava	Gruphiperpas				
+node	13013441602	42.4948973	1.6566071	drinking_water												
+node	13013443701	42.4851508	1.6398735					spring								
+node	13015189601	42.5822923	1.5183374	drinking_water												
+node	13023095402	42.6355170	1.4961664	shelter							Orri					
+node	13081627642	42.5424136	1.7335062			defibrillator										
+node	13089050157	42.4760269	1.5067956	water_point												
+node	13164503924	42.4742671	1.4521865	drinking_water												
+node	13169255262	42.5425000	1.7326969						supermarket		Record					
+node	13185016887	42.5063074	1.5222583	drinking_water												
+node	13185081648	42.5068379	1.5209978	drinking_water												
+node	13185097703	42.5073426	1.5219220			defibrillator										
+node	13185792581	42.5070313	1.5208117	drinking_water												
+node	13186080970	42.4604958	1.4916196	drinking_water												
+node	13232613220	42.5066058	1.5308587	clinic	primary	yes					Centre d'Atenció Primària	Servei Andorrà d'Atenció Sanitària	+376871185			
+node	13417549701	42.5640519	1.6630092			defibrillator										
+node	13564886622	42.4474560	1.4812815						supermarket		Family Cash		+376 891 891		Mo-Su 09:00-21:00	
+node	13564886628	42.4473200	1.4817096	pharmacy	pharmacy						Farmàcia Mallol		+376 800 666		Mo-Su 09:30-20:00	
+node	13645736303	42.5787763	1.4862583					spring								
+node	13816992188	42.5431081	1.7320604						supermarket		Europrix Supermercat					
+node	13817031947	42.5430179	1.7336545						supermarket		Hiperchamp 1					
+node	13851679120	42.5076397	1.5208151	pharmacy	pharmacy						Meritxell			+376 804555		
+node	13894136301	42.5084880	1.5290360			defibrillator										
+node	13894136702	42.5046235	1.5216612			defibrillator										
+node	14061794938	42.5457068	1.5147203	drinking_water												
+node	14066003922	42.6262286	1.5518882	drinking_water												
+node	14070347882	42.5089645	1.5642998					spring			Font de la Closa					
+node	14101235403	42.5086185	1.5289876			defibrillator										
+node	14101468702	42.4464158	1.5029945	drinking_water							Font del Fornell					
+node	14112948501	42.5663808	1.6010140						supermarket		Ametller Origen					
+node	14133604149	42.6021623	1.6860275			defibrillator										
+node	14158605301	42.5350203	1.5459633	drinking_water												
+node	14181044463	42.5562376	1.5343717					spring								
+node	14279224899	42.5770498	1.6664660	shelter												
+way	176484662	42.4544018	1.4865066						supermarket		River				Su-Th 09:00-20:00; Fr,Sa 09:00-21:00	
+way	183060297	42.5359541	1.5836923	townhall							Comú d'Encamp					
+way	183087884	42.5330439	1.5775614						supermarket		Monoprix	Groupe Casino				
+way	194525696	42.4689438	1.4924585	townhall							Comú de Sant Julià de Lòria					
+way	194554955	42.5114677	1.5339333	hospital	hospital	yes					Hospital de Nostra Senyora de Meritxell		+376 871 000			
+way	219555998	42.5664715	1.6012445	townhall							Comú de Canillo					
+way	247994523	42.5107857	1.5390588	townhall							Comú d'Escaldes-Engordany		+376 890 890		Mo-Fr 08:00-17:00	
+way	275123438	42.5222454	1.5595435	fuel												
+way	293097942	42.5500533	1.5110824	fuel							ELF					
+way	293107551	42.5457573	1.5199136	fire_station							Bombers de La Massana				24/7	
+way	294035779	42.5366509	1.5202535	fuel												
+way	294035888	42.5362645	1.5210345	fuel												
+way	305046558	42.5067371	1.5246675	fuel												
+way	320010747	42.5046735	1.5243176	fuel							Cepsa					
+way	330823762	42.5694086	1.6044983	fire_station							Bombers					
+way	351920541	42.4896216	1.6075230	shelter							Cabana de la Farga					
+way	358047860	42.4861839	1.6421127	shelter												
+way	358129350	42.5169993	1.6420704	shelter							Refugi d'Ensagents	Ministeri de Medi Ambient, Agricultura i Sostenibilitat d'Andorra				yes
+way	360886722	42.5591237	1.5893902	fuel							BP					
+way	362800077	42.6214133	1.6072370	shelter												
+way	365957881	42.5791959	1.6420006						supermarket		Caves Manacor					
+way	382248558	42.4811041	1.5757688	shelter							Cabana de Perafita					
+way	385225383	42.5658893	1.6407682	shelter							Refugi de Ribaescorjada	Ministeri de Medi Ambient, Agricultura i Sostenibilitat d'Andorra				
+way	385230804	42.5316095	1.6965494	hospital	hospital						Centre Mèdic Grau					
+way	387096691	42.6008353	1.4696840	shelter							Cabana					
+way	390911541	42.4528927	1.4872794	fuel							BP					
+way	392063295	42.4899121	1.4262955	shelter							Refugi de Francolí	Ministeri de Medi Ambient, Agricultura i Sostenibilitat d'Andorra				
+way	407683521	42.6457458	1.5576946	shelter							Cabana dels Planells de Rialb					
+way	488726926	42.5108555	1.5374562	shelter												
+way	547240158	42.4741417	1.4910174	fuel							elf					
+way	547240160	42.4743500	1.4907979	fuel							elf					
+way	579379305	42.4550337	1.4869699	fuel							Shell					
+way	631235779	42.5452813	1.7308570	fire_station							Bombers d'Andorra					
+way	664711712	42.5360414	1.5814514	clinic							Centre d'atenció primària Encamp					
+way	704181819	42.4943993	1.4997380	fire_station							Parc de Bombers d'Andorra la Vella					
+way	958504784	42.4534095	1.4873466	fuel							Total					
+way	967456989	42.4899973	1.4944033	fuel												
+way	975650652	42.6263357	1.5239624	shelter							Cabana					
+way	978057872	42.6079922	1.4960761	shelter							Refugi de l'Angonella	Ministeri de Medi Ambient, Agricultura i Sostenibilitat d'Andorra				
+way	978058669	42.4337002	1.5357803	shelter							Refugi de Roca de Pimés	Ministeri de Medi Ambient, Agricultura i Sostenibilitat d'Andorra				
+way	978058670	42.5110906	1.6089529	shelter							Refugi dels Agols	Ministeri de Medi Ambient, Agricultura i Sostenibilitat d'Andorra				
+way	978058671	42.5956372	1.6132129	shelter							Refugi de la Vall del Riu	Ministeri de Medi Ambient, Agricultura i Sostenibilitat d'Andorra				
+way	1051758735	42.5495861	1.5243549	fuel												
+way	1051803196	42.5462543	1.5219547						supermarket		Caprabo					
+way	1052015167	42.5450451	1.5156766	townhall												
+way	1052194749	42.5446693	1.5157472	fuel							BP					
+way	1055616924	42.5046454	1.5170625	shelter												
+way	1056147641	42.5050163	1.5152555	fuel												
+way	1056572724	42.4968760	1.5013124	fuel							Total					
+way	1056572738	42.4972639	1.5020636	fuel												
+way	1058035770	42.5555277	1.5350121	shelter												
+way	1058074043	42.5566562	1.5331840	townhall							Comú d'Ordino					
+way	1058236520	42.5564193	1.5348746	clinic	clinic						Centre d'Atenció Primària d'Ordino					
+way	1058436426	42.5122358	1.5340182	clinic	clinic											
+way	1058436427	42.5121276	1.5341430	hospital	hospital						Clínica Verge de Meritxell					
+way	1060402165	42.5075287	1.5381159	police							Despatx Central de la Policia	Policia d'Andorra		+376 872 000		
+way	1099896353	42.4847175	1.6123374	shelter							Cabana Estall Serrer					
+way	1099926349	42.4907980	1.6488178	shelter							Cabana Estany de la Bova					
+way	1102353409	42.5440926	1.7333598						supermarket		Supermercat Euromercat				Mo-Sa 08:00-20:00; Su 08:00-19:00	
+way	1103204286	42.6107854	1.5729414	shelter												
+way	1175181585	42.4768120	1.4907959	fuel												
+way	1175440104	42.4989916	1.5055669	fuel												
+way	1175440107	42.4962072	1.4999359	fuel												
+way	1199698957	42.5982445	1.4500550	shelter							Cabana de l'Estany Forcat					
+way	1267744756	42.5594241	1.6442759	fuel												
+way	1298762482	42.4962143	1.5064888	fuel												
+way	1298762492	42.4925256	1.4927047	shelter												
+way	1298818495	42.5314300	1.5769746	fuel												
+way	1298818496	42.5318914	1.5769359	fuel												
+way	1303033190	42.5422109	1.5913620	fuel												
+way	1306874629	42.5669759	1.6008472	fuel												
+way	1463700565	42.5439464	1.7342720	police							Jefatura de policía		+376755222			
+relation	10837845	42.5425374	1.7334712	townhall							Oficina del Comú d'Encamp					

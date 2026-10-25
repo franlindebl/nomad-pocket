@@ -1,9 +1,10 @@
-// Maps feature wiring: startup init, item-removal hook, and the search index /
+// Maps feature wiring: startup init, item-removal hooks (maps, routing packs), and the search index /
 // emergency points that follow every installed map.
 import { File, FileMode } from 'expo-file-system';
 
 import i18n from '@/i18n';
 import { registerInit } from '@/features/bootstrap';
+import { registerCompletionHandler } from '@/features/downloads/manager';
 import { getItem, listItems, onItemRemoved, upsertItem } from '@/features/content/items';
 import { HEADER_SIZE, parseHeader } from '@/lib/pmtiles/format';
 import { contentDir, deleteFile, partialDir } from '@/lib/storage';
@@ -13,6 +14,8 @@ import { forgetEstimates, mapItemId, onMapInstalled, WORLD_ID, type MapItemMeta 
 import { useMarkers } from './markers';
 import { forgetMapSource, indexStaleMaps, invalidateIndex } from './places';
 import { getRegion, regionName } from './regions';
+import { closeRouter, listRoutePacks, registerLoosePack, resolvePackFile } from './routing';
+import { onRouteFileDownloaded, sweepRoutingFiles } from './routing-packs';
 import { resolveMapFile, type MapItem } from './useMapSources';
 
 /** YYYYMMDD of a timestamp, the format map items keep their build date in. */
@@ -85,6 +88,16 @@ registerInit(() => {
       console.warn('[maps] cannot register', entry.name, e);
     }
   }
+  // Routing packs copied in by hand or seeded by the E2E suite.
+  const packs = new Set(listRoutePacks().map((i) => decodeURIComponent(i.fileUri.split('/').pop() ?? '')));
+  for (const entry of contentDir('route').list()) {
+    if (!(entry instanceof File) || !/\.tar$/i.test(entry.name) || packs.has(entry.name)) continue;
+    try {
+      registerLoosePack(entry, yyyymmdd(entry.info().modificationTime ?? Date.now()));
+    } catch (e) {
+      console.warn('[maps] cannot register routing pack', entry.name, e);
+    }
+  }
   // Index maps installed before search existed, or whose indexing was interrupted.
   // Delayed so the first screens render before the JS thread starts decoding tiles.
   setTimeout(() => {
@@ -92,6 +105,12 @@ registerInit(() => {
       indexStaleMaps();
     } catch (e) {
       console.warn('[maps] cannot schedule indexing', e);
+    }
+    // By now the download manager has restored its queue (what is still in flight).
+    try {
+      sweepRoutingFiles();
+    } catch (e) {
+      console.warn('[maps] cannot sweep routing files', e);
     }
   }, 4000);
 });
@@ -112,4 +131,15 @@ onItemRemoved('map', (item) => {
   cancelEmergencySync(item.id);
   forgetMapSource(item.id);
   deleteFile(resolveMapFile(item));
+});
+
+registerCompletionHandler('route', onRouteFileDownloaded);
+
+onItemRemoved('route', (item) => {
+  // The pack's emergency points and their search rows go with it.
+  forgetMapSource(item.id);
+  // Valhalla has the file mapped: release it first.
+  closeRouter()
+    .catch(() => {})
+    .finally(() => deleteFile(resolvePackFile(item)));
 });

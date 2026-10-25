@@ -82,6 +82,7 @@ src/
 modules/
   nomad-zim/                 libkiwix bridge + ZimWebView (Swift/Obj-C++ · Kotlin)
   nomad-llm/                 Apple Foundation Models + Gemini Nano bridge
+  nomad-route/               Valhalla routing (valhalla-mobile: iOS xcframework · Android AAR)
 scripts/                     checks, E2E runners, map asset generators, store screenshots
 e2e/                         Maestro flows (docs/E2E.md)
 site/                        privacy/support site, deployed by .github/workflows/pages.yml
@@ -136,6 +137,7 @@ Documents/
   content/                 excluded from iCloud backup (iOS); visible in Files/Finder
     zim/<kiwix file name>.zim
     maps/<key>.pmtiles     key = region id, 'world' or 'area-…'
+    routing/<id>.tar       Valhalla tile extract (routing pack), id = region id
     models/<file>.gguf
     partial/               in progress: <id>.part, map-<key>.pmtiles.part, import-<ts>.zim.part
   map-assets/v4/           glyphs + sprites unpacked from the bundled zip
@@ -338,19 +340,74 @@ Queries: `nearestEmergencyPlaces(category, from)` (equirectangular ORDER BY, GRO
 osm_id across overlapping regions), `emergencyPlacesIn(bbox)` for the map layer (zoom ≥ 11).
 `emergencyNumber()`: 911 for the device region in most of the Americas, else 112.
 
-**Guidance** (`guidance.ts`, `GuidancePanel.tsx`): "Llévame" in a straight line — no
-routing. A zustand store watches GPS (`BestForNavigation`, 3 m) and the compass
-(`watchHeadingAsync`, true north when available) while a target is set, keeps the
-screen awake, and the panel rotates an arrow by bearing − heading (map bearing without a
-compass), shows distance + 8-point direction, walking time (1.25 m/s) and accuracy;
-arrival ≤ max(20 m, accuracy) with a haptic. A session counter makes a superseded start
-remove its own watchers. Road routing and turn-by-turn are the plan's phases 2–3
-(`docs/MAPS_NAVIGATION_PLAN.md`).
+**Routing** (`modules/nomad-route`, `routing.ts`, `routing-packs.ts`, pure parts in
+`routing-core.ts`, `valhalla-defaults.json`): Valhalla 3.9.1 on the device through
+Rallista valhalla-mobile 0.6.4 (MIT). iOS: the static xcframework + `tzdata.tar` are
+fetched by `modules/nomad-route/scripts/fetch-ios-libs.sh` (postinstall, sha256-pinned);
+`NRRouter.mm` calls only the wrapper's plain functions (`create_valhalla_actor`, `route`,
+`matrix`) and **includes no Valhalla header** — inline templates instantiated in our file
+won over the library's at link time and every tar search came back empty (171) while
+loose tiles worked. Swift untars `tzdata` into `Library/tzdata` on first open. Android:
+Maven `io.github.rallista:valhalla-mobile:0.6.4` (`Valhalla(configPath).routeRaw`).
+Isochrones are not exposed by either wrapper (later). The module takes a config JSON
+(`valhallaConfig(defaults, tar)`; native writes it to a file per pack) and request JSON;
+errors come back as `valhalla <code>: <message>` (`routingErrorKind`: 171 no road near,
+442/170 no path, 154 too far). A **routing pack** is a Valhalla tile extract
+(`content/routing/<id>.tar`, mmapped, never unpacked), item kind `route`; its coverage
+(`meta.bbox` + `meta.cells`, the 1° cells holding its local-road tiles — a bbox
+over-claims: Spain's covers Portugal) comes from the manifest or, for loose files, from the
+tile names in the tar (`tileCoverage`). `computeRoute(from, to, costing)` tries the packs
+covering both ends, smallest first, moving on after "no road" / "no path" (a region
+pack can lack the roads a trip needs at its edge; region packs are tile subsets of one
+country build, so the country pack covers cross-region trips). Engine calls are
+serialized in JS (open + route never interleave with another request or a close). **Catalog**: `routing-manifest.json` in the
+fixed release `routing-index` (override: `EXPO_PUBLIC_ROUTING_MANIFEST_URL`, set by
+`scripts/e2e.sh` for its local pack server), cached in kv-store; each pack lists its tar
+parts (≤ 1900 MiB, GitHub's asset limit is 2 GiB) and a `.pois.tsv`. `downloadPack`
+checks the room needed up front and queues the parts and POIs not on disk yet (a retry
+only fetches what is missing) through the download manager (kind `route`). The
+completion handler fails a file whose size differs from the manifest; when every part is
+there it appends them into `<id>.tar.tmp`, checks the size, renames it, registers the
+item, then deletes the parts and imports the POIs into `map_pois` / the search index
+under `route-<id>` (`storeEmergencyPoints`, batched, shared with the Overpass sync). A
+kill mid-assembly is recovered by the manager re-finalizing the last part (all parts are
+still on disk); 4 s after startup `sweepRoutingFiles` deletes temp files and parts/POI
+files no active download belongs to. sha256 is in the manifest but not verified yet. Removing a pack closes the router
+and drops its POIs. **Packs are built** by `.github/workflows/routing-packs.yml` (monthly
++ manual): `scripts/routing/build-country.sh` per country of `packs.json` inside
+`ghcr.io/valhalla/valhalla:3.9.1` — Geofabrik PBF (md5-checked) + admin boundaries
+(levels 2/4) from Overpass → `valhalla_build_admins` → `valhalla_build_tiles` (retried:
+3.9.1 segfaults now and then) → country tar + one tar per subdivision in `regions.json`
+(`slice.py`) → emergency points (`osmium tags-filter` + `emergency-points.py`, same
+columns as the Overpass TSV) → split → `manifest.py` (bbox, cells, parts with sha256).
+Each run gets its own tag (`routing-YYYYMMDD-<run>`) and each pack records its release,
+so countries not rebuilt in a run keep their previous files; `routing-index` is updated
+last, and the run fails rather than drop countries if the previous manifest can't be
+read.
+
+**Guidance** (`guidance.ts`, `GuidancePanel.tsx`): a zustand store watches GPS
+(`BestForNavigation`, 3 m) and the compass while a target is set and keeps the screen
+awake. With a pack covering both ends it asks for a route (car / foot / bike chips) and
+follows it: `routeProgress` snaps each fix onto the shape (searching forward from the
+last segment), giving the next maneuver, distance to it and what is left (time scaled
+from Valhalla's estimate); two fixes off the route (> max(40 m, accuracy ≤ 80 m)) trigger
+a reroute, at most every 10 s. The map draws the route line and frames it on the first
+route of each target and on a mode change. `maps/route-steps` lists the maneuvers. A
+failed reroute keeps the old route; with no route, the store retries every 10 s (back on
+a road, a fresh fix after a stale one — last-known fixes older than 2 min are ignored).
+The start heading is the GPS course when moving (> 2 m/s), else the compass on foot or
+bike. Without a pack, or when Valhalla finds no way, it falls back to the straight line: an arrow rotated by
+bearing − heading (map bearing without a compass), distance + 8-point direction, time
+at a nominal speed, and a "Descargar rutas" button (`maps/routing-packs`); installing a
+pack mid-guidance retries the route (`retryRoute`). Arrival ≤ max(20 m, accuracy ≤ 50 m) from the target, with a haptic; at the route's end
+(it stops at the road nearest the target) the last stretch switches to the arrow. A session counter drops superseded starts, a
+request counter late routes. Turn-by-turn voice, background location and rerouting
+polish are phase 3 (`docs/MAPS_NAVIGATION_PLAN.md`).
 
 **Map screen extras**: search pill (opens `maps/search`), red Emergencias FAB
 (`maps/emergency`, also from a Home card via `unstable_settings.initialRouteName`), GeoJSON
 layers for emergency points (category colours, labels from z15, tap → place card), the
-selected place (ring) and the guidance line; bottom `PlaceCard` (kind, operator/police
+selected place (ring), the route line and the straight guidance line; bottom `PlaceCard` (kind, operator/police
 force, ER badge, hours, distance, decimal + UTM, Llévame / Guardar / Llamar) or
 `GuidancePanel`.
 
@@ -360,7 +417,9 @@ ES/EN names, continent. **UI state** (`store.ts`): persisted viewport + one-shot
 requests from sheets. **Markers** (`markers.ts`): `map_markers` + zustand store.
 Routes: `maps/index` (map, locate-me, compass, long-press to add a pin), sheets
 `regions` (installed + world + visible area + pick), `pick` (search regions), `download`
-(zoom choice and exact size before confirming), `markers`, `marker` (edit/delete).
+(zoom choice and exact size before confirming), `markers`, `marker` (edit/delete),
+`search`, `emergency`, `routing-packs` (catalog: installed, for this area, all) and
+`route-steps`.
 
 ### Assistant (`modules/nomad-llm`, `src/features/assistant`, `src/app/(tabs)/assistant`)
 - `modules/nomad-llm`: `getSystemModelStatus()` → `{ status: available | notEnabled |
@@ -431,6 +490,7 @@ Routes: `maps/index` (map, locate-me, compass, long-press to add a pin), sheets
 | `build-metadata.protomaps.dev/builds.json`, `build.protomaps.com` | daily planet build, HTTP Range extraction |
 | `huggingface.co` | GGUF models |
 | `overpass-api.de`, `overpass.private.coffee`, `maps.mail.ru/osm/tools/overpass` | emergency points per region (only the region bbox is sent; public servers, best effort) |
+| `github.com/franlindebl/nomad-pocket/releases` (`routing-index`, `routing-YYYYMMDD`) | routing catalog and packs, built by `.github/workflows/routing-packs.yml` (our only hosted data) |
 | `franlindebl.github.io/nomad-pocket` | privacy policy / support page (`site/`) |
 
 ## Testing

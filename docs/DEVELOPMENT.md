@@ -23,7 +23,14 @@ npm install
 - `postinstall` runs `modules/nomad-zim/scripts/fetch-ios-libs.sh`: downloads the pinned
   libkiwix xcframework (14.2.1-2, md5-checked, ~200 MB unpacked) into
   `modules/nomad-zim/ios/Frameworks/` (gitignored). Skipped off macOS or with
-  `NOMAD_ZIM_SKIP_FETCH=1`.
+  `NOMAD_ZIM_SKIP_FETCH=1`. Then `modules/nomad-route/scripts/fetch-ios-libs.sh`: the
+  Valhalla routing engine (Rallista valhalla-mobile 0.6.4 xcframework, ~22 MB download,
+  + `tzdata.tar`, sha256-checked) into `modules/nomad-route/ios/Frameworks/`
+  (`NOMAD_ROUTE_SKIP_FETCH=1` skips it). Android gets it from Maven Central.
+- Routing packs for testing: `scripts/routing/build-country.sh <country> <dir>` builds a
+  country's packs with Docker (`ghcr.io/valhalla/valhalla:3.9.1`; Andorra takes a minute,
+  Spain ~15 min and ~10 GB disk). Copy a `.tar` into the app's `Documents/content/routing/`
+  (simulator) and it registers at startup.
 - `prepare` sets `git config core.hooksPath .githooks` (pre-commit: tsc, lint, unit
   tests, i18n). Skip once with `git commit --no-verify`.
 

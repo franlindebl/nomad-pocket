@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { Database, GraduationCap, Map, ShieldCheck, Sparkles, Trash2, Wand2, type LucideIcon } from 'lucide-react-native';
+import { Database, GraduationCap, Map, Route, ShieldCheck, Sparkles, Trash2, Wand2, type LucideIcon } from 'lucide-react-native';
 import { Alert, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -21,6 +21,7 @@ const KIND_META: Record<ContentKind, { icon: LucideIcon; hue: Hue }> = {
   zim: { icon: Database, hue: 'reference' },
   map: { icon: Map, hue: 'maps' },
   model: { icon: Sparkles, hue: 'ai' },
+  route: { icon: Route, hue: 'maps' },
 };
 
 export default function SettingsScreen() {

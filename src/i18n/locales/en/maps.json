@@ -116,14 +116,18 @@
   "guidance": {
     "toward": "To {{name}}",
     "straightLine": "As the crow flies: it doesn’t follow roads or paths",
-    "walk": "{{time}} on foot",
     "arrived": "You have arrived",
     "stop": "End",
     "waiting": "Waiting for GPS…",
     "accuracy": "Accuracy ± {{meters}} m",
     "noCompass": "No compass: the arrow points relative to map north",
     "deniedTitle": "Location is off",
-    "deniedBody": "Guidance needs your location. It works offline thanks to GPS."
+    "deniedBody": "Guidance needs your location. It works offline thanks to GPS.",
+    "time": {
+      "auto": "{{time}} by car",
+      "pedestrian": "{{time}} on foot",
+      "bicycle": "{{time}} by bike"
+    }
   },
   "emergency": {
     "title": "Emergency",
@@ -270,5 +274,44 @@
     "administrative": "Administrative area",
     "residential": "Residential area",
     "industrial": "Industrial area"
+  },
+  "route": {
+    "costing": {
+      "auto": "Car",
+      "pedestrian": "On foot",
+      "bicycle": "Bike"
+    },
+    "remaining": "{{distance}} · {{time}} · arrive {{eta}}",
+    "steps": "Directions",
+    "stepsTitle": "Directions",
+    "computing": "Finding a route…",
+    "noPack": "Download routing for this area to follow roads and paths.",
+    "summary": "{{distance}} · {{time}}",
+    "toll": "Tolls",
+    "ferry": "Ferry",
+    "noRoute": "No route in progress.",
+    "error": {
+      "noRoad": "There is no road or path near the start or the destination.",
+      "noPath": "No way between the two points with this mode.",
+      "tooFar": "Too far for this mode of transport.",
+      "other": "Could not find a route.",
+      "unavailable": "Routing is not available in this build."
+    },
+    "lastStretch": "The route ends here: follow the arrow to the destination."
+  },
+  "packs": {
+    "title": "Offline routing",
+    "rowBody": "Follow roads and paths with no coverage",
+    "intro": "Each pack lets you plan car, foot and bike routes offline, and includes the area's emergency points (hospitals, police, water…). OpenStreetMap data.",
+    "detail": "{{size}} · data from {{date}}",
+    "nearby": "For this area",
+    "all": "All",
+    "loading": "Loading the catalog…",
+    "offline": "Could not load the routing catalog. You need an internet connection.",
+    "retry": "Try again",
+    "deleteTitle": "Delete routing for {{name}}?",
+    "download": "Download routing",
+    "failed": "Failed",
+    "section": "Routing"
   }
 }

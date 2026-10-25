@@ -11,8 +11,8 @@ can pick up without re-deriving anything.
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
   tour). Not yet run on a physical device by the agent.
-- Checks: 110 unit tests (109 pass, 1 network test skipped), `tsc` clean, lint clean, i18n keys complete. E2E: 46 Maestro flows (18 smoke,
-  13 full, 11 nightly, iPad tour, 3 Android flows) covering 53 of 55 test-plan cases plus the new maps cases and AI-06/07.
+- Checks: 122 unit tests (121 pass, 1 network test skipped), `tsc` clean, lint clean, i18n keys complete. E2E: 48 Maestro flows (19 smoke,
+  14 full, 11 nightly, iPad tour, 3 Android flows) covering 53 of 55 test-plan cases plus the new maps cases and AI-06/07.
 
 | Area | Status |
 |---|---|
@@ -24,7 +24,8 @@ can pick up without re-deriving anything.
 | Courses (14 courses, syllabus with fallbacks, progress) | done |
 | Maps (in-app PMTiles extraction, regions, visible area, world basemap, markers, GPS, multi-script labels) | done — iOS + Android |
 | Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
-| Maps road routing (Valhalla) and turn-by-turn (plan phases 2–3) | planned; Valhalla spike done: viable (numbers in the plan) |
+| Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); **packs not published yet** (push + run the workflow) |
+| Maps turn-by-turn (voice, background location; plan phase 3) | planned |
 | Assistant (Apple Intelligence / Gemini Nano / 4 GGUF models, RAG with citations, conversational: the model decides when to search) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change); Gemini Nano untested |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
 | E2E suite (Maestro) + pre-commit hook | done |
@@ -45,9 +46,11 @@ can pick up without re-deriving anything.
 
 Roughly by value. None is started.
 
-0. Maps plan phases 2–3 (`docs/MAPS_NAVIGATION_PLAN.md`): routing packs built in CI and
-   hosted on GitHub Releases (owner approved), on-device Valhalla, then turn-by-turn. Move
-   emergency points into the same packs (public Overpass is often at capacity).
+0. Publish the first routing packs: push, then Actions → "Routing packs" → Run (Spain,
+   Portugal, Andorra in `scripts/routing/packs.json`); check the release and the sheet.
+   Then measure on a real phone: route time/memory, assembling Spain (2.2 GB, JS copy),
+   mmap of a 2 GB tar on iOS (may need `com.apple.developer.kernel.extended-virtual-addressing`).
+   Then phase 3 (turn-by-turn: voice with expo-speech, background location).
 1. Watch App Review for 1.0.1; upload 1.0.2 (build 4) to TestFlight if not done
    (`docs/RELEASE.md`), test it on a real iPhone (GPU llama.cpp, Apple Intelligence,
    background downloads, Files import, airplane mode).
@@ -71,7 +74,10 @@ Roughly by value. None is started.
   thread in batches (minutes for a country on a phone, not yet measured on a device).
 - Emergency points depend on public Overpass servers (best effort; they can be at capacity
   for minutes). Fallback: the POIs in the map's own tiles (complete only at z15).
-- "Llévame" is a straight line (compass + distance), not a route.
+- Road routing needs a routing pack for the area (else the straight line). No
+  isochrones (valhalla-mobile exposes none), no cross-pack routes (the country pack covers
+  them), no voice / background navigation yet. Pack sha256 is not verified (size is).
+  Overpass still runs after each map download even where a pack brought the points.
 - Bbox queries (map dots, locality context) don't handle regions across the antimeridian.
 - Map screen first opens on the world when a region is registered after the first render
   (seeded/loose maps): pre-existing, cosmetic.
@@ -102,6 +108,31 @@ Roughly by value. None is started.
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-25 — Maps: offline road routing (plan phase 2)
+- Owner: commit phase 1 and start phase 2. `modules/nomad-route`: Valhalla 3.9.1 via
+  Rallista valhalla-mobile 0.6.4 (iOS xcframework fetched + sha256-pinned by postinstall,
+  Android Maven AAR, ~7.5 MB per platform). iOS pitfall: including Valhalla headers in our
+  `.mm` made every tile-extract search fail (171) through ODR — found with lldb on
+  `__cxa_throw`; the bridge now calls only the wrapper's free functions.
+- Routing packs (`content/routing/*.tar`, kind `route`): coverage by 1° cells, smallest
+  covering pack first with fallback, serialized engine calls. Catalog from GitHub Releases
+  (`routing-index`), downloads in parts (≤ 1900 MiB) reassembled crash-safely, pack
+  emergency points imported into Emergencias/search. Sheet "Rutas sin conexión" (from the
+  guidance panel and Regiones), directions sheet.
+- Guidance: car / foot / bike, next maneuver + distance, remaining distance/time/arrival,
+  route line, reroute after two off-route fixes, recovery from failed reroutes and stale
+  fixes, straight-line last stretch when the route ends at the road.
+- Pack pipeline: `scripts/routing/build-country.sh` (Geofabrik + Overpass admins →
+  Valhalla tiles → country + subdivision packs → POIs via osmium → split → manifest),
+  `.github/workflows/routing-packs.yml` (monthly + manual, one tag per run). Andorra built
+  locally end to end (3.1 MB, 408 points) — it is the E2E fixture.
+- E2E: `map-14-route` (smoke, seeded pack) and `map-15-routing-download` (full, local pack
+  server started by `scripts/e2e.sh`, two-part assembly) pass on the iOS 27 simulator; the
+  same download + route checked on the Android emulator (throwaway cleartext build).
+  Independent review: 16 findings, fixed (assembly crash safety, orphan parts/POIs,
+  size checks, bbox over-claiming, reroute recovery, false arrival, CI dropping countries,
+  engine call races, Android close on the JS thread, tzdata marker order, …).
 
 ### 2026-10-25 — Maps: search, Emergencias, straight-line guidance
 - Owner approved the maps plan (`docs/MAPS_NAVIGATION_PLAN.md`): phase 1 now, routing packs

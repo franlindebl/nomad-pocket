@@ -50,6 +50,7 @@ export default function MapScreen() {
   const poiVersion = usePoiSync((s) => s.version);
   const target = useGuidance((s) => s.target);
   const position = useGuidance((s) => s.position);
+  const route = useGuidance((s) => s.route);
   const cameraRef = useRef<CameraRef>(null);
   const [assets, setAssets] = useState<MapAssets | null>(null);
   const [bearing, setBearing] = useState(0);
@@ -130,7 +131,8 @@ export default function MapScreen() {
       properties: { end: true },
       geometry: { type: 'Point', coordinates: [target.lon, target.lat] },
     };
-    if (!position) return { type: 'FeatureCollection', features: [end] };
+    // Following roads: the route line (its own source) replaces the straight line.
+    if (!position || route) return { type: 'FeatureCollection', features: [end] };
     return {
       type: 'FeatureCollection',
       features: [
@@ -148,7 +150,26 @@ export default function MapScreen() {
         end,
       ],
     };
-  }, [target, position]);
+  }, [target, position, route]);
+
+  const routeData = useMemo<GeoJSON.FeatureCollection>(
+    () =>
+      route
+        ? { type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: route.shape } }] }
+        : EMPTY,
+    [route],
+  );
+
+  // Frame the whole route when the first one arrives and when the mode changes;
+  // a reroute keeps the user's framing.
+  const framedKey = useRef<string | null>(null);
+  useEffect(() => {
+    if (!route || !target) return;
+    const key = `${target.lat},${target.lon},${route.costing}`;
+    if (framedKey.current === key) return;
+    framedKey.current = key;
+    cameraRef.current?.fitBounds(route.bbox, { padding: { top: 140, bottom: 360, left: 60, right: 60 }, duration: 900 });
+  }, [route, target]);
 
   // Frame start and target once when guidance starts.
   const framedFor = useRef<typeof target>(null);
@@ -307,6 +328,20 @@ export default function MapScreen() {
                 'text-optional': true,
               }}
               paint={{ 'text-color': colors.textSecondary, 'text-halo-color': colors.surface, 'text-halo-width': 1.4 }}
+            />
+          </GeoJSONSource>
+          <GeoJSONSource id="route" data={routeData}>
+            <Layer
+              type="line"
+              id="route-casing"
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+              paint={{ 'line-color': colors.surface, 'line-width': 9 }}
+            />
+            <Layer
+              type="line"
+              id="route-line"
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+              paint={{ 'line-color': colors.accent, 'line-width': 5.5 }}
             />
           </GeoJSONSource>
           <GeoJSONSource id="guidance" data={guidanceData}>

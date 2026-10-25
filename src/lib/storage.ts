@@ -2,10 +2,10 @@
 // directory (never the cache dir — the OS may purge it, which defeats "offline").
 import { Directory, File, Paths } from 'expo-file-system';
 
-export type ContentKind = 'zim' | 'map' | 'model';
+export type ContentKind = 'zim' | 'map' | 'model' | 'route';
 
 const ROOT = 'content';
-const SUBDIRS: Record<ContentKind, string> = { zim: 'zim', map: 'maps', model: 'models' };
+const SUBDIRS: Record<ContentKind, string> = { zim: 'zim', map: 'maps', model: 'models', route: 'routing' };
 
 export function contentDir(kind: ContentKind): Directory {
   const dir = new Directory(Paths.document, ROOT, SUBDIRS[kind]);

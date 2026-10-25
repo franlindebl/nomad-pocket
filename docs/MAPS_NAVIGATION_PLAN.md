@@ -46,7 +46,25 @@ Finding during testing: the main Overpass server was **at capacity** for several
 ("this public endpoint is intended for browser-based and human-operated tools"). The app
 copes (3 servers, timeouts, tile fallback), but see phase 2.
 
-## Phase 2 — road routing on the device (next)
+## Phase 2 — road routing on the device (built 2026-10-25, packs not published yet)
+
+Status: engine, packs, catalog and downloads work end to end on the iOS simulator and the
+Android emulator (Andorra pack; E2E `map-14-route`, `map-15-routing-download`). What it
+does: car / foot / bike routes with Spanish or English maneuvers, route line, next
+maneuver + distance, remaining distance / time / arrival, directions list, reroute when off
+the route, straight-line fallback with "Descargar rutas", packs with their emergency
+points (no Overpass needed where a pack is installed). How: `ARCHITECTURE.md` (Maps →
+Routing). Pending:
+
+- **Publish the first packs**: push, then run `.github/workflows/routing-packs.yml`
+  (Actions → Routing packs → Run). Until `routing-index/routing-manifest.json` exists the
+  sheet says the catalog can't be loaded. Spain's country tar will be split in two parts.
+- Not measured on a phone: route time and memory, assembling a 2 GB pack (JS copy).
+- Isochrones: neither valhalla-mobile wrapper exposes them (iOS would need Valhalla
+  headers in our code, which broke tile reading: see CLAUDE.md pitfalls).
+- Routes between two packs need the country pack (region packs are tile subsets).
+- Overpass still runs after each map download, even where a pack already brought the points.
+
 
 - **Engine: Valhalla** (MIT, OSM), embedded through a local Expo module
   (`modules/nomad-route`) — prebuilt mobile builds exist (Rallista `valhalla-mobile`:
@@ -131,7 +149,7 @@ no elevation.
 
 Not yet measured: speed and memory on a phone.
 
-### Proposed phase 2 steps
+### Proposed phase 2 steps (done, except publishing and isochrones)
 
 1. `modules/nomad-route` (iOS xcframework vendored, Android Maven) with `route` and a
    route preview drawn in MapLibre; test with the Madrid tar copied into `content/`.
