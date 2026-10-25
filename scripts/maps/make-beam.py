@@ -14,7 +14,7 @@ OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../assets/map
 RADIUS = 88  # points
 WIDTHS = {"narrow": 26, "wide": 44}  # half angle, degrees
 COLORS = {"light": (0x1A, 0x73, 0xE8), "dark": (0x4C, 0x8D, 0xF6)}
-PEAK = {"light": 0.5, "dark": 0.56}
+PEAK = {"light": 0.72, "dark": 0.78}
 EDGE = 7  # degrees of soft edge
 
 
@@ -33,7 +33,7 @@ def beam(half, rgb, peak, scale):
             ang = abs(math.degrees(math.atan2(dx, dy)))
             if ang >= half:
                 continue
-            radial = (1 - d / r) ** 1.4
+            radial = (1 - d / r) ** 1.1
             side = min(1.0, (half - ang) / EDGE)
             side = side * side * (3 - 2 * side)  # smoothstep
             a = peak * radial * side

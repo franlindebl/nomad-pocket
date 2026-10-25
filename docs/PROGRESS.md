@@ -6,7 +6,7 @@ can pick up without re-deriving anything.
 
 ## Current state (2026-10-25)
 
-- **Version 1.1.0 (iOS build 6)** on TestFlight 2026-10-25 (build 5 earlier that day);
+- **Version 1.1.0 (iOS build 7)** on TestFlight 2026-10-25 (builds 5–6 earlier that day);
   **1.0.1 (build 3)** waiting for App Review. Release process and version table: `docs/RELEASE.md`.
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
@@ -58,7 +58,7 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
    Measure on a real phone: route time/memory, assembling Spain (2.2 GB, JS copy), mmap of
    a 2 GB tar on iOS (may need `com.apple.developer.kernel.extended-virtual-addressing`).
    Then phase 3 (turn-by-turn: voice with expo-speech, background location).
-1. Watch App Review for 1.0.1; test 1.1.0 (build 6, TestFlight) on a real iPhone: compass beam, street search,: routing
+1. Watch App Review for 1.0.1; test 1.1.0 (build 7, TestFlight) on a real iPhone: compass beam, street search,: routing
    packs (download Spain 2.2 GB, route time/memory), Preparedness reminders, GPU
    llama.cpp, Apple Intelligence, background downloads, Files import, airplane mode.
 2. Resume downloads after the app is killed on iOS: reattach the background URLSession
@@ -134,6 +134,7 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   sensor, so no compass events; the iOS simulator has no compass either): the beam
   renders from the puck, under the map's dots. Tab blur/focus verified; a sheet over the
   map keeps it. iOS map-08/10/14 pass. Needs a real phone to see it turn.
+- Owner on build 6: beam too faint. Peak opacity 0.5 → 0.72 (dark 0.56 → 0.78), slower fade (build 7).
 
 ### 2026-10-25 — Whole-country packs; street search from the packs
 

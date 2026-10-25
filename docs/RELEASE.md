@@ -24,9 +24,9 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 
 - Marketing version: `expo.version` (currently **1.1.0**). Keep `package.json`'s
   `version` equal (not used by the build, but it's what people read).
-- iOS build number: `expo.ios.buildNumber` (currently **"6"**) → `CFBundleVersion`. Bump it
+- iOS build number: `expo.ios.buildNumber` (currently **"7"**) → `CFBundleVersion`. Bump it
   for every upload: App Store Connect rejects a build number it has already seen.
-- Android: `expo.android.versionCode` (currently **6**, nothing published yet). Must grow
+- Android: `expo.android.versionCode` (currently **7**, nothing published yet). Must grow
   with every Play upload.
 - After changing any of them, run `npx expo prebuild` (it can regenerate `ios/` and
   `android/` from scratch: then `cd ios && pod install`).
@@ -38,6 +38,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.0.2 | 4 | uploaded to TestFlight 2026-10-24 (`51fbe2a`) |
 | 1.1.0 | 5 | TestFlight 2026-10-25: map search, Emergencias, offline road routing, Preparedness, conversational assistant |
 | 1.1.0 | 6 | TestFlight 2026-10-25: whole-country routing packs, street search from the packs, compass beam |
+| 1.1.0 | 7 | TestFlight 2026-10-25: stronger compass beam |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.
