@@ -1,6 +1,6 @@
 import { Camera, GeoJSONSource, Layer, Map, NativeUserLocation, type CameraRef, type InitialViewState } from '@maplibre/maplibre-react-native';
 import * as Location from 'expo-location';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { Layers, LocateFixed, MapPin, Navigation2, Search, Siren } from 'lucide-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,7 @@ import { ensureMapAssets, type MapAssets } from '@/features/maps/assets';
 import { emergencyPlacesIn, usePoiSync } from '@/features/maps/emergency';
 import { WORLD_ID } from '@/features/maps/extraction';
 import { GuidancePanel } from '@/features/maps/GuidancePanel';
+import { HeadingBeam } from '@/features/maps/HeadingBeam';
 import { useGuidance } from '@/features/maps/guidance';
 import { CATEGORY_COLORS } from '@/features/maps/labels';
 import { MapFab } from '@/features/maps/MapFab';
@@ -55,6 +56,14 @@ export default function MapScreen() {
   const [assets, setAssets] = useState<MapAssets | null>(null);
   const [bearing, setBearing] = useState(0);
   const [showUser, setShowUser] = useState(false);
+  // The Maps tab in front (a sheet over the map keeps it): the compass beam listens only then.
+  const navigation = useNavigation();
+  const [tabFocused, setTabFocused] = useState(true);
+  useEffect(() => {
+    const tab = navigation.getParent() ?? navigation;
+    const unsubscribe = [tab.addListener('focus', () => setTabFocused(true)), tab.addListener('blur', () => setTabFocused(false))];
+    return () => unsubscribe.forEach((u) => u());
+  }, [navigation]);
   const [locating, setLocating] = useState(false);
 
   useEffect(() => {
@@ -229,7 +238,7 @@ export default function MapScreen() {
           logo={false}
           compass={false}
           attributionPosition={{ bottom: space.sm, left: space.sm }}
-          tintColor={colors.textSecondary}
+          tintColor={colors.location}
           onRegionIsChanging={safe((e) => setBearing(Number(e.nativeEvent.bearing)))}
           onRegionDidChange={safe((e) => {
             const { center, zoom, bounds, bearing: b } = e.nativeEvent;
@@ -242,6 +251,7 @@ export default function MapScreen() {
           })}>
           <Camera ref={cameraRef} initialViewState={initialView} maxZoom={19} />
           {showUser ? <NativeUserLocation /> : null}
+          {showUser && tabFocused ? <HeadingBeam /> : null}
           <GeoJSONSource
             id="markers"
             data={markerData}

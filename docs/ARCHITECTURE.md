@@ -406,6 +406,15 @@ read. Before publishing, every pack's cells are clipped to its Geofabrik extract
 all, which would make Ireland's pack "cover" Bilbao). Then releases that neither the new
 nor the previous manifest points at are deleted.
 
+**Compass beam** (`HeadingBeam.tsx`): while "show my location" is on and the Maps tab is in
+front (tab `focus`/`blur`; a sheet over the map keeps it), a fan under the native puck
+points where the phone points, like Google Maps': a symbol layer with a pre-drawn image
+(narrow, or wide when the compass calibration is poor) rotated with `icon-rotate` in map
+alignment, so it keeps its screen size and follows the map's bearing natively. Position
+from MapLibre's `LocationManager` (the puck's engine), heading from
+`expo-location` (`watchHeadingAsync`, redrawn every ≥ 2°). No compass, no beam (the iOS
+simulator; the Android emulator has no rotation-vector sensor).
+
 **Guidance** (`guidance.ts`, `GuidancePanel.tsx`): a zustand store watches GPS
 (`BestForNavigation`, 3 m) and the compass while a target is set and keeps the screen
 awake. With a pack covering both ends it asks for a route (car / foot / bike chips) and

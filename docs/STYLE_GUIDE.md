@@ -48,6 +48,7 @@ Warm neutrals ("paper" and "ink") with a single brand accent.
 | `surfacePressed` | `#E6E3DD` | `#28282D` | Pressed rows, Android tab ripple |
 | `onAccent` | `#FFFFFF` | `#FFFFFF` | Text/icons on accent fills |
 | `successSoft` / `warningSoft` / `dangerSoft` | `#DDF3E5` / `#FCEFD3` / `#FBE1E1` | `#12301F` / `#33260C` / `#3A1517` | Status tint backgrounds (banners, badges) |
+| `location` | `#1A73E8` | `#4C8DF6` | The user's position on the map: the puck (map `tintColor`) and the compass beam (baked into `assets/maps/beam/*.png` by `scripts/maps/make-beam.py`: rerun it after changing this) |
 | `overlay` | `rgba(24,23,27,.45)` | `rgba(0,0,0,.6)` | Scrims behind popovers |
 | `shadow` | `rgba(24,23,27,.12)` | `rgba(0,0,0,.5)` | Floating elements |
 

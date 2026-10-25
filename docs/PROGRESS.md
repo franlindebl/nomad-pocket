@@ -124,6 +124,17 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-25 — Maps: compass beam
+
+- Owner asked for Google Maps' "flashlight": `HeadingBeam.tsx` draws a fan under the
+  position puck that turns with the compass (wider while uncalibrated), only while the
+  Maps tab is in front. New `location` token (blue) for the puck (map `tintColor`, was
+  `textSecondary` grey on iOS) and the beam images (`scripts/maps/make-beam.py`).
+- Checked on the Android emulator with a fixed heading (it has no rotation-vector
+  sensor, so no compass events; the iOS simulator has no compass either): the beam
+  renders from the puck, under the map's dots. Tab blur/focus verified; a sheet over the
+  map keeps it. iOS map-08/10/14 pass. Needs a real phone to see it turn.
+
 ### 2026-10-25 — Whole-country packs; street search from the packs
 
 - Owner feedback on build 5: no region packs, whole countries only (very large ones may

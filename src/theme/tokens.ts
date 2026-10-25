@@ -22,6 +22,8 @@ export const palette = {
     warningSoft: '#FCEFD3',
     danger: '#D93D42',
     dangerSoft: '#FBE1E1',
+    /** The user's position on the map (puck + compass beam: scripts/maps/make-beam.py). */
+    location: '#1A73E8',
     overlay: 'rgba(24,23,27,0.45)',
     shadow: 'rgba(24,23,27,0.12)',
   },
@@ -45,6 +47,7 @@ export const palette = {
     warningSoft: '#33260C',
     danger: '#FF6369',
     dangerSoft: '#3A1517',
+    location: '#4C8DF6',
     overlay: 'rgba(0,0,0,0.6)',
     shadow: 'rgba(0,0,0,0.5)',
   },
