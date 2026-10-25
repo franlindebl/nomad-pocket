@@ -71,6 +71,15 @@ test('routeRequest', () => {
   assert.equal(req.locations[0].heading, 350);
   assert.equal(req.locations[1].heading, undefined);
   assert.equal(req.exclude_polygons, undefined);
+  assert.deepEqual(req.locations[0].search_filter, { exclude_tunnel: true }, 'on foot, paths are fine ends; tunnels are not');
+  assert.deepEqual(req.locations[1].search_filter, { exclude_tunnel: true });
+  assert.equal(req.costing_options.pedestrian.max_hiking_difficulty, 2, 'mountain trails (T2), not just T1');
+  const reroute = JSON.parse(
+    routeRequest({ from: { lat: 40.4, lon: -3.7 }, to: { lat: 40.5, lon: -3.6 }, costing: 'bicycle', language: 'es', rerouting: true }),
+  );
+  assert.equal(reroute.locations[0].search_filter, undefined, 'rerouting: the user may be in the tunnel');
+  assert.deepEqual(reroute.locations[1].search_filter, { exclude_tunnel: true });
+  assert.equal(reroute.costing_options, undefined);
   const en = JSON.parse(
     routeRequest({
       from: { lat: 0, lon: 0 },
@@ -88,6 +97,9 @@ test('routeRequest', () => {
     }),
   );
   assert.equal(en.language, 'en-US');
+  // By car, never start in a garage: both ends snap to a street.
+  assert.deepEqual(en.locations[0].search_filter, { min_road_class: 'residential', exclude_tunnel: true });
+  assert.deepEqual(en.locations[1].search_filter, { min_road_class: 'residential', exclude_tunnel: true });
   assert.equal(en.exclude_polygons.length, 1);
 });
 

@@ -29,20 +29,52 @@ export type RouteRequestInput = {
   heading?: number | null;
   /** Closed polygons ([lon, lat] rings) to stay out of: a closed road, a flooded area. */
   avoid?: [number, number][][];
+  /** A new route from where the user is now, mid-trip (they may really be in a tunnel). */
+  rerouting?: boolean;
 };
+
+/**
+ * Where the ends of a route snap (Valhalla's `search_filter`), checked on Madrid's graph:
+ * - By car, to a street, never to a driveway or a parking aisle: someone at home inside a
+ *   block is often nearest to the garage under the building (Valhalla marks those
+ *   destination-only, which still lets a route start there), and the route then "left"
+ *   through the garage. On foot and by bike paths share that road class: no such filter.
+ * - Never into a tunnel: above one (Plaza de España, the M-30 at Madrid Río) the nearest
+ *   edge is the tunnel right below. Except when rerouting: then the user may really be in it.
+ */
+function searchFilter(costing: Costing, allowTunnel: boolean): Json | undefined {
+  const filter: Json = {};
+  if (costing === 'auto') filter.min_road_class = 'residential';
+  if (!allowTunnel) filter.exclude_tunnel = true;
+  return Object.keys(filter).length ? filter : undefined;
+}
+
+/**
+ * Valhalla's default allows only T1 trails on foot (sac_scale=hiking): mountain paths
+ * (T2) were cut off, and a walk to a mountain hut ended at the nearest easy path (Andorra:
+ * 6.4 km to the wrong place instead of 3.6 km on the trail). T2, not more: from T3 on
+ * trails get exposed, not what a default should send anyone onto.
+ */
+const MAX_HIKING_DIFFICULTY = 2;
 
 export function routeRequest(input: RouteRequestInput): string {
   const origin: Json = { lat: input.from.lat, lon: input.from.lon, type: 'break' };
+  const target: Json = { lat: input.to.lat, lon: input.to.lon, type: 'break' };
+  const fromFilter = searchFilter(input.costing, !!input.rerouting);
+  const toFilter = searchFilter(input.costing, false);
+  if (fromFilter) origin.search_filter = fromFilter;
+  if (toFilter) target.search_filter = toFilter;
   if (input.heading != null && Number.isFinite(input.heading)) {
     origin.heading = Math.round(((input.heading % 360) + 360) % 360);
     origin.heading_tolerance = 60;
   }
   const req: Json = {
-    locations: [origin, { lat: input.to.lat, lon: input.to.lon, type: 'break' }],
+    locations: [origin, target],
     costing: input.costing,
     language: input.language === 'es' ? 'es-ES' : 'en-US',
     directions_options: { units: 'kilometers' },
   };
+  if (input.costing === 'pedestrian') req.costing_options = { pedestrian: { max_hiking_difficulty: MAX_HIKING_DIFFICULTY } };
   if (input.avoid?.length) req.exclude_polygons = input.avoid;
   return JSON.stringify(req);
 }

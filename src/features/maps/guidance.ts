@@ -88,7 +88,7 @@ export const useGuidance = create<GuidanceState>((set, get) => {
       // Start the way the user moves (GPS course); the compass only on foot or by bike,
       // where the phone is in the hand (in a car it points anywhere).
       const startHeading = course ?? (costing === 'auto' ? null : heading);
-      const next = await computeRoute(position, target, costing, startHeading);
+      const next = await computeRoute(position, target, costing, startHeading, !!route);
       if (mine !== request) return;
       cumulative = cumulativeDistances(next.shape);
       set({ route: next, routing: 'ready', progress: routeProgress(next, cumulative, get().position ?? position) });

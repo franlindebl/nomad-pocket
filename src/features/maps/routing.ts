@@ -130,7 +130,7 @@ function serialized<T>(job: () => Promise<T>): Promise<T> {
   return run;
 }
 
-export function computeRoute(from: LatLon, to: LatLon, costing: Costing, heading?: number | null): Promise<Route> {
+export function computeRoute(from: LatLon, to: LatLon, costing: Costing, heading?: number | null, rerouting = false): Promise<Route> {
   if (!isNomadRouteAvailable()) return Promise.reject(new RoutingError('unavailable', 'nomad-route is not in this build'));
   const packs = packsFor(from, to);
   if (!packs.length) return Promise.reject(new RoutingError('noPack', 'no routing pack covers both points'));
@@ -141,7 +141,7 @@ export function computeRoute(from: LatLon, to: LatLon, costing: Costing, heading
       try {
         await NomadRoute.open(valhallaConfig(defaults, toNativePath(resolvePackFile(pack))));
         const started = Date.now();
-        const json = await NomadRoute.route(routeRequest({ from, to, costing, language: i18n.language, heading }));
+        const json = await NomadRoute.route(routeRequest({ from, to, costing, language: i18n.language, heading, rerouting }));
         if (__DEV__) console.log('[maps] route', pack.id, costing, `${Date.now() - started} ms`);
         return parseRoute(json, costing);
       } catch (e) {

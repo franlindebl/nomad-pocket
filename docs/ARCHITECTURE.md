@@ -355,7 +355,17 @@ fetched by `modules/nomad-route/scripts/fetch-ios-libs.sh` (postinstall, sha256-
 won over the library's at link time and every tar search came back empty (171) while
 loose tiles worked. Swift untars `tzdata` into `Library/tzdata` on first open. Android:
 Maven `io.github.rallista:valhalla-mobile:0.6.4` (`Valhalla(configPath).routeRaw`).
-Isochrones are not exposed by either wrapper (later). The module takes a config JSON
+Isochrones are not exposed by either wrapper (later). **Request tuning** (`routeRequest`,
+each checked against a local Valhalla 3.9.1 on Madrid's and Andorra's graphs, 2026-10-25):
+by car both ends snap with `search_filter.min_road_class: residential` (inside a block the
+nearest edge was the garage aisle under the building, destination-only but still a valid
+start, and routes "left" through the garage); every end except a reroute's origin also has
+`exclude_tunnel` (above Plaza de España's tunnel the start snapped into it); on foot
+`max_hiking_difficulty: 2` (Valhalla's default 1 cut off mountain trails: a hut 3.6 km
+away by the trail became 6.4 km to the wrong place). Driveways and parking aisles get no
+car-cost penalty in 3.9.1 (only generic service roads do) but are destination-only, so
+through routes avoid them; `date_time` changed nothing on central Madrid trips (not sent).
+The module takes a config JSON
 (`valhallaConfig(defaults, tar)`; native writes it to a file per pack) and request JSON;
 errors come back as `valhalla <code>: <message>` (`routingErrorKind`: 171 no road near,
 442/170 no path, 154 too far). A **routing pack** is a Valhalla tile extract
@@ -405,6 +415,14 @@ read. Before publishing, every pack's cells are clipped to its Geofabrik extract
 `.poly` (`manifest.py clip`: extracts keep whole ways that leave them, ferry lines above
 all, which would make Ireland's pack "cover" Bilbao). Then releases that neither the new
 nor the previous manifest points at are deleted.
+
+**Service roads on the map** (`style.ts`, `tameServiceRoads`): Protomaps draws every
+`highway=service` almost like a street, private and underground ones included. The tiles
+carry `access` and `is_tunnel` but not the service type or the layer, so private (`access`
+private/no) and underground service roads are hidden and the rest drawn at half width;
+an untagged garage ramp (`service=driveway` with no access, a `parking_aisle` with
+`layer=-1` but no `tunnel`) still shows, as a thin line. The real fix there is the OSM
+tags.
 
 **Compass beam** (`HeadingBeam.tsx`): while "show my location" is on and the Maps tab is in
 front (tab `focus`/`blur`; a sheet over the map keeps it), a fan under the native puck

@@ -40,7 +40,9 @@ tags: [smoke, maps, seeded-route]
           start: 50%, 85%
           end: 50%, 25%
           duration: 300
-- assertVisible: "(?s).*Ha llegado a su destino.*"
+# The last step: "Ha llegado…", or "Su destino está a la derecha/izquierda" when the
+# destination snaps to a street beside it (car routes end on streets).
+- assertVisible: "(?s).*(Ha llegado a su destino|Su destino está a la).*"
 # Dragging down scrolls the list back to the top, then closes the sheet.
 - repeat:
     while:

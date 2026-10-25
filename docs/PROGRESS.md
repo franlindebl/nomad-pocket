@@ -86,6 +86,9 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
   thread in batches (minutes for a country on a phone, not yet measured on a device).
 - Emergency points depend on public Overpass servers (best effort; they can be at capacity
   for minutes). Fallback: the POIs in the map's own tiles (complete only at z15).
+- OSM data quality shows through: a garage mapped without `access=private`/`tunnel=yes`
+  still draws as a thin line (routes no longer start in it). Not modelled: low-emission
+  zones (Madrid ZBE), live closures, traffic.
 - Road routing needs a routing pack for the area (else the straight line). No
   isochrones (valhalla-mobile exposes none), no cross-pack routes (the country pack covers
   them), no voice / background navigation yet. Pack sha256 is not verified (size is).
@@ -123,6 +126,20 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-25 — Maps: garages, tunnels and mountain trails
+
+- Owner on build 8: a private garage under a Madrid block
+  showed as a street and routes started through it. Cause, reproduced on a local Valhalla
+  3.9.1 with the Madrid graph: the start snapped to the garage's parking aisle (OSM:
+  driveways + `parking_aisle` at `layer=-1`, mostly without access tags). Car routes now
+  snap both ends to streets (`min_road_class: residential`).
+- Looked for similar traps (owner asked; the web had little Valhalla-specific): starts
+  above a tunnel snapped into it (Plaza de España) → `exclude_tunnel` except on reroutes;
+  foot routes allowed only T1 trails → `max_hiking_difficulty: 2` (Andorra hut: 3.6 km on
+  the trail instead of 6.4 km to the wrong place); `date_time`: no effect; car tracks are
+  already avoided by default (`use_tracks` 0).
+- Map: private and underground service roads hidden, the rest at half width.
 
 ### 2026-10-25 — Maps: navigation view
 
