@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { CheckCircle2 } from 'lucide-react-native';
 import { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
+import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
 import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { create } from 'zustand';
@@ -20,6 +20,8 @@ const useToasts = create<{ current: Toast | null; show: (m: string) => void; hid
 export function showToast(message: string, haptic = true) {
   if (haptic) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
   useToasts.getState().show(message);
+  // The pill's live region only speaks on Android: VoiceOver needs an explicit announcement.
+  if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibilityWithOptions(message, { queue: true });
 }
 
 /** Floating confirmation pill at the top of the screen. Mount once at the root. */

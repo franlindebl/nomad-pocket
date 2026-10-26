@@ -80,7 +80,11 @@ export default function SettingsScreen() {
           chevron
           onPress={() => router.push('/settings/country')}
         />
-        <ListRow title={t('wifiOnly')} subtitle={t('wifiOnlyBody')} trailing={<Switch value={s.wifiOnly} onValueChange={s.setWifiOnly} />} />
+        <ListRow
+          title={t('wifiOnly')}
+          subtitle={t('wifiOnlyBody')}
+          trailing={<Switch value={s.wifiOnly} onValueChange={s.setWifiOnly} accessibilityLabel={t('wifiOnly')} />}
+        />
       </ListGroup>
 
       <SectionHeader title={t('storage')} />
@@ -104,6 +108,7 @@ export default function SettingsScreen() {
             subtitle={`${t('countryKind')} · ${formatBytes(c.sizeBytes)}`}
             leading={<IconBadge icon={Map} hue="maps" size={36} />}
             trailing={trash}
+            accessibilityHint={t('deleteHint')}
             onPress={() => deleteCountry(c)}
           />
         ))}
@@ -120,6 +125,7 @@ export default function SettingsScreen() {
               />
             }
             trailing={trash}
+            accessibilityHint={t('deleteHint')}
             onPress={() => deleteItem(item)}
           />
         ))}

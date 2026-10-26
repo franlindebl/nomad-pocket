@@ -163,14 +163,16 @@
     "fetching": "Descargando {{name}}… {{done}} de {{total}}",
     "failed": "No se pudo descargar {{name}}: {{error}}",
     "offline": "Necesitas conexión a internet para descargar los puntos de emergencia.",
-    "regionInfo": "{{count}} puntos · {{date}}",
+    "regionInfo_one": "{{count}} punto · {{date}}",
+    "regionInfo_other": "{{count}} puntos · {{date}}",
     "regions": "Puntos por mapa",
     "refresh": "Actualizar",
     "source": "Datos de OpenStreetMap. Pueden estar incompletos o desactualizados: ante una emergencia, llama al {{number}}.",
     "preparingTitle": "Preparando los puntos de emergencia",
     "preparingBody": "Descargando los hospitales, farmacias, agua potable y refugios de tus mapas…",
     "bundled": "Incluidos con el mapa",
-    "regionFromTiles": "{{count}} puntos del mapa"
+    "regionFromTiles_one": "{{count}} punto del mapa",
+    "regionFromTiles_other": "{{count}} puntos del mapa"
   },
   "police": {
     "guardiaCivil": "Guardia Civil",
