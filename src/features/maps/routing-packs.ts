@@ -12,9 +12,9 @@
 // and side files stay while any download of their pack is left, failed ones included; the
 // startup sweep deletes the rest.
 import { File, FileMode } from 'expo-file-system';
-import Storage from 'expo-sqlite/kv-store';
 import { create } from 'zustand';
 
+import Storage from '@/db/kv';
 import { getItem, listItems, upsertItem } from '@/features/content/items';
 import { recordGroup } from '@/features/downloads/groups';
 import { cancelDownload, enqueueDownload, useDownloads, type DownloadGroup, type DownloadRecord, type EnqueueInput } from '@/features/downloads/manager';

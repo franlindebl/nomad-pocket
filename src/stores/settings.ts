@@ -1,9 +1,9 @@
 // User preferences, persisted in SQLite's key-value store (sync reads at startup).
-import Storage from 'expo-sqlite/kv-store';
 import { Appearance } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import Storage from '@/db/kv';
 import { deviceLanguage, setLanguage, type AppLanguage } from '@/i18n';
 
 export type ThemePreference = 'system' | 'light' | 'dark';

@@ -6,6 +6,7 @@ import { Alert, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { Chip, IconBadge, ListGroup, ListRow, ProgressBar, Row, Screen, SectionHeader, Segmented, Switch, Text } from '@/components/ui';
+import { searchIndexBytes } from '@/db';
 import { removeItem, useItems, type InstalledItem } from '@/features/content/items';
 import { clearHistory } from '@/features/library/history';
 import { removeCountry, useCountries, type CountryState } from '@/features/maps/countries';
@@ -25,7 +26,8 @@ export default function SettingsScreen() {
   const s = useSettings();
   const items = useItems();
   const { countries, otherMaps } = useCountries();
-  const used = items.reduce((sum, i) => sum + i.sizeBytes, 0);
+  // The map search index too: up to ~1 GB per country, and not part of any item's size.
+  const used = items.reduce((sum, i) => sum + i.sizeBytes, 0) + searchIndexBytes();
   const free = freeBytes();
   const total = totalBytes();
   const region = s.country ? getRegion(s.country) : undefined;

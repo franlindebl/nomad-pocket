@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { Crosshair, MapPin } from 'lucide-react-native';
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
@@ -10,9 +10,12 @@ import { distanceMeters, formatLatLon, formatUtm, parseCoordinates, toUtm, type 
 import { distanceWithDirection, kindColor, kindIcon, kindLabel } from '@/features/maps/labels';
 import { useMarkers } from '@/features/maps/markers';
 import { normalizeName } from '@/features/maps/places-core';
-import { hasSearchIndex, indexDetailAroundView, searchPlaces, usePlaceIndex } from '@/features/maps/places';
+import { hasSearchIndex, indexDetailAroundView, searchPlaces, usePlaceIndex, type SearchResult } from '@/features/maps/places';
 import { showPlace, useMapUi, type SelectedPlace } from '@/features/maps/store';
 import { space, useTheme } from '@/theme';
+
+/** Typing pause before searching: each search reads a country-sized index. */
+const SEARCH_DELAY = 200;
 
 // A plain scroll view (Screen) like the region picker: a virtualized list gets
 // no height inside a formSheet. Results are capped at 40.
@@ -34,12 +37,29 @@ export default function SearchSheet() {
   useEffect(() => indexDetailAroundView(), []);
 
   const coords = useMemo(() => parseCoordinates(deferred), [deferred]);
-  const results = useMemo(
-    () => (deferred.length >= 2 ? searchPlaces(deferred, near) : []),
+  // The index search runs off the JS thread once typing pauses; a newer one makes an
+  // older one stop and its results are dropped.
+  const [typed, setTyped] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => setTyped(query.trim()), SEARCH_DELAY);
+    return () => clearTimeout(timer);
+  }, [query]);
+  const [found, setFound] = useState<{ query: string; results: SearchResult[] }>({ query: '', results: [] });
+  const searchId = useRef(0);
+  useEffect(() => {
+    const id = ++searchId.current;
+    if (typed.length < 2) return;
+    const current = () => id === searchId.current;
+    searchPlaces(typed, near, 40, current)
+      .then((r) => {
+        if (current()) setFound({ query: typed, results: r });
+      })
+      .catch((e) => console.warn('[maps] search failed', e));
     // indexVersion: search again when an index finishes building.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [deferred, near, indexVersion],
-  );
+  }, [typed, near, indexVersion]);
+  // The last results stay up while the next search runs.
+  const results = deferred.length >= 2 ? found.results : [];
+  const searching = deferred.length >= 2 && (found.query !== typed || typed !== deferred);
   const savedHits = useMemo(() => {
     if (deferred.length < 2) return [];
     const q = normalizeName(deferred);
@@ -128,7 +148,9 @@ export default function SearchSheet() {
           {!maps.length && !hasSearchIndex()
             ? t('search.noMaps')
             : deferred.length >= 2 && hasSearchIndex()
-              ? t('search.noResults', { query: deferred })
+              ? searching
+                ? ' '
+                : t('search.noResults', { query: deferred })
               : t('search.hint')}
         </Text>
       ) : null}

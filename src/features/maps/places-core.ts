@@ -317,6 +317,15 @@ export function ftsQuery(text: string): string | null {
 }
 
 /**
+ * How many full-text matches one search reads at most. Ordering by importance reads every
+ * match, and two letters match ~40% of a country (400k rows): the first ones are enough
+ * to rank, and an exact query matches fewer.
+ */
+export function matchCap(text: string): number {
+  return [...text.replace(/[^\p{L}\p{N}]/gu, '')].length < 3 ? 20_000 : 50_000;
+}
+
+/**
  * A street address typed as "Calle Alcalá 50", "Alcalá, 50", "C/ Alcalá nº 50 bis" or
  * "50 Alcalá": the street part (searched among street names) and the house number.
  * Null without a number, or when what is left has no letters to search.

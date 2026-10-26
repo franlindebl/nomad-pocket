@@ -1,9 +1,9 @@
 // Map screen state shared with its sheets: the last viewport (persisted so the
 // map reopens where it was), one-shot camera requests (fly to a marker...) and
 // the place shown in the bottom card (a search result or a tapped point).
-import Storage from 'expo-sqlite/kv-store';
 import { create } from 'zustand';
 
+import Storage from '@/db/kv';
 import type { BBox } from '@/lib/pmtiles';
 
 export type Viewport = { center: [number, number]; zoom: number; bounds: BBox };

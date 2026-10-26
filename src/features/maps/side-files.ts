@@ -8,7 +8,7 @@
 // again one that got lost. Imports run one at a time, each file once at a time; a file that
 // keeps failing (or taking the app down with it) is given up after a few tries.
 import { File, FileMode } from 'expo-file-system';
-import Storage from 'expo-sqlite/kv-store';
+import Storage from '@/db/kv';
 
 import { getItem } from '@/features/content/items';
 import { contentFile, deleteFile } from '@/lib/storage';

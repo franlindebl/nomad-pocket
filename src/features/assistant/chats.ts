@@ -1,10 +1,10 @@
 // Assistant conversations: persistence (chat_sessions / chat_messages) and the
 // in-memory chat state, including the streaming answer and the send/stop flow.
-import Storage from 'expo-sqlite/kv-store';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { db, parseJson } from '@/db';
+import Storage from '@/db/kv';
 import i18n from '@/i18n';
 import { uid } from '@/lib/format';
 import { useSettings } from '@/stores/settings';
