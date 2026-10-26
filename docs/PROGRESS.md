@@ -223,6 +223,20 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-26 — A country can have several routing packs (the USA)
+
+- The full run lost the USA: the runner ran out of memory one hour into its 11 GB
+  Geofabrik extract (map side files). build-country-map.sh now reads an extract over 6 GB in
+  its Geofabrik sub-extracts (the 51 states and DC; not Puerto Rico or the US Virgin
+  Islands), merges and deduplicates the TSVs, and leaves out a side file over 1900 MiB
+  instead of failing the upload (a088642). Run 40323670602 builds the US map.
+- The USA's routing comes as four regional packs (us-west, us-midwest, us-northeast,
+  us-south; data side by the navigation session, d430791, inert until build 13 is on
+  TestFlight). App: `routePacksFor` (country-core, tested) returns every pack with the
+  country's `regionId`; offers, sizes, downloads (one group), "Tus mapas", readiness and
+  removal handle a list. A route between two packs fails offline, as between two countries.
+- build-country-map.sh skips side files for a country with regional packs too.
+
 ### 2026-10-26 — Routing packs for the rest of the world
 
 - Owner approved navigation everywhere. `packs.json` 60 → 232 countries: every country and

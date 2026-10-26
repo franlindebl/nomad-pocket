@@ -72,8 +72,8 @@ export default function CountryDownloadSheet() {
         {/* Without the catalog, a missing pack only means "couldn't check". */}
         <Includes
           title={t('country.routing')}
-          body={offer.pack ? t('country.routingBody') : catalogs === 'ready' ? t('country.routingMissing') : t('country.routingUnknown')}
-          missing={!offer.pack && catalogs === 'ready'}
+          body={offer.packs.length ? t('country.routingBody') : catalogs === 'ready' ? t('country.routingMissing') : t('country.routingUnknown')}
+          missing={!offer.packs.length && catalogs === 'ready'}
         />
         <Includes title={t('country.points')} body={t('country.pointsBody')} />
       </Card>

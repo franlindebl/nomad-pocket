@@ -12,7 +12,7 @@ import i18n from '@/i18n';
 import { HttpError } from '@/lib/pmtiles';
 import { fileSize, hasRoomFor } from '@/lib/storage';
 
-import { countryNeed, countryOfGroup, isNewer, packOutdated, pendingBytes, routePackFor, type CountryMap } from './country-core';
+import { countryNeed, countryOfGroup, isNewer, packOutdated, pendingBytes, routePacksFor, type CountryMap } from './country-core';
 import {
   abortCountryMap,
   countryDownloadGroup,
@@ -40,9 +40,12 @@ export type CountryOffer = {
   map: CountryMap | null;
   /** Zoom of an on-device extraction. */
   fallbackZoom: number;
-  /** Routing pack; null where none is published yet (guidance is then a straight line). */
-  pack: ManifestPack | null;
+  /** Routing packs (several for the USA); none where none is published yet (guidance is then a straight line). */
+  packs: ManifestPack[];
 };
+
+/** Whether a country's points come with its routing packs (no Overpass, no map side files). */
+const packsBringPoints = (o: CountryOffer) => o.packs.some((p) => !!p.pois);
 
 function offer(regionId: string, maps: CountryMap[], packs: ManifestPack[]): CountryOffer | null {
   const region = getRegion(regionId);
@@ -52,7 +55,7 @@ function offer(regionId: string, maps: CountryMap[], packs: ManifestPack[]): Cou
     title: regionName(region, i18n.language),
     map: maps.find((m) => m.regionId === regionId) ?? null,
     fallbackZoom: bestZoom(region.bbox),
-    pack: routePackFor(packs, regionId),
+    packs: routePacksFor(packs, regionId),
   };
 }
 
@@ -71,8 +74,8 @@ export type CountryPlan = {
   map: CountryMap | null;
   /** No prebuilt map and none installed: extracted on the phone. */
   extract: boolean;
-  /** The routing pack to fetch: not installed yet, or (`update`) a newer build. */
-  pack: ManifestPack | null;
+  /** The routing packs to fetch (several for the USA): not installed yet, or (`update`) newer builds. */
+  packs: ManifestPack[];
   /** Bytes to download (an extraction's from its estimate, when given). */
   bytes: number;
   /** Free space that takes: assembly copies and what is already in the queue included. */
@@ -88,14 +91,18 @@ export function planCountry(o: CountryOffer, estimate?: Estimate, opts: { update
   const maps = useMapsCatalog.getState().manifest;
   const routing = useRoutingCatalog.getState().manifest;
   const installedMap = getItem(mapItemId(o.region.id)) as MapItem | null;
-  const installedPack = o.pack ? (getItem(routePackId(o.pack.id)) as RoutePackItem | null) : null;
   const wantMap = !installedMap || (!!opts.update && !!o.map && isNewer(o.map.buildDate, installedMap.meta.buildDate));
   const map = wantMap && o.map && maps ? o.map : null;
   const extract = wantMap && !map;
-  const pack = o.pack && routing && (!installedPack || (!!opts.update && packOutdated(installedPack.meta, o.pack))) ? o.pack : null;
-  const need = countryNeed([map && countryMapPlan(map), pack && packPlan(pack)], pendingBytes(Object.values(useDownloads.getState().records)));
+  const packs = !routing
+    ? []
+    : o.packs.filter((p) => {
+        const installed = getItem(routePackId(p.id)) as RoutePackItem | null;
+        return !installed || (!!opts.update && packOutdated(installed.meta, p));
+      });
+  const need = countryNeed([map && countryMapPlan(map), ...packs.map(packPlan)], pendingBytes(Object.values(useDownloads.getState().records)));
   const extracted = extract ? (estimate?.plan.archiveBytes ?? 0) : 0;
-  return { map, extract, pack, bytes: need.bytes + extracted, needed: need.needed + extracted };
+  return { map, extract, packs, bytes: need.bytes + extracted, needed: need.needed + extracted };
 }
 
 export type CountrySize =
@@ -195,7 +202,7 @@ export function useCountrySize(o: CountryOffer | null): CountrySize & { retry: (
 
 /**
  * Starts what a country still needs (planCountry): its map, prebuilt or extracted, and its
- * routing pack; `update`: newer builds of what is installed. `estimate`: the on-device
+ * routing packs; `update`: newer builds of what is installed. `estimate`: the on-device
  * extraction plan the confirm sheet already computed (no prebuilt map). Throws
  * NotEnoughStorageError before starting anything, and queues all of it or none.
  */
@@ -204,12 +211,12 @@ export function downloadCountry(o: CountryOffer, estimate?: Estimate, opts: { up
   if (!hasRoomFor(plan.needed)) throw new NotEnoughStorageError(plan.needed);
   const maps = useMapsCatalog.getState().manifest;
   const routing = useRoutingCatalog.getState().manifest;
-  // One row in Downloads, even when the pack is another country's (Haiti uses the Dominican Republic's).
+  // One row in Downloads, even with several packs or another country's (Haiti uses the Dominican Republic's).
   const group = countryDownloadGroup(o.region.id);
   const queued: string[] = [];
   try {
-    if (plan.map && maps) queued.push(...downloadCountryMap(maps, plan.map, !!o.pack?.pois, group));
-    if (plan.pack && routing) queued.push(...downloadPack(routing, plan.pack, group));
+    if (plan.map && maps) queued.push(...downloadCountryMap(maps, plan.map, packsBringPoints(o), group));
+    if (routing) for (const pack of plan.packs) queued.push(...downloadPack(routing, pack, group));
   } catch (e) {
     for (const id of queued) void cancelDownload(id);
     throw e;
@@ -222,7 +229,7 @@ export function downloadCountry(o: CountryOffer, estimate?: Estimate, opts: { up
       minZoom: 0,
       maxZoom: o.fallbackZoom,
       regionId: o.region.id,
-      bundledPoints: !!o.pack?.pois,
+      bundledPoints: packsBringPoints(o),
       estimate,
     });
 }
@@ -231,8 +238,8 @@ export type CountryState = {
   regionId: string;
   title: string;
   map: MapItem | null;
-  pack: RoutePackItem | null;
-  /** Bytes on disk (map + pack). */
+  packs: RoutePackItem[];
+  /** Bytes on disk (map + packs). */
   sizeBytes: number;
   /** 0–1 while something is downloading, else null. */
   progress: number | null;
@@ -274,7 +281,7 @@ export function useCountries(): { countries: CountryState[]; otherMaps: MapItem[
       if (!region || region.type !== 'country') return null;
       let c = byCountry.get(regionId);
       if (!c) {
-        c = { regionId, title: regionName(region, i18n.language), map: null, pack: null, sizeBytes: 0, progress: null, failed: false, buildDate: null, update: false };
+        c = { regionId, title: regionName(region, i18n.language), map: null, packs: [], sizeBytes: 0, progress: null, failed: false, buildDate: null, update: false };
         byCountry.set(regionId, c);
       }
       return c;
@@ -301,16 +308,16 @@ export function useCountries(): { countries: CountryState[]; otherMaps: MapItem[
     }
     // A pack goes with the country whose map uses it (Haiti uses the Dominican Republic's).
     for (const p of packs) {
-      const owner = [...byCountry.values()].find((c) => routePackFor([{ id: p.catalogId ?? '', regionId: p.meta.regionId ?? '' }], c.regionId));
+      const owner = [...byCountry.values()].find((c) => routePacksFor([{ id: p.catalogId ?? '', regionId: p.meta.regionId ?? '' }], c.regionId).length);
       const c = owner ?? (p.meta.regionId ? country(p.meta.regionId) : null);
       if (!c) continue;
-      c.pack = p;
+      c.packs.push(p);
       // A newer build of its roads, points and addresses, or one this app's engine can't read.
       const latest = catalogPacks?.find((x) => x.id === p.catalogId);
       if (latest && packOutdated(p.meta, latest)) c.update = true;
     }
     for (const c of byCountry.values()) {
-      c.sizeBytes = (c.map?.sizeBytes ?? 0) + (c.pack?.sizeBytes ?? 0);
+      c.sizeBytes = (c.map?.sizeBytes ?? 0) + c.packs.reduce((sum, p) => sum + p.sizeBytes, 0);
       const mine = recordsBy.get(c.regionId) ?? [];
       const running = mine.filter((r) => ACTIVE.has(r.status));
       c.failed = !running.length && mine.some((r) => r.status === 'failed');
@@ -362,7 +369,7 @@ export function retryCountry(c: CountryState) {
   for (const r of whole) if (useDownloads.getState().records[r.id]?.status === 'failed') dismissDownload(r.id);
 }
 
-/** Cancels what is still downloading and deletes the country's map and pack. */
+/** Cancels what is still downloading and deletes the country's map and packs. */
 export async function removeCountry(c: CountryState) {
   const records = countryRecords(c.regionId);
   const mapIds = new Set<string>();
@@ -378,7 +385,7 @@ export async function removeCountry(c: CountryState) {
   packIds.forEach(abortPack);
   for (const id of new Set([...countryMapDownloadIds(c.regionId), ...records.map((r) => r.id)])) await cancelDownload(id);
   // Read again: an assembly that finished meanwhile registered its item after `c` was read.
-  const items = [mapItemId(c.regionId), c.pack?.id, ...[...packIds].map(routePackId)];
+  const items = [mapItemId(c.regionId), ...c.packs.map((p) => p.id), ...[...packIds].map(routePackId)];
   for (const id of new Set(items)) if (id && getItem(id)) await removeItem(id);
   mapIds.forEach(discardCountryMapFiles);
   packIds.forEach(discardPackFiles);

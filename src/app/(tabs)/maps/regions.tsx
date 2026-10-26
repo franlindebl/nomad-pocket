@@ -78,7 +78,7 @@ export default function MapsSheet() {
     if (c.progress !== null) return t('regions.downloadingPct', { pct: Math.round(c.progress * 100) });
     if (c.failed) return t('regions.failed');
     if (c.update) return t('regions.updateAvailable');
-    const what = !c.map ? t('regions.routingOnly') : c.pack ? t('regions.withRouting') : t('regions.mapOnly');
+    const what = !c.map ? t('regions.routingOnly') : c.packs.length ? t('regions.withRouting') : t('regions.mapOnly');
     return [what, formatBytes(c.sizeBytes), dataDate(c.buildDate, i18n.language)].filter(Boolean).join(' · ');
   };
 

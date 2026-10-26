@@ -86,7 +86,7 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
               ? mine.update
                 ? t('ready.mapUpdate')
                 : t('ready.mapStale')
-              : mine.pack
+              : mine.packs.length
                 ? t('ready.mapDone')
                 : t('ready.mapDoneNoRouting')
             : t('ready.mapTodo'),

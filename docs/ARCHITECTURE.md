@@ -440,12 +440,13 @@ gives the region's name).
 **Country downloads** (`countries.ts`, `country-maps.ts`, pure `country-core.ts`; plan in
 `docs/UX_SURVIVAL_PLAN.md`): the UI only offers whole countries (`regions.json`, without
 Antarctica; Northern Cyprus, Somaliland and the Siachen Glacier — `cyn`, `sol`, `kas` — stay in the
-picker by owner decision). A country = its map + its routing pack (`routePackFor`: same
-`regionId`, or a pack whose extract covers it, `ht` → `do`) + the emergency points and street
-names that come with either. `useCountryOffer` / `useCountrySize` read both catalogs (and,
+picker by owner decision). A country = its map + its routing packs (`routePacksFor`: those with its
+`regionId`, several for a country built in parts like the USA's `us-west`, `us-south`…; else a
+pack whose extract covers it, `ht` → `do`) + the emergency points and street names that come
+with either. All of it is one download group, one row in Downloads. `useCountryOffer` / `useCountrySize` read both catalogs (and,
 without a prebuilt map, a dry-run estimate); `downloadCountry` checks room for everything,
 then queues the prebuilt map (`downloadCountryMap`) or starts the extraction fallback, and
-the pack (`downloadPack`). `useCountries` groups installed items and downloads in flight by
+the packs (`downloadPack`). `useCountries` groups installed items and downloads in flight by
 country (one row: size, combined progress, failed → retry); `removeCountry` cancels and
 deletes both. Maps that aren't a country (older community/state or visible-area maps) are
 listed as "Otros mapas". **Prebuilt maps**: `.github/workflows/country-packages.yml` (monthly, or by hand with a
