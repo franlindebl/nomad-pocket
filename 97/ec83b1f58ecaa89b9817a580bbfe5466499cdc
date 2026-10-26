@@ -1,0 +1,21 @@
+site/index.html
+  s_9f5316f88b2e79::t_e8209a8fef6ab2 23,25,27-29,37,39,41,48,50-52,60,62,64,69
+site/privacy.html
+  s_9f5316f88b2e79::t_38271b83586429 24,27-30,34-36,43,45-47,51-64,72-74,76-81,83-97,99-101,116,119-122,126-128,135,137-139,143-155,163-169,171-172,174-188,190-192,205
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "97ec83b1f58ecaa89b9817a580bbfe5466499cdc",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
