@@ -302,12 +302,14 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ### 2026-10-25 — Maps: search finds nearby schools; addresses and abbreviations
 
-- Owner on build 9 (Spain map): schools near a Madrid test spot not found; "Calle Alcalá 50" found nothing. Cause: Spain's map is indexed at z12, where
+- Owner on build 9 (Spain map): schools near a Madrid test spot
+  not found; "Calle Alcalá 50" found nothing. Cause: Spain's map is indexed at z12, where
   Protomaps keeps no schools (they are in z14/z15 tiles); a number in the query was a word
   that had to match.
 - Detail index: the map's max zoom (≤ 15) over a 50 km square around the user / the
   searched area, besides the whole-map index (`listZoomTiles` takes a bbox). Checked on
-  the live planet around that spot: z14 finds one school's grounds and a sports centre; the school building itself only at z15. On the simulator
+  the live planet around that spot: z14 finds one school's grounds and a sports
+  centre; the school building itself only at z15. On the simulator
   (a z15 Madrid extract, index budget forced down on a throwaway build): all three found.
   A fresh install has no last known position: startup takes one coarse fix instead.
 - Addresses: "Calle Alcalá 50", "C/ Mayor 1", "Dr Fleming 10" find the street;
