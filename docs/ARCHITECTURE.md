@@ -98,7 +98,7 @@ src/
     credits/                 data behind Settings › Credits & licenses (credits-core.ts pure, licenses.ts)
 modules/
   nomad-zim/                 libkiwix bridge + ZimWebView (Swift/Obj-C++ · Kotlin)
-  nomad-llm/                 Apple Foundation Models + Gemini Nano bridge
+  nomad-llm/                 Apple Foundation Models bridge (+ Android Gemini Nano bridge, being removed)
   nomad-route/               Valhalla routing (valhalla-mobile: iOS xcframework · Android AAR)
 plugins/                     config plugins (with-android-backup-rules.js)
 locales/                     InfoPlist strings (localised permission prompts), es + en
