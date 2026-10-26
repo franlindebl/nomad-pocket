@@ -150,6 +150,8 @@ export default function OnboardingScreen() {
     const countryDownloading = !countryInstalled && countries.some((c) => c.regionId === country && c.progress !== null);
     const countryWanted = !countryInstalled && !countryDownloading;
     const countryBytes = countryWanted && countrySize.status === 'ready' ? countrySize.bytes : 0;
+    // What it takes on disk while it installs (a multi-part archive is assembled next to its parts).
+    const countryNeeded = countryWanted && countrySize.status === 'ready' ? countrySize.needed : 0;
     const allGuides = guideResources(s.contentLanguages).filter((r) => !installedIds.has(r.id));
     const guides = allGuides.filter((r) => !pendingIds.has(r.id));
     const guidesDownloading = guides.length < allGuides.length;
@@ -164,11 +166,14 @@ export default function OnboardingScreen() {
     // Any Wikipedia on its way: the free space has shrunk since it was picked, so a new pick
     // could be another variant (another id, which the download queue wouldn't dedupe).
     const wikiDownloading = !installedWiki && [...pendingIds].some((id) => WIKIPEDIA_IDS.has(id));
-    const rest = (on.country ? countryBytes : 0) + (on.guides ? guidesBytes : 0) + (on.assistant ? modelBytes : 0);
+    const others = (on.guides ? guidesBytes : 0) + (on.assistant ? modelBytes : 0);
+    const rest = (on.country ? countryBytes : 0) + others;
+    const restNeeded = (on.country ? countryNeeded : 0) + others;
     // Null with neither of those: not even the smallest one fits next to the rest.
-    const wiki = installedWiki || wikiDownloading ? null : pickWikipedia(wikiLang, free - rest);
+    const wiki = installedWiki || wikiDownloading ? null : pickWikipedia(wikiLang, free - restNeeded);
     const wikiBytes = wiki ? wiki.resource.sizeMB * 1e6 : 0;
     const total = rest + (on.wikipedia ? wikiBytes : 0);
+    const needed = restNeeded + (on.wikipedia ? wikiBytes : 0);
     return {
       free,
       countryInstalled,
@@ -189,12 +194,13 @@ export default function OnboardingScreen() {
       wiki,
       wikiBytes,
       total,
+      needed,
     };
   }, [country, installedCountries, countries, countrySize, s.contentLanguages, s.language, installedIds, pendingIds, system, on]);
 
   const countryPending = on.country && kit.countryWanted && countrySize.status === 'loading';
   const countryFailed = on.country && kit.countryWanted && (countrySize.status === 'offline' || countrySize.status === 'error');
-  const fits = kit.total <= kit.free;
+  const fits = kit.needed <= kit.free;
 
   const startKit = async () => {
     setStarting(true);
