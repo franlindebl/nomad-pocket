@@ -28,7 +28,7 @@ import { useGuidance } from './guidance';
 import { hasPackAddresses, hasPackPlaces, hasPackStreets, indexPackAddresses, indexPackPlaces, indexPackStreets } from './places';
 import { getRegion, regionName } from './regions';
 import { closeRouter, routePackId, type RoutePackMeta } from './routing';
-import { assetUrl, ENGINE_VALHALLA, parseManifest, type ManifestPack, type RoutingManifest } from './routing-core';
+import { assetUrl, ENGINE_VALHALLA, fileIntegrity, parseManifest, type ManifestPack, type RoutingManifest } from './routing-core';
 import { expectedSideFiles, expectSideFiles, forgetSideFile, importSideFile, isImporting } from './side-files';
 
 const REPO = 'franlindebl/nomad-pocket';
@@ -126,6 +126,7 @@ const partInput = (manifest: RoutingManifest, pack: ManifestPack, i: number, gro
   url: assetUrl(manifest, pack, pack.parts[i].name, REPO),
   filename: partName(pack.id, i),
   expectedBytes: pack.parts[i].size,
+  integrity: fileIntegrity(pack.parts[i]),
   meta: { pack, valhalla: manifest.valhalla, role: 'part', index: i },
   group,
 });
@@ -137,6 +138,7 @@ const sideInput = (manifest: RoutingManifest, pack: ManifestPack, side: SideFile
   url: assetUrl(manifest, pack, pack[side]!.name, REPO),
   filename: sideName(pack.id, side),
   expectedBytes: pack[side]!.size,
+  integrity: fileIntegrity(pack[side]!),
   meta: { pack, valhalla: manifest.valhalla, role: side },
   group,
 });

@@ -25,6 +25,7 @@ import {
   cellOf,
   engineReads,
   ENGINE_VALHALLA,
+  fileIntegrity,
   valhallaConfig,
 } from './routing-core.ts';
 import { bearingDegrees } from './geo.ts';
@@ -256,6 +257,12 @@ test('parseManifest keeps paths and other schemes out of URLs', () => {
     m.packs.map((p) => p.id),
     ['ad'],
   );
+});
+
+test('fileIntegrity promises the size, and the hash only when it is one', () => {
+  const sha = 'a'.repeat(64);
+  assert.deepEqual(fileIntegrity({ name: 'ad.tar', size: 10, sha256: sha }), { size: 10, sha256: sha });
+  assert.deepEqual(fileIntegrity({ name: 'ad.tar', size: 10, sha256: 'x' }), { size: 10 });
 });
 
 test('packs built by another Valhalla are not offered', () => {
