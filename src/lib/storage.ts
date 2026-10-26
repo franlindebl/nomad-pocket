@@ -1,6 +1,7 @@
 // On-disk layout for downloaded content. Everything lives under the app's document
 // directory (never the cache dir — the OS may purge it, which defeats "offline").
 import { Directory, File, Paths } from 'expo-file-system';
+import { getFreeDiskStorageAsync } from 'expo-file-system/legacy';
 
 export type ContentKind = 'zim' | 'map' | 'model' | 'route';
 
@@ -20,8 +21,15 @@ export function partialDir(): Directory {
   return dir;
 }
 
+/**
+ * A file directly inside the kind's content dir. Remote names are cleaned by the download
+ * manager (safeFileName) first; this only makes sure nothing ever lands outside the dir:
+ * Paths.join resolves "..", so "../../SQLite/nomad.db" would reach the app database.
+ */
 export function contentFile(kind: ContentKind, filename: string): File {
-  return new File(contentDir(kind), filename);
+  const name = filename.split('/').pop() ?? '';
+  if (!name || name === '.' || name === '..') throw new Error(`not a file name: ${filename}`);
+  return new File(contentDir(kind), name);
 }
 
 /**
@@ -42,8 +50,26 @@ export function toNativePath(uri: string): string {
   return decodeURIComponent(uri.replace(/^file:\/\//, ''));
 }
 
+// Paths.availableDiskSpace is iOS's systemFreeSize, which leaves out purgeable space (often
+// several GB that iOS frees for a download, and that Settings shows as available), and
+// Android's freeSpace, which counts blocks only root may use. The legacy call reads the right
+// values (volumeAvailableCapacityForImportantUsage, StatFs.availableBlocks) but only async:
+// keep the difference it measured and apply it to the live, synchronous value.
+let freeAdjust = 0;
+
+/** Re-measures the free-space correction (the download manager calls it at startup and on foreground). */
+export async function refreshFreeBytes(): Promise<void> {
+  try {
+    const usable = Number(await getFreeDiskStorageAsync());
+    if (Number.isFinite(usable) && usable > 0) freeAdjust = usable - Number(Paths.availableDiskSpace);
+  } catch {
+    // keep the last correction
+  }
+}
+
+/** Space a download may use, as the OS counts it for files the person asked for. */
 export function freeBytes(): number {
-  return Number(Paths.availableDiskSpace);
+  return Math.max(0, Number(Paths.availableDiskSpace) + freeAdjust);
 }
 
 export function totalBytes(): number {
