@@ -23,7 +23,7 @@
   "deleteConfirm": "Delete {{title}}? This frees {{size}}.",
   "deleteHint": "Deletes it from this phone",
   "about": "About",
-  "aboutBody": "Nomad Pocket is open source (GPL‑3.0), inspired by Project N.O.M.A.D. by Crosstalk Solutions. Content from Kiwix, Wikipedia, OpenStreetMap and Protomaps.",
+  "aboutBody": "Nomad Pocket is open source (GPL‑3.0-or-later), inspired by Project N.O.M.A.D. by Crosstalk Solutions. Content from Kiwix, Wikipedia, OpenStreetMap and Protomaps.",
   "version": "Version {{version}}",
   "credits": "Credits & licenses",
   "creditsIntro": "Nomad Pocket is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License, version 3 or (at your option) any later version.",
