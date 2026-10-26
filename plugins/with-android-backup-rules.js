@@ -1,11 +1,9 @@
 // Android backup rules. Auto Backup copies the app's files to the user's Google Drive, but an
 // app over 25 MB is skipped whole, emergency plan included. The downloaded content and the
-// unpacked map assets (gigabytes, all re-downloadable) never go. nomad.db stays out of the
-// cloud backup too, although it is small now: the map search indexes live in their own file,
-// content/index/search.db, which the content/ rule already covers. Putting nomad.db (saved
-// places, chats, bookmarks) back into the cloud backup is an open owner decision
-// (docs/PROGRESS.md). What is left is the kv-store (settings, the emergency plan and the kit),
-// which fits. A device-to-device transfer has no quota, so it also carries nomad.db; the app
+// unpacked map assets (gigabytes, all re-downloadable) never go, and neither does nomad.db
+// in the cloud: it also holds the map search indexes, hundreds of MB per country. What is left
+// is the kv-store (settings, the emergency plan and the kit), which fits. A device-to-device
+// transfer has no quota, so it also carries nomad.db (saved places, chats, bookmarks); the app
 // then finds its content rows without files, as after an iOS restore.
 //
 // Paths are relative to filesDir (expo-file-system's Paths.document on Android; expo-sqlite
