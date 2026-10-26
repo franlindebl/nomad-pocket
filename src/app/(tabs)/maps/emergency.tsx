@@ -20,7 +20,7 @@ import {
 } from '@/features/maps/emergency';
 import { EMERGENCY_CATEGORIES, policeForce, type EmergencyCategory } from '@/features/maps/emergency-core';
 import { formatLatLon, formatUtm, toUtm, type LatLon } from '@/features/maps/geo';
-import { useGuidance } from '@/features/maps/guidance';
+import { startGuidance } from '@/features/maps/guidance';
 import { usePlaceIndex } from '@/features/maps/places';
 import { CATEGORY_COLORS, CATEGORY_ICONS, distanceWithDirection, kindIcon, kindLabel } from '@/features/maps/labels';
 import { showPlace, useMapUi } from '@/features/maps/store';
@@ -124,8 +124,8 @@ export default function EmergencySheet() {
   };
 
   const guide = async (p: EmergencyPlace) => {
-    const ok = await useGuidance.getState().start({ name: p.name ?? kindLabel(t, p.kind), lat: p.lat, lon: p.lon });
-    if (ok) {
+    // Location denied: startGuidance says so and offers Settings; the sheet stays.
+    if (await startGuidance({ name: p.name ?? kindLabel(t, p.kind), lat: p.lat, lon: p.lon })) {
       useMapUi.getState().select(null);
       router.back();
     }
