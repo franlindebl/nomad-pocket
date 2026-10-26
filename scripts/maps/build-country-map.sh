@@ -28,6 +28,16 @@ UA="NomadPocket-maps/1.0 (+https://github.com/franlindebl/nomad-pocket)"
 OUT="$WORK/out"
 mkdir -p "$OUT" "$WORK/src"
 log() { echo "[map $ID] $*"; }
+# Geofabrik's mirrors sometimes answer 404 mid-update, which curl --retry doesn't retry:
+# a few more tries, minutes apart (the full run lost Germany's routing pack to one).
+fetch() {
+  local out="$1" url="$2" i
+  for i in 1 2 3 4; do
+    curl -fsSL --retry 3 -A "$UA" -o "$out" "$url" && return 0
+    (( i < 4 )) && { log "download failed ($url), again in $((i * 2)) min"; sleep $((i * 120)); }
+  done
+  return 1
+}
 
 BBOX="$(python3 -I - "$ROOT/src/features/maps/regions.json" "$ID" <<'PY'
 import json, sys
@@ -83,7 +93,7 @@ sys.exit(0 if sys.argv[2] in packs or SHARED.get(sys.argv[2]) in packs or region
 PY
 then
   INDEX="$WORK/src/geofabrik-index.json"
-  curl -fsSL --retry 3 -A "$UA" -o "$INDEX" https://download.geofabrik.de/index-v1-nogeom.json
+  fetch "$INDEX" https://download.geofabrik.de/index-v1-nogeom.json
   # An extract of this country alone before one shared with neighbours, and among those the
   # one named after it: Geofabrik tags six Pacific extracts VU (American Oceania, Tokelau,
   # French Polynesia…) and two MH. A tie left after that takes none (Overpass then), never
@@ -137,7 +147,7 @@ PY
     fi
     PBF="$WORK/src/$ID.osm.pbf"
     log "points from $URL"
-    curl -fsSL --retry 3 -A "$UA" -o "$PBF" "$URL"
+    fetch "$PBF" "$URL"
     # Keep in step with build-country.sh (step 5) and overpassQuery in emergency-core.ts.
     osmium tags-filter --overwrite "$PBF" \
       nwr/amenity=hospital,clinic,doctors,pharmacy,police,fire_station,drinking_water,water_point,shelter,fuel,townhall,embassy \
