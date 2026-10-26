@@ -157,18 +157,18 @@ const FACET_PREFIXES = [
 /**
  * The topic a follow-up question leaves implicit ("¿y cómo se trata?" after asking
  * about hypothermia): keywords of the previous user turn when the new question opens
- * with a conjunction, points back ("eso"), or only names facets of a topic. Empty
- * when the question stands alone.
+ * with a conjunction, only names facets of a topic, or points back ("eso", "it") with
+ * at most one word of its own. Empty when the question stands alone: English puts
+ * "it" in most questions ("Is it safe to drink rain water?").
  */
 export function followUpTopic(question: string, history: Turn[]): string[] {
   const prev = [...history].reverse().find((t) => t.role === 'user');
   if (!prev) return [];
   const own = extractKeywords(question);
   const ws = words(question);
+  const ownTopic = own.filter((k) => !FACET_PREFIXES.some((p) => normalize(k).startsWith(p)));
   const followUp =
-    FOLLOW_UP_START.has(ws[0] ?? '') ||
-    ws.some((w) => ANAPHORA.has(w)) ||
-    own.every((k) => FACET_PREFIXES.some((p) => normalize(k).startsWith(p)));
+    FOLLOW_UP_START.has(ws[0] ?? '') || ownTopic.length === 0 || (ownTopic.length <= 1 && ws.some((w) => ANAPHORA.has(w)));
   if (!followUp) return [];
   const ownSet = new Set(own.map(normalize));
   return extractKeywords(prev.content)
@@ -176,11 +176,17 @@ export function followUpTopic(question: string, history: Turn[]): string[] {
     .slice(0, 4);
 }
 
-/** Search queries for a question in a conversation: the implicit topic goes first. */
+/**
+ * Search queries for a question in a conversation: the implicit topic goes first, and
+ * the question's own keywords are searched too in case the topic guess was wrong (the
+ * engine wants every word, so a wrong topic would sink the merged queries).
+ */
 export function buildConversationQueries(question: string, history: Turn[], max = 4): string[] {
   const topic = followUpTopic(question, history);
   if (!topic.length) return buildSearchQueries(question, max);
-  return buildSearchQueries([...topic, ...extractKeywords(question)].join(' '), max);
+  const merged = buildSearchQueries([...topic, ...extractKeywords(question)].join(' '), max);
+  const own = extractKeywords(question).length ? buildSearchQueries(question, max) : [];
+  return [...new Set([...merged.slice(0, max - 1), ...own.slice(0, 1), ...merged.slice(max - 1), ...own.slice(1)])].slice(0, max);
 }
 
 // ---------------------------------------------------------------------------
@@ -203,15 +209,24 @@ const CHAT_WORDS = new Set(
   ).split(' '),
 );
 
-// Requests about the previous answer: rewrite it, don't look anything up.
+// Requests about the previous answer: rewrite it, don't look anything up. Long stems
+// match as prefixes ("resúmelo", "simplify"); short or ambiguous words only whole, so
+// one-word follow-ups such as "¿Y moretones?", "What about itching?" or "Listeria?" still search.
 const META_PREFIXES = [
-  'resum', 'simplif', 'sencill', 'facil', 'corto', 'cort', 'larg', 'breve', 'aclar', 'explic', 'tradu', 'repit', 'repet', 'continu', 'sigu',
-  'otra', 'vez', 'detall', 'ejempl', 'ingles', 'espanol', 'lista', 'puntos', 'tabla', 'frase', 'palabra', 'parrafo',
-  'dame', 'ponlo', 'ponerlo', 'hazlo', 'escribelo', 'dimelo', 'cuentamelo',
-  'summar', 'simpl', 'short', 'long', 'brief', 'clarif', 'explain', 'translat', 'rephras', 'repeat', 'again', 'continu', 'elaborat',
-  'expand', 'detail', 'exampl', 'english', 'spanish', 'list', 'bullet', 'table', 'easier', 'more', 'less', 'menos',
-  'sentence', 'word', 'paragraph', 'give', 'make', 'put', 'write', 'it',
+  'resum', 'simplif', 'sencill', 'facil', 'breve', 'aclar', 'explic', 'tradu', 'repit', 'repet', 'continu',
+  'detall', 'ejempl', 'ingles', 'espanol', 'escribelo', 'cuentamelo',
+  'summar', 'simpl', 'clarif', 'explain', 'translat', 'rephras', 'reword', 'rewrit', 'repeat', 'elaborat',
+  'expand', 'detail', 'exampl', 'english', 'spanish', 'sentence', 'paragraph',
 ];
+const META_WORDS = new Set(
+  (
+    'corto corta cortos cortas cortito largo larga largos largas sigue seguir siguiente otra otro vez ' +
+    'lista listas punto puntos tabla tablas frase frases palabra palabras parrafo parrafos menos ' +
+    'dame ponlo ponerlo hazlo dimelo ' +
+    'short shorter shorten long longer brief briefly again list lists bullet bullets bulleted table tables ' +
+    'easier more less word words give make put write'
+  ).split(' '),
+);
 
 export type Intent = 'chat' | 'search';
 
@@ -227,7 +242,7 @@ export function guessIntent(message: string, history: Turn[] = []): Intent {
   const hasHistory = history.some((t) => t.role === 'assistant');
   const content = ws.filter((w) => !isStopword(w));
   const chatty = (w: string) =>
-    CHAT_WORDS.has(w) || /^(?:ja|je|ha){2,}h?$/.test(w) || (hasHistory && META_PREFIXES.some((p) => w.startsWith(p)));
+    CHAT_WORDS.has(w) || /^(?:ja|je|ha){2,}h?$/.test(w) || (hasHistory && (META_WORDS.has(w) || META_PREFIXES.some((p) => w.startsWith(p))));
   return content.every(chatty) ? 'chat' : 'search';
 }
 
