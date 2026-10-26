@@ -52,6 +52,11 @@ export function screenHeading(deviceHeading: number, orientation: InterfaceOrien
   return (((deviceHeading + SCREEN_TURN[orientation]) % 360) + 360) % 360;
 }
 
+/** A last-known position may be hours old, in another town: only a fix this recent counts. */
+export function isFreshFix(timestamp: number, maxAgeMs: number, now = Date.now()): boolean {
+  return now - timestamp <= maxAgeMs;
+}
+
 /** Square-ish box around a point, for SQL prefilters. */
 export function bboxAround(p: LatLon, radiusMeters: number): [number, number, number, number] {
   const dLat = deg(radiusMeters / R);

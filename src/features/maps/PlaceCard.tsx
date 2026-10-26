@@ -14,12 +14,18 @@ import { space } from '@/theme';
 import { callNumber } from './call';
 import { findEmergencyPlace, getEmergencyPlace } from './emergency';
 import { policeForce } from './emergency-core';
-import { distanceMeters, formatLatLon, formatUtm, toUtm, type LatLon } from './geo';
+import { distanceMeters, formatLatLon, formatUtm, isFreshFix, toUtm, type LatLon } from './geo';
 import { startGuidance } from './guidance';
 import { distanceWithDirection, isEmergencyKind, kindColor, kindIcon, kindLabel } from './labels';
 import { addMarker } from './markers';
 import { parsePhones } from './phone';
 import { useMapUi, type SelectedPlace } from './store';
+
+/**
+ * Distances only from a fix this recent. A last-known position can be days old and in
+ * another town (the phone travelled switched off): "35 km NE" for a hospital 800 m away.
+ */
+const FRESH_FIX_MS = 5 * 60_000;
 
 export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: number }) {
   const { t, i18n } = useTranslation('maps');
@@ -38,10 +44,21 @@ export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: num
 
   // The parent keys this card by place, so `saved` starts fresh for each one.
   useEffect(() => {
-    Location.getForegroundPermissionsAsync()
-      .then((p) => (p.granted ? Location.getLastKnownPositionAsync() : null))
-      .then((pos) => setHere(pos ? { lat: pos.coords.latitude, lon: pos.coords.longitude } : null))
-      .catch(() => {});
+    let alive = true;
+    (async () => {
+      if (!(await Location.getForegroundPermissionsAsync()).granted) return;
+      const last = await Location.getLastKnownPositionAsync({ maxAge: FRESH_FIX_MS });
+      // No recent fix (a cold GPS just after launch): no distance until a new one comes.
+      // A card is no reason for Android's "turn on location" dialog.
+      const pos =
+        last && isFreshFix(last.timestamp, FRESH_FIX_MS)
+          ? last
+          : await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced, mayShowUserSettingsDialog: false });
+      if (alive) setHere({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+    })().catch(() => {});
+    return () => {
+      alive = false;
+    };
   }, [place]);
 
   const kind = poi?.kind ?? place.kind;
