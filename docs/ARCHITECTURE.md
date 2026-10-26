@@ -384,7 +384,12 @@ brings the streets matching its street part, after the full-text hits, and befor
 the door itself on the best 8 of those streets (`doorHits`: the pack's house numbers of
 that street name within 3 km; `locateHouseNumber`: the door, else between the nearest
 numbers on the same side, else the nearest number ≤ 10 away; kind `address` /
-`address_approx`). The search sheet
+`address_approx`). Japan has no streets in its addresses (blocks inside a chōme):
+`parseJapaneseAddress` reads "台東2丁目5-1", "台東2-5-1", "台東二丁目5番1号" (also after the
+prefecture and city) as the street "台東2丁目" + number "5-1" that places.py writes from
+`addr:quarter` + `addr:neighbourhood` + `addr:block_number` + `addr:housenumber`, and
+`japaneseDoorHits` looks the door up by that key directly (else any door of the block,
+approximate). The search sheet
 also matches saved places and parses coordinates (`geo.ts`: decimal, DMS with N/S/E/W/O,
 UTM with band letter). House numbers come only from a pack (Protomaps tiles carry none).
 

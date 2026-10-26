@@ -14,6 +14,7 @@ import {
   normalizeName,
   locateHouseNumber,
   parseAddress,
+  parseJapaneseAddress,
   parseAddressesTsv,
   parsePlacesTsv,
   parseStreetsTsv,
@@ -114,6 +115,27 @@ test('parseAddress splits the street from the house number', () => {
   assert.equal(parseAddress('M-30'), null);
   assert.equal(parseAddress('50'), null);
   assert.equal(parseAddress('Hotel 7 Islas'), null);
+});
+
+test('parseJapaneseAddress reads chōme, block and number the way places.py writes them', () => {
+  const jp = (street: string, number: string) => ({ street, number });
+  assert.deepEqual(parseJapaneseAddress('台東2丁目5-1'), [jp('台東2丁目', '5-1')]);
+  assert.deepEqual(parseJapaneseAddress('台東2-5-1'), [jp('台東2丁目', '5-1'), jp('台東', '2-5-1')]);
+  assert.deepEqual(parseJapaneseAddress('台東二丁目5番1号'), [jp('台東2丁目', '5-1')]);
+  assert.deepEqual(parseJapaneseAddress('丸の内十二丁目9番地1'), [jp('丸の内12丁目', '9-1')]);
+  assert.deepEqual(parseJapaneseAddress('東京都台東区台東２－５－１'), [
+    jp('東京都台東区台東2丁目', '5-1'),
+    jp('台東区台東2丁目', '5-1'),
+    jp('台東2丁目', '5-1'),
+    jp('東京都台東区台東', '2-5-1'),
+    jp('台東区台東', '2-5-1'),
+    jp('台東', '2-5-1'),
+  ]);
+  // Two numbers: chōme + block, or a rural block + number.
+  assert.deepEqual(parseJapaneseAddress('台東2-5'), [jp('台東2丁目', '5'), jp('台東', '2-5')]);
+  assert.deepEqual(parseJapaneseAddress('岩村田1234-5'), [jp('岩村田', '1234-5')]);
+  assert.deepEqual(parseJapaneseAddress('台東'), []);
+  assert.deepEqual(parseJapaneseAddress('Calle Alcalá 50'), []);
 });
 
 test('normalizeName drops accents and case', () => {
