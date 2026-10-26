@@ -81,6 +81,15 @@ const CONTINENT = {
 };
 const UN = { Africa: 'africa', Asia: 'asia', Europe: 'europe', Americas: 'north-america', Oceania: 'oceania' };
 
+// Natural Earth names that read wrong in the picker: two "San Martín" rows in Spanish, the
+// sovereignty unit's formal name instead of the usual one.
+const NAMES = {
+  sx: { es: 'San Martín (Países Bajos)' },
+  mf: { es: 'San Martín (Francia)' },
+  tw: { es: 'Taiwán' },
+  cn: { en: 'China' },
+};
+
 const regions = [];
 const taken = new Set();
 const ordered = [...a0.features].sort((a, b) => (a.properties.TYPE === 'Dependency' ? 1 : 0) - (b.properties.TYPE === 'Dependency' ? 1 : 0) || a.properties.LEVEL - b.properties.LEVEL);
@@ -91,7 +100,8 @@ for (const f of ordered) {
   if (taken.has(id)) id = p.ADM0_A3.toLowerCase();
   taken.add(id);
   const continent = CONTINENT[p.CONTINENT] ?? UN[p.REGION_UN] ?? 'oceania';
-  regions.push({ id, type: 'country', continent, name: { es: p.NAME_ES || p.NAME, en: p.NAME_EN || p.NAME }, bbox: round(countryBBox([f.geometry])) });
+  const name = { es: p.NAME_ES || p.NAME, en: p.NAME_EN || p.NAME, ...NAMES[id] };
+  regions.push({ id, type: 'country', continent, name, bbox: round(countryBBox([f.geometry])) });
 }
 
 const ES = {
