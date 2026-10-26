@@ -38,13 +38,12 @@ import { Button, Card, Chip, IconButton, Row, Text } from '@/components/ui';
 import { formatDuration } from '@/lib/format';
 import { space, useTheme } from '@/theme';
 
+import { hasArrived } from './follow-core';
 import { bearingDegrees, compassSector, distanceMeters } from './geo';
 import { useGuidance } from './guidance';
 import { formatDistance } from './labels';
 import { useRoutingCatalog } from './routing-packs';
 import { COSTINGS, maneuverIcon, packsCovering, remainingSeconds, STRAIGHT_LINE_SPEED, type Costing, type ManeuverIcon } from './routing-core';
-
-const ARRIVED_METERS = 20;
 
 const COSTING_ICONS: Record<Costing, LucideIcon> = { auto: Car, pedestrian: Footprints, bicycle: Bike };
 
@@ -102,8 +101,8 @@ export function GuidancePanel({ bottom, top, mapBearing, onHeight, onBannerHeigh
 
   const distance = target && position ? distanceMeters(position, target) : null;
   const bearing = target && position ? bearingDegrees(position, target) : null;
-  // A coarse fix (approximate location: kilometres) must not count as arriving.
-  const arrived = distance !== null && distance <= Math.max(ARRIVED_METERS, Math.min(position?.accuracy ?? 0, 50));
+  // The same test that makes guidance end by itself a minute later.
+  const arrived = distance !== null && hasArrived(distance, position?.accuracy ?? null);
   // At the end of the route but not at the target (a hut 300 m off the road): the last
   // stretch is straight-line guidance.
   const routeDone = !!route && !!progress && progress.remainingM < 15 && progress.offRouteM < 30;
@@ -155,9 +154,14 @@ export function GuidancePanel({ bottom, top, mapBearing, onHeight, onBannerHeigh
         {t('guidance.waiting')}
       </Text>
     ) : arrived ? (
-      <Text variant="title2" color="success">
-        {t('guidance.arrived')}
-      </Text>
+      <View style={{ gap: 2 }}>
+        <Text variant="title2" color="success">
+          {t('guidance.arrived')}
+        </Text>
+        <Text variant="footnote" color="textSecondary">
+          {t('guidance.arrivedEnds')}
+        </Text>
+      </View>
     ) : following && next && NextIcon ? (
       <Row gap={space.lg}>
         <View style={[styles.arrow, { backgroundColor: colors.accentSoft }]} accessibilityElementsHidden>

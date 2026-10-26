@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { followBearing, followZoom, turnBetween } from './follow-core.ts';
+import { followBearing, followZoom, hasArrived, hasMoved, turnBetween } from './follow-core.ts';
 import type { RouteProgress } from './routing-core.ts';
 
 const onRoute: RouteProgress = { segment: 3, offRouteM: 5, remainingM: 900, next: 2, toNextM: 120, aheadBearing: 80 };
@@ -27,4 +27,19 @@ test('turnBetween wraps around north', () => {
   assert.equal(turnBetween(350, 10), 20);
   assert.equal(turnBetween(10, 350), 20);
   assert.equal(turnBetween(0, 180), 180);
+});
+
+test('hasArrived: 20 m, widened by a poor fix up to 50 m', () => {
+  assert.equal(hasArrived(15, 5), true);
+  assert.equal(hasArrived(25, 5), false);
+  assert.equal(hasArrived(25, null), false);
+  assert.equal(hasArrived(40, 45), true, 'within the fix error');
+  assert.equal(hasArrived(80, 3000), false, 'approximate location never arrives');
+});
+
+test('hasMoved: beyond jitter and the fix error', () => {
+  assert.equal(hasMoved(10, 5), false);
+  assert.equal(hasMoved(40, 5), true);
+  assert.equal(hasMoved(40, 60), false, 'a poor fix wanders further');
+  assert.equal(hasMoved(40, null), true);
 });

@@ -78,6 +78,10 @@ export default function MapScreen() {
     const unsubscribe = [tab.addListener('focus', () => setTabFocused(true)), tab.addListener('blur', () => setTabFocused(false))];
     return () => unsubscribe.forEach((u) => u());
   }, [navigation]);
+  // Guidance keeps the screen awake and the compass on only while the map is in front.
+  useEffect(() => {
+    useGuidance.getState().setMapFocused(tabFocused);
+  }, [tabFocused]);
   // The OpenStreetMap credit, until a few seconds pass or the first gesture (MapCredit).
   const [credit, setCredit] = useState(true);
   const [locating, setLocating] = useState(false);
