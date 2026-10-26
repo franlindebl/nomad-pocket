@@ -1,0 +1,33 @@
+src/app/(tabs)/maps/download.tsx
+  s_9f5316f88b2e79::t_34483a865382b6 45-47,114,116
+src/app/(tabs)/maps/regions.tsx
+  s_9f5316f88b2e79::t_d7c53663482b99 9,43,48,58-59
+src/features/maps/countries.ts
+  s_9f5316f88b2e79::t_14670882ef8bf5 10,13,15,17,20,22,29,31,69-100,103-104,128-132,137,150-156,170,189-190,193,197-200,203-205,209-217,247-249,259-261,291,340-359,362-379
+src/features/maps/country-core.test.ts
+  s_9f5316f88b2e79::t_aab9e131d3c99c 4-14,90-140
+src/features/maps/country-core.ts
+  s_9f5316f88b2e79::t_96aa6befdbf365 105-156
+src/features/maps/country-maps.ts
+  s_9f5316f88b2e79::t_2c35a12cd9801f 9-12,18,20,25,28,30-31,35,68,84,89-109,113-117,122-123,127-183,185-191,195-198,200-202,204-213,216,233,235,241-247,251-252,254-300,302,307-310,323,337,340-346,357,372,375,379,381-382,396-398,401-405,407-411,414-432,434-477
+src/features/maps/register.ts
+  s_9f5316f88b2e79::t_57f479a04be6d2 13,20-21,120-122,172,182
+src/features/maps/routing-packs.ts
+  s_9f5316f88b2e79::t_7e72f131d4b9bb 8-13,18-20,22,24-26,32,79-80,83-87,89-91,95-151,154-156,158-159,161-170,173,176-179,183-184,188-198,200-201,203-206,210-211,223-228,231-238,242-254,256-276,278,282-285,298,312,315-321,329,346,350,352-354,362,368-370,375-377,380-384,387,389-421
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9d344c3eb06049089b77639bbc8dc4a86a21867a",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

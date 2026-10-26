@@ -1,0 +1,21 @@
+src/features/maps/emergency.ts
+  s_9f5316f88b2e79::t_2c9df6ef33f8db 5,25-27,136-151,156-158,161-165,167-177,181-185,191
+src/features/maps/side-files.ts
+  s_9f5316f88b2e79::t_1777743ec26b78 1-184
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "89049a0cfac162fc74653117bcc690a5383cffb8",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
