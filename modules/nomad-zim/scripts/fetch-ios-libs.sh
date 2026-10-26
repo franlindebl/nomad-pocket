@@ -9,7 +9,9 @@
 set -euo pipefail
 
 VERSION="14.2.1-2"
-MD5="78c0398d14228d11d2caf2c888314d04"
+# Kiwix publishes an MD5 (78c0398d14228d11d2caf2c888314d04); this is the SHA-256 of the
+# archive that matched it.
+SHA256="14820648788dddc3df8a89ff0820af60d7efc1cfda6c83602989455263ee1561"
 URL="https://download.kiwix.org/release/libkiwix/libkiwix_xcframework-${VERSION}.tar.gz"
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -32,10 +34,6 @@ if [[ -f "$STAMP" && "$(cat "$STAMP")" == "$STAMP_VALUE" && -d "$DEST/CoreKiwix.
   exit 0
 fi
 
-md5_of() {
-  if command -v md5 >/dev/null 2>&1; then md5 -q "$1"; else md5sum "$1" | cut -d' ' -f1; fi
-}
-
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 ARCHIVE="$TMP/libkiwix.tar.gz"
@@ -43,9 +41,9 @@ ARCHIVE="$TMP/libkiwix.tar.gz"
 echo "[nomad-zim] downloading libkiwix xcframework $VERSION (~60 MB)…"
 curl -fsSL --retry 3 --retry-delay 2 -o "$ARCHIVE" "$URL"
 
-ACTUAL="$(md5_of "$ARCHIVE")"
-if [[ "$ACTUAL" != "$MD5" ]]; then
-  echo "[nomad-zim] md5 mismatch: expected $MD5, got $ACTUAL" >&2
+ACTUAL="$(shasum -a 256 "$ARCHIVE" | cut -d' ' -f1)"
+if [[ "$ACTUAL" != "$SHA256" ]]; then
+  echo "[nomad-zim] sha256 mismatch: expected $SHA256, got $ACTUAL" >&2
   exit 1
 fi
 
