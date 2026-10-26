@@ -20,7 +20,6 @@ import { contentDir, contentFile, deleteFile, hasRoomFor } from '@/lib/storage';
 import { parseOverpassTsv } from './emergency-core';
 import { storeEmergencyPoints } from './emergency';
 import { useGuidance } from './guidance';
-import { parseStreetsTsv } from './places-core';
 import { hasPackAddresses, hasPackPlaces, hasPackStreets, indexPackAddresses, indexPackPlaces, indexPackStreets } from './places';
 import { getRegion, regionName } from './regions';
 import { routePackId, type RoutePackMeta } from './routing';
@@ -201,8 +200,8 @@ async function importSideFile(pack: ManifestPack, side: SideFile) {
   const id = routePackId(pack.id);
   if (!file.exists || !getItem(id)) return;
   try {
-    // Places and addresses are ~100 MB for a big country: read in blocks, not one string.
-    if (side === 'streets') await indexPackStreets(id, parseStreetsTsv(await file.text()));
+    // Streets, places and addresses are 100+ MB for a big country: read in blocks by places.ts.
+    if (side === 'streets') await indexPackStreets(id, file);
     else if (side === 'places') await indexPackPlaces(id, file);
     else await indexPackAddresses(id, file);
   } finally {

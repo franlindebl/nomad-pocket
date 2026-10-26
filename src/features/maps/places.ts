@@ -24,6 +24,7 @@ import {
   parseAddressesTsv,
   parseJapaneseAddress,
   parsePlacesTsv,
+  parseStreetsTsv,
   pickIndexZoom,
   rankHits,
   tileRows,
@@ -122,7 +123,6 @@ export function deletePlaceRows(source: string) {
 /** Adds emergency points to the search index under 'pois:<item id>' (replacing earlier ones). */
 export function indexEmergencyPoints(itemId: string, rows: PlaceRow[]) {
   deletePlaceRows(`pois:${itemId}`);
-  deletePlaceRows(`streets:${itemId}`);
   insertRows(`pois:${itemId}`, rows);
   bumpVersion();
 }
@@ -137,16 +137,8 @@ export function hasPackStreets(itemId: string): boolean {
  * inserted in batches with a yield in between, so the UI stays responsive. Counted as
  * a search index (hasSearchIndex) even without a map installed.
  */
-export async function indexPackStreets(itemId: string, rows: PlaceRow[]) {
-  deletePlaceRows(itemId);
-  for (let i = 0; i < rows.length && getItem(itemId); i += 5000) {
-    insertRows(itemId, rows.slice(i, i + 5000));
-    await yieldToUi();
-  }
-  if (!getItem(itemId)) {
-    deletePlaceRows(itemId); // removed meanwhile
-    return;
-  }
+export async function indexPackStreets(itemId: string, file: File) {
+  if (!(await insertStreetsFile(itemId, itemId, file))) return;
   db().runSync(
     `INSERT INTO map_sources (item_id, index_version, indexed_at) VALUES (?, ?, ?)
      ON CONFLICT(item_id) DO UPDATE SET index_version = excluded.index_version, indexed_at = excluded.indexed_at`,
@@ -320,15 +312,28 @@ function doorsNear(streetName: string, near: LatLon, meters: number): AddressRow
  * A country map's street and locality names (country-maps.ts, where no routing pack brings
  * them), under 'streets:<item id>' so the map's own tile index keeps its rows.
  */
-export async function indexMapStreets(itemId: string, rows: PlaceRow[]) {
-  const source = `streets:${itemId}`;
-  deletePlaceRows(source);
-  for (let i = 0; i < rows.length && getItem(itemId); i += 5000) {
-    insertRows(source, rows.slice(i, i + 5000));
-    await yieldToUi();
-  }
-  if (!getItem(itemId)) deletePlaceRows(source); // removed meanwhile
+export async function indexMapStreets(itemId: string, file: File) {
+  await insertStreetsFile(`streets:${itemId}`, itemId, file);
   bumpVersion();
+}
+
+/**
+ * A streets file (France: 150 MB) into the index under `source`, read in blocks like the
+ * places. False, leaving nothing, when the item is removed meanwhile.
+ */
+async function insertStreetsFile(source: string, itemId: string, file: File): Promise<boolean> {
+  deletePlaceRows(source);
+  await forEachLineBlock(file, async (text) => {
+    const rows = parseStreetsTsv(text);
+    for (let i = 0; i < rows.length && getItem(itemId); i += 5000) {
+      insertRows(source, rows.slice(i, i + 5000));
+      await yieldToUi();
+    }
+    return !!getItem(itemId);
+  });
+  if (getItem(itemId)) return true;
+  deletePlaceRows(source); // removed meanwhile
+  return false;
 }
 
 /**
