@@ -1,6 +1,7 @@
 // Bottom card for the selected place (search result, emergency point or a tapped
-// dot on the map): what it is, how far, and the actions — take me there, save,
-// call when OpenStreetMap has a phone number.
+// dot on the map): what it is, how far, and the actions — take me there, save, and
+// one call button per number OpenStreetMap lists. The buttons show the number, so it
+// can be dialled from another phone when this device can't call.
 import * as Location from 'expo-location';
 import { Check, MapPin, Navigation, Phone, X } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
@@ -8,19 +9,20 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Linking, StyleSheet, View } from 'react-native';
 
 import { Badge, Button, Card, IconBadge, IconButton, Row, Text } from '@/components/ui';
-import { space, useTheme } from '@/theme';
+import { space } from '@/theme';
 
+import { callNumber } from './call';
 import { findEmergencyPlace, getEmergencyPlace } from './emergency';
 import { policeForce } from './emergency-core';
 import { distanceMeters, formatLatLon, formatUtm, toUtm, type LatLon } from './geo';
 import { useGuidance } from './guidance';
 import { distanceWithDirection, isEmergencyKind, kindColor, kindIcon, kindLabel } from './labels';
 import { addMarker } from './markers';
+import { parsePhones } from './phone';
 import { useMapUi, type SelectedPlace } from './store';
 
 export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: number }) {
   const { t, i18n } = useTranslation('maps');
-  const { colors } = useTheme();
   const [here, setHere] = useState<LatLon | null>(null);
   const [saved, setSaved] = useState(false);
   const poi = useMemo(
@@ -32,6 +34,7 @@ export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: num
           : null,
     [place],
   );
+  const phones = useMemo(() => parsePhones(poi?.phone), [poi]);
 
   // The parent keys this card by place, so `saved` starts fresh for each one.
   useEffect(() => {
@@ -91,6 +94,22 @@ export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: num
             {poi.openingHours ? <Badge label={t('place.hours', { hours: poi.openingHours })} /> : null}
           </Row>
         ) : null}
+        {phones.length ? (
+          <Row gap={space.sm} style={{ flexWrap: 'wrap' }}>
+            {phones.map((p) => (
+              <Button
+                key={p.dial}
+                testID="place-call"
+                title={p.label}
+                icon={Phone}
+                variant="secondary"
+                size="sm"
+                accessibilityLabel={t('place.callNumber', { number: p.label })}
+                onPress={() => callNumber(p)}
+              />
+            ))}
+          </Row>
+        ) : null}
         <Text variant="caption" color="textTertiary" tabular selectable>
           {formatLatLon(place.lat, place.lon)}
           {utm ? `  ·  UTM ${formatUtm(utm)}` : ''}
@@ -108,15 +127,6 @@ export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: num
               setSaved(true);
             }}
           />
-          {poi?.phone ? (
-            <IconButton
-              icon={Phone}
-              size={44}
-              color={colors.success}
-              accessibilityLabel={t('place.call')}
-              onPress={() => Linking.openURL(`tel:${poi.phone!.replace(/[^\d+]/g, '')}`)}
-            />
-          ) : null}
         </Row>
       </Card>
     </View>

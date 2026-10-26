@@ -1,9 +1,9 @@
 import { router } from 'expo-router';
 import { HeartPulse, MapPin, Phone, Plus, type LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Linking } from 'react-native';
 
 import { IconBadge, IconButton, ListGroup, ListRow, Screen, SectionHeader, Text } from '@/components/ui';
+import { callPhones } from '@/features/maps/call';
 import { Field } from '@/features/prepare/components';
 import { usePrepare } from '@/features/prepare/store';
 import type { EntryKind, MeetingSlot } from '@/features/prepare/types';
@@ -79,7 +79,7 @@ export default function PlanScreen() {
                   size={36}
                   color={colors.success}
                   accessibilityLabel={t('plan.call', { name: c.name })}
-                  onPress={() => Linking.openURL(`tel:${c.phone.replace(/[^\d+]/g, '')}`).catch(() => {})}
+                  onPress={() => callPhones(c.phone)}
                 />
               ) : undefined
             }

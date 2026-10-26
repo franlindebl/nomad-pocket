@@ -108,12 +108,18 @@
     "takeMeThere": "Llévame",
     "save": "Guardar",
     "saved": "Guardado",
-    "call": "Llamar",
+    "callNumber": "Llamar al {{number}}",
     "close": "Cerrar",
     "emergencyYes": "Urgencias",
     "emergencyNo": "Sin urgencias",
     "hours": "Horario: {{hours}}",
     "away": "a {{distance}}"
+  },
+  "call": {
+    "failedTitle": "No se ha podido llamar",
+    "failedBody": "Si este dispositivo no hace llamadas, marca el {{number}} desde otro teléfono.",
+    "invalid": "«{{number}}» no parece un número de teléfono.",
+    "chooseTitle": "Elige un número"
   },
   "guidance": {
     "start": "Iniciar",

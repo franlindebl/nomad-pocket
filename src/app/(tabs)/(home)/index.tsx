@@ -21,7 +21,7 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Linking, Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Card, IconBadge, IconButton, ListGroup, ListRow, ProgressBar, Row, Screen, SectionHeader, Text } from '@/components/ui';
@@ -30,6 +30,7 @@ import { groupDownloads } from '@/features/downloads/groups';
 import { useActiveDownloads } from '@/features/downloads/manager';
 import { ContinueCarousel } from '@/features/home/ContinueCarousel';
 import { useReadiness, type ReadinessKey } from '@/features/home/readiness';
+import { callPhones } from '@/features/maps/call';
 import { emergencyNumber } from '@/features/maps/emergency';
 import { formatBytes } from '@/lib/format';
 import { freeBytes } from '@/lib/storage';
@@ -117,7 +118,7 @@ export default function HomeScreen() {
         <QuickAction testID="home-emergency" icon={Siren} hue="medicine" title={t('crisis.nearby')} onPress={() => router.navigate('/maps/emergency')} />
         <QuickAction testID="home-first-aid" icon={HeartPulse} hue="medicine" title={t('crisis.firstAid')} onPress={openFirstAid} />
         <QuickAction testID="home-plan" icon={Users} hue="survival" title={t('crisis.plan')} onPress={() => router.push('/prepare/plan')} />
-        <QuickAction testID="home-call" icon={Phone} hue="medicine" title={t('crisis.call', { number })} onPress={() => Linking.openURL(`tel:${number}`)} />
+        <QuickAction testID="home-call" icon={Phone} hue="medicine" title={t('crisis.call', { number })} onPress={() => callPhones(number)} />
       </View>
 
       {downloads.length > 0 ? (
