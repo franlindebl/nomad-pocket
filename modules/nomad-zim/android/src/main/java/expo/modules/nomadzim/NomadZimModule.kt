@@ -13,6 +13,9 @@ class ArchiveNotOpenException(id: String) : CodedException("ZIM archive '$id' is
 
 class OpenFailedException(message: String) : CodedException(message)
 
+/** Largest entry getContent returns (articles are far smaller; HTML-wrapped books may reach a few MB). */
+private const val MAX_CONTENT_BYTES = 8L * 1024 * 1024
+
 class NomadZimModule : Module() {
   private val context
     get() = requireNotNull(appContext.reactContext) { "React context is not available" }
@@ -58,10 +61,14 @@ class NomadZimModule : Module() {
       }
     }
 
+    // Null for binary or oversized entries, checked before reading: the whole entry becomes
+    // one string bridged to JS (a PDF or video the reader shows would otherwise be read and
+    // decoded only to be thrown away).
     AsyncFunction("getContent") Coroutine { id: String, path: String ->
       withContext(Dispatchers.IO) {
         val h = handle(id)
         val info = h.entryInfo(path) ?: return@withContext null
+        if (!isText(info.mimeType) || info.size > MAX_CONTENT_BYTES) return@withContext null
         val bytes = h.data(info.path) ?: return@withContext null
         mapOf("path" to info.path, "title" to info.title, "mimeType" to info.mimeType, "content" to String(bytes, Charsets.UTF_8))
       }
@@ -87,7 +94,8 @@ class NomadZimModule : Module() {
       withContext(Dispatchers.IO) { handle(id).listArticles(limit).map(::hit) }
     }
 
-    // iOS-only concept (iCloud backup). Android auto-backup excludes large files anyway.
+    // iOS-only (per-file iCloud backup flag). On Android the content folders are excluded by
+    // path in the backup rules (plugins/with-android-backup-rules.js).
     AsyncFunction("excludeFromBackup") { _: String -> false }
 
     View(ZimWebView::class) {
@@ -112,6 +120,11 @@ class NomadZimModule : Module() {
       }
       AsyncFunction("clearFind") { view: ZimWebView -> view.clearFind() }
     }
+  }
+
+  private fun isText(mimeType: String): Boolean {
+    val mime = mimeType.lowercase()
+    return mime.startsWith("text/") || "json" in mime || "xml" in mime || "javascript" in mime
   }
 
   private fun plainPath(uri: String): String =

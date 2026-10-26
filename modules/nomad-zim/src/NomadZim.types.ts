@@ -38,6 +38,7 @@ export type NomadZimNativeModule = {
   suggest(id: string, query: string, limit: number): Promise<NativeZimHit[]>;
   search(id: string, query: string, limit: number): Promise<NativeZimHit[]>;
   getEntry(id: string, path: string): Promise<NativeZimEntry | null>;
+  /** Text entry (HTML, CSS, JSON…) as a string, redirects resolved. Null when missing, not text, or over 8 MB. */
   getContent(id: string, path: string): Promise<NativeZimContent | null>;
   getMainPath(id: string): Promise<string | null>;
   randomPath(id: string): Promise<string | null>;
