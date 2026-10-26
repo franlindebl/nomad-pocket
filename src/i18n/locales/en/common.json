@@ -49,6 +49,8 @@
     "queuedCount_one": "{{count}} queued",
     "queuedCount_other": "{{count}} queued",
     "finished": "{{title}} is ready to use offline",
+    "missing_one": "A download is missing from this device. Download it again while you're online.",
+    "missing_other": "{{count}} downloads are missing from this device. Download them again while you're online.",
     "needsConnection": "You need an internet connection to download.",
     "waiting": {
       "wifi": "Waiting for Wi‑Fi",

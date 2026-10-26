@@ -113,17 +113,24 @@ export function onItemRemoved(kind: ContentKind, hook: RemoveHook) {
   removeHooks[kind] = hook;
 }
 
-export async function removeItem(id: string) {
+/**
+ * Removes an item, its file and what was derived from it (removal hooks). `keepUserData` keeps
+ * the person's bookmarks, history and course progress: used when the file vanished on its own
+ * (a restored backup), so they come back with the same archive downloaded again.
+ */
+export async function removeItem(id: string, options: { keepUserData?: boolean } = {}) {
   const item = getItem(id);
   if (!item) return;
   await removeHooks[item.kind]?.(item);
   deleteFile(item.fileUri);
   const d = db();
   d.runSync('DELETE FROM items WHERE id = ?', id);
-  d.runSync('DELETE FROM bookmarks WHERE item_id = ?', id);
-  d.runSync('DELETE FROM history WHERE item_id = ?', id);
-  d.runSync('DELETE FROM courses WHERE item_id = ?', id);
-  d.runSync('DELETE FROM course_progress WHERE item_id = ?', id);
+  if (!options.keepUserData) {
+    d.runSync('DELETE FROM bookmarks WHERE item_id = ?', id);
+    d.runSync('DELETE FROM history WHERE item_id = ?', id);
+    d.runSync('DELETE FROM courses WHERE item_id = ?', id);
+    d.runSync('DELETE FROM course_progress WHERE item_id = ?', id);
+  }
   useContent.getState().refresh();
 }
 
