@@ -1,0 +1,39 @@
+src/features/content/items.ts
+  s_9a897e9e3fd008::t_17a27aefb6a0d8 116-121,128-133
+src/features/content/reconcile-core.test.ts
+  s_9f5316f88b2e79::t_3fe133931e7834 1-62
+src/features/content/reconcile-core.ts
+  s_9f5316f88b2e79::t_722e40bc068968 1-48
+src/features/content/register.ts
+  s_9a897e9e3fd008::t_06bdea5e779e31 1-80
+src/features/registry.ts
+  s_9f5316f88b2e79::t_c63d7e3f7f8488 3
+src/i18n/locales/en/common.json
+  s_9f5316f88b2e79::t_cb7907fbaddbb8 52-53
+src/i18n/locales/es/common.json
+  s_9f5316f88b2e79::t_ed34283bf052b7 52-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "115d37e79a2774fa14dcd3ca2462404d6d2ea312",
+  "prompts": {},
+  "sessions": {
+    "s_9a897e9e3fd008": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "43f501aa-0e5c-4028-b06c-4d4a88254ca0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

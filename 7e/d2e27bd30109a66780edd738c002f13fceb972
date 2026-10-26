@@ -1,0 +1,19 @@
+src/features/library/register.ts
+  s_9f5316f88b2e79::t_e7bafc4497821b 10,145-154
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7ed2e27bd30109a66780edd738c002f13fceb972",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
