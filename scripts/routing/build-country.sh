@@ -5,7 +5,9 @@
 # of at most 1900 MiB (GitHub Release assets stop at 2 GiB) and a JSON fragment for the
 # manifest (manifest.py).
 #
-# Usage: scripts/routing/build-country.sh <country id from packs.json> <work dir>
+# Usage: scripts/routing/build-country.sh <pack id from packs.json> <work dir>
+# A pack id is a country id, or a part of a country too big for one pack ("us-west", with
+# "region": "us" in packs.json).
 # Needs curl, python3 with pyosmium and osmium-tool, and the Valhalla tools: run inside
 # ghcr.io/valhalla/valhalla (CI does: apt-get install osmium-tool python3-pyosmium), or
 # on a host with docker, which then runs each Valhalla tool in that image.
@@ -26,15 +28,15 @@ UA="NomadPocket-routing/1.0 (+https://github.com/franlindebl/nomad-pocket)"
 # geofabrik: one extract path, or a list merged into one build (Spain + Canary Islands).
 # clip: the extract is bigger than the country (Singapore in malaysia-singapore-brunei):
 # cut it to the country's bbox from regions.json, with a margin for roads at the border.
-read -r ISO CLIP GEOFABRIK < <(python3 -I - "$HERE/packs.json" "$HERE/../../src/features/maps/regions.json" "$COUNTRY" <<'PY'
+read -r ISO CLIP REGION GEOFABRIK < <(python3 -I - "$HERE/packs.json" "$HERE/../../src/features/maps/regions.json" "$COUNTRY" <<'PY'
 import json, sys
 c = json.load(open(sys.argv[1]))["countries"][sys.argv[3]]
 g = c["geofabrik"]
 clip = "-"
 if c.get("clip"):
-    w, s, e, n = next(r["bbox"] for r in json.load(open(sys.argv[2]))["regions"] if r["id"] == sys.argv[3])
+    w, s, e, n = next(r["bbox"] for r in json.load(open(sys.argv[2]))["regions"] if r["id"] == c.get("region", sys.argv[3]))
     clip = f"{w - 0.05:.4f},{s - 0.05:.4f},{e + 0.05:.4f},{n + 0.05:.4f}"
-print(c["iso"], clip, *(g if isinstance(g, list) else [g]))
+print(c["iso"], clip, c.get("region", sys.argv[3]), *(g if isinstance(g, list) else [g]))
 PY
 )
 
@@ -167,5 +169,5 @@ for tar in "$OUT"/*.tar; do
   fi
 done
 
-python3 -I "$HERE/manifest.py" fragment "$OUT" "$COUNTRY" "$BUILD_DATE" > "$OUT/$COUNTRY.packs.json"
+python3 -I "$HERE/manifest.py" fragment "$OUT" "$COUNTRY" "$BUILD_DATE" "$REGION" > "$OUT/$COUNTRY.packs.json"
 log "done: $(ls "$OUT" | wc -l) files"

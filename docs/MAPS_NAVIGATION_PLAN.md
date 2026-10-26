@@ -124,8 +124,13 @@ up from the manifest with no app release. Order the owner agreed:
    country and territory of `regions.json` but the uninhabited ones, Haiti (routed by `do`)
    and the USA, 232 in all, as whole packs (Germany, France, Canada, Russia included: the
    runner has ~100 GB of disk). Places without an extract of their own are cut from the
-   one that holds them (`clip`). The USA (12 GB PBF) needs several packs per country in the
-   app first. Originally planned: with the big countries as whole packs where they fit (Italy,
+   one that holds them (`clip`). The USA (12 GB PBF) gets four packs from Geofabrik's
+   regional extracts (us-west 3.4 GB incl. Alaska and Hawaii, us-midwest 2.5, us-northeast
+   1.8, us-south 4.2): `packs.json` entries keyed by pack id with `"region": "us"`, one CI
+   job each (the plan job adds them to the matrix), `regionId` "us" in the manifest; the
+   app offers a country's packs together (`routePacksFor`). They land in `packs.json`
+   once a TestFlight build has multi-pack countries (build 13). Routes across two packs
+   fail offline, as across two countries. Originally planned: with the big countries as whole packs where they fit (Italy,
    UK, Poland, Brazil ~3.5 GB; Germany, France ~7.5 GB) and the huge ones (USA, Russia,
    Canada) split coarsely: a few Geofabrik sub-extracts merged per quarter (e.g. US
    West/Central/East from its state extracts), as `geofabrik` lists in `packs.json` and
