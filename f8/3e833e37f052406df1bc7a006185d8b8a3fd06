@@ -1,0 +1,21 @@
+CLAUDE.md
+  s_5a372e6ad43b16::t_8718de9adaef92 24
+docs/DOWNLOADS_SPEED_PLAN.md
+  s_5a372e6ad43b16::t_503e379861b837 1-244
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f83e833e37f052406df1bc7a006185d8b8a3fd06",
+  "prompts": {},
+  "sessions": {
+    "s_5a372e6ad43b16": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "037c1280-203c-48a8-87c3-482a6e45bf75",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
