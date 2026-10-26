@@ -2,6 +2,7 @@
 // region: fetched once from OpenStreetMap through public Overpass servers while
 // online (only the region's bbox is sent), stored in map_pois and added to the
 // search index. Everything after that works offline.
+import type { File } from 'expo-file-system';
 import { getLocales } from 'expo-localization';
 import { create } from 'zustand';
 
@@ -21,7 +22,9 @@ import {
 } from './emergency-core';
 import type { LatLon } from './geo';
 import { distanceMeters } from './geo';
-import { indexEmergencyPoints } from './places';
+import { forgetMapSource, indexEmergencyPoints } from './places';
+import type { PlaceRow } from './places-core';
+import { forEachLineBlock } from './side-files';
 import type { MapItem } from './useMapSources';
 
 // Tried in order; the main instance is often busy.
@@ -130,35 +133,62 @@ const STORE_BATCH = 5000;
  * pack's own file) and adds the named ones to the search index.
  */
 export async function storeEmergencyPoints(source: string, pois: EmergencyPoi[]) {
+  await storePoints(source, async (put) => {
+    await put(pois);
+  });
+}
+
+/** The same from a points file (Overpass TSV columns), read in blocks: a country's is tens of MB. */
+export async function storeEmergencyPointsFile(source: string, file: File) {
+  await storePoints(source, (put) => forEachLineBlock(file, (text) => put(parseOverpassTsv(text))));
+}
+
+/**
+ * Writes the points `feed` hands over in transactions of STORE_BATCH with a yield in between.
+ * Stops, leaving nothing behind, when the source's item is removed meanwhile (its removal
+ * already dropped what was stored before).
+ */
+async function storePoints(source: string, feed: (put: (pois: EmergencyPoi[]) => Promise<boolean>) => Promise<void>) {
   const d = db();
   const insert = d.prepareSync(
     'INSERT OR REPLACE INTO map_pois (source, osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
   );
+  const named: PlaceRow[] = [];
+  let count = 0;
+  let removed = false;
   try {
     d.runSync('DELETE FROM map_pois WHERE source = ?', source);
-    for (let i = 0; i < pois.length; i += STORE_BATCH) {
-      d.withTransactionSync(() => {
-        for (const p of pois.slice(i, i + STORE_BATCH)) {
-          insert.executeSync(source, p.osmId, p.kind, kindCategory(p.kind), p.name, p.operator, p.phone, p.openingHours, p.emergency, p.lat, p.lon);
+    await feed(async (pois) => {
+      for (let i = 0; i < pois.length; i += STORE_BATCH) {
+        if (!getItem(source)) {
+          removed = true;
+          return false;
         }
-      });
-      await new Promise<void>((r) => setTimeout(r, 0));
-    }
+        d.withTransactionSync(() => {
+          for (const p of pois.slice(i, i + STORE_BATCH)) {
+            insert.executeSync(source, p.osmId, p.kind, kindCategory(p.kind), p.name, p.operator, p.phone, p.openingHours, p.emergency, p.lat, p.lon);
+          }
+        });
+        await new Promise<void>((r) => setTimeout(r, 0));
+      }
+      for (const p of pois) if (p.name) named.push({ layer: 'poi', kind: p.kind, name: p.name, names: p.name, lat: p.lat, lon: p.lon, rank: 13 });
+      count += pois.length;
+      return true;
+    });
   } finally {
     insert.finalizeSync();
   }
-  indexEmergencyPoints(
-    source,
-    pois
-      .filter((p) => p.name)
-      .map((p) => ({ layer: 'poi', kind: p.kind, name: p.name!, names: p.name!, lat: p.lat, lon: p.lon, rank: 13 })),
-  );
+  if (removed || !getItem(source)) {
+    forgetMapSource(source);
+    return;
+  }
+  indexEmergencyPoints(source, named);
   d.runSync(
     `INSERT INTO map_sources (item_id, pois_at, pois_count) VALUES (?, ?, ?)
      ON CONFLICT(item_id) DO UPDATE SET pois_at = excluded.pois_at, pois_count = excluded.pois_count`,
     source,
     Date.now(),
-    pois.length,
+    count,
   );
   usePoiSync.setState((st) => ({ version: st.version + 1 }));
 }
