@@ -108,12 +108,18 @@
     "takeMeThere": "Take me there",
     "save": "Save",
     "saved": "Saved",
-    "call": "Call",
+    "callNumber": "Call {{number}}",
     "close": "Close",
     "emergencyYes": "Emergency room",
     "emergencyNo": "No emergency room",
     "hours": "Hours: {{hours}}",
     "away": "{{distance}} away"
+  },
+  "call": {
+    "failedTitle": "Couldn’t start the call",
+    "failedBody": "If this device can’t make calls, dial {{number}} from another phone.",
+    "invalid": "“{{number}}” doesn’t look like a phone number.",
+    "chooseTitle": "Choose a number"
   },
   "guidance": {
     "start": "Start",

@@ -4,9 +4,10 @@ import { router } from 'expo-router';
 import { Navigation, Phone, RefreshCw, Share2 } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Linking, ScrollView, Share, View } from 'react-native';
+import { Alert, ScrollView, Share, View } from 'react-native';
 
 import { Button, Card, Chip, IconBadge, IconButton, ListGroup, ListRow, Row, Screen, SectionHeader, Text } from '@/components/ui';
+import { callPhones } from '@/features/maps/call';
 import {
   emergencyNumber,
   emergencySyncInfo,
@@ -170,7 +171,7 @@ export default function EmergencySheet() {
           variant="danger"
           size="lg"
           style={{ flex: 1 }}
-          onPress={() => Linking.openURL(`tel:${number}`)}
+          onPress={() => callPhones(number)}
         />
         <IconButton
           testID="emergency-share"
