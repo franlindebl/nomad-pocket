@@ -7,6 +7,7 @@ import {
   countryOfGroup,
   isNewer,
   mapAssetUrl,
+  packOutdated,
   parseMapsManifest,
   pendingBytes,
   routePackFor,
@@ -132,9 +133,15 @@ test('pendingBytes counts what the queue still has to fetch', () => {
   );
 });
 
-test('isNewer compares build dates', () => {
+test('isNewer and packOutdated compare build dates and the engine', () => {
   assert.ok(isNewer('20261105', '20261005'));
   assert.ok(!isNewer('20261005', '20261005'));
   assert.ok(!isNewer('', '20261005'));
   assert.ok(!isNewer('20261105', null));
+  assert.ok(packOutdated({ buildDate: '20261005' }, { buildDate: '20261105' }));
+  assert.ok(!packOutdated({ buildDate: '20261105', valhalla: '3.9.1' }, { buildDate: '20261105' }));
+  // Built by a Valhalla this engine can't read: replace it even at the same date.
+  assert.ok(packOutdated({ buildDate: '20261105', valhalla: '3.8.0' }, { buildDate: '20261105' }));
+  // No version recorded: the packs of that time, all 3.9.1.
+  assert.ok(!packOutdated({ buildDate: '20261105' }, { buildDate: '20261105' }));
 });

@@ -23,6 +23,8 @@ import {
   tileCoverage,
   covers,
   cellOf,
+  engineReads,
+  ENGINE_VALHALLA,
   valhallaConfig,
 } from './routing-core.ts';
 import { bearingDegrees } from './geo.ts';
@@ -254,6 +256,18 @@ test('parseManifest keeps paths and other schemes out of URLs', () => {
     m.packs.map((p) => p.id),
     ['ad'],
   );
+});
+
+test('packs built by another Valhalla are not offered', () => {
+  assert.equal(ENGINE_VALHALLA, '3.9.1');
+  assert.ok(engineReads('3.9.1'));
+  assert.ok(engineReads('3.9.4'), 'a patch release reads the same tiles');
+  assert.ok(engineReads(''), 'manifests before the field');
+  assert.ok(!engineReads('3.10.0'));
+  assert.ok(!engineReads('4.0.0'));
+  const raw = JSON.parse(MANIFEST);
+  assert.equal(parseManifest(JSON.stringify({ ...raw, valhalla: '3.10.0' }))!.packs.length, 0);
+  assert.equal(parseManifest(JSON.stringify({ ...raw, valhalla: '3.10.0' }))!.valhalla, '3.10.0');
 });
 
 test('assetUrl and packsCovering', () => {

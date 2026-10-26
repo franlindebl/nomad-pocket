@@ -295,7 +295,26 @@ const isFile = (f: unknown): f is ManifestFile =>
 const isRelease = (v: unknown): v is string => typeof v === 'string' && /^[\w.-]+$/.test(v);
 const isBaseUrl = (v: unknown): v is string => typeof v === 'string' && /^https?:\/\/[^\s]+$/i.test(v);
 
-/** Validates a downloaded manifest; packs that don't look right are dropped. */
+/**
+ * The Valhalla inside modules/nomad-route (valhalla-mobile 0.6.4). Packs only load in the
+ * version that built them: keep in step with VALHALLA_IMAGE (country-packages.yml,
+ * scripts/routing/build-country.sh) and the "valhalla" scripts/routing/manifest.py writes.
+ */
+export const ENGINE_VALHALLA = '3.9.1';
+/** Packs registered before their Valhalla version was recorded were all built by this one. */
+export const LEGACY_PACK_VALHALLA = '3.9.1';
+
+/** Whether tiles built by Valhalla `version` load in this app's engine (same major.minor; unknown: yes). */
+export function engineReads(version: string | null | undefined, engine = ENGINE_VALHALLA): boolean {
+  if (!version) return true;
+  const minor = (v: string) => v.trim().split('.').slice(0, 2).join('.');
+  return minor(version) === minor(engine);
+}
+
+/**
+ * Validates a downloaded manifest; packs that don't look right are dropped, and all of them
+ * when another Valhalla built them (an app older or newer than the catalog can't route on them).
+ */
 export function parseManifest(json: string): RoutingManifest | null {
   let raw: Partial<RoutingManifest>;
   try {
@@ -305,8 +324,10 @@ export function parseManifest(json: string): RoutingManifest | null {
   }
   if (raw?.version !== 1 || !isRelease(raw.release) || !Array.isArray(raw.packs)) return null;
   if (raw.baseUrl != null && !isBaseUrl(raw.baseUrl)) return null;
+  const valhalla = String(raw.valhalla ?? '');
   const packs = raw.packs.filter(
     (p) =>
+      engineReads(valhalla) &&
       p &&
       typeof p.id === 'string' &&
       /^[\w-]+$/.test(p.id) &&
@@ -327,7 +348,7 @@ export function parseManifest(json: string): RoutingManifest | null {
     version: 1,
     release: raw.release,
     baseUrl: raw.baseUrl,
-    valhalla: String(raw.valhalla ?? ''),
+    valhalla,
     packs: packs.map((p) => ({ ...p, cells: Array.isArray(p.cells) && p.cells.every(Number.isFinite) ? p.cells : null })),
   };
 }

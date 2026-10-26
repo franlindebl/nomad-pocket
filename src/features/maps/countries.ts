@@ -12,7 +12,7 @@ import i18n from '@/i18n';
 import { HttpError } from '@/lib/pmtiles';
 import { fileSize, hasRoomFor } from '@/lib/storage';
 
-import { countryNeed, countryOfGroup, isNewer, pendingBytes, routePackFor, type CountryMap } from './country-core';
+import { countryNeed, countryOfGroup, isNewer, packOutdated, pendingBytes, routePackFor, type CountryMap } from './country-core';
 import {
   abortCountryMap,
   countryDownloadGroup,
@@ -71,7 +71,7 @@ export type CountryPlan = {
   map: CountryMap | null;
   /** No prebuilt map and none installed: extracted on the phone. */
   extract: boolean;
-  /** The routing pack to fetch: not installed yet. */
+  /** The routing pack to fetch: not installed yet, or (`update`) a newer build. */
   pack: ManifestPack | null;
   /** Bytes to download (an extraction's from its estimate, when given). */
   bytes: number;
@@ -81,8 +81,8 @@ export type CountryPlan = {
 
 /**
  * What a country download fetches and the room it needs: one figure for the size the sheet
- * shows and the check `downloadCountry` makes (country-core countryNeed). `update`: a newer
- * map build replaces the installed one.
+ * shows and the check `downloadCountry` makes (country-core countryNeed). `update`: newer
+ * builds replace what is installed (only what is outdated).
  */
 export function planCountry(o: CountryOffer, estimate?: Estimate, opts: { update?: boolean } = {}): CountryPlan {
   const maps = useMapsCatalog.getState().manifest;
@@ -92,7 +92,7 @@ export function planCountry(o: CountryOffer, estimate?: Estimate, opts: { update
   const wantMap = !installedMap || (!!opts.update && !!o.map && isNewer(o.map.buildDate, installedMap.meta.buildDate));
   const map = wantMap && o.map && maps ? o.map : null;
   const extract = wantMap && !map;
-  const pack = o.pack && routing && !installedPack ? o.pack : null;
+  const pack = o.pack && routing && (!installedPack || (!!opts.update && packOutdated(installedPack.meta, o.pack))) ? o.pack : null;
   const need = countryNeed([map && countryMapPlan(map), pack && packPlan(pack)], pendingBytes(Object.values(useDownloads.getState().records)));
   const extracted = extract ? (estimate?.plan.archiveBytes ?? 0) : 0;
   return { map, extract, pack, bytes: need.bytes + extracted, needed: need.needed + extracted };
@@ -195,7 +195,7 @@ export function useCountrySize(o: CountryOffer | null): CountrySize & { retry: (
 
 /**
  * Starts what a country still needs (planCountry): its map, prebuilt or extracted, and its
- * routing pack; `update`: a newer build of the installed map. `estimate`: the on-device
+ * routing pack; `update`: newer builds of what is installed. `estimate`: the on-device
  * extraction plan the confirm sheet already computed (no prebuilt map). Throws
  * NotEnoughStorageError before starting anything, and queues all of it or none.
  */
@@ -239,7 +239,7 @@ export type CountryState = {
   failed: boolean;
   /** YYYYMMDD of the map data. */
   buildDate: string | null;
-  /** The maps catalog has a newer build of this country's map. */
+  /** The catalogs have a newer build of this country's map or routing pack. */
   update: boolean;
 };
 
@@ -265,6 +265,7 @@ export function useCountries(): { countries: CountryState[]; otherMaps: MapItem[
   const packs = useItems('route') as RoutePackItem[];
   const records = useDownloads((s) => s.records);
   const catalogMaps = useMapsCatalog((s) => s.manifest?.maps);
+  const catalogPacks = useRoutingCatalog((s) => s.manifest?.packs);
 
   return useMemo(() => {
     const byCountry = new Map<string, CountryState>();
@@ -302,7 +303,11 @@ export function useCountries(): { countries: CountryState[]; otherMaps: MapItem[
     for (const p of packs) {
       const owner = [...byCountry.values()].find((c) => routePackFor([{ id: p.catalogId ?? '', regionId: p.meta.regionId ?? '' }], c.regionId));
       const c = owner ?? (p.meta.regionId ? country(p.meta.regionId) : null);
-      if (c) c.pack = p;
+      if (!c) continue;
+      c.pack = p;
+      // A newer build of its roads, points and addresses, or one this app's engine can't read.
+      const latest = catalogPacks?.find((x) => x.id === p.catalogId);
+      if (latest && packOutdated(p.meta, latest)) c.update = true;
     }
     for (const c of byCountry.values()) {
       c.sizeBytes = (c.map?.sizeBytes ?? 0) + (c.pack?.sizeBytes ?? 0);
@@ -334,7 +339,7 @@ export function useCountries(): { countries: CountryState[]; otherMaps: MapItem[
     }
     const countries = [...byCountry.values()].sort((a, b) => a.title.localeCompare(b.title, i18n.language));
     return { countries, otherMaps };
-  }, [maps, packs, records, catalogMaps]);
+  }, [maps, packs, records, catalogMaps, catalogPacks]);
 }
 
 /**

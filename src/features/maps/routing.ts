@@ -31,6 +31,8 @@ export type RoutePackMeta = {
   /** YYYYMMDD of the OSM data. */
   buildDate: string;
   regionId: string | null;
+  /** Valhalla that built it (routing-core engineReads); absent: LEGACY_PACK_VALHALLA. */
+  valhalla?: string;
 };
 
 export type RoutePackItem = InstalledItem & { meta: RoutePackMeta };
