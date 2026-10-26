@@ -1,0 +1,23 @@
+src/features/maps/places-core.test.ts
+  s_9f5316f88b2e79::t_3d30fe6f4d5505 4,14,111-141,146
+src/features/maps/places-core.ts
+  s_9f5316f88b2e79::t_44aa6d53930ee1 301-302,314-315,322-355
+src/features/maps/places.ts
+  s_9f5316f88b2e79::t_1bf21c611b2bdd 21,139
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "974378d07746629c8fa9feebe91a00342979f233",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
