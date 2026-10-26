@@ -98,9 +98,15 @@ export function mapAssetUrl(manifest: Pick<MapsManifest, 'release' | 'baseUrl'>,
 // Keep in step with SHARED in scripts/maps/build-country-map.sh.
 const SHARED_PACKS: Record<string, string> = { ht: 'do' };
 
-/** The routing pack of a country, if the catalog has one. */
-export function routePackFor<P extends Pick<ManifestPack, 'id' | 'regionId'>>(packs: P[], regionId: string): P | null {
-  return packs.find((p) => p.regionId === regionId) ?? packs.find((p) => p.id === SHARED_PACKS[regionId]) ?? null;
+/**
+ * The routing packs of a country: usually one; several for a country too big to build at
+ * once (the USA: us-west, us-south…, each `regionId` "us"); a shared extract's; or none.
+ */
+export function routePacksFor<P extends Pick<ManifestPack, 'id' | 'regionId'>>(packs: P[], regionId: string): P[] {
+  const own = packs.filter((p) => p.regionId === regionId);
+  if (own.length) return own;
+  const shared = packs.find((p) => p.id === SHARED_PACKS[regionId]);
+  return shared ? [shared] : [];
 }
 
 // --- One download per country (map, pack and side files under one group) ------

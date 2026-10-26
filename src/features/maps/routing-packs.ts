@@ -21,7 +21,7 @@ import { cancelDownload, enqueueDownload, useDownloads, type DownloadGroup, type
 import i18n from '@/i18n';
 import { contentDir, contentFile, deleteFile } from '@/lib/storage';
 
-import { routePackFor, type PlannedArchive } from './country-core';
+import { routePacksFor, type PlannedArchive } from './country-core';
 import { countryDownloadGroup, enqueueAll } from './country-maps';
 import { emergencySyncInfo, storeEmergencyPointsFile } from './emergency';
 import { useGuidance } from './guidance';
@@ -180,7 +180,7 @@ export function downloadPack(manifest: RoutingManifest, pack: ManifestPack, grou
 /** The country whose download a pack's files belong to: the installed map it routes (Haiti for the Dominican Republic's), else its own. */
 function packCountry(manifest: RoutingManifest, pack: ManifestPack): string {
   const maps = listItems('map').map((m) => (m.meta as { regionId?: string | null }).regionId);
-  return maps.find((r): r is string => !!r && routePackFor(manifest.packs, r)?.id === pack.id) ?? pack.regionId;
+  return maps.find((r): r is string => !!r && routePacksFor(manifest.packs, r).some((x) => x.id === pack.id)) ?? pack.regionId;
 }
 
 /**

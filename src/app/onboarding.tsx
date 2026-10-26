@@ -357,7 +357,7 @@ export default function OnboardingScreen() {
                 icon={Map}
                 hue="maps"
                 title={t('onboarding.kit.country', { name: countryTitle })}
-                body={offer?.pack || catalogs !== 'ready' ? t('onboarding.kit.countryBody') : t('onboarding.kit.countryBodyNoRouting')}
+                body={offer?.packs.length || catalogs !== 'ready' ? t('onboarding.kit.countryBody') : t('onboarding.kit.countryBodyNoRouting')}
                 size={
                   !kit.countryWanted
                     ? null

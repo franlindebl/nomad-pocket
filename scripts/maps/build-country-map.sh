@@ -73,11 +73,13 @@ fi
 #    islands) get none: the app then asks Overpass for their points by itself.
 if [[ "${SKIP_POINTS:-}" != "1" ]] && ! python3 -I - "$ROOT/scripts/routing/packs.json" "$ID" <<'PY'
 import json, sys
-# A pack of its own, or one whose extract covers the whole country (routePackFor in
+# A pack of its own, or one whose extract covers the whole country (routePacksFor in
 # src/features/maps/country-core.ts). Not the UK: `ie` lists GB for Northern Ireland only.
 SHARED = {"ht": "do"}
 packs = json.load(open(sys.argv[1]))["countries"]
-sys.exit(0 if sys.argv[2] in packs or SHARED.get(sys.argv[2]) in packs else 1)
+# Or packs of its own regions (the USA: us-west, us-south…, "region": "us").
+regional = any(p.get("region") == sys.argv[2] for p in packs.values())
+sys.exit(0 if sys.argv[2] in packs or SHARED.get(sys.argv[2]) in packs or regional else 1)
 PY
 then
   INDEX="$WORK/src/geofabrik-index.json"

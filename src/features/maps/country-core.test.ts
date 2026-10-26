@@ -10,7 +10,7 @@ import {
   packOutdated,
   parseMapsManifest,
   pendingBytes,
-  routePackFor,
+  routePacksFor,
   type PlannedArchive,
 } from './country-core.ts';
 
@@ -77,16 +77,20 @@ test('mapAssetUrl uses the map release, else the manifest one, else baseUrl', ()
   assert.equal(mapAssetUrl({ ...m, baseUrl: 'http://localhost:8080/' }, m.maps[1], 'a b', 'o/r'), 'http://localhost:8080/a%20b');
 });
 
-test('routePackFor matches the region, then a shared extract', () => {
+test('routePacksFor matches the region, then a shared extract', () => {
   const packs = [
     { id: 'es', regionId: 'es' },
     { id: 'do', regionId: 'do' },
     { id: 'ie', regionId: 'ie' },
+    { id: 'us-west', regionId: 'us' },
+    { id: 'us-south', regionId: 'us' },
   ];
-  assert.equal(routePackFor(packs, 'es')?.id, 'es');
-  assert.equal(routePackFor(packs, 'ht')?.id, 'do');
-  assert.equal(routePackFor(packs, 'gb'), null);
-  assert.equal(routePackFor(packs, 'fr'), null);
+  const ids = (regionId: string) => routePacksFor(packs, regionId).map((p) => p.id);
+  assert.deepEqual(ids('es'), ['es']);
+  assert.deepEqual(ids('ht'), ['do']);
+  assert.deepEqual(ids('us'), ['us-west', 'us-south']);
+  assert.deepEqual(ids('gb'), []);
+  assert.deepEqual(ids('fr'), []);
 });
 
 test('a country group names its country, the pack it uses included', () => {
