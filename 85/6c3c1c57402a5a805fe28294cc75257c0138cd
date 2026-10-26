@@ -1,0 +1,61 @@
+e2e/flows/android/android-03-search-emergency.yaml
+  s_9f5316f88b2e79::t_f7c160648a4195 22-26
+e2e/flows/android/android-05-routing.yaml
+  s_9f5316f88b2e79::t_612b84437287b0 31-35
+scripts/e2e-android.sh
+  s_9f5316f88b2e79::t_9a5564cf14e373 35-37
+src/app/downloads.tsx
+  s_9f5316f88b2e79::t_179a2a8c2d546a 1,4,6,9-11,15,17-20,29-49,54-55
+src/features/assistant/register.ts
+  s_9f5316f88b2e79::t_c8f0e79d86cc7d 28-31
+src/features/catalog/DownloadButton.tsx
+  s_9f5316f88b2e79::t_df7fad8a6d216e 2,8,13,16-19,24-28,34,56,78-79,85-86,89-95
+src/features/catalog/index.ts
+  s_9f5316f88b2e79::t_f8ee7b0c1a31e1 71-73,102
+src/features/downloads/DownloadRow.tsx
+  s_9f5316f88b2e79::t_0067d2348bf24c 5,11,13-17,23,27,49-59
+src/features/downloads/errors.test.ts
+  s_9f5316f88b2e79::t_3de896e48b645d 18-22
+src/features/downloads/errors.ts
+  s_9f5316f88b2e79::t_72ee4b9d4b39a6 4,7,12-13,18-21
+src/features/downloads/manager-core.test.ts
+  s_9f5316f88b2e79::t_5a358bec805dc1 1-98
+src/features/downloads/manager-core.ts
+  s_9f5316f88b2e79::t_1dbc6cd5836f55 1-94
+src/features/downloads/manager.ts
+  s_9f5316f88b2e79::t_e5dce9f5ede687 6-13,17-20,22,27-37,40-49,51,54,83,90-93,99-101,103,109-116,123-132,181-182,189,220-227,232-372,400-427,445-455,457-476,486,489-498,509,515,522,527-528,531,541,543,555-556,577-594,603,605-612,642-652,656,661-662,676,679,681,684-691,693-702,704-705,708-709,715,733-753,755-766,769,775-777,780-786,804,861,869,877,911-917
+src/features/downloads/mirrors.test.ts
+  s_9f5316f88b2e79::t_dcb91fc09a442d 4,20-49
+src/features/downloads/mirrors.ts
+  s_9f5316f88b2e79::t_50ecf81be874bb 6-10,42-56,78-84,88-94,97,99
+src/features/downloads/wifi-prompt.ts
+  s_9a897e9e3fd008::t_30e78cc8c263cc 1-28
+src/i18n/locales/en/common.json
+  s_9f5316f88b2e79::t_23648dcea5a495 44,59-71,76
+src/i18n/locales/es/common.json
+  s_9f5316f88b2e79::t_88879aede4d00b 44,59-71,76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "856c3c1c57402a5a805fe28294cc75257c0138cd",
+  "prompts": {},
+  "sessions": {
+    "s_9a897e9e3fd008": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "43f501aa-0e5c-4028-b06c-4d4a88254ca0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
