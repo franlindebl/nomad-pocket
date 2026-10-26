@@ -63,7 +63,8 @@ Routing). Pending:
   and subdivision coverage is clipped to the region's bbox (ferry lines). Re-run
   40198385548 published Spain, its 16 slices and Canarias: 22 packs live. Superseded the
   same day: whole-country packs only (Spain includes Canarias), see the roadmap.
-- **Street search from the packs** (2026-10-25): a search for a Madrid side street got nothing — the map index of a big map holds only main roads. Packs now
+- **Street search from the packs** (2026-10-25): a search for a Madrid side
+  street got nothing — the map index of a big map holds only main roads. Packs now
   carry `<id>.streets.tsv` (every named street + localities), indexed for search.
 - Not measured on a phone: route time and memory, assembling a 2 GB pack (JS copy).
 - Isochrones: neither valhalla-mobile wrapper exposes them (iOS would need Valhalla
