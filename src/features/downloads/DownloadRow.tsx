@@ -2,25 +2,29 @@ import { AlertCircle, Check, Pause, Play, RotateCw, X } from 'lucide-react-nativ
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
-import { IconButton, ProgressBar, Row, Text } from '@/components/ui';
+import { Button, IconButton, ProgressBar, Row, Text } from '@/components/ui';
 import { formatBytes, formatDuration } from '@/lib/format';
 import { space, useTheme } from '@/theme';
 
 import { downloadErrorKind } from './errors';
 import type { DownloadEntry } from './groups';
-import { cancelDownloads, pauseDownloads, resumeDownloads, type DownloadRecord } from './manager';
+import { allowMobileData, cancelDownloads, pauseDownloads, resumeDownloads, type DownloadRecord } from './manager';
 
-/** One row of the Downloads sheet: a single download or a group of files (a country). */
-export function DownloadRow({ entry }: { entry: DownloadEntry<DownloadRecord> }) {
+/**
+ * One row of the Downloads sheet: a single download or a group of files (a country).
+ * `waiting`: why its queued files aren't starting (the network rules), if that's the case.
+ */
+export function DownloadRow({ entry, waiting }: { entry: DownloadEntry<DownloadRecord>; waiting?: 'wifi' | 'offline' | null }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { status, bytesWritten, totalBytes, speed, records } = entry;
   const progress = totalBytes > 0 ? bytesWritten / totalBytes : 0;
   const eta = speed && speed > 0 && totalBytes > 0 ? (totalBytes - bytesWritten) / speed : 0;
+  const held = status === 'queued' && waiting ? waiting : null;
 
   let detail = `${formatBytes(bytesWritten)} / ${formatBytes(totalBytes)}`;
   if (status === 'running' && eta) detail += ` · ${t('downloads.eta', { time: formatDuration(eta) })}`;
-  if (status !== 'running') detail = `${t(`status.${status}`)} · ${detail}`;
+  if (status !== 'running') detail = `${held ? t(`downloads.waiting.${held}`) : t(`status.${status}`)} · ${detail}`;
   if (status === 'failed') {
     // A message a person can act on; the raw error stays in the logs.
     const { kind, status: http } = downloadErrorKind(entry.error);
@@ -42,6 +46,17 @@ export function DownloadRow({ entry }: { entry: DownloadEntry<DownloadRecord> })
         <Text variant="caption" color={status === 'failed' ? 'danger' : 'textSecondary'} numberOfLines={2} tabular>
           {detail}
         </Text>
+        {held === 'wifi' ? (
+          // Mobile data for this download only: the "Wi-Fi only" setting stays on.
+          <Button
+            testID="download-allow-cellular"
+            title={t('downloads.wifi.useMobileData')}
+            size="sm"
+            variant="secondary"
+            onPress={() => allowMobileData(records.map((r) => r.id))}
+            style={{ alignSelf: 'flex-start' }}
+          />
+        ) : null}
       </View>
       <Row gap={space.xs}>
         {status === 'running' && !entry.external ? (

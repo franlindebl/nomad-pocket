@@ -25,11 +25,13 @@ export class WifiRequiredError extends Error {
   }
 }
 
-/** Queue a GGUF model download (checks connectivity and the Wi-Fi-only setting). */
+/**
+ * Queue a GGUF model download (checks connectivity). On mobile data with "Wi-Fi only" on,
+ * the download manager queues it until Wi-Fi and asks whether to use mobile data instead.
+ */
 export async function downloadModel(model: GgufModel) {
   const net = await Network.getNetworkStateAsync();
   if (net.isConnected === false || net.isInternetReachable === false) throw new OfflineError();
-  if (useSettings.getState().wifiOnly && net.type === Network.NetworkStateType.CELLULAR) throw new WifiRequiredError();
   return enqueueDownload({
     id: model.id,
     kind: 'model',

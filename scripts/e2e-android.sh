@@ -32,6 +32,9 @@ if ! "$ADB" devices | grep -q "emulator-.*device$"; then
   until [[ "$("$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == 1 ]]; do sleep 2; done
 fi
 SERIAL="$("$ADB" devices | awk '/^emulator-.*device$/ {print $1; exit}')"
+# Mobile data only, so "Wi-Fi only" (on by default) always asks before a download and the
+# flows can require that question ("Usar datos móviles"). Some images connect to AndroidWifi.
+"$ADB" -s "$SERIAL" shell svc wifi disable || true
 # The app trusts Android's "validated" flag: until the network is validated it says
 # "Necesitas conexión". The emulator's probes flap between validated and partial
 # connectivity, so captive portal detection is off; an airplane-mode toggle makes Android

@@ -15,5 +15,10 @@ test('downloadErrorKind reads the usual failures', () => {
   assert.equal(downloadErrorKind('java.net.UnknownHostException: Unable to resolve host "github.com"').kind, 'offline');
   assert.equal(downloadErrorKind('The Internet connection appears to be offline.').kind, 'offline');
   assert.equal(downloadErrorKind('ad.tar.part00: 12 bytes, expected 2000000').kind, 'other');
+  // URLSession's text on a Spanish iPhone.
+  assert.equal(downloadErrorKind('Unable to download a file: Se ha perdido la conexión de red.').kind, 'offline');
+  assert.equal(downloadErrorKind('Unable to download a file: Se ha agotado el tiempo de espera.').kind, 'offline');
+  assert.equal(downloadErrorKind('SIZE_MISMATCH: 12 bytes, expected 13').kind, 'integrity');
+  assert.equal(downloadErrorKind('CHECKSUM_MISMATCH: sha-256 00ff').kind, 'integrity');
   assert.equal(downloadErrorKind(null).kind, 'other');
 });

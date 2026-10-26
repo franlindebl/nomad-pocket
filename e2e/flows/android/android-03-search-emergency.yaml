@@ -19,9 +19,13 @@ tags: [android, network]
     visible: "Descargar · .*"
     timeout: 60000
 - tapOn: "Descargar · .*"
+# The runner keeps the emulator on mobile data: "Wi-Fi only" must ask before the country
+# downloads (they wait for Wi-Fi otherwise).
+- extendedWaitUntil:
+    visible: "Descargas solo con Wi.Fi"
+    timeout: 10000
 - tapOn:
     text: "(?i)usar datos móviles"
-    optional: true
 - extendedWaitUntil:
     visible: "(?s).*Mapa( y navegación)? · .*"
     timeout: 300000
