@@ -38,7 +38,7 @@ export default function KitItemSheet() {
     setKitEntry(id, { have, note: note.trim() });
     router.back();
     if (expires !== (entry?.expires ?? null)) {
-      const allowed = await setExpiry(id, def ? t(`kit.items.${def.id}.title`) : finalName, expires);
+      const allowed = await setExpiry(id, expires);
       if (!allowed) Alert.alert(t('item.expiry'), t('item.notificationsOff'));
     }
   };

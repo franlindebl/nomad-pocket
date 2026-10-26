@@ -36,7 +36,8 @@ export default function EntrySheet() {
   const { t } = useTranslation('prepare');
   const { t: tc } = useTranslation();
   const params = useLocalSearchParams<{ kind: EntryKind; id?: string }>();
-  const kind: EntryKind = params.kind in FIELDS ? params.kind : 'contact';
+  // Own keys only: a deep link with kind=constructor or __proto__ must not reach FIELDS' prototype.
+  const kind: EntryKind = typeof params.kind === 'string' && Object.hasOwn(FIELDS, params.kind) ? params.kind : 'contact';
   const fields = FIELDS[kind];
   const existing = usePrepare((s) => (s[LIST[kind]] as { id: string }[]).find((e) => e.id === params.id)) as
     Record<string, string> | undefined;

@@ -89,5 +89,7 @@ export const usePrepare = create<PrepareData & Actions>()(
 );
 
 export function getKitEntry(id: string): KitEntry {
-  return usePrepare.getState().kit[id] ?? EMPTY_KIT_ENTRY;
+  // Ids come from route params too: `constructor` must not find Object's.
+  const { kit } = usePrepare.getState();
+  return Object.hasOwn(kit, id) ? kit[id] : EMPTY_KIT_ENTRY;
 }
