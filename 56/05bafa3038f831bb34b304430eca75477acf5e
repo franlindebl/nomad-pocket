@@ -1,0 +1,33 @@
+src/app/(tabs)/maps/regions.tsx
+  s_9f5316f88b2e79::t_e9d0e104b23dbd 55
+src/features/maps/countries.ts
+  s_9f5316f88b2e79::t_841847544e8e9d 15,74,84-85,95,198,242,268,306-310,342
+src/features/maps/country-core.test.ts
+  s_9f5316f88b2e79::t_748ebcb38f92c1 10,136,141-146
+src/features/maps/country-core.ts
+  s_9f5316f88b2e79::t_7cf995e52eee81 4,121-129
+src/features/maps/routing-core.test.ts
+  s_9f5316f88b2e79::t_06249a1cca8da8 26-27,261-272
+src/features/maps/routing-core.ts
+  s_9f5316f88b2e79::t_4a277954bd0640 298-317,327,330,351
+src/features/maps/routing-packs.ts
+  s_9f5316f88b2e79::t_941dbe3b0143e0 30-31,129,140,155-156,172,256-260,316-317,319-321,334,378
+src/features/maps/routing.ts
+  s_9f5316f88b2e79::t_1222b1c0c0099d 34-35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5605bafa3038f831bb34b304430eca75477acf5e",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
