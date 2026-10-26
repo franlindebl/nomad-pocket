@@ -5,6 +5,11 @@ import { gunzipSync, gzipSync } from 'fflate';
 export const HEADER_SIZE = 127;
 /** Header + root directory must fit in the first 16 KiB of an archive. */
 export const ROOT_SIZE_LIMIT = 16384;
+/**
+ * Leaf directory levels below the root a reader follows. Writers use one (two for planet
+ * scale); the official reader stops at three. A corrupt archive could nest them without end.
+ */
+export const MAX_LEAF_DEPTH = 3;
 
 // Plain const objects (not enums) so the module runs under node --experimental-strip-types.
 export const Compression = { Unknown: 0, None: 1, Gzip: 2, Brotli: 3, Zstd: 4 } as const;
@@ -221,6 +226,9 @@ export function serializeDirectory(entries: readonly Entry[]): Uint8Array {
 export function deserializeDirectory(bytes: Uint8Array): Entry[] {
   const r = new ByteReader(bytes);
   const n = r.varint();
+  // Each entry takes four varints of at least a byte: a larger count is corruption, and
+  // would allocate a huge array before the reads fail.
+  if (n * 4 > bytes.length - r.pos) throw new FormatError(`directory of ${bytes.length} bytes claims ${n} entries`);
   const entries: Entry[] = new Array(n);
   let lastId = 0;
   for (let i = 0; i < n; i++) {
