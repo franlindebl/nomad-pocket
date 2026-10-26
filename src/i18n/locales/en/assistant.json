@@ -55,10 +55,6 @@
     "language": "The built-in model doesn't support this language yet.",
     "notReady": "The built-in model isn't ready yet. Try again in a few minutes.",
     "busy": "The model is busy. Try again in a moment.",
-    "batteryQuota": "The system paused the built-in model to save battery. Try again later.",
-    "background": "The built-in model only works while the app is open.",
-    "diskFull": "There isn't enough free space for the built-in model.",
-    "systemUpdate": "The built-in model needs a system update.",
     "empty": "The model didn't write an answer. Try again or rephrase the question.",
     "generic": "The model couldn't answer: {{message}}"
   },
@@ -97,19 +93,16 @@
       "multilingual": "Google's model with excellent Spanish and 140+ languages."
     },
     "systemProvider": {
-      "apple": "Apple Intelligence",
-      "gemini": "Gemini Nano"
+      "apple": "Apple Intelligence"
     },
     "systemStatus": {
       "available": "Ready. Fast, private and with no download.",
       "notEnabled": "Turn on Apple Intelligence in Settings to use it.",
       "deviceNotEligible": "This device can't run the built-in model.",
       "modelNotReady": "The system is still preparing the model. Try again later.",
-      "downloadable": "Available for this device. Download it through the system.",
       "unsupportedOS": "Requires iOS 26 or later.",
       "unsupported": "There's no built-in model on this device.",
       "checking": "Checking…"
-    },
-    "downloadSystem": "Download"
+    }
   }
 }

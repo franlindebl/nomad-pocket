@@ -363,17 +363,6 @@
       "copyright": ["Copyright 2016-2025 JetBrains s.r.o. and Kotlin Programming Language contributors"],
       "url": "https://github.com/Kotlin/kotlinx.coroutines",
       "text": "texts/kotlinx-coroutines.txt"
-    },
-    {
-      "id": "mlkit-genai",
-      "name": "Google ML Kit GenAI Prompt API",
-      "version": "1.0.0-beta4",
-      "platforms": ["android"],
-      "license": "Proprietary (ML Kit Terms of Service)",
-      "copyright": ["Copyright Google LLC"],
-      "url": "https://developers.google.com/ml-kit/terms",
-      "note": "Closed-source Google library used to reach Gemini Nano on supported phones. It is not covered by Nomad Pocket's GPL licence.",
-      "text": null
     }
   ],
   "data": [
