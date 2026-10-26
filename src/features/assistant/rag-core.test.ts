@@ -301,11 +301,30 @@ describe('chat or search', () => {
   });
 
   test('requests about the previous answer are chat, only in a conversation', () => {
-    for (const m of ['resúmelo', 'explícamelo más simple', 'más corto, por favor', 'otra vez', 'tradúcelo al inglés', 'make it shorter', 'explain it again']) {
+    for (const m of [
+      'resúmelo',
+      'explícamelo más simple',
+      'más corto, por favor',
+      'otra vez',
+      'tradúcelo al inglés',
+      'dame más detalles',
+      'hazlo en una tabla',
+      'sigue',
+      'make it shorter',
+      'explain it again',
+      'put it in a list',
+      'reword it',
+    ]) {
       assert.equal(guessIntent(m, H), 'chat', m);
     }
     assert.equal(guessIntent('¿y cómo se trata?', H), 'search');
     assert.equal(guessIntent('resúmelo'), 'search');
+  });
+
+  test('one-word follow-ups that only start like a rewrite request are searched', () => {
+    for (const m of ['What about itching?', '¿Y moretones?', '¿Cortaduras?', 'Tablets?', 'Lessons?', 'Italy?', 'Listeria?', 'Longitude?', 'Makeup?']) {
+      assert.equal(guessIntent(m, H), 'search', m);
+    }
   });
 
   test('followUpTopic fills in the topic a follow-up leaves out', () => {
@@ -317,10 +336,36 @@ describe('chat or search', () => {
     assert.deepEqual(followUpTopic('¿y cómo se trata?', []), []);
   });
 
+  test('a pronoun carries the topic over only when the question names almost nothing itself', () => {
+    const burn: Turn[] = [
+      { role: 'user', content: 'How do I treat a burn?' },
+      { role: 'assistant', content: 'Cool it under running water [1].' },
+    ];
+    assert.deepEqual(followUpTopic('Is it safe to drink rain water?', burn), []);
+    assert.deepEqual(followUpTopic('Is it possible to start a fire with a battery?', burn), []);
+    assert.deepEqual(followUpTopic('Can they hear ultrasound?', burn), []);
+    assert.deepEqual(followUpTopic('Is it contagious?', burn), ['treat', 'burn']);
+    assert.deepEqual(followUpTopic('Does it scar?', burn), ['treat', 'burn']);
+    assert.deepEqual(followUpTopic('And in children?', burn), ['treat', 'burn']);
+    assert.deepEqual(followUpTopic('¿Eso es peligroso?', H), ['hipotermia']);
+    assert.deepEqual(followUpTopic('¿Se puede curar esto en casa?', H), ['hipotermia']);
+    assert.deepEqual(followUpTopic('¿Esto sirve para hacer fuego con pilas?', H), []);
+    assert.deepEqual(buildConversationQueries('Is it safe to drink rain water?', burn), buildSearchQueries('Is it safe to drink rain water?'));
+  });
+
   test('buildConversationQueries searches the combined topic first', () => {
     assert.deepEqual(buildConversationQueries('¿y cómo se trata?', H), ['hipotermia trata', 'hipotermia', 'trata']);
     assert.ok(buildConversationQueries('¿Y en niños es distinto?', H).includes('hipotermia niños'));
     assert.deepEqual(buildConversationQueries('¿Qué es la fotosíntesis?', H), buildSearchQueries('¿Qué es la fotosíntesis?'));
+    assert.deepEqual(buildConversationQueries('¿y eso?', H), ['hipotermia']);
+  });
+
+  test('buildConversationQueries also searches a follow-up on its own', () => {
+    // "y" makes it a follow-up, but it names its own topic: a wrong guess must not sink the search.
+    const qs = buildConversationQueries('¿Y si me quemo con aceite hirviendo?', H);
+    assert.equal(qs[0], 'hipotermia quemo aceite hirviendo');
+    assert.ok(qs.includes('quemo aceite hirviendo'), qs.join(' | '));
+    assert.equal(qs.length, 4);
   });
 
   test('router prompt carries recent turns, shortened', () => {
