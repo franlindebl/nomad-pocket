@@ -4,7 +4,7 @@ Nomad Pocket is an offline-first iOS + Android app (Expo / React Native) that br
 [Project N.O.M.A.D.](https://github.com/Crosstalk-Solutions/project-nomad) to phones:
 download knowledge (Kiwix ZIM archives: Wikipedia, medicine, survival, DIY, books,
 courses), offline maps and a local AI model while online, then use it all with no
-connection. GPL-3.0, public repo `github.com/franlindebl/nomad-pocket`, bundle id
+connection. GPL-3.0-or-later, public repo `github.com/franlindebl/nomad-pocket`, bundle id
 `com.fjlinde.nomadpocket`, submitted to the App Store (ASC app 6826502392).
 
 The owner writes in Spanish: answer in Spanish. Code, comments, commits and docs are in
@@ -33,7 +33,8 @@ English. User-facing strings are Spanish + English (i18n).
   form sheets. State: zustand. Persistence: expo-sqlite (+ `expo-sqlite/kv-store`).
   Files: expo-file-system 58 (`File`, `Directory`, `DownloadTask`). i18n: i18next.
 - Native: local Expo modules `modules/nomad-zim` (libkiwix/libzim),
-  `modules/nomad-llm` (Apple Foundation Models / Gemini Nano) and `modules/nomad-route`
+  `modules/nomad-llm` (Apple Foundation Models; Android's Gemini Nano/ML Kit bridge is being removed,
+  Android uses downloadable models only) and `modules/nomad-route`
   (Valhalla routing via Rallista valhalla-mobile 0.6.4); `llama.rn` 0.13.0-rc.8
   (GGUF); `@maplibre/maplibre-react-native` 11.5 (+ `@protomaps/basemaps` styles).
 - Min OS: iOS 16.4 (Expo 58 floor), Android 8.0 (API 26). CNG: `ios/` and `android/`
@@ -52,6 +53,8 @@ npx tsc --noEmit            # typecheck
 npx expo lint               # ESLint (eslint-config-expo)
 npm run check:i18n          # every t('…') key exists in es and en
 npm run check:catalog       # validates src/data/catalog.json + every URL (--offline: schema only)
+node scripts/licenses.mjs   # regenerates src/data/licenses.json (Credits screen); --check fails if stale.
+                            # Run after any dependency change; native libraries live in scripts/licenses/native.json
 npm run e2e                 # Maestro smoke suite on the iOS simulator (docs/E2E.md)
 ```
 
@@ -66,14 +69,16 @@ hangs on a Keychain prompt). Android needs
 ## Repo map
 
 ```
-src/app/            routes only (Expo Router). (tabs)/{(home),library,maps,courses,assistant}
+src/app/            routes only (Expo Router). (tabs)/{(home),library,maps,assistant} (Courses live under library)
 src/features/<f>/   feature logic + feature components; register.ts wires it at startup
 src/components/ui/  design system (Text, Screen, Button, Card, ListRow, …)
 src/theme/          tokens + useTheme()        src/i18n/  i18next, locales/<lang>/<ns>.json
-src/db/             SQLite schema/migrations   src/lib/   storage paths, format, pmtiles/
+src/db/             SQLite files, schema/migrations, kv   src/lib/   storage paths, format, units, pmtiles/
 src/stores/         settings (persisted)       src/data/catalog.json  bundled content catalog
 modules/            nomad-zim, nomad-llm, nomad-route (Swift/Obj-C++/Kotlin Expo modules)
-scripts/            check-i18n, validate-catalog, e2e*, maps/ (asset generators), routing/ (pack builds), store-screenshots
+plugins/            config plugins (Android backup rules)   locales/  localised InfoPlist strings (es, en)
+scripts/            check-i18n, validate-catalog, licenses.mjs (+ licenses/), e2e*, maps/ (asset generators),
+                    routing/ (pack builds), store-screenshots
 e2e/                Maestro flows, subflows, fixtures     site/  privacy/support site (GitHub Pages)
 assets/             fonts (Inter), icons, splash, maps/basemap-assets.zip
 docs/               the docs above + screenshots/ + store/
@@ -103,10 +108,14 @@ docs/               the docs above + screenshots/ + store/
   pressable inside another pressable (iOS merges it — VoiceOver and Maestro can't reach
   it): use `ListRow`'s `trailingAction`. Add a `testID` when an E2E flow needs it and
   list it in `docs/E2E.md`.
-- **Database.** One SQLite db (`src/db/index.ts`). Add a migration by appending a SQL
-  string to `MIGRATIONS`; never edit an existing one.
-- **Files.** Content lives under `Documents/content/{zim,maps,models,partial}` (never the
-  cache dir). iOS moves the app container on reinstall/update, so stored absolute URIs go
+- **Database.** Two SQLite files, only opened inside `src/db`: `db()` is `nomad.db` (user data and the
+  content registry, small, backed up) and `indexDb()` is `content/index/search.db` (map search index and
+  emergency points, derived, out of backups). Key-value state goes through `@/db/kv`, never
+  `expo-sqlite/kv-store` (ESLint enforces it, and bans `openDatabaseSync/Async` outside `src/db`).
+  Add a migration by appending a SQL string to `MIGRATIONS` (user) or `INDEX_MIGRATIONS` (index) in
+  `src/db/schema.ts`; never edit an existing one.
+- **Files.** Content lives under `Documents/content/{zim,maps,routing,models,index,partial}` (never the
+  cache dir; `index/` holds `search.db`). iOS moves the app container on reinstall/update, so stored absolute URIs go
   stale: read them through `resolveContentUri()` (items, downloads) or resolve by file
   name (`resolveMapFile`). Native libraries want plain paths: `toNativePath()`.
 - **expo-file-system 58 gotchas.** int64 values (sizes, progress) arrive as **BigInt**:
@@ -114,7 +123,7 @@ docs/               the docs above + screenshots/ + store/
   `Intl.RelativeTimeFormat` (see `lib/format.ts`).
 - **Pure, tested modules** (`src/lib/{pmtiles,mvt}`, `features/assistant/{rag-core,models,markdown}`,
   `features/library/html`, `features/catalog/opds`, `features/downloads/{mirrors,errors,groups}`,
-  `features/maps/{glyphs,geo,places-core,emergency-core,routing-core,follow-core,country-core}`, `features/prepare/{kit,document}`) use no `@/` aliases and import siblings with `.ts` extensions,
+  `features/maps/{glyphs,geo,places-core,emergency-core,routing-core,follow-core,country-core,phone}`, `features/prepare/{kit,document}`, `features/downloads/manager-core`, `lib/units`, `features/library/{register-core,medical}`, `features/content/reconcile-core`, `features/assistant/errors`, `features/credits/credits-core`, `db/{migrate-core,schema}`) use no `@/` aliases and import siblings with `.ts` extensions,
   so `node --test --experimental-strip-types` can load them. Keep it that way and add
   `*.test.ts` next to them.
 - **Style of code.** Match the surrounding code: a short header comment per file saying
@@ -141,6 +150,9 @@ docs/               the docs above + screenshots/ + store/
 - A `router.push` before the root navigator is ready is dropped (onboarding waits for it).
 - On Android, downloads stop with the process: the manager snapshots resume data on
   background and pumps again on foreground.
+- Archive pages must stay offline: the WKURLSchemeHandler / `shouldInterceptRequest` responses
+  carry a CSP and iOS compiles a content rule list (`docs/ARCHITECTURE.md`, ZIM library). On Android
+  an archive's JS storage (PouchDB…) is per archive origin (`https://<uuid>.zim.local`).
 - Valhalla on iOS: never include Valhalla/boost headers in `modules/nomad-route/ios`
   sources. Our copies of their inline templates won at link time and tile-extract
   searches silently failed ("No suitable edges", 171). Call the wrapper's free functions.
@@ -148,6 +160,7 @@ docs/               the docs above + screenshots/ + store/
   breakpoint on `__cxa_throw` to see the real one.
 - Routing packs only work with the Valhalla version that built them: keep
   `VALHALLA_IMAGE` (`.github/workflows/country-packages.yml`, `scripts/routing/build-country.sh`)
+  and `ENGINE_VALHALLA` (`features/maps/routing-core.ts`, which hides packs of another version)
   in step with valhalla-mobile's bundled Valhalla (3.9.1).
 
 ## Working on this repo
@@ -159,5 +172,6 @@ docs/               the docs above + screenshots/ + store/
   `adb shell uiautomator dump` + `input tap` on Android.
 - When you finish a block: update `docs/PROGRESS.md` (status, log entry, next steps),
   and ARCHITECTURE.md / E2E.md / STYLE_GUIDE.md if contracts, flows or UI rules changed.
-- Releases: follow `docs/RELEASE.md`; the owner reviews store listing changes before
-  they're submitted to review.
+- Releases: follow `docs/RELEASE.md` (tag every store build, e.g. `v1.1.0-12`); the owner
+  reviews store listing changes before they're submitted to review. The privacy policy
+  (`site/privacy.html`, es + en) must stay exactly true to what the app connects to.

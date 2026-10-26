@@ -4,32 +4,36 @@ Living document: current status, backlog, known issues and a dated log. Update i
 the end of every work block (status table, a log entry, next steps) so the next session
 can pick up without re-deriving anything.
 
-## Current state (2026-10-25)
+## Current state (2026-10-26)
 
-- **Version 1.1.0 (iOS build 11)** on TestFlight 2026-10-26: the survival-kit redesign (builds 5–10 on 2026-10-25);
-  **1.0.1 (build 3)** waiting for App Review. Release process and version table: `docs/RELEASE.md`.
+- **Version 1.1.0 (iOS build 12)** on TestFlight 2026-10-26: the survival-kit redesign (build 11) plus a country as
+  one download (builds 5–10 on 2026-10-25); **1.0.1 (build 3)** waiting for App Review. The fixes of the
+  pre-release audit (log entry 2026-10-26, branch `audit-fixes`) are in no build yet. Release process and
+  version table: `docs/RELEASE.md`.
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
   tour). Not yet run on a physical device by the agent.
-- Checks: 132 unit tests (131 pass, 1 network test skipped), `tsc` clean, lint clean, i18n keys complete. E2E: 55 Maestro flows (21 smoke,
-  16 full, 12 nightly, iPad tour, 5 Android flows) covering 53 of 55 test-plan cases plus the new maps cases, AI-06/07 and PREP-01…04.
+- Checks: `npm test` (the count drifts: run it), `tsc` clean, lint clean, i18n keys complete. E2E: 54 Maestro flows
+  (21 smoke, 17 full, 11 nightly, 1 iPad tour, 4 Android); which cases they cover is in the catalog of `docs/E2E.md`.
+  The audit fixes were not run through the Maestro suite (see the log entry).
 
 | Area | Status |
 |---|---|
 | Foundation (design system, nav, i18n, db, downloads core) | done |
 | Catalog (101 resources, 6 categories, Wikipedia picker, Kiwix OPDS explore, Files import) | done |
-| Downloads (queue, pause/resume, iOS background, fastest Kiwix mirror, Wi-Fi-only) | done |
+| Downloads (queue, pause/resume, iOS background, fastest Kiwix mirror, Wi-Fi-only enforced in the manager, size + sha-256 checks, retry with backoff) | done |
 | UX redesign: survival kit (`docs/UX_SURVIVAL_PLAN.md`): onboarding country + kit, Home "En una emergencia" + "Tu preparación", 4 tabs, maps by country, bundled world map, simpler settings | done — iOS sim (E2E smoke + full), Android spot check; build 11; country maps CI first run 2026-10-26 |
 | ZIM library + reader (search, TOC, bookmarks, history, find, text size, dark mode) | done — iOS + Android |
 | Courses (14 courses, syllabus with fallbacks, progress; inside Library since the redesign) | done |
 | Maps (country downloads: prebuilt z15 map + routing pack + points; on-device extraction as fallback; bundled world map; markers, GPS, multi-script labels) | done — iOS sim (Andorra, local catalog) |
 | Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
-| Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 79 packs live 2026-10-25 (Europe + Latin America up to Spain's size); E2E vs the live catalog on iOS + Android |
+| Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 60 whole-country packs live since 2026-10-25 (Europe + Latin America up to Spain's size; more countries in the 2026-10-26 full run); E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
-| Assistant (Apple Intelligence / Gemini Nano / 4 GGUF models, RAG with citations, conversational: the model decides when to search) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change); Gemini Nano untested |
+| Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: Gemini Nano (ML Kit) is being removed, downloadable models only (owner decision 2026-10-26) |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
 | Preparedness (family plan, emergency kit with expiry reminders, printable PDF, offline guides) | done — iOS sim + Android emulator (E2E) |
 | E2E suite (Maestro) + pre-commit hook | done |
+| Pre-release audit (2026-10-26): ~60 verified findings fixed in code and docs | done on branch `audit-fixes`; device checks and the deferred items below pending |
 
 ## Decisions (kickoff 2026-10-24, by the owner)
 
@@ -45,19 +49,70 @@ can pick up without re-deriving anything.
 
 ## Next steps / backlog
 
-Roughly by value. Items U and 0 are in progress; the rest are not started. (Preparedness was added
+Roughly by value. Items A, U and 0 are in progress; the rest are not started. (Preparedness was added
 on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
 
+A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check in ~2 days, with the
+   country-coverage work**:
+   - README country claims and "60 countries", and the US map (DOCS-PUBLIC-1, DOCS-PUBLIC-2,
+     DOCS-INTERNAL-8): the README's coverage lines stay as they are until that work lands.
+   - CI supply-chain findings SUPPLY-1/2/3 in `country-packages.yml` (another session is changing
+     that workflow).
+   - Regenerate the store screenshots (DOCS-PUBLIC-3 / LEGAL-14); the map ones must show the OSM credit.
+   - OSS-9: obsolete PNGs in the repo.
+   - The git history rewrite that removes the owner's old location examples (pending a quiet window).
+     **Then tag the store builds** (`v1.1.0-12` for build 12, and every later build: GPL section 6).
+   Owner decisions still open or to carry out:
+   - Android before any Play release: remove ML Kit GenAI (Gemini Nano) from the Android build
+     (option A) and try to drop Firebase (expo-notifications) from the APK; list the full transitive
+     Android notices (Gradle licence plugin); see `docs/RELEASE.md`. Until done the Android privacy
+     claims (no third-party SDKs) are not guaranteed.
+   - Store prebuild gated by an env var (LEGAL-9): the generated `Info.plist` is shared by Debug and
+     Release, so dev-launcher keys can reach a store build.
+   - A planned index rebuild to reclaim the space of existing users' old index file.
+   - Optionally ship `OFL.txt` and the sprites' MIT licence inside `basemap-assets.zip` (bump
+     `features/maps/assets.ts` `VERSION`).
+   - Geofabrik mis-tags `pf`, `wf`, `tk`, Clipperton (VU) and `pn` (MH), and `as`, `gu`, `mp` have no
+     extract of their own: no side files for them (Overpass fallback); matching by name could give them
+     points. Consider whether `maps.mail.ru` (VK) should stay among the Overpass fallbacks.
+   - `aboutBody` (es/en settings strings) still says "GPL‑3.0": make it "GPL‑3.0-or-later" (OSS-8
+     remainder, code).
+   - The pronoun threshold of the assistant (a follow-up inherits the previous topic only with at
+     most one word of its own) loses some two-word English follow-ups ("Can I put ice on it?") on the
+     heuristic search paths; long questions (> 600 chars) are searched once.
+   - Code cleanup: `places.ts` keeps a private `forEachLineBlock` that duplicates `side-files.ts`'s.
+   Decisions already taken (2026-10-26): the OSM credit fades after 5 s (approved); guidance
+   auto-stops 60 s after arrival and keeps the screen awake only with movement in the last 10 min
+   (approved); copyright line "Copyright (C) 2026 Fran Linde Blázquez and contributors"; Northern
+   Cyprus, Somaliland and the Siachen Glacier (`cyn`, `sol`, `kas`) stay in the picker; private
+   vulnerability reporting is enabled (SECURITY.md); emergency points and their state live in
+   `search.db`, and both platforms back up `nomad.db` and the kv-store (log entry).
+   Device checks pending from the audit fixes (nothing below was run on hardware):
+   - iOS: Files import (file moved, duplicate toast, no Inbox copy); Explore download of a bundled
+     course landing in Courses; medical banner on an Explore/imported medical ZIM; the "can't call"
+     alert (iPad, Wi-Fi tablet); denied-location alert; landscape compass on phone and iPad (both
+     sides, upside down, launch in landscape); iOS TOC on a PDF entry.
+   - Downloads and countries: a multi-part download with one part failing, then restart and Retry;
+     kill during a side-file import then relaunch (replay); delete a country during assembly; pack
+     update with routing active; sha-256 time on a 2 GB part; Wi-Fi-only on a phone (the question,
+     waiting, mobile-data override).
+   - Database split on an existing phone with a big index, on iOS and on Android (the Android split in
+     place is untested); removing a real installed country; phone timings of search and imports.
+   - Reader on Android (new origin, CSP, external-link prompt, recovery after `chrome://crash`, an
+     imported PouchDB archive); iOS reader with a remote image/fetch (verified blocked on the simulator).
+   - Android build with the new native dependency (`expo-screen-orientation`); dark mode, VoiceOver and
+     iPad width of the new screens (Credits, onboarding); a real GGUF backgrounded mid-load/search;
+     Apple FM error codes translated; the Maestro suite on the merged branch.
+
 U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owner approved
-   2026-10-26); TestFlight 1.1.0 build 11 = ebafcdd. Fixes after build 11, on main but in no
-   build yet (next free build number: 12): country sheet "couldn't check" vs "no navigation"
-   offline + size retry/timeout + disabled buttons look disabled (27fb184), readable download
-   errors (159f565). State at 2026-10-26 10:45 UTC, in order:
+   2026-10-26); TestFlight 1.1.0 build 11 = ebafcdd, build 12 (country as one download, friendlier
+   errors, "couldn't check" vs "no navigation") on TestFlight. State at 2026-10-26 10:45 UTC, in order:
    1. **CI full run** `country-packages.yml` run 40289348691 (all 241 countries, parts=all,
       started 08:00 UTC, ~55 countries/h): 157 ok, 1 failed (`us`), 83 left; it publishes
       routing-index + maps-index at the end (~12:30 UTC). Check: `gh run view 40289348691`;
       then spot-check the manifests (packs keep places/addresses; maps per continent release).
-   2. **US failed**: the runner shut down while `build-country-map.sh` processed Geofabrik's
+   2. **US failed** (since addressed by a088642 and d430791: the USA's points are read state by state and a
+      country can have several routing packs; confirm in the next full run): the runner shut down while `build-country-map.sh` processed Geofabrik's
       11 GB `us` extract (side files; likely OOM in pyosmium with node locations, 16 GB
       runner). Plan: for extracts above ~4 GB use Geofabrik's sub-regions (us-west,
       us-midwest, us-northeast, us-south, …), build side files per part and concatenate the
@@ -86,17 +141,15 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
 1. Watch App Review for 1.0.1; test 1.1.0 (build 10, TestFlight) on a real iPhone: navigation view (driving and on foot), compass beam, street and school search, routing
    packs (download Spain 2.2 GB, route time/memory), Preparedness reminders, GPU
    llama.cpp, Apple Intelligence, background downloads, Files import, airplane mode.
-2. Publish packs with the search side files: the next routing-packs build (monthly or
-   manual dispatch) adds `.places.tsv` / `.addresses.tsv` to every pack (code landed
-   2026-10-26; the published packs don't have them yet). The country packages of the
-   redesign (`ux-survival`) call the same scripts and index functions. Measure the import
-   on a real phone (Spain: 1.0 M places + 2.2 M doors).
+2. Search side files: published (the 2026-10-26 full run; packs and country maps carry
+   `.places.tsv` / `.addresses.tsv`). Still to measure the import on a real phone (Spain: 1.0 M
+   places + 2.2 M doors).
 3. Resume downloads after the app is killed on iOS: reattach the background URLSession
    (small native module) instead of restarting from zero.
 4. Map extraction: resume after a kill (persist the plan + written ranges) and move it off
    the JS thread.
-5. Android release: upload keystore, Play listing + data safety;
-   test Gemini Nano on an AICore device.
+5. Android release: upload keystore, Play listing + data safety; the ML Kit / Firebase removal of
+   item A comes first.
 6. Reader: auto-hiding toolbar on scroll (style guide), syllabus for SPA course ZIMs read
    from the rendered DOM.
 7. Assistant: copy / regenerate an answer; better small-model citations; check the
@@ -104,19 +157,24 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
    real iPhone (tool-call latency with Metal).
 8. Preparedness follow-ups: share ZIMs/maps phone to phone (share sheet export, import
    exists); "Ready.gov"-style quick cards bundled in the app (radio frequencies, first aid)
-   that need no download; optional Face ID lock for the plan; cold-start notification tap
-   (only a warm tap opens the kit now); link the plan's meeting points to maps' Llévame
+   that need no download; optional Face ID lock for the plan; link the plan's meeting points to maps' Llévame
    guidance and the hub to the Emergencias sheet (both landed on main in parallel).
 
 
 ## Known issues / limitations
 
-- Map search: house numbers and far-away POIs need a pack built with the side files
-  (none published yet). Without one, big regions are indexed at a lower zoom (≤ 40k tiles:
-  Spain z14 → z12) with full detail only within ~25 km of the user or the searched area.
-  House numbers are as complete as OSM (Spain: 2.2 M doors; "Calle de Alcalá 50" isn't
-  mapped, so it lands between 48 and 52, marked approximate). Indexing and imports run on
-  the JS thread in batches (not yet measured on a device).
+- Map search: house numbers and far-away POIs come from the country package's side files
+  (published). Without them (a map from the extraction fallback), big regions are indexed at a
+  lower zoom (≤ 40k tiles: Spain z14 → z12) with full detail only within ~25 km of the user or the
+  searched area. House numbers are as complete as OSM (a missing number lands between its
+  neighbours, marked approximate). Indexing and imports run on the JS thread in batches (not yet
+  measured on a device); search itself runs on a second connection.
+- Chinese and Japanese names indexed before the pair-indexing change only match from their first
+  character until the map is re-indexed (`INDEX_VERSION` was not bumped).
+- The search index file of an existing phone doesn't shrink: the old `nomad.db` was renamed to become
+  `search.db` and can't switch to incremental `auto_vacuum` without a full `VACUUM` (too risky); freed
+  pages are reused by later imports but not returned. Fresh installs are fine. A planned index rebuild
+  would reclaim it (item A).
 - Emergency points depend on public Overpass servers (best effort; they can be at capacity
   for minutes). Fallback: the POIs in the map's own tiles (complete only at z15).
 - OSM data quality shows through: a garage mapped without `access=private`/`tunnel=yes`
@@ -124,20 +182,29 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
   zones (Madrid ZBE), live closures, traffic.
 - Road routing needs a routing pack for the area (else the straight line). No
   isochrones (valhalla-mobile exposes none), no cross-pack routes (the country pack covers
-  them), no voice / background navigation yet. Pack sha256 is not verified (size is).
-  Maps downloaded as a country (map with the pack or its own points) no longer ask Overpass.
+  them), no voice / background navigation yet. Pack and map files are verified against the
+  manifest's size and sha-256. Maps downloaded as a country (map with the pack or its own points) no longer ask Overpass.
 - Bbox queries (map dots, locality context) don't handle regions across the antimeridian.
 - Map screen first opens on the world when a region is registered after the first render
   (seeded/loose maps): pre-existing, cosmetic.
-- `app.json` location purpose string changed (distances/guidance): needs `npx expo prebuild`
-  before the next store build.
-
-- Downloads interrupted by app termination restart from zero unless paused first
-  (expo-file-system tasks don't survive relaunch).
+- After a backup restore the database comes back without the content (items are dropped at
+  startup, see ARCHITECTURE), but the `downloads` rows are not reconciled: paused or queued rows
+  return and the manager retries them (not fixed).
+- Downloads interrupted by app termination restart from zero unless paused first on Android
+  (expo-file-system tasks don't survive relaunch); on iOS the background session keeps
+  transferring but is not reattached after the app is terminated (BUG-CORE-16: needs a small
+  native hook), so the bytes may be fetched twice.
+- The Downloads sheet's group cancel skips a member that is mid-assembly (`processing`), so a country
+  deleted from there can still finish assembling; removing or cancelling from the regions screen
+  does abort it (BUG-CORE-9 / BUG-MAPS-12 partly).
+- Compass heading in landscape: iOS reports an orientation of UNKNOWN until the first rotation after
+  launch, so the heading is withheld in landscape until then; Android tablets whose natural
+  orientation is landscape stay 90° off.
+- Android: the Gemini Nano (ML Kit) bridge and Firebase are still in the build until the removal of
+  item A; the Android privacy claims depend on it.
+- The generated `Info.plist` is shared by Debug and Release (LEGAL-9, item A).
 - Map extraction runs on the JS thread in the foreground (screen kept awake) and does
   not resume after the app is killed.
-- Gemini Nano path compiled but untested on a real AICore device; its output-token limits
-  are unverified.
 - Qwen3.5 0.8B rarely emits `[n]` (all retrieved sources are shown then) and is
   unreliable for health answers — the app recommends 2B+ where RAM allows. In small talk
   it sometimes rambles or echoes its instructions, and it searches some chit-chat
@@ -153,12 +220,61 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
   (MapLibre Native can't shape them); country bboxes skip far-flung territories.
 - ZIM media Range path untested with a real video archive.
 - Not automated: importing a ZIM from Files (system picker) and true offline mode
-  (simulator has no airplane mode); the Android tour covers visible-area map downloads but
-  not the named-region picker or the assistant (both checked by hand on the emulator).
+  (simulator has no airplane mode); the Android tour covers country downloads, search,
+  Emergencias, Preparedness and routing, but not the assistant or labels in other scripts
+  (checked by hand on the emulator).
 
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-26 — Pre-release audit: findings fixed (branch `audit-fixes`)
+
+- An independent audit of the whole repo (code, native modules, CI scripts, docs, legal) produced
+  findings; the verified ones were fixed in nine code packages and one docs pass, merged on
+  `audit-fixes`. Nothing was run on a physical device and the Maestro suite was not re-run: see the
+  device checks of backlog item A.
+- Downloads: Wi-Fi only is enforced in the manager (held records wait, one question per country or
+  kit, a running transfer that reaches mobile data pauses); size and sha-256 checks (Kiwix metalink,
+  manifests) with the bad copy deleted; network errors keep the bytes and retry with backoff;
+  `safeFileName`; storage message counts queued downloads; late network reads can't undo newer state.
+- Maps and countries: downloads survive failures, kills and removal (side-file import queue with
+  replay, assembly that never reports success without a map, abort on removal, one up-front room
+  check, grouped records); manifests validated; pack updates and `ENGINE_VALHALLA` gate; sha-256
+  integrity; names of the two San Martín, Taiwán and China fixed.
+- Search and database: the search index and the emergency points moved to their own file
+  (`Documents/content/index/search.db`, out of backups) and `nomad.db` plus the kv-store moved to
+  Library/Application Support on iOS, out of the Files app (resumable migration, tested); search off
+  the JS thread with a debounce and a match cap; Chinese/Japanese names found from any part.
+- Reader and native: archive pages have no network (WKContentRuleList + CSP, per-archive origin on
+  Android), external links need a tap and a confirmation, renderer crashes recover, `getContent`
+  skips binary and big entries, a reopened routing pack file is noticed.
+- Library: archive identity (a Files import can't replace an installed archive; fallback ids; chat
+  citations retargeted), medical disclaimer for unknown archives, startup reconciliation drops items
+  whose file is gone (after a restore) keeping bookmarks, history and course progress.
+- Assistant: released engines stay released and background ends the answer, pronoun follow-ups
+  inherit the topic only when short, the whole RAG frame counts in the token budget, "Search my
+  library" keeps the old answer until the new one exists, model errors are translated.
+- App shell: onboarding and Home honesty fixes, accessibility (toast announcements, hints), reminders
+  reconciled with the plan, cold-start notification and link handling, PDF cleanup, root error
+  boundary, localised permission prompt, Android backup rules, a Credits & licenses screen generated by
+  `scripts/licenses.mjs`, seven unused dependencies and dead code removed, OSM credit on the map,
+  guidance auto-stop and keep-awake rules, compass heading in landscape (new dependency
+  `expo-screen-orientation`: native rebuild needed), phone calls through one helper.
+- Scripts: SHA-256 for libkiwix, postinstall that works off macOS and keeps an existing hooks path,
+  pinned Natural Earth, a failed outline fails the CI job, side files from the extract named after the
+  country.
+- Docs and legal (this pass): privacy policy rewritten to be exactly true (catalog check at launch,
+  every host, where data lives, deletion, backups, reader without network, Android assistant),
+  SECURITY.md (private vulnerability reporting), CONTRIBUTING.md, `e2e/fixtures/README.md`,
+  GPL-3.0-or-later and the copyright line everywhere, Gemma 4 is Apache-2.0, ARCHITECTURE/E2E/
+  STYLE_GUIDE/DEVELOPMENT/RELEASE/CLAUDE brought up to date, `.gitignore`, AGENTS.md without EAS.
+- Final storage layout (owner decision): `nomad.db` holds only user data and bookkeeping and stays small;
+  `search.db` holds the search index, the emergency points and their state; both platforms back up
+  `nomad.db` and the kv-store and exclude `content/` and `map-assets/`.
+- Owner decisions recorded in backlog item A (ML Kit/Firebase removal, tagging builds, cyn/sol/kas,
+  timings, copyright). Deferred to the country-coverage work: README country claims, CI supply-chain
+  findings, store screenshots, obsolete PNGs, the history rewrite.
 
 ### 2026-10-26 — Maps: street files read in blocks; manifest spot check
 
@@ -461,6 +577,67 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   Overpass CSV-quoted names ("Acuartelamiento ""Capitán…""") unquoted.
 - Valhalla spike: viable (numbers and pack design in the plan).
 
+### 2026-10-25 — Preparedness (worktree `preparedness`)
+- New Home card → `/prepare`: family plan (two meeting points, one of them can be a map
+  pin; contacts with call button; important numbers; health per person; home notes),
+  emergency kit (household steppers + 72 h / 1 week / 2 weeks → water, kcal, medication
+  days; 29-item checklist in 8 categories, children/pet items only when they apply;
+  custom items; expiry month per item with a local reminder the month before), PDF export
+  (A4, blank rows to fill by hand) through the share sheet, and the catalog's offline
+  guides (Ready.gov, post-disaster, medicine, water, food) with download buttons.
+- Data: one kv-store document (`prepare`), no SQL migration, nothing leaves the device;
+  privacy policy updated. New deps: `expo-print`, `expo-sharing`, `expo-notifications`
+  (plugin with `enableRemoteNotifications: false`: no push entitlement; Android
+  notification icon `assets/images/notification-icon.png`).
+- Android: form sheets show no native header, so `SheetHeader` draws title + Save in the
+  content there (native header on iOS). `android-04-prepare` passes on the emulator
+  (API 36, release APK); the reminder alarm is set for the 1st of the month before expiry.
+- `ListRow` takes `accessibilityRole` / `accessibilityState` (checkbox rows).
+- Found by E2E and fixed: the keyboard covered the sheets' bottom Save button (Save moved
+  to the top: native header on iOS, `SheetHeader` row on Android); cards hid their status from accessibility; "Show on map" didn't move a
+  map in a hidden tab (viewport seeded + focus after the tab shows); kit quantities
+  printed `{{days}}`.
+- Verified on the iOS 27 simulator (Release, `NP-prepare`): PREP-01…04 pass; smoke + full
+  32/33 (the flaky `lib-03`, then 3/3). PDF checked by eye (2 pages).
+- Rebased on main after the maps search/Emergencias, road routing and conversational
+  assistant work (docs-only conflicts; Home card moved under Emergencias): smoke + full
+  36/37 on the merged Release build (`ai-01` hit the onboarding race, then 3/3).
+
+### 2026-10-25 — Conversational assistant
+- The owner's report: "hola" made the assistant search the library for "hola". Now it
+  chats, and searches only when it helps. `chats.ts` `answer()` decides per message:
+  library off → chat; `guessIntent` (rag-core, deterministic: greetings, thanks, "who are
+  you", jokes, laughter, and requests about the previous answer like "resúmelo" / "más
+  simple") → chat; otherwise the model decides when it can, and a question is searched
+  when it can't (Gemini Nano).
+- GGUF models call a `search_library` tool (llama.rn `tools`, two passes: decide/answer,
+  then answer from the results with `tool_choice: 'none'`). Qwen3.5 only calls tools with
+  thinking on (budget 256 tokens; it mostly closes the block at once), Gemma 4 without
+  (with thinking it reasons ~350 tokens first): `models.ts` `tools: 'thinking' | 'direct'`.
+- Apple FM ignores tools most of the time (7–11 of 14), so it routes instead: native
+  `route()` asks for a `@Generable { search, query }` with greedy sampling (~0.7 s), with
+  English few-shot instructions from `ROUTER_INSTRUCTIONS`. With `guessIntent` first it
+  got every question right and 8 of 10 chatty messages the heuristic missed.
+- Prompts tuned on the Mac (llama-server from Homebrew with the same GGUFs, Foundation
+  Models via swiftc): 32–34 of 36 for Qwen 0.8B/2B/4B and Gemma 4 on a chat/search
+  bench. Findings in the comments: spelling out small talk makes models stop calling
+  the tool (tools mode keeps the tone short); "search even if you know" fixed famous
+  facts answered from memory; wording about "the user's library" got echoed back.
+- Retrieval: follow-ups ("¿y cómo se trata?", "¿Y cuándo murió?") borrow the previous
+  question's keywords (`followUpTopic`); queries drop one word at a time so a word the
+  library lacks doesn't sink them (the router's "Michael Jackson fallecimiento" found
+  nothing in an English Wikipedia); greetings are left out of queries; chunks sharing
+  too few question terms are dropped (`relevantChunks`).
+- UI: "Buscar en mi biblioteca" under the latest answer given without the library
+  (answers again with a forced search; in memory only, not stored), phase "Pensando…",
+  conversational copy ("Pregunta o charla…").
+- Catalog GGUFs copied into `content/models` register at startup (Files/Finder, and
+  the new `seeded-model` E2E tag; fixture fetched by `e2e:setup`).
+- Verified on the iOS 27 simulator (Release, new `NP-chat` simulator): all 5 assistant
+  flows pass, including new `ai-06-conversation` (Apple FM: greeting without sources →
+  question with sources → follow-up with sources) and `ai-07-gguf-tools` (Qwen 0.8B:
+  greeting → button → tool call with sources); smoke suite 16/16.
+
 ### 2026-10-24
 - Analysed Project NOMAD source (admin/ AdonisJS app + collections JSON).
 - Scaffolded Expo 58 app, design tokens + UI kit, navigation shell (native tabs),
@@ -588,8 +765,8 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 - Verified on the iOS 27 simulator (Release). Android: nomad-zim compiles (runtime untested).
 
 ### 2026-10-24 — Functional E2E suite (Maestro, iOS simulator)
-- 36 Maestro flows cover 53 of the 55 cases of the functional test plan (Claude doc
-  "Plan de tests funcionales iOS — Nomad App"). How to run and write them: `docs/E2E.md`
+- 36 Maestro flows covered 53 of the 55 cases of the functional test plan written for this
+  suite (its case ids are in the flow catalog of `docs/E2E.md`). How to run and write them: `docs/E2E.md`
   (`npm run e2e:setup` once, then `npm run e2e` / `e2e:full` / `e2e:all`).
 - Fixed from the first pass: buttons nested in another button were unreachable by
   VoiceOver (pack download, catalog row download, lesson check, delete in places /
@@ -641,64 +818,3 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   "4", `android.versionCode` 4) instead of the generated `Info.plist`; `package.json` at
   1.0.2; native projects regenerated (Android had `versionName 0.1.0`); lint warnings in
   `src/i18n/index.ts` and the i18n checker's unresolved `tc` binding on Home fixed.
-
-### 2026-10-25 — Conversational assistant
-- The owner's report: "hola" made the assistant search the library for "hola". Now it
-  chats, and searches only when it helps. `chats.ts` `answer()` decides per message:
-  library off → chat; `guessIntent` (rag-core, deterministic: greetings, thanks, "who are
-  you", jokes, laughter, and requests about the previous answer like "resúmelo" / "más
-  simple") → chat; otherwise the model decides when it can, and a question is searched
-  when it can't (Gemini Nano).
-- GGUF models call a `search_library` tool (llama.rn `tools`, two passes: decide/answer,
-  then answer from the results with `tool_choice: 'none'`). Qwen3.5 only calls tools with
-  thinking on (budget 256 tokens; it mostly closes the block at once), Gemma 4 without
-  (with thinking it reasons ~350 tokens first): `models.ts` `tools: 'thinking' | 'direct'`.
-- Apple FM ignores tools most of the time (7–11 of 14), so it routes instead: native
-  `route()` asks for a `@Generable { search, query }` with greedy sampling (~0.7 s), with
-  English few-shot instructions from `ROUTER_INSTRUCTIONS`. With `guessIntent` first it
-  got every question right and 8 of 10 chatty messages the heuristic missed.
-- Prompts tuned on the Mac (llama-server from Homebrew with the same GGUFs, Foundation
-  Models via swiftc): 32–34 of 36 for Qwen 0.8B/2B/4B and Gemma 4 on a chat/search
-  bench. Findings in the comments: spelling out small talk makes models stop calling
-  the tool (tools mode keeps the tone short); "search even if you know" fixed famous
-  facts answered from memory; wording about "the user's library" got echoed back.
-- Retrieval: follow-ups ("¿y cómo se trata?", "¿Y cuándo murió?") borrow the previous
-  question's keywords (`followUpTopic`); queries drop one word at a time so a word the
-  library lacks doesn't sink them (the router's "Michael Jackson fallecimiento" found
-  nothing in an English Wikipedia); greetings are left out of queries; chunks sharing
-  too few question terms are dropped (`relevantChunks`).
-- UI: "Buscar en mi biblioteca" under the latest answer given without the library
-  (answers again with a forced search; in memory only, not stored), phase "Pensando…",
-  conversational copy ("Pregunta o charla…").
-- Catalog GGUFs copied into `content/models` register at startup (Files/Finder, and
-  the new `seeded-model` E2E tag; fixture fetched by `e2e:setup`).
-- Verified on the iOS 27 simulator (Release, new `NP-chat` simulator): all 5 assistant
-  flows pass, including new `ai-06-conversation` (Apple FM: greeting without sources →
-  question with sources → follow-up with sources) and `ai-07-gguf-tools` (Qwen 0.8B:
-  greeting → button → tool call with sources); smoke suite 16/16.
-
-### 2026-10-25 — Preparedness (worktree `preparedness`)
-- New Home card → `/prepare`: family plan (two meeting points, one of them can be a map
-  pin; contacts with call button; important numbers; health per person; home notes),
-  emergency kit (household steppers + 72 h / 1 week / 2 weeks → water, kcal, medication
-  days; 29-item checklist in 8 categories, children/pet items only when they apply;
-  custom items; expiry month per item with a local reminder the month before), PDF export
-  (A4, blank rows to fill by hand) through the share sheet, and the catalog's offline
-  guides (Ready.gov, post-disaster, medicine, water, food) with download buttons.
-- Data: one kv-store document (`prepare`), no SQL migration, nothing leaves the device;
-  privacy policy updated. New deps: `expo-print`, `expo-sharing`, `expo-notifications`
-  (plugin with `enableRemoteNotifications: false`: no push entitlement; Android
-  notification icon `assets/images/notification-icon.png`).
-- Android: form sheets show no native header, so `SheetHeader` draws title + Save in the
-  content there (native header on iOS). `android-04-prepare` passes on the emulator
-  (API 36, release APK); the reminder alarm is set for the 1st of the month before expiry.
-- `ListRow` takes `accessibilityRole` / `accessibilityState` (checkbox rows).
-- Found by E2E and fixed: the keyboard covered the sheets' bottom Save button (Save moved
-  to the top: native header on iOS, `SheetHeader` row on Android); cards hid their status from accessibility; "Show on map" didn't move a
-  map in a hidden tab (viewport seeded + focus after the tab shows); kit quantities
-  printed `{{days}}`.
-- Verified on the iOS 27 simulator (Release, `NP-prepare`): PREP-01…04 pass; smoke + full
-  32/33 (the flaky `lib-03`, then 3/3). PDF checked by eye (2 pages).
-- Rebased on main after the maps search/Emergencias, road routing and conversational
-  assistant work (docs-only conflicts; Home card moved under Emergencias): smoke + full
-  36/37 on the merged Release build (`ai-01` hit the onboarding race, then 3/3).
