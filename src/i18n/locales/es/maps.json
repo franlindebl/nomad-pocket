@@ -23,6 +23,7 @@
     "seeDownloads": "Ver descargas"
   },
   "loadingAssets": "Preparando el mapa sin conexión…",
+  "credit": "© Colaboradores de OpenStreetMap",
   "location": {
     "deniedTitle": "La ubicación está desactivada",
     "deniedBody": "Permite el acceso a la ubicación en Ajustes para verte en el mapa. Funciona sin conexión gracias al GPS.",

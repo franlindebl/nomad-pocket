@@ -23,6 +23,7 @@
     "seeDownloads": "See downloads"
   },
   "loadingAssets": "Preparing offline map…",
+  "credit": "© OpenStreetMap contributors",
   "location": {
     "deniedTitle": "Location is off",
     "deniedBody": "Allow location access in Settings to see where you are on the map. It works offline using GPS.",
