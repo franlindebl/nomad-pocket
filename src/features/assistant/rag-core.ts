@@ -678,18 +678,34 @@ export function formatSources(sources: PackedSource[]): string {
   return sources.map((s) => `[${s.n}] ${s.title}\n${s.passages.join('\n…\n')}`).join('\n\n');
 }
 
+// A question longer than this (pasted text, a long description) is sent once, after
+// the sources: a second copy would take the room of the sources themselves.
+const REPEAT_QUESTION_CHARS = 600;
+
+/** What goes before and after the sources in a RAG user turn. */
+function ragFrame(question: string, lang: Lang): [before: string, after: string] {
+  const label =
+    lang === 'es'
+      ? { src: 'Fuentes de la biblioteca', q: 'Pregunta', a: 'Responde ahora a la pregunta con tus palabras, usando estas fuentes y citándolas con [n].' }
+      : { src: 'Library sources', q: 'Question', a: 'Now answer the question in your own words using these sources, citing them with [n].' };
+  // Question first and last: small models lose track of it after long context.
+  const first = question.length <= REPEAT_QUESTION_CHARS ? `${label.q}: ${question}\n\n` : '';
+  return [`${first}${label.src}:\n\n`, `\n\n${label.q}: ${question}\n${label.a}`];
+}
+
 /**
  * Builds the final user turn for a RAG question. With no sources the model is
  * told the library had nothing so it can say so honestly.
  */
 export function buildRagUserMessage(question: string, sources: PackedSource[], lang: Lang): string {
   if (!sources.length) return `${NO_HITS[lang]}\n\n${lang === 'es' ? 'Pregunta' : 'Question'}: ${question}`;
-  const label =
-    lang === 'es'
-      ? { src: 'Fuentes de la biblioteca', q: 'Pregunta', a: 'Responde ahora a la pregunta con tus palabras, usando estas fuentes y citándolas con [n].' }
-      : { src: 'Library sources', q: 'Question', a: 'Now answer the question in your own words using these sources, citing them with [n].' };
-  // Question first and last: small models lose track of it after long context.
-  return `${label.q}: ${question}\n\n${label.src}:\n\n${formatSources(sources)}\n\n${label.q}: ${question}\n${label.a}`;
+  const [before, after] = ragFrame(question, lang);
+  return `${before}${formatSources(sources)}${after}`;
+}
+
+/** The RAG user turn without its sources (the question, maybe twice, and the labels): for the token budget. */
+export function ragMessageFrame(question: string, lang: Lang): string {
+  return ragFrame(question, lang).join('');
 }
 
 /** Citation numbers actually used in an answer, e.g. "… [1][3]" → [1, 3]. */

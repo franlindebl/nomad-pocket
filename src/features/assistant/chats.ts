@@ -19,6 +19,7 @@ import {
   estimateTokens,
   guessIntent,
   isHealthQuestion,
+  ragMessageFrame,
   ROUTER_INSTRUCTIONS,
   searchToolSpec,
   systemPrompt,
@@ -302,10 +303,13 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
       const answerTokens = engine.kind === 'system' ? SYSTEM_ANSWER_TOKENS : MAX_ANSWER_TOKENS;
       let sys = systemPrompt(lang, mode === 'tools' ? 'tools' : mode === 'search' ? 'sources' : 'chat', { health, library });
       const toolTokens = mode === 'tools' ? TOOL_PROMPT_TOKENS : 0;
-      const free = engine.contextTokens - answerTokens - estimateTokens(sys) - estimateTokens(text) - toolTokens - 120;
+      // With sources in the user turn the question goes in twice (once if long), with labels.
+      const questionTokens = estimateTokens(mode === 'search' ? ragMessageFrame(text, lang) : text);
+      const free = engine.contextTokens - answerTokens - estimateTokens(sys) - questionTokens - toolTokens - 120;
       const historyBudget = tokensToChars(Math.max(0, Math.floor(free * 0.25)));
       const turns = trimHistory(history, historyBudget);
-      const contextBudget = Math.max(800, tokensToChars(free) - turns.reduce((s, t) => s + t.content.length + 16, 0));
+      // Sources get what's left: none when a very long question fills the window.
+      const contextBudget = Math.max(0, tokensToChars(free) - turns.reduce((s, t) => s + t.content.length + 16, 0));
       const keep = (r: { sources: { n: number; itemId: string; path: string; title: string }[] }) => {
         sources = r.sources.map(({ n, itemId, path, title }) => ({ n, itemId, path, title }));
         searched = true;
