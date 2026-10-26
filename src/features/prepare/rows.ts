@@ -55,6 +55,8 @@ export type PrepareSummary = {
   total: number;
   /** Items expired or expiring this month or the next. */
   attention: number;
+  /** Of those, the ones already expired: they need replacing now, not soon. */
+  expired: number;
   contacts: number;
   meeting: boolean;
   started: boolean;
@@ -66,6 +68,7 @@ export function summarize(data: PrepareData, groups: KitGroup[]): PrepareSummary
     done: rows.filter((r) => r.entry.have).length,
     total: rows.length,
     attention: rows.filter((r) => r.status === 'expired' || r.status === 'soon').length,
+    expired: rows.filter((r) => r.status === 'expired').length,
     contacts: data.contacts.length,
     meeting: !!(data.meeting.primary || data.meeting.secondary),
     started:

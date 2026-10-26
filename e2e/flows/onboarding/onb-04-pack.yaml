@@ -22,12 +22,12 @@ tags: [nightly, onboarding, network, routing-server, maps-server]
 - tapOn: { id: "kit-wikipedia" }
 - tapOn: { id: "kit-assistant" }
 - extendedWaitUntil:
-    visible: "Descargar mi kit · .*"
+    visible: "Descargar · .*"
     timeout: 20000
 - takeScreenshot: 01-kit
 - tapOn: { id: "onboarding-download" }
 - extendedWaitUntil:
-    visible: "Tu kit se está descargando"
+    visible: "Tu contenido se está descargando"
     timeout: 20000
 - takeScreenshot: 02-ready-downloads
 - tapOn: { id: "onboarding-finish" }

@@ -1,20 +1,27 @@
 import * as Device from 'expo-device';
 import { router } from 'expo-router';
-import { BookOpen, Check, Compass, Map, ShieldCheck, Sparkles, Stethoscope, Users, type LucideIcon } from 'lucide-react-native';
+import { BookOpen, Check, Compass, Map, ShieldCheck, Sparkles, Stethoscope, Users, X, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Badge, Button, Card, IconBadge, PressableScale, Row, Segmented, Switch, Text } from '@/components/ui';
+import { Badge, Button, Card, IconBadge, IconButton, PressableScale, Row, Segmented, Switch, Text } from '@/components/ui';
 import { ramGB, SYSTEM_MODEL_ID } from '@/features/assistant/models';
 import { downloadModel } from '@/features/assistant/register';
 import { useSystemModel } from '@/features/assistant/system';
 import { downloadResource, loc, sumMB, catalog } from '@/features/catalog';
 import { showDownloadError } from '@/features/catalog/DownloadButton';
-import { NotEnoughStorageError } from '@/features/downloads/manager';
-import { downloadCountry, useCatalogsState, useCountryOffer, useCountrySize, useInstalledCountryIds } from '@/features/maps/countries';
+import { NotEnoughStorageError, useDownloads, type DownloadStatus } from '@/features/downloads/manager';
+import {
+  downloadCountry,
+  useCatalogsState,
+  useCountries,
+  useCountryOffer,
+  useCountrySize,
+  useInstalledCountryIds,
+} from '@/features/maps/countries';
 import { CountryList, deviceCountry } from '@/features/maps/CountryList';
 import { guideResources, pickModel, pickWikipedia } from '@/features/onboarding/kit';
 import { useItems } from '@/features/content/items';
@@ -25,6 +32,10 @@ import { useSettings } from '@/stores/settings';
 import { layout, radius, space, useTheme, type Hue } from '@/theme';
 
 type Piece = 'country' | 'guides' | 'wikipedia' | 'assistant';
+
+/** A download in flight: a second run (Home's "Completar") must not offer it again. */
+const IN_FLIGHT: DownloadStatus[] = ['queued', 'running', 'paused', 'processing'];
+const WIKIPEDIA_IDS = new Set(Object.values(catalog.wikipedia).flatMap((options) => options.map((o) => o.resourceId)));
 
 /** Content languages follow the app language: Spanish speakers also get the (many) English-only guides. */
 const contentLanguagesFor = (l: AppLanguage): AppLanguage[] => (l === 'es' ? ['es', 'en'] : ['en']);
@@ -37,7 +48,7 @@ function KitRow({
   size,
   value,
   onChange,
-  included,
+  badge,
   testID,
 }: {
   icon: LucideIcon;
@@ -47,7 +58,8 @@ function KitRow({
   size: string | null;
   value: boolean;
   onChange?: (v: boolean) => void;
-  included?: string;
+  /** Instead of the switch: why the piece isn't a choice (installed, downloading, won't fit). */
+  badge?: { label: string; tone: 'success' | 'accent' | 'warning' };
   testID: string;
 }) {
   const { colors } = useTheme();
@@ -60,8 +72,9 @@ function KitRow({
       onPress={onChange ? () => onChange(!value) : undefined}
       accessibilityRole={onChange ? 'switch' : undefined}
       accessibilityState={onChange ? { checked: value } : undefined}
-      accessibilityLabel={[title, body, size, included].filter(Boolean).join(', ')}
-      style={[styles.piece, { backgroundColor: colors.surface, borderColor: colors.border, opacity: onChange && !value ? 0.7 : 1 }]}>
+      accessibilityLabel={[title, body, size, badge?.label].filter(Boolean).join(', ')}
+      restOpacity={onChange && !value ? 0.6 : 1}
+      style={[styles.piece, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <IconBadge icon={icon} hue={hue} size={40} />
       <View style={{ flex: 1, gap: 2 }}>
         <Text variant="headline">{title}</Text>
@@ -74,8 +87,8 @@ function KitRow({
           </Text>
         ) : null}
       </View>
-      {included ? (
-        <Badge label={included} tone="success" />
+      {badge ? (
+        <Badge label={badge.label} tone={badge.tone} />
       ) : onChange ? (
         <View pointerEvents="none" importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
           <Switch value={value} onValueChange={onChange} />
@@ -96,10 +109,24 @@ export default function OnboardingScreen() {
   const [on, setOn] = useState<Record<Piece, boolean>>({ country: true, guides: true, wikipedia: true, assistant: true });
   const [starting, setStarting] = useState(false);
   const [started, setStarted] = useState(0);
+  // A second run (Settings, or Home's "Completar"): the first-run choices are kept and the
+  // wizard can be closed.
+  const [rerun] = useState(() => useSettings.getState().onboarded);
 
   const installedCountries = useInstalledCountryIds();
+  const { countries } = useCountries();
   const installed = useItems();
   const installedIds = useMemo(() => new Set(installed.map((i) => i.catalogId ?? i.id)), [installed]);
+  const records = useDownloads((st) => st.records);
+  const pendingIds = useMemo(
+    () =>
+      new Set(
+        Object.values(records)
+          .filter((r) => IN_FLIGHT.includes(r.status))
+          .map((r) => r.id),
+      ),
+    [records],
+  );
   const offer = useCountryOffer(country ?? undefined);
   const countrySize = useCountrySize(step >= 2 ? offer : null);
   const catalogs = useCatalogsState();
@@ -110,32 +137,63 @@ export default function OnboardingScreen() {
   }, [refreshSystem]);
 
   const setLanguage = (l: AppLanguage) => {
+    if (l === s.language) return;
     s.setLanguage(l);
-    s.setContentLanguages(contentLanguagesFor(l));
+    // Only the first run derives them; later the user's own choice (Settings) stays.
+    if (!rerun) s.setContentLanguages(contentLanguagesFor(l));
   };
 
-  // What the kit holds (skipping what is already on the phone, for a second run).
+  // What the kit holds, skipping what is already on the phone or still downloading (a second run).
   const kit = useMemo(() => {
     const free = freeBytes() - STORAGE_HEADROOM;
     const countryInstalled = !!country && installedCountries.has(country);
-    const countryBytes = countryInstalled ? 0 : countrySize.status === 'ready' ? countrySize.bytes : 0;
-    const guides = guideResources(s.contentLanguages).filter((r) => !installedIds.has(r.id));
+    const countryDownloading = !countryInstalled && countries.some((c) => c.regionId === country && c.progress !== null);
+    const countryWanted = !countryInstalled && !countryDownloading;
+    const countryBytes = countryWanted && countrySize.status === 'ready' ? countrySize.bytes : 0;
+    const allGuides = guideResources(s.contentLanguages).filter((r) => !installedIds.has(r.id));
+    const guides = allGuides.filter((r) => !pendingIds.has(r.id));
+    const guidesDownloading = guides.length < allGuides.length;
     const guidesBytes = sumMB(guides) * 1e6;
     const systemModel = system?.status === 'available' ? system.provider : null;
     const model = pickModel(ramGB(Device.totalMemory));
     const modelInstalled = installedIds.has(model.id);
-    const modelBytes = systemModel || modelInstalled ? 0 : model.sizeBytes;
+    const modelDownloading = !modelInstalled && pendingIds.has(model.id);
+    const modelBytes = systemModel || modelInstalled || modelDownloading ? 0 : model.sizeBytes;
     const wikiLang = s.contentLanguages.includes(s.language) ? s.language : (s.contentLanguages[0] ?? 'en');
     const installedWiki = catalog.wikipedia[wikiLang]?.find((o) => installedIds.has(o.resourceId));
+    // Any Wikipedia on its way: the free space has shrunk since it was picked, so a new pick
+    // could be another variant (another id, which the download queue wouldn't dedupe).
+    const wikiDownloading = !installedWiki && [...pendingIds].some((id) => WIKIPEDIA_IDS.has(id));
     const rest = (on.country ? countryBytes : 0) + (on.guides ? guidesBytes : 0) + (on.assistant ? modelBytes : 0);
-    const wiki = installedWiki ? null : pickWikipedia(wikiLang, free - rest);
+    // Null with neither of those: not even the smallest one fits next to the rest.
+    const wiki = installedWiki || wikiDownloading ? null : pickWikipedia(wikiLang, free - rest);
     const wikiBytes = wiki ? wiki.resource.sizeMB * 1e6 : 0;
     const total = rest + (on.wikipedia ? wikiBytes : 0);
-    return { free, countryInstalled, countryBytes, guides, guidesBytes, systemModel, model, modelInstalled, modelBytes, installedWiki, wiki, wikiBytes, total };
-  }, [country, installedCountries, countrySize, s.contentLanguages, s.language, installedIds, system, on]);
+    return {
+      free,
+      countryInstalled,
+      countryDownloading,
+      countryWanted,
+      countryBytes,
+      guides,
+      guidesDownloading,
+      guidesBytes,
+      systemModel,
+      model,
+      modelInstalled,
+      modelDownloading,
+      modelBytes,
+      wikiLang,
+      installedWiki,
+      wikiDownloading,
+      wiki,
+      wikiBytes,
+      total,
+    };
+  }, [country, installedCountries, countries, countrySize, s.contentLanguages, s.language, installedIds, pendingIds, system, on]);
 
-  const countryPending = on.country && !kit.countryInstalled && countrySize.status === 'loading';
-  const countryFailed = on.country && !kit.countryInstalled && (countrySize.status === 'offline' || countrySize.status === 'error');
+  const countryPending = on.country && kit.countryWanted && countrySize.status === 'loading';
+  const countryFailed = on.country && kit.countryWanted && (countrySize.status === 'offline' || countrySize.status === 'error');
   const fits = kit.total <= kit.free;
 
   const startKit = async () => {
@@ -143,7 +201,7 @@ export default function OnboardingScreen() {
     let count = 0;
     try {
       if (country) s.setCountry(country);
-      if (on.country && offer && !kit.countryInstalled && countrySize.status === 'ready') {
+      if (on.country && offer && kit.countryWanted && countrySize.status === 'ready') {
         downloadCountry(offer, countrySize.estimate);
         count++;
       }
@@ -152,8 +210,8 @@ export default function OnboardingScreen() {
         await downloadResource(r);
         count++;
       }
-      if (kit.systemModel) s.setAiModelId(SYSTEM_MODEL_ID);
-      else if (on.assistant && !kit.modelInstalled) {
+      if (kit.systemModel) keepSystemModel();
+      else if (on.assistant && !kit.modelInstalled && !kit.modelDownloading) {
         await downloadModel(kit.model);
         count++;
       }
@@ -167,16 +225,31 @@ export default function OnboardingScreen() {
     }
   };
 
-  const finish = (then?: '/prepare/plan') => {
-    s.setOnboarded(true);
+  // The phone's own model, unless the user already chose one (a second run keeps it).
+  const keepSystemModel = () => {
+    if (!useSettings.getState().aiModelId) s.setAiModelId(SYSTEM_MODEL_ID);
+  };
+
+  const close = () => {
     if (router.canGoBack()) router.back();
     else router.replace('/');
+  };
+
+  const finish = (then?: '/prepare/plan') => {
+    s.setOnboarded(true);
+    close();
     if (then) setTimeout(() => router.push(then), 350);
   };
 
   const countryTitle = offer?.title ?? '';
   const sizeLabel = (bytes: number) => formatBytes(bytes);
-  const anything = (on.country && !kit.countryInstalled) || (on.guides && kit.guides.length > 0) || (on.wikipedia && !!kit.wiki) || (on.assistant && !kit.systemModel && !kit.modelInstalled);
+  const anything =
+    (on.country && kit.countryWanted) ||
+    (on.guides && kit.guides.length > 0) ||
+    (on.wikipedia && !!kit.wiki) ||
+    (on.assistant && !kit.systemModel && !kit.modelInstalled && !kit.modelDownloading);
+  const installedBadge = { label: tc('status.installed'), tone: 'success' } as const;
+  const downloadingBadge = { label: tc('status.running'), tone: 'accent' } as const;
 
   return (
     // The country search's keyboard must not cover the step's buttons. The bottom inset is a
@@ -191,6 +264,17 @@ export default function OnboardingScreen() {
         {[0, 1, 2, 3].map((i) => (
           <View key={i} style={[styles.dot, { backgroundColor: i <= step ? colors.accent : colors.surfaceAlt, width: i === step ? 24 : 8 }]} />
         ))}
+        {rerun ? (
+          // The first run can't be skipped; a second one is only a look at what's missing.
+          <IconButton
+            testID="onboarding-close"
+            icon={X}
+            size={32}
+            accessibilityLabel={tc('actions.close')}
+            onPress={close}
+            style={styles.close}
+          />
+        ) : null}
       </Row>
 
       {step === 0 ? (
@@ -269,7 +353,7 @@ export default function OnboardingScreen() {
                 title={t('onboarding.kit.country', { name: countryTitle })}
                 body={offer?.pack || catalogs !== 'ready' ? t('onboarding.kit.countryBody') : t('onboarding.kit.countryBodyNoRouting')}
                 size={
-                  kit.countryInstalled
+                  !kit.countryWanted
                     ? null
                     : countrySize.status === 'ready'
                       ? sizeLabel(countrySize.bytes)
@@ -278,8 +362,8 @@ export default function OnboardingScreen() {
                         : t('onboarding.kit.sizeFailed')
                 }
                 value={on.country}
-                onChange={kit.countryInstalled ? undefined : (v) => setOn((o) => ({ ...o, country: v }))}
-                included={kit.countryInstalled ? tc('status.installed') : undefined}
+                onChange={kit.countryWanted ? (v) => setOn((o) => ({ ...o, country: v })) : undefined}
+                badge={kit.countryInstalled ? installedBadge : kit.countryDownloading ? downloadingBadge : undefined}
               />
               <KitRow
                 testID="kit-guides"
@@ -290,18 +374,34 @@ export default function OnboardingScreen() {
                 size={kit.guides.length ? t('onboarding.kit.guidesSize', { count: kit.guides.length, size: sizeLabel(kit.guidesBytes) }) : null}
                 value={on.guides}
                 onChange={kit.guides.length ? (v) => setOn((o) => ({ ...o, guides: v })) : undefined}
-                included={kit.guides.length ? undefined : tc('status.installed')}
+                badge={kit.guides.length ? undefined : kit.guidesDownloading ? downloadingBadge : installedBadge}
               />
               <KitRow
                 testID="kit-wikipedia"
                 icon={BookOpen}
                 hue="reference"
                 title={t('onboarding.kit.wikipedia')}
-                body={kit.wiki ? loc(catalog.wikipedia[s.language]?.find((o) => o.id === kit.wiki?.optionId)?.name) || kit.wiki.resource.id : t('onboarding.kit.wikipediaInstalled')}
+                body={
+                  kit.wiki
+                    ? loc(catalog.wikipedia[kit.wikiLang]?.find((o) => o.id === kit.wiki?.optionId)?.name) || kit.wiki.resource.id
+                    : kit.installedWiki
+                      ? t('onboarding.kit.wikipediaInstalled')
+                      : kit.wikiDownloading
+                        ? t('onboarding.kit.wikipediaDownloading')
+                        : t('onboarding.kit.wikipediaNoRoom')
+                }
                 size={kit.wiki ? sizeLabel(kit.wikiBytes) : null}
                 value={on.wikipedia}
                 onChange={kit.wiki ? (v) => setOn((o) => ({ ...o, wikipedia: v })) : undefined}
-                included={kit.wiki ? undefined : tc('status.installed')}
+                badge={
+                  kit.wiki
+                    ? undefined
+                    : kit.installedWiki
+                      ? installedBadge
+                      : kit.wikiDownloading
+                        ? downloadingBadge
+                        : { label: t('onboarding.kit.noRoom'), tone: 'warning' }
+                }
               />
               <KitRow
                 testID="kit-assistant"
@@ -313,10 +413,20 @@ export default function OnboardingScreen() {
                     ? t('onboarding.kit.assistantSystem', { provider: t(`assistant:models.systemProvider.${kit.systemModel}`) })
                     : t('onboarding.kit.assistantModel', { name: kit.model.name })
                 }
-                size={kit.systemModel || kit.modelInstalled ? null : sizeLabel(kit.modelBytes)}
+                size={kit.systemModel || kit.modelInstalled || kit.modelDownloading ? null : sizeLabel(kit.modelBytes)}
                 value={on.assistant}
-                onChange={kit.systemModel || kit.modelInstalled ? undefined : (v) => setOn((o) => ({ ...o, assistant: v }))}
-                included={kit.systemModel ? t('onboarding.kit.included') : kit.modelInstalled ? tc('status.installed') : undefined}
+                onChange={
+                  kit.systemModel || kit.modelInstalled || kit.modelDownloading ? undefined : (v) => setOn((o) => ({ ...o, assistant: v }))
+                }
+                badge={
+                  kit.systemModel
+                    ? { label: t('onboarding.kit.included'), tone: 'success' }
+                    : kit.modelInstalled
+                      ? installedBadge
+                      : kit.modelDownloading
+                        ? downloadingBadge
+                        : undefined
+                }
               />
             </View>
             <Card style={{ gap: space.xs }}>
@@ -341,7 +451,7 @@ export default function OnboardingScreen() {
             <Button title={tc('actions.back')} variant="secondary" size="lg" onPress={() => setStep(1)} />
             <Button
               testID="onboarding-download"
-              title={anything ? t('onboarding.kit.download', { size: formatBytes(kit.total) }) : t('onboarding.kit.skip')}
+              title={anything ? tc('actions.downloadSize', { size: formatBytes(kit.total) }) : t('onboarding.kit.skip')}
               size="lg"
               style={{ flex: 1 }}
               loading={starting}
@@ -358,7 +468,7 @@ export default function OnboardingScreen() {
                     }
                   : () => {
                       if (country) s.setCountry(country);
-                      if (kit.systemModel) s.setAiModelId(SYSTEM_MODEL_ID);
+                      if (kit.systemModel) keepSystemModel();
                       setStep(3);
                     }
               }
@@ -399,6 +509,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, ...layout.column, paddingHorizontal: space.gutter },
   flex: { flex: 1, gap: space.lg },
   dots: { gap: 6, marginBottom: space.lg },
+  close: { marginLeft: 'auto' },
   dot: { height: 8, borderRadius: 4 },
   content: { gap: space.lg, paddingBottom: space.xl },
   logo: { width: 80, height: 80, borderRadius: 24, alignItems: 'center', justifyContent: 'center', borderCurve: 'continuous' },

@@ -29,7 +29,10 @@ export function Segmented<T extends string>({
             accessibilityRole="tab"
             accessibilityState={{ selected }}
             haptic="selection"
-            onPress={() => onChange(o.value)}
+            // Tapping the selected option changes nothing (callers may reset related state on change).
+            onPress={() => {
+              if (!selected) onChange(o.value);
+            }}
             style={[
               styles.segment,
               selected && { backgroundColor: scheme === 'dark' ? colors.surfacePressed : colors.surface, shadowColor: colors.shadow },

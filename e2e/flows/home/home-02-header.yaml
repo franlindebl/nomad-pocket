@@ -10,4 +10,4 @@ tags: [smoke, home, downloads]
 - tapOn: { id: "open-settings" }
 - assertVisible: "Ajustes"
 - scrollUntilVisible:
-    element: "Revisar mi kit"
+    element: "Revisar descargas recomendadas"

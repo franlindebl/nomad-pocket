@@ -13,6 +13,9 @@ export type PressableScaleProps = Omit<RNPressableProps, 'style'> & {
   /** Scale applied while pressed. */
   pressedScale?: number;
   haptic?: HapticKind;
+  /** Opacity at rest (e.g. a dimmed, switched-off row). A static opacity in `style` loses to
+   *  the animated one. */
+  restOpacity?: number;
 };
 
 export function triggerHaptic(kind: HapticKind) {
@@ -22,12 +25,22 @@ export function triggerHaptic(kind: HapticKind) {
 }
 
 /** Pressable with the standard press feedback: scale 0.98 + slight fade. */
-export function PressableScale({ style, pressedScale = 0.98, haptic = 'none', onPressIn, onPressOut, onPress, disabled, ...rest }: PressableScaleProps) {
+export function PressableScale({
+  style,
+  pressedScale = 0.98,
+  haptic = 'none',
+  restOpacity: idleOpacity = 1,
+  onPressIn,
+  onPressOut,
+  onPress,
+  disabled,
+  ...rest
+}: PressableScaleProps) {
   const reduceMotion = useReducedMotion();
   const pressed = useSharedValue(0);
   // Disabled dims here: a static opacity next to the animated style lost to it (disabled
   // buttons looked enabled).
-  const restOpacity = disabled ? 0.45 : 1;
+  const restOpacity = disabled ? 0.45 : idleOpacity;
   const animatedStyle = useAnimatedStyle(
     () => ({
       opacity: restOpacity * (1 - pressed.value * 0.1),

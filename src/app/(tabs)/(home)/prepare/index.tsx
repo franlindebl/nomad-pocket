@@ -87,6 +87,13 @@ export default function PrepareScreen() {
     }
   };
 
+  // Expired items first: they are already unusable, not merely expiring.
+  const attention = summary.expired
+    ? t('home.expired', { count: summary.expired })
+    : summary.attention
+      ? t('home.attention', { count: summary.attention })
+      : undefined;
+
   const confirmReset = () =>
     Alert.alert(t('hub.resetTitle'), t('hub.resetBody'), [
       { text: tc('actions.cancel'), style: 'cancel' },
@@ -111,13 +118,13 @@ export default function PrepareScreen() {
         icon={Backpack}
         title={t('hub.kitTitle')}
         body={summary.done ? t('kit.progress', { done: summary.done, total: summary.total }) : t('hub.kitEmpty')}
-        status={summary.attention ? t('home.attention', { count: summary.attention }) : undefined}
+        status={attention}
         onPress={() => router.push('/prepare/kit')}
         testID="prepare-kit">
-        {summary.done || summary.attention ? (
+        {summary.done || attention ? (
           <View style={{ gap: space.sm }}>
             <ProgressBar value={summary.total ? summary.done / summary.total : 0} />
-            {summary.attention ? <Badge tone="warning" label={t('home.attention', { count: summary.attention })} /> : null}
+            {attention ? <Badge tone={summary.expired ? 'danger' : 'warning'} label={attention} /> : null}
           </View>
         ) : null}
       </HubCard>
