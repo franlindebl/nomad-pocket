@@ -1,0 +1,25 @@
+src/app/(tabs)/maps/emergency.tsx
+  s_9f5316f88b2e79::t_44096e3c171942 23,127-128
+src/app/(tabs)/maps/marker.tsx
+  s_9f5316f88b2e79::t_c52c555e0b1672 8,90-91
+src/features/maps/PlaceCard.tsx
+  s_9f5316f88b2e79::t_e0c740b7972763 9,18,108-114
+src/features/maps/guidance.ts
+  s_9f5316f88b2e79::t_3002a4ea2f27fd 7,10-11,214-225
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cee2b08f7f4697b0b0e7d9a875438c6e636e5669",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
