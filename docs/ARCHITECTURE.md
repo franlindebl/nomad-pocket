@@ -878,7 +878,7 @@ Storage layout). `ios/` and `android/` are generated from it.
 | `opds.library.kiwix.org/catalog/v2` | newest ZIM versions, Explore search (the typed text) and thumbnails |
 | `build-metadata.protomaps.dev/builds.json`, `build.protomaps.com` | daily planet build, HTTP Range extraction: fallback for a country without a prebuilt map |
 | `huggingface.co` | GGUF models |
-| `overpass-api.de`, `overpass.private.coffee`, `maps.mail.ru/osm/tools/overpass` (VK) | emergency points for a map without bundled points (only the region bbox is sent; public servers, best effort) |
+| `overpass-api.de`, `overpass.private.coffee`, `overpass.kumi.systems` (European operators only) | emergency points for a map without bundled points (only the region bbox is sent; public servers, best effort) |
 | `franlindebl.github.io/nomad-pocket` | privacy policy / support page (`site/`), opened in the browser from Settings |
 
 Archive pages in the reader cannot reach the network at all (Library section).

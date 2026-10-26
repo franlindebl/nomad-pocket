@@ -74,9 +74,7 @@ A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check
      `features/maps/assets.ts` `VERSION`).
    - Geofabrik mis-tags `pf`, `wf`, `tk`, Clipperton (VU) and `pn` (MH), and `as`, `gu`, `mp` have no
      extract of their own: no side files for them (Overpass fallback); matching by name could give them
-     points. Consider whether `maps.mail.ru` (VK) should stay among the Overpass fallbacks.
-   - `aboutBody` (es/en settings strings) still says "GPL‑3.0": make it "GPL‑3.0-or-later" (OSS-8
-     remainder, code).
+     points.
    - The pronoun threshold of the assistant (a follow-up inherits the previous topic only with at
      most one word of its own) loses some two-word English follow-ups ("Can I put ice on it?") on the
      heuristic search paths; long questions (> 600 chars) are searched once.
