@@ -371,6 +371,7 @@ async function run(id: string) {
       pump();
       return;
     }
+    console.warn('[downloads] failed', id, e);
     setStatus(id, 'failed', { error: String((e as Error)?.message ?? e) }, { error: String((e as Error)?.message ?? e) });
     pump();
     return;
@@ -390,6 +391,7 @@ async function run(id: string) {
     await file.move(dest);
     await finalize(id, dest);
   } catch (e) {
+    console.warn('[downloads] failed', id, e);
     setStatus(id, 'failed', { error: String((e as Error)?.message ?? e) }, { error: String((e as Error)?.message ?? e) });
   }
   pump();
