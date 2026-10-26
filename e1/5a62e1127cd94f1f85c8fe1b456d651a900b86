@@ -1,0 +1,35 @@
+src/app/(tabs)/(home)/index.tsx
+  s_9f5316f88b2e79::t_b5dd6215e56882 24,33,121
+src/app/(tabs)/(home)/prepare/plan.tsx
+  s_9f5316f88b2e79::t_7e168af1425c08 6,82
+src/app/(tabs)/maps/emergency.tsx
+  s_9f5316f88b2e79::t_7bc9c695695013 7,10,174
+src/features/maps/PlaceCard.tsx
+  s_9f5316f88b2e79::t_418bc4a68e5652 2-4,12,14,21,37,97-112
+src/features/maps/call.ts
+  s_9f5316f88b2e79::t_d28bac6e6a4633 1-31
+src/features/maps/phone.test.ts
+  s_9f5316f88b2e79::t_69c1e376846a1e 1-60
+src/features/maps/phone.ts
+  s_9f5316f88b2e79::t_96eb2dd9ccae9f 1-66
+src/i18n/locales/en/maps.json
+  s_9f5316f88b2e79::t_c8193ff2211ec4 111,118-123
+src/i18n/locales/es/maps.json
+  s_9f5316f88b2e79::t_7a88d8e46a3e5e 111,118-123
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e15a62e1127cd94f1f85c8fe1b456d651a900b86",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
