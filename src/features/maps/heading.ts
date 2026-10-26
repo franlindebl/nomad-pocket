@@ -4,14 +4,16 @@
 // on Android), so in landscape (an iPad, a car mount) everything pointed 90° off.
 // expo-screen-orientation says how the interface is turned. Its change event rides on
 // the window size on Android, which a 180° flip (landscape to landscape) doesn't
-// change, so there the orientation is also re-read every couple of seconds.
+// change, so there the orientation is also re-read every couple of seconds. On iOS it
+// is cached from rotations and may be UNKNOWN until the first one after launch
+// (knownOrientation then gives no heading in landscape rather than a guessed one).
 // Android tablets whose natural orientation is landscape report rotation 0 as
 // LANDSCAPE_RIGHT and stay 90° off: rare, and expo-screen-orientation hides the raw value.
 import * as Location from 'expo-location';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import { Platform } from 'react-native';
+import { Dimensions, Platform } from 'react-native';
 
-import { screenHeading, type InterfaceOrientation } from './geo';
+import { knownOrientation, screenHeading, type InterfaceOrientation } from './geo';
 
 export type ScreenHeading = {
   /** Degrees clockwise from true north (magnetic when true north is unavailable). */
@@ -30,8 +32,11 @@ const ORIENTATIONS: Record<ScreenOrientation.Orientation, InterfaceOrientation> 
   [ScreenOrientation.Orientation.LANDSCAPE_RIGHT]: 'landscapeRight',
 };
 
-/** Like Location.watchHeadingAsync, turned to the screen; rejects without a compass. */
-export async function watchScreenHeading(onHeading: (h: ScreenHeading) => void): Promise<{ remove: () => void }> {
+/**
+ * Like Location.watchHeadingAsync, turned to the screen. null: there is a compass but
+ * which way the screen is turned isn't known. Rejects without a compass.
+ */
+export async function watchScreenHeading(onHeading: (h: ScreenHeading | null) => void): Promise<{ remove: () => void }> {
   let orientation: InterfaceOrientation = 'unknown';
   const read = () =>
     ScreenOrientation.getOrientationAsync()
@@ -51,7 +56,10 @@ export async function watchScreenHeading(onHeading: (h: ScreenHeading) => void):
   try {
     const sub = await Location.watchHeadingAsync((h) => {
       const deg = h.trueHeading >= 0 ? h.trueHeading : h.magHeading;
-      if (deg >= 0) onHeading({ deg: screenHeading(deg, orientation), accuracy: h.accuracy });
+      if (deg < 0) return;
+      // The screen's bounds turn with the interface (the window's don't in Split View).
+      const turned = knownOrientation(orientation, Dimensions.get('screen'));
+      onHeading(turned ? { deg: screenHeading(deg, turned), accuracy: h.accuracy } : null);
     });
     return {
       remove: () => {
