@@ -33,8 +33,7 @@ English. User-facing strings are Spanish + English (i18n).
   form sheets. State: zustand. Persistence: expo-sqlite (+ `expo-sqlite/kv-store`).
   Files: expo-file-system 58 (`File`, `Directory`, `DownloadTask`). i18n: i18next.
 - Native: local Expo modules `modules/nomad-zim` (libkiwix/libzim),
-  `modules/nomad-llm` (Apple Foundation Models; Android's Gemini Nano/ML Kit bridge is being removed,
-  Android uses downloadable models only) and `modules/nomad-route`
+  `modules/nomad-llm` (Apple Foundation Models, iOS only; Android offers downloadable models only) and `modules/nomad-route`
   (Valhalla routing via Rallista valhalla-mobile 0.6.4); `llama.rn` 0.13.0-rc.8
   (GGUF); `@maplibre/maplibre-react-native` 11.5 (+ `@protomaps/basemaps` styles).
 - Min OS: iOS 16.4 (Expo 58 floor), Android 8.0 (API 26). CNG: `ios/` and `android/`
@@ -76,7 +75,7 @@ src/theme/          tokens + useTheme()        src/i18n/  i18next, locales/<lang
 src/db/             SQLite files, schema/migrations, kv   src/lib/   storage paths, format, units, pmtiles/
 src/stores/         settings (persisted)       src/data/catalog.json  bundled content catalog
 modules/            nomad-zim, nomad-llm, nomad-route (Swift/Obj-C++/Kotlin Expo modules)
-plugins/            config plugins (Android backup rules)   locales/  localised InfoPlist strings (es, en)
+plugins/            config plugins (Android backup rules, no Firebase)   locales/  localised InfoPlist strings (es, en)
 scripts/            check-i18n, validate-catalog, licenses.mjs (+ licenses/), e2e*, maps/ (asset generators),
                     routing/ (pack builds), store-screenshots
 e2e/                Maestro flows, subflows, fixtures     site/  privacy/support site (GitHub Pages)

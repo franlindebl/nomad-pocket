@@ -35,9 +35,9 @@ services; the privacy policy in `site/privacy.html` lists the same hosts).
 - Icons: `lucide-react-native`; tab bar uses SF Symbols / Material Symbols.
 - Native deps: libkiwix 14.2.1 xcframework (iOS) / `org.kiwix:libkiwix:2.7.0` (Android),
   MapLibre Native via `@maplibre/maplibre-react-native` 11.5, `llama.rn` 0.13.0-rc.8,
-  FoundationModels (iOS 26+, weak-linked). Android's ML Kit `genai-prompt` (Gemini Nano) is
-  being removed (owner decision 2026-10-26, `docs/PROGRESS.md`): the Android assistant uses
-  downloadable models only.
+  FoundationModels (iOS 26+, weak-linked). Android has no system model: ML Kit GenAI (Gemini
+  Nano) was removed on 2026-10-26 (proprietary, sends diagnostics to Google), and Firebase is kept
+  out of the APK (`plugins/with-android-no-firebase.js`).
 - Other: `fflate` (gzip/zip), `@protomaps/basemaps` (style layers), `expo-network`
   (Wi-Fi checks), `expo-keep-awake` (map extraction, guidance), `expo-document-picker` (ZIM
   import), `expo-location`, `expo-screen-orientation` (compass heading in landscape),
@@ -98,7 +98,7 @@ src/
     credits/                 data behind Settings › Credits & licenses (credits-core.ts pure, licenses.ts)
 modules/
   nomad-zim/                 libkiwix bridge + ZimWebView (Swift/Obj-C++ · Kotlin)
-  nomad-llm/                 Apple Foundation Models bridge (+ Android Gemini Nano bridge, being removed)
+  nomad-llm/                 Apple Foundation Models bridge (iOS only)
   nomad-route/               Valhalla routing (valhalla-mobile: iOS xcframework · Android AAR)
 plugins/                     config plugins (with-android-backup-rules.js)
 locales/                     InfoPlist strings (localised permission prompts), es + en
@@ -286,8 +286,10 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
   España" with the summed bytes and one set of buttons (`pauseDownloads`,
   `resumeDownloads`, `cancelDownloads` act on the whole row). A group's finished files stay
   in the store until the last one is done, so its total holds steady, and the listeners
-  fire once, with the group's title. `cancelDownloads` skips members in `processing` on
-  purpose (a group cancel from the sheet lets a member mid-assembly finish; PROGRESS).
+  fire once, with the group's title. `cancelDownloads` cancels a member in `processing` only
+  when its `meta.abortable` is set (`EnqueueInput.abortable`; decided by `cancelAction` in
+  manager-core): country map and pack parts are, and their assembly aborts, registers nothing and
+  deletes its parts.
 - `pauseDownload`, `resumeDownload`, `cancelDownload` (deletes the partial file),
   `dismissDownload`, hooks `useActiveDownloads()`, `useDownload(id)`.
 - `startExternalJob({ id, kind, title, totalBytes, cancel })` → `{ update, finish, fail }`
@@ -750,14 +752,15 @@ without them are fetched on their own when the sheet opens online) and `route-st
 
 ### Assistant (`modules/nomad-llm`, `src/features/assistant`, `src/app/(tabs)/assistant`)
 - `modules/nomad-llm`: `getSystemModelStatus()` → `{ status: available | notEnabled |
-  deviceNotEligible | modelNotReady | downloadable | unsupportedOS | unsupported,
-  provider: 'apple' | 'gemini' | null }`, `generate(requestId, { prompt, system?,
+  deviceNotEligible | modelNotReady | unsupportedOS | unsupported,
+  provider: 'apple' | null }`, `generate(requestId, { prompt, system?,
   temperature?, maxTokens? }, onDelta)` (events `onDelta {requestId, delta, reset?}` /
-  `onDone` / `onError`), `cancel(id)`, `downloadSystemModel()` (Android), `route(prompt,
+  `onDone` / `onError`), `cancel(id)`, `route(prompt,
   instructions)` → `{ search, query }` (iOS: guided generation with a `@Generable`
-  struct, greedy). iOS weak-links FoundationModels (iOS 26+). Android: owner decision 2026-10-26 — the ML Kit GenAI
-  (Gemini Nano) bridge, proprietary and sending diagnostics to Google, is removed from the Android
-  build (`docs/PROGRESS.md` backlog), so the Android assistant uses downloadable GGUF models only.
+  struct, greedy). iOS weak-links FoundationModels (iOS 26+). The module is Apple-only (no android/ folder):
+  on Android the bridge isn't linked, the status is `unsupported`, `HAS_SYSTEM_MODEL`
+  (`system.ts`) hides the system model in the models screen and onboarding, and a stale
+  `aiModelId === 'system'` is reset at startup. The Android assistant uses GGUF models only.
 - `models.ts`: curated GGUF list, URLs pinned to a Hugging Face commit with exact sizes:
 
   | id | Size | Min RAM | Context |
