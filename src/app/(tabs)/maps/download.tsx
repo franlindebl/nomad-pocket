@@ -6,7 +6,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { Button, Card, Row, Text } from '@/components/ui';
 import { NotEnoughStorageError } from '@/features/downloads/manager';
-import { downloadCountry, useCountryOffer, useCountrySize } from '@/features/maps/countries';
+import { downloadCountry, useCatalogsState, useCountryOffer, useCountrySize } from '@/features/maps/countries';
 import { formatBytes } from '@/lib/format';
 import { freeBytes, hasRoomFor } from '@/lib/storage';
 import { space, useTheme } from '@/theme';
@@ -37,6 +37,7 @@ export default function CountryDownloadSheet() {
   const { regionId, from } = useLocalSearchParams<{ regionId?: string; from?: string }>();
   const offer = useCountryOffer(regionId);
   const size = useCountrySize(offer);
+  const catalogs = useCatalogsState();
   const [error, setError] = useState<string | null>(null);
 
   if (!offer) return null;
@@ -66,10 +67,11 @@ export default function CountryDownloadSheet() {
 
       <Card style={{ gap: space.lg }}>
         <Includes title={t('country.map')} body={zoom >= 15 ? t('country.mapFull') : t('country.mapReduced')} />
+        {/* Without the catalog, a missing pack only means "couldn't check". */}
         <Includes
           title={t('country.routing')}
-          body={offer.pack ? t('country.routingBody') : t('country.routingMissing')}
-          missing={!offer.pack}
+          body={offer.pack ? t('country.routingBody') : catalogs === 'ready' ? t('country.routingMissing') : t('country.routingUnknown')}
+          missing={!offer.pack && catalogs === 'ready'}
         />
         <Includes title={t('country.points')} body={t('country.pointsBody')} />
       </Card>
@@ -88,9 +90,12 @@ export default function CountryDownloadSheet() {
         ) : failed ? (
           <Row gap={space.sm} align="flex-start">
             {failed.status === 'offline' ? <WifiOff size={18} color={colors.warning} /> : <AlertTriangle size={18} color={colors.warning} />}
-            <Text variant="callout" color="textSecondary" style={{ flex: 1 }}>
-              {failed.status === 'offline' ? t('download.offline') : t('download.estimateFailed', { error: failed.status === 'error' ? failed.message : '' })}
-            </Text>
+            <View style={{ flex: 1, gap: space.sm }}>
+              <Text variant="callout" color="textSecondary">
+                {failed.status === 'offline' ? t('download.offline') : t('download.estimateFailed', { error: failed.status === 'error' ? failed.message : '' })}
+              </Text>
+              <Button testID="country-retry-size" title={t('regions.retry')} variant="secondary" size="sm" style={{ alignSelf: 'flex-start' }} onPress={size.retry} />
+            </View>
           </Row>
         ) : total !== null ? (
           <>

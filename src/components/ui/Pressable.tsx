@@ -25,10 +25,16 @@ export function triggerHaptic(kind: HapticKind) {
 export function PressableScale({ style, pressedScale = 0.98, haptic = 'none', onPressIn, onPressOut, onPress, disabled, ...rest }: PressableScaleProps) {
   const reduceMotion = useReducedMotion();
   const pressed = useSharedValue(0);
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: 1 - pressed.value * 0.1,
-    transform: [{ scale: reduceMotion ? 1 : 1 - pressed.value * (1 - pressedScale) }],
-  }));
+  // Disabled dims here: a static opacity next to the animated style lost to it (disabled
+  // buttons looked enabled).
+  const restOpacity = disabled ? 0.45 : 1;
+  const animatedStyle = useAnimatedStyle(
+    () => ({
+      opacity: restOpacity * (1 - pressed.value * 0.1),
+      transform: [{ scale: reduceMotion ? 1 : 1 - pressed.value * (1 - pressedScale) }],
+    }),
+    [restOpacity, reduceMotion, pressedScale],
+  );
   return (
     <AnimatedPressable
       {...rest}
@@ -45,7 +51,7 @@ export function PressableScale({ style, pressedScale = 0.98, haptic = 'none', on
         triggerHaptic(haptic);
         onPress?.(e);
       }}
-      style={[style, animatedStyle, disabled && { opacity: 0.45 }]}
+      style={[style, animatedStyle]}
     />
   );
 }

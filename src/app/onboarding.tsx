@@ -14,7 +14,7 @@ import { useSystemModel } from '@/features/assistant/system';
 import { downloadResource, loc, sumMB, catalog } from '@/features/catalog';
 import { showDownloadError } from '@/features/catalog/DownloadButton';
 import { NotEnoughStorageError } from '@/features/downloads/manager';
-import { downloadCountry, useCountryOffer, useCountrySize, useInstalledCountryIds } from '@/features/maps/countries';
+import { downloadCountry, useCatalogsState, useCountryOffer, useCountrySize, useInstalledCountryIds } from '@/features/maps/countries';
 import { CountryList, deviceCountry } from '@/features/maps/CountryList';
 import { guideResources, pickModel, pickWikipedia } from '@/features/onboarding/kit';
 import { useItems } from '@/features/content/items';
@@ -55,9 +55,9 @@ function KitRow({
   return (
     <PressableScale
       testID={testID}
-      haptic="selection"
-      disabled={!onChange}
-      onPress={() => onChange?.(!value)}
+      haptic={onChange ? 'selection' : 'none'}
+      // Not `disabled`: an included piece must not look faded.
+      onPress={onChange ? () => onChange(!value) : undefined}
       accessibilityRole={onChange ? 'switch' : undefined}
       accessibilityState={onChange ? { checked: value } : undefined}
       accessibilityLabel={[title, body, size, included].filter(Boolean).join(', ')}
@@ -102,6 +102,7 @@ export default function OnboardingScreen() {
   const installedIds = useMemo(() => new Set(installed.map((i) => i.catalogId ?? i.id)), [installed]);
   const offer = useCountryOffer(country ?? undefined);
   const countrySize = useCountrySize(step >= 2 ? offer : null);
+  const catalogs = useCatalogsState();
   const system = useSystemModel((st) => st.info);
   const refreshSystem = useSystemModel((st) => st.refresh);
   useEffect(() => {
@@ -262,7 +263,7 @@ export default function OnboardingScreen() {
                 icon={Map}
                 hue="maps"
                 title={t('onboarding.kit.country', { name: countryTitle })}
-                body={offer?.pack ? t('onboarding.kit.countryBody') : t('onboarding.kit.countryBodyNoRouting')}
+                body={offer?.pack || catalogs !== 'ready' ? t('onboarding.kit.countryBody') : t('onboarding.kit.countryBodyNoRouting')}
                 size={
                   kit.countryInstalled
                     ? null

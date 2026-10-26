@@ -311,6 +311,7 @@
     "routingMissing": "Not available in this country yet: you'll be guided in a straight line to your destination.",
     "points": "Emergency points and streets",
     "pointsBody": "Hospitals, pharmacies, police, drinking water and shelters, and every street in search.",
-    "wifiHint": "Best on Wi‑Fi with the phone charging. You can keep using the app meanwhile."
+    "wifiHint": "Best on Wi‑Fi with the phone charging. You can keep using the app meanwhile.",
+    "routingUnknown": "Couldn't check while offline. Try again once you're online."
   }
 }

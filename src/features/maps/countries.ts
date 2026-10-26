@@ -67,40 +67,81 @@ export type CountrySize =
  * What a country download will take: from the catalogs (refreshed on mount), or, for a
  * map the catalog doesn't have, from a dry run of the on-device extraction.
  */
-export function useCountrySize(o: CountryOffer | null): CountrySize {
+/** Gives up on a size estimate after this long (a dead network can hang instead of failing). */
+const ESTIMATE_TIMEOUT_MS = 45_000;
+
+/**
+ * Whether both catalogs are known: 'unknown' when one never loaded (first launch offline,
+ * DNS down) and has no cached copy, so a country's pack can't be told from no pack.
+ */
+export function useCatalogsState(): 'loading' | 'ready' | 'unknown' {
+  const maps = useMapsCatalog((s) => (s.manifest ? 'ready' : s.status));
+  const routing = useRoutingCatalog((s) => (s.manifest ? 'ready' : s.status));
+  if (maps === 'ready' && routing === 'ready') return 'ready';
+  if (maps === 'error' || routing === 'error') return 'unknown';
+  return 'loading';
+}
+
+export function retryCatalogs() {
+  refreshMapsCatalog();
+  refreshRoutingCatalog();
+}
+
+/** The size plus `retry` (catalogs and estimate again, after a failure). */
+export function useCountrySize(o: CountryOffer | null): CountrySize & { retry: () => void } {
   const mapsStatus = useMapsCatalog((s) => s.status);
   const routingStatus = useRoutingCatalog((s) => s.status);
+  const catalogs = useCatalogsState();
   const [estimate, setEstimate] = useState<{ key: string; size: CountrySize } | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const retry = () => {
+    retryCatalogs();
+    setAttempt((n) => n + 1);
+  };
 
   useEffect(() => {
-    refreshMapsCatalog();
-    refreshRoutingCatalog();
+    retryCatalogs();
   }, []);
 
   const catalogsLoading = mapsStatus === 'loading' || routingStatus === 'loading';
-  const key = o && !o.map && !catalogsLoading ? `${o.region.id}|${o.fallbackZoom}` : null;
+  const key = o && !o.map && !catalogsLoading && catalogs === 'ready' ? `${o.region.id}|${o.fallbackZoom}|${attempt}` : null;
   useEffect(() => {
     if (!o || !key) return;
     const ctrl = new AbortController();
-    const done = (size: CountrySize) => !ctrl.signal.aborted && setEstimate({ key, size });
+    const timer = setTimeout(() => {
+      done({ status: 'offline' });
+      ctrl.abort();
+    }, ESTIMATE_TIMEOUT_MS);
+    const done = (size: CountrySize) => {
+      if (ctrl.signal.aborted) return;
+      clearTimeout(timer);
+      setEstimate({ key, size });
+    };
     estimateExtract(o.region.bbox, 0, o.fallbackZoom, ctrl.signal)
       .then((e) => done({ status: 'ready', bytes: e.plan.archiveBytes, estimate: e }))
       .catch((e) => {
+        console.warn('[maps] country size', o.region.id, e);
+        // A server's answer is worth showing; anything else (DNS, TLS, a dropped connection)
+        // reads as "no connection" with a retry.
         if (e instanceof HttpError) done({ status: 'error', message: e.message });
-        else if (e instanceof TypeError || /network|internet|offline/i.test(String(e?.message))) done({ status: 'offline' });
-        else done({ status: 'error', message: String(e?.message ?? e) });
+        else done({ status: 'offline' });
       });
-    return () => ctrl.abort();
+    return () => {
+      clearTimeout(timer);
+      ctrl.abort();
+    };
     // The key stands for the offer.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
-  if (!o || catalogsLoading) return { status: 'loading' };
+  if (!o || catalogsLoading) return { status: 'loading', retry };
+  // Without the catalogs nothing can be sized (nor downloaded, as for any download offline).
+  if (catalogs === 'unknown') return { status: 'offline', retry };
   const pack = o.pack && !isPackInstalled(o.pack.id) ? o.pack.size : 0;
-  if (o.map) return { status: 'ready', bytes: o.map.size + pack };
+  if (o.map) return { status: 'ready', bytes: o.map.size + pack, retry };
   const est = estimate?.key === key ? estimate.size : null;
-  if (!est) return { status: 'loading' };
-  return est.status === 'ready' ? { ...est, bytes: est.bytes + pack } : est;
+  if (!est) return { status: 'loading', retry };
+  return est.status === 'ready' ? { ...est, bytes: est.bytes + pack, retry } : { ...est, retry };
 }
 
 /**
