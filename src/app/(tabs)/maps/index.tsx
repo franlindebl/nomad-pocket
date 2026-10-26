@@ -72,7 +72,8 @@ export default function MapScreen() {
   const [showUser, setShowUser] = useState(false);
   // The Maps tab in front (a sheet over the map keeps it): the compass beam listens only then.
   const navigation = useNavigation();
-  const [tabFocused, setTabFocused] = useState(true);
+  // Native tabs may mount this screen behind another tab: no focus event comes until it is shown.
+  const [tabFocused, setTabFocused] = useState(() => (navigation.getParent() ?? navigation).isFocused());
   useEffect(() => {
     const tab = navigation.getParent() ?? navigation;
     const unsubscribe = [tab.addListener('focus', () => setTabFocused(true)), tab.addListener('blur', () => setTabFocused(false))];
@@ -108,11 +109,12 @@ export default function MapScreen() {
     [assets, scheme, i18n.language, all],
   );
 
+  // Counted while the map is on screen: the tab may be mounted behind Home at launch.
   useEffect(() => {
-    if (!style || !credit) return;
+    if (!style || !credit || !tabFocused) return;
     const timer = setTimeout(() => setCredit(false), CREDIT_MS);
     return () => clearTimeout(timer);
-  }, [style, credit]);
+  }, [style, credit, tabFocused]);
 
   // Where to open: last viewport, else the first region, else the whole world.
   const initialView = useMemo<InitialViewState>(() => {
