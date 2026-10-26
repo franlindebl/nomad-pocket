@@ -29,6 +29,29 @@ export function compassSector(bearing: number): number {
   return Math.round((((bearing % 360) + 360) % 360) / 45) % 8;
 }
 
+/** How the interface is turned (expo-screen-orientation's names); landscapeLeft: home side on the left. */
+export type InterfaceOrientation = 'portraitUp' | 'portraitDown' | 'landscapeLeft' | 'landscapeRight' | 'unknown';
+
+/** Where the top of the screen points, from where the device's portrait top points. */
+const SCREEN_TURN: Record<InterfaceOrientation, number> = {
+  portraitUp: 0,
+  unknown: 0,
+  // Turned clockwise: the device's top points right of the screen's top.
+  landscapeLeft: 270,
+  // Turned counter-clockwise: the device's top points left of it.
+  landscapeRight: 90,
+  portraitDown: 180,
+};
+
+/**
+ * The compass heading of the screen's top. Both platforms' compasses measure along the
+ * device's portrait top, so with the interface in landscape or upside down an arrow
+ * drawn from it would be 90° or 180° off.
+ */
+export function screenHeading(deviceHeading: number, orientation: InterfaceOrientation): number {
+  return (((deviceHeading + SCREEN_TURN[orientation]) % 360) + 360) % 360;
+}
+
 /** Square-ish box around a point, for SQL prefilters. */
 export function bboxAround(p: LatLon, radiusMeters: number): [number, number, number, number] {
   const dLat = deg(radiusMeters / R);

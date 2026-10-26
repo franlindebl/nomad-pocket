@@ -7,6 +7,7 @@ import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { create } from 'zustand';
 
 import type { LatLon } from './geo';
+import { watchScreenHeading } from './heading';
 import { computeRoute, packFor, RoutingError } from './routing';
 import { cumulativeDistances, isOffRoute, routeProgress, type Costing, type Route, type RouteProgress } from './routing-core';
 
@@ -21,7 +22,7 @@ type Position = LatLon & { accuracy: number | null; course?: number | null; spee
 type GuidanceState = {
   target: GuidanceTarget | null;
   position: Position | null;
-  /** Degrees clockwise from true north (magnetic when true north is unavailable). */
+  /** Degrees clockwise from true north (magnetic when true north is unavailable), of the screen's top. */
   heading: number | null;
   costing: Costing;
   routing: RoutingStatus;
@@ -42,7 +43,7 @@ type GuidanceState = {
 const KEEP_AWAKE_TAG = 'maps-guidance';
 /** Don't reroute more often than this, whatever the GPS does. */
 const REROUTE_MS = 10_000;
-let subscriptions: Location.LocationSubscription[] = [];
+let subscriptions: { remove: () => void }[] = [];
 /** Bumped by every start/stop, so a slow start that was superseded cleans up after itself. */
 let session = 0;
 /** Bumped by every route request: a late answer for an older request is dropped. */
@@ -55,7 +56,7 @@ let course: number | null = null;
 /** A last-known fix older than this is not a starting point (it may be another town). */
 const STALE_FIX_MS = 2 * 60_000;
 
-function remove(subs: Location.LocationSubscription[]) {
+function remove(subs: { remove: () => void }[]) {
   for (const s of subs) {
     try {
       s.remove();
@@ -151,7 +152,7 @@ export const useGuidance = create<GuidanceState>((set, get) => {
       course = null;
       const last = await Location.getLastKnownPositionAsync({ maxAge: STALE_FIX_MS }).catch(() => null);
       if (last && session === mine && Date.now() - last.timestamp < STALE_FIX_MS) firstFix({ lat: last.coords.latitude, lon: last.coords.longitude, accuracy: last.coords.accuracy });
-      const subs: Location.LocationSubscription[] = [];
+      const subs: { remove: () => void }[] = [];
       try {
         subs.push(
           await Location.watchPositionAsync({ accuracy: Location.Accuracy.BestForNavigation, distanceInterval: 3, timeInterval: 2000 }, (p) => {
@@ -164,9 +165,9 @@ export const useGuidance = create<GuidanceState>((set, get) => {
           }),
         );
         subs.push(
-          await Location.watchHeadingAsync((h) => {
-            const heading = h.trueHeading >= 0 ? h.trueHeading : h.magHeading;
-            if (heading >= 0 && session === mine) set({ heading });
+          // Turned to the screen: in landscape the arrow and the camera follow its top.
+          await watchScreenHeading((h) => {
+            if (session === mine) set({ heading: h.deg });
           }),
         );
       } catch (e) {

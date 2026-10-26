@@ -122,7 +122,7 @@ export function GuidancePanel({ bottom, top, mapBearing, onHeight, onBannerHeigh
   const following = routing === 'ready' && route && progress && !routeDone;
   const next = following ? route.maneuvers[progress.next] : null;
   const NextIcon = next ? MANEUVER_ICONS[maneuverIcon(next.type)] : null;
-  // Relative to where the phone points; without a compass, relative to the map's north.
+  // Relative to where the screen's top points; without a compass, relative to the map's north.
   const rotation = bearing === null ? 0 : bearing - (heading ?? mapBearing);
   const left = following && progress ? remainingSeconds(route, progress.remainingM) : null;
   const remaining =
