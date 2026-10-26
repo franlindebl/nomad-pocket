@@ -1,0 +1,19 @@
+plugins/with-android-backup-rules.js
+  s_9f5316f88b2e79::t_72502afa524fc3 1-12,15-16,21,26,28,32,36,41,44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c417af5b3575fe0d68a25181b569c356f33fe871",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
