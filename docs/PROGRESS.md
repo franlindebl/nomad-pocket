@@ -6,7 +6,7 @@ can pick up without re-deriving anything.
 
 ## Current state (2026-10-25)
 
-- **Version 1.1.0 (iOS build 10)** on TestFlight 2026-10-25 (builds 5–9 earlier that day);
+- **Version 1.1.0 (iOS build 11)** on TestFlight 2026-10-26: the survival-kit redesign (builds 5–10 on 2026-10-25);
   **1.0.1 (build 3)** waiting for App Review. Release process and version table: `docs/RELEASE.md`.
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
@@ -19,7 +19,7 @@ can pick up without re-deriving anything.
 | Foundation (design system, nav, i18n, db, downloads core) | done |
 | Catalog (101 resources, 6 categories, Wikipedia picker, Kiwix OPDS explore, Files import) | done |
 | Downloads (queue, pause/resume, iOS background, fastest Kiwix mirror, Wi-Fi-only) | done |
-| UX redesign: survival kit (`docs/UX_SURVIVAL_PLAN.md`): onboarding country + kit, Home "En una emergencia" + "Tu preparación", 4 tabs, maps by country, bundled world map, simpler settings | built on branch `ux-survival` (worktree `../nomad-app-ux`), iOS sim checked; country maps CI not run yet |
+| UX redesign: survival kit (`docs/UX_SURVIVAL_PLAN.md`): onboarding country + kit, Home "En una emergencia" + "Tu preparación", 4 tabs, maps by country, bundled world map, simpler settings | done — iOS sim (E2E smoke + full), Android spot check; build 11; country maps CI first run 2026-10-26 |
 | ZIM library + reader (search, TOC, bookmarks, history, find, text size, dark mode) | done — iOS + Android |
 | Courses (14 courses, syllabus with fallbacks, progress; inside Library since the redesign) | done |
 | Maps (country downloads: prebuilt z15 map + routing pack + points; on-device extraction as fallback; bundled world map; markers, GPS, multi-script labels) | done — iOS sim (Andorra, local catalog) |
@@ -47,11 +47,11 @@ can pick up without re-deriving anything.
 
 Roughly by value. Items U and 0 are in progress; the rest are not started.
 
-U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`, branch `ux-survival`), waiting for the owner:
-   review the app, then merge to main. Needs the owner's go for: running
-   `.github/workflows/country-maps.yml` (≈240 countries at z15, roughly 100–150 GB of
-   release assets, monthly; never run yet — until then every country falls back to
-   on-device extraction at z15) and the next TestFlight build (11). Follow-ups: bundled quick cards (first aid, water, radio) and
+U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): on main as ebafcdd (owner approved
+   2026-10-26), TestFlight build 11. Country maps: first run 40281825369 (es pt ad fr de
+   it gb) to validate, then the rest by continent; routing packs re-run 40281828336 for
+   places/addresses. Test build 11 on a real iPhone (onboarding kit, a country download,
+   assembly of a multi-GB map, places import). Follow-ups: bundled quick cards (first aid, water, radio) and
    emergency numbers per country, Android check of the bundled world map. (Preparedness was added
 on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
 
