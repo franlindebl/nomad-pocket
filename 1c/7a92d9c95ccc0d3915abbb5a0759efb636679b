@@ -1,0 +1,23 @@
+docs/MAPS_NAVIGATION_PLAN.md
+  s_9f5316f88b2e79::t_4cec0c92606820 66-67
+docs/PROGRESS.md
+  s_9f5316f88b2e79::t_5f435cbbce5736 69,293,305,311-312,315,322,368
+src/features/maps/places-core.test.ts
+  s_9f5316f88b2e79::t_8c339fec5c95fb 102,104-105,186,192,198,203,209-212,215
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1c7a92d9c95ccc0d3915abbb5a0759efb636679b",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
