@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, TextInput, View } from 'react-native';
 
 import { Button, Row, Text } from '@/components/ui';
-import { useGuidance } from '@/features/maps/guidance';
+import { startGuidance } from '@/features/maps/guidance';
 import { addMarker, deleteMarker, formatCoords, getMarker, updateMarker, useMarkers } from '@/features/maps/markers';
 import { useMapUi } from '@/features/maps/store';
 import { fontFamily, radius, space, typography, useTheme } from '@/theme';
@@ -87,7 +87,8 @@ export default function MarkerSheet() {
           variant="secondary"
           fullWidth
           onPress={async () => {
-            if (await useGuidance.getState().start({ name: existing.name, lat: existing.lat, lon: existing.lon })) router.back();
+            // Location denied: startGuidance says so and offers Settings; the sheet stays.
+            if (await startGuidance({ name: existing.name, lat: existing.lat, lon: existing.lon })) router.back();
           }}
         />
       ) : null}

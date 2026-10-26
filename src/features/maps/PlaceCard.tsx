@@ -6,7 +6,7 @@ import * as Location from 'expo-location';
 import { Check, MapPin, Navigation, Phone, X } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Linking, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Badge, Button, Card, IconBadge, IconButton, Row, Text } from '@/components/ui';
 import { space } from '@/theme';
@@ -15,7 +15,7 @@ import { callNumber } from './call';
 import { findEmergencyPlace, getEmergencyPlace } from './emergency';
 import { policeForce } from './emergency-core';
 import { distanceMeters, formatLatLon, formatUtm, toUtm, type LatLon } from './geo';
-import { useGuidance } from './guidance';
+import { startGuidance } from './guidance';
 import { distanceWithDirection, isEmergencyKind, kindColor, kindIcon, kindLabel } from './labels';
 import { addMarker } from './markers';
 import { parsePhones } from './phone';
@@ -55,16 +55,6 @@ export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: num
     .filter(Boolean)
     .join(' · ');
   const utm = toUtm(place.lat, place.lon);
-
-  const guide = async () => {
-    const ok = await useGuidance.getState().start({ name: place.name, lat: place.lat, lon: place.lon });
-    if (!ok) {
-      Alert.alert(t('guidance.deniedTitle'), t('guidance.deniedBody'), [
-        { text: t('common:actions.cancel'), style: 'cancel' },
-        { text: t('location.openSettings'), onPress: () => Linking.openSettings() },
-      ]);
-    }
-  };
 
   return (
     <View style={[styles.wrap, { bottom }]} pointerEvents="box-none">
@@ -115,7 +105,13 @@ export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: num
           {utm ? `  ·  UTM ${formatUtm(utm)}` : ''}
         </Text>
         <Row gap={space.sm}>
-          <Button testID="place-guide" title={t('place.takeMeThere')} icon={Navigation} onPress={guide} style={{ flex: 1 }} />
+          <Button
+            testID="place-guide"
+            title={t('place.takeMeThere')}
+            icon={Navigation}
+            onPress={() => startGuidance({ name: place.name, lat: place.lat, lon: place.lon })}
+            style={{ flex: 1 }}
+          />
           <Button
             testID="place-save"
             title={saved ? t('place.saved') : t('place.save')}

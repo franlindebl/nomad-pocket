@@ -4,7 +4,10 @@
 // without one it falls back to a straight line, which works anywhere.
 import * as Location from 'expo-location';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
+import { Alert, Linking } from 'react-native';
 import { create } from 'zustand';
+
+import i18n from '@/i18n';
 
 import type { LatLon } from './geo';
 import { watchScreenHeading } from './heading';
@@ -208,3 +211,15 @@ export const useGuidance = create<GuidanceState>((set, get) => {
     },
   };
 });
+
+/** start() for a "take me there" button: without location access, says why nothing happens and offers Settings. */
+export async function startGuidance(target: GuidanceTarget): Promise<boolean> {
+  const ok = await useGuidance.getState().start(target);
+  if (!ok) {
+    Alert.alert(i18n.t('maps:guidance.deniedTitle'), i18n.t('maps:guidance.deniedBody'), [
+      { text: i18n.t('common:actions.cancel'), style: 'cancel' },
+      { text: i18n.t('maps:location.openSettings'), onPress: () => Linking.openSettings() },
+    ]);
+  }
+  return ok;
+}
