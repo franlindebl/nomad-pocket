@@ -115,7 +115,8 @@ iso, url = sys.argv[2].upper(), sys.argv[3]
 props = [f["properties"] for f in json.load(open(sys.argv[1]))["features"]]
 parent = next(p["id"] for p in props if p["urls"]["pbf"] == url)
 for p in props:
-    # Germany's Länder name their parent; the US states are only named "us/…".
+    # The German Länder name their parent; the US states are only named "us/…". (No
+    # apostrophes in here: the bash 3.2 of macOS then fails to parse this heredoc.)
     if (p.get("parent") == parent or p["id"].startswith(parent + "/")) and iso in p.get("iso3166-1:alpha2", [iso]) and all(c.startswith(iso + "-") for c in p.get("iso3166-2", [iso + "-"])):
         print(p["urls"]["pbf"])
 PY
@@ -124,7 +125,8 @@ PY
   fi
   ROLES=(pois streets places addresses)
   [[ ${#URLS[@]} -gt 0 ]] || log "no Geofabrik extract: no points"
-  for URL in "${URLS[@]}"; do
+  # (An empty "${URLS[@]}" is unbound under set -u in the bash 3.2 of macOS.)
+  for URL in ${URLS[@]+"${URLS[@]}"}; do
     BYTES="$(pbf_bytes "$URL")"
     FREE_BYTES="$(python3 -I -c 'import shutil, sys; print(shutil.disk_usage(sys.argv[1]).free)' "$WORK")"
     if (( BYTES * 2 > FREE_BYTES )); then
