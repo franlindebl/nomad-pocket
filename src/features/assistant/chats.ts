@@ -1,12 +1,12 @@
 // Assistant conversations: persistence (chat_sessions / chat_messages) and the
 // in-memory chat state, including the streaming answer and the send/stop flow.
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 
 import { db, parseJson } from '@/db';
-import Storage from '@/db/kv';
 import i18n from '@/i18n';
 import { uid } from '@/lib/format';
+import { kvStorage } from '@/lib/kv';
 import { useSettings } from '@/stores/settings';
 
 import { EngineUnavailableError, stopGeneration, withEngine, type SearchTool } from './engine';
@@ -163,7 +163,7 @@ export const useChat = create<ChatState>()(
     }),
     {
       name: 'assistant',
-      storage: createJSONStorage(() => Storage),
+      storage: kvStorage(),
       partialize: ({ useLibrary }) => ({ useLibrary }),
     },
   ),

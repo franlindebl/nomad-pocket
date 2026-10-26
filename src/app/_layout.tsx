@@ -45,12 +45,9 @@ export default function RootLayout() {
     setNavigatorReadyCheck(() => navigation.isReady());
     bootstrap().finally(() => {
       SplashScreen.hideAsync();
-      // Settings hydrate asynchronously from SQLite: wait before deciding.
-      const decide = () => {
-        if (!useSettings.getState().onboarded) whenNavigatorReady(() => router.push('/onboarding'));
-      };
-      if (useSettings.persist.hasHydrated()) decide();
-      else useSettings.persist.onFinishHydration(decide);
+      // Settings are already hydrated: the store reads them synchronously (lib/kv.ts). A push
+      // before the root navigator is ready is dropped: whenNavigatorReady waits for it.
+      if (!useSettings.getState().onboarded) whenNavigatorReady(() => router.push('/onboarding'));
     });
   }, [navigation]);
 

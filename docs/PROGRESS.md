@@ -208,8 +208,6 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
   photosynthesis?"); the "Buscar en mi biblioteca" button covers it. Apple FM tends to
   open every answer with "¡Hola!" once the chat started with a greeting.
 - Apple Intelligence fails on the iOS 26.5 simulator (works on iOS 27).
-- E2E: the setup wizard occasionally doesn't show on a fresh install (`lib-03` failed once
-  in a full run on 2026-10-25, then passed 3/3): the onboarding push race, not new code.
 - Kit reminder texts are written in the language active when the expiry was saved.
 - Map labels in Bengali, Tamil and other Indic scripts, Myanmar and Khmer are not drawn
   (MapLibre Native can't shape them); country bboxes skip far-flung territories.
@@ -222,6 +220,25 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-26 — Setup wizard missing on a fresh install: kv-store first-open race
+
+- The "onboarding race" (wizard not shown on a fresh install, ~1 in 25 launches: `lib-03`,
+  `map-08`, `ai-01` on iOS, `android-04` on Android) was not the navigation push. Traced on
+  the Android emulator (release APK, 50 fresh launches, 2 without wizard): the settings
+  store never finished hydrating, so the root never decided to push. The kv-store's first
+  open migrates inside a transaction; its async open (zustand `persist` on `settings`,
+  `prepare`, `assistant`) yielded mid-transaction and the maps viewport's sync read on the
+  same native connection failed with "cannot start a transaction within a transaction";
+  that rollback left the async open hanging, and zustand swallows it.
+- Fix: `src/lib/kv.ts` `kvStorage()` reads with `getItemSync` (writes stay async), used by
+  the three persisted stores, so the first open is always synchronous; settings are
+  hydrated when the store is created and `_layout.tsx` no longer waits for hydration.
+  Checked: 50/50 fresh launches show the wizard (was 2 missing in 50), `android-04-prepare`
+  passes, and a relaunch keeps `onboarded` and the plan. iOS not re-run yet.
+- Seen on the way: on a fresh launch the emulator's JS thread stayed busy 4–8 s right
+  after the wizard mounted (timers fired late), under heavy Mac load; not investigated.
+  The long-running emulator's `system_server` also started crash-looping (cold boot fixed it).
 
 ### 2026-10-26 — A country can have several routing packs (the USA)
 
