@@ -21,32 +21,47 @@
 
   <section id="es" lang="es">
     <h1>Política de privacidad</h1>
-    <p class="muted">Última actualización: 25 de octubre de 2026</p>
+    <p class="muted">Última actualización: 26 de octubre de 2026</p>
 
     <div class="card">
-      <strong>En resumen:</strong> Nomad Pocket no recoge, no guarda en servidores, no vende y no comparte ningún dato personal.
-      No hay cuentas, ni publicidad, ni analítica, ni rastreo. Todo lo que haces en la app se queda en tu dispositivo.
+      <strong>En resumen:</strong> Nomad Pocket no recoge, no vende y no comparte ningún dato personal, y no tiene servidor propio.
+      No hay cuentas, ni publicidad, ni analítica, ni rastreo. Lo que haces en la app se queda en tu dispositivo. La app solo se conecta
+      a internet para descargar contenido y catálogos de servicios públicos de terceros, que ven tu dirección IP como en cualquier
+      conexión (abajo explicamos cuáles y cuándo).
     </div>
 
     <h2>Quién es el responsable</h2>
-    <p>Nomad Pocket es una app de código abierto (GPL‑3.0) desarrollada por Fran Linde Blázquez.
-      Contacto: <a href="mailto:fran.linde.blazquez@gmail.com">fran.linde.blazquez@gmail.com</a>.</p>
+    <p>Nomad Pocket es una app de código abierto (GPL‑3.0 o posterior) desarrollada por Fran Linde Blázquez.
+      Contacto: <a href="mailto:fran.linde.blazquez@gmail.com">fran.linde.blazquez@gmail.com</a>.
+      Esta política cubre la app en iPhone y iPad y, cuando se publique, en Android.</p>
 
     <h2>Datos que no recogemos</h2>
     <p>La app no tiene servidor propio. No recogemos nombre, correo, identificadores del dispositivo, ubicación,
       historial de uso, diagnósticos ni ningún otro dato. No usamos SDK de analítica, publicidad ni informes de errores de terceros.</p>
 
     <h2>Datos que se quedan en tu dispositivo</h2>
-    <p>Para funcionar, la app guarda localmente en tu iPhone o iPad:</p>
+    <p>Para funcionar, la app guarda localmente en tu dispositivo:</p>
     <ul>
-      <li>El contenido que descargas (libros y enciclopedias en formato ZIM, mapas y modelos de IA).</li>
-      <li>Tu historial de lectura, marcadores, progreso de cursos, marcadores de mapa y ajustes.</li>
+      <li>El contenido que descargas (libros y enciclopedias en formato ZIM, mapas, paquetes de navegación y modelos de IA) y un índice de
+        búsqueda de tus mapas, que la app construye a partir de ellos.</li>
+      <li>Tu historial de lectura, marcadores, progreso de cursos, lugares guardados en el mapa y ajustes.</li>
       <li>Las conversaciones con el asistente.</li>
       <li>Tu plan de emergencia y tu kit (contactos, puntos de encuentro, números importantes, datos de salud y notas). Solo salen del dispositivo si tú exportas el PDF y lo compartes. Los recordatorios de caducidad son notificaciones locales: no usamos notificaciones push.</li>
     </ul>
-    <p>Estos datos nunca se envían a nosotros. Puedes borrarlos desde Ajustes de la app o eliminando la app.
-      Pueden incluirse en las copias de seguridad de tu dispositivo según cómo tengas configurado iCloud o tu ordenador
-      (los archivos de la biblioteca se excluyen de la copia).</p>
+    <p>Estos datos nunca se envían a nosotros.</p>
+    <p><strong>Dónde se guardan.</strong> En iPhone y iPad, tus datos (ajustes, historial, marcadores, conversaciones, lugares, plan y kit)
+      están en la carpeta Application Support de la app, que no aparece en la app Archivos. El contenido descargado y el índice de búsqueda
+      están en la carpeta «content» de la app, que sí aparece en Archivos (puedes copiar ahí tus propios archivos ZIM o de mapa).
+      En Android, todo está en el almacenamiento privado de la app.</p>
+    <p><strong>Cómo borrarlos.</strong> En Ajustes puedes borrar cada mapa, país, libro o modelo descargado y vaciar el historial de lectura.
+      El resto se borra donde se muestra: las conversaciones en la lista de conversaciones, los lugares guardados en el mapa,
+      los marcadores en el lector y el plan y el kit en sus pantallas. Si desinstalas la app, se borra todo.</p>
+    <p><strong>Copias de seguridad.</strong> En iPhone y iPad, tus datos pueden incluirse en las copias de seguridad de iCloud o de tu
+      ordenador según cómo las tengas configuradas; el contenido descargado y el índice de búsqueda se excluyen. Al restaurar una copia
+      en otro dispositivo, tus datos vuelven, pero el contenido no: al abrir la app, lo que ya no tiene archivo se retira de la lista y puedes
+      volver a descargarlo. En Android, la copia en la nube de Google (si la tienes activada) incluye solo tus ajustes, tu plan y tu kit;
+      se excluyen el contenido descargado, los mapas desempaquetados y la base de datos con tus lugares, marcadores y conversaciones. La
+      transferencia directa a un dispositivo nuevo sí lleva esa base de datos, pero tampoco el contenido descargado.</p>
 
     <h2>Ubicación</h2>
     <p>Si das permiso, la app usa tu ubicación solo mientras la usas: para mostrar dónde estás en los mapas sin conexión, calcular
@@ -54,23 +69,36 @@
       si tú la compartes con el botón «Compartir mi posición», a quien tú elijas.</p>
 
     <h2>Asistente de IA</h2>
-    <p>El asistente funciona íntegramente en tu dispositivo: con el modelo integrado del sistema (Apple Intelligence, cuando está disponible)
-      o con un modelo que descargas y se ejecuta localmente. Tus preguntas, las respuestas y los textos de tu biblioteca que consulta
-      no se envían a ningún servidor.</p>
+    <p>El asistente funciona íntegramente en tu dispositivo. En iPhone y iPad usa el modelo integrado del sistema (Apple Intelligence,
+      cuando está disponible) o un modelo que descargas y se ejecuta localmente; en Android usa solo modelos descargables que se ejecutan
+      localmente. Tus preguntas, las respuestas y los textos de tu biblioteca que consulta no se envían a ningún servidor.</p>
 
-    <h2>Descargas desde servicios de terceros</h2>
-    <p>Cuando decides descargar contenido, la app se conecta directamente a los servidores públicos de quien lo publica:</p>
+    <h2>Lector de libros</h2>
+    <p>Las páginas de los archivos que lees se muestran sin acceso a la red: no pueden cargar imágenes, scripts ni otros recursos de
+      internet. Los enlaces a sitios web solo se abren si los tocas y lo confirmas, en tu navegador; a partir de ahí se aplica la política de ese sitio.</p>
+
+    <h2>Conexiones a servicios de terceros</h2>
+    <p>La app no tiene cuentas ni servidor propio. Se conecta directamente a los servidores públicos de quien publica cada cosa:</p>
     <ul>
-      <li><a href="https://kiwix.org">Kiwix</a> (catálogo y archivos ZIM: Wikipedia, guías, libros, cursos).</li>
-      <li><a href="https://protomaps.com">Protomaps</a> (datos de mapas de OpenStreetMap).</li>
-      <li>Servidores públicos de <a href="https://wiki.openstreetmap.org/wiki/Overpass_API">Overpass API</a> (puntos de emergencia de OpenStreetMap
-        de las regiones que descargas: la petición incluye solo los límites de la región, no tu ubicación).</li>
-      <li><a href="https://github.com/franlindebl/nomad-pocket/releases">GitHub</a> (paquetes de rutas sin conexión y sus puntos de emergencia,
-        generados por este proyecto a partir de OpenStreetMap).</li>
-      <li><a href="https://huggingface.co">Hugging Face</a> (modelos de IA descargables).</li>
+      <li><strong>Al abrirla con conexión</strong>, y al abrir las pantallas de países, la app consulta en <a href="https://github.com/franlindebl/nomad-pocket/releases">GitHub</a>
+        (propiedad de Microsoft) los catálogos de mapas y paquetes de navegación de este proyecto: archivos pequeños, sin que la app envíe nada tuyo.
+        Aunque no hayas descargado nada, GitHub ve tu dirección IP y cada cuánto abres la app. También sirve los mapas por país, los paquetes de
+        navegación y sus puntos de emergencia, calles y direcciones (generados por este proyecto a partir de OpenStreetMap) cuando decides descargarlos.</li>
+      <li><a href="https://kiwix.org">Kiwix</a>: el catálogo (<code>opds.library.kiwix.org</code>), que recibe el texto que escribes al buscar en «Explorar»,
+        sirve las miniaturas e indica la última versión de cada archivo ZIM; y los archivos ZIM (Wikipedia, guías, libros, cursos) desde
+        <code>download.kiwix.org</code>, que reparte las descargas entre una red de servidores espejo de terceros. Para elegir el más rápido, la app lee
+        la lista de espejos y prueba hasta cuatro con una petición pequeña antes de descargar del más rápido; cada espejo ve tu dirección IP.</li>
+      <li><a href="https://protomaps.com">Protomaps</a> (<code>build.protomaps.com</code>): solo para recortar en el dispositivo el mapa de un país
+        que todavía no tiene mapa prefabricado en GitHub.</li>
+      <li>Servidores públicos de <a href="https://wiki.openstreetmap.org/wiki/Overpass_API">Overpass API</a>
+        (<code>overpass-api.de</code>, <code>overpass.private.coffee</code> y <code>maps.mail.ru</code>, operado por VK, en ese orden si uno no responde):
+        solo para obtener puntos de emergencia de OpenStreetMap de un mapa que no los trae incluidos, al instalarlo o al abrir Emergencias con conexión.
+        La petición incluye solo los límites de la región, no tu ubicación.</li>
+      <li><a href="https://huggingface.co">Hugging Face</a>: los modelos de IA descargables.</li>
     </ul>
-    <p>Como en cualquier conexión a internet, esos servidores reciben tu dirección IP y la petición del archivo, y se rigen por sus propias
-      políticas de privacidad. La app no les envía ningún identificador tuyo ni datos personales.</p>
+    <p>Como en cualquier conexión a internet, esos servidores reciben tu dirección IP y la petición, y se rigen por sus propias
+      políticas de privacidad. La app no les envía ningún identificador tuyo ni datos personales. Si la opción «Solo con Wi‑Fi» está
+      activada, las descargas de contenido esperan a una red Wi‑Fi o a que autorices los datos móviles.</p>
 
     <h2>Enlaces externos</h2>
     <p>Los enlaces a sitios web externos se abren en el navegador; a partir de ahí se aplica la política de ese sitio.</p>
@@ -85,32 +113,46 @@
 
   <section id="en" lang="en">
     <h1>Privacy policy</h1>
-    <p class="muted">Last updated: October 25, 2026</p>
+    <p class="muted">Last updated: October 26, 2026</p>
 
     <div class="card">
-      <strong>In short:</strong> Nomad Pocket does not collect, store on servers, sell or share any personal data.
-      There are no accounts, ads, analytics or tracking. Everything you do in the app stays on your device.
+      <strong>In short:</strong> Nomad Pocket does not collect, sell or share any personal data, and has no server of its own.
+      There are no accounts, ads, analytics or tracking. What you do in the app stays on your device. The app only goes online to download
+      content and catalogs from public third-party services, which see your IP address as with any internet connection
+      (we explain which ones and when below).
     </div>
 
     <h2>Who is responsible</h2>
-    <p>Nomad Pocket is an open-source app (GPL‑3.0) developed by Fran Linde Blázquez.
-      Contact: <a href="mailto:fran.linde.blazquez@gmail.com">fran.linde.blazquez@gmail.com</a>.</p>
+    <p>Nomad Pocket is an open-source app (GPL‑3.0-or-later) developed by Fran Linde Blázquez.
+      Contact: <a href="mailto:fran.linde.blazquez@gmail.com">fran.linde.blazquez@gmail.com</a>.
+      This policy covers the app on iPhone and iPad and, once released, on Android.</p>
 
     <h2>Data we don't collect</h2>
     <p>The app has no server of its own. We don't collect your name, email, device identifiers, location, usage history,
       diagnostics or any other data. We use no third-party analytics, advertising or crash-reporting SDKs.</p>
 
     <h2>Data that stays on your device</h2>
-    <p>To work, the app stores locally on your iPhone or iPad:</p>
+    <p>To work, the app stores locally on your device:</p>
     <ul>
-      <li>The content you download (ZIM books and encyclopedias, maps and AI models).</li>
-      <li>Your reading history, bookmarks, course progress, map pins and settings.</li>
+      <li>The content you download (ZIM books and encyclopedias, maps, navigation packs and AI models) and a search index of your maps,
+        which the app builds from them.</li>
+      <li>Your reading history, bookmarks, course progress, saved map places and settings.</li>
       <li>Your conversations with the assistant.</li>
       <li>Your emergency plan and kit (contacts, meeting points, important numbers, health details and notes). They only leave the device if you export the PDF and share it. Expiry reminders are local notifications: we don't use push notifications.</li>
     </ul>
-    <p>This data is never sent to us. You can delete it from the app's Settings or by deleting the app.
-      It may be included in your device backups depending on your iCloud or computer settings
-      (library files are excluded from backups).</p>
+    <p>This data is never sent to us.</p>
+    <p><strong>Where it lives.</strong> On iPhone and iPad, your data (settings, history, bookmarks, conversations, places, plan and kit)
+      is in the app's Application Support folder, which does not show up in the Files app. Downloaded content and the search index are in the
+      app's “content” folder, which does show up in Files (you can copy your own ZIM or map files there).
+      On Android, everything is in the app's private storage.</p>
+    <p><strong>How to delete it.</strong> In Settings you can delete each downloaded map, country, book or model and clear your reading history.
+      The rest is deleted where it is shown: conversations in the conversations list, saved places on the map, bookmarks in the reader,
+      and the plan and kit on their screens. Uninstalling the app deletes everything.</p>
+    <p><strong>Backups.</strong> On iPhone and iPad, your data may be included in iCloud or computer backups depending on your settings;
+      downloaded content and the search index are excluded. When you restore a backup on another device, your data comes back but the content
+      does not: when the app opens, anything whose file is gone is removed from the list and you can download it again. On Android, Google's cloud
+      backup (if you have it on) includes only your settings, plan and kit; it excludes downloaded content, unpacked map assets and the database
+      with your places, bookmarks and conversations. A direct transfer to a new device does carry that database, but not the downloaded content.</p>
 
     <h2>Location</h2>
     <p>If you allow it, the app uses your location only while you use it: to show where you are on offline maps, measure distances to
@@ -118,23 +160,36 @@
       Location is processed on the device and only leaves it if you share it with the “Share my position” button, with whoever you choose.</p>
 
     <h2>AI assistant</h2>
-    <p>The assistant runs entirely on your device: using the system's built-in model (Apple Intelligence, when available)
-      or a model you download that runs locally. Your questions, the answers and the library passages it reads are never
-      sent to any server.</p>
+    <p>The assistant runs entirely on your device. On iPhone and iPad it uses the system's built-in model (Apple Intelligence, when available)
+      or a model you download that runs locally; on Android it uses downloadable models only, which run locally. Your questions, the answers
+      and the library passages it reads are never sent to any server.</p>
 
-    <h2>Downloads from third-party services</h2>
-    <p>When you choose to download content, the app connects directly to the public servers of its publisher:</p>
+    <h2>Book reader</h2>
+    <p>The pages of the archives you read are shown with no network access: they cannot load images, scripts or other resources from the
+      internet. Links to websites open only if you tap them and confirm, in your browser; that site's policy applies from there.</p>
+
+    <h2>Connections to third-party services</h2>
+    <p>The app has no accounts and no server of its own. It connects directly to the public servers of whoever publishes each thing:</p>
     <ul>
-      <li><a href="https://kiwix.org">Kiwix</a> (catalog and ZIM files: Wikipedia, guides, books, courses).</li>
-      <li><a href="https://protomaps.com">Protomaps</a> (OpenStreetMap map data).</li>
-      <li>Public <a href="https://wiki.openstreetmap.org/wiki/Overpass_API">Overpass API</a> servers (OpenStreetMap emergency places for the regions
-        you download: the request contains only the region's bounds, not your location).</li>
-      <li><a href="https://github.com/franlindebl/nomad-pocket/releases">GitHub</a> (offline routing packs and their emergency places,
-        built by this project from OpenStreetMap).</li>
-      <li><a href="https://huggingface.co">Hugging Face</a> (downloadable AI models).</li>
+      <li><strong>When it opens online</strong>, and when you open the country screens, the app checks <a href="https://github.com/franlindebl/nomad-pocket/releases">GitHub</a>
+        (owned by Microsoft) for this project's map and navigation-pack catalogs: small files, with nothing of yours sent by the app.
+        Even if you haven't downloaded anything, GitHub sees your IP address and how often you open the app. It also serves the country maps,
+        navigation packs and their emergency points, streets and addresses (built by this project from OpenStreetMap) when you choose to download them.</li>
+      <li><a href="https://kiwix.org">Kiwix</a>: the catalog (<code>opds.library.kiwix.org</code>), which receives the text you type when
+        searching in “Explore”, serves the thumbnails and tells the newest version of each ZIM file; and the ZIM files (Wikipedia, guides, books, courses)
+        from <code>download.kiwix.org</code>, which spreads downloads over a network of third-party mirror servers. To pick the fastest, the app reads
+        the mirror list and tests up to four of them with a small request before downloading from the fastest; each mirror sees your IP address.</li>
+      <li><a href="https://protomaps.com">Protomaps</a> (<code>build.protomaps.com</code>): only to cut, on the device, the map of a country
+        that has no prebuilt map on GitHub yet.</li>
+      <li>Public <a href="https://wiki.openstreetmap.org/wiki/Overpass_API">Overpass API</a> servers
+        (<code>overpass-api.de</code>, <code>overpass.private.coffee</code> and <code>maps.mail.ru</code>, operated by VK, tried in that order if one doesn't answer):
+        only to get OpenStreetMap emergency places for a map that doesn't bring them, when you install it or open Emergencias online.
+        The request contains only the region's bounds, not your location.</li>
+      <li><a href="https://huggingface.co">Hugging Face</a>: downloadable AI models.</li>
     </ul>
-    <p>As with any internet connection, those servers receive your IP address and the file request, and are governed by their own
-      privacy policies. The app sends them no identifiers or personal data about you.</p>
+    <p>As with any internet connection, those servers receive your IP address and the request, and are governed by their own
+      privacy policies. The app sends them no identifiers or personal data about you. If “Wi‑Fi only” is on, content downloads wait for a
+      Wi‑Fi network or for you to allow mobile data.</p>
 
     <h2>External links</h2>
     <p>Links to external websites open in your browser; that site's policy applies from there.</p>
@@ -147,7 +202,7 @@
       <a href="https://github.com/franlindebl/nomad-pocket">GitHub</a>, so anyone can verify what it does.</p>
   </section>
 
-  <footer>© 2026 Fran Linde Blázquez · <a href="./">Nomad Pocket</a></footer>
+  <footer>© 2026 Fran Linde Blázquez and contributors · <a href="./">Nomad Pocket</a></footer>
 </main>
 </body>
 </html>
