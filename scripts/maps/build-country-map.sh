@@ -52,8 +52,7 @@ fi
 # 1. Points, street names, places and house numbers, unless a routing pack covers the
 #    country. Before the map, so the extract is gone when the map needs the disk (~14 GB
 #    on a runner). Countries with no Geofabrik extract of their own (Vatican, small
-#    islands) or one too big for the disk (the USA, 11 GB) get none: the app then asks
-#    Overpass for their points by itself.
+#    islands) get none: the app then asks Overpass for their points by itself.
 if [[ "${SKIP_POINTS:-}" != "1" ]] && ! python3 -I - "$ROOT/scripts/routing/packs.json" "$ID" <<'PY'
 import json, sys
 # A pack of its own, or one whose extract covers the whole country (routePackFor in
@@ -63,39 +62,81 @@ packs = json.load(open(sys.argv[1]))["countries"]
 sys.exit(0 if sys.argv[2] in packs or SHARED.get(sys.argv[2]) in packs else 1)
 PY
 then
-  PBF_URL="$(curl -fsSL --retry 3 -A "$UA" https://download.geofabrik.de/index-v1-nogeom.json | python3 -I -c '
+  INDEX="$WORK/src/geofabrik-index.json"
+  curl -fsSL --retry 3 -A "$UA" -o "$INDEX" https://download.geofabrik.de/index-v1-nogeom.json
+  # An extract of this country alone before one shared with neighbours.
+  PBF_URL="$(python3 -I - "$INDEX" "$ID" <<'PY'
 import json, sys
-iso = sys.argv[1].upper()
-found = [f["properties"] for f in json.load(sys.stdin)["features"] if iso in f["properties"].get("iso3166-1:alpha2", [])]
-# An extract of this country alone before one shared with neighbours.
+iso = sys.argv[2].upper()
+found = [f["properties"] for f in json.load(open(sys.argv[1]))["features"] if iso in f["properties"].get("iso3166-1:alpha2", [])]
 found.sort(key=lambda p: len(p["iso3166-1:alpha2"]))
-print(found[0]["urls"]["pbf"] if found else "")' "$ID")"
-  PBF_BYTES="$( [[ -n "$PBF_URL" ]] && curl -fsSLI --retry 3 -A "$UA" "$PBF_URL" | tr -d '\r' | awk 'tolower($1)=="content-length:"{n=$2} END{print n+0}' || echo 0)"
-  FREE_BYTES="$(python3 -I -c 'import shutil, sys; print(shutil.disk_usage(sys.argv[1]).free)' "$WORK")"
-  if [[ -n "$PBF_URL" ]] && (( PBF_BYTES * 2 > FREE_BYTES )); then
-    log "extract of $PBF_BYTES bytes doesn't fit in $FREE_BYTES free: no points"
-  elif [[ -n "$PBF_URL" ]]; then
+print(found[0]["urls"]["pbf"] if found else "")
+PY
+)"
+  pbf_bytes() { { curl -fsSLI --retry 3 -A "$UA" "$1" || true; } | tr -d '\r' | awk 'tolower($1)=="content-length:"{n=$2} END{print n+0}'; }
+  URLS=()
+  [[ -n "$PBF_URL" ]] && URLS=("$PBF_URL")
+  # One too big to read at once (the USA, 11 GB: the runner ran out of memory) is read
+  # in its Geofabrik sub-extracts (the states) and the files are merged after. Not
+  # those of other countries (Puerto Rico and the US Virgin Islands sit under us/).
+  if [[ -n "$PBF_URL" ]] && (( $(pbf_bytes "$PBF_URL") > ${SPLIT_BYTES:-6000000000} )); then
+    URLS=()
+    while IFS= read -r url; do URLS+=("$url"); done < <(python3 -I - "$INDEX" "$ID" "$PBF_URL" <<'PY'
+import json, sys
+iso, url = sys.argv[2].upper(), sys.argv[3]
+props = [f["properties"] for f in json.load(open(sys.argv[1]))["features"]]
+parent = next(p["id"] for p in props if p["urls"]["pbf"] == url)
+for p in props:
+    # Germany's Länder name their parent; the US states are only named "us/…".
+    if (p.get("parent") == parent or p["id"].startswith(parent + "/")) and iso in p.get("iso3166-1:alpha2", [iso]) and all(c.startswith(iso + "-") for c in p.get("iso3166-2", [iso + "-"])):
+        print(p["urls"]["pbf"])
+PY
+)
+    log "extract too big to read at once: ${#URLS[@]} sub-extracts"
+  fi
+  ROLES=(pois streets places addresses)
+  [[ ${#URLS[@]} -gt 0 ]] || log "no Geofabrik extract: no points"
+  for URL in "${URLS[@]}"; do
+    BYTES="$(pbf_bytes "$URL")"
+    FREE_BYTES="$(python3 -I -c 'import shutil, sys; print(shutil.disk_usage(sys.argv[1]).free)' "$WORK")"
+    if (( BYTES * 2 > FREE_BYTES )); then
+      log "extract of $BYTES bytes doesn't fit in $FREE_BYTES free: no points from $URL"
+      continue
+    fi
     PBF="$WORK/src/$ID.osm.pbf"
-    log "points from $PBF_URL"
-    curl -fsSL --retry 3 -A "$UA" -o "$PBF" "$PBF_URL"
+    log "points from $URL"
+    curl -fsSL --retry 3 -A "$UA" -o "$PBF" "$URL"
     # Keep in step with build-country.sh (step 5) and overpassQuery in emergency-core.ts.
     osmium tags-filter --overwrite "$PBF" \
       nwr/amenity=hospital,clinic,doctors,pharmacy,police,fire_station,drinking_water,water_point,shelter,fuel,townhall,embassy \
       nwr/healthcare=hospital,centre,clinic nwr/emergency=ambulance_station,defibrillator,assembly_point \
       nwr/military=barracks,base nwr/natural=spring nwr/shop=supermarket,hardware,doityourself nwr/office=diplomatic \
       -o "$WORK/src/pois.osm.pbf"
-    python3 -I "$ROOT/scripts/routing/emergency-points.py" "$WORK/src/pois.osm.pbf" "$OUT/$ID.pois.tsv"
+    python3 -I "$ROOT/scripts/routing/emergency-points.py" "$WORK/src/pois.osm.pbf" "$WORK/src/part.pois.tsv"
     rm -f "$WORK/src/pois.osm.pbf"
     osmium tags-filter --overwrite "$PBF" w/highway n/place -o "$WORK/src/streets.osm.pbf"
-    python3 -I "$ROOT/scripts/routing/streets.py" "$WORK/src/streets.osm.pbf" "$OUT/$ID.streets.tsv"
+    python3 -I "$ROOT/scripts/routing/streets.py" "$WORK/src/streets.osm.pbf" "$WORK/src/part.streets.tsv"
     rm -f "$WORK/src/streets.osm.pbf"
     # Keep in step with build-country.sh (step 6b).
     osmium tags-filter --overwrite "$PBF" nwr/name nwr/addr:housenumber nwr/addr:block_number -o "$WORK/src/places.osm.pbf"
-    python3 -I "$ROOT/scripts/routing/places.py" "$WORK/src/places.osm.pbf" "$OUT/$ID.places.tsv" "$OUT/$ID.addresses.tsv"
-    rm -f "$PBF" "$WORK/src/pois.osm.pbf" "$WORK/src/streets.osm.pbf" "$WORK/src/places.osm.pbf"
-  else
-    log "no Geofabrik extract: no points"
-  fi
+    python3 -I "$ROOT/scripts/routing/places.py" "$WORK/src/places.osm.pbf" "$WORK/src/part.places.tsv" "$WORK/src/part.addresses.tsv"
+    rm -f "$PBF" "$WORK/src/places.osm.pbf"
+    for ROLE in "${ROLES[@]}"; do
+      cat "$WORK/src/part.$ROLE.tsv" >> "$OUT/$ID.$ROLE.tsv"
+      rm -f "$WORK/src/part.$ROLE.tsv"
+    done
+  done
+  for ROLE in "${ROLES[@]}"; do
+    F="$OUT/$ID.$ROLE.tsv"
+    [[ -f "$F" ]] || continue
+    # Sub-extracts overlap along their borders: the same rows twice.
+    (( ${#URLS[@]} > 1 )) && LC_ALL=C sort -u -T "$WORK/src" -o "$F" "$F"
+    # A side file is one release asset (2 GiB at most) and one import on the phone.
+    if (( $(wc -c < "$F") > PART_BYTES )); then
+      log "$ROLE: $(wc -c < "$F") bytes, too big for one asset: left out"
+      rm -f "$F"
+    fi
+  done
 fi
 
 # 2. The highest zoom (15 down to 10) whose archive fits, from pmtiles' dry run.
