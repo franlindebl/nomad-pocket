@@ -112,10 +112,10 @@ All exported from `@/components/ui` (`src/components/ui/index.ts`).
 | `Button` | `primary` (ink), `accent` (ember, rare), `secondary` (surfaceAlt), `ghost`, `danger`. Sizes `sm`/`md`/`lg`, optional icon, `fullWidth`. Pill shape. Haptic on press. |
 | `IconButton` | Circular icon control (default 40×40; variants `filled` (surfaceAlt), `plain`, `ink`). Needs `accessibilityLabel`. |
 | `Card` | surface + hairline + radius lg; optional `onPress` with scale-down press feedback (0.98). |
-| `ListRow` / `ListGroup` | Row with leading IconBadge/icon, title, subtitle, `trailing` accessory (chevron, size, switch). `trailingAction` puts a separate button beside the row (a button inside the row's pressable would be unreachable by VoiceOver). A row that toggles (kit checklist) passes `accessibilityRole="checkbox"` + `accessibilityState={{ checked }}`. `ListGroup` groups rows in one card. |
+| `ListRow` / `ListGroup` | Row with leading IconBadge/icon, title, subtitle, `trailing` accessory (chevron, size, switch). `trailingAction` puts a separate button beside the row (a button inside the row's pressable would be unreachable by VoiceOver). A row that toggles (kit checklist) passes `accessibilityRole="checkbox"` + `accessibilityState={{ checked }}`. A row whose action its title doesn't say (a trash row in Settings that deletes) passes `accessibilityHint`. `ListGroup` groups rows in one card; a long list (`FlatList`, e.g. `settings/packages.tsx`) can't be wrapped in one, so its rows draw the inset card piecewise. |
 | `SectionHeader` | `overline` label + optional action link. |
 | `Chip` | Filter/segment chip with optional icon; selected = ink fill. |
-| `Segmented`, `Switch` | Segmented control (theme, text size…) and themed switch. |
+| `Segmented`, `Switch` | Segmented control (theme, text size…; it doesn't fire for the already selected option) and themed switch. |
 | `ProgressBar` | 6-px track (surfaceAlt), ember fill, rounded, animated. |
 | `ProgressRing` | Course and download progress in compact spots. |
 | `IconBadge` | Category icon in a tinted rounded square (`hue`, `size`). |
@@ -123,9 +123,9 @@ All exported from `@/components/ui` (`src/components/ui/index.ts`).
 | `EmptyState` | Large soft icon badge, title, body, primary action. |
 | `Badge` | Small pill: "Installed", "Update", sizes. |
 | `Divider`, `Row` | Hairline separator; horizontal flex row with `gap`/`align`. |
-| `PressableScale`, `triggerHaptic` | Base pressable with press scale + haptic; haptic helper. |
+| `PressableScale`, `triggerHaptic` | Base pressable with press scale + haptic; haptic helper. `restOpacity` dims a row at rest (a disabled-looking action that still explains itself when tapped). |
 
-Outside the kit: `components/Toast.tsx` (`showToast`, e.g. "download finished") and
+Outside the kit: `components/Toast.tsx` (`showToast`, e.g. "download finished"; announced to VoiceOver on iOS, a live region on Android) and
 `components/navigation.ts` (`useStackOptions`, `largeTitle`). Feature-specific pieces live
 in their feature (`features/catalog/DownloadButton`, `features/courses/CourseCard`,
 `features/library/components/*`, `features/assistant/ui/*`, `features/maps/MapFab`).
@@ -141,8 +141,13 @@ in their feature (`features/catalog/DownloadButton`, `features/courses/CourseCar
 
 ## 8. Layout patterns
 
-- **Home:** greeting + storage summary hero card, "Continue" carousel (last pages read
-  across archives), quick-access grid of modules, active downloads.
+- **Home** (the survival-kit layout, `docs/UX_SURVIVAL_PLAN.md`): app name with the network
+  line and the downloads / settings icon buttons, the "En una emergencia" quick-action grid
+  (emergency services, first aid, family plan, call), a downloads card while something
+  downloads, the "Tu preparación" readiness card (a status row per piece, with progress while it
+  downloads), the continue list and a storage line.
+- **Map:** the "© OpenStreetMap contributors" credit shows when the map first appears and fades
+  after about five seconds or the first gesture; store screenshots of the map must show it.
 - **Catalog:** category hero → tier cards (Essential / Standard / Comprehensive) with
   size, item count and a one-tap "Download pack".
 - **Detail:** title, publisher, language, size, date, description, single primary CTA

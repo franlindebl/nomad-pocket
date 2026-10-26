@@ -2,10 +2,9 @@
 
 [Maestro](https://maestro.mobile.dev) flows that drive the Release build of the app on an
 iOS simulator, the same way a person would: tapping, typing and reading the screen through
-accessibility. 54 flows cover 51 of the 55 cases in the test plan (Claude doc "Plan de
-tests funcionales iOS — Nomad App"), plus AI-06, AI-07 and MAP-17 (navigation view) added after it; the case ids (`RDR-03`, `MAP-06`…) are on the first
-line of each flow. Preparedness (`PREP-01`…`PREP-04`) came after the plan and has its own
-flows.
+accessibility. Every flow names the functional cases it covers (`RDR-03`, `MAP-06`, `PREP-02`…)
+on its first line and in the Flow catalog below, which is the list of what is automated;
+"Not automated" under the catalog lists the cases that are not, and why.
 
 ## Quick start
 
@@ -63,8 +62,10 @@ Android has its own tour (`e2e/flows/android/`, `scripts/e2e-android.sh`): it in
 release APK on the `Pixel_API_36` emulator (`--build` rebuilds it), gives the app Spanish as
 its per-app language (`cmd locale set-app-locales`) and location, and runs the flows tagged
 `android`. A release build can't be seeded (no `run-as`), so the tour downloads a 1 MB and
-a 12 MB archive; on the emulator's mobile data the app asks first ("Descargas solo con
-Wi-Fi") and the flow accepts. Android tabs show only the active label, so they are tapped
+a 12 MB archive; the runner turns the emulator's Wi-Fi off (`svc wifi disable`), so it is on mobile data and
+"Wi-Fi only" (on by default) always asks first ("Descargas solo con Wi-Fi"): android-03 and
+android-05 wait for that question and accept it ("Usar datos móviles"); without the answer a
+country download would wait for Wi-Fi. Android tabs show only the active label, so they are tapped
 by position (4 tabs: Inicio 12 %, Mapas 37 %, Biblioteca 63 %, Asistente 88 %). The
 script-labels tour (`android-02-map-scripts`, six cities by visible-area download) was
 removed with the visible-area downloads in the 2026-10-25 redesign: maps are whole
@@ -208,8 +209,11 @@ By hand:
   | `es-ml.pmtiles` | 0.6 MB | maps: Melilla up to zoom 12 (© OpenStreetMap, Protomaps build), a region map as older versions downloaded ("Otros mapas"), in git |
   | `maps/ad.pmtiles` | 2.5 MB | country download: Andorra up to zoom 10, served by the local catalog (`maps-server`; Protomaps build 2026-10-25, © OpenStreetMap), in git |
   | `routing/ad.tar`, `routing/ad.pois.tsv`, `routing/ad.streets.tsv` | 3 MB | routing: Andorra pack + emergency points + street names built by `scripts/routing/build-country.sh ad` (Valhalla 3.9.1, Geofabrik 2026-10-24, © OpenStreetMap), in git |
-| `routing/ad.places.tsv`, `routing/ad.addresses.tsv` | 140 KB | named places and house numbers of Andorra from `scripts/routing/places.py` (Geofabrik 2026-10-25), served with the pack by the local pack server |
+  | `routing/ad.places.tsv`, `routing/ad.addresses.tsv` | 140 KB | named places and house numbers of Andorra from `scripts/routing/places.py` (Geofabrik 2026-10-25), served with the pack by the local pack server |
   | `models/Qwen3.5-0.8B-Q4_K_M.gguf` | 533 MB | assistant with a llama.cpp model (`seeded-model`), from Hugging Face |
+
+  The committed fixtures are third-party data: see `e2e/fixtures/README.md` for their sources and
+  licences (ODbL, CC BY-SA).
 
   Kiwix removes old files from the mirror. `wikipedia_en_100_mini_2026-01.zim` is no
   longer there, so it is committed to git; the other three are downloaded by
@@ -276,7 +280,12 @@ By hand:
 | android | `android-05-routing` | ANDROID-05 | android | network (published catalog + Andorra pack from GitHub) |
 
 Not automated: LIB-08 (import from Files: the system picker is outside the app) and X-02
-(offline: the simulator has no airplane mode). Check them by hand on a device.
+(offline: the simulator has no airplane mode). Check them by hand on a device. Also by hand: map
+labels in other scripts (ANDROID-02's script tour went with the visible-area downloads).
+
+The Settings row that reruns the wizard is "Revisar descargas recomendadas" ("Review recommended
+downloads"; flows `home-02`, `onb-02`). The wizard's download button reads "Descargar · <size>"
+and its confirmation "Tu contenido se está descargando".
 
 Removed in the 2026-10-25 redesign (docs/UX_SURVIVAL_PLAN.md): MAP-05 (the world map is
 bundled, nothing to download; `map-01` checks it is "Incluido"), ONB-03 (content languages
@@ -305,12 +314,15 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   if it downloads a published one (needs internet and the live catalog), `seeded-model`
   for the GGUF model, and `network` if it downloads from the internet. A map file
   named after a region id (`es-ml.pmtiles`) registers as that region.
+- Map search is asynchronous (the query runs on a second connection after a 200 ms debounce, and
+  a newer search cancels the older): after typing, wait for the result with `extendedWaitUntil`
+  instead of asserting at once.
 - Text matching is a full-string regex: `"Michael Jackson.*"`, and escape `. ( ) ?`.
 - Cards and rows expose one merged accessibility label (`"Mapa de España, Máximo detalle…"`):
   match them with a regex (`"Mapa de España.*"`).
 - Prefer visible text, as a person would. Use a `testID` (`tapOn: { id: "…" }`) when the
   text is ambiguous or there is none (icon buttons). `testID` is supported by `Button`,
-  `IconButton`, `Card` and `ListRow`; the ones in use:
+  `IconButton`, `Card`, `ListRow` and `Chip`; the ones in use:
 
   | testID | Control |
   |---|---|
@@ -326,6 +338,8 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `map-search`, `map-emergency` | map search pill and Emergencias button |
   | `search-input`, `search-result`, `search-coordinates` | search sheet field, result rows, "go to coordinates" row |
   | `place-card`, `place-guide`, `place-save`, `place-close` | selected place card and its actions |
+  | `place-call` | one "Llamar" button per phone number of the place (several numbers = several buttons) |
+  | `map-credit` | the "© OpenStreetMap contributors" pill shown when the map first appears (gone after ~5 s or the first gesture) |
   | `guidance-panel`, `guidance-distance`, `guidance-stop` | guidance panel: remaining distance (route) or distance + direction (straight line), stop |
   | `guidance-costing-<auto\|pedestrian\|bicycle>`, `guidance-next`, `guidance-next-distance`, `guidance-steps` | mode chips, next maneuver and its distance, directions button |
   | `guidance-note`, `guidance-get-routing` | straight-line note and its "Descargar la navegación de este país" button (opens the country sheet) |
@@ -334,14 +348,17 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `map-recenter`, `map-overview` | navigation view: "Recentrar" pill (not following) and whole-route button (following) |
   | `route-summary`, `route-step` | directions sheet: distance · time, maneuver rows |
   | `country-row`, `add-country`, `country-retry`, `region-delete` | "Tus mapas" sheet: one row per country, "Añadir un país", retry a failed download, delete (also older maps) |
+  | `country-retry-size`, `country-update` | country sheet: retry the size check; "Tus mapas": update a country |
   | `country-<id>` | a country in the picker (onboarding, maps, settings), e.g. `country-ad` |
   | `country-download`, `country-size` | country sheet: download button, total size |
   | `home-emergency`, `home-first-aid`, `home-plan`, `home-call` | Home: "En una emergencia" actions |
   | `home-readiness`, `ready-<map\|guides\|wikipedia\|assistant\|plan\|kit>`, `home-downloads`, `home-network` | Home: "Tu preparación" card and rows, downloads card, connection line |
-  | `onboarding-start`, `onboarding-next`, `onboarding-download`, `onboarding-finish`, `onboarding-plan` | setup wizard buttons |
+  | `onboarding-start`, `onboarding-next`, `onboarding-download`, `onboarding-finish`, `onboarding-plan`, `onboarding-close` | setup wizard buttons (`onboarding-close` only on a second run) |
+  | `download-allow-cellular`, `downloads-waiting-wifi`, `downloads-allow-cellular-all` | download row: "use mobile data" for this download; Downloads sheet: the "waiting for Wi-Fi" card and its "use mobile data for all" button |
   | `kit-country`, `kit-guides`, `kit-wikipedia`, `kit-assistant` | setup wizard kit rows (the whole row toggles) |
   | `open-courses` | Courses card in the Library |
-  | `settings-country` | Settings: your country |
+  | `settings-country`, `settings-credits` | Settings: your country, Credits & licenses |
+  | `credits-source`, `credits-gpl`, `credits-js`, `credits-search` | Credits screen: source link, GPL text, JavaScript packages, package search |
   | `emergency-call`, `emergency-share`, `emergency-position` | Emergencias sheet: call, share position, position text |
   | `emergency-cat-<category>`, `emergency-place`, `emergency-guide` | category chips (health, security, water, supplies, official), rows and their Llévame button |
   | `emergency-region`, `emergency-fetch` | per-map rows and their retry/refresh button (points come with the country; Overpass runs by itself for maps without them) |

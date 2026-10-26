@@ -52,7 +52,7 @@ Status: engine, packs, catalog and downloads work end to end on the iOS simulato
 Android emulator (Andorra pack; E2E `map-14-route`, `map-15-routing-download`). What it
 does: car / foot / bike routes with Spanish or English maneuvers, route line, next
 maneuver + distance, remaining distance / time / arrival, directions list, reroute when off
-the route, straight-line fallback with "Descargar rutas", packs with their emergency
+the route, straight-line fallback with "Descargar la navegación de este país", packs with their emergency
 points (no Overpass needed where a pack is installed). How: `ARCHITECTURE.md` (Maps →
 Routing). Pending:
 
@@ -69,7 +69,7 @@ Routing). Pending:
 - Not measured on a phone: route time and memory, assembling a 2 GB pack (JS copy).
 - Isochrones: neither valhalla-mobile wrapper exposes them (iOS would need Valhalla
   headers in our code, which broke tile reading: see CLAUDE.md pitfalls).
-- Overpass still runs after each map download, even where a pack already brought the points.
+- ~~Overpass still runs after each map download, even where a pack already brought the points~~: fixed, maps with bundled points (a pack or a country map) skip Overpass.
 
 
 - **Engine: Valhalla** (MIT, OSM), embedded through a local Expo module
@@ -128,7 +128,7 @@ up from the manifest with no app release. Order the owner agreed:
 
 Limits to design around:
 
-- GitHub-hosted runner: 4 vCPU, 16 GB RAM, ~14 GB on `/` + `/mnt`; job timeout is 300 min
+- GitHub-hosted runner: 4 vCPU, 16 GB RAM, ~104 GB free on `/` in practice; job timeout is 340 min
   (GitHub's cap is 6 h). USA, Russia, Canada, Brazil, Germany, France, likely India and
   China won't fit as one build: build per sub-extract (US states, Länder, French regions…).
   `geofabrik` may list several extracts, merged into one build (`osmium merge`).
@@ -254,12 +254,12 @@ no elevation.
 
 Not yet measured: speed and memory on a phone.
 
-### Proposed phase 2 steps (done, except publishing and isochrones)
+### Proposed phase 2 steps (done; packs are published; isochrones remain)
 
 1. `modules/nomad-route` (iOS xcframework vendored, Android Maven) with `route` and a
    route preview drawn in MapLibre; test with the Madrid tar copied into `content/`.
 2. CI workflow (GitHub Actions, monthly): per country — Geofabrik PBF + Overpass admins →
-   tiles → region slices (CCAA, US states) → split parts ≤ 1.9 GB → GitHub Release; plus a
+   tiles → ~~region slices (CCAA, US states)~~ (dropped: whole-country packs only) → split parts ≤ 1.9 GB → GitHub Release; plus a
    compact emergency-points file per region from the same PBF (osmium tags-filter).
 3. Catalog of routing packs in the app (size, date), downloads through the manager, tars
    concatenated per device, "avoid area" and isochrones (iOS first).
