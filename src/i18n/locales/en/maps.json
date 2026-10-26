@@ -163,14 +163,16 @@
     "fetching": "Downloading {{name}}… {{done}} of {{total}}",
     "failed": "Couldn’t download {{name}}: {{error}}",
     "offline": "You need an internet connection to download emergency places.",
-    "regionInfo": "{{count}} places · {{date}}",
+    "regionInfo_one": "{{count}} place · {{date}}",
+    "regionInfo_other": "{{count}} places · {{date}}",
     "regions": "Points by map",
     "refresh": "Update",
     "source": "OpenStreetMap data. It may be incomplete or out of date: in an emergency, call {{number}}.",
     "preparingTitle": "Getting emergency points ready",
     "preparingBody": "Downloading the hospitals, pharmacies, drinking water and shelters of your maps…",
     "bundled": "Included with the map",
-    "regionFromTiles": "{{count}} points from the map"
+    "regionFromTiles_one": "{{count}} point from the map",
+    "regionFromTiles_other": "{{count}} points from the map"
   },
   "police": {
     "guardiaCivil": "Guardia Civil",

@@ -21,6 +21,7 @@
     "route": "Navigation"
   },
   "deleteConfirm": "Delete {{title}}? This frees {{size}}.",
+  "deleteHint": "Deletes it from this phone",
   "about": "About",
   "aboutBody": "Nomad Pocket is open source (GPL‑3.0), inspired by Project N.O.M.A.D. by Crosstalk Solutions. Content from Kiwix, Wikipedia, OpenStreetMap and Protomaps.",
   "version": "Version {{version}}",

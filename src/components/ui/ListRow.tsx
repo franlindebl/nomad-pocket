@@ -26,6 +26,8 @@ type Props = {
   /** E.g. 'checkbox' + { checked } for a row that toggles. */
   accessibilityRole?: AccessibilityRole;
   accessibilityState?: AccessibilityState;
+  /** What activating the row does, when the title doesn't say it (e.g. a row that deletes). */
+  accessibilityHint?: string;
 };
 
 export function ListRow({
@@ -44,6 +46,7 @@ export function ListRow({
   testID,
   accessibilityRole = 'button',
   accessibilityState,
+  accessibilityHint,
 }: Props) {
   const { colors } = useTheme();
   const content = (
@@ -77,6 +80,7 @@ export function ListRow({
       testID={testID}
       accessibilityRole={accessibilityRole}
       accessibilityState={accessibilityState}
+      accessibilityHint={accessibilityHint}
       onPress={onPress}
       onLongPress={onLongPress}
       pressedScale={0.99}

@@ -21,6 +21,7 @@
     "route": "Navegación"
   },
   "deleteConfirm": "¿Eliminar {{title}}? Liberarás {{size}}.",
+  "deleteHint": "Lo elimina del móvil",
   "about": "Acerca de",
   "aboutBody": "Nomad Pocket es una app de código abierto (GPL‑3.0) inspirada en Project N.O.M.A.D. de Crosstalk Solutions. Contenido de Kiwix, Wikipedia, OpenStreetMap y Protomaps.",
   "version": "Versión {{version}}",
