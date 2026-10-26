@@ -69,12 +69,18 @@ jobs:
           COUNTRIES: ${{ steps.plan.outputs.countries }}
         run: |
           want() { [[ "$PARTS" == all || "$PARTS" == "$1" ]]; }
-          if want routing && python3 -I -c 'import json, sys; sys.exit(0 if set(json.loads(sys.argv[1])) & set(json.load(open("scripts/routing/packs.json"))["countries"]) else 1)' "$COUNTRIES"; then
-            gh release create "routing-$STAMP" --prerelease --title "Routing packs routing-$STAMP" \
-              --notes "Offline routing packs (Valhalla 3.9.1 tiles), emergency points, street names, places and house numbers. Data © OpenStreetMap contributors, ODbL."
+          # One release per continent, for routing packs too: GitHub stops at 1000 assets per release.
+          continents() { # <countries json> <only those with a routing pack: 1|0>
+            python3 -I -c 'import json, sys; want = set(json.loads(sys.argv[1])); packs = json.load(open("scripts/routing/packs.json"))["countries"]; print(" ".join(sorted({r["continent"] for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["id"] in want and r["type"] == "country" and (sys.argv[2] == "0" or r["id"] in packs)})))' "$1" "$2"
+          }
+          if want routing; then
+            for c in $(continents "$COUNTRIES" 1); do
+              gh release create "routing-$STAMP-$c" --prerelease --title "Routing packs routing-$STAMP-$c" \
+                --notes "Offline routing packs (Valhalla 3.9.1 tiles), emergency points, street names, places and house numbers. Data © OpenStreetMap contributors, ODbL."
+            done
           fi
           if want maps; then
-            for c in $(python3 -I -c 'import json, sys; want = set(json.loads(sys.argv[1])); print(" ".join(sorted({r["continent"] for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["id"] in want and r["type"] == "country"})))' "$COUNTRIES"); do
+            for c in $(continents "$COUNTRIES" 0); do
               gh release create "maps-$STAMP-$c" --prerelease --title "Country maps maps-$STAMP-$c" \
                 --notes "Offline country maps (Protomaps basemap, PMTiles), emergency points, street names, places and house numbers. Data © OpenStreetMap contributors, ODbL."
             done
@@ -127,11 +133,15 @@ jobs:
           ls -la "$WORK/routing/out"
       - name: Upload the routing pack
         if: steps.what.outputs.routing == 'true'
+        env:
+          TAG: routing-${{ needs.plan.outputs.stamp }}-${{ steps.what.outputs.continent }}
         run: |
           cd "$WORK/routing/out"
+          # The fragment names its release (the catalog keeps one per pack).
+          python3 -I -c 'import json, sys; p = sys.argv[1]; m = json.load(open(p)); json.dump([dict(x, release=sys.argv[2]) for x in m], open(p, "w"), indent=1)' "$COUNTRY.packs.json" "$TAG"
           # Exactly the files the fragment lists (it drops empty packs and side files).
           python3 -I -c 'import json, sys; [print(f["name"]) for p in json.load(open(sys.argv[1])) for f in p["parts"] + [x for x in (p["pois"], p.get("streets"), p.get("places"), p.get("addresses")) if x]]' \
-            "$COUNTRY.packs.json" | xargs gh release upload "routing-$STAMP" --clobber --repo "$GITHUB_REPOSITORY"
+            "$COUNTRY.packs.json" | xargs gh release upload "$TAG" --clobber --repo "$GITHUB_REPOSITORY"
           mkdir -p "$WORK/fragments" && cp "$COUNTRY.packs.json" "$WORK/fragments/"
           # Uploaded: the map needs the disk.
           rm -rf "$WORK/routing"
@@ -197,7 +207,6 @@ jobs:
           # Coverage within each extract's polygon (ferry lines leave it), carried packs too.
           python3 -I scripts/routing/manifest.py clip routing-manifest.json scripts/routing/packs.json > clipped.json
           mv clipped.json routing-manifest.json
-          gh release upload "routing-$STAMP" --clobber routing-manifest.json
           gh release view routing-index >/dev/null 2>&1 || gh release create routing-index --prerelease \
             --title "Routing catalog" --notes "routing-manifest.json: the current offline routing packs (read by the app)."
           gh release upload routing-index --clobber routing-manifest.json
@@ -215,6 +224,20 @@ jobs:
           gh release view maps-index >/dev/null 2>&1 || gh release create maps-index --prerelease \
             --title "Country maps catalog" --notes "maps-manifest.json: the current offline country maps (read by the app)."
           gh release upload maps-index --clobber maps-manifest.json
+      - name: Map side files a routing pack brings
+        run: |
+          # A country that just got a routing pack keeps last month's map with its own points,
+          # streets, places and doors: drop those from the maps catalog, or the app would
+          # download and index both.
+          mkdir -p unshare
+          gh release download maps-index --pattern maps-manifest.json --dir unshare --clobber || exit 0
+          gh release download routing-index --pattern routing-manifest.json --dir unshare --clobber || exit 0
+          python3 -I scripts/routing/manifest.py unshare unshare/maps-manifest.json unshare/routing-manifest.json > maps-manifest.json
+          if python3 -I -c 'import json, sys; sys.exit(0 if json.load(open(sys.argv[1]))["maps"] == json.load(open(sys.argv[2]))["maps"] else 1)' unshare/maps-manifest.json maps-manifest.json; then
+            echo "nothing to drop"
+          else
+            gh release upload maps-index --clobber maps-manifest.json
+          fi
       - name: Prune old releases
         run: |
           # Keep every release the catalogs now published point at (read back from the indexes,

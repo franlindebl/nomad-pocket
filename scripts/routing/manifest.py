@@ -4,6 +4,8 @@
   carry <previous manifest> <new manifest> <packs.json>  → new + previous packs of countries not rebuilt
                                                            (and still listed in packs.json)
   clip <manifest> <packs.json>                           → cells limited to each extract's .poly
+  unshare <maps manifest> <routing manifest>             → maps manifest without the side files
+                                                           a country's routing pack brings
 A pack is one tar (Valhalla tile extract) in one or more parts; the app downloads the
 parts in order and appends them. bbox comes from the tile names, like tileBBox() in
 src/features/maps/routing-core.ts."""
@@ -119,8 +121,9 @@ def fragment(out_dir, country, build_date):
 
 
 def merge(release, files):
-    # Each pack names its release: packs carried over from a previous month keep theirs.
-    packs = [dict(p, release=release) for f in files for p in json.load(open(f))]
+    # Each pack names its release (one per continent, set by the workflow); packs carried
+    # over from a previous month keep theirs.
+    packs = [dict(p, release=p.get("release") or release) for f in files for p in json.load(open(f))]
     json.dump({
         "version": 1,
         "release": release,
@@ -233,6 +236,25 @@ def clip_polys(manifest_path, packs_json):
     json.dump(manifest, sys.stdout, indent=1)
 
 
+# Countries routed by another country's pack: SHARED_PACKS in src/features/maps/country-core.ts.
+SHARED_PACKS = {"ht": "do"}
+SIDE_FILES = ("pois", "streets", "places", "addresses")
+
+
+def unshare(maps_path, routing_path):
+    """A country that gains a routing pack still has last month's map, with its own points,
+    streets, places and doors: the app would download and index both. The pack's win."""
+    maps, routing = json.load(open(maps_path)), json.load(open(routing_path))
+    by_region = {p["regionId"]: p for p in routing["packs"]}
+    for m in maps["maps"]:
+        pack = by_region.get(m["regionId"]) or next((p for p in routing["packs"] if p["id"] == SHARED_PACKS.get(m["regionId"])), None)
+        for role in SIDE_FILES:
+            if pack and pack.get(role) and m.get(role):
+                print(f"{m['id']}: {role} from the pack", file=sys.stderr)
+                m[role] = None
+    json.dump(maps, sys.stdout, indent=1)
+
+
 if sys.argv[1] == "fragment":
     fragment(sys.argv[2], sys.argv[3], sys.argv[4])
 elif sys.argv[1] == "merge":
@@ -241,5 +263,7 @@ elif sys.argv[1] == "carry":
     carry(sys.argv[2], sys.argv[3], sys.argv[4])
 elif sys.argv[1] == "clip":
     clip_polys(sys.argv[2], sys.argv[3])
+elif sys.argv[1] == "unshare":
+    unshare(sys.argv[2], sys.argv[3])
 else:
     raise SystemExit(__doc__)

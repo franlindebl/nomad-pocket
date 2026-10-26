@@ -127,7 +127,8 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
       newer build (maps already offer "Hay un mapa más reciente"), Hawaii (islands > 10° from
       the rest are outside the US outline), measure on a phone.
 
-0. Routing packs: 60 whole-country packs live since 2026-10-25 (20.6 GB, with street
+0. Routing packs for the whole world (232 countries, all but the USA) are in `packs.json`
+   since 2026-10-26, waiting for a run. Before: 60 whole-country packs live since 2026-10-25 (20.6 GB, with street
    names for search): Spain (incl. Canarias), Portugal, Andorra and 57 more countries of
    Europe and Latin America (every one whose Geofabrik extract is ≤ Spain's). E2E against the live catalog passes on iOS
    (`map-16-routing-github`) and Android (`android-05-routing`). Next, step 4 of the
@@ -221,6 +222,22 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-26 — Routing packs for the rest of the world
+
+- Owner approved navigation everywhere. `packs.json` 60 → 232 countries: every country and
+  territory of `regions.json` but the uninhabited ones (aq, atc, gs, hm, io, kas, pn, tf),
+  Haiti (routed by `do`) and the USA (12 GB PBF: several packs per country need app work
+  first). Big ones as whole packs (Germany, France, Canada, Russia, Japan…): runners have
+  ~100 GB of disk (`df` in run 40289348691), not the ~14 GB the plan assumed.
+- `build-country.sh`: `clip` cuts a bigger extract to the country's bbox (43 places with
+  no extract of their own: gcc-states, malaysia-singapore-brunei, central-america…); admin
+  boundaries fall back to ISO 3166-1 at any level, then ISO 3166-2, then none (Guam is
+  level 4 in OSM). Local Docker builds route: Guam 5 MB pack (9.5 km test route), Singapore
+  87 MB (cut from malaysia-singapore-brunei; 21 km city → airport).
+- Workflow: routing releases per continent (`routing-<stamp>-<continent>`, 1000-asset
+  limit); `manifest.py unshare` drops a map's side files when its country's pack brings
+  them (else the app would download and index both).
 
 ### 2026-10-26 — Pre-release audit: findings fixed (branch `audit-fixes`)
 

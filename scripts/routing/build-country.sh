@@ -24,11 +24,17 @@ OVERPASS=(https://overpass-api.de/api/interpreter https://overpass.private.coffe
 UA="NomadPocket-routing/1.0 (+https://github.com/franlindebl/nomad-pocket)"
 
 # geofabrik: one extract path, or a list merged into one build (Spain + Canary Islands).
-read -r ISO GEOFABRIK < <(python3 -I - "$HERE/packs.json" "$COUNTRY" <<'PY'
+# clip: the extract is bigger than the country (Singapore in malaysia-singapore-brunei):
+# cut it to the country's bbox from regions.json, with a margin for roads at the border.
+read -r ISO CLIP GEOFABRIK < <(python3 -I - "$HERE/packs.json" "$HERE/../../src/features/maps/regions.json" "$COUNTRY" <<'PY'
 import json, sys
-c = json.load(open(sys.argv[1]))["countries"][sys.argv[2]]
+c = json.load(open(sys.argv[1]))["countries"][sys.argv[3]]
 g = c["geofabrik"]
-print(c["iso"], *(g if isinstance(g, list) else [g]))
+clip = "-"
+if c.get("clip"):
+    w, s, e, n = next(r["bbox"] for r in json.load(open(sys.argv[2]))["regions"] if r["id"] == sys.argv[3])
+    clip = f"{w - 0.05:.4f},{s - 0.05:.4f},{e + 0.05:.4f},{n + 0.05:.4f}"
+print(c["iso"], clip, *(g if isinstance(g, list) else [g]))
 PY
 )
 
@@ -66,6 +72,11 @@ if (( ${#SRCS[@]} > 1 )); then
 elif [[ "${SRCS[0]}" != "$PBF" ]]; then
   mv "${SRCS[0]}" "$PBF"
 fi
+if [[ "$CLIP" != "-" ]]; then
+  log "cutting to $CLIP"
+  osmium extract --overwrite -s smart -b "$CLIP" "$PBF" -o "$WORK/src/clipped.osm.pbf"
+  mv "$WORK/src/clipped.osm.pbf" "$PBF"
+fi
 BUILD_DATE="$(echo "${STAMP:-$(date -u +%Y-%m-%d)}" | cut -c1-10 | tr -d -)"
 log "data of $BUILD_DATE"
 
@@ -73,31 +84,45 @@ log "data of $BUILD_DATE"
 #    Geofabrik's are clipped at the extract edge, so Valhalla can't build areas from them,
 #    and without them it gets driving side and country access rules wrong. ISO may list
 #    several countries ("DO,HT") for an extract that spans them.
-QUERY="[out:xml][timeout:900];
-relation[\"boundary\"=\"administrative\"][\"admin_level\"=\"2\"][\"ISO3166-1\"~\"^(${ISO//,/|})\$\"]->.c;
+#    Territories are often not level 2 in OSM (Puerto Rico, Aruba, Åland): then the
+#    relation with that ISO 3166-1 code at any level, then by ISO 3166-2 ("US-PR"). With
+#    none at all the pack is built without them (right-hand traffic, default access).
+RE="${ISO//,/|}"
+admins_query() { # <tag filter of the country relation>
+  echo "[out:xml][timeout:900];
+relation[\"boundary\"=\"administrative\"]$1->.c;
 .c map_to_area->.a;
 (.c; relation(area.a)[\"boundary\"=\"administrative\"][\"admin_level\"=\"4\"];);
 (._;>;);
 out body;"
-ok=0
-for attempt in 1 2 3; do
-  for server in "${OVERPASS[@]}"; do
-    log "admin boundaries from $server (attempt $attempt)"
-    if curl -fsS --max-time 1200 -A "$UA" --data-urlencode "data=$QUERY" -o "$WORK/src/admins.osm" "$server" \
-      && grep -q '<relation' "$WORK/src/admins.osm"; then ok=1; break 2; fi
-    sleep 30
+}
+ADMINS="-"
+for filter in "[\"admin_level\"=\"2\"][\"ISO3166-1\"~\"^($RE)\$\"]" "[\"ISO3166-1\"~\"^($RE)\$\"]" "[\"ISO3166-2\"~\"-($RE)\$\"]"; do
+  answered=0
+  for attempt in 1 2 3; do
+    for server in "${OVERPASS[@]}"; do
+      log "admin boundaries $filter from $server (attempt $attempt)"
+      if curl -fsS --max-time 1200 -A "$UA" --data-urlencode "data=$(admins_query "$filter")" -o "$WORK/src/admins.osm" "$server" \
+        && grep -q '</osm>' "$WORK/src/admins.osm"; then answered=1; break 2; fi
+      sleep 30
+    done
   done
+  [[ $answered == 1 ]] || { log "no answer from Overpass"; exit 1; }
+  if grep -q '<relation' "$WORK/src/admins.osm"; then ADMINS=/w/admins.sqlite; break; fi
 done
-[[ $ok == 1 ]] || { log "no admin boundaries"; exit 1; }
-osmium cat --overwrite "$WORK/src/admins.osm" -o "$WORK/src/admins.osm.pbf"
+if [[ "$ADMINS" == "-" ]]; then
+  log "no admin boundaries in OSM for $ISO: building without them"
+else
+  osmium cat --overwrite "$WORK/src/admins.osm" -o "$WORK/src/admins.osm.pbf"
+fi
 
 # 3. Valhalla tiles. build_tiles segfaults now and then in "Enhancing local graph"
 #    (3.9.1): retry from scratch. Paths that don't exist instead of "" for unused inputs.
 valhalla valhalla_build_config \
-  --mjolnir-tile-dir /w/tiles --mjolnir-tile-extract /w/tiles.tar --mjolnir-admin /w/admins.sqlite \
+  --mjolnir-tile-dir /w/tiles --mjolnir-tile-extract /w/tiles.tar --mjolnir-admin "${ADMINS/#-//w/nonexistent/admins.sqlite}" \
   --mjolnir-timezone /w/nonexistent/tz.sqlite --mjolnir-traffic-extract /w/nonexistent/traffic.tar \
   --mjolnir-landmarks /w/nonexistent/landmarks.sqlite --mjolnir-concurrency "$CONC" > "$WORK/valhalla.json"
-valhalla valhalla_build_admins -c /w/valhalla.json /w/src/admins.osm.pbf > "$WORK/admins.log" 2>&1
+[[ "$ADMINS" == "-" ]] || valhalla valhalla_build_admins -c /w/valhalla.json /w/src/admins.osm.pbf > "$WORK/admins.log" 2>&1
 built=0
 for attempt in 1 2 3; do
   rm -rf "$WORK/tiles"
