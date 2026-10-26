@@ -130,6 +130,8 @@ const suspending = new Map<string, 'paused' | 'queued'>();
 const cellularJobs = new Set<string>();
 /** External jobs waiting for the network rules (whenDownloadAllowed). */
 const gateWaiters = new Set<() => void>();
+/** The latest run() of each download. */
+const runs = new Map<string, symbol>();
 
 /** Each feature registers what to do with a finished file of its kind. */
 export function registerCompletionHandler(kind: ContentKind, handler: CompletionHandler) {
@@ -252,19 +254,32 @@ export function waitingReason(records: DownloadRecord[], network: NetworkSnapsho
 
 let gateTimer: ReturnType<typeof setTimeout> | null = null;
 
+/** `settle`: wait for the network to settle before acting (events); the first reading acts at once. */
 function setNetwork(net: NetworkSnapshot, settle: boolean) {
+  const wait = settle && !!useDownloads.getState().network;
   useDownloads.setState({ network: { type: net.type, isConnected: net.isConnected, isInternetReachable: net.isInternetReachable } });
   if (gateTimer) clearTimeout(gateTimer);
-  gateTimer = settle ? setTimeout(applyGate, GATE_SETTLE_MS) : null;
-  if (!settle) applyGate();
+  gateTimer = wait ? setTimeout(applyGate, GATE_SETTLE_MS) : null;
+  if (!wait) applyGate();
 }
 
+/** Bumped by every network event: a read that started before one is stale. */
+let networkSeq = 0;
+
 function readNetwork() {
+  // iOS answers "no connection" when its path monitor takes over 5 s: never let such a late
+  // answer overwrite a newer event.
+  const seq = ++networkSeq;
   Network.getNetworkStateAsync().then(
-    (net) => setNetwork(net, false),
+    (net) => seq === networkSeq && setNetwork(net, false),
     // Can't tell: don't hold downloads back forever.
-    () => useDownloads.getState().network || setNetwork({ type: 'UNKNOWN', isConnected: true }, false),
+    () => seq === networkSeq && !useDownloads.getState().network && setNetwork({ type: 'UNKNOWN', isConnected: true }, false),
   );
+}
+
+function onNetworkEvent(net: NetworkSnapshot) {
+  networkSeq++;
+  setNetwork(net, true);
 }
 
 /**
@@ -401,7 +416,7 @@ export function initDownloads() {
 
   // Nothing starts before the network is known (pump() holds the queue until then).
   readNetwork();
-  Network.addNetworkStateListener((net) => setNetwork(net, true));
+  Network.addNetworkStateListener(onNetworkEvent);
   useSettings.subscribe((s, prev) => {
     if (s.wifiOnly !== prev.wifiOnly) applyGate();
   });
@@ -655,6 +670,9 @@ async function run(id: string) {
   if (!rec) return;
   retryAt.delete(id);
   setStatus(id, 'running', { error: null }, { error: null });
+  // Paused and resumed while probing mirrors: a newer run() owns the download then.
+  const token = Symbol(id);
+  runs.set(id, token);
 
   const row = db().getFirstSync<Row>('SELECT pause_state FROM downloads WHERE id = ?', id);
   const saved = parseJson<DownloadPauseState | null>(row?.pause_state, null);
@@ -684,7 +702,7 @@ async function run(id: string) {
       const url = await pickSource(id);
       // Paused, cancelled or held back by the network while mirrors were being probed.
       const now = useDownloads.getState().records[id];
-      if (now?.status !== 'running') return;
+      if (now?.status !== 'running' || runs.get(id) !== token) return;
       if (gateOf(now) !== 'go') {
         setStatus(id, 'queued');
         return;
@@ -705,7 +723,9 @@ async function run(id: string) {
     file = await (resumed ? task.resumeAsync() : task.downloadAsync());
   } catch (e) {
     tasks.delete(id);
-    if (useDownloads.getState().records[id]?.status === 'cancelled') return;
+    // Cancelled (the record is gone, or about to be).
+    const current = useDownloads.getState().records[id];
+    if (!current || current.status === 'cancelled') return;
     failed(id, e, resumed);
     return;
   }
@@ -759,8 +779,9 @@ export async function pauseDownload(id: string) {
   const rec = useDownloads.getState().records[id];
   if (!rec || rec.external) return;
   if (!tasks.has(id)) {
-    // Queued, or running but still choosing its mirror (run() checks the status after the probe).
-    if (rec.status === 'queued' || rec.status === 'running') {
+    if (rec.status === 'queued') setStatus(id, 'paused');
+    else if (rec.status === 'running') {
+      // Still choosing its mirror: run() checks the status after the probe. Its slot is free now.
       setStatus(id, 'paused');
       pump();
     }
@@ -784,6 +805,7 @@ function forget(id: string) {
   failures.delete(id);
   retryAt.delete(id);
   cellularJobs.delete(id);
+  runs.delete(id);
 }
 
 export async function cancelDownload(id: string) {
