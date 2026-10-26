@@ -1,0 +1,43 @@
+src/app/(tabs)/assistant/index.tsx
+  s_9f5316f88b2e79::t_b2174fa6495e3a 11,217
+src/features/assistant/chats.ts
+  s_9f5316f88b2e79::t_ca6e6f460f596e 13,274,365,368,371,375-378
+src/features/assistant/engine.ts
+  s_9f5316f88b2e79::t_e5826bf1311cc7 225-227,233,237,242-243
+src/features/assistant/errors.test.ts
+  s_9a897e9e3fd008::t_e53bdb7642213a 1-28
+src/features/assistant/errors.ts
+  s_9a897e9e3fd008::t_968469aad9caf8 1-57
+src/features/assistant/rag-core.test.ts
+  s_9f5316f88b2e79::t_90d95527583536 434-435
+src/features/assistant/rag-core.ts
+  s_9f5316f88b2e79::t_b11d59299dc382 580-583,589-593
+src/i18n/locales/en/assistant.json
+  s_9a897e9e3fd008::t_ecf81240771a78 58-67
+src/i18n/locales/es/assistant.json
+  s_9a897e9e3fd008::t_5c685e1b72c512 58-67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0cd062ceb6f42b60f8d34d19e1d8edd9d0fd038c",
+  "prompts": {},
+  "sessions": {
+    "s_9a897e9e3fd008": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "43f501aa-0e5c-4028-b06c-4d4a88254ca0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
