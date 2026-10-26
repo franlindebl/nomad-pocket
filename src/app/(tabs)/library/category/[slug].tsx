@@ -105,7 +105,12 @@ function TierCard({
   const items = useContent((s) => s.items);
   const downloads = useDownloads((s) => s.records);
   const resources = tierResources(category, tier, langs);
-  const missing = resources.filter((r) => !items.some((i) => i.catalogId === r.id) && !downloads[r.id]);
+  // A failed or cancelled record doesn't make a resource "handled": enqueueDownload takes it again.
+  const inFlight = (id: string) => {
+    const status = downloads[id]?.status;
+    return !!status && status !== 'failed' && status !== 'cancelled';
+  };
+  const missing = resources.filter((r) => !items.some((i) => i.catalogId === r.id) && !inFlight(r.id));
   const done = resources.length > 0 && resources.every((r) => items.some((i) => i.catalogId === r.id));
 
   const downloadPack = () => {
