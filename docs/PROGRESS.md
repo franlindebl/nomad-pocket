@@ -45,15 +45,33 @@ can pick up without re-deriving anything.
 
 ## Next steps / backlog
 
-Roughly by value. Items U and 0 are in progress; the rest are not started.
-
-U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): on main as ebafcdd (owner approved
-   2026-10-26), TestFlight build 11. CI: one workflow, `country-packages.yml` (owner,
-   2026-10-26), replaced `routing-packs.yml` + `country-maps.yml`; first test Spain alone,
-   then all countries. Test build 11 on a real iPhone (onboarding kit, a country download,
-   assembly of a multi-GB map, places import). Follow-ups: bundled quick cards (first aid, water, radio) and
-   emergency numbers per country, Android check of the bundled world map. (Preparedness was added
+Roughly by value. Items U and 0 are in progress; the rest are not started. (Preparedness was added
 on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
+
+U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owner approved
+   2026-10-26); TestFlight 1.1.0 build 11 = ebafcdd. Fixes after build 11, on main but in no
+   build yet (next free build number: 12): country sheet "couldn't check" vs "no navigation"
+   offline + size retry/timeout + disabled buttons look disabled (27fb184), readable download
+   errors (159f565). State at 2026-10-26 10:45 UTC, in order:
+   1. **CI full run** `country-packages.yml` run 40289348691 (all 241 countries, parts=all,
+      started 08:00 UTC, ~55 countries/h): 157 ok, 1 failed (`us`), 83 left; it publishes
+      routing-index + maps-index at the end (~12:30 UTC). Check: `gh run view 40289348691`;
+      then spot-check the manifests (packs keep places/addresses; maps per continent release).
+   2. **US failed**: the runner shut down while `build-country-map.sh` processed Geofabrik's
+      11 GB `us` extract (side files; likely OOM in pyosmium with node locations, 16 GB
+      runner). Plan: for extracts above ~4 GB use Geofabrik's sub-regions (us-west,
+      us-midwest, us-northeast, us-south, …), build side files per part and concatenate the
+      TSVs (or skip side files and let the app use Overpass); then re-run
+      `gh workflow run country-packages.yml -f countries="us" -f parts=maps`. Same for `ru`,
+      `ca` or others if they fail.
+   3. Owner: test build 11 on a real iPhone (onboarding kit, Spain ≈4.8 GB, assembly of a
+      multi-GB map, places/addresses import, Emergencias offline). This Mac is sometimes behind
+      a TLS-intercepting corporate proxy: simulators/emulators then fail
+      on protomaps.dev / Kiwix with TLS errors — the network, not the app.
+   4. Follow-ups: bundled quick cards (first aid, water, radio; owner reviews medical
+      content first), emergency numbers per country, updating an installed routing pack to a
+      newer build (maps already offer "Hay un mapa más reciente"), Hawaii (islands > 10° from
+      the rest are outside the US outline), measure on a phone.
 
 0. Routing packs: 60 whole-country packs live since 2026-10-25 (20.6 GB, with street
    names for search): Spain (incl. Canarias), Portugal, Andorra and 57 more countries of
