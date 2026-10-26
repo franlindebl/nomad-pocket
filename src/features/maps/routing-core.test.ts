@@ -245,6 +245,17 @@ test('parseManifest keeps well-formed packs only', () => {
   assert.equal(parseManifest('not json'), null);
 });
 
+test('parseManifest keeps paths and other schemes out of URLs', () => {
+  const raw = JSON.parse(MANIFEST);
+  assert.equal(parseManifest(JSON.stringify({ ...raw, release: '../x' })), null);
+  assert.equal(parseManifest(JSON.stringify({ ...raw, baseUrl: 'javascript:alert(1)' })), null);
+  const m = parseManifest(JSON.stringify({ ...raw, packs: [{ ...raw.packs[0], release: 'a/b' }, { ...raw.packs[1], regionId: 7 }, raw.packs[0]] }))!;
+  assert.deepEqual(
+    m.packs.map((p) => p.id),
+    ['ad'],
+  );
+});
+
 test('assetUrl and packsCovering', () => {
   const m = parseManifest(MANIFEST)!;
   assert.equal(assetUrl(m, m.packs[0], 'ad.tar', 'franlindebl/nomad-pocket'), 'https://github.com/franlindebl/nomad-pocket/releases/download/routing-20261024/ad.tar');
