@@ -21,16 +21,20 @@ let routeQueue = DispatchQueue(label: "nomad.route", qos: .userInitiated)
 public final class NomadRouteModule: Module {
   private var router: NRRouter?
   private var openConfig: String?
+  private var openStamp: String?
 
   public func definition() -> ModuleDefinition {
     Name("NomadRoute")
 
     /// Opens (or reuses) a Valhalla actor for a config JSON. Reopening with the same
-    /// config is free; another pack replaces the actor.
+    /// config is free while its tile extract is the same file; another pack, or a pack
+    /// file replaced at the same path (an update), rebuilds the actor.
     AsyncFunction("open") { (configJson: String) in
-      if self.openConfig == configJson, self.router != nil { return }
+      let stamp = Self.extractStamp(configJson)
+      if self.openConfig == configJson, self.openStamp == stamp, self.router != nil { return }
       self.router = nil
       self.openConfig = nil
+      self.openStamp = nil
       do {
         // valhalla-mobile builds its actor from a file; one fixed name, rewritten per pack
         // (the actor has read it by the time the initializer returns).
@@ -39,14 +43,18 @@ public final class NomadRouteModule: Module {
         try Data(configJson.utf8).write(to: url, options: .atomic)
         self.router = try NRRouter(configPath: url.path)
         self.openConfig = configJson
+        self.openStamp = stamp
       } catch let error as NSError {
         throw RoutingFailedException(error)
       }
     }.runOnQueue(routeQueue)
 
+    /// Releases the actor and its mmap of the tile extract (call before deleting or
+    /// replacing a pack file, so its space is freed right away).
     AsyncFunction("close") {
       self.router = nil
       self.openConfig = nil
+      self.openStamp = nil
     }.runOnQueue(routeQueue)
 
     AsyncFunction("route") { (request: String) -> String in
@@ -56,6 +64,20 @@ public final class NomadRouteModule: Module {
     AsyncFunction("matrix") { (request: String) -> String in
       try self.run { try $0.matrix(request) }
     }.runOnQueue(routeQueue)
+  }
+
+  /// Identity of the tile extract a config points at (inode, size, mtime), nil when it
+  /// can't be read. The actor mmaps the extract: after a pack is replaced at the same path
+  /// it would keep routing on the old, unlinked file (and keep its blocks allocated).
+  private static func extractStamp(_ configJson: String) -> String? {
+    guard let json = try? JSONSerialization.jsonObject(with: Data(configJson.utf8)) as? [String: Any],
+          let mjolnir = json["mjolnir"] as? [String: Any],
+          let path = mjolnir["tile_extract"] as? String,
+          let attrs = try? FileManager.default.attributesOfItem(atPath: path) else { return nil }
+    let inode = (attrs[.systemFileNumber] as? NSNumber)?.uint64Value ?? 0
+    let size = (attrs[.size] as? NSNumber)?.uint64Value ?? 0
+    let mtime = (attrs[.modificationDate] as? Date)?.timeIntervalSince1970 ?? 0
+    return "\(inode):\(size):\(mtime)"
   }
 
   private static func supportDir() throws -> URL {
