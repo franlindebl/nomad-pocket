@@ -1,0 +1,21 @@
+e2e/flows/maps/map-18-credit.yaml
+  s_9f5316f88b2e79::t_37e655644470d1 1-14
+e2e/flows/settings/set-05-credits.yaml
+  s_9f5316f88b2e79::t_d4ae3467c71ddc 1-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "52d24f8b5ff74eeb7b32759174d373a5a8f403d0",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
