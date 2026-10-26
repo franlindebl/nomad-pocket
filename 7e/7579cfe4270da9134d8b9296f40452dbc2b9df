@@ -1,0 +1,19 @@
+package-lock.json
+  s_07e0fce91233cb::t_d0837781fc2d4b 9361,10031
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7e7579cfe4270da9134d8b9296f40452dbc2b9df",
+  "prompts": {},
+  "sessions": {
+    "s_07e0fce91233cb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a3d2630e9df245d3b",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
