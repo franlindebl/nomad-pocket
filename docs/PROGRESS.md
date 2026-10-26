@@ -142,6 +142,24 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-26 — Android check of the redesign (emulator)
+
+- Owner asked for an Android run while the country packages build. Pass: android-03
+  (country download, search, guidance, Emergencias), android-05 (route on the published
+  Andorra pack), android-04 once (Preparedness).
+- Not the app: the emulator's DNS went stale, Android's validation flapped (the app then
+  says "Sin conexión"), and this Mac is now behind a TLS-intercepting proxy, so ZIM
+  downloads fail on the emulator (android-01). The setup wizard didn't show once
+  (android-04, the known onboarding race).
+- Fixed: the startup coarse fix for the search detail (`indexDetailAroundUser`) showed
+  Google's "Location Accuracy" dialog on Android (`mayShowUserSettingsDialog: false`);
+  `scripts/e2e-android.sh` ended the run after the first failed flow (set -e/pipefail) and
+  now waits for a validated network. Reported to the redesign session (fixed in 27fb184):
+  a country sheet said "navigation not available" when the catalog simply hadn't loaded.
+- Note: a download error shows the raw exception ("Call to function
+  'FileSystemDownloadTask.start' has been rejected… CertPathValidatorException") in the
+  Downloads sheet; a friendlier message would help.
+
 ### 2026-10-26 — CI: one workflow per country package
 
 - Owner: why two workflows for one download? `country-packages.yml` replaces

@@ -127,14 +127,18 @@ registerInit(() => {
 
 /**
  * The map detail around the user (where they are, else where the map was left), so search
- * finds nearby schools and shops on a big map. Never asks for permission. A fresh install
- * has no last known position yet: then one coarse fix.
+ * finds nearby schools and shops on a big map. Never asks for permission, nor (Android) to
+ * turn on Google's location accuracy. A fresh install has no last known position yet: then
+ * one coarse fix.
  */
 function indexDetailAroundUser() {
   Location.getForegroundPermissionsAsync()
     .then(async (p) => {
       if (!p.granted) return null;
-      return (await Location.getLastKnownPositionAsync()) ?? (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low }));
+      return (
+        (await Location.getLastKnownPositionAsync()) ??
+        (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low, mayShowUserSettingsDialog: false }))
+      );
     })
     .catch(() => null)
     .then((pos) => {
