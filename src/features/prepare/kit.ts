@@ -137,3 +137,46 @@ export function formatMonth(month: string, locale: string): string {
   const i = index(month);
   return new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(new Date(Math.floor(i / 12), i % 12, 15));
 }
+
+// ── Expiry reminders ──
+
+/** A kit reminder the OS holds: notification id, the item it is for, the language of its text. */
+export type ScheduledReminder = { id: string; itemId: string | null; lang: string | null };
+
+export type ReminderPlan = {
+  /** Notifications to cancel: strays, outdated or in another language. */
+  cancel: string[];
+  /** Items that need a (new) reminder. */
+  schedule: string[];
+  /** Items whose stored reminder id no longer stands for anything. */
+  clear: string[];
+};
+
+/**
+ * What to change so that every item of the household's kit (`inKit`) with an expiry month
+ * still ahead has exactly one pending reminder, in `lang`, and nothing else is scheduled.
+ * Scheduled reminders don't come back with a backup restore, aren't set when permission was
+ * granted later, and outlive items that leave the kit (no more children or pets).
+ */
+export function planReminders(
+  entries: Record<string, { expires: string | null; reminderId: string | null }>,
+  inKit: ReadonlySet<string>,
+  scheduled: ScheduledReminder[],
+  now: Date,
+  lang: string,
+): ReminderPlan {
+  const wanted = (id: string) => {
+    const expires = entries[id]?.expires;
+    return inKit.has(id) && isMonth(expires) && reminderDate(expires, now) !== null;
+  };
+  const kept = new Set<string>();
+  const cancel: string[] = [];
+  for (const s of scheduled) {
+    const ok = !!s.itemId && wanted(s.itemId) && entries[s.itemId].reminderId === s.id && s.lang === lang && !kept.has(s.itemId);
+    if (ok && s.itemId) kept.add(s.itemId);
+    else cancel.push(s.id);
+  }
+  const schedule = Object.keys(entries).filter((id) => wanted(id) && !kept.has(id));
+  const clear = Object.keys(entries).filter((id) => !wanted(id) && entries[id].reminderId !== null);
+  return { cancel, schedule, clear };
+}

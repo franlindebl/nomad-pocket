@@ -79,6 +79,7 @@
   },
   "errors": {
     "generic": "Algo ha ido mal",
+    "screenFailed": "No se ha podido mostrar esta pantalla. Lo que has descargado sigue en tu móvil.",
     "network": "Sin conexión. Inténtalo cuando tengas internet."
   },
   "health": {

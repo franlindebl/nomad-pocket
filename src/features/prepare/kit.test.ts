@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { addMonths, expiryStatus, formatMonth, isMonth, KIT, kitFor, monthOf, monthsUntil, reminderDate, supplies } from './kit.ts';
+import { addMonths, expiryStatus, formatMonth, isMonth, KIT, kitFor, monthOf, monthsUntil, planReminders, reminderDate, supplies } from './kit.ts';
 
 test('supplies scale with people, pets and days', () => {
   const s = supplies({ adults: 2, children: 1, pets: 1, days: 3 });
@@ -52,4 +52,43 @@ test('reminder a month ahead, never in the past', () => {
 test('formatMonth is localized', () => {
   assert.match(formatMonth('2027-06', 'es'), /junio/);
   assert.match(formatMonth('2027-06', 'en'), /June 2027/);
+});
+
+test('planReminders schedules what is missing and cancels the rest', () => {
+  const now = new Date(2026, 9, 25);
+  const entries = {
+    water: { expires: '2027-06', reminderId: 'n-water' },
+    food: { expires: '2027-03', reminderId: null }, // permission granted later, or a restored backup
+    batteries: { expires: '2027-01', reminderId: 'n-lost' }, // stored id the OS no longer holds
+    firstAid: { expires: '2026-11', reminderId: 'n-past' }, // the reminder moment has passed
+    kidsFood: { expires: '2027-05', reminderId: 'n-kids' }, // no children any more
+    candles: { expires: null, reminderId: null },
+  };
+  const inKit = new Set(['water', 'food', 'batteries', 'firstAid', 'candles']);
+  const scheduled = [
+    { id: 'n-water', itemId: 'water', lang: 'es' },
+    { id: 'n-kids', itemId: 'kidsFood', lang: 'es' },
+    { id: 'n-stray', itemId: 'water', lang: 'es' },
+    { id: 'n-old', itemId: null, lang: null },
+  ];
+  const plan = planReminders(entries, inKit, scheduled, now, 'es');
+  assert.deepEqual(plan.cancel.sort(), ['n-kids', 'n-old', 'n-stray']);
+  assert.deepEqual(plan.schedule.sort(), ['batteries', 'food']);
+  assert.deepEqual(plan.clear.sort(), ['firstAid', 'kidsFood']);
+});
+
+test('planReminders rewrites reminders scheduled in another language', () => {
+  const now = new Date(2026, 9, 25);
+  const entries = { water: { expires: '2027-06', reminderId: 'n-water' } };
+  const inKit = new Set(['water']);
+  assert.deepEqual(planReminders(entries, inKit, [{ id: 'n-water', itemId: 'water', lang: 'es' }], now, 'en'), {
+    cancel: ['n-water'],
+    schedule: ['water'],
+    clear: [],
+  });
+  assert.deepEqual(planReminders(entries, inKit, [{ id: 'n-water', itemId: 'water', lang: 'en' }], now, 'en'), {
+    cancel: [],
+    schedule: [],
+    clear: [],
+  });
 });

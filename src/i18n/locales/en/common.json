@@ -79,6 +79,7 @@
   },
   "errors": {
     "generic": "Something went wrong",
+    "screenFailed": "This screen couldn't be shown. What you downloaded is still on your phone.",
     "network": "You're offline. Try again when you have internet."
   },
   "health": {

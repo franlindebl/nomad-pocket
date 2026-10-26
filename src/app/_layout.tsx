@@ -1,18 +1,40 @@
 import '@/i18n';
 
-import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider, useNavigationContainerRef } from 'expo-router';
+import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider, useNavigationContainerRef, type ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import { AlertTriangle } from 'lucide-react-native';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { setNavigatorReadyCheck, whenNavigatorReady } from '@/components/navigation';
 import { ToastHost } from '@/components/Toast';
+import { EmptyState } from '@/components/ui';
 import { bootstrap } from '@/features/bootstrap';
 import { useSettings } from '@/stores/settings';
 import { fontFamily, palette, useTheme } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
+
+/** A render error anywhere (a malformed deep link, a bug) shows this instead of closing the app. */
+export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', backgroundColor: colors.bg }}>
+      <EmptyState
+        icon={AlertTriangle}
+        hue="medicine"
+        title={t('errors.generic')}
+        body={t('errors.screenFailed')}
+        action={t('actions.retry')}
+        onAction={() => void retry()}
+      />
+    </View>
+  );
+}
 
 export default function RootLayout() {
   const { scheme, colors } = useTheme();
@@ -20,18 +42,12 @@ export default function RootLayout() {
   const navigation = useNavigationContainerRef();
 
   useEffect(() => {
+    setNavigatorReadyCheck(() => navigation.isReady());
     bootstrap().finally(() => {
       SplashScreen.hideAsync();
-      // Settings hydrate asynchronously from SQLite: wait before deciding. A push before the
-      // root navigator is ready is dropped (the wizard sometimes never showed), so wait for it.
+      // Settings hydrate asynchronously from SQLite: wait before deciding.
       const decide = () => {
-        if (useSettings.getState().onboarded) return;
-        let tries = 0;
-        const open = () => {
-          if (navigation.isReady() || tries++ > 100) router.push('/onboarding');
-          else setTimeout(open, 50);
-        };
-        open();
+        if (!useSettings.getState().onboarded) whenNavigatorReady(() => router.push('/onboarding'));
       };
       if (useSettings.persist.hasHydrated()) decide();
       else useSettings.persist.onFinishHydration(decide);
