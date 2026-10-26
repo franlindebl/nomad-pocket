@@ -2,12 +2,13 @@
 // once into a SQLite FTS5 index (map_places, in the index file: indexDb) in the
 // background, one map at a time, in small batches so the JS thread stays responsive.
 // Country files (places, streets, house numbers) and emergency points (emergency.ts)
-// go into the same index. Writes to it take turns (exclusive); searches and the big
-// deletes of a removed map run off the JS thread on a second connection.
+// go into the same index; the points themselves (map_pois) live in the same file. Writes
+// to it take turns (exclusive); searches and the big deletes of a removed map run off the
+// JS thread on a second connection.
 import { File, FileMode } from 'expo-file-system';
 import { create } from 'zustand';
 
-import { db, indexDb, indexDbAsync } from '@/db';
+import { indexDb, indexDbAsync } from '@/db';
 import Storage from '@/db/kv';
 import { getItem, listItems } from '@/features/content/items';
 import { decodeTile } from '@/lib/mvt/decode';
@@ -100,11 +101,12 @@ const yieldToUi = () => new Promise<void>((r) => setTimeout(r, 0));
 let writes: Promise<unknown> = Promise.resolve();
 
 /**
- * Runs `job` after every index write queued before it. One writer at a time: a long
- * import and the deletes of a removed map, on two connections, would otherwise wait on
- * each other's locks, the synchronous side blocking the JS thread.
+ * Runs `job` after every write to the index file queued before it (emergency points
+ * included). One writer at a time: a long import and the deletes of a removed map, on two
+ * connections, would otherwise wait on each other's locks, the synchronous side blocking
+ * the JS thread. Never await one job from inside another.
  */
-function exclusive<T>(job: () => Promise<T> | T): Promise<T> {
+export function exclusive<T>(job: () => Promise<T> | T): Promise<T> {
   const run = writes.then(job);
   writes = run.catch((e) => console.warn('[maps] index write failed', e));
   return run;
@@ -369,7 +371,7 @@ async function insertStreetsFile(source: string, itemId: string, file: File): Pr
  * points came with the download (country map or routing pack): they would show twice.
  */
 function storeTileEmergencyPoints(itemId: string, rows: PlaceRow[]) {
-  const d = db();
+  const d = indexDb();
   if ((getItem(itemId)?.meta as { bundledPoints?: boolean } | undefined)?.bundledPoints) return;
   if (d.getFirstSync('SELECT 1 FROM map_sources WHERE item_id = ? AND pois_at IS NOT NULL', itemId)) return;
   const insert = d.prepareSync(
@@ -518,9 +520,6 @@ export function forgetMapSource(itemId: string) {
   cancelled.add(itemId);
   again.delete(itemId);
   forgetDetailState(itemId);
-  db().runSync('DELETE FROM map_pois WHERE source = ?', itemId);
-  // Its emergency state; the index states too while the index is still in nomad.db (db/index.ts).
-  db().runSync('DELETE FROM map_sources WHERE item_id IN (?, ?, ?)', itemId, placesSource(itemId), addressesSource(itemId));
   dropIndexRows(itemId);
 }
 
@@ -541,7 +540,10 @@ function setPendingDrop(itemId: string, pending: boolean) {
   Storage.setItemSync(DROPS_KEY, JSON.stringify([...ids]));
 }
 
-/** Drops a removed item's index rows, after the writes queued before (remembered until done, across launches). */
+/**
+ * Drops a removed item's index rows and emergency points, after the writes queued before
+ * (remembered until done, across launches).
+ */
 function dropIndexRows(itemId: string) {
   setPendingDrop(itemId, true);
   const sources = [itemId, `pois:${itemId}`, placesSource(itemId), `streets:${itemId}`, detailSource(itemId)].map(sqlText).join(', ');
@@ -556,7 +558,9 @@ function dropIndexRows(itemId: string) {
         DELETE FROM map_localities WHERE source IN (${sources});
         DELETE FROM map_addresses WHERE street IN (SELECT id FROM map_address_streets WHERE source = ${id});
         DELETE FROM map_address_streets WHERE source = ${id};
-        DELETE FROM index_sources WHERE item_id IN (${states});`),
+        DELETE FROM index_sources WHERE item_id IN (${states});
+        DELETE FROM map_pois WHERE source = ${id};
+        DELETE FROM map_sources WHERE item_id = ${id};`),
     );
     setPendingDrop(itemId, false);
     await d.execAsync('PRAGMA incremental_vacuum;');

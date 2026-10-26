@@ -1,11 +1,13 @@
 // The app's SQLite files. nomad.db holds the user's data and the content registry
 // (downloads, history, bookmarks, courses, saved places, chats). On iOS it lives under
 // Library/Application Support, which is backed up but hidden from the Files app
-// (UIFileSharingEnabled shows all of Documents). The map search index has its own file,
-// Documents/content/index/search.db: up to ~1 GB per country, derived from downloads,
-// and kept out of backups like the content it comes from. Both files move into place
-// the first time db() runs (migrate-core.ts). Content files live on disk under
-// src/lib/storage paths; these databases only reference them.
+// (UIFileSharingEnabled shows all of Documents); on Android in filesDir/SQLite, which the
+// backup rules include (plugins/with-android-backup-rules.js). What can be built or
+// fetched again has its own file, Documents/content/index/search.db: the map search index
+// (up to ~1 GB per country) and the emergency points (tens of MB), kept out of backups
+// like the content they come from. Both files move into place the first time db() runs
+// (migrate-core.ts). Content files live on disk under src/lib/storage paths; these
+// databases only reference them.
 import { Directory, File } from 'expo-file-system';
 import { defaultDatabaseDirectory, openDatabaseSync, type SQLiteDatabase, type SQLiteOpenOptions } from 'expo-sqlite';
 import { Platform } from 'react-native';
@@ -106,7 +108,11 @@ export function db(): SQLiteDatabase {
 let indexInstance: SQLiteDatabase | null = null;
 let indexBackground: SQLiteDatabase | null = null;
 
-/** The map search index (map_places, map_localities, house numbers, index_sources). */
+/**
+ * The index file: the map search index (map_places, map_localities, house numbers,
+ * index_sources) and the emergency points (map_pois, map_sources). Writes take turns
+ * through places.ts's exclusive().
+ */
 export function indexDb(): SQLiteDatabase {
   if (indexInstance) return indexInstance;
   const main = db();
@@ -142,7 +148,7 @@ export function indexDbAsync(): SQLiteDatabase {
   return indexBackground;
 }
 
-/** Bytes the search index takes on disk (0 while it is still inside nomad.db). */
+/** Bytes the index file (search index and emergency points) takes on disk (0 while still inside nomad.db). */
 export function searchIndexBytes(): number {
   const { index } = dbPaths();
   if (indexPath && indexPath !== index) return 0;
