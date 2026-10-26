@@ -17,7 +17,7 @@ import {
 } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, BackHandler, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, BackHandler, Linking, StyleSheet, View } from 'react-native';
 
 import { EmptyState, Text, triggerHaptic } from '@/components/ui';
 import { useItems } from '@/features/content/items';
@@ -31,7 +31,13 @@ import { ensureArchive, randomPath } from '@/features/library/zim';
 import { useSettings } from '@/stores/settings';
 import { space, useTheme } from '@/theme';
 
-import { ZimWebView, type ZimNavigationEvent, type ZimWebViewRef } from '../../../modules/nomad-zim';
+import {
+  ZimWebView,
+  type ZimExternalLinkEvent,
+  type ZimLoadEndEvent,
+  type ZimNavigationEvent,
+  type ZimWebViewRef,
+} from '../../../modules/nomad-zim';
 
 type Panel = null | 'text' | 'more';
 type SheetKind = null | 'search' | 'library' | 'toc';
@@ -120,6 +126,36 @@ export default function ReaderScreen() {
     }
   };
 
+  // Archive pages are third-party content: a link that leaves the app opens only after the
+  // user confirms where it goes. A page can fake taps in a loop (iOS can't tell them apart):
+  // one prompt at a time, then a short pause so the user can go back.
+  const externalPrompt = useRef(false);
+  const externalQuietUntil = useRef(0);
+  const onExternalLink = (e: { nativeEvent: ZimExternalLinkEvent }) => {
+    const { url, label } = e.nativeEvent;
+    if (externalPrompt.current || Date.now() < externalQuietUntil.current) return;
+    externalPrompt.current = true;
+    const done = () => {
+      externalPrompt.current = false;
+      externalQuietUntil.current = Date.now() + 2000;
+    };
+    Alert.alert(t('externalLinkTitle'), t('externalLinkBody', { target: label }), [
+      { text: tc('actions.cancel'), style: 'cancel', onPress: done },
+      {
+        text: tc('actions.open'),
+        onPress: () => {
+          done();
+          Linking.openURL(url).catch(() => undefined);
+        },
+      },
+    ]);
+  };
+
+  const onLoadEnd = (e: { nativeEvent: ZimLoadEndEvent }) => {
+    setFirstLoad(false);
+    if (e.nativeEvent.crashed) Alert.alert(t('pageCrashed'), t('pageCrashedBody'));
+  };
+
   const go = (p: string) => {
     setSheet(null);
     setPanel(null);
@@ -189,7 +225,8 @@ export default function ReaderScreen() {
           darkMode={scheme === 'dark'}
           textZoom={textZoom}
           onNavigationChange={onNavigationChange}
-          onLoadEnd={() => setFirstLoad(false)}
+          onLoadEnd={onLoadEnd}
+          onExternalLink={onExternalLink}
         />
         {firstLoad ? (
           <View style={[StyleSheet.absoluteFill, styles.center]} pointerEvents="none">

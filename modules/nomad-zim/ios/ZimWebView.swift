@@ -3,9 +3,14 @@ import UIKit
 import WebKit
 
 /// WKWebView that renders ZIM content through `zim://<uuid>/<path>`.
+///
+/// Archive pages are untrusted third-party HTML/JS (any file can be imported): they get
+/// no network (content rule list + CSP), only their own archive, and can leave the app
+/// only through a tapped link the reader confirms (`onExternalLink`).
 final class ZimWebView: ExpoView, WKNavigationDelegate, WKUIDelegate {
   let onNavigationChange = EventDispatcher()
   let onLoadEnd = EventDispatcher()
+  let onExternalLink = EventDispatcher()
 
   /// Website data (IndexedDB, localStorage) of ZIM pages, kept apart from other web views.
   private static let dataStoreID = UUID(uuidString: "6E0D7A1C-3B2F-4C55-9A61-5F2E8B9D4C01")!
@@ -21,6 +26,10 @@ final class ZimWebView: ExpoView, WKNavigationDelegate, WKUIDelegate {
   private var darkMode = false
   private var textZoom = 100
   private var lastNavigationPayload: [String: AnyHashable] = [:]
+  /// Loads wait for the offline content rule list (compiled once per launch, async).
+  private var rulesReady = false
+  private var pendingLoad: String?
+  private var crashGuard = ZimCrashGuard()
 
   required init(appContext: AppContext? = nil) {
     let config = WKWebViewConfiguration()
@@ -49,11 +58,23 @@ final class ZimWebView: ExpoView, WKNavigationDelegate, WKUIDelegate {
     webView.backgroundColor = .clear
     webView.scrollView.backgroundColor = .clear
     webView.scrollView.contentInsetAdjustmentBehavior = .automatic
+    #if DEBUG
     if #available(iOS 16.4, *) {
       webView.isInspectable = true
     }
+    #endif
     addSubview(webView)
     installUserScripts()
+    schemeHandler.resolveArchive = { [weak self] host in self?.archive(forHost: host) }
+    ZimContentRules.whenReady { [weak self] rules in
+      guard let self else { return }
+      if let rules { self.webView.configuration.userContentController.add(rules) }
+      self.rulesReady = true
+      if let path = self.pendingLoad {
+        self.pendingLoad = nil
+        self.load(path: path)
+      }
+    }
 
     observations = [
       webView.observe(\.canGoBack, options: [.new]) { [weak self] _, _ in self?.emitNavigation() },
@@ -76,6 +97,13 @@ final class ZimWebView: ExpoView, WKNavigationDelegate, WKUIDelegate {
     archiveId.flatMap { ZimRegistry.shared.archive(id: $0) }
   }
 
+  /// The only archive the scheme handler serves: this view's item, by id. Another item
+  /// with the same UUID (a re-import, or a crafted file) never answers for it.
+  private func archive(forHost host: String) -> NZArchive? {
+    guard let archive, archive.uuid.lowercased() == host.lowercased() else { return nil }
+    return archive
+  }
+
   // MARK: - Loading
 
   /// Called after every prop update: (re)loads when the archive or the `path` prop changed.
@@ -90,6 +118,10 @@ final class ZimWebView: ExpoView, WKNavigationDelegate, WKUIDelegate {
 
   /// Loads a ZIM path ("" = main page), resolving redirects first so relative URLs work.
   func load(path rawPath: String) {
+    guard rulesReady else {
+      pendingLoad = rawPath
+      return
+    }
     guard let archive else { return }
     var path = rawPath
     var fragment: String? = nil
@@ -209,11 +241,15 @@ final class ZimWebView: ExpoView, WKNavigationDelegate, WKUIDelegate {
       decisionHandler(.allow)
       return
     }
-    // External links (http, https, mailto, tel, geo…) go to the system.
-    if navigationAction.navigationType == .linkActivated || navigationAction.targetFrame == nil {
-      UIApplication.shared.open(url)
-    }
     decisionHandler(.cancel)
+    // Leaving the app: only a tapped link (scripted location changes are .other) in the
+    // page or a new window, with a scheme the system handles for a reader. The reader
+    // asks before opening it, so a synthetic click can't launch anything by itself.
+    let tapped = navigationAction.navigationType == .linkActivated
+    let topLevel = navigationAction.targetFrame?.isMainFrame ?? true
+    if tapped, topLevel, let event = ZimExternalLink.event(for: url) {
+      onExternalLink(event)
+    }
   }
 
   func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -232,27 +268,116 @@ final class ZimWebView: ExpoView, WKNavigationDelegate, WKUIDelegate {
     onLoadEnd(["path": currentPath() ?? "", "error": error.localizedDescription])
   }
 
+  /// The web process died (memory, or a hostile page): reload, but a page that keeps
+  /// killing it gets an error instead of an endless reload loop.
   func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
-    webView.reload()
+    let path = currentPath() ?? (lastNavigationPayload["path"] as? String)
+    guard crashGuard.shouldReload(path) else {
+      onLoadEnd(["path": path ?? "", "error": "web content process terminated", "crashed": true])
+      return
+    }
+    if webView.url != nil {
+      webView.reload()
+    } else if let path {
+      load(path: path)
+    }
   }
 
   // MARK: - WKUIDelegate
 
-  /// target="_blank" links: open in place (ZIM) or in the system browser.
+  /// target="_blank" ZIM links open in place. External ones never get here: the
+  /// navigation delegate cancels them first.
   func webView(
     _ webView: WKWebView,
     createWebViewWith configuration: WKWebViewConfiguration,
     for navigationAction: WKNavigationAction,
     windowFeatures: WKWindowFeatures
   ) -> WKWebView? {
-    if let url = navigationAction.request.url {
-      if url.scheme == ZimURL.scheme {
-        webView.load(navigationAction.request)
-      } else {
-        UIApplication.shared.open(url)
-      }
+    if let url = navigationAction.request.url, url.scheme == ZimURL.scheme {
+      webView.load(navigationAction.request)
     }
     return nil
+  }
+}
+
+/// Links that may leave the app: schemes the system handles for a reader (browser, mail,
+/// phone, maps). App deep links, file: and the rest are dropped.
+enum ZimExternalLink {
+  static let schemes: Set<String> = ["http", "https", "mailto", "tel", "geo"]
+
+  /// `{url, label}` for the reader's confirmation (label: the host, or the address or
+  /// number of mailto/tel/geo), or nil when the URL may not leave the app.
+  static func event(for url: URL) -> [String: String]? {
+    guard let scheme = url.scheme?.lowercased(), schemes.contains(scheme) else { return nil }
+    var label: String
+    if scheme == "http" || scheme == "https" {
+      label = url.host ?? ""
+    } else {
+      label = URLComponents(url: url, resolvingAgainstBaseURL: false)?.path ?? ""
+    }
+    // Shown as the destination: no bidi overrides or other invisible format characters.
+    var scalars = String.UnicodeScalarView()
+    scalars.append(contentsOf: label.unicodeScalars.filter { $0.properties.generalCategory != .format })
+    label = String(String(scalars).prefix(200))
+    guard !label.isEmpty else { return nil }
+    return ["url": url.absoluteString, "label": label]
+  }
+}
+
+/// Whether a page whose web process died may be reloaded: once per page, and only a few
+/// times a minute, so a page that always crashes (too big, or hostile) can't loop.
+struct ZimCrashGuard {
+  static let window: TimeInterval = 60
+  static let maxPerWindow = 3
+  private var recent: [(page: String, at: Date)] = []
+
+  mutating func shouldReload(_ page: String?, now: Date = Date()) -> Bool {
+    recent.removeAll { now.timeIntervalSince($0.at) > Self.window }
+    let again = recent.contains { $0.page == page }
+    recent.append((page ?? "", now))
+    return page != nil && !again && recent.count <= Self.maxPerWindow
+  }
+}
+
+/// Content rule list that blocks every network load archive pages make (images, scripts,
+/// styles, fonts, media, fetch/XHR, beacons, WebSockets), also from documents the CSP
+/// header doesn't reach (data: URLs). Navigations are decided in decidePolicyFor before
+/// it applies, so tapped external links still reach the reader's confirmation.
+enum ZimContentRules {
+  private static let identifier = "nomad-zim-offline-1"
+  // url-filter has no alternation: one rule per scheme.
+  private static let json = """
+  [
+    {"trigger": {"url-filter": "^https?:"}, "action": {"type": "block"}},
+    {"trigger": {"url-filter": "^wss?:"}, "action": {"type": "block"}},
+    {"trigger": {"url-filter": "^ftp:"}, "action": {"type": "block"}}
+  ]
+  """
+
+  // Main thread only.
+  private static var compiled: WKContentRuleList?
+  private static var done = false
+  private static var waiting: [(WKContentRuleList?) -> Void] = []
+
+  /// Calls `ready` on the main thread with the compiled list (nil if compiling failed:
+  /// the CSP header still applies then).
+  static func whenReady(_ ready: @escaping (WKContentRuleList?) -> Void) {
+    if done {
+      ready(compiled)
+      return
+    }
+    waiting.append(ready)
+    guard waiting.count == 1 else { return }
+    WKContentRuleListStore.default().compileContentRuleList(forIdentifier: identifier, encodedContentRuleList: json) { list, error in
+      DispatchQueue.main.async {
+        if let error { NSLog("[nomad-zim] content rule list failed: %@", String(describing: error)) }
+        compiled = list
+        done = true
+        let callbacks = waiting
+        waiting = []
+        callbacks.forEach { $0(list) }
+      }
+    }
   }
 }
 

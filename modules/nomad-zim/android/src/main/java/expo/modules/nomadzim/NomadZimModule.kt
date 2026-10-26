@@ -99,7 +99,7 @@ class NomadZimModule : Module() {
     AsyncFunction("excludeFromBackup") { _: String -> false }
 
     View(ZimWebView::class) {
-      Events("onNavigationChange", "onLoadEnd")
+      Events("onNavigationChange", "onLoadEnd", "onExternalLink")
 
       Prop("archiveId") { view: ZimWebView, id: String? -> view.archiveId = id }
       Prop("path") { view: ZimWebView, path: String? -> view.requestedPath = path }

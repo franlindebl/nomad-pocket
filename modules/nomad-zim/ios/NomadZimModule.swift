@@ -94,7 +94,7 @@ public final class NomadZimModule: Module {
     }.runOnQueue(zimWorkQueue)
 
     View(ZimWebView.self) {
-      Events("onNavigationChange", "onLoadEnd")
+      Events("onNavigationChange", "onLoadEnd", "onExternalLink")
 
       Prop("archiveId") { (view: ZimWebView, id: String?) in
         view.archiveId = id

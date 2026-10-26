@@ -1,12 +1,12 @@
 package expo.modules.nomadzim
 
 import android.annotation.SuppressLint
-import android.content.ActivityNotFoundException
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.os.SystemClock
 import android.view.ContextThemeWrapper
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -19,19 +19,24 @@ import java.io.ByteArrayInputStream
 import java.io.InputStream
 
 /**
- * android.webkit.WebView serving ZIM content from `https://zim.local/<uuid>/<path>`
+ * android.webkit.WebView serving ZIM content from `https://<uuid>.zim.local/<path>`
  * via shouldInterceptRequest (an https origin so the page gets a normal secure
- * context, like kiwix-android does).
+ * context, like kiwix-android does; one origin per archive, so archives can't read each
+ * other's storage).
+ *
+ * Archive pages are untrusted third-party HTML/JS (any file can be imported): they get no
+ * network (other hosts are intercepted, and a CSP covers what interception never sees,
+ * like WebSockets), only their own archive, and can leave the app only through a tapped
+ * link the reader confirms (`onExternalLink`).
  */
 @SuppressLint("SetJavaScriptEnabled", "ViewConstructor")
 class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, appContext) {
   val onNavigationChange by EventDispatcher()
   val onLoadEnd by EventDispatcher()
+  val onExternalLink by EventDispatcher()
 
-  // Light theme context: pages always get prefers-color-scheme: light, our invert CSS is the only
-  // dark mode (pages with their own dark rules would otherwise be inverted back to light).
-  val webView = WebView(ContextThemeWrapper(context, android.R.style.Theme_DeviceDefault_Light))
-
+  // Read by shouldInterceptRequest on WebView's IO thread.
+  @Volatile
   var archiveId: String? = null
   var requestedPath: String? = null
   private var loadedArchiveId: String? = null
@@ -40,17 +45,31 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
 
   @Volatile
   private var darkMode = false
+  private var zoomPercent = 100
   private var lastPayload: Map<String, Any?> = emptyMap()
 
   private var lastFind: String? = null
   private var pendingFind: Promise? = null
+  private val crashGuard = CrashGuard()
+
+  /** Replaced by a fresh one when its renderer process dies (see [onRendererGone]). */
+  lateinit var webView: WebView
+    private set
 
   private val handle: ZimHandle?
     get() = archiveId?.let { ZimRegistry.get(it) }
 
   init {
-    webView.setBackgroundColor(Color.TRANSPARENT)
-    webView.settings.apply {
+    webView = createWebView()
+    addView(webView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+  }
+
+  private fun createWebView(): WebView {
+    // Light theme context: pages always get prefers-color-scheme: light, our invert CSS is the only
+    // dark mode (pages with their own dark rules would otherwise be inverted back to light).
+    val view = WebView(ContextThemeWrapper(context, android.R.style.Theme_DeviceDefault_Light))
+    view.setBackgroundColor(Color.TRANSPARENT)
+    view.settings.apply {
       javaScriptEnabled = true
       domStorageEnabled = true
       allowFileAccess = false
@@ -62,15 +81,16 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
       builtInZoomControls = true
       displayZoomControls = false
       setSupportMultipleWindows(false)
+      textZoom = zoomPercent
     }
-    webView.webViewClient = Client()
-    webView.setFindListener { active, matches, done ->
+    view.webViewClient = Client()
+    view.setFindListener { active, matches, done ->
       if (done) {
         pendingFind?.resolve(mapOf("found" to (matches > 0), "matches" to matches, "active" to if (matches > 0) active + 1 else 0))
         pendingFind = null
       }
     }
-    addView(webView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+    return view
   }
 
   // region Loading
@@ -100,6 +120,38 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
     webView.loadUrl(zimUrl(h.uuid, path, fragment))
   }
 
+  /** The only archive this view serves: its own item's, by id, never another item that shares the UUID. */
+  private fun handleFor(uri: Uri): ZimHandle? {
+    val h = handle ?: return null
+    return h.takeIf { uuidOf(uri) == it.uuid }
+  }
+
+  /**
+   * The renderer died (crash, or killed for memory) and took the WebView with it: swap in a
+   * fresh one and reload the page, but a page that keeps killing it gets an error instead of
+   * an endless loop.
+   */
+  private fun onRendererGone(dead: WebView) {
+    val current = dead === webView
+    val path = if (current) currentPath(dead.url) ?: lastPayload["path"] as? String else null
+    removeView(dead)
+    dead.destroy()
+    if (!current) return
+    webView = createWebView()
+    addView(webView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+    // React Native doesn't lay out children added after the fact.
+    measureAndLayout()
+    lastPayload = emptyMap()
+    lastFind = null
+    pendingFind?.resolve(mapOf("found" to false))
+    pendingFind = null
+    if (path != null && crashGuard.shouldReload(path, SystemClock.elapsedRealtime())) {
+      load(path)
+    } else {
+      onLoadEnd(mapOf("path" to (path ?: ""), "error" to "renderer process gone", "crashed" to true))
+    }
+  }
+
   // endregion
 
   // region Appearance
@@ -111,7 +163,8 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
   }
 
   fun setTextZoom(percent: Int) {
-    webView.settings.textZoom = percent.coerceIn(50, 300)
+    zoomPercent = percent.coerceIn(50, 300)
+    webView.settings.textZoom = zoomPercent
   }
 
   // endregion
@@ -145,8 +198,8 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
 
   private fun currentPath(url: String? = webView.url): String? {
     val uri = url?.let(Uri::parse) ?: return null
-    if (uri.host != HOST) return null
-    return pathOf(uri)?.second
+    if (uuidOf(uri) == null) return null
+    return pathOf(uri)
   }
 
   private fun emitNavigation(url: String? = webView.url) {
@@ -168,10 +221,10 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
   private inner class Client : WebViewClient() {
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
       val uri = request.url
-      if (uri.host == HOST && (uri.scheme == "https" || uri.scheme == "http")) {
+      if (uuidOf(uri) != null) {
         if (request.isForMainFrame) {
-          val h = pathOf(uri)?.let { ZimRegistry.byUuid(it.first) } ?: return false
-          val path = pathOf(uri)!!.second
+          val h = handleFor(uri) ?: return false
+          val path = pathOf(uri)
           val info = h.entryInfo(path)
           if (info != null && info.path != path) {
             view.loadUrl(zimUrl(h.uuid, info.path, uri.fragment))
@@ -180,28 +233,34 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
         }
         return false
       }
-      if (uri.scheme == "about" || uri.scheme == "data" || uri.scheme == "blob" || uri.scheme == "javascript") return false
-      try {
-        context.startActivity(Intent(Intent.ACTION_VIEW, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-      } catch (_: ActivityNotFoundException) {
-        // No app to handle it.
-      }
+      val scheme = uri.scheme?.lowercase()
+      if (scheme == "about" || scheme == "blob" || scheme == "javascript") return false
+      // A top-level data: document has no CSP: its WebSockets would reach the network.
+      if (scheme == "data") return request.isForMainFrame
+      // Leaving the app: only a link the user tapped in the page itself (this runs for
+      // script navigations and iframes too), with a scheme the system handles for a reader.
+      // The reader asks before opening it.
+      if (request.isForMainFrame && request.hasGesture()) externalLinkEvent(uri)?.let { onExternalLink(it) }
       return true
     }
 
     override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
       val uri = request.url
-      if (uri.host != HOST) {
+      if (uuidOf(uri) == null) {
         // Offline app: block every other network request made by content.
         return if (uri.scheme == "http" || uri.scheme == "https") notFound() else null
       }
-      val (uuid, path) = pathOf(uri) ?: return notFound()
-      val h = ZimRegistry.byUuid(uuid) ?: return notFound()
-      val info = h.entryInfo(path) ?: return notFound()
+      val h = handleFor(uri) ?: return notFound()
+      val info = h.entryInfo(pathOf(uri)) ?: return notFound()
       val mime = normalizedMime(info.mimeType, info.path)
       val encoding = if (isText(mime)) "utf-8" else null
       val size = info.size
-      val headers = mutableMapOf("Accept-Ranges" to "bytes", "Cache-Control" to "max-age=86400", "Access-Control-Allow-Origin" to "*")
+      val headers = mutableMapOf(
+        "Accept-Ranges" to "bytes",
+        "Cache-Control" to "max-age=86400",
+        "Content-Security-Policy" to CONTENT_SECURITY_POLICY,
+        "X-DNS-Prefetch-Control" to "off",
+      )
 
       val rangeHeader = request.requestHeaders.entries.firstOrNull { it.key.equals("Range", ignoreCase = true) }?.value
       val range = parseRange(rangeHeader, size)
@@ -238,6 +297,12 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
       emitNavigation(url)
       onLoadEnd(mapOf("path" to (currentPath(url) ?: ""), "title" to (lastPayload["title"] ?: "")))
     }
+
+    // The default (false) takes the whole app down with the renderer.
+    override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
+      onRendererGone(view)
+      return true
+    }
   }
 
   /** Streams a large item in chunks so a big video never sits fully in memory. */
@@ -267,10 +332,36 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
     }
   }
 
+  /** Whether a page whose renderer died may be reloaded: once per page, and only a few times a minute. */
+  private class CrashGuard {
+    private val recent = mutableListOf<Pair<String, Long>>()
+
+    fun shouldReload(page: String, now: Long): Boolean {
+      recent.removeAll { now - it.second > CRASH_WINDOW_MS }
+      val again = recent.any { it.first == page }
+      recent.add(page to now)
+      return !again && recent.size <= MAX_CRASHES_PER_WINDOW
+    }
+  }
+
   companion object {
-    const val HOST = "zim.local"
+    const val HOST_SUFFIX = ".zim.local"
     private const val MAX_RANGE_CHUNK = 4L * 1024 * 1024
     private const val STREAM_CHUNK = 2L * 1024 * 1024
+    private const val CRASH_WINDOW_MS = 60_000L
+    private const val MAX_CRASHES_PER_WINDOW = 3
+
+    /**
+     * Archive pages may load only from their own origin, data: and blob:. Inline scripts,
+     * styles and eval stay allowed (archive apps and our dark-mode style need them). Sent on
+     * every response because workers take their policy from their own script's response.
+     */
+    private const val CONTENT_SECURITY_POLICY =
+      "default-src 'self' data: blob: about: 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'"
+
+    /** Schemes the system handles for a reader (browser, mail, phone, maps). */
+    private val EXTERNAL_SCHEMES = setOf("http", "https", "mailto", "tel", "geo")
+    private val FORMAT_CHARS = Regex("\\p{Cf}")
 
     // Pages that are dark by design get data-nomad-native-dark (see NATIVE_DARK_JS) and are left alone.
     private const val DARK_CSS =
@@ -309,16 +400,29 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
 
     fun zimUrl(uuid: String, path: String, fragment: String?): String {
       val encoded = path.split('/').joinToString("/") { Uri.encode(it) }
-      return "https://$HOST/$uuid/$encoded" + (fragment?.takeIf { it.isNotEmpty() }?.let { "#$it" } ?: "")
+      return "https://$uuid$HOST_SUFFIX/$encoded" + (fragment?.takeIf { it.isNotEmpty() }?.let { "#$it" } ?: "")
     }
 
-    /** (uuid, decoded ZIM path) of a `https://zim.local/<uuid>/<path>` URL. */
-    fun pathOf(uri: Uri): Pair<String, String>? {
-      val encoded = uri.encodedPath ?: return null
-      val trimmed = encoded.removePrefix("/")
-      val slash = trimmed.indexOf('/')
-      if (slash <= 0) return if (trimmed.isNotEmpty()) Pair(trimmed, "") else null
-      return Pair(trimmed.substring(0, slash), Uri.decode(trimmed.substring(slash + 1)))
+    /** Archive UUID of a `https://<uuid>.zim.local/<path>` URL, or null for any other URL. */
+    fun uuidOf(uri: Uri): String? {
+      if (uri.scheme != "https" && uri.scheme != "http") return null
+      val host = uri.host?.lowercase() ?: return null
+      if (!host.endsWith(HOST_SUFFIX)) return null
+      return host.removeSuffix(HOST_SUFFIX).takeIf { it.isNotEmpty() }
+    }
+
+    /** Decoded ZIM path of a zim.local URL (no leading slash, query dropped). */
+    fun pathOf(uri: Uri): String = Uri.decode((uri.encodedPath ?: "").removePrefix("/"))
+
+    /** `{url, label}` for the reader's confirmation (label: the host, or the address or number), or null when it may not leave. */
+    fun externalLinkEvent(uri: Uri): Map<String, String>? {
+      val scheme = uri.scheme?.lowercase() ?: return null
+      if (scheme !in EXTERNAL_SCHEMES) return null
+      val raw = if (scheme == "http" || scheme == "https") uri.host.orEmpty() else uri.schemeSpecificPart.orEmpty().substringBefore('?')
+      // Shown as the destination: no bidi overrides or other invisible format characters.
+      val label = raw.replace(FORMAT_CHARS, "").take(200)
+      if (label.isEmpty()) return null
+      return mapOf("url" to uri.toString(), "label" to label)
     }
 
     fun parseRange(header: String?, size: Long): LongRange? {
