@@ -2,9 +2,10 @@
 // (key `prepare`). A handful of small lists: no SQL tables needed. Side effects that
 // go with some edits (expiry reminders) live in reminders.ts.
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 
-import Storage from '@/db/kv';
+import { kvStorage } from '@/lib/kv';
+
 
 import { DEFAULT_HOUSEHOLD, HOUSEHOLD_MAX, type Household } from './kit';
 import type { EntryKind, EntryOf, KitEntry, MeetingPoint, MeetingSlot, PrepareData } from './types';
@@ -74,7 +75,7 @@ export const usePrepare = create<PrepareData & Actions>()(
     {
       name: 'prepare',
       version: 1,
-      storage: createJSONStorage(() => Storage),
+      storage: kvStorage(),
       partialize: ({ contacts, numbers, people, meeting, homeNotes, household, kit, custom }) => ({
         contacts,
         numbers,

@@ -1,10 +1,10 @@
 // User preferences, persisted in SQLite's key-value store (sync reads at startup).
 import { Appearance } from 'react-native';
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 
-import Storage from '@/db/kv';
 import { deviceLanguage, setLanguage, type AppLanguage } from '@/i18n';
+import { kvStorage } from '@/lib/kv';
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 
@@ -62,7 +62,7 @@ export const useSettings = create<SettingsState>()(
     }),
     {
       name: 'settings',
-      storage: createJSONStorage(() => Storage),
+      storage: kvStorage(),
       partialize: ({ language, contentLanguages, theme, wifiOnly, readerTextScale, onboarded, aiModelId, country }) => ({
         language,
         contentLanguages,

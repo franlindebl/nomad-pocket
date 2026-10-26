@@ -137,9 +137,9 @@ assets/                      fonts, icons, splash, maps/basemap-assets.zip, maps
    - prepare: notification handler (foreground banners) and tap → `/prepare/kit` (also from a
      cold start: the response waits for the navigator); expiry reminders are reconciled with the
      plan (startup, foreground, household or language change) through one queue.
-4. The splash hides. Settings hydrate asynchronously from the kv-store; once hydrated,
-   if `onboarded` is false the root pushes `/onboarding`, waiting until the navigator
-   is ready (an early push is dropped).
+4. The splash hides. Settings were hydrated when their store was created (synchronous
+   kv-store read, `src/lib/kv.ts`); if `onboarded` is false the root pushes `/onboarding`,
+   waiting until the navigator is ready (an early push is dropped).
 
 ## Data model (SQLite, `src/db`)
 
@@ -196,7 +196,11 @@ Preparedness), `assistant` (`chats.ts`: persists `useLibrary`), `maps.viewport`,
 `maps.routingManifest` and `maps.countryManifest` (cached catalogs), `maps.detailIndex` (centre
 of the detail index), `maps.sideImports` (side files still to import),
 `maps.pendingIndexDrops` (index rows of removed maps still to delete) and
-`reader.disclaimerDismissed.<itemId>`.
+`reader.disclaimerDismissed.<itemId>`. Persisted stores use `kvStorage()`
+(`src/lib/kv.ts`): reads use the sync API, so the stores are hydrated when they are created and
+the root layout doesn't wait for hydration (with expo-sqlite's own kv-store, an async first open
+racing a sync read once left the settings hydration hanging and the setup wizard never showed);
+writes stay async.
 
 ## Storage layout
 

@@ -161,6 +161,10 @@ docs/               the docs above + screenshots/ + store/
   `VALHALLA_IMAGE` (`.github/workflows/country-packages.yml`, `scripts/routing/build-country.sh`)
   and `ENGINE_VALHALLA` (`features/maps/routing-core.ts`, which hides packs of another version)
   in step with valhalla-mobile's bundled Valhalla (3.9.1).
+- kv-store: a zustand `persist` store uses `kvStorage()` (`src/lib/kv.ts`), never
+  `createJSONStorage(() => Storage)`. Mixing its async and sync APIs on the first open
+  breaks the migration transaction: on a fresh install the settings never hydrated and
+  the setup wizard didn't show (~1 in 25 launches; seen in E2E on iOS and Android).
 
 ## Working on this repo
 
