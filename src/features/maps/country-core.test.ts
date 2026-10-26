@@ -1,7 +1,17 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { mapAssetUrl, parseMapsManifest, routePackFor } from './country-core.ts';
+import {
+  countryGroupId,
+  countryNeed,
+  countryOfGroup,
+  isNewer,
+  mapAssetUrl,
+  parseMapsManifest,
+  pendingBytes,
+  routePackFor,
+  type PlannedArchive,
+} from './country-core.ts';
 
 const file = (name: string, size = 10) => ({ name, size, sha256: 'x' });
 
@@ -76,4 +86,55 @@ test('routePackFor matches the region, then a shared extract', () => {
   assert.equal(routePackFor(packs, 'ht')?.id, 'do');
   assert.equal(routePackFor(packs, 'gb'), null);
   assert.equal(routePackFor(packs, 'fr'), null);
+});
+
+test('a country group names its country, the pack it uses included', () => {
+  assert.equal(countryGroupId('ht'), 'country-ht');
+  assert.equal(countryOfGroup(countryGroupId('ht')), 'ht');
+  assert.equal(countryOfGroup('model-x'), null);
+  assert.equal(countryOfGroup(undefined), null);
+});
+
+const GB = 1e9;
+const planned = (size: number, onDisk = false, queued = false) => ({ size, onDisk, queued });
+
+test('countryNeed: a fresh two-part map and pack, side files included', () => {
+  // Spain-like: map 2.3 GB and pack 2.27 GB in two parts each, 0.3 GB of side files.
+  const map: PlannedArchive = { size: 2.3 * GB, parts: [planned(2 * GB), planned(0.3 * GB)], sides: [planned(0.1 * GB), planned(0.05 * GB)] };
+  const pack: PlannedArchive = { size: 2.27 * GB, parts: [planned(2 * GB), planned(0.27 * GB)], sides: [planned(0.15 * GB)] };
+  const need = countryNeed([map, pack]);
+  assert.equal(Math.round(need.bytes / 1e6), 4870);
+  // Both assembly copies on top of the download.
+  assert.equal(Math.round(need.needed / 1e6), 4870 + 2300 + 2270);
+});
+
+test('countryNeed: what is on disk or queued costs nothing; a single part needs no copy', () => {
+  const retry: PlannedArchive = { size: 2.3 * GB, parts: [planned(2 * GB, true), planned(0.3 * GB, false, true)], sides: [planned(0.1 * GB, true)] };
+  // The queued part is in `pending` (the manager counts the rest of the queue).
+  assert.deepEqual(countryNeed([retry], 0.2 * GB), { bytes: 0, needed: 0.2 * GB + 2.3 * GB });
+  const single: PlannedArchive = { size: 3e6, parts: [planned(3e6)], sides: [] };
+  assert.deepEqual(countryNeed([single, null]), { bytes: 3e6, needed: 3e6 });
+  // Nothing to fetch (the map is installed): only the queue.
+  assert.deepEqual(countryNeed([null, undefined], 5), { bytes: 0, needed: 5 });
+});
+
+test('pendingBytes counts what the queue still has to fetch', () => {
+  assert.equal(
+    pendingBytes([
+      { status: 'running', totalBytes: 100, bytesWritten: 40 },
+      { status: 'queued', totalBytes: 50, bytesWritten: 0 },
+      { status: 'paused', totalBytes: 30, bytesWritten: 10 },
+      { status: 'failed', totalBytes: 999, bytesWritten: 0 },
+      { status: 'processing', totalBytes: 999, bytesWritten: 999 },
+      { status: 'running', totalBytes: 999, bytesWritten: 0, external: true },
+    ]),
+    60 + 50 + 20,
+  );
+});
+
+test('isNewer compares build dates', () => {
+  assert.ok(isNewer('20261105', '20261005'));
+  assert.ok(!isNewer('20261005', '20261005'));
+  assert.ok(!isNewer('', '20261005'));
+  assert.ok(!isNewer('20261105', null));
 });

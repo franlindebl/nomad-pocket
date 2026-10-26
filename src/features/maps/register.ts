@@ -10,14 +10,15 @@ import { getItem, listItems, onItemRemoved, upsertItem } from '@/features/conten
 import { HEADER_SIZE, parseHeader } from '@/lib/pmtiles/format';
 import { contentDir, deleteFile, partialDir } from '@/lib/storage';
 
-import { onMapFileDownloaded, refreshMapsCatalog, sweepCountryMapFiles } from './country-maps';
+import { onMapFileDownloaded, refreshMapsCatalog, resumeMapImports, sweepCountryMapFiles } from './country-maps';
 import { cancelEmergencySync, syncEmergencyPoints } from './emergency';
 import { forgetEstimates, mapItemId, onMapInstalled, WORLD_ID, type MapItemMeta } from './extraction';
 import { useMarkers } from './markers';
 import { forgetMapSource, indexDetailAround, indexDetailAroundView, indexStaleMaps, invalidateIndex } from './places';
 import { getRegion, regionName } from './regions';
 import { closeRouter, listRoutePacks, registerLoosePack, resolvePackFile } from './routing';
-import { onRouteFileDownloaded, refreshRoutingCatalog, sweepRoutingFiles } from './routing-packs';
+import { onRouteFileDownloaded, refreshRoutingCatalog, resumePackImports, sweepRoutingFiles } from './routing-packs';
+import { forgetSideFilesOf } from './side-files';
 import { resolveMapFile, type MapItem } from './useMapSources';
 import { ensureWorldMap } from './world';
 
@@ -116,6 +117,9 @@ registerInit(() => {
     try {
       sweepRoutingFiles();
       sweepCountryMapFiles();
+      // Imports a kill cut short: their files are still on disk.
+      resumePackImports();
+      resumeMapImports();
     } catch (e) {
       console.warn('[maps] cannot sweep routing files', e);
     }
@@ -165,6 +169,7 @@ onItemRemoved('map', (item) => {
   forgetEstimates();
   cancelEmergencySync(item.id);
   forgetMapSource(item.id);
+  forgetSideFilesOf(item.id);
   deleteFile(resolveMapFile(item));
 });
 
@@ -174,6 +179,7 @@ registerCompletionHandler('route', onRouteFileDownloaded);
 onItemRemoved('route', (item) => {
   // The pack's emergency points and their search rows go with it.
   forgetMapSource(item.id);
+  forgetSideFilesOf(item.id);
   // Valhalla has the file mapped: release it first.
   closeRouter()
     .catch(() => {})

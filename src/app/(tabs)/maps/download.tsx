@@ -42,7 +42,9 @@ export default function CountryDownloadSheet() {
 
   if (!offer) return null;
   const total = size.status === 'ready' ? size.bytes : null;
-  const enough = total === null || hasRoomFor(total);
+  // Room for the download plus its assembly copies and the rest of the queue (planCountry).
+  const needed = size.status === 'ready' ? size.needed : null;
+  const enough = needed === null || hasRoomFor(needed);
   const failed = size.status === 'offline' || size.status === 'error' ? size : null;
   const loading = size.status === 'loading';
   const zoom = offer.map?.maxZoom ?? offer.fallbackZoom;
@@ -109,9 +111,9 @@ export default function CountryDownloadSheet() {
         ) : null}
       </Card>
 
-      {!enough && total !== null ? (
+      {!enough && needed !== null ? (
         <Text variant="footnote" color="danger">
-          {t('download.notEnough', { needed: formatBytes(total), free: formatBytes(freeBytes()) })}
+          {t('download.notEnough', { needed: formatBytes(needed), free: formatBytes(freeBytes()) })}
         </Text>
       ) : null}
       {error ? (

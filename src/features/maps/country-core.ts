@@ -102,3 +102,55 @@ const SHARED_PACKS: Record<string, string> = { ht: 'do' };
 export function routePackFor<P extends Pick<ManifestPack, 'id' | 'regionId'>>(packs: P[], regionId: string): P | null {
   return packs.find((p) => p.regionId === regionId) ?? packs.find((p) => p.id === SHARED_PACKS[regionId]) ?? null;
 }
+
+// --- One download per country (map, pack and side files under one group) ------
+
+/** The download group of a country: its map, its pack (even another country's) and their side files. */
+export const countryGroupId = (regionId: string) => `country-${regionId}`;
+
+/** The country a download group belongs to (null: not a country's group). */
+export function countryOfGroup(groupId: string | null | undefined): string | null {
+  return (groupId && /^country-(.+)$/.exec(groupId)?.[1]) || null;
+}
+
+/** YYYYMMDD build dates: whether `latest` is a newer build than `installed`. */
+export function isNewer(latest: string | null | undefined, installed: string | null | undefined): boolean {
+  return !!latest && !!installed && latest > installed;
+}
+
+/** One file of an archive to download: already on disk, already queued, or still to fetch. */
+export type PlannedFile = { size: number; onDisk: boolean; queued: boolean };
+/** A country map or routing pack: its parts (appended into the archive) and its side files. */
+export type PlannedArchive = { size: number; parts: PlannedFile[]; sides: PlannedFile[] };
+/** `bytes`: what will be fetched; `needed`: the free space that takes. */
+export type CountryNeed = { bytes: number; needed: number };
+
+const toFetch = (f: PlannedFile) => (f.onDisk || f.queued ? 0 : f.size);
+
+/**
+ * What a country download takes, for the size it shows and the room it checks (both the same
+ * figure, so the sheet never offers what the download then refuses). Files already on disk
+ * cost nothing; queued ones are in `pending` (the remaining bytes of every download in the
+ * queue, as the download manager counts them before queueing another). A multi-part archive
+ * is appended into a temp copy while its parts still exist: its whole size again.
+ */
+export function countryNeed(archives: (PlannedArchive | null | undefined)[], pending = 0): CountryNeed {
+  let bytes = 0;
+  let needed = pending;
+  for (const a of archives) {
+    if (!a) continue;
+    const fetch = a.parts.reduce((sum, f) => sum + toFetch(f), 0) + a.sides.reduce((sum, f) => sum + toFetch(f), 0);
+    bytes += fetch;
+    needed += fetch + (a.parts.length > 1 ? a.size : 0);
+  }
+  return { bytes, needed };
+}
+
+type PendingRecord = { status: string; totalBytes: number; bytesWritten: number; external?: boolean };
+
+/** Bytes still to come for downloads in the queue (the manager's own room check counts these). */
+export function pendingBytes(records: PendingRecord[]): number {
+  return records
+    .filter((r) => !r.external && (r.status === 'queued' || r.status === 'running' || r.status === 'paused'))
+    .reduce((sum, r) => sum + Math.max(0, r.totalBytes - r.bytesWritten), 0);
+}
