@@ -71,6 +71,16 @@ removed with the visible-area downloads in the 2026-10-25 redesign: maps are who
 countries now, too big for a per-script check; check map labels in other scripts by hand.
 Results go to `e2e/artifacts/latest-android/`.
 
+Emulator network (2026-10-26): the app follows Android's "validated" flag
+(`isInternetReachable`), so "Sin conexión" / "Necesitas conexión" on the emulator usually
+means the network isn't validated, not the app. The script boots the emulator with
+`-dns-server 8.8.8.8,1.1.1.1` (its resolver went stale after the Mac changed network:
+pings fine, "Unable to resolve host github.com"), turns captive portal probing off and
+waits for `VALIDATED` (toggling airplane mode). Behind a TLS-intercepting proxy every
+download fails with `CertPathValidatorException: Trust anchor for certification path not
+found` (Downloads sheet): the emulator doesn't trust the proxy's CA. Run the network
+flows on a network without one.
+
 ## Running part of the suite
 
 ```bash

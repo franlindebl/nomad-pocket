@@ -25,11 +25,25 @@ fi
 
 if ! "$ADB" devices | grep -q "emulator-.*device$"; then
   echo "Starting emulator ${AVD}…"
-  "$ANDROID_HOME/emulator/emulator" -avd "$AVD" -no-snapshot-save -no-audio >/dev/null 2>&1 &
+  # Explicit DNS: after the Mac changes network the emulator's resolver can go stale
+  # (pings work, "Unable to resolve host github.com").
+  "$ANDROID_HOME/emulator/emulator" -avd "$AVD" -no-snapshot-save -no-audio -dns-server 8.8.8.8,1.1.1.1 >/dev/null 2>&1 &
   "$ADB" wait-for-device
   until [[ "$("$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == 1 ]]; do sleep 2; done
 fi
 SERIAL="$("$ADB" devices | awk '/^emulator-.*device$/ {print $1; exit}')"
+# The app trusts Android's "validated" flag: until the network is validated it says
+# "Necesitas conexión". The emulator's probes flap between validated and partial
+# connectivity, so captive portal detection is off; an airplane-mode toggle makes Android
+# evaluate the network again.
+"$ADB" -s "$SERIAL" shell settings put global captive_portal_mode 0
+validated() { "$ADB" -s "$SERIAL" shell dumpsys connectivity | grep -q "INTERNET&.*&VALIDATED"; }
+for attempt in 1 2 3; do
+  for _ in $(seq 1 15); do validated && break 2; sleep 2; done
+  "$ADB" -s "$SERIAL" shell cmd connectivity airplane-mode enable; sleep 3
+  "$ADB" -s "$SERIAL" shell cmd connectivity airplane-mode disable
+done
+validated || echo "warning: the emulator's network is not validated; network flows will fail"
 
 if ! java -version >/dev/null 2>&1; then
   export JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk}"
@@ -52,11 +66,12 @@ for flow in $(grep -lE '^tags:.*[[ ,]android[],]' "$ROOT"/e2e/flows/**/*.yaml "$
   if "$MAESTRO" --device "$SERIAL" test "$flow" --test-output-dir "$OUT/$name" > "$OUT/$name/maestro.log" 2>&1; then
     passed=$((passed + 1)); echo "  ✓"
   else
-    reason="$(grep -m1 '^\[Failed\]' "$OUT/$name/maestro.log" | sed -E 's/^\[Failed\] [^ ]+ \([^)]*\) //')"
+    reason="$(grep -m1 '^\[Failed\]' "$OUT/$name/maestro.log" | sed -E 's/^\[Failed\] [^ ]+ \([^)]*\) //' || true)"
     failed+=("$name  ${reason:-see maestro.log}"); echo "  ✗ ${reason:-}"
   fi
   # Lift <dir>/<timestamp>/<flow>/ to <dir>, as scripts/e2e.sh does.
-  for inner in "$OUT/$name"/*/"$name"; do [[ -d "$inner" ]] && mv "$inner"/* "$OUT/$name"/ && rm -r "$(dirname "$inner")"; done
+  # (`|| true`: under set -e a flow without that folder would end the whole run.)
+  for inner in "$OUT/$name"/*/"$name"; do [[ -d "$inner" ]] && mv "$inner"/* "$OUT/$name"/ && rm -r "$(dirname "$inner")" || true; done
 done
 
 {
