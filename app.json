@@ -7,6 +7,10 @@
     "icon": "./assets/images/icon.png",
     "scheme": "nomadpocket",
     "userInterfaceStyle": "automatic",
+    "locales": {
+      "es": "./locales/es.json",
+      "en": "./locales/en.json"
+    },
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.fjlinde.nomadpocket",
@@ -110,7 +114,11 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Nomad Pocket usa tu ubicación para mostrarte en los mapas sin conexión, medir distancias y guiarte hasta lugares y puntos de emergencia."
+          "locationWhenInUsePermission": "Nomad Pocket usa tu ubicación para mostrarte en los mapas sin conexión, medir distancias y guiarte hasta lugares y puntos de emergencia.",
+          "locationAlwaysAndWhenInUsePermission": false,
+          "locationAlwaysPermission": false,
+          "locationFullAccuracyPermission": false,
+          "motionUsagePermission": false
         }
       ],
       "@maplibre/maplibre-react-native",
@@ -134,7 +142,8 @@
           "icon": "./assets/images/notification-icon.png",
           "color": "#F2643A"
         }
-      ]
+      ],
+      "./plugins/with-android-backup-rules"
     ],
     "experiments": {
       "typedRoutes": true,

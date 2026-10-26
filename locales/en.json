@@ -1,0 +1,5 @@
+{
+  "ios": {
+    "NSLocationWhenInUseUsageDescription": "Nomad Pocket uses your location to show you on the offline maps, measure distances and guide you to places and emergency points."
+  }
+}
