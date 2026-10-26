@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { integrityProblem, isStaleResumeError, networkGate, planAfterFailure, RETRY_DELAYS_MS, safeFileName, urlHost } from './manager-core.ts';
+import { cancelAction, integrityProblem, isStaleResumeError, networkGate, planAfterFailure, RETRY_DELAYS_MS, safeFileName, urlHost } from './manager-core.ts';
 
 const wifi = { type: 'WIFI', isConnected: true, isInternetReachable: true };
 const cellular = { type: 'CELLULAR', isConnected: true, isInternetReachable: true };
@@ -95,4 +95,13 @@ test('urlHost', () => {
   assert.equal(urlHost('https://ftp.FAU.de/kiwix/zim/a.zim'), 'ftp.fau.de');
   assert.equal(urlHost('https://mirror.download.kiwix.org:443/zim/a.zim?x=1'), 'mirror.download.kiwix.org:443');
   assert.equal(urlHost('not a url'), '');
+});
+
+test('cancelAction keeps a file being installed unless its assembly can stop', () => {
+  assert.equal(cancelAction({ status: 'failed', meta: {} }), 'dismiss');
+  assert.equal(cancelAction({ status: 'done', meta: {} }), 'dismiss');
+  assert.equal(cancelAction({ status: 'running', meta: {} }), 'cancel');
+  assert.equal(cancelAction({ status: 'queued', meta: {} }), 'cancel');
+  assert.equal(cancelAction({ status: 'processing', meta: {} }), 'keep');
+  assert.equal(cancelAction({ status: 'processing', meta: { abortable: true } }), 'cancel');
 });

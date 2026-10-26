@@ -16,8 +16,8 @@
 // register themselves as "external jobs" so they show up in the same UI.
 //
 // Record meta the manager owns: group (groups.ts), allowCellular (mobile data allowed for
-// this download), integrity (promised size/sha-256), source (the URL actually fetched) and
-// avoidMirrors (hosts that served a bad copy).
+// this download), integrity (promised size/sha-256), source (the URL actually fetched),
+// avoidMirrors (hosts that served a bad copy) and abortable (EnqueueInput.abortable).
 import { DownloadTask, File, type DownloadPauseState } from 'expo-file-system';
 import * as Network from 'expo-network';
 import { AppState, Platform } from 'react-native';
@@ -38,6 +38,7 @@ import { useSettings } from '@/stores/settings';
 
 import { recordGroup, type DownloadGroup } from './groups';
 import {
+  cancelAction,
   integrityProblem,
   networkGate,
   planAfterFailure,
@@ -91,6 +92,12 @@ export type EnqueueInput = {
   integrity?: Integrity;
   /** Queued without the person asking (a missing search file): no mobile-data question. */
   quiet?: boolean;
+  /**
+   * Its completion handler stops, registering nothing, when the record disappears (a country's
+   * map and pack parts, whose handler assembles the whole file): cancelling it while
+   * 'processing' is safe. Other handlers would still install what they were given.
+   */
+  abortable?: boolean;
 };
 
 export type CompletionHandler = (file: File, record: DownloadRecord) => Promise<void>;
@@ -511,6 +518,7 @@ export function enqueueDownload(input: EnqueueInput): DownloadRecord {
   const meta: Record<string, unknown> = { ...input.meta };
   if (input.group) meta.group = input.group;
   if (input.integrity) meta.integrity = input.integrity;
+  if (input.abortable) meta.abortable = true;
   const rec: DownloadRecord = {
     id: input.id,
     kind: input.kind,
@@ -917,8 +925,9 @@ export function resumeDownloads(records: DownloadRecord[]) {
 
 export async function cancelDownloads(records: DownloadRecord[]) {
   for (const r of records) {
-    if (r.status === 'failed' || r.status === 'done') dismissDownload(r.id);
-    else if (r.status !== 'processing') await cancelDownload(r.id);
+    const action = cancelAction(r);
+    if (action === 'dismiss') dismissDownload(r.id);
+    else if (action === 'cancel') await cancelDownload(r.id);
   }
 }
 

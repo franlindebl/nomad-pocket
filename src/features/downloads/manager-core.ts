@@ -1,7 +1,7 @@
 // Decisions the download manager takes, kept apart from expo-file-system so they can be
 // unit-tested: whether a download may start on the current network ("Wi-Fi only"), what a
-// failed transfer means for the bytes already downloaded, which file name is safe to write
-// and whether a finished file is the one the server promised.
+// failed transfer means for the bytes already downloaded, which file name is safe to write,
+// whether a finished file is the one the server promised and what cancelling a row does.
 // No `@/` imports: unit tests load this file directly.
 import { downloadErrorKind } from './errors.ts';
 
@@ -91,4 +91,15 @@ export function integrityProblem(actual: { size: number; sha256?: string }, expe
 /** Host of a URL, for remembering a mirror that served a bad file. */
 export function urlHost(url: string): string {
   return /^[a-z]+:\/\/([^/?#]+)/i.exec(url)?.[1]?.toLowerCase() ?? '';
+}
+
+/**
+ * What cancelling a Downloads-sheet row does to each of its records. A file being installed
+ * ('processing') is kept: its handler would still install it. Unless the record is
+ * `abortable` (a country's map or pack part): its assembly stops when the record goes.
+ */
+export function cancelAction(r: { status: string; meta: Record<string, unknown> }): 'dismiss' | 'cancel' | 'keep' {
+  if (r.status === 'failed' || r.status === 'done') return 'dismiss';
+  if (r.status === 'processing' && r.meta.abortable !== true) return 'keep';
+  return 'cancel';
 }
