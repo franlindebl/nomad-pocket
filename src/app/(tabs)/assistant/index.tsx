@@ -29,7 +29,7 @@ export default function AssistantScreen() {
   const libraryItems = useItems('zim');
   const { messages, streaming, error, useLibrary, setUseLibrary, activeSessionId } = useChat();
 
-  const sessionStreaming = streaming && (streaming.sessionId === activeSessionId || !activeSessionId) ? streaming : null;
+  const sessionStreaming = streaming?.sessionId === activeSessionId ? streaming : null;
   const rows = useMemo<Row_[]>(() => {
     const out: Row_[] = messages.map((m) => ({ key: m.id, message: m }));
     if (sessionStreaming) out.push({ key: sessionStreaming.messageId, streaming: sessionStreaming });

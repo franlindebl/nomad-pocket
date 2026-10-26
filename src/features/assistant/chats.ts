@@ -122,10 +122,7 @@ export function deleteSession(id: string) {
   d.runSync('DELETE FROM chat_messages WHERE session_id = ?', id);
   d.runSync('DELETE FROM chat_sessions WHERE id = ?', id);
   const st = useChat.getState();
-  if (st.streaming?.sessionId === id) {
-    cancelledAnswers.add(st.streaming.messageId);
-    stopGeneration().catch(() => {});
-  }
+  if (st.streaming?.sessionId === id) stopAnswer().catch(() => {});
   useChat.setState({
     sessions: listSessions(),
     ...(st.activeSessionId === id ? { activeSessionId: null, messages: [], error: null } : {}),
@@ -176,7 +173,8 @@ export function refreshSessions() {
 
 export function openSession(id: string | null) {
   const st = useChat.getState();
-  if (st.streaming && st.streaming.sessionId !== id) stopGeneration().catch(() => {});
+  // The answer being written belongs to the conversation we leave: it ends there.
+  if (st.streaming && st.streaming.sessionId !== id) stopAnswer().catch(() => {});
   useChat.setState({ activeSessionId: id, messages: id ? loadMessages(id) : [], error: null });
 }
 
@@ -392,9 +390,18 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
 /** Answers stopped before generation started (ids of their streaming messages). */
 const cancelledAnswers = new Set<string>();
 
-export async function stopAnswer() {
+/**
+ * Marks the answer in progress as stopped. While it loads, routes or searches the engine
+ * has nothing to stop yet: `answer()` checks this between steps. Text already written
+ * is kept.
+ */
+export function cancelAnswer() {
   const id = useChat.getState().streaming?.messageId;
   if (id) cancelledAnswers.add(id);
+}
+
+export async function stopAnswer() {
+  cancelAnswer();
   await stopGeneration();
 }
 
