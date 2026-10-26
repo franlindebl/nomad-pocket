@@ -3,7 +3,7 @@ appId: com.fjlinde.nomadpocket
 tags: [full, courses, seeded]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "graduationcap" }
+- runFlow: ../../subflows/open-courses.yaml
 - assertVisible: "freeCodeCamp en español.*"
 - tapOn: "freeCodeCamp en español.*"
 - extendedWaitUntil:

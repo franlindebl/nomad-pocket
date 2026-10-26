@@ -1,12 +1,13 @@
-# ANDROID-05 — road routing on Android against the published catalog: the release APK
-# reads routing-manifest.json from GitHub, downloads the Andorra pack (3 MB) from GitHub
-# Releases, the engine routes on it and the pack's emergency points reach Emergencias.
+# ANDROID-05 — road routing on Android against the published catalog: guidance offers
+# Andorra's country download, which brings the routing pack (3 MB, routing-manifest.json
+# and the pack from GitHub Releases) with the map; the engine routes on it and the pack's
+# emergency points reach Emergencias.
 appId: com.fjlinde.nomadpocket
 tags: [android, network]
 ---
 - setLocation: { latitude: 42.5075, longitude: 1.5218 }
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { point: "50%,93%" }   # Mapas
+- tapOn: { point: "37%,93%" }   # Mapas
 - extendedWaitUntil:
     visible: { id: "map-search" }
     timeout: 20000
@@ -22,22 +23,17 @@ tags: [android, network]
     timeout: 30000
 - tapOn: { id: "guidance-get-routing" }
 - extendedWaitUntil:
-    visible: "Para esta zona"
-    timeout: 20000
-- assertVisible: "(?s).*Andorra.*"
-- takeScreenshot: 01-packs
-- tapOn: { id: "pack-download", index: 0 }
+    visible: "Descargar · .*"
+    timeout: 60000
+- assertVisible: "Andorra"
+- takeScreenshot: 01-country-sheet
+- tapOn: { id: "country-download" }
 - tapOn:
     text: "(?i)usar datos móviles"
     optional: true
 - extendedWaitUntil:
-    visible: { id: "pack-installed" }
-    timeout: 120000
-- takeScreenshot: 02-installed
-- back
-- extendedWaitUntil:
     visible: { id: "guidance-next" }
-    timeout: 30000
+    timeout: 300000
 - takeScreenshot: 03-route
 - tapOn: { id: "guidance-stop" }
 - tapOn: { id: "map-emergency" }

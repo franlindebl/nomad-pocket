@@ -1,0 +1,11 @@
+# Opens Courses, a section of the Library tab.
+appId: com.fjlinde.nomadpocket
+---
+- tapOn: { id: "books.vertical" }
+- scrollUntilVisible:
+    element: { id: "open-courses" }
+    direction: DOWN
+- tapOn: { id: "open-courses" }
+- extendedWaitUntil:
+    visible: "Mis cursos"
+    timeout: 10000

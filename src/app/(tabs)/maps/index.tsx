@@ -10,7 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card, PressableScale, Text } from '@/components/ui';
 import { ensureMapAssets, type MapAssets } from '@/features/maps/assets';
 import { emergencyPlacesIn, usePoiSync } from '@/features/maps/emergency';
-import { WORLD_ID } from '@/features/maps/extraction';
+import { deviceCountry } from '@/features/maps/CountryList';
 import { FollowArrow, useFollowCamera } from '@/features/maps/FollowCamera';
 import { GuidancePanel } from '@/features/maps/GuidancePanel';
 import { HeadingBeam } from '@/features/maps/HeadingBeam';
@@ -19,9 +19,11 @@ import { CATEGORY_COLORS } from '@/features/maps/labels';
 import { MapFab } from '@/features/maps/MapFab';
 import { markersGeoJSON, useMarkers } from '@/features/maps/markers';
 import { PlaceCard } from '@/features/maps/PlaceCard';
+import { getRegion, regionName } from '@/features/maps/regions';
 import { showPlace, useMapUi } from '@/features/maps/store';
 import { buildMapStyle } from '@/features/maps/style';
 import { useMapItems } from '@/features/maps/useMapSources';
+import { useSettings } from '@/stores/settings';
 import { hues, radius, space, useTheme } from '@/theme';
 
 /** Emergency points are drawn from this zoom on (fewer would be a cloud of dots). */
@@ -43,7 +45,12 @@ export default function MapScreen() {
   const { t, i18n } = useTranslation('maps');
   const { scheme, colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const { all, world, regions } = useMapItems();
+  const { all, regions } = useMapItems();
+  const chosen = useSettings((st) => st.country);
+  const home = useMemo(() => {
+    const id = chosen ?? deviceCountry();
+    return id ? getRegion(id) : undefined;
+  }, [chosen]);
   const markers = useMarkers((s) => s.markers);
   const request = useMapUi((s) => s.request);
   const selected = useMapUi((s) => s.selected);
@@ -510,18 +517,21 @@ export default function MapScreen() {
         <PlaceCard key={`${selected.lat},${selected.lon}`} place={selected} bottom={cardBottom} />
       ) : null}
 
-      {style && !all.length && !target && !selected ? (
+      {style && !regions.length && !target && !selected ? (
         <View style={[styles.bottom, { bottom: cardBottom }]} pointerEvents="box-none">
-          <Card style={{ gap: space.md }}>
+          <Card style={{ gap: space.md }} testID="maps-empty">
             <Text variant="title3">{t('empty.title')}</Text>
             <Text variant="callout" color="textSecondary">
               {t('empty.body')}
             </Text>
             <View style={{ gap: space.sm }}>
-              {!world ? (
-                <Button title={t('empty.worldNoSize')} onPress={() => router.push({ pathname: '/maps/download', params: { key: WORLD_ID } })} />
+              {home ? (
+                <Button
+                  title={t('empty.country', { name: regionName(home, i18n.language) })}
+                  onPress={() => router.push({ pathname: '/maps/download', params: { regionId: home.id } })}
+                />
               ) : null}
-              <Button title={t('empty.pickRegion')} variant="secondary" onPress={() => router.push('/maps/pick')} />
+              <Button title={t('empty.pickCountry')} variant={home ? 'secondary' : 'primary'} onPress={() => router.push('/maps/pick')} />
             </View>
           </Card>
         </View>

@@ -7,12 +7,12 @@ tags: [ipad, seeded, seeded-map]
 - launchApp:
     stopApp: true
 - extendedWaitUntil:
-    visible: "Siguiente"
+    visible: { id: "onboarding-start" }
     timeout: 20000
 - takeScreenshot: 00-setup-wizard
 - runFlow: ../../subflows/finish-onboarding.yaml
 - extendedWaitUntil:
-    visible: "5 elementos.*"
+    visible: "En una emergencia|EN UNA EMERGENCIA"
     timeout: 10000
 - takeScreenshot: 01-home
 - tapOn: { text: "Biblioteca", index: 0 }
@@ -40,14 +40,17 @@ tags: [ipad, seeded, seeded-map]
 - tapOn: { id: "BackButton" }
 - tapOn: { text: "Mapas", index: 0 }
 - extendedWaitUntil:
-    visible: "Mapas sin conexión"
+    visible: "Tus mapas"
     timeout: 20000
 - takeScreenshot: 07-maps
-- tapOn: "Mapas sin conexión"
+- tapOn: "Tus mapas"
 - tapOn: "Melilla.*"
 - waitForAnimationToEnd
 - takeScreenshot: 07b-map-region
-- tapOn: { text: "Cursos", index: 0 }
+- tapOn: { text: "Biblioteca", index: 0 }
+- scrollUntilVisible:
+    element: { id: "open-courses" }
+- tapOn: { id: "open-courses" }
 - tapOn: "freeCodeCamp en español.*"
 - extendedWaitUntil:
     visible: { id: "lesson-check-1" }

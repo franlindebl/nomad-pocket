@@ -12,6 +12,8 @@ export default function Layout() {
       <Stack.Screen name="category/[slug]" options={{ title: '', headerTransparent: true }} />
       <Stack.Screen name="wikipedia" options={{ title: tl('wikipedia') }} />
       <Stack.Screen name="explore" options={{ title: tl('explore') }} />
+      <Stack.Screen name="courses" options={{ title: '', headerTransparent: true }} />
+      <Stack.Screen name="course/[id]" options={{ title: '', headerTransparent: true }} />
       <Stack.Screen
         name="resource/[id]"
         options={{ title: '', presentation: 'formSheet', sheetAllowedDetents: [0.55, 0.9], sheetGrabberVisible: true, headerShown: false }}

@@ -7,6 +7,7 @@ import { create } from 'zustand';
 
 import { db } from '@/db';
 import { getItem } from '@/features/content/items';
+import { useSettings } from '@/stores/settings';
 
 import {
   EMERGENCY_KINDS,
@@ -32,9 +33,9 @@ const SERVERS = [
 // 112 works on any GSM phone and is the number across Europe; most of the Americas use 911.
 const NINE_ONE_ONE = new Set(['US', 'CA', 'MX', 'AR', 'CR', 'PA', 'PY', 'UY', 'SV', 'GT', 'HN', 'DO', 'EC', 'VE', 'PR', 'PH']);
 
-/** Emergency number for the device's region. */
+/** Emergency number for the user's country (onboarding), else the device's region. */
 export function emergencyNumber(): string {
-  const region = getLocales()[0]?.regionCode ?? '';
+  const region = useSettings.getState().country ?? getLocales()[0]?.regionCode ?? '';
   return NINE_ONE_ONE.has(region.toUpperCase()) ? '911' : '112';
 }
 

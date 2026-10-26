@@ -1,49 +1,50 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { Database, GraduationCap, Map, Route, ShieldCheck, Sparkles, Trash2, Wand2, type LucideIcon } from 'lucide-react-native';
+import { Database, GraduationCap, Map, ShieldCheck, Sparkles, Trash2, Wand2 } from 'lucide-react-native';
 import { Alert, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { Chip, IconBadge, ListGroup, ListRow, ProgressBar, Row, Screen, SectionHeader, Segmented, Switch, Text } from '@/components/ui';
 import { removeItem, useItems, type InstalledItem } from '@/features/content/items';
 import { clearHistory } from '@/features/library/history';
+import { removeCountry, useCountries, type CountryState } from '@/features/maps/countries';
+import { getRegion, regionName } from '@/features/maps/regions';
 import type { AppLanguage } from '@/i18n';
 import { formatBytes } from '@/lib/format';
-import type { ContentKind } from '@/lib/storage';
 import { freeBytes, totalBytes } from '@/lib/storage';
 import { useSettings, type ThemePreference } from '@/stores/settings';
-import { space, useTheme, type Hue } from '@/theme';
+import { space, useTheme } from '@/theme';
 
 const PRIVACY_URL = 'https://franlindebl.github.io/nomad-pocket/privacy.html';
 
-const KIND_META: Record<ContentKind, { icon: LucideIcon; hue: Hue }> = {
-  zim: { icon: Database, hue: 'reference' },
-  map: { icon: Map, hue: 'maps' },
-  model: { icon: Sparkles, hue: 'ai' },
-  route: { icon: Route, hue: 'maps' },
-};
-
 export default function SettingsScreen() {
-  const { t } = useTranslation('settings');
+  const { t, i18n } = useTranslation('settings');
   const { t: tc } = useTranslation();
   const { colors } = useTheme();
   const s = useSettings();
   const items = useItems();
+  const { countries, otherMaps } = useCountries();
   const used = items.reduce((sum, i) => sum + i.sizeBytes, 0);
   const free = freeBytes();
   const total = totalBytes();
+  const region = s.country ? getRegion(s.country) : undefined;
+  const zims = items.filter((i) => i.kind === 'zim');
+  const models = items.filter((i) => i.kind === 'model');
 
   const toggleContentLang = (l: AppLanguage) => {
     const next = s.contentLanguages.includes(l) ? s.contentLanguages.filter((x) => x !== l) : [...s.contentLanguages, l];
     if (next.length) s.setContentLanguages(next);
   };
 
-  const confirmDelete = (item: InstalledItem) =>
-    Alert.alert(item.title, t('deleteConfirm', { title: item.title, size: formatBytes(item.sizeBytes) }), [
+  const confirm = (title: string, size: number, onDelete: () => void) =>
+    Alert.alert(title, t('deleteConfirm', { title, size: formatBytes(size) }), [
       { text: tc('actions.cancel'), style: 'cancel' },
-      { text: tc('actions.delete'), style: 'destructive', onPress: () => removeItem(item.id) },
+      { text: tc('actions.delete'), style: 'destructive', onPress: onDelete },
     ]);
+  const deleteItem = (item: InstalledItem) => confirm(item.title, item.sizeBytes, () => void removeItem(item.id));
+  const deleteCountry = (c: CountryState) => confirm(c.title, c.sizeBytes, () => void removeCountry(c));
+  const trash = <Trash2 size={18} color={colors.textTertiary} />;
 
   return (
     <Screen>
@@ -72,21 +73,13 @@ export default function SettingsScreen() {
             ]}
           />
         </View>
-        <View style={{ padding: space.lg, gap: space.sm }}>
-          <Text variant="headline">{t('contentLanguages')}</Text>
-          <Text variant="footnote" color="textSecondary">
-            {t('contentLanguagesBody')}
-          </Text>
-          <Row style={{ marginTop: space.xs }}>
-            {(['es', 'en'] as AppLanguage[]).map((l) => (
-              <Chip key={l} label={tc(`language.${l}`)} selected={s.contentLanguages.includes(l)} onPress={() => toggleContentLang(l)} />
-            ))}
-          </Row>
-        </View>
-      </ListGroup>
-
-      <SectionHeader title={t('downloads')} />
-      <ListGroup>
+        <ListRow
+          testID="settings-country"
+          title={t('country')}
+          subtitle={region ? regionName(region, i18n.language) : t('countryNone')}
+          chevron
+          onPress={() => router.push('/settings/country')}
+        />
         <ListRow title={t('wifiOnly')} subtitle={t('wifiOnlyBody')} trailing={<Switch value={s.wifiOnly} onValueChange={s.setWifiOnly} />} />
       </ListGroup>
 
@@ -104,29 +97,47 @@ export default function SettingsScreen() {
             {t('storageFree')}: {formatBytes(free)}
           </Text>
         </View>
-        {items.map((item) => {
-          const meta = KIND_META[item.kind];
-          return (
-            <ListRow
-              key={item.id}
-              title={item.title}
-              subtitle={`${t(`kind.${item.kind}`)} · ${formatBytes(item.sizeBytes)}`}
-              leading={<IconBadge icon={item.isCourse ? GraduationCap : meta.icon} hue={item.isCourse ? 'education' : meta.hue} size={36} />}
-              trailing={<Trash2 size={18} color={colors.textTertiary} />}
-              onPress={() => confirmDelete(item)}
-            />
-          );
-        })}
+        {countries.map((c) => (
+          <ListRow
+            key={c.regionId}
+            title={c.title}
+            subtitle={`${t('countryKind')} · ${formatBytes(c.sizeBytes)}`}
+            leading={<IconBadge icon={Map} hue="maps" size={36} />}
+            trailing={trash}
+            onPress={() => deleteCountry(c)}
+          />
+        ))}
+        {[...otherMaps, ...zims, ...models].map((item) => (
+          <ListRow
+            key={item.id}
+            title={item.title}
+            subtitle={`${t(`kind.${item.kind}`)} · ${formatBytes(item.sizeBytes)}`}
+            leading={
+              <IconBadge
+                icon={item.kind === 'map' ? Map : item.kind === 'model' ? Sparkles : item.isCourse ? GraduationCap : Database}
+                hue={item.kind === 'map' ? 'maps' : item.kind === 'model' ? 'ai' : item.isCourse ? 'education' : 'reference'}
+                size={36}
+              />
+            }
+            trailing={trash}
+            onPress={() => deleteItem(item)}
+          />
+        ))}
       </ListGroup>
 
-      <SectionHeader title={t('about')} />
+      <SectionHeader title={t('advanced')} />
       <ListGroup>
-        <ListRow
-          title={t('setupAgain')}
-          leading={<IconBadge icon={Wand2} hue="survival" size={36} />}
-          chevron
-          onPress={() => router.push('/onboarding')}
-        />
+        <View style={{ padding: space.lg, gap: space.sm }}>
+          <Text variant="headline">{t('contentLanguages')}</Text>
+          <Text variant="footnote" color="textSecondary">
+            {t('contentLanguagesBody')}
+          </Text>
+          <Row style={{ marginTop: space.xs }}>
+            {(['es', 'en'] as AppLanguage[]).map((l) => (
+              <Chip key={l} label={tc(`language.${l}`)} selected={s.contentLanguages.includes(l)} onPress={() => toggleContentLang(l)} />
+            ))}
+          </Row>
+        </View>
         <ListRow
           title={t('clearHistory')}
           leading={<IconBadge icon={Trash2} hue="medicine" size={36} />}
@@ -135,6 +146,11 @@ export default function SettingsScreen() {
             Alert.alert(t('historyCleared'));
           }}
         />
+      </ListGroup>
+
+      <SectionHeader title={t('about')} />
+      <ListGroup>
+        <ListRow title={t('setupAgain')} leading={<IconBadge icon={Wand2} hue="survival" size={36} />} chevron onPress={() => router.push('/onboarding')} />
         <ListRow
           title={t('privacy')}
           leading={<IconBadge icon={ShieldCheck} hue="reference" size={36} />}

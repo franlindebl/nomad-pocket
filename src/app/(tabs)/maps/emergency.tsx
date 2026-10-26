@@ -1,7 +1,7 @@
 import * as Location from 'expo-location';
 import * as Network from 'expo-network';
 import { router } from 'expo-router';
-import { Download, Navigation, Phone, RefreshCw, Share2 } from 'lucide-react-native';
+import { Navigation, Phone, RefreshCw, Share2 } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Linking, ScrollView, Share, View } from 'react-native';
@@ -143,25 +143,22 @@ export default function EmergencySheet() {
 
   const utm = here ? toUtm(here.lat, here.lon) : null;
 
-  // Regions still without OpenStreetMap points: offered at the top, not only in the list below.
-  const missing = regions.filter((r) => !info[r.id]).slice(0, 3);
-  const fetchButtons = missing.map((r) => {
-    const state = syncStates[r.id];
-    return state?.status === 'running' ? (
-      <Text key={r.id} variant="footnote" color="textSecondary">
-        {t('emergency.fetching', { name: r.title, done: state.done, total: state.total })}
-      </Text>
-    ) : (
-      <Button
-        key={r.id}
-        testID="emergency-fetch-top"
-        title={t('emergency.fetch', { name: r.title })}
-        variant="secondary"
-        icon={Download}
-        onPress={() => fetchRegion(r.id)}
-      />
-    );
-  });
+  // Maps whose points neither came with them nor were fetched yet: fetched on their own
+  // after the download; a failure shows a retry in the list below.
+  const pending = regions.filter((r) => !info[r.id] && !r.meta.bundledPoints);
+  const syncing = pending.some((r) => syncStates[r.id]?.status === 'running');
+  // Opening the sheet online retries them (a first fetch that failed, a map seeded offline).
+  useEffect(() => {
+    if (!pending.length) return;
+    Network.getNetworkStateAsync()
+      .then((net) => {
+        if (net.isInternetReachable === false) return;
+        for (const r of pending) if (!usePoiSync.getState().states[r.id]) syncEmergencyPoints(r);
+      })
+      .catch(() => {});
+    // Once per opening, for the maps pending then.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Screen contentStyle={{ paddingTop: space.lg, gap: space.md }}>
@@ -205,15 +202,6 @@ export default function EmergencySheet() {
           </Text>
         )}
       </Card>
-
-      {hasData && missing.length ? (
-        <Card style={{ gap: space.sm }}>
-          <Text variant="callout" color="textSecondary">
-            {t('emergency.partial')}
-          </Text>
-          {fetchButtons}
-        </Card>
-      ) : null}
 
       {hasData ? (
         <>
@@ -271,15 +259,11 @@ export default function EmergencySheet() {
         </>
       ) : (
         <Card style={{ gap: space.md }}>
-          <Text variant="title3">{t('emergency.noDataTitle')}</Text>
+          <Text variant="title3">{regions.length ? t('emergency.preparingTitle') : t('emergency.noDataTitle')}</Text>
           <Text variant="callout" color="textSecondary">
-            {regions.length ? t('emergency.noDataBody') : t('emergency.noRegions')}
+            {regions.length ? (syncing ? t('emergency.preparingBody') : t('emergency.noDataBody')) : t('emergency.noRegions')}
           </Text>
-          {!regions.length ? (
-            <Button title={t('emergency.pickRegion')} variant="secondary" onPress={() => router.push('/maps/pick')} />
-          ) : (
-            fetchButtons
-          )}
+          {!regions.length ? <Button title={t('emergency.pickRegion')} variant="secondary" onPress={() => router.push('/maps/pick')} /> : null}
         </Card>
       )}
 
@@ -297,6 +281,8 @@ export default function EmergencySheet() {
                     ? t('emergency.failed', { name: r.title, error: state.error })
                     : done
                       ? t('emergency.regionInfo', { count: done.count, date: formatRelativeDate(done.at) })
+                      : r.meta.bundledPoints
+                        ? t('emergency.bundled')
                       : fromTiles[r.id]
                         ? t('emergency.regionFromTiles', { count: fromTiles[r.id] })
                         : t('emergency.noDataTitle');
@@ -307,7 +293,7 @@ export default function EmergencySheet() {
                   title={r.title}
                   subtitle={status}
                   trailingAction={
-                    state?.status === 'running' ? undefined : (
+                    state?.status === 'running' || (r.meta.bundledPoints && !done) ? undefined : (
                       <IconButton
                         testID="emergency-fetch"
                         icon={RefreshCw}

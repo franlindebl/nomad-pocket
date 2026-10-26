@@ -9,4 +9,5 @@ tags: [smoke, home, downloads]
 - swipe: { direction: DOWN }
 - tapOn: { id: "open-settings" }
 - assertVisible: "Ajustes"
-- assertVisible: "Asistente de configuración"
+- scrollUntilVisible:
+    element: "Revisar mi kit"

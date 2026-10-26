@@ -1,9 +1,9 @@
-# CRS-01 — no courses yet; subject chips filter the catalog.
+# CRS-01 — Courses (a section of the Library): no courses yet; subject chips filter the catalog.
 appId: com.fjlinde.nomadpocket
 tags: [smoke, courses]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "graduationcap" }
+- runFlow: ../../subflows/open-courses.yaml
 - assertVisible: "Aún no tienes cursos.*"
-- assertVisible: "Explorar cursos"
+- assertVisible: "Explorar cursos|EXPLORAR CURSOS"
 - takeScreenshot: 01-courses-empty

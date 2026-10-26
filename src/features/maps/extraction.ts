@@ -1,13 +1,14 @@
-// Region downloads: extract a bbox from the Protomaps daily planet build into a
-// local .pmtiles file (src/lib/pmtiles), shown in the downloads sheet as an
-// external job, then registered as an installed item of kind 'map'.
+// On-device map extraction: a bbox from the Protomaps daily planet build into a local
+// .pmtiles file (src/lib/pmtiles), shown in the downloads sheet as an external job, then
+// registered as an installed item of kind 'map'. Country maps normally come prebuilt from
+// CI (country-maps.ts); this is the fallback for a country the catalog doesn't have yet.
 import { fetch as expoFetch } from 'expo/fetch';
 import { File, FileMode } from 'expo-file-system';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
 import { upsertItem } from '@/features/content/items';
 import { NotEnoughStorageError, startExternalJob, useDownloads } from '@/features/downloads/manager';
-import { executeExtract, FetchSource, planExtract, type BBox, type ExtractPlan, type FetchSourceOptions } from '@/lib/pmtiles';
+import { countBBoxTiles, executeExtract, FetchSource, planExtract, type BBox, type ExtractPlan, type FetchSourceOptions } from '@/lib/pmtiles';
 import { contentFile, deleteFile, hasRoomFor, partialDir } from '@/lib/storage';
 
 const BUILDS_URL = 'https://build-metadata.protomaps.dev/builds.json';
@@ -18,9 +19,13 @@ export const WORLD_ID = 'world';
 export const WORLD_MAX_ZOOM = 5;
 export const WORLD_BBOX: BBox = [-180, -85.0511, 180, 85.0511];
 
-/** Max-zoom choices offered for regions: detail vs. size. */
-export const ZOOM_CHOICES = [12, 14, 15] as const;
-export type ZoomChoice = (typeof ZOOM_CHOICES)[number];
+/** Above this many tiles the plan gets too heavy for a phone (memory, time). */
+const MAX_TILES = 2_500_000;
+
+/** Full detail (z15) unless the area is too big to extract on a phone. */
+export function bestZoom(bbox: BBox): number {
+  return [15, 14, 13, 12, 11, 10].find((z) => countBBoxTiles(bbox, 0, z) <= MAX_TILES) ?? 10;
+}
 
 export type MapItemMeta = {
   role: 'world' | 'region';
@@ -30,6 +35,8 @@ export type MapItemMeta = {
   /** Planet build, YYYYMMDD. */
   buildDate: string;
   regionId?: string | null;
+  /** Emergency points came with the download (country map or routing pack): no Overpass. */
+  bundledPoints?: boolean;
 };
 
 export type Build = { url: string; date: string };
@@ -93,6 +100,7 @@ export type StartMapDownload = {
   minZoom: number;
   maxZoom: number;
   regionId?: string | null;
+  bundledPoints?: boolean;
   estimate?: Estimate;
 };
 
@@ -104,6 +112,17 @@ const installedListeners: InstalledListener[] = [];
 /** Called after a region or the world basemap finishes downloading (register.ts indexes it). */
 export function onMapInstalled(fn: InstalledListener) {
   installedListeners.push(fn);
+}
+
+/** Tells the listeners (search index, emergency points) about a newly installed map. */
+export function notifyMapInstalled(itemId: string) {
+  for (const fn of installedListeners) {
+    try {
+      fn(itemId);
+    } catch (e) {
+      console.warn('[maps] installed listener failed', e);
+    }
+  }
 }
 
 export function isMapJobRunning(key: string) {
@@ -166,6 +185,7 @@ export function startMapDownload(input: StartMapDownload) {
         maxZoom: plan.header.maxZoom,
         buildDate: build.date,
         regionId: input.regionId ?? null,
+        bundledPoints: input.bundledPoints,
       };
       upsertItem({
         id: mapItemId(input.key),
@@ -184,13 +204,7 @@ export function startMapDownload(input: StartMapDownload) {
         meta,
       });
       job.finish();
-      for (const fn of installedListeners) {
-        try {
-          fn(mapItemId(input.key));
-        } catch (e) {
-          console.warn('[maps] installed listener failed', e);
-        }
-      }
+      notifyMapInstalled(mapItemId(input.key));
     } catch (e) {
       try {
         handle?.close();

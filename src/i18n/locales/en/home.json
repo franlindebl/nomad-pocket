@@ -1,72 +1,98 @@
 {
-  "greeting": {
-    "morning": "Good morning",
-    "afternoon": "Good afternoon",
-    "evening": "Good evening"
-  },
-  "storageTitle": "Your offline library",
-  "storageBody": "{{count}} items · {{size}}",
-  "storageEmpty": "You haven't downloaded anything yet",
   "continue": "Continue",
-  "modules": "Explore",
-  "module": {
-    "library": "Library",
-    "libraryBody": "Wikipedia, medicine, survival and books",
-    "maps": "Maps",
-    "mapsBody": "Offline regions with GPS",
-    "courses": "Courses",
-    "coursesBody": "Learn at your own pace, no internet",
-    "assistant": "Assistant",
-    "assistantBody": "Local AI that reads your library"
-  },
-  "getStarted": {
-    "title": "Set up your Nomad",
-    "body": "Choose the knowledge you want to carry with you. We'll suggest a starter pack based on your free space.",
-    "action": "Get started"
-  },
-  "downloadsActive": "Downloads in progress",
-  "offlineReady": "Ready offline",
   "onboarding": {
-    "welcomeTitle": "Knowledge that stays with you offline",
-    "welcomeBody": "Wikipedia, medical and survival guides, maps, courses and a local AI. Download once, use it wherever there's no signal.",
-    "appLanguage": "App language",
-    "contentLanguages": "Content in",
-    "packTitle": "Choose your starter pack",
-    "packBody": "You can always add or remove content from the Library.",
-    "free": "You have {{size}} free",
-    "packs": {
-      "light": {
-        "name": "Light",
-        "body": "The essentials: compact Wikipedia, first aid and basic survival."
-      },
-      "balanced": {
-        "name": "Balanced",
-        "body": "Wikipedia without images plus the essential tier of every collection."
-      },
-      "complete": {
-        "name": "Complete",
-        "body": "Full compact Wikipedia plus the standard tier of every collection."
-      },
-      "none": {
-        "name": "I'll choose",
-        "body": "Start empty and browse the catalog at your own pace."
-      }
-    },
-    "items_one": "{{count}} resource",
-    "items_other": "{{count}} resources",
-    "tooBig": "Doesn't fit in your free space",
-    "readyTitle": "All set",
-    "readyBodyDownloads": "We've started downloading {{count}} resources ({{size}}). You can keep using the app meanwhile.",
-    "readyBodyEmpty": "Browse the Library, download the map of your area and try the assistant.",
-    "tipWifi": "Large downloads work best on Wi‑Fi with your phone charging.",
-    "tipMaps": "In Maps you can download your country or whatever area is on screen.",
-    "tipAi": "In Assistant you can download an AI model that works without internet.",
-    "next": "Next",
+    "welcomeTitle": "Your kit for when the internet is gone",
+    "welcomeBody": "If the network goes down for days or months, your phone will still know where you are, how to treat a wound and where to find water. Get it ready today, while you're online.",
+    "pointMaps": "Your country's map, with routes, hospitals, pharmacies and drinking water",
+    "pointGuides": "First aid, medicine and survival guides, and Wikipedia",
+    "pointAi": "An assistant that answers without internet",
+    "pointPlan": "Your family plan and your emergency bag",
+    "appLanguage": "Language",
     "start": "Get started",
+    "countryTitle": "Where do you live?",
+    "countryBody": "We'll download your country's map with its navigation and emergency points.",
+    "next": "Next",
+    "kitTitle": "Your kit",
+    "kitBody": "We've put it together for your country and your phone. Remove what you don't want: you can add it later.",
+    "kit": {
+      "country": "Map of {{name}}",
+      "countryBody": "Full detail, turn-by-turn navigation and emergency points.",
+      "countryBodyNoRouting": "Full detail and emergency points. Navigation isn't available for this country yet.",
+      "sizing": "Working out the size…",
+      "sizeFailed": "Couldn't work out the map's size.",
+      "offline": "Offline: the map can't be downloaded right now.",
+      "countryLater": "The map can't be downloaded right now. Download the rest and add the map later from Maps.",
+      "guides": "Survival guides",
+      "guidesBody": "First aid, medicine, water, food and shelter.",
+      "guidesSize_one": "{{count}} guide · {{size}}",
+      "guidesSize_other": "{{count}} guides · {{size}}",
+      "wikipedia": "Wikipedia",
+      "wikipediaInstalled": "Already on your phone.",
+      "assistant": "Offline assistant",
+      "assistantSystem": "Uses {{provider}}, already on your phone.",
+      "assistantModel": "{{name}}, the recommended model for your phone.",
+      "included": "Included",
+      "total": "Total",
+      "download": "Download my kit · {{size}}",
+      "skip": "Continue without downloading"
+    },
+    "free": "You have {{size}} free",
+    "tooBig": "Doesn't fit in your free space: remove something from the kit.",
+    "tipWifi": "Big downloads go better on Wi‑Fi with the phone charging. You can keep using the app meanwhile.",
+    "readyTitle": "Your kit is downloading",
+    "readyTitleEmpty": "All set",
+    "readyBodyDownloads": "You'll see the progress on Home. Once it's done, everything works offline.",
+    "readyBodyEmpty": "You can complete your kit from Home whenever you like.",
+    "planTitle": "Meanwhile: your family plan",
+    "planBody": "Meeting point, contacts and medical details, at hand even with no network.",
     "finish": "Go to Nomad"
   },
-  "emergency": {
-    "title": "Emergency",
-    "body": "Hospitals, police, water and shelters near you, offline"
-  }
+  "network": {
+    "online": "Online",
+    "offline": "Offline · everything you downloaded still works"
+  },
+  "crisis": {
+    "title": "In an emergency",
+    "nearby": "Emergency services nearby",
+    "firstAid": "First aid",
+    "plan": "My family plan",
+    "call": "Call {{number}}"
+  },
+  "downloadsHint": "Leave it on Wi‑Fi and charging. You can keep using the app.",
+  "ready": {
+    "title": "Your preparation",
+    "count": "{{done}} of {{total}} ready",
+    "complete": "Complete",
+    "allDone": "All set to work without internet.",
+    "hintOnline": "Complete what's missing while you're online.",
+    "hintOffline": "Nothing can be downloaded offline: use what you have.",
+    "map": "Map of {{name}}",
+    "mapAny": "Your country's map",
+    "mapDone": "Streets, navigation and emergency points",
+    "mapDoneNoRouting": "Streets and emergency points (navigation not available yet)",
+    "mapStale": "Over 6 months old: update it while you're online",
+    "mapTodo": "Download it: streets, routes and hospitals offline",
+    "downloading": "Downloading… {{pct}}%",
+    "guides": "Survival guides",
+    "guidesDone": "{{count}} of {{total}} guides",
+    "guidesTodo": "First aid, medicine, water and food",
+    "wikipedia": "Wikipedia",
+    "wikipediaTodo": "The whole encyclopedia, offline",
+    "assistant": "Offline assistant",
+    "assistantTodo": "An AI model that answers without internet",
+    "plan": "Family plan",
+    "planDone_one": "Meeting point and {{count}} contact",
+    "planDone_other": "Meeting point and {{count}} contacts",
+    "planTodo": "Meeting point, contacts and medical details",
+    "kit": "Emergency bag",
+    "kitProgress": "{{done}} of {{total}} ready",
+    "kitAttention_one": "{{count}} item expires soon",
+    "kitAttention_other": "{{count}} items expire soon",
+    "kitTodo": "Water, food, torch, radio, first-aid kit…",
+    "mapUpdate": "A newer version is out: update it while you're online",
+    "planMeeting": "Meeting point set · add contacts",
+    "planContacts_one": "{{count}} contact · no meeting point yet",
+    "planContacts_other": "{{count}} contacts · no meeting point yet"
+  },
+  "storageLine": "Using {{used}} · {{free}} free"
 }

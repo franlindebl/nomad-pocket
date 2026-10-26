@@ -21,7 +21,7 @@ export function CourseCard({ resource, progress, lessons, wide }: { resource: Ca
     <Card
       padded={false}
       style={wide ? styles.wide : styles.card}
-      onPress={() => router.push({ pathname: '/courses/[id]', params: { id: resource.id } })}
+      onPress={() => router.push({ pathname: '/library/course/[id]', params: { id: resource.id } })}
       accessibilityLabel={loc(resource.title)}>
       <View style={[styles.band, { backgroundColor: h.bg }]}>
         <IconBadge icon={iconByName(subject?.icon)} color={h.fg} size={44} />
@@ -51,7 +51,7 @@ export function CourseCard({ resource, progress, lessons, wide }: { resource: Ca
           </View>
         ) : (
           <Row style={{ justifyContent: 'flex-end', marginTop: space.xs }}>
-            <DownloadButton resource={resource} onOpen={() => router.push({ pathname: '/courses/[id]', params: { id: resource.id } })} />
+            <DownloadButton resource={resource} onOpen={() => router.push({ pathname: '/library/course/[id]', params: { id: resource.id } })} />
           </Row>
         )}
       </View>

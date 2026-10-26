@@ -10,6 +10,7 @@ import { getItem, listItems, onItemRemoved, upsertItem } from '@/features/conten
 import { HEADER_SIZE, parseHeader } from '@/lib/pmtiles/format';
 import { contentDir, deleteFile, partialDir } from '@/lib/storage';
 
+import { onMapFileDownloaded, refreshMapsCatalog, sweepCountryMapFiles } from './country-maps';
 import { cancelEmergencySync, syncEmergencyPoints } from './emergency';
 import { forgetEstimates, mapItemId, onMapInstalled, WORLD_ID, type MapItemMeta } from './extraction';
 import { useMarkers } from './markers';
@@ -18,6 +19,7 @@ import { getRegion, regionName } from './regions';
 import { closeRouter, listRoutePacks, registerLoosePack, resolvePackFile } from './routing';
 import { onRouteFileDownloaded, refreshRoutingCatalog, sweepRoutingFiles } from './routing-packs';
 import { resolveMapFile, type MapItem } from './useMapSources';
+import { ensureWorldMap } from './world';
 
 /** YYYYMMDD of a timestamp, the format map items keep their build date in. */
 function yyyymmdd(ms: number): string {
@@ -99,6 +101,8 @@ registerInit(() => {
       console.warn('[maps] cannot register routing pack', entry.name, e);
     }
   }
+  // The bundled world basemap: always there, even with nothing downloaded.
+  ensureWorldMap();
   // Index maps installed before search existed, or whose indexing was interrupted.
   // Delayed so the first screens render before the JS thread starts decoding tiles.
   setTimeout(() => {
@@ -111,11 +115,13 @@ registerInit(() => {
     // By now the download manager has restored its queue (what is still in flight).
     try {
       sweepRoutingFiles();
+      sweepCountryMapFiles();
     } catch (e) {
       console.warn('[maps] cannot sweep routing files', e);
     }
-    // Installed packs pick up what the catalog added since (street names for search).
-    if (listRoutePacks().length) refreshRoutingCatalog();
+    // Both catalogs make up a country download (and installed packs pick up street names).
+    refreshRoutingCatalog();
+    refreshMapsCatalog();
   }, 4000);
 });
 
@@ -143,8 +149,9 @@ onMapInstalled((id) => {
   if (!item) return;
   invalidateIndex(item);
   indexDetailAroundUser();
-  // The new region's emergency points (needs the connection the download just used).
-  syncEmergencyPoints(item).catch((e) => console.warn('[maps] emergency points', e));
+  // The new region's emergency points (needs the connection the download just used),
+  // unless they came with it (country map or routing pack).
+  if (!item.meta.bundledPoints) syncEmergencyPoints(item).catch((e) => console.warn('[maps] emergency points', e));
 });
 
 // The map screen drops the source from its style as soon as the items list
@@ -157,6 +164,7 @@ onItemRemoved('map', (item) => {
   deleteFile(resolveMapFile(item));
 });
 
+registerCompletionHandler('map', onMapFileDownloaded);
 registerCompletionHandler('route', onRouteFileDownloaded);
 
 onItemRemoved('route', (item) => {

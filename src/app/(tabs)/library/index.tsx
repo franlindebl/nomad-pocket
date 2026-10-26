@@ -2,7 +2,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { File } from 'expo-file-system';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { Compass, FileDown, Globe } from 'lucide-react-native';
+import { Compass, FileDown, Globe, GraduationCap } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, StyleSheet, View } from 'react-native';
@@ -49,6 +49,10 @@ async function importZimFile(asset: DocumentPicker.DocumentPickerAsset) {
     throw e;
   }
 }
+
+/** Survival first: what you need in a crisis before what you learn with time. */
+const CATEGORY_ORDER = ['medicine', 'survival', 'agriculture', 'diy', 'education', 'computing'];
+const categoryRank = (slug: string) => (CATEGORY_ORDER.indexOf(slug) + 1 || CATEGORY_ORDER.length + 1);
 
 export default function LibraryScreen() {
   const { t } = useTranslation('library');
@@ -111,9 +115,19 @@ export default function LibraryScreen() {
         </View>
       </Card>
 
+      <Card onPress={() => router.push('/library/courses')} style={[styles.wikiCard, { marginTop: space.md }]} testID="open-courses">
+        <IconBadge icon={GraduationCap} hue="education" size={48} />
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text variant="title3">{tc('tabs.courses')}</Text>
+          <Text variant="footnote" color="textSecondary">
+            {t('coursesBody')}
+          </Text>
+        </View>
+      </Card>
+
       <SectionHeader title={t('categories')} />
       <View style={styles.grid}>
-        {catalog.categories.map((c) => {
+        {[...catalog.categories].sort((a, b) => categoryRank(a.slug) - categoryRank(b.slug)).map((c) => {
           const all = tierResources(c, c.tiers[c.tiers.length - 1], langs);
           const essential = c.tiers[0] ? tierResources(c, c.tiers[0], langs) : [];
           return (

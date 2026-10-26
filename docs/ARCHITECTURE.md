@@ -14,7 +14,7 @@ downloading.
 | Protomaps `pmtiles extract` | `src/lib/pmtiles` — HTTP-range extractor in TS, MapLibre Native |
 | Ollama + Qdrant RAG | `modules/nomad-llm` (Apple Foundation Models / Gemini Nano) + `llama.rn` GGUF; RAG over libzim full-text search |
 | Curated collections JSON | `src/data/catalog.json` + live Kiwix OPDS |
-| Easy Setup wizard | `src/app/onboarding.tsx` + `features/onboarding/packs.ts` |
+| Easy Setup wizard | `src/app/onboarding.tsx` + `features/onboarding/kit.ts` (country + one kit proposal) |
 | Docker apps, benchmark | not applicable |
 
 ## Stack
@@ -45,21 +45,20 @@ downloading.
 src/
   app/                       routes (Expo Router). Only screens here.
     _layout.tsx              root Stack, bootstrap(), onboarding trigger, ToastHost
-    (tabs)/_layout.tsx       NativeTabs: (home) library maps courses assistant
-    (tabs)/(home)/index      Home: storage hero, continue carousel, preparedness card, modules, downloads
+    (tabs)/_layout.tsx       NativeTabs: (home) maps library assistant (docs/UX_SURVIVAL_PLAN.md)
+    (tabs)/(home)/index      Home: network state, "En una emergencia" actions, downloads, "Tu preparación" checklist, continue carousel
     (tabs)/(home)/prepare/   index (hub, PDF export, offline guides), plan, kit; sheets:
                              entry (contact/number/person), meeting, item
-    (tabs)/library/          index (installed + categories + import), category/[slug]
+    (tabs)/library/          index (installed + Wikipedia + Courses + categories + import), category/[slug]
                              (tiers), resource/[id] (sheet), wikipedia (size picker),
-                             explore (Kiwix OPDS search)
-    (tabs)/maps/             index (full-screen map), sheets: regions, pick, download,
-                             markers, marker
-    (tabs)/courses/          index (my courses + explore), [id] (syllabus)
+                             explore (Kiwix OPDS search), courses (my courses + explore), course/[id] (syllabus)
+    (tabs)/maps/             index (full-screen map), sheets: regions ("Tus mapas"), pick (countries),
+                             download (one country), markers, marker, search, emergency, route-steps
     (tabs)/assistant/        index (chat), models, conversations (sheet)
     reader/[itemId]          ZIM reader (?path=)
     search                   global search across installed archives
     downloads                downloads sheet
-    settings/                settings (modal stack)
+    settings/                settings (modal stack), country (picker)
     onboarding               setup wizard (full-screen modal)
   components/ui/             design system (docs/STYLE_GUIDE.md)
   components/navigation.ts   useStackOptions(), largeTitle()
@@ -76,13 +75,14 @@ src/
     content/items.ts         installed content registry (items table)
     downloads/               queue (manager.ts), Kiwix mirror picker, DownloadRow
     catalog/                 catalog accessors, downloadResource, OPDS client, DownloadButton, icons
-    onboarding/packs.ts      starter packs
+    onboarding/kit.ts        the onboarding kit: guides, Wikipedia by free space, assistant model
     library/                 ZIM facade, registration, history/bookmarks, HTML helpers, reader components
     courses/                 syllabus + progress, CourseCard
-    maps/                    regions, extraction jobs, style, assets/glyphs, markers, map UI state
+    maps/                    countries (one download = map + routing + points), country maps catalog,
+                             bundled world map, extraction fallback, style, assets/glyphs, markers, map UI state
     assistant/               models, engines, RAG, chats, markdown, chat UI
-    home/ContinueCarousel    recent reading
-    prepare/                 emergency plan + kit: store, kit maths, reminders, PDF, HomeCard
+    home/                    readiness checklist (readiness.ts), ContinueCarousel
+    prepare/                 emergency plan + kit: store, kit maths, reminders, PDF
 modules/
   nomad-zim/                 libkiwix bridge + ZimWebView (Swift/Obj-C++ · Kotlin)
   nomad-llm/                 Apple Foundation Models + Gemini Nano bridge
@@ -90,7 +90,7 @@ modules/
 scripts/                     checks, E2E runners, map asset generators, store screenshots
 e2e/                         Maestro flows (docs/E2E.md)
 site/                        privacy/support site, deployed by .github/workflows/pages.yml
-assets/                      fonts, icons, splash, maps/basemap-assets.zip
+assets/                      fonts, icons, splash, maps/basemap-assets.zip, maps/world.pmtiles (bundled z0–5)
 ```
 
 ## Startup
@@ -208,11 +208,17 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
 - `scripts/validate-catalog.mjs` checks the schema and that every URL resolves with the
   expected size. Edit the JSON by hand; keep ES and EN texts.
 
-### Starter packs (`features/onboarding/packs.ts`)
-`light` (Wikipedia top-mini + medicine & survival essential tiers, primary language
-only, items ≤ 300 MB), `balanced` (top-nopic + every essential tier, ≤ 1.5 GB each),
-`complete` (all-mini + every standard tier), `none`. The wizard (language → pack sized
-against free space → tips) enqueues the pack's resources.
+### Onboarding kit (`src/app/onboarding.tsx`, `features/onboarding/kit.ts`)
+Welcome (crisis message, app language; content languages follow it: es → es+en, en → en)
+→ country (`CountryList`, preselected from `settings.country`, else the phone's region;
+stored in `settings.country`) → one kit proposal, each piece a switchable row:
+the country download (`useCountrySize`), essential guides (`guideResources`: medicine,
+survival, agriculture essential tiers in the content languages, items ≤ 300/100 MB, plus
+`zimgit-post-disaster_en`), Wikipedia (`pickWikipedia`: all-nopic / all-mini / top-nopic /
+top-mini, the biggest that leaves 60 / 20 / 6 / 0 GB free after the rest), the assistant
+(the system model if available, else `recommendModel(ram)`) → done (family plan shortcut).
+Pieces already on the phone show as installed, so "Revisar mi kit" (Settings, Home's
+"Completar") reruns it to fill gaps. Nothing else is asked.
 
 ### ZIM library (`modules/nomad-zim`, facade `src/features/library/zim.ts`)
 - Facade (the only entry point for other features): `openArchive(itemId, fileUri) →
@@ -291,10 +297,41 @@ are refused (choose less detail).
 regionId, estimate })` runs as an external download job on the JS thread with the screen
 kept awake, writes `partial/map-<key>.pmtiles.part`, moves it to `content/maps/<key>.pmtiles`
 and upserts `{ kind: 'map', id: 'map-<key>', meta: { role: 'world'|'region', bbox,
-minZoom, maxZoom, buildDate, regionId } }`. Zoom choices: 12 / 14 / 15; the world
-basemap is z0–5. Jobs live in memory (not resumed after a kill). Loose `.pmtiles` files
+minZoom, maxZoom, buildDate, regionId, bundledPoints } }`. Only the fallback for a country
+the maps catalog doesn't have: `bestZoom(bbox)` = 15, lower only above 2.5 M tiles. Jobs live in memory (not resumed after a kill). Loose `.pmtiles` files
 are registered at startup from their header (`register.ts`; a region id as file name
 gives the region's name).
+
+**Country downloads** (`countries.ts`, `country-maps.ts`, pure `country-core.ts`; plan in
+`docs/UX_SURVIVAL_PLAN.md`): the UI only offers whole countries (`COUNTRIES`, regions.json
+without Antarctica). A country = its map + its routing pack (`routePackFor`: same
+`regionId`, or a pack whose extract covers it, `ht` → `do`) + the emergency points and street
+names that come with either. `useCountryOffer` / `useCountrySize` read both catalogs (and,
+without a prebuilt map, a dry-run estimate); `downloadCountry` checks room for everything,
+then queues the prebuilt map (`downloadCountryMap`) or starts the extraction fallback, and
+the pack (`downloadPack`). `useCountries` groups installed items and downloads in flight by
+country (one row: size, combined progress, failed → retry); `removeCountry` cancels and
+deletes both. Maps that aren't a country (older community/state or visible-area maps) are
+listed as "Otros mapas". **Prebuilt maps**: `.github/workflows/country-maps.yml` (monthly)
+runs `scripts/maps/build-country-map.sh` per country: `pmtiles extract` of the planet build
+over the country's outline (`country-region.py`: Natural Earth 10m polygons with islands and
+exclaves within 10°, grown 5 km; Spain then carries Canarias and no Portugal: 2.3 GB instead
+of the bbox's 3.2 GB) at z15 (the highest zoom whose archive is ≤ 10 GB), split in
+≤ 1900 MiB parts; for countries without a routing pack also `<id>.{pois,streets,places,addresses}.tsv`
+from the Geofabrik extract (scripts/routing/emergency-points.py, streets.py, places.py: the
+same side files as a routing pack). `scripts/maps/maps-manifest.py` writes `maps-manifest.json` (release
+`maps-index`, files in one release per continent, `maps-YYYYMMDD-N-<continent>`: GitHub stops at
+1000 assets per release). The job builds the side files first and deletes the extract before
+writing the map, cuts the parts off the end of the archive (the ~14 GB runner disk never holds
+it twice) and skips the side files when the extract doesn't fit (the USA's 11 GB: Overpass then). The app downloads parts as `kind: 'map'`
+downloads (`country-<id>-p<i>`, completion handler `onMapFileDownloaded`), appends them into
+`content/maps/<regionId>.pmtiles` (same crash-safety as routing packs, startup sweep), registers
+`map-<regionId>` with `bundledPoints` and imports its side files: points (`storeEmergencyPoints`),
+streets (`indexMapStreets`, source `streets:<item id>`), places and house numbers
+(`indexPackPlaces` / `indexPackAddresses`, as for a pack). `bundledPoints` maps skip Overpass and the
+tile-POI fallback. **World map** (`world.ts`): `assets/maps/world.pmtiles` (z0–5, 15 MB,
+`scripts/maps/make-world.sh`, `metro.config.js` adds the `pmtiles` asset extension) is copied
+to `content/maps/world.pmtiles` at startup and registered; a newer `BUNDLED_BUILD` replaces it.
 
 **Rendering**: MapLibre Native (iOS 6.31 / Android 13.6 via maplibre-react-native
 11.5) reads local archives natively with `pmtiles://file:///…/x.pmtiles` — no
@@ -489,7 +526,8 @@ a road, a fresh fix after a stale one — last-known fixes older than 2 min are 
 The start heading is the GPS course when moving (> 2 m/s), else the compass on foot or
 bike. Without a pack, or when Valhalla finds no way, it falls back to the straight line: an arrow rotated by
 bearing − heading (map bearing without a compass), distance + 8-point direction, time
-at a nominal speed, and a "Descargar rutas" button (`maps/routing-packs`); installing a
+at a nominal speed, and, where the routing catalog has a pack covering the target, a button that opens that
+country's download (`maps/download`); installing a
 pack mid-guidance retries the route (`retryRoute`). Arrival ≤ max(20 m, accuracy ≤ 50 m) from the target, with a haptic; at the route's end
 (it stops at the road nearest the target) the last stretch switches to the arrow. A session counter drops superseded starts, a
 request counter late routes. Turn-by-turn voice, background location and rerouting
@@ -503,14 +541,15 @@ force, ER badge, hours, distance, decimal + UTM, Llévame / Guardar / Llamar) or
 `GuidancePanel`.
 
 **Regions** (`regions.json`, 312): Natural Earth countries with far-flung overseas
-territories trimmed from the bbox, 19 Spanish autonomous communities, 51 US states;
+territories trimmed from the bbox (what the app downloads), plus 19 Spanish autonomous
+communities and 51 US states that only name maps installed by earlier versions;
 ES/EN names, continent. **UI state** (`store.ts`): persisted viewport + one-shot camera
 requests from sheets. **Markers** (`markers.ts`): `map_markers` + zustand store.
 Routes: `maps/index` (map, locate-me, compass, long-press to add a pin), sheets
-`regions` (installed + world + visible area + pick), `pick` (search regions), `download`
-(zoom choice and exact size before confirming), `markers`, `marker` (edit/delete),
-`search`, `emergency`, `routing-packs` (catalog: installed, for this area, all) and
-`route-steps`.
+`regions` ("Tus mapas": countries, add a country, bundled world, other maps), `pick`
+(`CountryList`), `download` (one country: what it includes and its exact size), `markers`,
+`marker` (edit/delete), `search`, `emergency` (points of the installed maps; maps still
+without them are fetched on their own when the sheet opens online) and `route-steps`.
 
 ### Assistant (`modules/nomad-llm`, `src/features/assistant`, `src/app/(tabs)/assistant`)
 - `modules/nomad-llm`: `getSystemModelStatus()` → `{ status: available | notEnabled |
@@ -575,8 +614,8 @@ Routes: `maps/index` (map, locate-me, compass, long-press to add a pin), sheets
 ### Preparedness (`src/features/prepare`, `src/app/(tabs)/(home)/prepare`)
 
 Emergency plan and kit, inspired by "if the internet goes down" checklists: things a
-downloaded library can't hold because they are the user's own. Entry: a card on Home
-(`PrepareHomeCard`: kit progress, contacts, items expiring) → `/prepare`.
+downloaded library can't hold because they are the user's own. Entry: Home's "Mi plan
+familiar" action and the plan/kit rows of "Tu preparación" (`features/home/readiness.ts`).
 
 - Data (`types.ts`, `store.ts`): one JSON document in the kv-store key `prepare` —
   contacts, important numbers, people (medication, allergies, blood type), two meeting
@@ -610,7 +649,7 @@ downloaded library can't hold because they are the user's own. Entry: a card on 
 | `build-metadata.protomaps.dev/builds.json`, `build.protomaps.com` | daily planet build, HTTP Range extraction |
 | `huggingface.co` | GGUF models |
 | `overpass-api.de`, `overpass.private.coffee`, `maps.mail.ru/osm/tools/overpass` | emergency points per region (only the region bbox is sent; public servers, best effort) |
-| `github.com/franlindebl/nomad-pocket/releases` (`routing-index`, `routing-YYYYMMDD`) | routing catalog and packs, built by `.github/workflows/routing-packs.yml` (our only hosted data) |
+| `github.com/franlindebl/nomad-pocket/releases` (`routing-index`, `routing-YYYYMMDD`; `maps-index`, `maps-YYYYMMDD`) | routing catalog and packs (`.github/workflows/routing-packs.yml`), country maps catalog and archives (`.github/workflows/country-maps.yml`): our only hosted data |
 | `franlindebl.github.io/nomad-pocket` | privacy policy / support page (`site/`) |
 
 ## Testing

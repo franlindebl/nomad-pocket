@@ -1,5 +1,6 @@
-// Bundled list of downloadable regions: countries, Spanish autonomous
-// communities and US states, with bounding boxes from Natural Earth.
+// Bundled list of regions with bounding boxes from Natural Earth: countries (what the app
+// downloads), plus Spanish autonomous communities and US states, which only name region
+// maps installed by earlier versions.
 import type { BBox } from '@/lib/pmtiles';
 
 import data from './regions.json';
@@ -41,22 +42,24 @@ export function fold(s: string): string {
 export type RegionSection = { key: string; title: string; data: Region[] };
 
 /**
- * Regions grouped for the picker. Subdivisions get their own section under the
- * parent country ("Spain — autonomous communities"); search matches both names.
+ * Countries grouped by continent for the picker (downloads are whole countries: the
+ * subdivisions in regions.json only name maps installed before that). `suggested` (the
+ * phone's country) comes first in its own section.
  */
-export function groupRegions(lang: string, query: string, titles: { continent: (c: Continent) => string; subdivisions: (country: string) => string }): RegionSection[] {
+export function groupCountries(
+  lang: string,
+  query: string,
+  titles: { continent: (c: Continent) => string; suggested: string },
+  suggested?: string | null,
+): RegionSection[] {
   const q = fold(query);
   const match = (r: Region) => !q || fold(r.name.es).includes(q) || fold(r.name.en).includes(q) || r.id === q;
   const sort = (a: Region, b: Region) => regionName(a, lang).localeCompare(regionName(b, lang), lang);
   const sections: RegionSection[] = [];
-  for (const parent of ['es', 'us']) {
-    const subs = REGIONS.filter((r) => r.parent === parent && match(r)).sort(sort);
-    const country = byId.get(parent);
-    if (subs.length && country) sections.push({ key: `sub-${parent}`, title: titles.subdivisions(regionName(country, lang)), data: subs });
-  }
-  // Spanish users mostly want Spain: list the communities first.
-  if (lang !== 'es') sections.reverse();
+  const top = suggested ? byId.get(suggested) : undefined;
+  if (top && top.type === 'country' && match(top) && !q) sections.push({ key: 'suggested', title: titles.suggested, data: [top] });
   for (const c of CONTINENTS) {
+    if (c === 'antarctica') continue;
     const list = REGIONS.filter((r) => r.type === 'country' && r.continent === c && match(r)).sort(sort);
     if (list.length) sections.push({ key: c, title: titles.continent(c), data: list });
   }

@@ -3,8 +3,9 @@ appId: com.fjlinde.nomadpocket
 tags: [full, prepare]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "open-prepare" }
-- tapOn: { id: "prepare-kit" }
+- scrollUntilVisible:
+    element: { id: "ready-kit" }
+- tapOn: { id: "ready-kit" }
 - scrollUntilVisible:
     element: { id: "kit-batteries-details" }
 - tapOn: { id: "kit-batteries-details" }
@@ -18,7 +19,14 @@ tags: [full, prepare]
 - tapOn: "Permitir"
 - assertVisible: ".*Caduca en .*"
 - assertNotVisible: "Las notificaciones están desactivadas.*"
+# The Preparedness hub (PDF export): Home's plan row.
 - tapOn: { id: "BackButton" }
+- scrollUntilVisible:
+    element: { id: "ready-plan" }
+- tapOn: { id: "ready-plan" }
+- extendedWaitUntil:
+    visible: { id: "prepare-export" }
+    timeout: 10000
 - tapOn: { id: "prepare-export" }
 # The system share sheet, titled with the PDF's name.
 - extendedWaitUntil:

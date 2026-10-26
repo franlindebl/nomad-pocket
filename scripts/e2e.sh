@@ -13,14 +13,16 @@
 # content/routing/ (registered at startup by src/features/{library,maps}/register.ts).
 # Results: e2e/artifacts/<timestamp>/.
 #
-# Env: DEVICE (simulator name, default NP-e2e), APP (path to a Release simulator
-# .app; built when missing), MAESTRO (binary), JAVA_HOME.
+# Env: DEVICE (simulator name, default NP-e2e), DERIVED (xcodebuild derived data, default
+# ios/build/sim), APP (path to a Release simulator .app; built when missing), MAESTRO
+# (binary), JAVA_HOME.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BUNDLE=com.fjlinde.nomadpocket
 DEVICE="${DEVICE:-NP-e2e}"
-APP="${APP:-$ROOT/ios/build/sim/Build/Products/Release-iphonesimulator/NomadPocket.app}"
+DERIVED="${DERIVED:-$ROOT/ios/build/sim}"
+APP="${APP:-$DERIVED/Build/Products/Release-iphonesimulator/NomadPocket.app}"
 MAESTRO="${MAESTRO:-maestro}"
 TAGS=smoke
 TARGETS=()
@@ -58,14 +60,15 @@ if ! java -version >/dev/null 2>&1; then
   export PATH="$JAVA_HOME/bin:$PATH"
 fi
 
-# The suite's app reads the routing catalog from the local pack server below.
-ROUTING_PORT=8765
+# The suite's app reads the routing and country map catalogs from the local server below.
+ROUTING_PORT="${ROUTING_PORT:-8765}"
 export EXPO_PUBLIC_ROUTING_MANIFEST_URL="http://localhost:$ROUTING_PORT/routing-manifest.json"
+export EXPO_PUBLIC_MAPS_MANIFEST_URL="http://localhost:$ROUTING_PORT/maps-manifest.json"
 
 if [[ $BUILD -eq 1 || ! -d "$APP" ]]; then
   echo "Building ${APP}…"
   xcodebuild -workspace "$ROOT/ios/NomadPocket.xcworkspace" -scheme NomadPocket \
-    -configuration Release -sdk iphonesimulator -derivedDataPath "$ROOT/ios/build/sim" \
+    -configuration Release -sdk iphonesimulator -derivedDataPath "$DERIVED" \
     -packageAuthorizationProvider netrc build | tail -3
 fi
 
@@ -80,14 +83,17 @@ xcrun simctl location "$UDID" set 40.4168,-3.7038
 # from localhost.
 # `routing-live` flows get the published catalog instead (a copy of GitHub's
 # routing-manifest.json, whose packs download from GitHub Releases), swapped in per flow.
+# The country maps catalog (maps-manifest.json) always lists Andorra: the fixture map in
+# e2e/fixtures/maps/ split in two parts, so a country download exercises reassembly.
 SERVER_PID=""
-if printf '%s\n' "${FLOWS[@]}" | xargs grep -lE '^tags:.*[[ ,]routing-(server|live)[],]' >/dev/null 2>&1; then
+if printf '%s\n' "${FLOWS[@]}" | xargs grep -lE '^tags:.*[[ ,](routing-server|routing-live|maps-server)[],]' >/dev/null 2>&1; then
   SERVE="$(mktemp -d)"
   if printf '%s\n' "${FLOWS[@]}" | xargs grep -lE '^tags:.*[[ ,]routing-live[],]' >/dev/null 2>&1; then
     curl -fsSL -o "$SERVE/live.json" "https://github.com/franlindebl/nomad-pocket/releases/download/routing-index/routing-manifest.json"
   fi
   split -b 2000000 -d -a 2 "$ROOT/e2e/fixtures/routing/ad.tar" "$SERVE/ad.tar.part"
   cp "$ROOT"/e2e/fixtures/routing/ad.{pois,streets,places,addresses}.tsv "$SERVE/"
+  split -b 1500000 -d -a 2 "$ROOT/e2e/fixtures/maps/ad.pmtiles" "$SERVE/ad.pmtiles.part"
   python3 -I - "$SERVE" "$ROUTING_PORT" <<'PY'
 import hashlib, json, os, sys
 d, port = sys.argv[1], sys.argv[2]
@@ -100,6 +106,12 @@ pack = {"id": "ad", "country": "ad", "regionId": "ad", "buildDate": "20261024", 
         "places": f("ad.places.tsv"), "addresses": f("ad.addresses.tsv")}
 json.dump({"version": 1, "release": "e2e", "baseUrl": f"http://localhost:{port}", "valhalla": "3.9.1", "packs": [pack]},
           open(os.path.join(d, "fixture.json"), "w"))
+# The country map: its points and street names come with the routing pack, as for a real country.
+mparts = [f(n) for n in sorted(os.listdir(d)) if n.startswith("ad.pmtiles.part")]
+cmap = {"id": "ad", "regionId": "ad", "buildDate": "20261025", "maxZoom": 10, "bbox": [1.394, 42.414, 1.761, 42.663],
+        "size": sum(p["size"] for p in mparts), "parts": mparts, "pois": None, "streets": None}
+json.dump({"version": 1, "release": "e2e", "baseUrl": f"http://localhost:{port}", "maps": [cmap]},
+          open(os.path.join(d, "maps-manifest.json"), "w"))
 PY
   python3 -m http.server "$ROUTING_PORT" --bind 127.0.0.1 --directory "$SERVE" >/dev/null 2>&1 &
   SERVER_PID=$!

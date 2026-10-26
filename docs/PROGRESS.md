@@ -19,10 +19,10 @@ can pick up without re-deriving anything.
 | Foundation (design system, nav, i18n, db, downloads core) | done |
 | Catalog (101 resources, 6 categories, Wikipedia picker, Kiwix OPDS explore, Files import) | done |
 | Downloads (queue, pause/resume, iOS background, fastest Kiwix mirror, Wi-Fi-only) | done |
-| Onboarding (language → starter pack → tips) | done |
+| UX redesign: survival kit (`docs/UX_SURVIVAL_PLAN.md`): onboarding country + kit, Home "En una emergencia" + "Tu preparación", 4 tabs, maps by country, bundled world map, simpler settings | built on branch `ux-survival` (worktree `../nomad-app-ux`), iOS sim checked; country maps CI not run yet |
 | ZIM library + reader (search, TOC, bookmarks, history, find, text size, dark mode) | done — iOS + Android |
-| Courses (14 courses, syllabus with fallbacks, progress) | done |
-| Maps (in-app PMTiles extraction, regions, visible area, world basemap, markers, GPS, multi-script labels) | done — iOS + Android |
+| Courses (14 courses, syllabus with fallbacks, progress; inside Library since the redesign) | done |
+| Maps (country downloads: prebuilt z15 map + routing pack + points; on-device extraction as fallback; bundled world map; markers, GPS, multi-script labels) | done — iOS sim (Andorra, local catalog) |
 | Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
 | Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 79 packs live 2026-10-25 (Europe + Latin America up to Spain's size); E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
@@ -45,7 +45,14 @@ can pick up without re-deriving anything.
 
 ## Next steps / backlog
 
-Roughly by value. Item 0 is in progress; the rest are not started. (Preparedness was added
+Roughly by value. Items U and 0 are in progress; the rest are not started.
+
+U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`, branch `ux-survival`), waiting for the owner:
+   review the app, then merge to main. Needs the owner's go for: running
+   `.github/workflows/country-maps.yml` (≈240 countries at z15, roughly 100–150 GB of
+   release assets, monthly; never run yet — until then every country falls back to
+   on-device extraction at z15) and the next TestFlight build (11). Follow-ups: bundled quick cards (first aid, water, radio) and
+   emergency numbers per country, Android check of the bundled world map. (Preparedness was added
 on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
 
 0. Routing packs: 60 whole-country packs live since 2026-10-25 (20.6 GB, with street
@@ -100,7 +107,7 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
 - Road routing needs a routing pack for the area (else the straight line). No
   isochrones (valhalla-mobile exposes none), no cross-pack routes (the country pack covers
   them), no voice / background navigation yet. Pack sha256 is not verified (size is).
-  Overpass still runs after each map download even where a pack brought the points.
+  Maps downloaded as a country (map with the pack or its own points) no longer ask Overpass.
 - Bbox queries (map dots, locality context) don't handle regions across the antimeridian.
 - Map screen first opens on the world when a region is registered after the first render
   (seeded/loose maps): pre-existing, cosmetic.
@@ -134,6 +141,45 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-26 — UX redesign: a survival kit (branch `ux-survival`)
+
+- Owner: the features felt scattered; the app should read as a crisis/survival tool;
+  onboarding and settings offered too many choices and never asked for the map or the AI;
+  maps must come with navigation and emergency points ("no extras"), countries only, always
+  full detail, world map always there. Approved: prebuilt country maps in CI, 4 tabs,
+  one kit proposal with switches, world map bundled.
+- Maps: `countries.ts` (one country = map + routing pack + points + streets),
+  `country-maps.ts` (maps catalog, multi-part downloads, assembly, side files),
+  `country-core.ts` (+ tests), `world.ts` (bundled `assets/maps/world.pmtiles`, 15 MB),
+  `country-maps.yml` + `scripts/maps/{build-country-map.sh,maps-manifest.py,make-world.sh}`.
+  Sheets: "Tus mapas", countries-only picker, one-country download sheet; routing-packs
+  sheet, zoom choice, visible area, communities and states gone (old maps listed as
+  "Otros mapas"). Emergencias no longer offers "descarga los de OpenStreetMap": points come
+  with the country, or are fetched on their own. Maps with bundled points skip Overpass
+  and the tile-POI fallback (they showed twice).
+- Onboarding: welcome → country → kit (country, guides, Wikipedia by free space, assistant:
+  system model or recommended GGUF) → plan shortcut. Home: network state, emergency
+  actions (nearby, first aid, plan, call 112/911), "Tu preparación" (6 items with status,
+  stale-map warning). Tabs: Inicio · Mapas · Biblioteca (Cursos inside) · Asistente.
+  Settings: country, storage by country/item, advanced (content languages).
+- Measured (Protomaps 20261025): Spain z12/14/15 = 408 MB / 1.6 GB / 3.2 GB (+2.3 GB
+  routing pack), Portugal 84 / 336 / 635 MB, France 1.1 / 4.5 / 9.4 GB, Germany 0.9 / 3.5 /
+  7.2 GB. Checked on the iOS 27 simulator: onboarding (Spain sized 5.5 GB; Andorra kit
+  installed), Home, Tus mapas, Emergencias with pack points, Library → Cursos, Settings;
+  country download from a local maps catalog (3 parts assembled, 408 points, 1375 streets).
+- CI maps extract by the country's outline (`scripts/maps/country-region.py`): Spain z15
+  2.3 GB with Canarias (the regions.json bbox left them out), France 9.4 → 5.5 GB,
+  Germany 7.2 → 5.5 GB; all 241 countries get an outline. Android release APK: onboarding,
+  Home and the bundled world map render on the emulator.
+- Rebased on faed459 (places and house numbers in the packs): country maps without a pack
+  carry the same `places` / `addresses` side files (places.py in build-country-map.sh,
+  imported with `indexPackPlaces` / `indexPackAddresses`).
+- E2E rewritten for the redesign (subagent, on simulator `NP-ux-e2e`, `ROUTING_PORT=8791`):
+  map-05 and android-02 removed (bundled world map, no visible area), map-15/16 download
+  the country from guidance, new `maps-server` tag (Andorra country map fixture). Found and
+  fixed: the Preparedness hub had no entry (now Home's plan row), the country search's
+  keyboard covered the wizard's buttons, "Punto de encuentro y 0 contactos".
 
 ### 2026-10-26 — Maps: every named place and house number in the packs
 

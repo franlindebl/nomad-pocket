@@ -1,13 +1,25 @@
-# Walks the setup wizard without downloading anything ("Lo elijo yo").
+# Walks the setup wizard without downloading anything: keeps the suggested country,
+# switches every piece of the kit off ("Continuar sin descargar"). Rows already on the
+# phone ("Instalado", "Incluido") ignore the tap.
 appId: com.fjlinde.nomadpocket
 ---
 - extendedWaitUntil:
-    visible: "Siguiente"
+    visible: { id: "onboarding-start" }
     timeout: 20000
-- tapOn: "Siguiente"
-- tapOn: "Lo elijo yo.*"   # radio card: label merges name + description
-- tapOn: "Siguiente"
-- tapOn: "Ir a Nomad"
+- tapOn: { id: "onboarding-start" }
+- tapOn: { id: "onboarding-next" }
+- extendedWaitUntil:
+    visible: { id: "kit-country" }
+    timeout: 10000
+- tapOn: { id: "kit-country" }
+- tapOn: { id: "kit-guides" }
+- tapOn: { id: "kit-wikipedia" }
+- tapOn: { id: "kit-assistant" }
+- extendedWaitUntil:
+    visible: "Continuar sin descargar"
+    timeout: 10000
+- tapOn: { id: "onboarding-download" }
+- tapOn: { id: "onboarding-finish" }
 - extendedWaitUntil:
     visible: "Inicio"
     timeout: 10000

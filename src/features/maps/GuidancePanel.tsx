@@ -30,7 +30,7 @@ import {
   X,
   type LucideIcon,
 } from 'lucide-react-native';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
@@ -41,7 +41,8 @@ import { space, useTheme } from '@/theme';
 import { bearingDegrees, compassSector, distanceMeters } from './geo';
 import { useGuidance } from './guidance';
 import { formatDistance } from './labels';
-import { COSTINGS, maneuverIcon, remainingSeconds, STRAIGHT_LINE_SPEED, type Costing, type ManeuverIcon } from './routing-core';
+import { useRoutingCatalog } from './routing-packs';
+import { COSTINGS, maneuverIcon, packsCovering, remainingSeconds, STRAIGHT_LINE_SPEED, type Costing, type ManeuverIcon } from './routing-core';
 
 const ARRIVED_METERS = 20;
 
@@ -87,6 +88,12 @@ export function GuidancePanel({ bottom, top, mapBearing, onHeight, onBannerHeigh
   const heading = useGuidance((s) => s.heading);
   const costing = useGuidance((s) => s.costing);
   const routing = useGuidance((s) => s.routing);
+  const packs = useRoutingCatalog((s) => s.manifest?.packs);
+  // No routing here: offer the country download that brings it, if one exists.
+  const packCountry = useMemo(
+    () => (routing === 'none' && target && packs ? (packsCovering(packs, target)[0]?.regionId ?? null) : null),
+    [routing, target, packs],
+  );
   const route = useGuidance((s) => s.route);
   const routeError = useGuidance((s) => s.routeError);
   const progress = useGuidance((s) => s.progress);
@@ -264,7 +271,7 @@ export function GuidancePanel({ bottom, top, mapBearing, onHeight, onBannerHeigh
             {remaining}
           </Text>
         ) : null}
-        {routing === 'none' && !arrived ? (
+        {packCountry && !arrived ? (
           <Button
             testID="guidance-get-routing"
             title={t('packs.download')}
@@ -272,7 +279,7 @@ export function GuidancePanel({ bottom, top, mapBearing, onHeight, onBannerHeigh
             variant="secondary"
             size="sm"
             style={{ alignSelf: 'flex-start' }}
-            onPress={() => router.push('/maps/routing-packs')}
+            onPress={() => router.push({ pathname: '/maps/download', params: { regionId: packCountry } })}
           />
         ) : null}
         {note}

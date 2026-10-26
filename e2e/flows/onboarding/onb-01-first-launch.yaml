@@ -1,12 +1,38 @@
-# ONB-01 — first launch shows the setup wizard; "Lo elijo yo" ends on Home, empty.
+# ONB-01 — first launch shows the setup wizard (welcome → country → kit); with the kit
+# switched off it ends on Home: emergency actions and the preparation checklist.
 appId: com.fjlinde.nomadpocket
 tags: [smoke, onboarding]
 ---
 - launchApp
 - extendedWaitUntil:
-    visible: "Conocimiento que te acompaña sin conexión"
+    visible: "Tu kit para cuando no haya internet"
     timeout: 20000
 - takeScreenshot: 01-welcome
-- runFlow: ../../subflows/finish-onboarding.yaml
-- assertVisible: "Prepara tu Nomad"
-- takeScreenshot: 02-home-empty
+- tapOn: { id: "onboarding-start" }
+# The phone's region (es_ES) is suggested first and already chosen.
+- assertVisible: "¿Dónde vives\\?"
+- assertVisible: "TU PAÍS|Tu país"
+- takeScreenshot: 02-country
+- tapOn: { id: "onboarding-next" }
+- extendedWaitUntil:
+    visible: { id: "kit-country" }
+    timeout: 10000
+- assertVisible: "Mapa de España.*"
+- assertVisible: "Guías de supervivencia.*"
+- takeScreenshot: 03-kit
+- tapOn: { id: "kit-country" }
+- tapOn: { id: "kit-guides" }
+- tapOn: { id: "kit-wikipedia" }
+- tapOn: { id: "kit-assistant" }
+- extendedWaitUntil:
+    visible: "Continuar sin descargar"
+    timeout: 10000
+- tapOn: { id: "onboarding-download" }
+- assertVisible: "Todo listo"
+- tapOn: { id: "onboarding-finish" }
+- extendedWaitUntil:
+    visible: "En una emergencia|EN UNA EMERGENCIA"
+    timeout: 10000
+- assertVisible: { id: "home-readiness" }
+- assertVisible: "Mapa de España.*"
+- takeScreenshot: 04-home-empty

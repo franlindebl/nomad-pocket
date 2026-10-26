@@ -1,22 +1,41 @@
-# ONB-04 — choosing the Light pack starts real downloads; the last step reports them. Cancels them after.
+# ONB-04 — a kit for another country (Andorra, from the local catalogs) with the survival
+# guides starts real downloads; the last step reports them and Home shows the progress.
+# Cancels them after.
 appId: com.fjlinde.nomadpocket
-tags: [nightly, onboarding, network]
+tags: [nightly, onboarding, network, routing-server, maps-server]
 ---
 - launchApp
 - extendedWaitUntil:
-    visible: "Siguiente"
+    visible: { id: "onboarding-start" }
     timeout: 20000
-- tapOn: "Siguiente"
-- assertVisible: "Ligero.*"
-- tapOn: "Descargar"
+- tapOn: { id: "onboarding-start" }
+- tapOn: "Buscar un país"
+- inputText: "Andorra"
+- tapOn: { id: "country-ad" }
+# The keyboard covers the wizard's buttons.
+- hideKeyboard
+- tapOn: { id: "onboarding-next" }
 - extendedWaitUntil:
-    visible: "Hemos empezado a descargar .*"
+    visible: "Mapa de Andorra.*"
     timeout: 20000
-- takeScreenshot: 01-ready-downloads
-- tapOn: "Ir a Nomad"
+# Keep the map and the guides; Wikipedia off (gigabytes). The assistant may be the
+# system one ("Incluido", not a download) or a model: switch it off either way.
+- tapOn: { id: "kit-wikipedia" }
+- tapOn: { id: "kit-assistant" }
+- extendedWaitUntil:
+    visible: "Descargar mi kit · .*"
+    timeout: 20000
+- takeScreenshot: 01-kit
+- tapOn: { id: "onboarding-download" }
+- extendedWaitUntil:
+    visible: "Tu kit se está descargando"
+    timeout: 20000
+- takeScreenshot: 02-ready-downloads
+- tapOn: { id: "onboarding-finish" }
+- assertVisible: { id: "home-downloads" }
 - tapOn: "Descargas"
 - assertVisible: "Pausar|Cancelar"
-- takeScreenshot: 02-queue
+- takeScreenshot: 03-queue
 - repeat:
     while:
       visible: "Cancelar"
@@ -24,4 +43,4 @@ tags: [nightly, onboarding, network]
       - tapOn: "Cancelar"
 - extendedWaitUntil:
     visible: "No hay descargas activas"
-    timeout: 20000
+    timeout: 60000

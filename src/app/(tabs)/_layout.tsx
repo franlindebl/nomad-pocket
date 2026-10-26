@@ -19,17 +19,13 @@ export default function TabsLayout() {
         <NativeTabs.Trigger.Label>{t('tabs.home')}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf={{ default: 'house', selected: 'house.fill' }} md="home" />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="library">
-        <NativeTabs.Trigger.Label>{t('tabs.library')}</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf={{ default: 'books.vertical', selected: 'books.vertical.fill' }} md="local_library" />
-      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="maps">
         <NativeTabs.Trigger.Label>{t('tabs.maps')}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf={{ default: 'map', selected: 'map.fill' }} md="map" />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="courses">
-        <NativeTabs.Trigger.Label>{t('tabs.courses')}</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf={{ default: 'graduationcap', selected: 'graduationcap.fill' }} md="school" />
+      <NativeTabs.Trigger name="library">
+        <NativeTabs.Trigger.Label>{t('tabs.library')}</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf={{ default: 'books.vertical', selected: 'books.vertical.fill' }} md="local_library" />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="assistant">
         <NativeTabs.Trigger.Label>{t('tabs.assistant')}</NativeTabs.Trigger.Label>

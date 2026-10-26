@@ -1,10 +1,11 @@
-# MAP-15 — download a routing pack (Andorra, two parts, from the local pack server that
-# scripts/e2e.sh starts for `routing-server` flows): guidance on a straight line offers
-# "Descargar rutas", the sheet lists the pack for this area, the download assembles the
-# parts, guidance switches to roads, the pack's emergency points reach Emergencias and
-# its street names, named places and house numbers the search (no map installed).
+# MAP-15 — download a country (Andorra) from guidance: on a straight line the panel offers
+# the navigation of this country, which opens the country sheet (map + navigation +
+# points, sizes from the local catalogs scripts/e2e.sh serves for `routing-server` /
+# `maps-server` flows). One download brings the map (two parts, reassembled) and the
+# routing pack (two parts): guidance switches to roads, the pack's emergency points reach
+# Emergencias, its street names, named places and house numbers the search, and "Tus mapas" lists one row for the country.
 appId: com.fjlinde.nomadpocket
-tags: [full, maps, routing-server]
+tags: [full, maps, routing-server, maps-server]
 ---
 - setLocation:
     latitude: 42.5075
@@ -26,29 +27,26 @@ tags: [full, maps, routing-server]
     timeout: 30000
 - tapOn: { id: "guidance-get-routing" }
 - extendedWaitUntil:
-    visible: "Para esta zona"
+    visible: { id: "country-download" }
     timeout: 20000
 - assertVisible: "Andorra"
-- takeScreenshot: 01-packs
-- tapOn: { id: "pack-download", index: 0 }
-- extendedWaitUntil:
-    visible: { id: "pack-installed" }
-    timeout: 60000
-- takeScreenshot: 02-installed
-- repeat:
-    while:
-      visible: { id: "pack-installed" }
-    times: 6
-    commands:
-      - swipe:
-          start: 50%, 40%
-          end: 50%, 98%
-          duration: 300
+- assertVisible: "Navegación sin conexión"
+- assertVisible: "Rutas en coche, a pie y en bici.*"
+- assertVisible: { id: "country-size" }
+- takeScreenshot: 01-country-sheet
+- tapOn: { id: "country-download" }
 - extendedWaitUntil:
     visible: { id: "guidance-next" }
-    timeout: 30000
-- takeScreenshot: 03-route
+    timeout: 90000
+- takeScreenshot: 02-route
 - tapOn: { id: "guidance-stop" }
+- tapOn: "Tus mapas"
+- extendedWaitUntil:
+    visible: "(?s).*Mapa y navegación.*"
+    timeout: 60000
+- assertVisible: { id: "country-row" }
+- takeScreenshot: 03-your-maps
+- swipe: { direction: DOWN }
 - tapOn: { id: "map-emergency" }
 - tapOn: { id: "emergency-cat-health" }
 - extendedWaitUntil:

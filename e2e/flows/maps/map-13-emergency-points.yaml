@@ -1,6 +1,7 @@
-# MAP-13 — emergency points: an installed map gives a few from its own tiles (offline
-# fallback); the region's full set downloads from OpenStreetMap (Overpass), lists by
-# category and distance, opens on the map and starts guidance.
+# MAP-13 — emergency points of a map that brought none (Melilla, a region map from an
+# older version): a few from its own tiles at first (offline fallback); opening
+# Emergencias online fetches the full set from OpenStreetMap (Overpass) by itself, with
+# no button. Lists by category and distance, opens on the map and starts guidance.
 appId: com.fjlinde.nomadpocket
 tags: [nightly, maps, network, seeded-map]
 ---
@@ -10,18 +11,12 @@ tags: [nightly, maps, network, seeded-map]
     visible: { id: "map-emergency" }
     timeout: 20000
 - tapOn: { id: "map-emergency" }
-# The startup indexing (4 s after launch) stores the hospitals in the seeded Melilla tiles.
-- extendedWaitUntil:
-    visible: "Solo tienes los puntos que trae el mapa.*"
-    timeout: 30000
-- assertVisible: { id: "emergency-place" }
-- takeScreenshot: 01-from-tiles
-- tapOn: { id: "emergency-fetch-top" }
+- assertNotVisible: { id: "emergency-fetch-top" }
+- takeScreenshot: 01-fetching
 # Pharmacies are not in the z12 tiles: they arrive with the OpenStreetMap points.
 - extendedWaitUntil:
     visible: "(?s).*Farmacia\\n.*"
     timeout: 240000
-- assertNotVisible: "Solo tienes los puntos que trae el mapa.*"
 - takeScreenshot: 02-health
 - tapOn: { id: "emergency-cat-security" }
 - assertVisible: { id: "emergency-place" }

@@ -1,7 +1,7 @@
 {
   "title": "Mapas",
   "controls": {
-    "regions": "Mapas sin conexión",
+    "regions": "Tus mapas",
     "markers": "Lugares guardados",
     "north": "Orientar al norte",
     "locate": "Mostrar mi ubicación",
@@ -11,11 +11,10 @@
     "overview": "Ver toda la ruta"
   },
   "empty": {
-    "title": "Mapas que funcionan en cualquier sitio",
-    "body": "Descarga el mapa del mundo y las regiones que necesites. Siguen funcionando sin cobertura.",
-    "world": "Descargar mapa del mundo · {{size}}",
-    "worldNoSize": "Descargar mapa del mundo",
-    "pickRegion": "Elegir una región"
+    "title": "Descarga el mapa de tu país",
+    "body": "Ya tienes el mapa del mundo. Con tu país tendrás calles, rutas y puntos de emergencia sin conexión.",
+    "country": "Descargar {{name}}",
+    "pickCountry": "Elegir un país"
   },
   "loadingAssets": "Preparando el mapa sin conexión…",
   "location": {
@@ -25,26 +24,33 @@
     "unavailable": "No se ha podido obtener tu ubicación. Prueba de nuevo al aire libre."
   },
   "regions": {
-    "title": "Mapas sin conexión",
+    "title": "Tus mapas",
+    "intro": "Cada país trae su mapa con el máximo detalle, la navegación sin conexión y sus puntos de emergencia.",
     "world": "Mapa del mundo",
-    "worldBody": "Países, ciudades y carreteras principales, hasta el zoom {{zoom}}. Se muestra bajo tus regiones.",
-    "visibleArea": "Descargar la zona visible",
-    "visibleAreaBody": "Guarda justo lo que ves ahora en pantalla",
-    "addRegion": "Añadir un país o región",
-    "addRegionBody": "Países, comunidades autónomas, estados de EE. UU.",
-    "installed": "Descargados",
-    "none": "Aún no tienes regiones. Elige una o descarga la zona que estás viendo.",
-    "detail": "Detalle hasta zoom {{zoom}} · {{size}} · {{date}}",
+    "worldBody": "Países, ciudades y carreteras principales. Viene con la app.",
+    "included": "Incluido",
+    "addCountry": "Añadir un país",
+    "addFirstCountry": "Descargar tu país",
+    "addCountryBody": "Mapa, navegación y puntos de emergencia",
+    "other": "Otros mapas",
+    "withRouting": "Mapa y navegación",
+    "mapOnly": "Mapa",
+    "routingOnly": "Solo navegación",
+    "downloadingPct": "Descargando… {{pct}} %",
+    "failed": "La descarga se interrumpió",
+    "retry": "Reintentar",
     "deleteTitle": "¿Eliminar {{name}}?",
     "deleteBody": "Liberarás {{size}}. Podrás volver a descargarlo cuando quieras.",
+    "downloading": "Descargando…",
     "update": "Actualizar",
-    "downloading": "Descargando…"
+    "updateAvailable": "Hay un mapa más reciente",
+    "updateBody": "Hay una versión más reciente del mapa ({{size}}). Descárgala mientras tengas conexión."
   },
   "picker": {
-    "title": "Elegir una región",
-    "search": "Buscar países y regiones",
-    "subdivisions": "{{country}} · regiones",
-    "noResults": "Ninguna región coincide con «{{query}}»"
+    "title": "Elegir un país",
+    "search": "Buscar un país",
+    "suggested": "Tu país",
+    "noResults": "Ningún país coincide con «{{query}}»"
   },
   "continent": {
     "europe": "Europa",
@@ -56,28 +62,14 @@
     "antarctica": "Antártida"
   },
   "download": {
-    "titleArea": "Zona visible",
     "titleWorld": "Mapa del mundo",
-    "detail": "Nivel de detalle",
-    "zoom12": "Pueblos",
-    "zoom14": "Calles",
-    "zoom15": "Máximo",
-    "zoomHint": {
-      "12": "Pueblos, carreteras principales y usos del suelo. La descarga más ligera.",
-      "14": "Todas las calles y caminos. Ideal para ir a pie o en coche.",
-      "15": "Edificios y todo el detalle. La descarga más pesada."
-    },
     "estimating": "Calculando el tamaño…",
     "size": "Tamaño de la descarga",
-    "tiles": "{{n}} teselas",
     "free": "{{size}} libres en este dispositivo",
     "notEnough": "No hay espacio suficiente: necesitas {{needed}} y tienes {{free}} libres.",
-    "tooLarge": "La zona es demasiado grande para este nivel de detalle. Elige menos detalle o una zona más pequeña.",
     "offline": "Necesitas conexión a internet para descargar mapas. Después funcionan sin conexión.",
     "estimateFailed": "No se ha podido calcular el tamaño: {{error}}",
-    "action": "Descargar · {{size}}",
-    "source": "Protomaps, versión del {{date}} · © OpenStreetMap",
-    "areaName": "Zona cerca de {{coords}}"
+    "action": "Descargar · {{size}}"
   },
   "markers": {
     "title": "Lugares guardados",
@@ -148,20 +140,22 @@
       "official": "Instituciones"
     },
     "empty": "No hay puntos de esta categoría en tus regiones descargadas.",
-    "noDataTitle": "Descarga los puntos de emergencia",
-    "noDataBody": "Hospitales, policía, bomberos, agua potable y refugios de tus regiones, desde OpenStreetMap. Necesitas conexión una vez; después funcionan sin ella.",
-    "noRegions": "Primero descarga el mapa de tu región: sus puntos de emergencia se descargan con él.",
-    "pickRegion": "Elegir una región",
+    "noDataTitle": "Puntos de emergencia",
+    "noDataBody": "Los puntos de emergencia de tus mapas se descargarán solos en cuanto tengas conexión.",
+    "noRegions": "Descarga el mapa de tu país: trae sus hospitales, farmacias, agua potable y refugios.",
+    "pickRegion": "Elegir un país",
     "fetch": "Descargar · {{name}}",
     "fetching": "Descargando {{name}}… {{done}} de {{total}}",
     "failed": "No se pudo descargar {{name}}: {{error}}",
     "offline": "Necesitas conexión a internet para descargar los puntos de emergencia.",
     "regionInfo": "{{count}} puntos · {{date}}",
-    "regions": "Puntos por región",
+    "regions": "Puntos por mapa",
     "refresh": "Actualizar",
     "source": "Datos de OpenStreetMap. Pueden estar incompletos o desactualizados: ante una emergencia, llama al {{number}}.",
-    "regionFromTiles": "{{count}} puntos del mapa · descarga los de OpenStreetMap para más detalle",
-    "partial": "Solo tienes los puntos que trae el mapa. Descarga los de OpenStreetMap: más hospitales, farmacias, agua potable y teléfonos."
+    "preparingTitle": "Preparando los puntos de emergencia",
+    "preparingBody": "Descargando los hospitales, farmacias, agua potable y refugios de tus mapas…",
+    "bundled": "Incluidos con el mapa",
+    "regionFromTiles": "{{count}} puntos del mapa"
   },
   "police": {
     "guardiaCivil": "Guardia Civil",
@@ -306,18 +300,17 @@
     "lastStretch": "La ruta termina aquí: sigue la flecha hasta el destino."
   },
   "packs": {
-    "title": "Rutas sin conexión",
-    "rowBody": "Para ir por carreteras y caminos sin cobertura",
-    "intro": "Cada paquete permite calcular rutas en coche, a pie y en bici sin conexión, y trae los puntos de emergencia de la zona (hospitales, policía, agua…). Datos de OpenStreetMap.",
-    "detail": "{{size}} · datos de {{date}}",
-    "nearby": "Para esta zona",
-    "all": "Todos",
-    "loading": "Cargando el catálogo…",
-    "offline": "No se pudo cargar el catálogo de rutas. Necesitas conexión a internet.",
-    "retry": "Reintentar",
-    "deleteTitle": "¿Eliminar las rutas de {{name}}?",
-    "download": "Descargar rutas",
-    "failed": "Error",
-    "section": "Rutas"
+    "download": "Descargar la navegación de este país"
+  },
+  "country": {
+    "map": "Mapa con el máximo detalle",
+    "mapFull": "Todas las calles, caminos y edificios.",
+    "mapReduced": "Calles y carreteras. Es un país muy grande: algo menos de detalle para que quepa en el móvil.",
+    "routing": "Navegación sin conexión",
+    "routingBody": "Rutas en coche, a pie y en bici, con indicaciones paso a paso.",
+    "routingMissing": "Aún no disponible en este país: te guiaremos en línea recta hasta el destino.",
+    "points": "Puntos de emergencia y calles",
+    "pointsBody": "Hospitales, farmacias, policía, agua potable y refugios, y todas las calles en el buscador.",
+    "wifiHint": "Mejor con Wi‑Fi y el móvil cargando. Puedes seguir usando la app mientras tanto."
   }
 }

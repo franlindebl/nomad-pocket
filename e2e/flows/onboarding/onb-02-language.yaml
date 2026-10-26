@@ -1,23 +1,21 @@
-# ONB-02 + ONB-03 — wizard in English; the last content language can't be unselected; reopen from Settings.
+# ONB-02 — the wizard in English, back to Spanish; reopened from Settings ("Revisar mi
+# kit"). Content languages follow the app language (no choice in the wizard any more).
 appId: com.fjlinde.nomadpocket
 tags: [full, onboarding]
 ---
 - launchApp
 - extendedWaitUntil:
-    visible: "Siguiente"
+    visible: { id: "onboarding-start" }
     timeout: 20000
 - tapOn: "English"
-- assertVisible: "Next"
-- tapOn: "Spanish"
-- tapOn: "English"
-- takeScreenshot: 01-last-language
+- assertVisible: "Your kit for when the internet is gone"
+- assertVisible: "Get started"
+- takeScreenshot: 01-english
 - tapOn: "Español"
-- tapOn: "Siguiente"
-- tapOn: "Lo elijo yo.*"
-- tapOn: "Siguiente"
-- tapOn: "Ir a Nomad"
+- assertVisible: "Tu kit para cuando no haya internet"
+- runFlow: ../../subflows/finish-onboarding.yaml
 - tapOn: { id: "open-settings" }
 - scrollUntilVisible:
-    element: "Asistente de configuración"
-- tapOn: "Asistente de configuración"
-- assertVisible: "Conocimiento que te acompaña sin conexión"
+    element: "Revisar mi kit"
+- tapOn: "Revisar mi kit"
+- assertVisible: "Tu kit para cuando no haya internet"

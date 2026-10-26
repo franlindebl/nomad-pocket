@@ -13,7 +13,7 @@ tags: [android, network]
 - back
 
 # Collection tier: the pack button sits beside the tier's button (B1).
-- tapOn: { point: "30%,93%" }   # Biblioteca
+- tapOn: { point: "63%,93%" }   # Biblioteca
 - tapOn: "Medicina.*"
 - tapOn: { id: "pack-download" }
 - assertVisible: "¿Descargar .*"
@@ -60,9 +60,9 @@ tags: [android, network]
 - back
 
 # Places: the delete button sits beside the row (B1).
-- tapOn: { point: "50%,93%" }   # Mapas
+- tapOn: { point: "37%,93%" }   # Mapas
 - extendedWaitUntil:
-    visible: "Mapas sin conexión"
+    visible: "Tus mapas"
     timeout: 20000
 - takeScreenshot: 06-maps
 - longPressOn: { point: "50%,30%" }
@@ -89,7 +89,10 @@ tags: [android, network]
     visible: "Abrir"
     timeout: 180000
 - back
-- tapOn: { point: "70%,93%" }   # Cursos
+- tapOn: { point: "63%,93%" }   # Biblioteca: Cursos is a section of it
+- scrollUntilVisible:
+    element: { id: "open-courses" }
+- tapOn: { id: "open-courses" }
 - tapOn: "freeCodeCamp en español.*"
 - extendedWaitUntil:
     visible: { id: "lesson-check-1" }
@@ -99,6 +102,6 @@ tags: [android, network]
 - takeScreenshot: 09-course
 - back
 
-- tapOn: { point: "90%,93%" }   # Asistente
+- tapOn: { point: "88%,93%" }   # Asistente
 - assertVisible: "Elige un modelo para empezar|¿En qué te ayudo\\?"
 - takeScreenshot: 10-assistant

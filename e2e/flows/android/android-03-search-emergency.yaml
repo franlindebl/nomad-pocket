@@ -1,21 +1,20 @@
 # ANDROID-03 — map search, place card, straight-line guidance and Emergencias on Android:
-# downloads the visible area around Melilla (its emergency points follow from Overpass).
+# downloads a small country (Andorra: map extracted on the phone while the country maps
+# catalog has none; its routing pack and emergency points from the published catalog).
 appId: com.fjlinde.nomadpocket
 tags: [android, network]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { point: "50%,93%" }   # Mapas
+- tapOn: { point: "37%,93%" }   # Mapas
 - extendedWaitUntil:
-    visible: "Mapas sin conexión"
+    visible: "Tus mapas"
     timeout: 20000
-- setLocation: { latitude: 35.2937, longitude: -2.9383 }
-- tapOn: "Mostrar mi ubicación"
-- extendedWaitUntil:
-    visible: "NoExiste"
-    timeout: 3000
-    optional: true
-- tapOn: "Mapas sin conexión"
-- tapOn: "Descargar la zona visible.*"
+- setLocation: { latitude: 42.5075, longitude: 1.5218 }
+- tapOn: "Tus mapas"
+- tapOn: { id: "add-country" }
+- tapOn: "Buscar un país"
+- inputText: "Andorra"
+- tapOn: { id: "country-ad" }
 - extendedWaitUntil:
     visible: "Descargar · .*"
     timeout: 60000
@@ -24,11 +23,11 @@ tags: [android, network]
     text: "(?i)usar datos móviles"
     optional: true
 - extendedWaitUntil:
-    notVisible: "Descargando.*|Preparando.*"
+    visible: "(?s).*Mapa( y navegación)? · .*"
     timeout: 300000
 - back
 - tapOn: { id: "map-search" }
-- inputText: "Melilla"
+- inputText: "Andorra la Vella"
 - extendedWaitUntil:
     visible: { id: "search-result" }
     timeout: 60000
@@ -52,7 +51,7 @@ tags: [android, network]
 - extendedWaitUntil:
     visible: "Llamar al 112"
     timeout: 15000
-# Overpass runs right after the download; give it time (public servers can be slow).
+# The points come with the routing pack, or from Overpass when there is none.
 - extendedWaitUntil:
     visible: { id: "emergency-place" }
     timeout: 240000

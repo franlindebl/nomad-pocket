@@ -5,7 +5,7 @@ tags: [full, maps]
 - runFlow: ../../subflows/launch.yaml
 - tapOn: { id: "map" }
 - extendedWaitUntil:
-    visible: "Mapas sin conexión"
+    visible: "Tus mapas"
     timeout: 20000
 - longPressOn: { point: "50%,25%" }
 - assertVisible: "Nuevo lugar"

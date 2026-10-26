@@ -2,7 +2,7 @@
 
 [Maestro](https://maestro.mobile.dev) flows that drive the Release build of the app on an
 iOS simulator, the same way a person would: tapping, typing and reading the screen through
-accessibility. 56 flows cover 53 of the 55 cases in the test plan (Claude doc "Plan de
+accessibility. 54 flows cover 51 of the 55 cases in the test plan (Claude doc "Plan de
 tests funcionales iOS — Nomad App"), plus AI-06, AI-07 and MAP-17 (navigation view) added after it; the case ids (`RDR-03`, `MAP-06`…) are on the first
 line of each flow. Preparedness (`PREP-01`…`PREP-04`) came after the plan and has its own
 flows.
@@ -42,10 +42,10 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 | Command | Flows | Time | Covers | Needs |
 |---|---|---|---|---|
 | `npm run e2e` | 21 | ~14 min | P0: every screen's main path (incl. map search, Emergencias, road routing and Preparedness) | nothing (offline) |
-| `npm run e2e:full` | 37 | ~24 min | + P1: secondary features (themes, markers, find in page, courses, reminders, PDF…) | nothing (offline) |
+| `npm run e2e:full` | 38 | ~24 min | + P1: secondary features (themes, markers, find in page, courses, reminders, PDF…) | nothing (offline) |
 | `npm run e2e:all` | 49 | ~35 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape, light and dark | nothing (offline) |
-| `npm run e2e:android` | 5 | ~15 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack | internet, Android emulator |
+| `npm run e2e:android` | 4 | ~15 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack | internet, Android emulator |
 
 When to run what: smoke before every TestFlight build or after a risky change; full and the
 iPad tour before an App Store release (then look through the iPad screenshots in
@@ -65,10 +65,11 @@ its per-app language (`cmd locale set-app-locales`) and location, and runs the f
 `android`. A release build can't be seeded (no `run-as`), so the tour downloads a 1 MB and
 a 12 MB archive; on the emulator's mobile data the app asks first ("Descargas solo con
 Wi-Fi") and the flow accepts. Android tabs show only the active label, so they are tapped
-by position. `android-02-map-scripts` sets the emulator's location to six cities (Melilla,
-Bangkok, Tokyo, Tbilisi, Addis Ababa, Kathmandu), downloads the visible area of each and
-screenshots it: check the labels in every script the app ships glyphs for. Results go to
-`e2e/artifacts/latest-android/`.
+by position (4 tabs: Inicio 12 %, Mapas 37 %, Biblioteca 63 %, Asistente 88 %). The
+script-labels tour (`android-02-map-scripts`, six cities by visible-area download) was
+removed with the visible-area downloads in the 2026-10-25 redesign: maps are whole
+countries now, too big for a per-script check; check map labels in other scripts by hand.
+Results go to `e2e/artifacts/latest-android/`.
 
 ## Running part of the suite
 
@@ -88,7 +89,9 @@ npm run e2e -- e2e/flows/maps --build                  # options also work throu
 | `--build` | rebuild the Release `.app` before running |
 | `--list` | print the selected flows and exit |
 | `DEVICE=…` | simulator name (default `NP-e2e`) |
-| `APP=…` | another simulator `.app` (default `ios/build/sim/…/NomadPocket.app`) |
+| `DERIVED=…` | xcodebuild derived data for `--build` (default `ios/build/sim`): use another one (`ios/build/e2e`) to keep the suite's build apart from a dev build |
+| `APP=…` | another simulator `.app` (default `$DERIVED/…/NomadPocket.app`) |
+| `ROUTING_PORT=…` | port of the local catalog server (default 8765). It is baked into the app at build time: change it when another checkout runs its suite at the same time, and rebuild |
 | `MAESTRO=…` | Maestro binary (default `maestro` on `PATH`) |
 
 ## Reading the results
@@ -122,12 +125,15 @@ To look into a failure:
 ```
 scripts/e2e.sh
  ├─ pick flows by tag (the `tags:` line of each e2e/flows/**/*.yaml)
- ├─ build the Release .app if missing or --build (with EXPO_PUBLIC_ROUTING_MANIFEST_URL
- │   pointing at the local pack server below)
- ├─ if any flow is tagged `routing-server` or `routing-live`: serve the Andorra routing
- │   pack split in two parts + its emergency points + a manifest on http://localhost:8765;
- │   before each `routing-live` flow the manifest is swapped for a copy of the published
- │   one (GitHub's routing-index), so that flow downloads a real pack from GitHub Releases
+ ├─ build the Release .app if missing or --build (with EXPO_PUBLIC_ROUTING_MANIFEST_URL and
+ │   EXPO_PUBLIC_MAPS_MANIFEST_URL pointing at the local server below: a build without
+ │   them reads GitHub's catalogs and the `*-server` flows fail)
+ ├─ if any flow is tagged `routing-server`, `routing-live` or `maps-server`: serve on
+ │   http://localhost:8765 the Andorra routing pack split in two parts + its emergency
+ │   points and street names + routing-manifest.json, and the Andorra country map
+ │   (e2e/fixtures/maps/ad.pmtiles, z0–10) split in two parts + maps-manifest.json;
+ │   before each `routing-live` flow the routing manifest is swapped for a copy of the
+ │   published one (GitHub's routing-index), so that flow downloads a real pack
  ├─ boot NP-e2e, set its location to Madrid
  └─ for each flow
      ├─ uninstall + install the app        → fresh state, nothing left from the last flow
@@ -139,8 +145,9 @@ scripts/e2e.sh
      │   (the app registers loose files there at startup:
      │    src/features/{library,maps,assistant}/register.ts)
      └─ maestro test <flow>
-         └─ subflows/launch.yaml: launch, walk the setup wizard with "Lo elijo yo"
-            (no downloads) and land on Home; then the flow's own steps
+         └─ subflows/launch.yaml: launch, walk the setup wizard (suggested country, every
+            piece of the kit switched off: "Continuar sin descargar") and land on Home;
+            then the flow's own steps
 ```
 
 The reinstall costs ~15 s per flow, but it means a flow never depends on another one and
@@ -151,7 +158,7 @@ the shipped app and is not slowed down by dev-mode checks.
 e2e/
   config.yaml          # Maestro workspace config
   flows/<area>/*.yaml  # one file per test, named after its main case (rdr-03-bookmark)
-  subflows/            # shared steps: launch, finish-onboarding, open-wikipedia
+  subflows/            # shared steps: launch, finish-onboarding, open-wikipedia, open-courses
   fixtures/            # ZIM, map and routing files for `seeded` / `seeded-map` / `seeded-route` flows (see Setup)
   artifacts/           # results (gitignored)
 scripts/e2e.sh         # runner
@@ -188,7 +195,8 @@ By hand:
   | `devdocs_en_node_2026-08.zim` | 1 MB | library list and delete |
   | `freecodecamp_es_all_2026-10.zim` | 11 MB | courses |
   | `nhs.uk_en_medicines_2026-09b.zim` | 15 MB | medical disclaimer |
-  | `es-ml.pmtiles` | 0.6 MB | maps: Melilla up to zoom 12 (© OpenStreetMap, Protomaps build), in git |
+  | `es-ml.pmtiles` | 0.6 MB | maps: Melilla up to zoom 12 (© OpenStreetMap, Protomaps build), a region map as older versions downloaded ("Otros mapas"), in git |
+  | `maps/ad.pmtiles` | 2.5 MB | country download: Andorra up to zoom 10, served by the local catalog (`maps-server`; Protomaps build 2026-10-25, © OpenStreetMap), in git |
   | `routing/ad.tar`, `routing/ad.pois.tsv`, `routing/ad.streets.tsv` | 3 MB | routing: Andorra pack + emergency points + street names built by `scripts/routing/build-country.sh ad` (Valhalla 3.9.1, Geofabrik 2026-10-24, © OpenStreetMap), in git |
 | `routing/ad.places.tsv`, `routing/ad.addresses.tsv` | 140 KB | named places and house numbers of Andorra from `scripts/routing/places.py` (Geofabrik 2026-10-25), served with the pack by the local pack server |
   | `models/Qwen3.5-0.8B-Q4_K_M.gguf` | 533 MB | assistant with a llama.cpp model (`seeded-model`), from Hugging Face |
@@ -203,8 +211,8 @@ By hand:
 | Area | Flow | Cases | Suite | Needs |
 |---|---|---|---|---|
 | onboarding | `onb-01-first-launch` | ONB-01 | smoke | — |
-| onboarding | `onb-02-language` | ONB-02, ONB-03 | full | — |
-| onboarding | `onb-04-pack` | ONB-04 | nightly | network |
+| onboarding | `onb-02-language` | ONB-02 | full | — |
+| onboarding | `onb-04-pack` | ONB-04 | nightly | network, routing-server, maps-server (kit for Andorra + survival guides) |
 | home | `home-01-storage-modules` | HOME-01 | smoke | seeded |
 | home | `home-02-header` | HOME-02, DL-01 | smoke | — |
 | home | `x-01-persistence` | X-01 | smoke | seeded |
@@ -228,17 +236,16 @@ By hand:
 | reader | `rdr-10-dark` | RDR-10 | full | seeded |
 | maps | `map-01-empty` | MAP-01, MAP-02 | smoke | — |
 | maps | `map-02-seeded-region` | MAP-09 (offline) | smoke | seeded-map |
-| maps | `map-03-pick-region` | MAP-03 | full | — |
-| maps | `map-04-region` | MAP-04, MAP-09 | nightly | network |
-| maps | `map-05-world` | MAP-05 | nightly | network |
+| maps | `map-03-pick-region` | MAP-03 | full | routing-server, maps-server |
+| maps | `map-04-region` | MAP-04, MAP-09 | nightly | network (on-device extraction of a country the catalog lacks) |
 | maps | `map-06-markers` | MAP-06, MAP-07 | full | — |
 | maps | `map-08-locate` | MAP-08 | full | — |
 | maps | `map-10-search` | MAP-10, MAP-11 | smoke | seeded-map |
 | maps | `map-12-emergency-empty` | MAP-12 | smoke | — |
 | maps | `map-13-emergency-points` | MAP-13 | nightly | network, seeded-map |
 | maps | `map-14-route` | MAP-14 | smoke | seeded-route (Andorra pack, location set by the flow) |
-| maps | `map-15-routing-download` | MAP-15 | full | routing-server (local pack server; also searches a street, a place and an address from the pack's side files) |
-| maps | `map-16-routing-github` | MAP-16 | nightly | routing-live (published catalog, Andorra pack from GitHub, 3 MB) |
+| maps | `map-15-routing-download` | MAP-15 | full | routing-server, maps-server (country download from guidance: map + pack; also searches a street, a place and an address from the pack's side files) |
+| maps | `map-16-routing-github` | MAP-16 | nightly | routing-live, maps-server (published routing catalog, Andorra pack from GitHub, 3 MB) |
 | maps | `map-17-follow` | MAP-17 | full | seeded-route (navigation view; drives the CG-1 with Maestro `travel`) |
 | courses | `crs-01-empty` | CRS-01 | smoke | — |
 | courses | `crs-02-course` | CRS-02, CRS-03, CRS-04 | full | seeded |
@@ -254,13 +261,18 @@ By hand:
 | prepare | `prep-04-meeting-pin` | PREP-04 | full | seeded-map |
 | ipad | `ipad-01-tour` | IPAD-01 | ipad | seeded, seeded-map |
 | android | `android-01-tour` | ANDROID-01 | android | network |
-| android | `android-02-map-scripts` | ANDROID-02 | android | network (~15 MB) |
-| android | `android-03-search-emergency` | ANDROID-03 | android | network (visible-area map + Overpass) |
+| android | `android-03-search-emergency` | ANDROID-03 | android | network (Andorra country download) |
 | android | `android-04-prepare` | ANDROID-04 | android | — (offline) |
 | android | `android-05-routing` | ANDROID-05 | android | network (published catalog + Andorra pack from GitHub) |
 
 Not automated: LIB-08 (import from Files: the system picker is outside the app) and X-02
 (offline: the simulator has no airplane mode). Check them by hand on a device.
+
+Removed in the 2026-10-25 redesign (docs/UX_SURVIVAL_PLAN.md): MAP-05 (the world map is
+bundled, nothing to download; `map-01` checks it is "Incluido"), ONB-03 (content languages
+left the wizard; they follow the app language) and ANDROID-02 (visible-area downloads).
+The Preparedness hub (`/prepare`, PDF export) opens from Home's plan row (`ready-plan`);
+"Mi plan familiar" (`home-plan`) goes straight to the plan.
 
 ## Writing a flow
 
@@ -278,13 +290,14 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
 
 - Put it in `e2e/flows/<area>/`, named after its main case. Tag `seeded` if it needs the
   ZIM fixtures, `seeded-map` for the map one, `seeded-route` for the routing pack,
-  `routing-server` if it downloads a routing pack from the local server, `routing-live`
+  `routing-server` if it downloads a routing pack from the local server, `maps-server` if
+  it needs the local country maps catalog (Andorra), `routing-live`
   if it downloads a published one (needs internet and the live catalog), `seeded-model`
   for the GGUF model, and `network` if it downloads from the internet. A map file
   named after a region id (`es-ml.pmtiles`) registers as that region.
 - Text matching is a full-string regex: `"Michael Jackson.*"`, and escape `. ( ) ?`.
-- Cards and rows expose one merged accessibility label (`"Lo elijo yo, Empieza vacío…"`):
-  match them with a regex (`"Lo elijo yo.*"`).
+- Cards and rows expose one merged accessibility label (`"Mapa de España, Máximo detalle…"`):
+  match them with a regex (`"Mapa de España.*"`).
 - Prefer visible text, as a person would. Use a `testID` (`tapOn: { id: "…" }`) when the
   text is ambiguous or there is none (icon buttons). `testID` is supported by `Button`,
   `IconButton`, `Card` and `ListRow`; the ones in use:
@@ -305,24 +318,31 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `place-card`, `place-guide`, `place-save`, `place-close` | selected place card and its actions |
   | `guidance-panel`, `guidance-distance`, `guidance-stop` | guidance panel: remaining distance (route) or distance + direction (straight line), stop |
   | `guidance-costing-<auto\|pedestrian\|bicycle>`, `guidance-next`, `guidance-next-distance`, `guidance-steps` | mode chips, next maneuver and its distance, directions button |
-  | `guidance-note`, `guidance-get-routing` | straight-line note and its "Descargar rutas" button |
+  | `guidance-note`, `guidance-get-routing` | straight-line note and its "Descargar la navegación de este país" button (opens the country sheet) |
   | `guidance-start`, `guidance-banner`, `guidance-remaining` | "Iniciar" (trip preview); navigation view: maneuver banner, remaining distance/time in the bottom bar |
   | `map-recenter`, `map-overview` | navigation view: "Recentrar" pill (not following) and whole-route button (following) |
   | `route-summary`, `route-step` | directions sheet: distance · time, maneuver rows |
-  | `pack-row`, `pack-download`, `pack-installed`, `pack-delete`, `packs-retry`, `regions-routing` | routing packs sheet and its entry in Regiones |
-  | `home-emergency` | Emergencias card on Home |
+  | `country-row`, `add-country`, `country-retry`, `region-delete` | "Tus mapas" sheet: one row per country, "Añadir un país", retry a failed download, delete (also older maps) |
+  | `country-<id>` | a country in the picker (onboarding, maps, settings), e.g. `country-ad` |
+  | `country-download`, `country-size` | country sheet: download button, total size |
+  | `home-emergency`, `home-first-aid`, `home-plan`, `home-call` | Home: "En una emergencia" actions |
+  | `home-readiness`, `ready-<map\|guides\|wikipedia\|assistant\|plan\|kit>`, `home-downloads`, `home-network` | Home: "Tu preparación" card and rows, downloads card, connection line |
+  | `onboarding-start`, `onboarding-next`, `onboarding-download`, `onboarding-finish`, `onboarding-plan` | setup wizard buttons |
+  | `kit-country`, `kit-guides`, `kit-wikipedia`, `kit-assistant` | setup wizard kit rows (the whole row toggles) |
+  | `open-courses` | Courses card in the Library |
+  | `settings-country` | Settings: your country |
   | `emergency-call`, `emergency-share`, `emergency-position` | Emergencias sheet: call, share position, position text |
   | `emergency-cat-<category>`, `emergency-place`, `emergency-guide` | category chips (health, security, water, supplies, official), rows and their Llévame button |
-  | `emergency-fetch-top`, `emergency-region`, `emergency-fetch` | download OSM points (top card), per-region rows and their refresh button |
+  | `emergency-region`, `emergency-fetch` | per-map rows and their retry/refresh button (points come with the country; Overpass runs by itself for maps without them) |
   | `marker-guide` | Llévame in a saved place's sheet |
   | `search-library` | "Buscar en mi biblioteca" under an answer given without the library |
-  | `open-prepare`, `prepare-plan`, `prepare-kit`, `prepare-export` | Home card and Preparedness hub |
+  | `prepare-plan`, `prepare-kit`, `prepare-export` | Preparedness hub (`nomadpocket:///prepare`) |
   | `meeting-primary`, `meeting-secondary`, `add-contact`, `add-number`, `add-person`, `call-contact-<n>`, `home-notes` | family plan (n 0-based) |
   | `entry-<field>`, `entry-save` | plan entry sheet (`entry-name`, `entry-phone`…) |
   | `meeting-place`, `meeting-details`, `meeting-pin-<id>`, `meeting-save` | meeting point sheet |
   | `adults-plus`/`-minus`/`-value` (also `children-`, `pets-`), `kit-progress`, `kit-<item>`, `kit-<item>-details`, `kit-add` | kit screen |
   | `item-name`, `item-add-expiry`, `expiry-month`, `item-save` | kit item sheet |
-  | `house`, `books.vertical`, `map`, `graduationcap`, `sparkles` | tabs (SF Symbol ids, set by iOS) |
+  | `house`, `map`, `books.vertical`, `sparkles` | tabs (SF Symbol ids, set by iOS); Courses is inside the Library (`subflows/open-courses.yaml`) |
   | `BackButton` | the native header's back button |
 
 - A control inside another button is invisible to VoiceOver and to Maestro (iOS merges it
@@ -345,8 +365,9 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
 | `Simulator 'NP-e2e' not found` | `npm run e2e:setup` |
 | A change in the app is not there | run with `--build` |
 | Java / `JAVA_HOME` errors | `brew install openjdk`, or set `JAVA_HOME` |
-| First flow times out on "Siguiente" | the simulator was cold-booting; run again |
+| First flow times out on `onboarding-start` | the simulator was cold-booting; run again |
 | Many flows fail at random steps | close other simulators and heavy apps, and run again: Maestro waits for a calm screen, and a slow Mac makes it time out |
 | `seeded` flows show an empty library | a fixture is missing: `npm run e2e:setup` |
 | A `network` flow fails | check the server first (download.kiwix.org, build.protomaps.com, `curl https://overpass-api.de/api/status` for `map-13`) before suspecting the app |
-| `map-05-world` times out on "Instalado" | another suite was downloading at the same time (e.g. `e2e:android`): run the network suites one at a time |
+| `map-04-region` times out on the installed row | another suite was downloading at the same time (e.g. `e2e:android`): run the network suites one at a time |
+| `*-server` flows show "Aún no disponible" or no size | the app was built without the local catalog URLs: rebuild with `--build` (not a dev build) |

@@ -18,6 +18,8 @@ type SettingsState = {
   onboarded: boolean;
   /** Selected local AI model id (catalog id), or 'system' for the OS model. */
   aiModelId: string | null;
+  /** The user's country (regions.json id), chosen in onboarding: its map, emergency number. */
+  country: string | null;
   setLanguage: (l: AppLanguage) => void;
   setContentLanguages: (l: AppLanguage[]) => void;
   setTheme: (t: ThemePreference) => void;
@@ -25,6 +27,7 @@ type SettingsState = {
   setReaderTextScale: (v: number) => void;
   setOnboarded: (v: boolean) => void;
   setAiModelId: (id: string | null) => void;
+  setCountry: (id: string | null) => void;
 };
 
 function applyTheme(theme: ThemePreference) {
@@ -41,6 +44,7 @@ export const useSettings = create<SettingsState>()(
       readerTextScale: 1,
       onboarded: false,
       aiModelId: null,
+      country: null,
       setLanguage: (language) => {
         setLanguage(language);
         set({ language });
@@ -54,11 +58,12 @@ export const useSettings = create<SettingsState>()(
       setReaderTextScale: (readerTextScale) => set({ readerTextScale }),
       setOnboarded: (onboarded) => set({ onboarded }),
       setAiModelId: (aiModelId) => set({ aiModelId }),
+      setCountry: (country) => set({ country }),
     }),
     {
       name: 'settings',
       storage: createJSONStorage(() => Storage),
-      partialize: ({ language, contentLanguages, theme, wifiOnly, readerTextScale, onboarded, aiModelId }) => ({
+      partialize: ({ language, contentLanguages, theme, wifiOnly, readerTextScale, onboarded, aiModelId, country }) => ({
         language,
         contentLanguages,
         theme,
@@ -66,6 +71,7 @@ export const useSettings = create<SettingsState>()(
         readerTextScale,
         onboarded,
         aiModelId,
+        country,
       }),
       onRehydrateStorage: () => (state) => {
         if (!state) return;

@@ -1,0 +1,141 @@
+name: Country maps
+
+# Offline country maps (docs/UX_SURVIVAL_PLAN.md): one extract of the Protomaps planet
+# build per country of src/features/maps/regions.json at full detail (z15, less for the
+# very largest), plus emergency points and street names where no routing pack brings them,
+# published as assets of one release per continent, `maps-YYYYMMDD-N-<continent>` (GitHub
+# stops at 1000 assets per release; the world is ~1200). The app reads the catalog from the
+# fixed release `maps-index` (maps-manifest.json), updated last, so it only ever points at
+# a complete release; releases no manifest points at are then pruned.
+
+on:
+  workflow_dispatch:
+    inputs:
+      countries:
+        description: 'Country ids from src/features/maps/regions.json, space separated (empty: all)'
+        required: false
+        default: ''
+  schedule:
+    - cron: '0 3 8 * *' # monthly, after the routing packs
+
+permissions:
+  contents: write
+
+concurrency:
+  group: country-maps
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      countries: ${{ steps.plan.outputs.countries }}
+      release: ${{ steps.plan.outputs.release }}
+      build: ${{ steps.plan.outputs.build }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        env:
+          INPUT: ${{ github.event.inputs.countries }}
+        run: |
+          # Antarctica has no roads or towns worth a download.
+          countries=$(python3 -I -c 'import json, sys; all = [r["id"] for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["type"] == "country" and r["continent"] != "antarctica"]; want = sys.argv[1].split(); bad = [c for c in want if c not in all]; sys.exit(f"unknown: {bad}") if bad else print(json.dumps(want or all))' "$INPUT")
+          echo "countries=$countries" >> "$GITHUB_OUTPUT"
+          echo "release=maps-$(date -u +%Y%m%d)-${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+          # Every country of a run comes from the same planet build.
+          key=$(curl -fsSL https://build-metadata.protomaps.dev/builds.json | python3 -I -c 'import json, re, sys; print(sorted(b["key"] for b in json.load(sys.stdin) if re.match(r"^\d{8}\.pmtiles$", b["key"]))[-1])')
+          echo "build=https://build.protomaps.com/$key" >> "$GITHUB_OUTPUT"
+      - name: Create the releases (one per continent of this run)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREFIX: ${{ steps.plan.outputs.release }}
+          COUNTRIES: ${{ steps.plan.outputs.countries }}
+        run: |
+          for c in $(python3 -I -c 'import json, sys; want = set(json.loads(sys.argv[1])); print(" ".join(sorted({r["continent"] for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["id"] in want and r["type"] == "country"})))' "$COUNTRIES"); do
+            TAG="$PREFIX-$c"
+            gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --prerelease --title "Country maps $TAG" \
+              --notes "Offline country maps (Protomaps basemap, PMTiles), emergency points, street names, places and house numbers. Data © OpenStreetMap contributors, ODbL."
+          done
+
+  build:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        country: ${{ fromJson(needs.plan.outputs.countries) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          df -h / /mnt
+          # Work on whichever disk has more room (a 10 GB map plus one part, or a country extract).
+          if (( $(df --output=avail -B1 /mnt | tail -1) > $(df --output=avail -B1 / | tail -1) )); then
+            sudo mkdir -p /mnt/maps && sudo chown "$(id -u):$(id -g)" /mnt/maps && echo "WORK=/mnt/maps/build" >> "$GITHUB_ENV"
+          else
+            mkdir -p "$HOME/maps" && echo "WORK=$HOME/maps/build" >> "$GITHUB_ENV"
+          fi
+      - name: Tools
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq osmium-tool python3-pyosmium python3-shapely >/dev/null
+          curl -fsSL https://github.com/protomaps/go-pmtiles/releases/download/v1.31.2/go-pmtiles_1.31.2_Linux_x86_64.tar.gz | sudo tar -xz -C /usr/local/bin pmtiles
+          pmtiles version
+      - name: Build the map
+        run: bash scripts/maps/build-country-map.sh ${{ matrix.country }} "$WORK" "${{ needs.plan.outputs.build }}"
+      - name: Upload to the continent's release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREFIX: ${{ needs.plan.outputs.release }}
+        run: |
+          cd "$WORK/out"
+          TAG="$PREFIX-$(python3 -I -c 'import json, sys; print(next(r["continent"] for r in json.load(open(sys.argv[1]))["regions"] if r["id"] == sys.argv[2] and r["type"] == "country"))' "$GITHUB_WORKSPACE/src/features/maps/regions.json" "${{ matrix.country }}")"
+          # The fragment names its release (the manifest keeps one per map).
+          python3 -I -c 'import json, sys; p = sys.argv[1]; m = json.load(open(p)); m["release"] = sys.argv[2]; json.dump(m, open(p, "w"), indent=1)' "${{ matrix.country }}.maps.json" "$TAG"
+          python3 -I -c 'import json, sys; m = json.load(open(sys.argv[1])); [print(f["name"]) for f in m["parts"] + [x for x in (m["pois"], m["streets"], m.get("places"), m.get("addresses")) if x]]' \
+            "${{ matrix.country }}.maps.json" | xargs gh release upload "$TAG" --clobber --repo "$GITHUB_REPOSITORY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: maps-${{ matrix.country }}
+          path: ${{ env.WORK }}/out/${{ matrix.country }}.maps.json
+
+  publish:
+    needs: [plan, build]
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: maps-*
+          path: fragments
+          merge-multiple: true
+      - name: Manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.plan.outputs.release }}
+        run: |
+          ls fragments/*.maps.json || { echo "no country built"; exit 1; }
+          if gh release view maps-index >/dev/null 2>&1; then
+            gh release download maps-index --pattern maps-manifest.json --dir previous
+          fi
+          python3 -I scripts/maps/maps-manifest.py merge "$TAG" fragments/*.maps.json > maps-manifest.json
+          if [ -f previous/maps-manifest.json ]; then
+            python3 -I scripts/maps/maps-manifest.py carry previous/maps-manifest.json maps-manifest.json src/features/maps/regions.json > merged.json
+            mv merged.json maps-manifest.json
+          fi
+          gh release view maps-index >/dev/null 2>&1 || gh release create maps-index --prerelease \
+            --title "Country maps catalog" --notes "maps-manifest.json: the current offline country maps (read by the app)."
+          gh release upload maps-index --clobber maps-manifest.json
+      - name: Prune old releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          keep=$(python3 -I -c 'import json, sys; print("\n".join(sorted({m["release"] for f in sys.argv[1:] for m in json.load(open(f))["maps"]})))' \
+            maps-manifest.json $(ls previous/maps-manifest.json 2>/dev/null))
+          echo "keeping: $keep"
+          gh release list --limit 500 --json tagName --jq '.[].tagName' | grep -E '^maps-[0-9]{8}-[0-9]+(-[a-z-]+)?$' | while read -r tag; do
+            grep -qxF "$tag" <<<"$keep" || { echo "deleting $tag"; gh release delete "$tag" --yes --cleanup-tag; }
+          done

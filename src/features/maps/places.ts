@@ -121,6 +121,7 @@ export function deletePlaceRows(source: string) {
 /** Adds emergency points to the search index under 'pois:<item id>' (replacing earlier ones). */
 export function indexEmergencyPoints(itemId: string, rows: PlaceRow[]) {
   deletePlaceRows(`pois:${itemId}`);
+  deletePlaceRows(`streets:${itemId}`);
   insertRows(`pois:${itemId}`, rows);
   bumpVersion();
 }
@@ -315,12 +316,29 @@ function doorsNear(streetName: string, near: LatLon, meters: number): AddressRow
 }
 
 /**
+ * A country map's street and locality names (country-maps.ts, where no routing pack brings
+ * them), under 'streets:<item id>' so the map's own tile index keeps its rows.
+ */
+export async function indexMapStreets(itemId: string, rows: PlaceRow[]) {
+  const source = `streets:${itemId}`;
+  deletePlaceRows(source);
+  for (let i = 0; i < rows.length && getItem(itemId); i += 5000) {
+    insertRows(source, rows.slice(i, i + 5000));
+    await yieldToUi();
+  }
+  if (!getItem(itemId)) deletePlaceRows(source); // removed meanwhile
+  bumpVersion();
+}
+
+/**
  * Emergency points found in the map's own tiles, stored as an offline fallback
  * (ids 't…') until Overpass points replace them (emergency.ts deletes the source's
- * rows before inserting). Skipped once a region has Overpass points.
+ * rows before inserting). Skipped once a region has Overpass points, and for maps whose
+ * points came with the download (country map or routing pack): they would show twice.
  */
 function storeTileEmergencyPoints(itemId: string, rows: PlaceRow[]) {
   const d = db();
+  if ((getItem(itemId)?.meta as { bundledPoints?: boolean } | undefined)?.bundledPoints) return;
   if (d.getFirstSync('SELECT 1 FROM map_sources WHERE item_id = ? AND pois_at IS NOT NULL', itemId)) return;
   const insert = d.prepareSync(
     'INSERT OR REPLACE INTO map_pois (source, osm_id, kind, category, name, lat, lon) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -465,6 +483,7 @@ export function forgetMapSource(itemId: string) {
   deletePlaceRows(`pois:${itemId}`);
   deletePlaceRows(placesSource(itemId));
   deleteAddresses(itemId);
+  deletePlaceRows(`streets:${itemId}`);
   forgetDetail(itemId);
   db().runSync('DELETE FROM map_pois WHERE source = ?', itemId);
   db().runSync('DELETE FROM map_sources WHERE item_id IN (?, ?, ?)', itemId, placesSource(itemId), addressesSource(itemId));

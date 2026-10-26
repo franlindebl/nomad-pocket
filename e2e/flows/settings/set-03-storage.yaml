@@ -6,7 +6,12 @@ tags: [full, settings, seeded]
 - runFlow: ../../subflows/open-wikipedia.yaml
 - tapOn: { id: "BackButton" }
 - tapOn: { id: "house" }
-- assertVisible: "Continuar"
+# "Continuar" (recent reading) sits under the preparation checklist.
+- scrollUntilVisible:
+    element: "Continuar"
+- scrollUntilVisible:
+    element: { id: "open-settings" }
+    direction: UP
 - tapOn: { id: "open-settings" }
 - scrollUntilVisible:
     element: "Documentación de Node.js.*"
@@ -19,5 +24,11 @@ tags: [full, settings, seeded]
 - tapOn: "Borrar historial de lectura"
 - assertVisible: "Historial borrado"
 - tapOn: "OK"
-- swipe: { direction: DOWN }
+# Close the sheet by its header (a swipe in the middle scrolls the list).
+- swipe:
+    start: 50%, 9%
+    end: 50%, 95%
+    duration: 300
+- scrollUntilVisible:
+    element: "Usas .*"
 - assertNotVisible: "Continuar"

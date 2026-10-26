@@ -1,13 +1,11 @@
-# ANDROID-04 — Preparedness on Android: plan entry from the sheet's header Save, kit maths,
+# ANDROID-04 — Preparedness on Android (from Home's actions and checklist): plan entry from
+# the sheet's header Save, kit maths,
 # an expiry reminder (Android 13+ asks for notifications) and the PDF share sheet. Offline.
 appId: com.fjlinde.nomadpocket
 tags: [android]
 ---
 - runFlow: ../../subflows/launch.yaml
-- scrollUntilVisible:
-    element: { id: "open-prepare" }
-- tapOn: { id: "open-prepare" }
-- tapOn: { id: "prepare-plan" }
+- tapOn: { id: "home-plan" }
 - tapOn: { id: "add-contact" }
 - inputText: "Ana López"
 - tapOn: { id: "entry-phone" }
@@ -17,7 +15,9 @@ tags: [android]
 - assertVisible: { id: "call-contact-0" }
 - takeScreenshot: 01-plan
 - back
-- tapOn: { id: "prepare-kit" }
+- scrollUntilVisible:
+    element: { id: "ready-kit" }
+- tapOn: { id: "ready-kit" }
 - assertVisible: "24 L"
 - tapOn: { id: "adults-plus" }
 - assertVisible: "36 L"
@@ -31,7 +31,11 @@ tags: [android]
     optional: true
 - assertVisible: ".*Caduca en .*"
 - takeScreenshot: 03-kit-expiry
+# The Preparedness hub (PDF export): Home's plan row.
 - back
+- scrollUntilVisible:
+    element: { id: "ready-plan" }
+- tapOn: { id: "ready-plan" }
 - tapOn: { id: "prepare-export" }
 - extendedWaitUntil:
     visible: ".*(Plan de emergencia|PDF|Compartir).*"

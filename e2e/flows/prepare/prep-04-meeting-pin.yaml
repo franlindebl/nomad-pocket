@@ -5,14 +5,13 @@ tags: [full, prepare, maps, seeded-map]
 - runFlow: ../../subflows/launch.yaml
 - tapOn: { id: "map" }
 - extendedWaitUntil:
-    visible: "Mapas sin conexión"
+    visible: "Tus mapas"
     timeout: 20000
 - longPressOn: { point: "50%,25%" }
 - inputText: "Refugio"
 - tapOn: "Guardar"
 - tapOn: { id: "house" }
-- tapOn: { id: "open-prepare" }
-- tapOn: { id: "prepare-plan" }
+- tapOn: { id: "home-plan" }
 - tapOn: { id: "meeting-secondary" }
 - tapOn: "Refugio.*"
 - tapOn: { id: "meeting-save" }
@@ -20,13 +19,12 @@ tags: [full, prepare, maps, seeded-map]
 - takeScreenshot: 01-meeting-pin
 - stopApp
 - launchApp
-- tapOn: { id: "open-prepare" }
-- tapOn: { id: "prepare-plan" }
+- tapOn: { id: "home-plan" }
 - assertVisible: ".*Refugio.*"
 - tapOn: { id: "meeting-secondary" }
 - tapOn: "Ver en el mapa"
 - extendedWaitUntil:
-    visible: "Mapas sin conexión"
+    visible: "Tus mapas"
     timeout: 20000
 - waitForAnimationToEnd
 # Map labels are not in the accessibility tree: check 02-on-map (zoomed in on the pin).

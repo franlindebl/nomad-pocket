@@ -1,72 +1,98 @@
 {
-  "greeting": {
-    "morning": "Buenos días",
-    "afternoon": "Buenas tardes",
-    "evening": "Buenas noches"
-  },
-  "storageTitle": "Tu biblioteca sin conexión",
-  "storageBody": "{{count}} elementos · {{size}}",
-  "storageEmpty": "Aún no has descargado nada",
   "continue": "Continuar",
-  "modules": "Explorar",
-  "module": {
-    "library": "Biblioteca",
-    "libraryBody": "Wikipedia, medicina, supervivencia y libros",
-    "maps": "Mapas",
-    "mapsBody": "Regiones sin conexión con GPS",
-    "courses": "Cursos",
-    "coursesBody": "Aprende a tu ritmo, sin internet",
-    "assistant": "Asistente",
-    "assistantBody": "IA local que consulta tu biblioteca"
-  },
-  "getStarted": {
-    "title": "Prepara tu Nomad",
-    "body": "Elige qué conocimiento quieres llevar contigo. Te recomendamos un pack para empezar según tu espacio libre.",
-    "action": "Empezar"
-  },
-  "downloadsActive": "Descargas en curso",
-  "offlineReady": "Listo sin conexión",
   "onboarding": {
-    "welcomeTitle": "Conocimiento que te acompaña sin conexión",
-    "welcomeBody": "Wikipedia, guías médicas y de supervivencia, mapas, cursos y una IA local. Descárgalo una vez y úsalo donde no haya cobertura.",
-    "appLanguage": "Idioma de la app",
-    "contentLanguages": "Contenido en",
-    "packTitle": "Elige tu pack de inicio",
-    "packBody": "Siempre podrás añadir o quitar contenido desde la Biblioteca.",
-    "free": "Tienes {{size}} libres",
-    "packs": {
-      "light": {
-        "name": "Ligero",
-        "body": "Lo esencial: Wikipedia compacta, primeros auxilios y supervivencia básica."
-      },
-      "balanced": {
-        "name": "Equilibrado",
-        "body": "Wikipedia sin imágenes y el nivel esencial de todas las colecciones."
-      },
-      "complete": {
-        "name": "Completo",
-        "body": "Wikipedia completa compacta y el nivel estándar de todas las colecciones."
-      },
-      "none": {
-        "name": "Lo elijo yo",
-        "body": "Empieza vacío y explora el catálogo a tu ritmo."
-      }
-    },
-    "items_one": "{{count}} recurso",
-    "items_other": "{{count}} recursos",
-    "tooBig": "No cabe en tu espacio libre",
-    "readyTitle": "Todo listo",
-    "readyBodyDownloads": "Hemos empezado a descargar {{count}} recursos ({{size}}). Puedes seguir usando la app mientras tanto.",
-    "readyBodyEmpty": "Explora la Biblioteca, descarga el mapa de tu zona y prueba el asistente.",
-    "tipWifi": "Las descargas grandes van mejor con Wi‑Fi y el móvil cargando.",
-    "tipMaps": "En Mapas puedes descargar tu país o la zona que veas en pantalla.",
-    "tipAi": "En Asistente puedes descargar un modelo de IA que funciona sin internet.",
-    "next": "Siguiente",
+    "welcomeTitle": "Tu kit para cuando no haya internet",
+    "welcomeBody": "Si la red cae durante días o meses, tu móvil seguirá sabiendo dónde estás, cómo curar una herida y dónde encontrar agua. Prepáralo hoy, mientras tienes conexión.",
+    "pointMaps": "El mapa de tu país, con rutas y hospitales, farmacias y agua potable",
+    "pointGuides": "Primeros auxilios, medicina y supervivencia, y Wikipedia",
+    "pointAi": "Un asistente que responde sin internet",
+    "pointPlan": "Tu plan familiar y tu mochila de emergencia",
+    "appLanguage": "Idioma",
     "start": "Empezar",
+    "countryTitle": "¿Dónde vives?",
+    "countryBody": "Descargaremos el mapa de tu país con su navegación y sus puntos de emergencia.",
+    "next": "Siguiente",
+    "kitTitle": "Tu kit",
+    "kitBody": "Lo hemos preparado para tu país y tu móvil. Quita lo que no quieras: podrás añadirlo más tarde.",
+    "kit": {
+      "country": "Mapa de {{name}}",
+      "countryBody": "Máximo detalle, navegación paso a paso y puntos de emergencia.",
+      "countryBodyNoRouting": "Máximo detalle y puntos de emergencia. La navegación de este país aún no está disponible.",
+      "sizing": "Calculando el tamaño…",
+      "sizeFailed": "No se ha podido calcular el tamaño del mapa.",
+      "offline": "Sin conexión: el mapa no se puede descargar ahora.",
+      "countryLater": "Ahora no se puede descargar el mapa. Descarga el resto y añade el mapa más tarde desde Mapas.",
+      "guides": "Guías de supervivencia",
+      "guidesBody": "Primeros auxilios, medicina, agua, comida y refugio.",
+      "guidesSize_one": "{{count}} guía · {{size}}",
+      "guidesSize_other": "{{count}} guías · {{size}}",
+      "wikipedia": "Wikipedia",
+      "wikipediaInstalled": "Ya la tienes en tu móvil.",
+      "assistant": "Asistente sin conexión",
+      "assistantSystem": "Usa {{provider}}, que ya viene en tu móvil.",
+      "assistantModel": "{{name}}, el modelo recomendado para tu móvil.",
+      "included": "Incluido",
+      "total": "Total",
+      "download": "Descargar mi kit · {{size}}",
+      "skip": "Continuar sin descargar"
+    },
+    "free": "Tienes {{size}} libres",
+    "tooBig": "No cabe en tu espacio libre: quita algo del kit.",
+    "tipWifi": "Las descargas grandes van mejor con Wi‑Fi y el móvil cargando. Puedes seguir usando la app mientras tanto.",
+    "readyTitle": "Tu kit se está descargando",
+    "readyTitleEmpty": "Todo listo",
+    "readyBodyDownloads": "Verás el progreso en Inicio. Cuando termine, todo funcionará sin conexión.",
+    "readyBodyEmpty": "Desde Inicio puedes completar tu kit cuando quieras.",
+    "planTitle": "Mientras tanto: tu plan familiar",
+    "planBody": "Punto de encuentro, contactos y datos médicos, para tenerlos a mano aunque no haya red.",
     "finish": "Ir a Nomad"
   },
-  "emergency": {
-    "title": "Emergencias",
-    "body": "Hospitales, policía, agua y refugios cerca de ti, sin conexión"
-  }
+  "network": {
+    "online": "Con conexión",
+    "offline": "Sin conexión · todo lo descargado sigue funcionando"
+  },
+  "crisis": {
+    "title": "En una emergencia",
+    "nearby": "Emergencias cerca",
+    "firstAid": "Primeros auxilios",
+    "plan": "Mi plan familiar",
+    "call": "Llamar al {{number}}"
+  },
+  "downloadsHint": "Déjalo con Wi‑Fi y cargando. Puedes seguir usando la app.",
+  "ready": {
+    "title": "Tu preparación",
+    "count": "{{done}} de {{total}} listo",
+    "complete": "Completar",
+    "allDone": "Todo listo para funcionar sin internet.",
+    "hintOnline": "Completa lo que falta mientras tengas conexión.",
+    "hintOffline": "Sin conexión no se puede descargar: usa lo que ya tienes.",
+    "map": "Mapa de {{name}}",
+    "mapAny": "Mapa de tu país",
+    "mapDone": "Calles, navegación y puntos de emergencia",
+    "mapDoneNoRouting": "Calles y puntos de emergencia (navegación aún no disponible)",
+    "mapStale": "Tiene más de 6 meses: actualízalo mientras tengas conexión",
+    "mapTodo": "Descárgalo: calles, rutas y hospitales sin conexión",
+    "downloading": "Descargando… {{pct}} %",
+    "guides": "Guías de supervivencia",
+    "guidesDone": "{{count}} de {{total}} guías",
+    "guidesTodo": "Primeros auxilios, medicina, agua y comida",
+    "wikipedia": "Wikipedia",
+    "wikipediaTodo": "Toda la enciclopedia, sin conexión",
+    "assistant": "Asistente sin conexión",
+    "assistantTodo": "Un modelo de IA que responde sin internet",
+    "plan": "Plan familiar",
+    "planDone_one": "Punto de encuentro y {{count}} contacto",
+    "planDone_other": "Punto de encuentro y {{count}} contactos",
+    "planTodo": "Punto de encuentro, contactos y datos médicos",
+    "kit": "Mochila de emergencia",
+    "kitProgress": "{{done}} de {{total}} preparados",
+    "kitAttention_one": "{{count}} cosa caduca pronto",
+    "kitAttention_other": "{{count}} cosas caducan pronto",
+    "kitTodo": "Agua, comida, linterna, radio, botiquín…",
+    "mapUpdate": "Hay una versión más reciente: actualízalo mientras tengas conexión",
+    "planMeeting": "Punto de encuentro listo · añade contactos",
+    "planContacts_one": "{{count}} contacto · falta el punto de encuentro",
+    "planContacts_other": "{{count}} contactos · falta el punto de encuentro"
+  },
+  "storageLine": "Usas {{used}} · {{free}} libres"
 }

@@ -1,17 +1,25 @@
-# MAP-03 — region picker search opens the download sheet.
+# MAP-03 — the country picker (countries only, the phone's country first) opens the
+# country sheet: what the download brings and its size, from the local catalogs.
 appId: com.fjlinde.nomadpocket
-tags: [full, maps]
+tags: [full, maps, routing-server, maps-server]
 ---
 - runFlow: ../../subflows/launch.yaml
 - tapOn: { id: "map" }
 - extendedWaitUntil:
-    visible: "Elegir una región"
+    visible: "Elegir un país"
     timeout: 20000
-- tapOn: "Elegir una región"
-- tapOn: "Buscar países y regiones"
+- tapOn: "Elegir un país"
+- assertVisible: "Tu país|TU PAÍS"
+- tapOn: "Buscar un país"
 - inputText: "Madrid"
-- tapOn: { text: "Comunidad de Madrid.*", index: 0 }
+- assertVisible: "Ningún país coincide con «Madrid»"
+- eraseText: 10
+- inputText: "Andorra"
+- tapOn: { id: "country-ad" }
 - extendedWaitUntil:
     visible: "Descargar · .*"
     timeout: 30000
-- takeScreenshot: 01-download-sheet
+- assertVisible: "Mapa con el máximo detalle"
+- assertVisible: "Rutas en coche, a pie y en bici.*"
+- assertVisible: "Puntos de emergencia y calles"
+- takeScreenshot: 01-country-sheet

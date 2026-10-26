@@ -1,12 +1,14 @@
-# AI-01 + AI-02 — no model chosen: prompt to choose; models screen lists device, system and GGUF models.
+# AI-01 + AI-02 — the setup wizard picks the phone's own model when there is one (Apple
+# Intelligence on the iOS 27 simulator): the chat is ready; the model pill opens the models
+# screen with the device, the system model and the downloadable GGUF models.
 appId: com.fjlinde.nomadpocket
 tags: [smoke, assistant]
 ---
 - runFlow: ../../subflows/launch.yaml
 - tapOn: { id: "sparkles" }
-- assertVisible: "Elige un modelo para empezar"
-- takeScreenshot: 01-no-model
-- tapOn: "Elegir modelo"
+- assertVisible: "¿En qué te ayudo\\?|Elige un modelo para empezar"
+- takeScreenshot: 01-assistant
+- tapOn: "Modelo: .*"
 - assertVisible: "Tu dispositivo"
 - assertVisible: "Modelo integrado"
 - assertVisible: "Descargar un modelo"

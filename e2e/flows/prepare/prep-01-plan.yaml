@@ -1,14 +1,11 @@
-# PREP-01 — Home opens Preparedness; the family plan keeps contacts, a meeting point, health and home notes.
+# PREP-01 — Home's "Mi plan familiar" opens the family plan; it keeps contacts, a meeting point, health and home notes.
 appId: com.fjlinde.nomadpocket
 tags: [smoke, prepare]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "open-prepare" }
-- assertVisible: "Plan familiar.*"
-- assertVisible: "Kit de emergencia.*"
-- takeScreenshot: 01-hub-empty
-- tapOn: { id: "prepare-plan" }
+- tapOn: { id: "home-plan" }
 - assertVisible: "Puntos de encuentro"
+- takeScreenshot: 01-plan-empty
 - tapOn: { id: "add-contact" }
 - assertVisible: "Nuevo contacto"
 - inputText: "Ana López"
@@ -51,6 +48,7 @@ tags: [smoke, prepare]
 - tapOn: "Eliminar"
 - assertNotVisible: "Ana López.*"
 - tapOn: { id: "BackButton" }
-- assertVisible: ".*Puerta del colegio.*"
-- tapOn: { id: "BackButton" }
-- assertVisible: { id: "open-prepare" }
+# Home's checklist counts the plan as ready.
+- scrollUntilVisible:
+    element: { id: "ready-plan" }
+- assertVisible: ".*Punto de encuentro.*"

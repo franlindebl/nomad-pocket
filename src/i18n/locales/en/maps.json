@@ -1,7 +1,7 @@
 {
   "title": "Maps",
   "controls": {
-    "regions": "Offline maps",
+    "regions": "Your maps",
     "markers": "Saved places",
     "north": "Reset to north",
     "locate": "Show my location",
@@ -11,11 +11,10 @@
     "overview": "Route overview"
   },
   "empty": {
-    "title": "Maps that work anywhere",
-    "body": "Download the world map and the regions you need. They keep working with no signal.",
-    "world": "Get world map · {{size}}",
-    "worldNoSize": "Get world map",
-    "pickRegion": "Choose a region"
+    "title": "Download your country's map",
+    "body": "You already have the world map. With your country you get streets, routes and emergency points offline.",
+    "country": "Download {{name}}",
+    "pickCountry": "Choose a country"
   },
   "loadingAssets": "Preparing offline map…",
   "location": {
@@ -25,26 +24,33 @@
     "unavailable": "Couldn't get your location. Try again outdoors."
   },
   "regions": {
-    "title": "Offline maps",
+    "title": "Your maps",
+    "intro": "Each country comes with its map at full detail, offline navigation and its emergency points.",
     "world": "World map",
-    "worldBody": "Countries, cities and main roads, down to zoom {{zoom}}. Shown under your regions.",
-    "visibleArea": "Download visible area",
-    "visibleAreaBody": "Save exactly what's on screen now",
-    "addRegion": "Add a country or region",
-    "addRegionBody": "Countries, Spanish communities, US states",
-    "installed": "Downloaded",
-    "none": "No regions yet. Pick one or download the area you're looking at.",
-    "detail": "Detail to zoom {{zoom}} · {{size}} · {{date}}",
+    "worldBody": "Countries, cities and main roads. Comes with the app.",
+    "included": "Included",
+    "addCountry": "Add a country",
+    "addFirstCountry": "Download your country",
+    "addCountryBody": "Map, navigation and emergency points",
+    "other": "Other maps",
+    "withRouting": "Map and navigation",
+    "mapOnly": "Map",
+    "routingOnly": "Navigation only",
+    "downloadingPct": "Downloading… {{pct}}%",
+    "failed": "The download stopped",
+    "retry": "Retry",
     "deleteTitle": "Delete {{name}}?",
-    "deleteBody": "It frees {{size}}. You can download it again later.",
+    "deleteBody": "This frees {{size}}. You can download it again any time.",
+    "downloading": "Downloading…",
     "update": "Update",
-    "downloading": "Downloading…"
+    "updateAvailable": "A newer map is available",
+    "updateBody": "A newer version of the map is available ({{size}}). Download it while you're online."
   },
   "picker": {
-    "title": "Choose a region",
-    "search": "Search countries and regions",
-    "subdivisions": "{{country}} · regions",
-    "noResults": "No regions match “{{query}}”"
+    "title": "Choose a country",
+    "search": "Search for a country",
+    "suggested": "Your country",
+    "noResults": "No country matches “{{query}}”"
   },
   "continent": {
     "europe": "Europe",
@@ -56,28 +62,14 @@
     "antarctica": "Antarctica"
   },
   "download": {
-    "titleArea": "Visible area",
     "titleWorld": "World map",
-    "detail": "Detail",
-    "zoom12": "Towns",
-    "zoom14": "Streets",
-    "zoom15": "Maximum",
-    "zoomHint": {
-      "12": "Towns, main roads and land use. Smallest download.",
-      "14": "Every street and path. Good for walking and driving.",
-      "15": "Buildings and full detail. Largest download."
-    },
-    "estimating": "Calculating size…",
+    "estimating": "Working out the size…",
     "size": "Download size",
-    "tiles": "{{n}} tiles",
     "free": "{{size}} free on this device",
     "notEnough": "Not enough space: you need {{needed}} and have {{free}} free.",
-    "tooLarge": "This area is too big for this detail level. Choose less detail or a smaller area.",
-    "offline": "You need an internet connection to download maps. Downloaded maps then work offline.",
-    "estimateFailed": "Couldn't calculate the size: {{error}}",
-    "action": "Download · {{size}}",
-    "source": "Protomaps build {{date}} · © OpenStreetMap",
-    "areaName": "Area near {{coords}}"
+    "offline": "You need an internet connection to download maps. They work offline afterwards.",
+    "estimateFailed": "Couldn't work out the size: {{error}}",
+    "action": "Download · {{size}}"
   },
   "markers": {
     "title": "Saved places",
@@ -148,20 +140,22 @@
       "official": "Institutions"
     },
     "empty": "No places of this kind in your downloaded regions.",
-    "noDataTitle": "Download emergency places",
-    "noDataBody": "Hospitals, police, fire stations, drinking water and shelters in your regions, from OpenStreetMap. You need a connection once; after that they work offline.",
-    "noRegions": "First download the map of your region: its emergency places download with it.",
-    "pickRegion": "Choose a region",
+    "noDataTitle": "Emergency points",
+    "noDataBody": "Your maps' emergency points will download on their own as soon as you're online.",
+    "noRegions": "Download your country's map: it brings its hospitals, pharmacies, drinking water and shelters.",
+    "pickRegion": "Choose a country",
     "fetch": "Download · {{name}}",
     "fetching": "Downloading {{name}}… {{done}} of {{total}}",
     "failed": "Couldn’t download {{name}}: {{error}}",
     "offline": "You need an internet connection to download emergency places.",
     "regionInfo": "{{count}} places · {{date}}",
-    "regions": "Places by region",
+    "regions": "Points by map",
     "refresh": "Update",
     "source": "OpenStreetMap data. It may be incomplete or out of date: in an emergency, call {{number}}.",
-    "regionFromTiles": "{{count}} places from the map · download OpenStreetMap's for more detail",
-    "partial": "You only have the places that come with the map. Download OpenStreetMap's: more hospitals, pharmacies, drinking water and phone numbers."
+    "preparingTitle": "Getting emergency points ready",
+    "preparingBody": "Downloading the hospitals, pharmacies, drinking water and shelters of your maps…",
+    "bundled": "Included with the map",
+    "regionFromTiles": "{{count}} points from the map"
   },
   "police": {
     "guardiaCivil": "Guardia Civil",
@@ -306,18 +300,17 @@
     "lastStretch": "The route ends here: follow the arrow to the destination."
   },
   "packs": {
-    "title": "Offline routing",
-    "rowBody": "Follow roads and paths with no coverage",
-    "intro": "Each pack lets you plan car, foot and bike routes offline, and includes the area's emergency points (hospitals, police, water…). OpenStreetMap data.",
-    "detail": "{{size}} · data from {{date}}",
-    "nearby": "For this area",
-    "all": "All",
-    "loading": "Loading the catalog…",
-    "offline": "Could not load the routing catalog. You need an internet connection.",
-    "retry": "Try again",
-    "deleteTitle": "Delete routing for {{name}}?",
-    "download": "Download routing",
-    "failed": "Failed",
-    "section": "Routing"
+    "download": "Download this country's navigation"
+  },
+  "country": {
+    "map": "Map at full detail",
+    "mapFull": "Every street, path and building.",
+    "mapReduced": "Streets and roads. It's a very large country: a little less detail so it fits on a phone.",
+    "routing": "Offline navigation",
+    "routingBody": "Routes by car, on foot and by bike, with turn-by-turn directions.",
+    "routingMissing": "Not available in this country yet: you'll be guided in a straight line to your destination.",
+    "points": "Emergency points and streets",
+    "pointsBody": "Hospitals, pharmacies, police, drinking water and shelters, and every street in search.",
+    "wifiHint": "Best on Wi‑Fi with the phone charging. You can keep using the app meanwhile."
   }
 }

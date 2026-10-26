@@ -9,7 +9,7 @@ tags: [smoke, cross, seeded]
 - runFlow: ../../subflows/open-wikipedia.yaml
 - tapOn: "Guardar"
 - tapOn: { id: "BackButton" }
-- tapOn: { id: "graduationcap" }
+- runFlow: ../../subflows/open-courses.yaml
 - tapOn: "freeCodeCamp en español.*"
 - extendedWaitUntil:
     visible: { id: "lesson-check-1" }
@@ -17,7 +17,7 @@ tags: [smoke, cross, seeded]
 - tapOn: { id: "lesson-check-1" }
 - tapOn: { id: "map" }
 - extendedWaitUntil:
-    visible: "Mapas sin conexión"
+    visible: "Tus mapas"
     timeout: 20000
 - longPressOn: { point: "50%,25%" }
 - inputText: "Refugio"
@@ -30,7 +30,7 @@ tags: [smoke, cross, seeded]
 - tapOn: "Lugares guardados"
 - assertVisible: "Refugio.*"
 - swipe: { direction: DOWN }
-- tapOn: { id: "graduationcap" }
+- runFlow: ../../subflows/open-courses.yaml
 - tapOn: "freeCodeCamp en español.*"
 - assertVisible: { id: "lesson-check-1", text: "Marcar como pendiente" }
 - runFlow: ../../subflows/open-wikipedia.yaml

@@ -1,10 +1,11 @@
-# PREP-02 — the kit scales water with the household and days, ticks items, tracks an expiry and adds own items.
+# PREP-02 — from Home's checklist, the kit scales water with the household and days, ticks items, tracks an expiry and adds own items.
 appId: com.fjlinde.nomadpocket
 tags: [smoke, prepare]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "open-prepare" }
-- tapOn: { id: "prepare-kit" }
+- scrollUntilVisible:
+    element: { id: "ready-kit" }
+- tapOn: { id: "ready-kit" }
 - assertVisible: "Tu hogar"
 # 2 adults × 4 L × 3 days
 - assertVisible: "24 L"
@@ -49,8 +50,8 @@ tags: [smoke, prepare]
 - assertVisible: "Mis artículos"
 - takeScreenshot: 02-kit-custom
 - tapOn: { id: "BackButton" }
-- assertVisible: ".*2 de 29 listos.*"
-- assertVisible: ".*1 caduca pronto.*"
-- tapOn: { id: "BackButton" }
-- assertVisible: ".*Kit: 2 de 29.*"
-- takeScreenshot: 03-home-card
+# Home's checklist: the expiring item comes before the count.
+- scrollUntilVisible:
+    element: { id: "ready-kit" }
+- assertVisible: ".*1 cosa caduca pronto.*"
+- takeScreenshot: 03-home-checklist

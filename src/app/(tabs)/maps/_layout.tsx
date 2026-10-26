@@ -20,7 +20,6 @@ export default function Layout() {
       <Stack.Screen name="marker" options={{ ...sheet, headerShown: false, sheetAllowedDetents: 'fitToContents' }} />
       <Stack.Screen name="search" options={{ ...sheet, title: t('controls.search'), sheetAllowedDetents: [1] }} />
       <Stack.Screen name="emergency" options={{ ...sheet, title: t('emergency.title'), sheetAllowedDetents: [0.75, 1] }} />
-      <Stack.Screen name="routing-packs" options={{ ...sheet, title: t('packs.title'), sheetAllowedDetents: [0.75, 1] }} />
       <Stack.Screen name="route-steps" options={{ ...sheet, title: t('route.stepsTitle'), sheetAllowedDetents: [0.6, 1] }} />
     </Stack>
   );

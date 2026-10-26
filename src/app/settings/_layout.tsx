@@ -8,6 +8,7 @@ export default function Layout() {
   return (
     <Stack screenOptions={useStackOptions()}>
       <Stack.Screen name="index" options={{ title: t('title') }} />
+      <Stack.Screen name="country" options={{ title: t('country') }} />
     </Stack>
   );
 }
