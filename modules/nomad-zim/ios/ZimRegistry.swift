@@ -1,14 +1,14 @@
 import Foundation
 
-/// Process-wide registry of open archives, shared by the module functions and the
-/// `zim://` scheme handler. Archives are keyed by the app's item id and by UUID
-/// (the URL host used by ZimWebView).
+/// Process-wide registry of open archives, keyed by the app's item id and shared by the
+/// module functions and ZimWebView. There is no UUID index: two installed items can
+/// carry the same ZIM UUID (a re-import, or a crafted file), so each reader serves only
+/// the archive of its own item id (see ZimWebView.archive(forHost:)).
 final class ZimRegistry: @unchecked Sendable {
   static let shared = ZimRegistry()
 
   private let lock = NSLock()
   private var byId: [String: NZArchive] = [:]
-  private var byUuid: [String: NZArchive] = [:]
 
   func open(id: String, path: String) throws -> NZArchive {
     lock.lock()
@@ -23,36 +23,20 @@ final class ZimRegistry: @unchecked Sendable {
 
     lock.lock()
     defer { lock.unlock() }
-    if let old = byId[id] { removeUuid(of: old) }
     byId[id] = archive
-    // Metadata probes (registerZimFile) must not take over the UUID the reader uses.
-    if !id.hasPrefix(Self.probePrefix) { byUuid[archive.uuid] = archive }
     return archive
   }
 
   func close(id: String) {
     lock.lock()
     defer { lock.unlock() }
-    if let old = byId.removeValue(forKey: id) { removeUuid(of: old) }
-  }
-
-  static let probePrefix = "__probe_"
-
-  /// Caller holds the lock. Only drops the UUID entry if it still points at `archive`.
-  private func removeUuid(of archive: NZArchive) {
-    if byUuid[archive.uuid] === archive { byUuid.removeValue(forKey: archive.uuid) }
+    byId.removeValue(forKey: id)
   }
 
   func archive(id: String) -> NZArchive? {
     lock.lock()
     defer { lock.unlock() }
     return byId[id]
-  }
-
-  func archive(uuid: String) -> NZArchive? {
-    lock.lock()
-    defer { lock.unlock() }
-    return byUuid[uuid.lowercased()]
   }
 }
 

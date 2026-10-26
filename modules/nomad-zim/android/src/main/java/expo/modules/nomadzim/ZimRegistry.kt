@@ -26,7 +26,9 @@ data class ZimHit(val path: String, val title: String, val snippet: String?, val
  * not, so they are created lazily and used under a lock.
  */
 class ZimHandle(val id: String, val filePath: String, val archive: Archive) {
-  val uuid: String = runCatching { archive.uuid.lowercase() }.getOrDefault(id)
+  // The reader's host name (https://<uuid>.zim.local): an item id is no valid fallback.
+  val uuid: String =
+    runCatching { archive.uuid.lowercase() }.getOrNull()?.takeIf { it.isNotEmpty() } ?: java.util.UUID.randomUUID().toString()
   private val suggestLock = Any()
   private val searchLock = Any()
   private var suggester: SuggestionSearcher? = null
@@ -142,10 +144,13 @@ class ZimHandle(val id: String, val filePath: String, val archive: Archive) {
   }
 }
 
-/** Process-wide open archives, shared by module functions and ZimWebView. */
+/**
+ * Process-wide open archives by item id, shared by module functions and ZimWebView. There
+ * is no UUID index: two installed items can carry the same ZIM UUID (a re-import, or a
+ * crafted file), so each reader serves only the archive of its own item id.
+ */
 object ZimRegistry {
   private val byId = ConcurrentHashMap<String, ZimHandle>()
-  private val byUuid = ConcurrentHashMap<String, ZimHandle>()
 
   @Volatile
   private var jni: JNIKiwix? = null
@@ -158,8 +163,6 @@ object ZimRegistry {
     }
   }
 
-  private const val PROBE_PREFIX = "__probe_"
-
   /**
    * WebView requests, media streams and IO coroutines may still be reading a handle
    * when it is closed; disposing it right away frees native memory under them (a
@@ -169,7 +172,6 @@ object ZimRegistry {
   private val reaper = Executors.newSingleThreadScheduledExecutor { r -> Thread(r, "zim-reaper").apply { isDaemon = true } }
 
   private fun retire(handle: ZimHandle) {
-    byUuid.remove(handle.uuid, handle)
     reaper.schedule({ handle.dispose() }, DISPOSE_DELAY_MS, TimeUnit.MILLISECONDS)
   }
 
@@ -178,8 +180,6 @@ object ZimRegistry {
     byId[id]?.let { if (it.filePath == path) return it }
     val handle = ZimHandle(id, path, Archive(path))
     byId.put(id, handle)?.let { old -> retire(old) }
-    // Metadata probes (registerZimFile) must not take over the UUID the reader uses.
-    if (!id.startsWith(PROBE_PREFIX)) byUuid[handle.uuid] = handle
     return handle
   }
 
@@ -188,6 +188,4 @@ object ZimRegistry {
   }
 
   fun get(id: String): ZimHandle? = byId[id]
-
-  fun byUuid(uuid: String): ZimHandle? = byUuid[uuid.lowercase()]
 }

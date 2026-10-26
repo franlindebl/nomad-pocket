@@ -1,8 +1,11 @@
 import Foundation
 import WebKit
 
-/// Serves `zim://<uuid>/<path>` from open archives.
+/// Serves `zim://<uuid>/<path>` from the archive of the view that owns it.
 ///
+/// - Only that archive's UUID resolves (`resolveArchive`): pages can't read another
+///   archive, and a second item with the same UUID can't take over this one.
+/// - Every response carries a Content-Security-Policy (see `contentSecurityPolicy`).
 /// - Redirect entries are resolved and served directly (WKURLSchemeHandler cannot
 ///   emit 3xx). Main-frame redirects are turned into real navigations by
 ///   ZimWebView's navigation delegate so relative links keep working.
@@ -14,6 +17,17 @@ final class ZimSchemeHandler: NSObject, WKURLSchemeHandler {
   /// Bodies above this are streamed in chunks.
   private static let streamChunk: UInt64 = 2 * 1024 * 1024
 
+  /// Archive pages are third-party HTML/JS and the app promises that reading stays on the
+  /// device: they may load only from the archive, data: and blob:, so no image, script,
+  /// font, fetch/XHR, beacon or WebSocket reaches the network. Inline scripts, styles and
+  /// eval stay allowed (archive apps and our injected scripts need them). Sent on every
+  /// response because workers take their policy from their own script's response.
+  static let contentSecurityPolicy =
+    "default-src 'self' zim: data: blob: about: 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'"
+
+  /// Archive for a URL host, set by the owning ZimWebView. Main thread.
+  var resolveArchive: ((String) -> NZArchive?)?
+
   // Accessed on the main thread only.
   private var active = Set<ObjectIdentifier>()
 
@@ -21,7 +35,7 @@ final class ZimSchemeHandler: NSObject, WKURLSchemeHandler {
     let key = ObjectIdentifier(urlSchemeTask)
     active.insert(key)
     let request = urlSchemeTask.request
-    guard let url = request.url, let host = url.host, let archive = ZimRegistry.shared.archive(uuid: host) else {
+    guard let url = request.url, let host = url.host, let archive = resolveArchive?(host) else {
       respondStatus(urlSchemeTask, key: key, status: 404)
       return
     }
@@ -40,6 +54,8 @@ final class ZimSchemeHandler: NSObject, WKURLSchemeHandler {
         "Content-Type": Self.contentType(mime),
         "Accept-Ranges": "bytes",
         "Cache-Control": "max-age=86400",
+        "Content-Security-Policy": Self.contentSecurityPolicy,
+        "X-DNS-Prefetch-Control": "off",
       ]
 
       if let range = Self.parseRange(rangeHeader, size: size) {

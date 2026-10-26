@@ -49,7 +49,14 @@ export type NomadZimNativeModule = {
 };
 
 export type ZimNavigationEvent = { path: string; title: string; canGoBack: boolean; canGoForward: boolean };
-export type ZimLoadEndEvent = { path: string; title?: string; error?: string };
+/** `crashed`: the page kept killing the web content process, so it was not reloaded again. */
+export type ZimLoadEndEvent = { path: string; title?: string; error?: string; crashed?: boolean };
+/**
+ * A link the user tapped that leaves the app (http, https, mailto, tel, geo only). Nothing
+ * opens by itself: the handler decides (the reader asks first). `label` is what to show as
+ * the destination: the host, or the address or number.
+ */
+export type ZimExternalLinkEvent = { url: string; label: string };
 
 export type ZimWebViewProps = {
   /** Installed item id of an archive opened with `openArchive`. */
@@ -61,6 +68,7 @@ export type ZimWebViewProps = {
   textZoom?: number;
   onNavigationChange?: (event: { nativeEvent: ZimNavigationEvent }) => void;
   onLoadEnd?: (event: { nativeEvent: ZimLoadEndEvent }) => void;
+  onExternalLink?: (event: { nativeEvent: ZimExternalLinkEvent }) => void;
   style?: StyleProp<ViewStyle>;
 };
 
