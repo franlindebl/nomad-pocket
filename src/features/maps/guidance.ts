@@ -157,7 +157,9 @@ export const useGuidance = create<GuidanceState>((set, get) => {
   function startCompass(mine: number) {
     if (compass) return;
     const pending = watchScreenHeading((h) => {
-      if (session === mine) set({ heading: h.deg });
+      // null (screen turned, side unknown): the arrow falls back to the map's north.
+      const heading = h?.deg ?? null;
+      if (session === mine && heading !== get().heading) set({ heading });
     });
     compass = pending;
     // No compass (some emulators): the panel falls back to a north-up arrow.

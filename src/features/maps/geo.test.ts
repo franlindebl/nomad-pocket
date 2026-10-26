@@ -1,7 +1,18 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { bearingDegrees, compassSector, distanceMeters, formatUtm, fromUtm, isFreshFix, parseCoordinates, screenHeading, toUtm } from './geo.ts';
+import {
+  bearingDegrees,
+  compassSector,
+  distanceMeters,
+  formatUtm,
+  fromUtm,
+  isFreshFix,
+  knownOrientation,
+  parseCoordinates,
+  screenHeading,
+  toUtm,
+} from './geo.ts';
 
 const near = (a: number, b: number, eps: number, msg?: string) => assert.ok(Math.abs(a - b) <= eps, `${msg ?? ''} ${a} ≉ ${b}`);
 
@@ -86,6 +97,14 @@ test('screenHeading turns the compass to the screen top', () => {
   assert.equal(screenHeading(45, 'unknown'), 45);
   assert.equal(screenHeading(10, 'landscapeLeft'), 280);
   assert.equal(screenHeading(300, 'landscapeRight'), 30);
+});
+
+test('knownOrientation: an unknown one is portrait only on a portrait-shaped screen', () => {
+  const tall = { width: 390, height: 844 };
+  const wide = { width: 844, height: 390 };
+  assert.equal(knownOrientation('landscapeLeft', tall), 'landscapeLeft');
+  assert.equal(knownOrientation('unknown', tall), 'portraitUp');
+  assert.equal(knownOrientation('unknown', wide), null);
 });
 
 test('isFreshFix', () => {

@@ -38,7 +38,13 @@ export function HeadingBeam() {
     let alive = true;
     let sub: { remove: () => void } | null = null;
     // Turned to the screen: in landscape the user looks where the screen's top points.
-    watchScreenHeading(({ deg, accuracy }) => {
+    watchScreenHeading((h) => {
+      // Which way the screen is turned isn't known yet: no beam rather than a wrong one.
+      if (!h) {
+        setHeading(null);
+        return;
+      }
+      const { deg, accuracy } = h;
       // Calibration 3 (iOS: < 20° off) and 2 (< 35°): narrow; worse: wide.
       const wide = accuracy < 2;
       setHeading((prev) => {

@@ -52,6 +52,16 @@ export function screenHeading(deviceHeading: number, orientation: InterfaceOrien
   return (((deviceHeading + SCREEN_TURN[orientation]) % 360) + 360) % 360;
 }
 
+/**
+ * The orientation to turn the compass by, or null when it can't be told. An unknown one
+ * on a portrait-shaped screen is portrait; on a landscape one it could be either side,
+ * and a guess would point 180° wrong half the time: better no compass than a wrong one.
+ */
+export function knownOrientation(orientation: InterfaceOrientation, screen: { width: number; height: number }): InterfaceOrientation | null {
+  if (orientation !== 'unknown') return orientation;
+  return screen.width > screen.height ? null : 'portraitUp';
+}
+
 /** A last-known position may be hours old, in another town: only a fix this recent counts. */
 export function isFreshFix(timestamp: number, maxAgeMs: number, now = Date.now()): boolean {
   return now - timestamp <= maxAgeMs;
