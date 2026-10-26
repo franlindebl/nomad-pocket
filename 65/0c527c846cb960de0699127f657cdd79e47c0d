@@ -1,0 +1,61 @@
+eslint.config.js
+  s_9f5316f88b2e79::t_8fbc66e5c30a46 10-26
+src/app/(tabs)/maps/search.tsx
+  s_9f5316f88b2e79::t_380873f79d50f6 3,13,17-19,40-57,59-62,151-153
+src/app/reader/[itemId].tsx
+  s_9f5316f88b2e79::t_1be69aea1bb934 22
+src/app/settings/index.tsx
+  s_9f5316f88b2e79::t_83aca375bfca96 9,29-30
+src/db/index.ts
+  s_9f5316f88b2e79::t_a0f0b3ff1c26f2 1-30,32-39,41-68,70-80,83-84,88-93,95-100,102-127,131-160
+src/db/kv.ts
+  s_9a897e9e3fd008::t_9294a1a2eb87ad 1-61
+src/db/migrate-core.test.ts
+  s_9f5316f88b2e79::t_f2bc0b8f85a90b 1-310
+src/db/migrate-core.ts
+  s_9f5316f88b2e79::t_0b36dc59d7bb9f 1-357
+src/db/schema.ts
+  s_9f5316f88b2e79::t_1dba6b1a5e7e77 1-244
+src/features/assistant/chats.ts
+  s_9f5316f88b2e79::t_29ff3335702add 7
+src/features/maps/country-maps.ts
+  s_9f5316f88b2e79::t_348acbace63986 16
+src/features/maps/places-core.test.ts
+  s_9f5316f88b2e79::t_88093311f21ac3 13,109-114
+src/features/maps/places-core.ts
+  s_9f5316f88b2e79::t_ba706b248d0e0b 319-327
+src/features/maps/places.ts
+  s_9f5316f88b2e79::t_079bae4be6ba93 2-6,10-11,21,99-125,128,149-150,153,155-159,164,172-177,221,230-245,247-249,260-261,266,275-280,282,315,320,322-331,338-342,453,474,488-493,502-505,509-515,519,521,523-563,597-600,616,674-676,678-679,681-682,685,688-690,694,697,712-716,723-727,742,750-753,755-757,766-768,775-776,790,792,807
+src/features/maps/routing-packs.ts
+  s_9f5316f88b2e79::t_78ff9a6f3c522e 17
+src/features/maps/store.ts
+  s_9f5316f88b2e79::t_b147ec85b57348 6
+src/features/prepare/store.ts
+  s_9f5316f88b2e79::t_2e9120281ed06d 7-8
+src/stores/settings.ts
+  s_9f5316f88b2e79::t_5f26a4c3b1020b 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "650c527c846cb960de0699127f657cdd79e47c0d",
+  "prompts": {},
+  "sessions": {
+    "s_9a897e9e3fd008": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "43f501aa-0e5c-4028-b06c-4d4a88254ca0",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
