@@ -1,0 +1,23 @@
+modules/nomad-route/android/src/main/java/expo/modules/nomadroute/NomadRouteModule.kt
+  s_9f5316f88b2e79::t_e4ae836c2944af 3,13,37-49,66-67,71-72,76,83,91-93,100
+modules/nomad-route/ios/NomadRouteModule.swift
+  s_9f5316f88b2e79::t_8e59d3c6cbcb96 24,30-31,33-34,37,46,52-53,57,69-82
+modules/nomad-route/src/NomadRoute.types.ts
+  s_9f5316f88b2e79::t_d2ea861ad521d9 2-5,7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "84bb247c649053a89f07fd847060a4232537b498",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
