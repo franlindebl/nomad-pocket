@@ -1,6 +1,7 @@
 /// <reference types="node" />
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
 
 import { decodeTile } from '../../lib/mvt/decode.ts';
@@ -10,6 +11,7 @@ import { listZoomTiles, readTile } from '../../lib/pmtiles/reader.ts';
 import {
   ftsQuery,
   INDEX_LAYERS,
+  indexText,
   matchCap,
   nearestLocality,
   normalizeName,
@@ -106,10 +108,42 @@ test('ftsQuery: an abbreviation also matches its full word', () => {
   assert.equal(ftsQuery('Ntra Sra de Atocha'), '("Ntra"* OR "nuestra"*) AND ("Sra"* OR "senora"*) AND "de"* AND "Atocha"*');
 });
 
+test('Chinese and Japanese names match from any character pair', () => {
+  assert.equal(indexText('Soria'), 'Soria');
+  assert.equal(indexText('東京タワー Tokyo Tower'), '東京タワー Tokyo Tower 東京 京タ タワ ワー');
+  assert.equal(ftsQuery('タワー'), '("タワー"* OR "タワ ワー")');
+  assert.equal(ftsQuery('東'), '"東"*');
+  assert.equal(ftsQuery('JR東京'), '("JR東京"* OR "東京")');
+
+  // Against SQLite's own FTS5, with the app's tokenizer.
+  const d = new DatabaseSync(':memory:');
+  d.exec("CREATE VIRTUAL TABLE t USING fts5(names, tokenize = 'unicode61 remove_diacritics 2')");
+  const add = d.prepare('INSERT INTO t (names) VALUES (?)');
+  for (const n of ['東京タワー', '北京首都国际机场', '東京都庁', 'Calle Mayor', '東京・大阪']) add.run(indexText(n));
+  const find = (q: string) =>
+    d
+      .prepare('SELECT names FROM t WHERE t MATCH ?')
+      .all(ftsQuery(q)!)
+      .map((r) => String((r as { names: string }).names).split(' ')[0]);
+  assert.deepEqual(find('タワー'), ['東京タワー']);
+  assert.deepEqual(find('机场'), ['北京首都国际机场']);
+  assert.deepEqual(find('都庁'), ['東京都庁']);
+  assert.deepEqual(find('東京 タワー'), ['東京タワー']);
+  assert.deepEqual(find('東京'), ['東京タワー', '東京都庁', '東京・大阪']);
+  assert.deepEqual(find('大阪'), ['東京・大阪']);
+  // One character matches where a pair starts: not at the end of a run ("東京・大阪").
+  assert.deepEqual(find('京'), ['東京タワー', '北京首都国际机场', '東京都庁']);
+  // Pairs must follow each other: "東庁" is not in "東京都庁".
+  assert.deepEqual(find('東庁'), []);
+  assert.deepEqual(find('mayor'), ['Calle']);
+  d.close();
+});
+
 test('matchCap reads fewer matches for very short queries', () => {
   assert.equal(matchCap('ca'), 20_000);
   assert.equal(matchCap(' c a '), 20_000);
   assert.equal(matchCap('cal'), 50_000);
+  assert.equal(matchCap('机场'), 20_000);
 });
 
 test('parseAddress splits the street from the house number', () => {

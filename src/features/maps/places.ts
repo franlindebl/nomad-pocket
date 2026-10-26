@@ -18,6 +18,7 @@ import { bboxAround, distanceMeters, type LatLon } from './geo';
 import {
   ftsQuery,
   INDEX_LAYERS,
+  indexText,
   matchCap,
   nearestLocality,
   houseNumberKey,
@@ -135,7 +136,7 @@ function insertRows(source: string, rows: PlaceRow[]) {
       for (const r of rows) {
         // Unnamed emergency points (drinking water…) only feed the emergency list.
         if (!r.name) continue;
-        place.executeSync(r.names, r.name, r.layer, r.kind, r.lat, r.lon, r.rank, source);
+        place.executeSync(indexText(r.names), r.name, r.layer, r.kind, r.lat, r.lon, r.rank, source);
         if (r.layer === 'place' && LOCALITY_KINDS.has(r.kind)) locality.executeSync(source, r.name, r.lat, r.lon);
       }
     });
