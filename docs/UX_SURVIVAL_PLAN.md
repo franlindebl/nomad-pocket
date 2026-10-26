@@ -57,9 +57,10 @@ France 5.5 GB, Germany 5.5 GB.
 
 ## Status (2026-10-26)
 
-Phases 1–4 built on branch `ux-survival` and checked on the iOS 27 simulator (Android:
-onboarding, Home and the bundled world map). Country maps catalog not published yet: the
-workflow has never run, so the app extracts on the phone (z15 by bbox) until it does.
+Done: phases 1–4 are on `main` (ebafcdd) and shipped in TestFlight builds 11 and 12. The country
+packages workflow (`country-packages.yml`) has run in full and published both catalogs; the app
+extracts on the phone only for a country the catalog lacks. Current status and what is left:
+`docs/PROGRESS.md`.
 
 ## Phases
 

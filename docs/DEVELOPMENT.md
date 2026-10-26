@@ -7,8 +7,10 @@ How to set up, build, run and check Nomad Pocket. Architecture is in
 
 - Node 22.6+ and npm (the repo uses `package-lock.json`; `npm test` needs
   `--experimental-strip-types`).
-- Xcode 26+ with an iOS 27 simulator runtime (Apple Intelligence works there, not on
-  26.5). CocoaPods comes with `expo prebuild`/`run:ios`.
+- Xcode. The iOS 27 simulator runtime that comes with Xcode 27 is needed for Apple
+  Intelligence (it fails on 26.5) and for the E2E suite (`scripts/e2e-setup.sh` creates its
+  simulators on the iOS 27.0 runtime); plain builds and the unit tests also work with Xcode 26.
+  CocoaPods comes with `expo prebuild`/`run:ios`.
 - Android Studio (SDK, NDK, emulator `Pixel_API_36`). Gradle needs its bundled JDK:
   `export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`.
 - Optional: Maestro 2.x (`brew install mobile-dev-inc/tap/maestro`) + `openjdk` for E2E,
@@ -20,19 +22,27 @@ How to set up, build, run and check Nomad Pocket. Architecture is in
 npm install
 ```
 
-- `postinstall` runs `modules/nomad-zim/scripts/fetch-ios-libs.sh`: downloads the pinned
-  libkiwix xcframework (14.2.1-2, md5-checked, ~200 MB unpacked) into
-  `modules/nomad-zim/ios/Frameworks/` (gitignored). Skipped off macOS or with
+- `postinstall` runs `scripts/postinstall.mjs` (no bash needed; it skips both iOS fetches off
+  macOS): `modules/nomad-zim/scripts/fetch-ios-libs.sh` downloads the pinned
+  libkiwix xcframework (14.2.1-2, sha256-checked, ~200 MB unpacked) into
+  `modules/nomad-zim/ios/Frameworks/` (gitignored). Skipped with
   `NOMAD_ZIM_SKIP_FETCH=1`. Then `modules/nomad-route/scripts/fetch-ios-libs.sh`: the
   Valhalla routing engine (Rallista valhalla-mobile 0.6.4 xcframework, ~22 MB download,
   + `tzdata.tar`, sha256-checked) into `modules/nomad-route/ios/Frameworks/`
   (`NOMAD_ROUTE_SKIP_FETCH=1` skips it). Android gets it from Maven Central.
 - Routing packs for testing: `scripts/routing/build-country.sh <country> <dir>` builds a
-  country's packs with Docker (`ghcr.io/valhalla/valhalla:3.9.1`; Andorra takes a minute,
-  Spain ~15 min and ~10 GB disk). Copy a `.tar` into the app's `Documents/content/routing/`
+  country's packs. Only the Valhalla calls run in Docker (`ghcr.io/valhalla/valhalla:3.9.1`); the host
+  also needs `python3`, `osmium-tool` and `pyosmium` (and, for maps, `go-pmtiles` and `shapely`),
+  or run the whole script inside the image as CI does. Andorra takes a minute, Spain ~15 min and
+  ~10 GB disk. Copy a `.tar` into the app's `Documents/content/routing/`
   (simulator) and it registers at startup.
-- `prepare` sets `git config core.hooksPath .githooks` (pre-commit: tsc, lint, unit
-  tests, i18n). Skip once with `git commit --no-verify`.
+- `prepare` (`scripts/git-hooks.mjs`) sets `git config core.hooksPath .githooks` only when no
+  hooks path is set (an existing one is left alone) (pre-commit: tsc, lint, unit tests, i18n).
+  Skip once with `git commit --no-verify`.
+- After any dependency change run `node scripts/licenses.mjs` (regenerates
+  `src/data/licenses.json`, the Credits screen; `--check` fails if it is stale). When you bump a
+  fetch script, podspec or Gradle version of a native library, update
+  `scripts/licenses/native.json` too.
 
 ## Native projects
 
@@ -80,9 +90,15 @@ cd android && JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/
 adb install -r app/build/outputs/apk/release/app-release.apk
 ```
 
-On a physical iPhone: open `ios/NomadPocket.xcworkspace` in Xcode, select team
-`F3VY6C7GKX` with automatic signing, or build from the command line with
-`DEVELOPMENT_TEAM=… CODE_SIGN_STYLE=Automatic -allowProvisioningUpdates`.
+On a physical iPhone you need your own Apple team *and your own bundle id*:
+`com.fjlinde.nomadpocket` is registered to the maintainer, so another team can't sign it. Locally
+change `ios.bundleIdentifier` in `app.json` (don't commit that), run `npx expo prebuild`, open
+`ios/NomadPocket.xcworkspace` in Xcode and select your team with automatic signing, or build from
+the command line with `DEVELOPMENT_TEAM=<your team> CODE_SIGN_STYLE=Automatic
+-allowProvisioningUpdates`. llama.rn's extended-virtual-addressing and increased-memory-limit
+entitlements are only added to production builds (`NODE_ENV=production`), and whether a free
+developer account can provision them is untested. The maintainer uses team `F3VY6C7GKX`
+(maintainer only). Simulator and emulator builds need no account.
 
 ## Checks
 
@@ -91,7 +107,8 @@ On a physical iPhone: open `ios/NomadPocket.xcworkspace` in Xcode, select team
 | `npx tsc --noEmit` | typecheck | always (pre-commit) |
 | `npx expo lint` | ESLint, `eslint-config-expo` flat config | always (pre-commit) |
 | `npm test` | unit tests, `node --test --experimental-strip-types "src/**/*.test.ts"` | always (pre-commit) |
-| `npm run check:i18n` | every `t('…')` key exists in `es` and `en`, same plural/template keys | always (pre-commit) |
+| `npm run check:i18n` | every `t('…')` key exists in `es` and `en`, same plural/template keys; also prints an informational list of unused keys | always (pre-commit) |
+| `node scripts/licenses.mjs --check` | the committed `src/data/licenses.json` matches `package-lock.json` and `scripts/licenses/native.json` | after dependency changes, before a store build |
 | `npm run check:catalog` | catalog schema + every download URL and size (`-- --offline` for schema only) | after editing `catalog.json` |
 | `PMTILES_NETWORK=1 npm test` | adds a live extract against build.protomaps.com | after touching `src/lib/pmtiles` |
 | `npm run e2e` (`-- --build`) | Maestro smoke suite on the iOS simulator | before every TestFlight build |
@@ -105,10 +122,11 @@ Unit tests import with `.ts` extensions and no `@/` aliases (Node loads them dir
   JS `console.*` shows there in Release builds too.
 - Android: `adb logcat | grep -E "ReactNativeJS|nomad|kiwix|AndroidRuntime"`.
 - Simulator app data: `xcrun simctl get_app_container booted com.fjlinde.nomadpocket data`
-  → `Documents/content/…`, `Documents/SQLite/nomad.db` (open it with `sqlite3`). Drop a
+  → `Documents/content/…`; the databases are in `Library/Application Support/SQLite/nomad.db` (user data;
+  open it with `sqlite3`) and `Documents/content/index/search.db` (map search index and emergency points). Drop a
   `.zim` into `Documents/content/zim/` or a `.pmtiles` (named after a region id) into
   `Documents/content/maps/` and relaunch: they are registered at startup.
-- Re-run the setup wizard: Settings → "Asistente de configuración", or reinstall.
+- Re-run the setup wizard: Settings → "Revisar descargas recomendadas" ("Review recommended downloads"), or reinstall.
 - UI automation: Maestro (`maestro --device <udid> hierarchy`, `maestro studio`) or `axe`
   on iOS; `adb shell uiautomator dump` + `adb shell input tap x y` on Android.
 - Deep links: `xcrun simctl openurl booted "nomadpocket:///library/resource/<id>"`
@@ -125,6 +143,6 @@ Unit tests import with `.ts` extensions and no `@/` aliases (Node loads them dir
 - `llama.rn` is a release candidate (0.13.0-rc.8): `stopCompletion()`/`release()` may not
   return promises, so don't chain `.catch` on them directly (`engine.ts` wraps them).
 - Apple Intelligence fails every request on the iOS 26.5 simulator (`GenerationError -1`):
-  use iOS 27. Gemini Nano needs a real AICore device (untested so far).
+  use iOS 27. (Android's Gemini Nano bridge is being removed: the Android assistant uses downloadable models only.)
 - `xcodebuild` builds for a simulator need `ios/` from `npx expo prebuild`; the E2E runner
   builds `ios/build/sim/…/NomadPocket.app` itself when it is missing.
