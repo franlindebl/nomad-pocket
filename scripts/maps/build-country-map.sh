@@ -2,9 +2,10 @@
 # Builds the offline map of one country for the app's country downloads
 # (docs/UX_SURVIVAL_PLAN.md): an extract of the Protomaps planet build over the country's
 # outline (country-region.py: Natural Earth polygons, islands included, neighbours out;
-# the bbox of src/features/maps/regions.json if that fails) at full detail (z15). Very
-# large countries get the highest zoom whose archive stays under MAX_BYTES. Parts of at most 1900 MiB (GitHub
-# Release assets stop at 2 GiB). Countries without a routing pack (scripts/routing/packs.json:
+# the bbox of src/features/maps/regions.json for a country Natural Earth lacks) at full
+# detail (z15). Very large countries get the highest zoom whose archive stays under
+# MAX_BYTES. Parts of at most 1900 MiB (GitHub Release assets stop at 2 GiB). Countries
+# without a routing pack (scripts/routing/packs.json:
 # those packs already carry them) also get their emergency points, street names, named
 # places and house numbers from their Geofabrik extract, so a country download is complete
 # and never needs Overpass.
@@ -37,16 +38,33 @@ print(",".join(str(v) for v in r["bbox"]))
 PY
 )"
 
-# 0. The country's outline (and the bbox the manifest gives the app).
-AREA=(--bbox="$BBOX")
+# 0. The country's outline (and the bbox the manifest gives the app). A failed download or
+#    outline fails the job (the catalog keeps last month's map): the bbox would drop islands
+#    and exclaves (Spain's leaves out Canarias, Ceuta and Melilla; Portugal's the Azores and
+#    Madeira). Natural Earth v5.1.2, pinned by commit and hash: the commit dl-ne.mjs fetches
+#    for the region ids of make-regions.mjs.
+NE_URL="https://raw.githubusercontent.com/nvkelso/natural-earth-vector/f1890d9f152c896d250a77557a5751a93d494776/geojson/ne_10m_admin_0_countries.geojson"
+NE_SHA256="239eec57ac17f100a11e2536cffc56752c318b50ae765b0918ff7aab4ce8f255"
 NE="$WORK/src/ne_10m_admin_0_countries.geojson"
-[[ -s "$NE" ]] || curl -fsSL --retry 3 -o "$NE" https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_0_countries.geojson || true
-if [[ -s "$NE" ]] && REGION_BBOX="$(python3 -I "$HERE/country-region.py" "$ID" "$NE" "$WORK/src/$ID.geojson")"; then
+[[ -s "$NE" ]] || curl -fsSL --retry 3 -o "$NE" "$NE_URL"
+NE_ACTUAL="$(python3 -I -c 'import hashlib, sys; print(hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest())' "$NE")"
+if [[ "$NE_ACTUAL" != "$NE_SHA256" ]]; then
+  rm -f "$NE"
+  log "Natural Earth sha256 mismatch: expected $NE_SHA256, got $NE_ACTUAL"
+  exit 1
+fi
+REGION_STATUS=0
+REGION_BBOX="$(python3 -I "$HERE/country-region.py" "$ID" "$NE" "$WORK/src/$ID.geojson")" || REGION_STATUS=$?
+if (( REGION_STATUS == 0 )); then
   AREA=(--region="$WORK/src/$ID.geojson")
   BBOX="$REGION_BBOX"
   log "outline, bbox $BBOX"
+elif (( REGION_STATUS == 3 )); then # country-region.py's NOT_FOUND
+  AREA=(--bbox="$BBOX")
+  log "not in Natural Earth: bbox $BBOX"
 else
-  log "no outline: bbox $BBOX"
+  log "country-region.py failed ($REGION_STATUS)"
+  exit 1
 fi
 
 # 1. Points, street names, places and house numbers, unless a routing pack covers the
