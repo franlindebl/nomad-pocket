@@ -1,4 +1,3 @@
-import Storage from 'expo-sqlite/kv-store';
 import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   ALargeSmall,
@@ -20,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, BackHandler, Linking, StyleSheet, View } from 'react-native';
 
 import { EmptyState, Text, triggerHaptic } from '@/components/ui';
+import Storage from '@/db/kv';
 import { useItems } from '@/features/content/items';
 import { ArchiveSearchSheet } from '@/features/library/components/ArchiveSearchSheet';
 import { DisclaimerBanner, FindBar, MenuItem, Popover, ReaderToolbar, TextSizeControl } from '@/features/library/components/ReaderChrome';

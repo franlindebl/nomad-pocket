@@ -1,197 +1,161 @@
-// Single SQLite database for all local app state (content registry, downloads,
-// reading history, courses, maps, chats). Content files themselves live on disk
-// under src/lib/storage paths; this database only references them.
-import { openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
+// The app's SQLite files. nomad.db holds the user's data and the content registry
+// (downloads, history, bookmarks, courses, saved places, chats). On iOS it lives under
+// Library/Application Support, which is backed up but hidden from the Files app
+// (UIFileSharingEnabled shows all of Documents). The map search index has its own file,
+// Documents/content/index/search.db: up to ~1 GB per country, derived from downloads,
+// and kept out of backups like the content it comes from. Both files move into place
+// the first time db() runs (migrate-core.ts). Content files live on disk under
+// src/lib/storage paths; these databases only reference them.
+import { Directory, File } from 'expo-file-system';
+import { defaultDatabaseDirectory, openDatabaseSync, type SQLiteDatabase, type SQLiteOpenOptions } from 'expo-sqlite';
+import { Platform } from 'react-native';
 
-const MIGRATIONS: string[] = [
-  // v1
-  `
-  CREATE TABLE IF NOT EXISTS items (
-    id TEXT PRIMARY KEY NOT NULL,
-    kind TEXT NOT NULL,            -- 'zim' | 'map' | 'model'
-    title TEXT NOT NULL,
-    description TEXT,
-    language TEXT,
-    category TEXT,                 -- catalog category slug (medicine, survival, ...)
-    is_course INTEGER NOT NULL DEFAULT 0,
-    file_path TEXT NOT NULL,       -- absolute file URI
-    size_bytes INTEGER NOT NULL DEFAULT 0,
-    version TEXT,
-    source_url TEXT,
-    catalog_id TEXT,               -- id in the bundled catalog, if any
-    meta TEXT,                     -- JSON, kind-specific
-    installed_at INTEGER NOT NULL
-  );
-  CREATE INDEX IF NOT EXISTS items_kind ON items(kind);
+import {
+  ADOPT_INDEX_STATE,
+  applyLadder,
+  cleanRetiredIndex,
+  dirOf,
+  splitDatabase,
+  SPLIT_VERSION,
+  userDatabaseAfter,
+  type Env,
+  type Sql,
+} from './migrate-core';
+import { INDEX_MIGRATIONS, INDEX_OPEN, MIGRATIONS } from './schema';
 
-  CREATE TABLE IF NOT EXISTS downloads (
-    id TEXT PRIMARY KEY NOT NULL,
-    kind TEXT NOT NULL,            -- 'zim' | 'map' | 'model'
-    title TEXT NOT NULL,
-    url TEXT NOT NULL,
-    dest_uri TEXT NOT NULL,
-    total_bytes INTEGER NOT NULL DEFAULT 0,
-    bytes_written INTEGER NOT NULL DEFAULT 0,
-    status TEXT NOT NULL,          -- queued | running | paused | processing | failed | done | cancelled
-    error TEXT,
-    pause_state TEXT,              -- JSON DownloadPauseState
-    meta TEXT,                     -- JSON: item fields to register on completion
-    created_at INTEGER NOT NULL,
-    updated_at INTEGER NOT NULL
-  );
+const fileAt = (path: string) => new File(`file://${encodeURI(path)}`);
 
-  CREATE TABLE IF NOT EXISTS bookmarks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    item_id TEXT NOT NULL,
-    path TEXT NOT NULL,
-    title TEXT NOT NULL,
-    created_at INTEGER NOT NULL,
-    UNIQUE(item_id, path)
-  );
+export function openAt(path: string, options?: SQLiteOpenOptions): SQLiteDatabase {
+  return openDatabaseSync(path.slice(path.lastIndexOf('/') + 1), options, dirOf(path));
+}
 
-  CREATE TABLE IF NOT EXISTS history (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    item_id TEXT NOT NULL,
-    path TEXT NOT NULL,
-    title TEXT NOT NULL,
-    visited_at INTEGER NOT NULL
-  );
-  CREATE INDEX IF NOT EXISTS history_visited ON history(visited_at DESC);
+function sqlOf(d: SQLiteDatabase): Sql {
+  return {
+    exec: (sql) => d.execSync(sql),
+    all: <T>(sql: string, ...params: (string | number | null)[]) => d.getAllSync<T>(sql, ...params),
+    run: (sql, ...params) => void d.runSync(sql, ...params),
+    close: () => d.closeSync(),
+  };
+}
 
-  CREATE TABLE IF NOT EXISTS courses (
-    item_id TEXT PRIMARY KEY NOT NULL,
-    syllabus TEXT,                 -- JSON [{path,title,section?}]
-    enrolled_at INTEGER NOT NULL,
-    last_path TEXT,
-    last_title TEXT,
-    last_opened_at INTEGER
-  );
+/** File access for the moves in migrate-core.ts (plain paths). */
+export const migrationEnv: Env = {
+  // Its own connection, closed after: a file is renamed only once nothing holds it open.
+  open: (path) => sqlOf(openAt(path, { useNewConnection: true })),
+  exists: (path) => fileAt(path).exists,
+  rename: (from, to) => fileAt(from).moveSync(fileAt(to)),
+  remove: (path) => {
+    const f = fileAt(path);
+    if (f.exists) f.delete();
+  },
+  mkdirp: (dir) => new Directory(`file://${encodeURI(dir)}`).create({ intermediates: true, idempotent: true }),
+};
 
-  CREATE TABLE IF NOT EXISTS course_progress (
-    item_id TEXT NOT NULL,
-    path TEXT NOT NULL,
-    completed_at INTEGER NOT NULL,
-    PRIMARY KEY(item_id, path)
-  );
+type DbPaths = { legacyDir: string; userDir: string; legacy: string; user: string; index: string };
+let pathsMemo: DbPaths | null = null;
 
-  CREATE TABLE IF NOT EXISTS map_markers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    lat REAL NOT NULL,
-    lon REAL NOT NULL,
-    color TEXT,
-    note TEXT,
-    created_at INTEGER NOT NULL
-  );
+/** Plain paths of the app's databases. */
+export function dbPaths(): DbPaths {
+  if (pathsMemo) return pathsMemo;
+  // <Documents>/SQLite on iOS, <files>/SQLite on Android, where expo-sqlite opens by default.
+  const legacyDir = defaultDatabaseDirectory.replace(/\/+$/, '');
+  const documents = dirOf(legacyDir);
+  // Android's files dir is private already: the databases stay where they are.
+  const userDir =
+    Platform.OS === 'ios' && documents.endsWith('/Documents') ? `${dirOf(documents)}/Library/Application Support/SQLite` : legacyDir;
+  pathsMemo = { legacyDir, userDir, legacy: `${legacyDir}/nomad.db`, user: `${userDir}/nomad.db`, index: `${documents}/content/index/search.db` };
+  return pathsMemo;
+}
 
-  CREATE TABLE IF NOT EXISTS chat_sessions (
-    id TEXT PRIMARY KEY NOT NULL,
-    title TEXT NOT NULL,
-    model_id TEXT,
-    created_at INTEGER NOT NULL,
-    updated_at INTEGER NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS chat_messages (
-    id TEXT PRIMARY KEY NOT NULL,
-    session_id TEXT NOT NULL,
-    role TEXT NOT NULL,            -- user | assistant | system
-    content TEXT NOT NULL,
-    sources TEXT,                  -- JSON [{itemId,path,title}]
-    created_at INTEGER NOT NULL
-  );
-  CREATE INDEX IF NOT EXISTS chat_messages_session ON chat_messages(session_id, created_at);
-  `,
-  // v2: offline map search and emergency points
-  `
-  -- Search index built from installed maps' tiles (and the emergency points).
-  -- 'rank' is reserved by FTS5, hence 'importance' (lower = more important).
-  CREATE VIRTUAL TABLE IF NOT EXISTS map_places USING fts5(
-    names,
-    name UNINDEXED,
-    layer UNINDEXED,               -- place | poi | road
-    kind UNINDEXED,
-    lat UNINDEXED,
-    lon UNINDEXED,
-    importance UNINDEXED,
-    source UNINDEXED,              -- map item id, or 'pois:<map item id>'
-    tokenize = 'unicode61 remove_diacritics 2'
-  );
-
-  -- Towns and neighbourhoods of the index, for "Calle Mayor · Soria" context lines.
-  CREATE TABLE IF NOT EXISTS map_localities (
-    source TEXT NOT NULL,
-    name TEXT NOT NULL,
-    lat REAL NOT NULL,
-    lon REAL NOT NULL
-  );
-  CREATE INDEX IF NOT EXISTS map_localities_lat ON map_localities(lat);
-  CREATE INDEX IF NOT EXISTS map_localities_source ON map_localities(source);
-
-  -- OpenStreetMap emergency points fetched (Overpass) for each map region.
-  CREATE TABLE IF NOT EXISTS map_pois (
-    source TEXT NOT NULL,          -- map item id
-    osm_id TEXT NOT NULL,          -- n123 | w456 | r789
-    kind TEXT NOT NULL,
-    category TEXT NOT NULL,
-    name TEXT,
-    operator TEXT,
-    phone TEXT,
-    opening_hours TEXT,
-    emergency INTEGER,
-    lat REAL NOT NULL,
-    lon REAL NOT NULL,
-    PRIMARY KEY (source, osm_id)
-  );
-  CREATE INDEX IF NOT EXISTS map_pois_category ON map_pois(category);
-  CREATE INDEX IF NOT EXISTS map_pois_lat ON map_pois(lat);
-
-  -- Per map item: search index and emergency point state.
-  CREATE TABLE IF NOT EXISTS map_sources (
-    item_id TEXT PRIMARY KEY NOT NULL,
-    index_version INTEGER,         -- NULL until indexed
-    index_zoom INTEGER,
-    indexed_at INTEGER,
-    pois_at INTEGER,               -- last successful emergency point fetch
-    pois_count INTEGER
-  );
-  `,
-  // v3: house numbers for map search (a country pack's addresses file)
-  `
-  -- One row per street name and source; key = nameKey ("Calle de Alcalá" → "calle alcala").
-  CREATE TABLE IF NOT EXISTS map_address_streets (
-    id INTEGER PRIMARY KEY,
-    source TEXT NOT NULL,          -- routing pack or map item id
-    key TEXT NOT NULL
-  );
-  CREATE INDEX IF NOT EXISTS map_address_streets_key ON map_address_streets(key);
-  CREATE INDEX IF NOT EXISTS map_address_streets_source ON map_address_streets(source);
-
-  -- One row per door, millions for a country: no rowid, coordinates in 1e-5 degrees (~1 m).
-  CREATE TABLE IF NOT EXISTS map_addresses (
-    street INTEGER NOT NULL,       -- map_address_streets.id
-    lat INTEGER NOT NULL,
-    lon INTEGER NOT NULL,
-    number TEXT NOT NULL,          -- houseNumberKey: "12B"
-    PRIMARY KEY (street, lat, lon, number)
-  ) WITHOUT ROWID;
-  `,
-];
+/** Documents/SQLite once nothing is left in it, so the Files app stops showing it. */
+export function removeEmptyLegacyDir() {
+  const { legacyDir, userDir } = dbPaths();
+  if (legacyDir === userDir) return;
+  try {
+    const dir = new Directory(`file://${encodeURI(legacyDir)}`);
+    if (dir.exists && dir.list().length === 0) dir.delete();
+  } catch (e) {
+    console.warn('[db] cannot remove the old database folder', e);
+  }
+}
 
 let instance: SQLiteDatabase | null = null;
+/** Where the index tables are: the index file, or nomad.db itself while the split has not happened. */
+let indexPath = '';
 
 export function db(): SQLiteDatabase {
   if (instance) return instance;
-  const database = openDatabaseSync('nomad.db');
-  database.execSync('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
-  const row = database.getFirstSync<{ user_version: number }>('PRAGMA user_version');
-  const current = row?.user_version ?? 0;
-  for (let v = current; v < MIGRATIONS.length; v++) {
-    database.execSync(MIGRATIONS[v]);
-    database.execSync(`PRAGMA user_version = ${v + 1}`);
+  const paths = dbPaths();
+  try {
+    splitDatabase(migrationEnv, paths, MIGRATIONS);
+  } catch (e) {
+    // Nothing is lost: the old file is used as before and the split is retried next launch.
+    console.warn('[db] cannot move the map search index out of nomad.db yet', e);
   }
+  const at = userDatabaseAfter(migrationEnv, paths);
+  const database = openAt(at.path);
+  database.execSync('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
+  // v4 drops the index tables: never on a file that still holds the only copy of them.
+  applyLadder(sqlOf(database), at.split ? MIGRATIONS : MIGRATIONS.slice(0, SPLIT_VERSION - 1));
+  indexPath = at.split ? paths.index : at.path;
   instance = database;
+  removeEmptyLegacyDir();
   return database;
+}
+
+let indexInstance: SQLiteDatabase | null = null;
+let indexBackground: SQLiteDatabase | null = null;
+
+/** The map search index (map_places, map_localities, house numbers, index_sources). */
+export function indexDb(): SQLiteDatabase {
+  if (indexInstance) return indexInstance;
+  const main = db();
+  if (indexPath !== dbPaths().index) {
+    // The split failed this launch: the index is still in nomad.db, which gets the index
+    // state table the index file has.
+    main.withTransactionSync(() => main.execSync(ADOPT_INDEX_STATE));
+    indexInstance = main;
+    return main;
+  }
+  migrationEnv.mkdirp(dirOf(indexPath));
+  const database = openAt(indexPath);
+  database.execSync(INDEX_OPEN);
+  const sql = sqlOf(database);
+  // A retired nomad.db: drop the user tables it still has (their rows are in the new nomad.db).
+  cleanRetiredIndex(sql);
+  applyLadder(sql, INDEX_MIGRATIONS);
+  indexInstance = database;
+  return database;
+}
+
+/**
+ * A second connection to the index, for the async queries and deletes (they run off the
+ * JS thread). WAL lets the main connection's synchronous reads go on meanwhile.
+ */
+export function indexDbAsync(): SQLiteDatabase {
+  if (indexBackground) return indexBackground;
+  const index = indexDb();
+  // Still inside nomad.db: a second writer there would make the user's own writes fail as busy.
+  if (index === instance) return (indexBackground = index);
+  indexBackground = openAt(indexPath, { useNewConnection: true });
+  indexBackground.execSync('PRAGMA busy_timeout = 5000;');
+  return indexBackground;
+}
+
+/** Bytes the search index takes on disk (0 while it is still inside nomad.db). */
+export function searchIndexBytes(): number {
+  const { index } = dbPaths();
+  if (indexPath && indexPath !== index) return 0;
+  let total = 0;
+  for (const path of [index, `${index}-wal`]) {
+    try {
+      const f = fileAt(path);
+      if (f.exists) total += Number(f.size ?? 0);
+    } catch {
+      // gone meanwhile
+    }
+  }
+  return total;
 }
 
 export function parseJson<T>(value: string | null | undefined, fallback: T): T {

@@ -1,9 +1,10 @@
 // The user's emergency plan and kit, persisted as one JSON document in the kv-store
 // (key `prepare`). A handful of small lists: no SQL tables needed. Side effects that
 // go with some edits (expiry reminders) live in reminders.ts.
-import Storage from 'expo-sqlite/kv-store';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+
+import Storage from '@/db/kv';
 
 import { DEFAULT_HOUSEHOLD, HOUSEHOLD_MAX, type Household } from './kit';
 import type { EntryKind, EntryOf, KitEntry, MeetingPoint, MeetingSlot, PrepareData } from './types';

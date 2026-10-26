@@ -1,12 +1,14 @@
 // Offline place search over installed maps. Each map item's tiles are decoded
-// once into a SQLite FTS5 index (map_places) in the background, one map at a
-// time, in small batches so the JS thread stays responsive. Emergency points
-// fetched from Overpass (emergency.ts) are added to the same index.
+// once into a SQLite FTS5 index (map_places, in the index file: indexDb) in the
+// background, one map at a time, in small batches so the JS thread stays responsive.
+// Country files (places, streets, house numbers) and emergency points (emergency.ts)
+// go into the same index. Writes to it take turns (exclusive); searches and the big
+// deletes of a removed map run off the JS thread on a second connection.
 import { File, FileMode } from 'expo-file-system';
-import Storage from 'expo-sqlite/kv-store';
 import { create } from 'zustand';
 
-import { db } from '@/db';
+import { db, indexDb, indexDbAsync } from '@/db';
+import Storage from '@/db/kv';
 import { getItem, listItems } from '@/features/content/items';
 import { decodeTile } from '@/lib/mvt/decode';
 import { countBBoxTiles, listZoomTiles, readTile, type Header, type RangeSource, type TileEntry } from '@/lib/pmtiles';
@@ -16,6 +18,7 @@ import { bboxAround, distanceMeters, type LatLon } from './geo';
 import {
   ftsQuery,
   INDEX_LAYERS,
+  matchCap,
   nearestLocality,
   houseNumberKey,
   locateHouseNumber,
@@ -93,9 +96,36 @@ class LocalFileSource implements RangeSource {
 
 const yieldToUi = () => new Promise<void>((r) => setTimeout(r, 0));
 
+let writes: Promise<unknown> = Promise.resolve();
+
+/**
+ * Runs `job` after every index write queued before it. One writer at a time: a long
+ * import and the deletes of a removed map, on two connections, would otherwise wait on
+ * each other's locks, the synchronous side blocking the JS thread.
+ */
+function exclusive<T>(job: () => Promise<T> | T): Promise<T> {
+  const run = writes.then(job);
+  writes = run.catch((e) => console.warn('[maps] index write failed', e));
+  return run;
+}
+
+/** Index state rows (index_sources): a map's tile index, or a country file's import. */
+function markIndexed(itemId: string, zoom: number | null = null) {
+  indexDb().runSync(
+    'INSERT OR REPLACE INTO index_sources (item_id, index_version, index_zoom, indexed_at) VALUES (?, ?, ?, ?)',
+    itemId,
+    INDEX_VERSION,
+    zoom,
+    Date.now(),
+  );
+}
+
+const isIndexed = (itemId: string) =>
+  !!indexDb().getFirstSync('SELECT 1 FROM index_sources WHERE item_id = ? AND index_version IS NOT NULL', itemId);
+
 function insertRows(source: string, rows: PlaceRow[]) {
   if (!rows.length) return;
-  const d = db();
+  const d = indexDb();
   const place = d.prepareSync(
     'INSERT INTO map_places (names, name, layer, kind, lat, lon, importance, source) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
   );
@@ -116,20 +146,22 @@ function insertRows(source: string, rows: PlaceRow[]) {
 }
 
 export function deletePlaceRows(source: string) {
-  db().runSync('DELETE FROM map_places WHERE source = ?', source);
-  db().runSync('DELETE FROM map_localities WHERE source = ?', source);
+  indexDb().runSync('DELETE FROM map_places WHERE source = ?', source);
+  indexDb().runSync('DELETE FROM map_localities WHERE source = ?', source);
 }
 
-/** Adds emergency points to the search index under 'pois:<item id>' (replacing earlier ones). */
+/** Adds emergency points to the search index under 'pois:<item id>' (replacing earlier ones), in turn with other writes. */
 export function indexEmergencyPoints(itemId: string, rows: PlaceRow[]) {
-  deletePlaceRows(`pois:${itemId}`);
-  insertRows(`pois:${itemId}`, rows);
-  bumpVersion();
+  void exclusive(() => {
+    deletePlaceRows(`pois:${itemId}`);
+    insertRows(`pois:${itemId}`, rows);
+    bumpVersion();
+  });
 }
 
 /** Whether a routing pack's street names are in the index. */
 export function hasPackStreets(itemId: string): boolean {
-  return !!db().getFirstSync('SELECT 1 FROM map_sources WHERE item_id = ? AND index_version IS NOT NULL', itemId);
+  return isIndexed(itemId);
 }
 
 /**
@@ -137,16 +169,12 @@ export function hasPackStreets(itemId: string): boolean {
  * inserted in batches with a yield in between, so the UI stays responsive. Counted as
  * a search index (hasSearchIndex) even without a map installed.
  */
-export async function indexPackStreets(itemId: string, file: File) {
-  if (!(await insertStreetsFile(itemId, itemId, file))) return;
-  db().runSync(
-    `INSERT INTO map_sources (item_id, index_version, indexed_at) VALUES (?, ?, ?)
-     ON CONFLICT(item_id) DO UPDATE SET index_version = excluded.index_version, indexed_at = excluded.indexed_at`,
-    itemId,
-    INDEX_VERSION,
-    Date.now(),
-  );
-  bumpVersion();
+export function indexPackStreets(itemId: string, file: File): Promise<void> {
+  return exclusive(async () => {
+    if (!(await insertStreetsFile(itemId, itemId, file))) return;
+    markIndexed(itemId);
+    bumpVersion();
+  });
 }
 
 // --- Every named place of a country (pack side files) ---------------------------
@@ -190,7 +218,7 @@ async function forEachLineBlock(file: File, onBlock: (text: string) => Promise<b
 
 /** Whether a country's places file was imported for this item. */
 export function hasPackPlaces(itemId: string): boolean {
-  return !!db().getFirstSync('SELECT 1 FROM map_sources WHERE item_id = ? AND index_version IS NOT NULL', placesSource(itemId));
+  return isIndexed(placesSource(itemId));
 }
 
 /**
@@ -199,30 +227,27 @@ export function hasPackPlaces(itemId: string): boolean {
  * of the country whatever the map's zoom. Batches with a yield in between; replaces an
  * earlier import; stops (leaving nothing) when the item is removed meanwhile.
  */
-export async function indexPackPlaces(itemId: string, file: File) {
-  const source = placesSource(itemId);
-  deletePlaceRows(source);
-  db().runSync('DELETE FROM map_sources WHERE item_id = ?', source);
-  await forEachLineBlock(file, async (text) => {
-    const rows = parsePlacesTsv(text);
-    for (let i = 0; i < rows.length && getItem(itemId); i += 5000) {
-      insertRows(source, rows.slice(i, i + 5000));
-      await yieldToUi();
+export function indexPackPlaces(itemId: string, file: File): Promise<void> {
+  return exclusive(async () => {
+    const source = placesSource(itemId);
+    deletePlaceRows(source);
+    indexDb().runSync('DELETE FROM index_sources WHERE item_id = ?', source);
+    await forEachLineBlock(file, async (text) => {
+      const rows = parsePlacesTsv(text);
+      for (let i = 0; i < rows.length && getItem(itemId); i += 5000) {
+        insertRows(source, rows.slice(i, i + 5000));
+        await yieldToUi();
+      }
+      return !!getItem(itemId);
+    });
+    if (!getItem(itemId)) {
+      deletePlaceRows(source); // removed meanwhile
+      return;
     }
-    return !!getItem(itemId);
+    // Its own index_sources row: counts as a search index, and never as the item's tile index.
+    markIndexed(source);
+    bumpVersion();
   });
-  if (!getItem(itemId)) {
-    deletePlaceRows(source); // removed meanwhile
-    return;
-  }
-  // Its own map_sources row: counts as a search index, and never as the item's tile index.
-  db().runSync(
-    'INSERT OR REPLACE INTO map_sources (item_id, index_version, indexed_at) VALUES (?, ?, ?)',
-    source,
-    INDEX_VERSION,
-    Date.now(),
-  );
-  bumpVersion();
 }
 
 // --- House numbers (pack side file) ------------------------------------------
@@ -232,13 +257,13 @@ const addressesSource = (itemId: string) => `addresses:${itemId}`;
 const E5 = 1e5;
 
 function deleteAddresses(itemId: string) {
-  db().runSync('DELETE FROM map_addresses WHERE street IN (SELECT id FROM map_address_streets WHERE source = ?)', itemId);
-  db().runSync('DELETE FROM map_address_streets WHERE source = ?', itemId);
+  indexDb().runSync('DELETE FROM map_addresses WHERE street IN (SELECT id FROM map_address_streets WHERE source = ?)', itemId);
+  indexDb().runSync('DELETE FROM map_address_streets WHERE source = ?', itemId);
 }
 
 /** Whether a country's addresses file was imported for this item. */
 export function hasPackAddresses(itemId: string): boolean {
-  return !!db().getFirstSync('SELECT 1 FROM map_sources WHERE item_id = ? AND index_version IS NOT NULL', addressesSource(itemId));
+  return isIndexed(addressesSource(itemId));
 }
 
 /**
@@ -247,10 +272,14 @@ export function hasPackAddresses(itemId: string): boolean {
  * big country: read in blocks, inserted in transactions of 5000 with a yield in between;
  * stops (leaving nothing) when the item is removed meanwhile.
  */
-export async function indexPackAddresses(itemId: string, file: File) {
-  const d = db();
+export function indexPackAddresses(itemId: string, file: File): Promise<void> {
+  return exclusive(() => importAddresses(itemId, file));
+}
+
+async function importAddresses(itemId: string, file: File) {
+  const d = indexDb();
   deleteAddresses(itemId);
-  d.runSync('DELETE FROM map_sources WHERE item_id = ?', addressesSource(itemId));
+  d.runSync('DELETE FROM index_sources WHERE item_id = ?', addressesSource(itemId));
   const streets = new Map<string, number>();
   const street = d.prepareSync('INSERT INTO map_address_streets (source, key) VALUES (?, ?)');
   // A door mapped twice (building + entrance node at the same spot) is kept once.
@@ -283,38 +312,34 @@ export async function indexPackAddresses(itemId: string, file: File) {
     deleteAddresses(itemId); // removed meanwhile
     return;
   }
-  d.runSync(
-    'INSERT OR REPLACE INTO map_sources (item_id, index_version, indexed_at) VALUES (?, ?, ?)',
-    addressesSource(itemId),
-    INDEX_VERSION,
-    Date.now(),
-  );
+  markIndexed(addressesSource(itemId));
   bumpVersion();
 }
 
 /** The doors of streets named like `streetName` within `meters` of `near`. */
-function doorsNear(streetName: string, near: LatLon, meters: number): AddressRow[] {
+async function doorsNear(streetName: string, near: LatLon, meters: number): Promise<AddressRow[]> {
   const [w, s, e, n] = bboxAround(near, meters);
-  return db()
-    .getAllSync<{ number: string; lat: number; lon: number }>(
-      `SELECT a.number, a.lat, a.lon FROM map_address_streets st JOIN map_addresses a ON a.street = st.id
-       WHERE st.key = ? AND a.lat BETWEEN ? AND ? AND a.lon BETWEEN ? AND ? LIMIT 5000`,
-      nameKey(streetName),
-      Math.floor(s * E5),
-      Math.ceil(n * E5),
-      Math.floor(w * E5),
-      Math.ceil(e * E5),
-    )
-    .map((r) => ({ street: streetName, number: r.number, lat: r.lat / E5, lon: r.lon / E5 }));
+  const rows = await indexDbAsync().getAllAsync<{ number: string; lat: number; lon: number }>(
+    `SELECT a.number, a.lat, a.lon FROM map_address_streets st JOIN map_addresses a ON a.street = st.id
+     WHERE st.key = ? AND a.lat BETWEEN ? AND ? AND a.lon BETWEEN ? AND ? LIMIT 5000`,
+    nameKey(streetName),
+    Math.floor(s * E5),
+    Math.ceil(n * E5),
+    Math.floor(w * E5),
+    Math.ceil(e * E5),
+  );
+  return rows.map((r) => ({ street: streetName, number: r.number, lat: r.lat / E5, lon: r.lon / E5 }));
 }
 
 /**
  * A country map's street and locality names (country-maps.ts, where no routing pack brings
  * them), under 'streets:<item id>' so the map's own tile index keeps its rows.
  */
-export async function indexMapStreets(itemId: string, file: File) {
-  await insertStreetsFile(`streets:${itemId}`, itemId, file);
-  bumpVersion();
+export function indexMapStreets(itemId: string, file: File): Promise<void> {
+  return exclusive(async () => {
+    await insertStreetsFile(`streets:${itemId}`, itemId, file);
+    bumpVersion();
+  });
 }
 
 /**
@@ -425,14 +450,7 @@ async function indexItem(item: MapItem) {
       for (const r of rows) if (r.layer === 'poi' && tileEmergencyKind(r.kind)) emergencyRows.push(r);
     });
     if (!done) return;
-    db().runSync(
-      `INSERT INTO map_sources (item_id, index_version, index_zoom, indexed_at) VALUES (?, ?, ?, ?)
-       ON CONFLICT(item_id) DO UPDATE SET index_version = excluded.index_version, index_zoom = excluded.index_zoom, indexed_at = excluded.indexed_at`,
-      item.id,
-      INDEX_VERSION,
-      z,
-      Date.now(),
-    );
+    markIndexed(item.id, z);
     storeTileEmergencyPoints(item.id, emergencyRows);
   } finally {
     source.close();
@@ -453,7 +471,7 @@ export function scheduleIndex(item: MapItem) {
   }
   queued.add(item.id);
   queue = queue
-    .then(() => (cancelled.has(item.id) ? undefined : indexItem(item)))
+    .then(() => (cancelled.has(item.id) ? undefined : exclusive(() => (cancelled.has(item.id) ? undefined : indexItem(item)))))
     .catch((e) => console.warn('[maps] indexing failed', item.id, e))
     .finally(() => {
       queued.delete(item.id);
@@ -467,7 +485,12 @@ export function scheduleIndex(item: MapItem) {
 
 /** Indexes every installed map whose index is missing or outdated. */
 export function indexStaleMaps() {
-  const rows = db().getAllSync<{ item_id: string; index_version: number | null }>('SELECT item_id, index_version FROM map_sources');
+  // Removals whose index rows were not dropped yet when the app stopped.
+  for (const id of pendingDrops()) {
+    if (getItem(id)) setPendingDrop(id, false);
+    else dropIndexRows(id);
+  }
+  const rows = indexDb().getAllSync<{ item_id: string; index_version: number | null }>('SELECT item_id, index_version FROM index_sources');
   const done = new Map(rows.map((r) => [r.item_id, r.index_version]));
   for (const item of listItems('map') as MapItem[]) {
     if (done.get(item.id) !== INDEX_VERSION) scheduleIndex(item);
@@ -476,23 +499,68 @@ export function indexStaleMaps() {
 
 /** A map item's file changed (re-downloaded): rebuild its index. */
 export function invalidateIndex(item: MapItem) {
-  db().runSync('UPDATE map_sources SET index_version = NULL WHERE item_id = ?', item.id);
-  forgetDetail(item.id);
+  void exclusive(() => {
+    indexDb().runSync('UPDATE index_sources SET index_version = NULL WHERE item_id = ?', item.id);
+    forgetDetail(item.id);
+  });
   scheduleIndex(item);
 }
 
-/** Map removed: stop its job and drop everything derived from it. */
+const sqlText = (s: string) => `'${s.replace(/'/g, "''")}'`;
+
+/**
+ * Map or pack removed: stop its job and drop everything derived from it. The index rows
+ * (millions for a country) go off the JS thread, in one transaction; one the app could
+ * not finish is done at the next launch. A fresh index file then gives the space back.
+ */
 export function forgetMapSource(itemId: string) {
   cancelled.add(itemId);
   again.delete(itemId);
-  deletePlaceRows(itemId);
-  deletePlaceRows(`pois:${itemId}`);
-  deletePlaceRows(placesSource(itemId));
-  deleteAddresses(itemId);
-  deletePlaceRows(`streets:${itemId}`);
-  forgetDetail(itemId);
+  forgetDetailState(itemId);
   db().runSync('DELETE FROM map_pois WHERE source = ?', itemId);
+  // Its emergency state; the index states too while the index is still in nomad.db (db/index.ts).
   db().runSync('DELETE FROM map_sources WHERE item_id IN (?, ?, ?)', itemId, placesSource(itemId), addressesSource(itemId));
+  dropIndexRows(itemId);
+}
+
+const DROPS_KEY = 'maps.pendingIndexDrops';
+
+function pendingDrops(): string[] {
+  try {
+    return JSON.parse(Storage.getItemSync(DROPS_KEY) ?? '[]') as string[];
+  } catch {
+    return [];
+  }
+}
+
+function setPendingDrop(itemId: string, pending: boolean) {
+  const ids = new Set(pendingDrops());
+  if (pending) ids.add(itemId);
+  else ids.delete(itemId);
+  Storage.setItemSync(DROPS_KEY, JSON.stringify([...ids]));
+}
+
+/** Drops a removed item's index rows, after the writes queued before (remembered until done, across launches). */
+function dropIndexRows(itemId: string) {
+  setPendingDrop(itemId, true);
+  const sources = [itemId, `pois:${itemId}`, placesSource(itemId), `streets:${itemId}`, detailSource(itemId)].map(sqlText).join(', ');
+  const id = sqlText(itemId);
+  const states = [itemId, placesSource(itemId), addressesSource(itemId)].map(sqlText).join(', ');
+  void exclusive(async () => {
+    const d = indexDbAsync();
+    // FTS5 filters on an unindexed column by reading the whole table: one pass for all sources.
+    await d.withTransactionAsync(() =>
+      d.execAsync(`
+        DELETE FROM map_places WHERE source IN (${sources});
+        DELETE FROM map_localities WHERE source IN (${sources});
+        DELETE FROM map_addresses WHERE street IN (SELECT id FROM map_address_streets WHERE source = ${id});
+        DELETE FROM map_address_streets WHERE source = ${id};
+        DELETE FROM index_sources WHERE item_id IN (${states});`),
+    );
+    setPendingDrop(itemId, false);
+    await d.execAsync('PRAGMA incremental_vacuum;');
+    bumpVersion();
+  });
 }
 
 // --- Detail around the user ---------------------------------------------------
@@ -526,6 +594,10 @@ function readDetail(): DetailState | null {
 
 function forgetDetail(itemId: string) {
   deletePlaceRows(detailSource(itemId));
+  forgetDetailState(itemId);
+}
+
+function forgetDetailState(itemId: string) {
   const state = readDetail();
   if (state?.zooms[itemId] === undefined) return;
   delete state.zooms[itemId];
@@ -541,7 +613,7 @@ export function indexDetailAround(p: LatLon) {
     .then(() => {
       const next = detailWanted;
       detailWanted = null;
-      return next ? refreshDetail(next) : undefined;
+      return next ? exclusive(() => refreshDetail(next)) : undefined;
     })
     .catch((e) => console.warn('[maps] detail indexing failed', e));
 }
@@ -599,28 +671,30 @@ type HitRow = { id: number; name: string; layer: PlaceLayer; kind: string; lat: 
 
 /**
  * Places, POIs and streets matching what the user typed, best first. An address
- * ("Calle Alcalá 50") also brings the streets matching its street part: no house
- * numbers are indexed, so it leads to the street.
+ * ("Calle Alcalá 50") also brings the streets matching its street part, and the door
+ * on them when a country's house numbers are installed. Runs off the JS thread; stops
+ * early (with no results) once `current` says a newer search replaced this one.
  */
-export function searchPlaces(text: string, near: LatLon | null, limit = 40): SearchResult[] {
-  let hits = matchPlaces(text, near, limit);
+export async function searchPlaces(text: string, near: LatLon | null, limit = 40, current = () => true): Promise<SearchResult[]> {
+  let hits = await matchPlaces(text, near, limit);
   const address = parseAddress(text);
-  if (address) {
-    const streets = matchPlaces(address.street, near, limit, 'road');
+  if (address && current()) {
+    const streets = await matchPlaces(address.street, near, limit, 'road');
     const seen = new Set(hits.map((h) => h.id));
     // The door on the best streets of that name (from a pack's house numbers), first.
-    hits = [...doorHits(streets.slice(0, 8), address.number), ...hits, ...streets.filter((h) => !seen.has(h.id))];
+    hits = [...(await doorHits(streets.slice(0, 8), address.number)), ...hits, ...streets.filter((h) => !seen.has(h.id))];
   }
   const japanese = parseJapaneseAddress(text);
-  if (japanese.length) hits = [...japaneseDoorHits(japanese, near), ...hits];
-  return hits.slice(0, limit).map((h) => ({ ...h, context: h.layer === 'place' ? null : localityNear(h) }));
+  if (japanese.length && current()) hits = [...(await japaneseDoorHits(japanese, near)), ...hits];
+  if (!current()) return [];
+  return Promise.all(hits.slice(0, limit).map(async (h) => ({ ...h, context: h.layer === 'place' ? null : await localityNear(h) })));
 }
 
 /** "Calle de Alcalá, 52" on each street hit that has doors (exact or approximate). */
-function doorHits(streets: Hit[], number: string): Hit[] {
+async function doorHits(streets: Hit[], number: string): Promise<Hit[]> {
   const out: Hit[] = [];
   for (const st of streets) {
-    const at = locateHouseNumber(doorsNear(st.name, st, DOOR_SEARCH), number, st, DOOR_SEARCH);
+    const at = locateHouseNumber(await doorsNear(st.name, st, DOOR_SEARCH), number, st, DOOR_SEARCH);
     if (!at) continue;
     const name = `${st.name}, ${houseNumberKey(number)}`;
     // Two index rows of the same street (one per tile) find the same door.
@@ -635,20 +709,22 @@ function doorHits(streets: Hit[], number: string): Hit[] {
  * looked up by chōme and number directly, the nearest few. Without that door anywhere,
  * the block ("5", or any "5-…") as an approximate one.
  */
-function japaneseDoorHits(addresses: { street: string; number: string }[], near: LatLon | null): Hit[] {
-  const found = addresses.flatMap(({ street, number }) => {
-    const block = number.split('-')[0];
-    return db()
-      .getAllSync<{ number: string; lat: number; lon: number }>(
+async function japaneseDoorHits(addresses: { street: string; number: string }[], near: LatLon | null): Promise<Hit[]> {
+  const readings = await Promise.all(
+    addresses.map(async ({ street, number }) => {
+      const block = number.split('-')[0];
+      const rows = await indexDbAsync().getAllAsync<{ number: string; lat: number; lon: number }>(
         `SELECT a.number, a.lat, a.lon FROM map_address_streets st JOIN map_addresses a ON a.street = st.id
          WHERE st.key = ? AND (a.number = ? OR a.number = ? OR a.number LIKE ?) LIMIT 500`,
         nameKey(street),
         number,
         block,
         `${block}-%`,
-      )
-      .map((r) => ({ name: `${street}${number}`, exact: r.number === number, lat: r.lat / E5, lon: r.lon / E5 }));
-  });
+      );
+      return rows.map((r) => ({ name: `${street}${number}`, exact: r.number === number, lat: r.lat / E5, lon: r.lon / E5 }));
+    }),
+  );
+  const found = readings.flat();
   // Several readings of an ambiguous address: the one that names a door wins.
   const doors = found.some((d) => d.exact) ? found.filter((d) => d.exact) : found;
   if (near) doors.sort((a, b) => distanceMeters(near, a) - distanceMeters(near, b));
@@ -663,7 +739,7 @@ function japaneseDoorHits(addresses: { street: string; number: string }[], near:
   return out;
 }
 
-function matchPlaces(text: string, near: LatLon | null, limit: number, layer?: PlaceLayer): Hit[] {
+async function matchPlaces(text: string, near: LatLon | null, limit: number, layer?: PlaceLayer): Promise<Hit[]> {
   const match = ftsQuery(text);
   if (!match) return [];
   let rows: HitRow[];
@@ -671,9 +747,14 @@ function matchPlaces(text: string, near: LatLon | null, limit: number, layer?: P
     'rowid AS id, name, layer, kind, CAST(lat AS REAL) AS lat, CAST(lon AS REAL) AS lon, CAST(importance AS INTEGER) AS importance';
   const onLayer = layer ? 'AND layer = ?' : '';
   const layerArg = layer ? [layer] : [];
+  // Ordering reads every match: "ca" matches 400k rows of a country. The first `cap` are
+  // ranked instead (0.3 s → 0.06 s on a 1M-row index on a Mac), all of them for a precise query.
+  const cap = matchCap(text);
+  const d = indexDbAsync();
   try {
-    rows = db().getAllSync<HitRow>(
-      `SELECT ${columns} FROM map_places WHERE map_places MATCH ? ${onLayer} ORDER BY CAST(importance AS INTEGER) LIMIT 600`,
+    rows = await d.getAllAsync<HitRow>(
+      `SELECT * FROM (SELECT ${columns} FROM map_places WHERE map_places MATCH ? ${onLayer} LIMIT ${cap})
+       ORDER BY importance LIMIT 600`,
       match,
       ...layerArg,
     );
@@ -682,18 +763,17 @@ function matchPlaces(text: string, near: LatLon | null, limit: number, layer?: P
     if (near) {
       const [w, s, e, n] = bboxAround(near, 30_000);
       const seen = new Set(rows.map((r) => r.id));
-      for (const r of db().getAllSync<HitRow>(
-        `SELECT ${columns} FROM map_places WHERE map_places MATCH ? ${onLayer}
-         AND CAST(lat AS REAL) BETWEEN ? AND ? AND CAST(lon AS REAL) BETWEEN ? AND ? LIMIT 600`,
+      const around = await d.getAllAsync<HitRow>(
+        `SELECT * FROM (SELECT ${columns} FROM map_places WHERE map_places MATCH ? ${onLayer} LIMIT ${cap * 4})
+         WHERE lat BETWEEN ? AND ? AND lon BETWEEN ? AND ? LIMIT 600`,
         match,
         ...layerArg,
         s,
         n,
         w,
         e,
-      )) {
-        if (!seen.has(r.id)) rows.push(r);
-      }
+      );
+      for (const r of around) if (!seen.has(r.id)) rows.push(r);
     }
   } catch (e) {
     console.warn('[maps] search failed', e);
@@ -707,9 +787,9 @@ function matchPlaces(text: string, near: LatLon | null, limit: number, layer?: P
   );
 }
 
-function localityNear(p: LatLon): string | null {
+async function localityNear(p: LatLon): Promise<string | null> {
   const [w, s, e, n] = bboxAround(p, 15_000);
-  const candidates = db().getAllSync<{ name: string; lat: number; lon: number }>(
+  const candidates = await indexDbAsync().getAllAsync<{ name: string; lat: number; lon: number }>(
     'SELECT name, lat, lon FROM map_localities WHERE lat BETWEEN ? AND ? AND lon BETWEEN ? AND ? LIMIT 400',
     s,
     n,
@@ -724,5 +804,5 @@ const DOOR_SEARCH = 3000;
 
 /** Whether any installed map has a finished search index (else the sheet explains why results are empty). */
 export function hasSearchIndex(): boolean {
-  return !!db().getFirstSync('SELECT 1 FROM map_sources WHERE index_version IS NOT NULL LIMIT 1');
+  return !!indexDb().getFirstSync('SELECT 1 FROM index_sources WHERE index_version IS NOT NULL LIMIT 1');
 }

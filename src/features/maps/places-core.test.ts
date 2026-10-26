@@ -10,6 +10,7 @@ import { listZoomTiles, readTile } from '../../lib/pmtiles/reader.ts';
 import {
   ftsQuery,
   INDEX_LAYERS,
+  matchCap,
   nearestLocality,
   normalizeName,
   locateHouseNumber,
@@ -103,6 +104,12 @@ test('ftsQuery: an abbreviation also matches its full word', () => {
   assert.equal(ftsQuery('Pº Castellana'), '("Pº"* OR "paseo"* OR "passeig"*) AND "Castellana"*');
   assert.equal(ftsQuery('C/ Dr. Fleming'), '"C"* AND ("Dr"* OR "doctor"* OR "drive"*) AND "Fleming"*');
   assert.equal(ftsQuery('Ntra Sra de Atocha'), '("Ntra"* OR "nuestra"*) AND ("Sra"* OR "senora"*) AND "de"* AND "Atocha"*');
+});
+
+test('matchCap reads fewer matches for very short queries', () => {
+  assert.equal(matchCap('ca'), 20_000);
+  assert.equal(matchCap(' c a '), 20_000);
+  assert.equal(matchCap('cal'), 50_000);
 });
 
 test('parseAddress splits the street from the house number', () => {

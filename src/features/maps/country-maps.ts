@@ -11,9 +11,9 @@
 // any download of their map is left, failed ones included (a retry fetches only what is
 // missing); the startup sweep deletes the rest.
 import { File, FileMode } from 'expo-file-system';
-import Storage from 'expo-sqlite/kv-store';
 import { create } from 'zustand';
 
+import Storage from '@/db/kv';
 import { getItem, upsertItem } from '@/features/content/items';
 import { recordGroup } from '@/features/downloads/groups';
 import {
