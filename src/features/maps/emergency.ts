@@ -1,12 +1,14 @@
 // Emergency points (hospitals, police, water, shelters…) for each installed map
 // region: fetched once from OpenStreetMap through public Overpass servers while
 // online (only the region's bbox is sent), stored in map_pois and added to the
-// search index. Everything after that works offline.
+// search index. Everything after that works offline. Both live in the index file
+// (indexDb), out of backups: they can be fetched again, and a country's points (tens of
+// MB) would push Android's backup over its quota.
 import type { File } from 'expo-file-system';
 import { getLocales } from 'expo-localization';
 import { create } from 'zustand';
 
-import { db } from '@/db';
+import { indexDb } from '@/db';
 import { getItem } from '@/features/content/items';
 import { useSettings } from '@/stores/settings';
 
@@ -22,7 +24,7 @@ import {
 } from './emergency-core';
 import type { LatLon } from './geo';
 import { distanceMeters } from './geo';
-import { forgetMapSource, indexEmergencyPoints } from './places';
+import { exclusive, forgetMapSource, indexEmergencyPoints } from './places';
 import type { PlaceRow } from './places-core';
 import { forEachLineBlock } from './side-files';
 import type { MapItem } from './useMapSources';
@@ -144,13 +146,20 @@ export async function storeEmergencyPointsFile(source: string, file: File) {
   await storePoints(source, (put) => forEachLineBlock(file, (text) => put(parseOverpassTsv(text))));
 }
 
+type Feed = (put: (pois: EmergencyPoi[]) => Promise<boolean>) => Promise<void>;
+
+/** In turn with the other writes to the index file (a removed map's deletes run on another connection). */
+function storePoints(source: string, feed: Feed) {
+  return exclusive(() => writePoints(source, feed));
+}
+
 /**
  * Writes the points `feed` hands over in transactions of STORE_BATCH with a yield in between.
  * Stops, leaving nothing behind, when the source's item is removed meanwhile (its removal
- * already dropped what was stored before).
+ * drops what was stored before).
  */
-async function storePoints(source: string, feed: (put: (pois: EmergencyPoi[]) => Promise<boolean>) => Promise<void>) {
-  const d = db();
+async function writePoints(source: string, feed: Feed) {
+  const d = indexDb();
   const insert = d.prepareSync(
     'INSERT OR REPLACE INTO map_pois (source, osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
   );
@@ -233,7 +242,7 @@ export function cancelEmergencySync(itemId: string) {
 
 /** When each region's points were fetched (absent = never). */
 export function emergencySyncInfo(): Record<string, { at: number; count: number }> {
-  const rows = db().getAllSync<{ item_id: string; pois_at: number; pois_count: number }>(
+  const rows = indexDb().getAllSync<{ item_id: string; pois_at: number; pois_count: number }>(
     'SELECT item_id, pois_at, pois_count FROM map_sources WHERE pois_at IS NOT NULL',
   );
   return Object.fromEntries(rows.map((r) => [r.item_id, { at: r.pois_at, count: r.pois_count }]));
@@ -241,7 +250,7 @@ export function emergencySyncInfo(): Record<string, { at: number; count: number 
 
 /** Emergency points taken from each map's own tiles (offline fallback, ids 't…'). */
 export function tilePointCounts(): Record<string, number> {
-  const rows = db().getAllSync<{ source: string; n: number }>("SELECT source, COUNT(*) AS n FROM map_pois WHERE osm_id LIKE 't%' GROUP BY source");
+  const rows = indexDb().getAllSync<{ source: string; n: number }>("SELECT source, COUNT(*) AS n FROM map_pois WHERE osm_id LIKE 't%' GROUP BY source");
   return Object.fromEntries(rows.map((r) => [r.source, r.n]));
 }
 
@@ -283,7 +292,7 @@ const fromRow = (r: PoiRow, from: LatLon | null): EmergencyPlace => ({
  */
 export function nearestEmergencyPlaces(category: EmergencyCategory, from: LatLon, limit = 60): EmergencyPlace[] {
   const k = Math.cos((from.lat * Math.PI) / 180);
-  const rows = db().getAllSync<PoiRow>(
+  const rows = indexDb().getAllSync<PoiRow>(
     `SELECT osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon FROM map_pois
      WHERE category = ? GROUP BY osm_id
      ORDER BY (lat - ?) * (lat - ?) + ((lon - ?) * ?) * ((lon - ?) * ?) LIMIT ?`,
@@ -302,7 +311,7 @@ export function nearestEmergencyPlaces(category: EmergencyCategory, from: LatLon
 /** Points inside a bbox, for the map layer. */
 export function emergencyPlacesIn(bbox: [number, number, number, number], limit = 600): EmergencyPlace[] {
   const [w, s, e, n] = bbox;
-  const rows = db().getAllSync<PoiRow>(
+  const rows = indexDb().getAllSync<PoiRow>(
     `SELECT osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon FROM map_pois
      WHERE lat BETWEEN ? AND ? AND lon BETWEEN ? AND ? GROUP BY osm_id
      ORDER BY CASE kind WHEN 'hospital' THEN 0 WHEN 'police' THEN 1 WHEN 'fire_station' THEN 1 WHEN 'ambulance_station' THEN 1 ELSE 2 END,
@@ -318,7 +327,7 @@ export function emergencyPlacesIn(bbox: [number, number, number, number], limit 
 }
 
 export function getEmergencyPlace(osmId: string, from: LatLon | null): EmergencyPlace | null {
-  const row = db().getFirstSync<PoiRow>(
+  const row = indexDb().getFirstSync<PoiRow>(
     'SELECT osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon FROM map_pois WHERE osm_id = ? LIMIT 1',
     osmId,
   );
@@ -327,7 +336,7 @@ export function getEmergencyPlace(osmId: string, from: LatLon | null): Emergency
 
 /** The stored point behind a search hit (search rows don't keep the OSM id). */
 export function findEmergencyPlace(name: string, lat: number, lon: number): EmergencyPlace | null {
-  const row = db().getFirstSync<PoiRow>(
+  const row = indexDb().getFirstSync<PoiRow>(
     `SELECT osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon FROM map_pois
      WHERE name = ? AND lat BETWEEN ? AND ? AND lon BETWEEN ? AND ? LIMIT 1`,
     name,
@@ -340,5 +349,5 @@ export function findEmergencyPlace(name: string, lat: number, lon: number): Emer
 }
 
 export function hasEmergencyPoints(): boolean {
-  return !!db().getFirstSync('SELECT 1 FROM map_pois LIMIT 1');
+  return !!indexDb().getFirstSync('SELECT 1 FROM map_pois LIMIT 1');
 }

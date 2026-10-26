@@ -1,6 +1,7 @@
 // Schemas of the app's two SQLite files: nomad.db (the user's data and the content
-// registry) and the map search index (Documents/content/index/search.db: derived from
-// downloaded content, so out of backups). Append a step to change one; never edit one.
+// registry, backed up) and the index file (Documents/content/index/search.db: the map
+// search index and the emergency points, derived from downloaded content or fetched again,
+// so out of backups). Append a step to change one; never edit one.
 // Pure TypeScript (no `@/` aliases) so node's test runner loads it.
 import { INDEX_STATE_TABLE } from './migrate-core.ts';
 
@@ -177,13 +178,16 @@ export const MIGRATIONS: string[] = [
     PRIMARY KEY (street, lat, lon, number)
   ) WITHOUT ROWID;
   `,
-  // v4: the map search index moved to its own file (INDEX_MIGRATIONS, migrate-core.ts).
-  // Only ever run on the split database: db() never runs it on a pre-split file.
+  // v4: the map search index and the emergency points moved to the index file
+  // (INDEX_MIGRATIONS, migrate-core.ts). Only ever run on the split database: db() never
+  // runs it on a pre-split file.
   `
   DROP TABLE IF EXISTS map_places;
   DROP TABLE IF EXISTS map_localities;
   DROP TABLE IF EXISTS map_addresses;
   DROP TABLE IF EXISTS map_address_streets;
+  DROP TABLE IF EXISTS map_pois;
+  DROP TABLE IF EXISTS map_sources;
   `,
 ];
 
@@ -194,9 +198,10 @@ export const MIGRATIONS: string[] = [
  */
 export const INDEX_OPEN = 'PRAGMA auto_vacuum = INCREMENTAL; PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000;';
 
-/** The map search index. Every step creates only what is missing: a retired nomad.db has it all. */
+/** The index file. Every step creates only what is missing: a retired nomad.db has it all. */
 export const INDEX_MIGRATIONS: string[] = [
-  // v1: what nomad.db v2-v3 held, plus the index state that was in map_sources.
+  // v1: what nomad.db v2-v3 held, with map_sources split into index_sources (the index
+  // state) and map_sources (the emergency point state).
   `
   -- Search index built from installed maps' tiles, country files and emergency points.
   -- 'rank' is reserved by FTS5, hence 'importance' (lower = more important).
@@ -240,5 +245,32 @@ export const INDEX_MIGRATIONS: string[] = [
     PRIMARY KEY (street, lat, lon, number)
   ) WITHOUT ROWID;
   ${INDEX_STATE_TABLE}
+
+  -- OpenStreetMap emergency points of each map region (Overpass, a country file, or the
+  -- map's own tiles), for the Emergencias list and the map layer.
+  CREATE TABLE IF NOT EXISTS map_pois (
+    source TEXT NOT NULL,          -- map item or routing pack id
+    osm_id TEXT NOT NULL,          -- n123 | w456 | r789, or 't<lat>,<lon>' from the tiles
+    kind TEXT NOT NULL,
+    category TEXT NOT NULL,
+    name TEXT,
+    operator TEXT,
+    phone TEXT,
+    opening_hours TEXT,
+    emergency INTEGER,
+    lat REAL NOT NULL,
+    lon REAL NOT NULL,
+    PRIMARY KEY (source, osm_id)
+  );
+  CREATE INDEX IF NOT EXISTS map_pois_category ON map_pois(category);
+  CREATE INDEX IF NOT EXISTS map_pois_lat ON map_pois(lat);
+
+  -- Per map item or pack: emergency point state. A retired nomad.db's table also has the
+  -- old index columns, always NULL (see ADOPT_INDEX_STATE).
+  CREATE TABLE IF NOT EXISTS map_sources (
+    item_id TEXT PRIMARY KEY NOT NULL,
+    pois_at INTEGER,               -- last successful emergency point import
+    pois_count INTEGER
+  );
   `,
 ];

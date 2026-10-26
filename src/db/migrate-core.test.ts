@@ -12,6 +12,7 @@ import {
   applyLadder,
   cleanRetiredIndex,
   copyUserTables,
+  USER_TABLES,
   planSplit,
   readSplitState,
   readyPath,
@@ -77,7 +78,9 @@ function makeLegacy(p: string, version = 3) {
     d.exec(`
       INSERT INTO map_places (names, name, layer, kind, lat, lon, importance, source) VALUES ('Soria', 'Soria', 'place', 'city', 41.76, -2.46, 4, 'map-es');
       INSERT INTO map_localities (source, name, lat, lon) VALUES ('map-es', 'Soria', 41.76, -2.46);
-      INSERT INTO map_pois (source, osm_id, kind, category, lat, lon) VALUES ('map-es', 'n1', 'hospital', 'health', 41.7, -2.4);
+      INSERT INTO map_pois (source, osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon)
+        VALUES ('map-es', 'n1', 'hospital', 'health', 'Hospital Santa Bárbara', 'Sacyl', '+34 975 23 43 00', '24/7', 1, 41.7, -2.4);
+      INSERT INTO map_pois (source, osm_id, kind, category, lat, lon) VALUES ('map-es', 't41.75,-2.47', 'drinking_water', 'water', 41.75, -2.47);
       INSERT INTO map_sources (item_id, index_version, index_zoom, indexed_at, pois_at, pois_count) VALUES ('map-es', 1, 12, 7, 8, 1);
       INSERT INTO map_sources (item_id, index_version, indexed_at) VALUES ('places:map-es', 1, 9);
     `);
@@ -93,6 +96,43 @@ function makeLegacy(p: string, version = 3) {
 
 /** node:sqlite rows have no prototype; deepEqual wants plain objects. */
 const plain = (rs: unknown[]) => rs.map((r) => ({ ...(r as object) }));
+
+const tableNames = (d: DatabaseSync) =>
+  d
+    .prepare("SELECT name FROM sqlite_master WHERE type = 'table'")
+    .all()
+    .map((r) => (r as { name: string }).name);
+
+/** The emergency points makeLegacy wrote, as the app reads them. */
+const LEGACY_POIS = [
+  {
+    source: 'map-es',
+    osm_id: 'n1',
+    kind: 'hospital',
+    category: 'health',
+    name: 'Hospital Santa Bárbara',
+    operator: 'Sacyl',
+    phone: '+34 975 23 43 00',
+    opening_hours: '24/7',
+    emergency: 1,
+    lat: 41.7,
+    lon: -2.4,
+  },
+  {
+    source: 'map-es',
+    osm_id: 't41.75,-2.47',
+    kind: 'drinking_water',
+    category: 'water',
+    name: null,
+    operator: null,
+    phone: null,
+    opening_hours: null,
+    emergency: null,
+    lat: 41.75,
+    lon: -2.47,
+  },
+];
+const POIS_SQL = 'SELECT source, osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon FROM map_pois ORDER BY osm_id';
 
 const rows = (p: string, sql: string) => {
   const d = new DatabaseSync(p);
@@ -114,13 +154,10 @@ function assertSplit(p: SplitPaths) {
     assert.equal(user.prepare('SELECT * FROM history').all().length, 1);
     assert.equal(user.prepare('SELECT * FROM map_markers').all().length, 1);
     assert.equal(user.prepare('SELECT * FROM items').all().length, 1);
-    assert.equal(user.prepare('SELECT * FROM map_pois').all().length, 1);
-    // Only the emergency state stays; the index state went with the index.
-    assert.deepEqual(plain(user.prepare('SELECT item_id, index_version, pois_at FROM map_sources').all()), [
-      { item_id: 'map-es', index_version: null, pois_at: 8 },
-    ]);
-    const tables = user.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all().map((r) => (r as { name: string }).name);
-    assert.ok(!tables.some((t) => t.startsWith('map_places') || t === 'map_addresses' || t === 'map_localities'), tables.join());
+    // Nothing derived from downloads: the index and the emergency points stay in the old file.
+    const tables = tableNames(user);
+    const derived = ['map_localities', 'map_addresses', 'map_address_streets', 'map_pois', 'map_sources', 'index_sources'];
+    assert.ok(!tables.some((t) => t.startsWith('map_places') || derived.includes(t)), tables.join());
     // AUTOINCREMENT keeps counting after the copied ids.
     user.exec("INSERT INTO map_markers (name, lat, lon, created_at) VALUES ('Car', 1, 1, 9)");
     assert.equal((user.prepare("SELECT id FROM map_markers WHERE name = 'Car'").get() as { id: number }).id, 2);
@@ -138,6 +175,28 @@ function openIndex(p: SplitPaths) {
   return { d, cleaned };
 }
 
+/** The retired file as db/index.ts opens it: index, emergency points and their state intact, no user table. */
+function assertIndex(p: SplitPaths) {
+  const { d } = openIndex(p);
+  try {
+    assert.equal((d.prepare('PRAGMA user_version').get() as { user_version: number }).user_version, INDEX_MIGRATIONS.length);
+    assert.equal(d.prepare("SELECT name FROM map_places WHERE map_places MATCH 'sor*'").all().length, 1);
+    assert.deepEqual(plain(d.prepare(POIS_SQL).all()), LEGACY_POIS);
+    // The emergency state only (the places: row held index state alone); the index state moved.
+    assert.deepEqual(plain(d.prepare('SELECT item_id, pois_at, pois_count FROM map_sources').all()), [
+      { item_id: 'map-es', pois_at: 8, pois_count: 1 },
+    ]);
+    assert.deepEqual(plain(d.prepare('SELECT item_id, index_version, index_zoom FROM index_sources ORDER BY item_id').all()), [
+      { item_id: 'map-es', index_version: 1, index_zoom: 12 },
+      { item_id: 'places:map-es', index_version: 1, index_zoom: null },
+    ]);
+    const tables = tableNames(d);
+    assert.ok(!tables.some((t) => (USER_TABLES as readonly string[]).includes(t)), tables.join());
+  } finally {
+    d.close();
+  }
+}
+
 for (const sameFile of [false, true]) {
   const where = sameFile ? 'in place (Android)' : 'to Application Support (iOS)';
 
@@ -150,21 +209,17 @@ for (const sameFile of [false, true]) {
 
     const { d, cleaned } = openIndex(p);
     assert.ok(cleaned);
-    assert.equal(d.prepare("SELECT name FROM map_places WHERE map_places MATCH 'sor*'").all().length, 1);
     assert.equal(d.prepare('SELECT * FROM map_addresses').all().length, 1);
-    assert.deepEqual(plain(d.prepare('SELECT item_id, index_version, index_zoom FROM index_sources ORDER BY item_id').all()), [
-      { item_id: 'map-es', index_version: 1, index_zoom: 12 },
-      { item_id: 'places:map-es', index_version: 1, index_zoom: null },
-    ]);
-    const tables = d.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all().map((r) => (r as { name: string }).name);
-    assert.ok(!tables.includes('chat_messages') && !tables.includes('items') && !tables.includes('map_sources'), tables.join());
     d.exec('PRAGMA wal_checkpoint(TRUNCATE)');
     d.close();
+    assertIndex(p);
     // The chats are gone from the index file, free pages included (secure_delete).
     assert.ok(!fs.readFileSync(p.index).includes(Buffer.from(SECRET)), 'no user data left in the index file');
 
     // Opening again changes nothing; a second split does nothing.
-    assert.equal(openIndex(p).cleaned, false);
+    const again = openIndex(p);
+    assert.equal(again.cleaned, false);
+    again.d.close();
     assert.deepEqual(splitDatabase(env, p, MIGRATIONS), []);
   });
 
@@ -176,6 +231,7 @@ for (const sameFile of [false, true]) {
     assert.deepEqual(planSplit(readSplitState(env, p)), ['retire', 'promote']);
     assert.deepEqual(splitDatabase(env, p, MIGRATIONS), ['retire', 'promote']);
     assertSplit(p);
+    assertIndex(p);
 
     // Killed after retiring the old file (on Android the user database is then missing).
     p = sandbox(sameFile);
@@ -185,6 +241,7 @@ for (const sameFile of [false, true]) {
     assert.deepEqual(userDatabaseAfter(env, p), { path: readyPath(p), split: true });
     assert.deepEqual(splitDatabase(env, p, MIGRATIONS), ['promote']);
     assertSplit(p);
+    assertIndex(p);
 
     // Killed during the copy: a partial file is thrown away and the copy starts over.
     p = sandbox(sameFile);
@@ -193,6 +250,7 @@ for (const sameFile of [false, true]) {
     fs.writeFileSync(`${p.user}.copy`, 'half a database');
     assert.deepEqual(splitDatabase(env, p, MIGRATIONS), ['copy', 'retire', 'promote']);
     assertSplit(p);
+    assertIndex(p);
     assert.ok(!fs.existsSync(`${p.user}.copy`));
   });
 
@@ -209,8 +267,10 @@ for (const sameFile of [false, true]) {
     assert.deepEqual(userDatabaseAfter(env, p), { path: p.legacy, split: false });
     assert.equal(rows(p.legacy, 'SELECT * FROM chat_messages').length, 1);
     assert.equal(rows(p.legacy, 'SELECT * FROM map_places').length, 1);
+    assert.deepEqual(rows(p.legacy, POIS_SQL), LEGACY_POIS);
     assert.deepEqual(splitDatabase(env, p, MIGRATIONS), ['copy', 'retire', 'promote']);
     assertSplit(p);
+    assertIndex(p);
   });
 }
 
@@ -227,10 +287,18 @@ test('split: index state written while the split could not run is kept', () => {
   // That session re-indexes the map and starts (without finishing) a country file import.
   d.exec("UPDATE index_sources SET index_zoom = 13 WHERE item_id = 'map-es'");
   d.exec("DELETE FROM index_sources WHERE item_id = 'places:map-es'");
+  // And imports a pack's emergency points (indexDb is nomad.db itself then).
+  d.exec(`INSERT INTO map_pois (source, osm_id, kind, category, lat, lon) VALUES ('route-es', 'n2', 'police', 'security', 40.4, -3.7);
+    INSERT INTO map_sources (item_id, pois_at, pois_count) VALUES ('route-es', 11, 1);`);
   d.close();
   assert.deepEqual(splitDatabase(env, p, MIGRATIONS), ['copy', 'retire', 'promote']);
   const { d: index } = openIndex(p);
   assert.deepEqual(plain(index.prepare('SELECT item_id, index_zoom FROM index_sources').all()), [{ item_id: 'map-es', index_zoom: 13 }]);
+  assert.deepEqual(plain(index.prepare('SELECT item_id, pois_at FROM map_sources ORDER BY item_id').all()), [
+    { item_id: 'map-es', pois_at: 8 },
+    { item_id: 'route-es', pois_at: 11 },
+  ]);
+  assert.equal(index.prepare('SELECT * FROM map_pois').all().length, 3);
   index.close();
 });
 
@@ -250,12 +318,35 @@ test('split: a database from before map search (v1) and a fresh install', () => 
   makeLegacy(p.legacy, 1).close();
   assert.deepEqual(splitDatabase(env, p, MIGRATIONS), ['copy', 'retire', 'promote']);
   assert.equal(rows(p.user, 'SELECT * FROM chat_messages').length, 1);
-  assert.equal(rows(p.user, 'SELECT * FROM map_pois').length, 0);
+  assert.ok(!rows(p.user, "SELECT name FROM sqlite_master WHERE name = 'map_pois'").length);
+  let { d, cleaned } = openIndex(p);
+  assert.ok(cleaned);
+  assert.equal(d.prepare('SELECT * FROM map_pois').all().length, 0);
+  d.close();
 
+  // A fresh install: nomad.db gets the whole ladder, the index file its own.
   p = sandbox();
   assert.deepEqual(splitDatabase(env, p, MIGRATIONS), []);
   assert.deepEqual(userDatabaseAfter(env, p), { path: p.user, split: true });
   assert.ok(!fs.existsSync(p.legacy) && !fs.existsSync(p.index));
+  fs.mkdirSync(path.dirname(p.user), { recursive: true });
+  const user = new DatabaseSync(p.user);
+  applyLadder(wrap(user), MIGRATIONS);
+  assert.deepEqual(tableNames(user).sort(), [...USER_TABLES, 'sqlite_sequence'].sort());
+  user.close();
+  fs.mkdirSync(path.dirname(p.index), { recursive: true });
+  ({ d, cleaned } = openIndex(p));
+  assert.equal(cleaned, false);
+  const tables = tableNames(d);
+  for (const t of ['map_places', 'map_localities', 'map_address_streets', 'map_addresses', 'index_sources', 'map_pois', 'map_sources']) {
+    assert.ok(tables.includes(t), t);
+  }
+  // What emergency.ts writes and reads.
+  d.exec(`INSERT INTO map_pois (source, osm_id, kind, category, name, lat, lon) VALUES ('map-es', 'n1', 'hospital', 'health', 'H', 1, 2);
+    INSERT INTO map_sources (item_id, pois_at, pois_count) VALUES ('map-es', 3, 1)
+      ON CONFLICT(item_id) DO UPDATE SET pois_at = excluded.pois_at, pois_count = excluded.pois_count;`);
+  assert.deepEqual(plain(d.prepare('SELECT item_id, pois_at, pois_count FROM map_sources').all()), [{ item_id: 'map-es', pois_at: 3, pois_count: 1 }]);
+  d.close();
 });
 
 test('planSplit', () => {

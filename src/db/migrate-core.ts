@@ -1,12 +1,14 @@
 // Moving the app's SQLite files, the pure part. Two one-time moves, both run before
 // anything reads the files:
 // - splitting nomad.db: up to 1.1.0 it held the user's data (chats, history, bookmarks,
-//   saved places) and the map search index (up to ~1 GB for a country) together, in
-//   Documents/SQLite. The user's tables are copied into a new nomad.db (on iOS under
-//   Library/Application Support, out of the Files app), and the old file, which then
-//   only adds index tables, becomes the search index under Documents/content (out of
-//   backups): renaming it costs nothing, where copying the index would take minutes and
-//   twice the space.
+//   saved places) together with data derived from downloads: the map search index (up to
+//   ~1 GB for a country) and the emergency points (tens of MB), in Documents/SQLite. The
+//   user's tables are copied into a new nomad.db (on iOS under Library/Application
+//   Support, out of the Files app), which stays small enough for any backup (Android's
+//   cloud backup skips an app over 25 MB whole). The old file, which then only adds
+//   derived tables, becomes the search index under Documents/content (out of backups):
+//   renaming it costs nothing, where copying the index would take minutes and twice the
+//   space.
 // - relocating the kv-store (settings, the emergency plan) on iOS, same reason.
 // Every step is idempotent and resumable after a kill: copy to a temporary file, verify
 // it, rename it into place (the commit point), and only then retire the old file.
@@ -40,7 +42,10 @@ export const SIDECARS = ['-wal', '-journal', '-shm'] as const;
 /** First user schema version without the search index tables (the split happened). */
 export const SPLIT_VERSION = 4;
 
-/** The user's tables of nomad.db up to SPLIT_VERSION - 1, all copied by the split. */
+/**
+ * The user's tables of nomad.db up to SPLIT_VERSION - 1, copied by the split and dropped
+ * from the retired file. The others (search index, emergency points) stay in the old file.
+ */
 export const USER_TABLES = [
   'items',
   'downloads',
@@ -51,17 +56,7 @@ export const USER_TABLES = [
   'map_markers',
   'chat_sessions',
   'chat_messages',
-  'map_pois',
-  'map_sources',
 ] as const;
-
-/**
- * map_sources held both the emergency point state (stays with the user's data) and the
- * search index state (moves to index_sources in the index file): only the first is copied.
- */
-const COPY_SPEC: Record<string, { columns: string[]; where: string }> = {
-  map_sources: { columns: ['item_id', 'pois_at', 'pois_count'], where: 'WHERE pois_at IS NOT NULL' },
-};
 
 export const dirOf = (path: string) => path.slice(0, path.lastIndexOf('/'));
 const q = (name: string) => `"${name.replace(/"/g, '""')}"`;
@@ -184,25 +179,24 @@ export function copyUserTables(env: Env, p: SplitPaths, userLadder: string[]) {
     const tables = tableNames(db).filter((t) => old.has(t));
     const plan = tables.map((t) => {
       const legacyColumns = new Set(columnNames(db, t, 'legacy'));
-      const spec = COPY_SPEC[t];
-      const columns = (spec?.columns ?? columnNames(db, t)).filter((c) => legacyColumns.has(c)).map(q);
-      return { table: q(t), columns: columns.join(', '), where: spec?.where ?? '' };
+      const columns = columnNames(db, t).filter((c) => legacyColumns.has(c)).map(q);
+      return { table: q(t), columns: columns.join(', ') };
     });
     db.exec('BEGIN');
     try {
-      for (const { table, columns, where } of plan) {
+      for (const { table, columns } of plan) {
         db.exec(`DELETE FROM main.${table}`);
-        db.exec(`INSERT INTO main.${table} (${columns}) SELECT ${columns} FROM legacy.${table} ${where}`);
+        db.exec(`INSERT INTO main.${table} (${columns}) SELECT ${columns} FROM legacy.${table}`);
       }
       db.exec('COMMIT');
     } catch (e) {
       db.exec('ROLLBACK');
       throw e;
     }
-    for (const { table, where } of plan) {
-      const count = (schema: string, w: string) => db.all<{ n: number }>(`SELECT COUNT(*) AS n FROM ${schema}.${table} ${w}`)[0].n;
-      const want = count('legacy', where);
-      const got = count('main', '');
+    for (const { table } of plan) {
+      const count = (schema: string) => db.all<{ n: number }>(`SELECT COUNT(*) AS n FROM ${schema}.${table}`)[0].n;
+      const want = count('legacy');
+      const got = count('main');
       if (got !== want) throw new Error(`split: ${table} copied ${got} of ${want} rows`);
     }
     const check = db.all<{ quick_check: string }>('PRAGMA main.quick_check')[0]?.quick_check;
@@ -214,7 +208,7 @@ export function copyUserTables(env: Env, p: SplitPaths, userLadder: string[]) {
   env.rename(copy, readyPath(p));
 }
 
-/** The old file, its user tables now copied, becomes the search index (cleaned on its first open). */
+/** The old file, its user tables now copied, becomes the index file (cleaned on its first open). */
 export function retireLegacy(env: Env, p: SplitPaths) {
   // Fold the journal into the main file first, so a kill while moving loses nothing.
   const db = env.open(p.legacy);
@@ -271,10 +265,12 @@ export const COPY_INDEX_STATE = `INSERT OR IGNORE INTO index_sources (item_id, i
   SELECT item_id, index_version, index_zoom, indexed_at FROM map_sources WHERE index_version IS NOT NULL`;
 
 /**
- * For a launch whose split failed, so the index stays inside the old nomad.db: its index
- * state moves into index_sources there, once (map_sources keeps only emergency state), as
- * the index file has it. The split later carries index_sources over with the file. Run it
- * in a transaction.
+ * A pre-split map_sources held the index state and the emergency point state together: the
+ * index state moves into index_sources and map_sources keeps the emergency state only, as
+ * in a fresh index file (its index columns stay, always NULL). Run on a retired nomad.db
+ * when it is cleaned, and on the old nomad.db itself for a launch whose split failed (the
+ * index is still inside it; the split later carries both tables over with the file).
+ * Idempotent; run it in a transaction.
  */
 export const ADOPT_INDEX_STATE = `
   ${INDEX_STATE_TABLE}
@@ -283,8 +279,9 @@ export const ADOPT_INDEX_STATE = `
   UPDATE map_sources SET index_version = NULL, index_zoom = NULL, indexed_at = NULL;`;
 
 /**
- * Turns a retired nomad.db into a plain index file: its index state into index_sources,
- * and the user tables (already copied to the new nomad.db) dropped, their pages zeroed.
+ * Turns a retired nomad.db into a plain index file: its index state into index_sources
+ * (ADOPT_INDEX_STATE; the emergency points and their state stay), and the user tables
+ * (already copied to the new nomad.db) dropped, their pages zeroed.
  * One transaction: a kill leaves it as it was, done again on the next open. Only call it
  * on the index file, once the split database exists. Returns whether it did anything.
  */
@@ -295,8 +292,7 @@ export function cleanRetiredIndex(db: Sql): boolean {
   db.exec('PRAGMA secure_delete = ON');
   db.exec('BEGIN');
   try {
-    db.exec(INDEX_STATE_TABLE);
-    if (tables.has('map_sources')) db.exec(COPY_INDEX_STATE);
+    db.exec(tables.has('map_sources') ? ADOPT_INDEX_STATE : INDEX_STATE_TABLE);
     for (const t of drop) db.exec(`DROP TABLE ${q(t)}`);
     // AUTOINCREMENT counters of the dropped tables.
     if (db.all("SELECT 1 FROM sqlite_master WHERE name = 'sqlite_sequence'").length) db.exec('DELETE FROM sqlite_sequence');
