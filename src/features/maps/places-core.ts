@@ -298,7 +298,8 @@ const ABBREVIATIONS: Record<string, string[]> = {
 
 /**
  * FTS5 MATCH expression: every word as a prefix, all required; an abbreviation also
- * matches its full word. Null when nothing searchable.
+ * matches its full word, and Chinese or Japanese also matches inside a word (cjkTerm).
+ * Null when nothing searchable.
  */
 export function ftsQuery(text: string): string | null {
   const words = text
@@ -310,10 +311,46 @@ export function ftsQuery(text: string): string | null {
   return words
     .map((w) => {
       const term = `"${w.replace(/"/g, '')}"*`;
+      const cjk = cjkTerm(w);
+      if (cjk) return cjk === term ? term : `(${term} OR ${cjk})`;
       const full = ABBREVIATIONS[normalizeName(w)];
       return full ? `(${[term, ...full.map((f) => `"${f}"*`)].join(' OR ')})` : term;
     })
     .join(' AND ');
+}
+
+// --- Chinese and Japanese ---------------------------------------------------
+// They don't separate words, and unicode61 keeps a run of Han or kana as one token
+// ("東京タワー"): only a search from its first character matched. Each run also goes into
+// the index as its overlapping character pairs ("東京 京タ タワ ワー"), and a run typed in
+// the query matches as the phrase of its pairs: any part of two or more characters. A
+// trigram tokenizer would need three, and "机场" or "都庁" are two.
+
+// Han (with 々〆〇), hiragana, katakana without the ・ separator, half-width katakana.
+const CJK_CHAR = String.raw`[\u3005-\u3007\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u31f0-\u31ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f\u{20000}-\u{3134f}]`;
+const CJK_RUNS = new RegExp(`${CJK_CHAR}+`, 'gu');
+
+const pairsOf = (run: string) => {
+  const chars = [...run];
+  return chars.slice(1).map((c, i) => chars[i] + c);
+};
+
+/** The full-text column for a row's `names`: the names, plus the character pairs of their CJK runs. */
+export function indexText(names: string): string {
+  const runs = new Set(names.match(CJK_RUNS) ?? []);
+  const pairs = [...runs].flatMap(pairsOf);
+  return pairs.length ? `${names} ${pairs.join(' ')}` : names;
+}
+
+/** A word's CJK runs as required phrases of pairs (a single character as a prefix); null without any. */
+function cjkTerm(word: string): string | null {
+  const runs = word.match(CJK_RUNS);
+  if (!runs) return null;
+  const parts = runs.map((r) => {
+    const pairs = pairsOf(r);
+    return pairs.length ? `"${pairs.join(' ')}"` : `"${r}"*`;
+  });
+  return parts.length > 1 ? `(${parts.join(' AND ')})` : parts[0];
 }
 
 /**
