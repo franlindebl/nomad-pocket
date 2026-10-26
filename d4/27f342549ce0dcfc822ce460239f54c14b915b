@@ -1,0 +1,65 @@
+CLAUDE.md
+  s_dae816423ce6de::t_fad54309b0a192 125
+package-lock.json
+  s_dae816423ce6de::t_59f68f4f7403a1 19,6088-6096
+package.json
+  s_dae816423ce6de::t_4dc2df90dd7734 12
+src/data/licenses.json
+  s_dae816423ce6de::t_0b6f322fb54b66 1
+src/features/downloads/manager.ts
+  s_dae816423ce6de::t_7713431e1c6db4 10-15,25-26,28-29,38,49,61-63,127-137,150-151,262-263,265-270,273-286,343,476-479,483-487,493,508,510,513-514,527-528,536-541,550,556,577,579-580,727-728,730-732,734-799,836,839,844-858,888-889,891-892,898,919,935,980-981,983,1056
+src/features/downloads/mirrors.test.ts
+  s_dae816423ce6de::t_2746cbbaeeeae4 4-12,58-196
+src/features/downloads/segmented.ts
+  s_dae816423ce6de::t_f54b26d4e401e9 1-400
+src/features/downloads/segments-core.test.ts
+  s_78b408ad093c39::t_dd64d2ecaa2d8c 1-262
+src/i18n/locales/en/common.json
+  s_dae816423ce6de::t_094567595875ff 55
+src/i18n/locales/es/common.json
+  s_dae816423ce6de::t_191fa3bdb3c25f 55
+docs/ARCHITECTURE.md
+  s_dae816423ce6de::t_f0d3a0da8e98d9 265-302,308-312,314-319
+docs/DOWNLOADS_SPEED_PLAN.md
+  s_dae816423ce6de::t_284031723a16de 3-63
+docs/E2E.md
+  s_dae816423ce6de::t_de64bfc0ac0bbc 360
+e2e/flows/downloads/dl-02-controls.yaml
+  s_dae816423ce6de::t_5cc0951feb5429 17,21
+src/app/downloads.tsx
+  s_dae816423ce6de::t_977964d3a610e5 9,19,61-65
+src/features/downloads/keep-awake.ts
+  s_dae816423ce6de::t_71472a75d54724 1-28
+src/features/downloads/mirrors.ts
+  s_dae816423ce6de::t_444a96aadc84ec 1-7,9-15,19-22,24-51,53,63-70,87,92,98-130,133,135,137,139,141-176,178,185-187,189-198,200,203-204,207-220,222
+src/features/downloads/segments-core.ts
+  s_dae816423ce6de::t_eca3e57a3da76b 1-340
+docs/PROGRESS.md
+  s_dae816423ce6de::t_2d2687ea7dbb63 24,145-150,195-200,228-248
+src/features/downloads/DownloadRow.tsx
+  s_dae816423ce6de::t_e1b5ec81633ecc 26-28,48-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d427f342549ce0dcfc822ce460239f54c14b915b",
+  "prompts": {},
+  "sessions": {
+    "s_78b408ad093c39": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e82e2e6d-65bd-4709-9859-f05fbe0b2151",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_dae816423ce6de": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b582f6fc-2f40-4b1f-b67a-6a2993dec875",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
