@@ -1,5 +1,6 @@
 """Describes built routing packs for the app (src/features/maps/routing-catalog.ts).
-  fragment <out dir> <country> <YYYYMMDD>                → JSON list of this country's packs
+  fragment <out dir> <pack> <YYYYMMDD> [region]          → JSON list with this pack (region: the
+                                                           country of a regional pack, "us-west" → "us")
   merge <release tag> <fragment.json...>                 → routing-manifest.json
   carry <previous manifest> <new manifest> <packs.json>  → new + previous packs of countries not rebuilt
                                                            (and still listed in packs.json)
@@ -93,7 +94,9 @@ def described(path):
     return {"name": os.path.basename(path), "size": os.path.getsize(path), "sha256": sha256(path)}
 
 
-def fragment(out_dir, country, build_date):
+def fragment(out_dir, country, build_date, region=None):
+    # "country" is the packs.json key (what carry and clip look up); regionId is the country
+    # the app files it under, the same for the packs of a split country.
     packs = []
     for pid in [country]:
         whole = os.path.join(out_dir, f"{pid}.tar")
@@ -106,7 +109,7 @@ def fragment(out_dir, country, build_date):
         packs.append({
             "id": pid,
             "country": country,
-            "regionId": pid,
+            "regionId": region or pid,
             "buildDate": build_date,
             "bbox": coverage[0],
             "cells": coverage[1],
@@ -256,7 +259,7 @@ def unshare(maps_path, routing_path):
 
 
 if sys.argv[1] == "fragment":
-    fragment(sys.argv[2], sys.argv[3], sys.argv[4])
+    fragment(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5] if len(sys.argv) > 5 else None)
 elif sys.argv[1] == "merge":
     merge(sys.argv[2], sys.argv[3:])
 elif sys.argv[1] == "carry":
