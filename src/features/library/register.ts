@@ -11,6 +11,7 @@ import { contentDir, deleteFile, fileSize, partialDir, resolveContentUri } from 
 
 import { NomadZim, isNomadZimAvailable } from '../../../modules/nomad-zim';
 
+import { fallbackZimId, retargetSources, zimFileStem, zimRegistrationId } from './register-core';
 import { closeArchive, excludeFromBackup, openArchive, type ZimInfo } from './zim';
 
 /** Download meta written by src/features/catalog (downloadResource). */
@@ -42,7 +43,23 @@ function appLanguage(zimLanguage: string): string | null {
 
 const str = (v: unknown): string | null => (typeof v === 'string' && v.trim() ? v : null);
 
+/** Unknown counts as there: callers only use it to avoid replacing or deleting something. */
+function fileExists(uri: string): boolean {
+  try {
+    return new File(uri).exists;
+  } catch {
+    return true;
+  }
+}
+
 let probeCounter = 0;
+
+/** An import of an archive that is already installed (same ZIM uuid) from another file. */
+export class AlreadyInstalledError extends Error {
+  constructor(public item: InstalledItem) {
+    super('ALREADY_INSTALLED');
+  }
+}
 
 /**
  * Catalog entry for a ZIM file. Catalog ids include the flavour
@@ -50,13 +67,18 @@ let probeCounter = 0;
  * try the file name without its date suffix ("…_nopic_2026-10.zim").
  */
 function catalogMatch(name: string | null | undefined, fileUri: string) {
-  const file = decodeURIComponent(fileUri.split('/').pop() ?? '').replace(/\.zim$/i, '');
-  const fromFile = file.replace(/_\d{4}-\d{2}[a-z]?$/i, '');
-  return getResource(fromFile) ?? (name ? getResource(name) : undefined);
+  return getResource(zimFileStem(fileUri)) ?? (name ? getResource(name) : undefined);
 }
 
-/** Open a ZIM file already inside content/zim, read its metadata and register it. */
-export async function registerZimFile(fileUri: string, meta?: Record<string, unknown>): Promise<InstalledItem> {
+/**
+ * Open a ZIM file already inside content/zim, read its metadata and register it.
+ * `rejectDuplicate` (imports): throw AlreadyInstalledError when the same archive is installed.
+ */
+export async function registerZimFile(
+  fileUri: string,
+  meta?: Record<string, unknown>,
+  options: { rejectDuplicate?: boolean } = {},
+): Promise<InstalledItem> {
   const m = (meta ?? {}) as ZimDownloadMeta;
 
   // Read the header under a temporary key to learn uuid/name, then open under the final id.
@@ -68,9 +90,21 @@ export async function registerZimFile(fileUri: string, meta?: Record<string, unk
     closeArchive(probeId);
   }
 
+  if (options.rejectDuplicate) {
+    const twin = listItems('zim').find((i) => i.meta.uuid === info.uuid && i.fileUri !== fileUri && fileExists(i.fileUri));
+    if (twin) throw new AlreadyInstalledError(twin);
+  }
+
   // Imported/scanned files carry no download meta: recover it from the catalog.
   const cat = getResource(str(m.catalogId) ?? '') ?? catalogMatch(info.name, fileUri);
-  const id = str(m.catalogId) ?? cat?.id ?? str(info.name) ?? info.uuid;
+  const version = str(m.version) ?? (info.date ? info.date.slice(0, 7) : null);
+  const derivedId = str(m.catalogId) ?? cat?.id ?? fallbackZimId(str(info.name), info.uuid, fileUri);
+  const taken = getItem(derivedId);
+  const id = zimRegistrationId(
+    derivedId,
+    { fileUri, uuid: info.uuid, version, requested: !!str(m.catalogId) },
+    taken && { fileUri: taken.fileUri, uuid: str(taken.meta.uuid), version: taken.version, fileExists: fileExists(taken.fileUri) },
+  );
   // Same file registered earlier under another id (before its catalog entry was known):
   // move its reading state to the new id and drop the old row.
   const stale = listItems('zim').find((i) => i.id !== id && i.fileUri === fileUri);
@@ -79,6 +113,15 @@ export async function registerZimFile(fileUri: string, meta?: Record<string, unk
     const d = db();
     for (const table of ['history', 'bookmarks', 'courses', 'course_progress']) {
       d.runSync(`UPDATE OR IGNORE ${table} SET item_id = ? WHERE item_id = ?`, id, stale.id);
+    }
+    // Assistant answers cite archives by id (JSON in chat_messages.sources).
+    const citing = d.getAllSync<{ id: string; sources: string | null }>(
+      'SELECT id, sources FROM chat_messages WHERE sources LIKE ?',
+      `%${JSON.stringify(stale.id).slice(1, -1)}%`,
+    );
+    for (const row of citing) {
+      const moved = retargetSources(row.sources, stale.id, id);
+      if (moved) d.runSync('UPDATE chat_messages SET sources = ? WHERE id = ?', moved, row.id);
     }
     d.runSync('DELETE FROM items WHERE id = ?', stale.id);
   }
@@ -99,7 +142,7 @@ export async function registerZimFile(fileUri: string, meta?: Record<string, unk
     isCourse: m.isCourse ?? cat?.isCourse ?? previous?.isCourse ?? false,
     fileUri,
     sizeBytes: Number(fileSize(fileUri)) || 0,
-    version: str(m.version) ?? (info.date ? info.date.slice(0, 7) : null),
+    version,
     sourceUrl: str(m.sourceUrl) ?? previous?.sourceUrl ?? null,
     catalogId: str(m.catalogId) ?? cat?.id ?? previous?.catalogId ?? null,
     meta: {
