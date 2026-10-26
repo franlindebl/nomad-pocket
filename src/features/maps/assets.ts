@@ -1,10 +1,12 @@
 // Offline glyphs (Noto Sans SDF ranges) and sprites ship inside the app as one
 // zip. On first use it is unpacked into Documents/map-assets/<version>/ and the
 // style references the files with file:// URLs, so labels and icons render with
-// no network at all.
+// no network at all. Out of iCloud backups: the app unpacks it again.
 import { Asset } from 'expo-asset';
 import { Directory, File, Paths } from 'expo-file-system';
 import { unzipSync } from 'fflate';
+
+import { excludeFromBackup } from '@/features/library/zim';
 
 import { emptyGlyphRange, FONTSTACKS, glyphRanges } from './glyphs';
 
@@ -45,7 +47,11 @@ export function ensureMapAssets(): Promise<MapAssets> {
 async function unpack(): Promise<MapAssets> {
   const dir = assetsDir();
   const marker = new File(dir, '.complete');
-  if (marker.exists) return urls(dir);
+  // Every session: installs that unpacked before this rule have it unset.
+  if (marker.exists) {
+    void excludeFromBackup(new Directory(Paths.document, 'map-assets').uri);
+    return urls(dir);
+  }
 
   const asset = Asset.fromModule(require('../../../assets/maps/basemap-assets.zip'));
   await asset.downloadAsync();
@@ -81,5 +87,6 @@ async function unpack(): Promise<MapAssets> {
   // Drop older unpacked versions.
   const root = new Directory(Paths.document, 'map-assets');
   for (const entry of root.list()) if (entry instanceof Directory && entry.name !== VERSION) entry.delete();
+  void excludeFromBackup(root.uri);
   return urls(dir);
 }
