@@ -1,0 +1,19 @@
+src/app/(tabs)/maps/index.tsx
+  s_fdfc1036043ea8::t_3026342a67ce3f 75-76,112,114,117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cbea68f83d0b4484d88b76cc35fffcb801cd082d",
+  "prompts": {},
+  "sessions": {
+    "s_fdfc1036043ea8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a8a6ff790058583ce",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

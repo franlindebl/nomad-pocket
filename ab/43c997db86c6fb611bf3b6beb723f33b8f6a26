@@ -1,0 +1,35 @@
+src/features/maps/HeadingBeam.tsx
+  s_9f5316f88b2e79::t_490d7b7e2f3d33 41-47
+src/features/maps/geo.test.ts
+  s_9f5316f88b2e79::t_deab46f069378d 4-15,102-109
+src/features/maps/geo.ts
+  s_9f5316f88b2e79::t_8e2a66e208bb16 55-64
+src/features/maps/guidance.ts
+  s_9f5316f88b2e79::t_008257856b6a3b 160-162
+src/features/maps/heading.ts
+  s_fdfc1036043ea8::t_6da74f59902437 7-9,14,16,35-39,59-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ab43c997db86c6fb611bf3b6beb723f33b8f6a26",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_fdfc1036043ea8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a8a6ff790058583ce",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

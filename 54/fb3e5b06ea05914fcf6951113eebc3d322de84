@@ -1,0 +1,25 @@
+src/features/maps/PlaceCard.tsx
+  s_9f5316f88b2e79::t_28df23ba374791 17,24-29,47-61
+src/features/maps/geo.test.ts
+  s_9f5316f88b2e79::t_0c0b94f0f27879 4,90-94
+src/features/maps/geo.ts
+  s_9f5316f88b2e79::t_ca293fe2a5c271 55-59
+src/features/maps/guidance.ts
+  s_9f5316f88b2e79::t_7d7579de2d2dcc 16,242
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "54fb3e5b06ea05914fcf6951113eebc3d322de84",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
