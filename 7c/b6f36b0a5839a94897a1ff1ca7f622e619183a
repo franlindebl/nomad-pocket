@@ -1,0 +1,41 @@
+CLAUDE.md
+  s_dae816423ce6de::t_f0128079080dc6 125
+docs/ARCHITECTURE.md
+  s_dae816423ce6de::t_c5547190a9b59e 255-267,290-292
+src/features/downloads/budget-core.test.ts
+  s_dae816423ce6de::t_ab627d2bbd2a18 1-87
+src/features/downloads/budget-core.ts
+  s_dae816423ce6de::t_c1cbb2ea0d8731 1-77
+src/features/downloads/segmented.ts
+  s_838c9370c44bfa::t_c8d247b0fd5328 107,144-153,267-268
+docs/DOWNLOADS_SPEED_PLAN.md
+  s_dae816423ce6de::t_7e531aede6a432 29-33,59-60
+docs/PROGRESS.md
+  s_dae816423ce6de::t_43dbe964746fcf 146-149,246-255
+src/features/downloads/manager.ts
+  s_dae816423ce6de::t_80b6533c29fb55 48,64,128-130,313,620,629-634,637-752,887,894
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7cb6f36b0a5839a94897a1ff1ca7f622e619183a",
+  "prompts": {},
+  "sessions": {
+    "s_838c9370c44bfa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65e8c9ca-b49f-4076-9462-02635ce8b6df",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_dae816423ce6de": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b582f6fc-2f40-4b1f-b67a-6a2993dec875",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
