@@ -10,6 +10,7 @@ import { uid } from '@/lib/format';
 import { useSettings } from '@/stores/settings';
 
 import { EngineUnavailableError, stopGeneration, withEngine, type SearchTool } from './engine';
+import { errorFor } from './errors';
 import { libraryItemIds, retrieve } from './rag';
 import {
   buildRouterPrompt,
@@ -270,6 +271,7 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
   let answerText = '';
   let sources: MessageSource[] = [];
   let searched = false;
+  let stopped = false;
   let failed: string | null = null;
   const cancelled = () => cancelledAnswers.has(streaming.messageId);
 
@@ -360,15 +362,20 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
         },
       });
       answerText = res.text || answerText;
+      stopped = res.stopped;
     });
   } catch (e) {
-    if (e instanceof EngineUnavailableError) failed = e.reason;
-    else failed = String((e as Error)?.message ?? e);
+    failed = e instanceof EngineUnavailableError ? e.reason : errorFor(e);
   }
 
+  const wasCancelled = cancelled();
   cancelledAnswers.delete(streaming.messageId);
   const cur = useChat.getState();
   const finalText = answerText.trim();
+  // A stopped answer reports nothing (the user may be in another conversation by now);
+  // one that came out empty (only reasoning, a call to an unknown tool) must not vanish silently.
+  if (wasCancelled) failed = null;
+  else if (!finalText && !failed && !stopped) failed = 'empty';
   // The conversation may have been deleted while answering.
   const sessionAlive = !!db().getFirstSync('SELECT 1 FROM chat_sessions WHERE id = ?', sessionId);
   if (finalText && sessionAlive) {

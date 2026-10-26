@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Card, IconBadge, IconButton, PressableScale, Row, Text } from '@/components/ui';
 import { dismissError, newChat, searchLibraryFor, sendMessage, stopAnswer, useChat, type ChatMessage, type Streaming } from '@/features/assistant/chats';
+import { isErrorKey } from '@/features/assistant/errors';
 import { SYSTEM_MODEL_ID } from '@/features/assistant/models';
 import { AssistantMessage, UserMessage } from '@/features/assistant/ui/Message';
 import { Composer } from '@/features/assistant/ui/Composer';
@@ -213,7 +214,7 @@ function NoLibraryCard() {
 function ErrorBanner({ code }: { code: string }) {
   const { t } = useTranslation('assistant');
   const { colors } = useTheme();
-  const known = ['noModel', 'notInstalled', 'systemUnavailable'].includes(code);
+  const known = isErrorKey(code);
   return (
     <View style={[styles.error, { backgroundColor: colors.dangerSoft }]}>
       <AlertCircle size={18} color={colors.danger} />
