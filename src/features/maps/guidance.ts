@@ -13,7 +13,7 @@ import { create } from 'zustand';
 import i18n from '@/i18n';
 
 import { hasArrived, hasMoved } from './follow-core';
-import { distanceMeters, type LatLon } from './geo';
+import { distanceMeters, isFreshFix, type LatLon } from './geo';
 import { watchScreenHeading } from './heading';
 import { computeRoute, packFor, RoutingError } from './routing';
 import { cumulativeDistances, isOffRoute, routeProgress, type Costing, type Route, type RouteProgress } from './routing-core';
@@ -239,7 +239,7 @@ export const useGuidance = create<GuidanceState>((set, get) => {
       };
       course = null;
       const last = await Location.getLastKnownPositionAsync({ maxAge: STALE_FIX_MS }).catch(() => null);
-      if (last && session === mine && Date.now() - last.timestamp < STALE_FIX_MS)
+      if (last && session === mine && isFreshFix(last.timestamp, STALE_FIX_MS))
         firstFix({ lat: last.coords.latitude, lon: last.coords.longitude, accuracy: last.coords.accuracy });
       try {
         const sub = await Location.watchPositionAsync(

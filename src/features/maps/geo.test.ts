@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { bearingDegrees, compassSector, distanceMeters, formatUtm, fromUtm, parseCoordinates, screenHeading, toUtm } from './geo.ts';
+import { bearingDegrees, compassSector, distanceMeters, formatUtm, fromUtm, isFreshFix, parseCoordinates, screenHeading, toUtm } from './geo.ts';
 
 const near = (a: number, b: number, eps: number, msg?: string) => assert.ok(Math.abs(a - b) <= eps, `${msg ?? ''} ${a} ≉ ${b}`);
 
@@ -86,4 +86,9 @@ test('screenHeading turns the compass to the screen top', () => {
   assert.equal(screenHeading(45, 'unknown'), 45);
   assert.equal(screenHeading(10, 'landscapeLeft'), 280);
   assert.equal(screenHeading(300, 'landscapeRight'), 30);
+});
+
+test('isFreshFix', () => {
+  assert.equal(isFreshFix(1_000, 5_000, 4_000), true);
+  assert.equal(isFreshFix(1_000, 5_000, 7_000), false);
 });
