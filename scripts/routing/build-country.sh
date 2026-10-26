@@ -129,7 +129,7 @@ osmium tags-filter --overwrite "$PBF" w/highway n/place -o "$WORK/src/streets.os
 python3 -I "$HERE/streets.py" "$WORK/src/streets.osm.pbf" "$OUT/$COUNTRY.streets.tsv"
 
 # 6b. Every named place (any zoom) and every house number, for the same search.
-osmium tags-filter --overwrite "$PBF" nwr/name nwr/addr:housenumber -o "$WORK/src/places.osm.pbf"
+osmium tags-filter --overwrite "$PBF" nwr/name nwr/addr:housenumber nwr/addr:block_number -o "$WORK/src/places.osm.pbf"
 python3 -I "$HERE/places.py" "$WORK/src/places.osm.pbf" "$OUT/$COUNTRY.places.tsv" "$OUT/$COUNTRY.addresses.tsv"
 rm -f "$WORK/src/places.osm.pbf"
 

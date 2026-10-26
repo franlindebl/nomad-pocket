@@ -90,7 +90,7 @@ print(found[0]["urls"]["pbf"] if found else "")' "$ID")"
     python3 -I "$ROOT/scripts/routing/streets.py" "$WORK/src/streets.osm.pbf" "$OUT/$ID.streets.tsv"
     rm -f "$WORK/src/streets.osm.pbf"
     # Keep in step with build-country.sh (step 6b).
-    osmium tags-filter --overwrite "$PBF" nwr/name nwr/addr:housenumber -o "$WORK/src/places.osm.pbf"
+    osmium tags-filter --overwrite "$PBF" nwr/name nwr/addr:housenumber nwr/addr:block_number -o "$WORK/src/places.osm.pbf"
     python3 -I "$ROOT/scripts/routing/places.py" "$WORK/src/places.osm.pbf" "$OUT/$ID.places.tsv" "$OUT/$ID.addresses.tsv"
     rm -f "$PBF" "$WORK/src/pois.osm.pbf" "$WORK/src/streets.osm.pbf" "$WORK/src/places.osm.pbf"
   else

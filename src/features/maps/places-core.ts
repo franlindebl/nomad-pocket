@@ -332,6 +332,51 @@ export function parseAddress(text: string): { street: string; number: string } |
   return { street, number: number.replace(/ /g, '').toUpperCase() };
 }
 
+const KANJI_DIGITS = '〇一二三四五六七八九';
+
+/** '十二' → 12 (chōme numbers: up to 99). */
+const kanjiNumber = (k: string) => {
+  const [tens, units] = k.includes('十') ? k.split('十') : ['', k];
+  return (k.includes('十') ? (tens ? KANJI_DIGITS.indexOf(tens) : 1) * 10 : 0) + (units ? KANJI_DIGITS.indexOf(units) : 0);
+};
+
+/**
+ * A Japanese address: blocks inside a chōme, no streets. "台東2丁目5-1", "台東2-5-1",
+ * "台東二丁目5番1号", also after the prefecture and city ("東京都台東区台東2-5-1"), as the
+ * street + number pairs places.py writes ("台東2丁目" + "5-1"). Several when it is
+ * ambiguous ("台東2-5": chōme 2 block 5, or block 2 number 5); empty when not one.
+ */
+export function parseJapaneseAddress(text: string): { street: string; number: string }[] {
+  const t = text
+    .normalize('NFKC')
+    .replace(/\s+/g, '')
+    .replace(/(?<=\d)[‐‑‒–—―−ー](?=\d)/g, '-')
+    .replace(/([〇一二三四五六七八九十]{1,3})丁目/g, (_, k: string) => `${kanjiNumber(k)}丁目`);
+  if (!/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u.test(t)) return [];
+  const out: { street: string; number: string }[] = [];
+  const block = (b: string, n?: string) => (n ? `${b}-${n}` : b);
+  // Block and number: "5-1", "5番1号", "5番地1", "5番", "5".
+  const tail = String.raw`(\d{1,5})(?:(?:番地?|-)(\d{1,5})号?|番地?)?$`;
+  const withChome = new RegExp(String.raw`^(.*[^\d-])(\d{1,2})丁目` + tail, 'u').exec(t);
+  if (withChome) out.push({ street: `${withChome[1]}${withChome[2]}丁目`, number: block(withChome[3], withChome[4]) });
+  const dashed = withChome ? null : /^(.*[^\d-])(\d{1,2})-(\d{1,5})(?:-(\d{1,5}))?$/u.exec(t);
+  if (dashed) out.push({ street: `${dashed[1]}${dashed[2]}丁目`, number: block(dashed[3], dashed[4]) });
+  // Some doors carry the whole "4-5-5" as their number.
+  if (dashed?.[4]) out.push({ street: dashed[1], number: `${dashed[2]}-${dashed[3]}-${dashed[4]}` });
+  // No chōme (rural 大字 + 番地): "岩村田1234-5".
+  const plain = withChome || dashed?.[4] ? null : new RegExp(String.raw`^(.*[^\d-])` + tail, 'u').exec(t);
+  if (plain) out.push({ street: plain[1], number: block(plain[2], plain[3]) });
+  // Without the prefecture, city or ward in front: they aren't part of the street.
+  return out.flatMap((a) => {
+    const all = [a];
+    for (let s = a.street, m; (m = /^.+?[都道府県市区郡]/u.exec(s)) && m[0].length < s.length; ) {
+      s = s.slice(m[0].length);
+      all.push({ street: s, number: a.number });
+    }
+    return all;
+  });
+}
+
 export type Hit = PlaceRow & { id: number };
 
 const LAYER_WEIGHT: Record<PlaceLayer, number> = { place: 0, poi: 1, road: 1.5 };

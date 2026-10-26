@@ -160,6 +160,20 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-26 — Maps: Japanese addresses
+
+- Spot check of the first full country run: Italy, Mexico and Japan's places and doors
+  are well formed, but Japan had 0.4 MB of doors. Japanese addresses aren't street +
+  number: 324 k objects carry `addr:block_number` (番) inside a chōme, almost none
+  `addr:street`. `places.py` now writes them as "台東2丁目" + "5-1" (kanji and full-width
+  digits as ASCII, "7番22号"/"1803番地2" as "7-22"/"1803-2", lot letters such as 甲 with
+  the place) and the osmium filters keep `addr:block_number`. The app reads what people
+  type (`parseJapaneseAddress`) and looks the door up directly (`japaneseDoorHits`).
+  Shikoku extract: 98 % of its doors are found from the address as written; the rest are
+  odd tagging.
+- `places.py` also cleans line breaks inside house numbers (3 broken rows in Japan).
+- Takes effect on the next country run.
+
 ### 2026-10-26 — Android check of the redesign (emulator)
 
 - Owner asked for an Android run while the country packages build. Pass: android-03

@@ -22,6 +22,7 @@ import {
   nameKey,
   parseAddress,
   parseAddressesTsv,
+  parseJapaneseAddress,
   parsePlacesTsv,
   pickIndexZoom,
   rankHits,
@@ -605,6 +606,8 @@ export function searchPlaces(text: string, near: LatLon | null, limit = 40): Sea
     // The door on the best streets of that name (from a pack's house numbers), first.
     hits = [...doorHits(streets.slice(0, 8), address.number), ...hits, ...streets.filter((h) => !seen.has(h.id))];
   }
+  const japanese = parseJapaneseAddress(text);
+  if (japanese.length) hits = [...japaneseDoorHits(japanese, near), ...hits];
   return hits.slice(0, limit).map((h) => ({ ...h, context: h.layer === 'place' ? null : localityNear(h) }));
 }
 
@@ -618,6 +621,39 @@ function doorHits(streets: Hit[], number: string): Hit[] {
     // Two index rows of the same street (one per tile) find the same door.
     if (out.some((o) => o.name === name && distanceMeters(o, at) < 300)) continue;
     out.push({ ...st, id: -1 - out.length, name, kind: at.exact ? 'address' : 'address_approx', lat: at.lat, lon: at.lon });
+  }
+  return out;
+}
+
+/**
+ * Japanese addresses ("台東2丁目5-1") have no streets to find first: their doors are
+ * looked up by chōme and number directly, the nearest few. Without that door anywhere,
+ * the block ("5", or any "5-…") as an approximate one.
+ */
+function japaneseDoorHits(addresses: { street: string; number: string }[], near: LatLon | null): Hit[] {
+  const found = addresses.flatMap(({ street, number }) => {
+    const block = number.split('-')[0];
+    return db()
+      .getAllSync<{ number: string; lat: number; lon: number }>(
+        `SELECT a.number, a.lat, a.lon FROM map_address_streets st JOIN map_addresses a ON a.street = st.id
+         WHERE st.key = ? AND (a.number = ? OR a.number = ? OR a.number LIKE ?) LIMIT 500`,
+        nameKey(street),
+        number,
+        block,
+        `${block}-%`,
+      )
+      .map((r) => ({ name: `${street}${number}`, exact: r.number === number, lat: r.lat / E5, lon: r.lon / E5 }));
+  });
+  // Several readings of an ambiguous address: the one that names a door wins.
+  const doors = found.some((d) => d.exact) ? found.filter((d) => d.exact) : found;
+  if (near) doors.sort((a, b) => distanceMeters(near, a) - distanceMeters(near, b));
+  const out: Hit[] = [];
+  for (const d of doors) {
+    // One hit per place: the doors of one block, or the same address in another town.
+    if (out.some((o) => distanceMeters(o, d) < 300)) continue;
+    const kind = d.exact ? 'address' : 'address_approx';
+    out.push({ id: -100 - out.length, layer: 'poi', kind, name: d.name, names: '', rank: 0, lat: d.lat, lon: d.lon });
+    if (out.length >= 5) break;
   }
   return out;
 }
