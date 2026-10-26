@@ -1,0 +1,28 @@
+# SET-05 — Settings › Créditos y licencias: the GPL notice, source links, native libraries and a JS package's licence text.
+appId: com.fjlinde.nomadpocket
+tags: [full, settings]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "open-settings" }
+- scrollUntilVisible:
+    element: { id: "settings-credits" }
+    direction: DOWN
+- tapOn: { id: "settings-credits" }
+- assertVisible: "Nomad Pocket es software libre.*"
+- assertVisible: { id: "credits-source" }
+- assertVisible: { id: "credits-gpl" }
+- takeScreenshot: 01-credits
+- scrollUntilVisible:
+    element: "libkiwix.*"
+    direction: DOWN
+- scrollUntilVisible:
+    element: { id: "credits-js" }
+    direction: DOWN
+- tapOn: { id: "credits-js" }
+- tapOn: { id: "credits-search" }
+- inputText: "zustand"
+# The query in the field also reads "zustand": take the row under it.
+- tapOn: { text: "zustand.*", below: { id: "credits-search" } }
+- assertVisible: "(?i)texto de la licencia"
+- assertVisible: ".*Permission is hereby granted.*"
+- takeScreenshot: 02-license

@@ -1,0 +1,14 @@
+# MAP-18 — the OpenStreetMap credit shows over the map when it first appears and folds away by itself after ~5 s.
+appId: com.fjlinde.nomadpocket
+tags: [full, maps]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: { id: "map-credit" }
+    timeout: 15000
+- assertVisible: "© Colaboradores de OpenStreetMap"
+- takeScreenshot: 01-credit
+- extendedWaitUntil:
+    notVisible: { id: "map-credit" }
+    timeout: 15000
