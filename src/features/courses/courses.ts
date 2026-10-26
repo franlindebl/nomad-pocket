@@ -6,7 +6,6 @@
 import { create } from 'zustand';
 
 import { db, parseJson } from '@/db';
-import { getItem } from '@/features/content/items';
 import { recordVisit } from '@/features/library/history';
 import { getJson, getLinks, getMainPath, listArticles, type ZimLink } from '@/features/library/zim';
 
@@ -58,11 +57,6 @@ export function getCourse(itemId: string): CourseState | null {
     completed: completedPaths(itemId, syllabus),
     syllabusBuilt: row.syllabus !== null,
   };
-}
-
-export function listCourses(): CourseState[] {
-  const rows = db().getAllSync<{ item_id: string }>('SELECT item_id FROM courses ORDER BY COALESCE(last_opened_at, enrolled_at) DESC');
-  return rows.map((r) => getCourse(r.item_id)).filter((c): c is CourseState => !!c && !!getItem(c.itemId));
 }
 
 // freeCodeCamp ZIMs (fcc2zim): superblock → block → challenges, in curriculum order.

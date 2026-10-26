@@ -22,8 +22,6 @@ import {
   type Turn,
 } from './rag-core';
 
-export type RagSource = SourceRef;
-
 export type RetrievalResult = {
   /** No ZIM archives installed at all. */
   noLibrary: boolean;

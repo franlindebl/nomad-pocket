@@ -19,12 +19,6 @@ export class OfflineError extends Error {
   }
 }
 
-export class WifiRequiredError extends Error {
-  constructor() {
-    super('WIFI_REQUIRED');
-  }
-}
-
 /**
  * Queue a GGUF model download (checks connectivity). On mobile data with "Wi-Fi only" on,
  * the download manager queues it until Wi-Fi and asks whether to use mobile data instead.

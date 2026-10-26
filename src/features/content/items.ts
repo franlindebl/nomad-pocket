@@ -143,7 +143,3 @@ export function useItems(kind?: ContentKind): InstalledItem[] {
   const items = useContent((s) => s.items);
   return kind ? items.filter((i) => i.kind === kind) : items;
 }
-
-export function isInstalled(catalogId: string): boolean {
-  return useContent.getState().items.some((i) => i.catalogId === catalogId || i.id === catalogId);
-}

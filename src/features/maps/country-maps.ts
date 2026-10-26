@@ -66,10 +66,6 @@ export async function refreshMapsCatalog(): Promise<void> {
   }
 }
 
-export function countryMapFor(regionId: string): CountryMap | null {
-  return useMapsCatalog.getState().manifest?.maps.find((m) => m.regionId === regionId) ?? null;
-}
-
 const title = (map: CountryMap) => {
   const region = getRegion(map.regionId);
   return region ? regionName(region, i18n.language) : map.id;

@@ -19,7 +19,6 @@
   "recommended": "Recomendado",
   "downloadPack": "Descargar pack · {{size}}",
   "packInstalled": "Pack instalado",
-  "packRemaining": "Faltan {{count}} · {{size}}",
   "inThisTier": "En este nivel",
   "packConfirmTitle": "¿Descargar {{name}}?",
   "packConfirmBody_one": "Se descargará {{count}} recurso ({{size}}). Tienes {{free}} libres.",
@@ -29,12 +28,7 @@
   "explorePlaceholder": "Busca en el catálogo de Kiwix",
   "exploreOffline": "Necesitas conexión para explorar el catálogo de Kiwix.",
   "exploreEmpty": "Sin resultados",
-  "wifiRequired": "Estás usando datos móviles y las descargas están limitadas a Wi‑Fi.",
-  "articles": "{{count}} artículos",
-  "openMain": "Abrir",
   "wikipediaPick": "Elige tu Wikipedia",
   "wikipediaPickBody": "Todas funcionan sin conexión. Las versiones sin imágenes ocupan mucho menos.",
-  "wifiTitle": "Descargas solo con Wi‑Fi",
-  "useMobileData": "Usar datos móviles",
   "coursesBody": "Aprende a tu ritmo, sin conexión: salud, ciencia, matemáticas, programación…"
 }

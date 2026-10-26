@@ -48,7 +48,6 @@
     "retry": "Retry",
     "deleteTitle": "Delete {{name}}?",
     "deleteBody": "This frees {{size}}. You can download it again any time.",
-    "downloading": "Downloading…",
     "update": "Update",
     "updateAvailable": "A newer map is available",
     "updateBody": "A newer version of the map is available ({{size}}). Download it while you're online."
@@ -101,8 +100,7 @@
     "noMaps": "Download a map to search offline. Meanwhile you can paste coordinates.",
     "indexing": "Preparing search in {{name}}… {{percent}}%",
     "noResults": "Nothing matches “{{query}}” in your maps",
-    "coordinates": "Go to these coordinates",
-    "saved": "Place saved"
+    "coordinates": "Go to these coordinates"
   },
   "place": {
     "takeMeThere": "Take me there",
@@ -112,8 +110,7 @@
     "close": "Close",
     "emergencyYes": "Emergency room",
     "emergencyNo": "No emergency room",
-    "hours": "Hours: {{hours}}",
-    "away": "{{distance}} away"
+    "hours": "Hours: {{hours}}"
   },
   "call": {
     "failedTitle": "Couldn’t start the call",

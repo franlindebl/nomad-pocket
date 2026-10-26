@@ -4,7 +4,6 @@
   "searchArchive": "Buscar en este libro",
   "searchArchivePlaceholder": "Buscar en {{title}}",
   "bookmark": "Guardar",
-  "bookmarked": "Guardado",
   "removeBookmark": "Quitar de guardados",
   "textSize": "Tamaño del texto",
   "smaller": "Texto más pequeño",
@@ -43,9 +42,6 @@
   "globalPlaceholder": "Busca en todos tus libros",
   "noArchives": "Aún no hay nada que buscar",
   "noArchivesBody": "Descarga un libro desde la biblioteca y búscalo aquí, sin conexión.",
-  "noFullTextIndex": "Este libro no tiene índice de texto completo; se muestran coincidencias de título.",
-  "articles_one": "{{count}} artículo",
-  "articles_other": "{{count}} artículos",
   "toc": "Índice",
   "tocEmpty": "Esta página no tiene secciones",
   "tocEmptyBody": "Las páginas cortas o las portadas no suelen tener índice."

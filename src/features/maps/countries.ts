@@ -22,15 +22,13 @@ import {
   useMapsCatalog,
 } from './country-maps';
 import { bestZoom, estimateExtract, mapItemId, startMapDownload, WORLD_ID, type Estimate } from './extraction';
-import { getRegion, regionName, REGIONS, type Region } from './regions';
+import { getRegion, regionName, type Region } from './regions';
 import type { RoutePackItem } from './routing';
 import type { ManifestPack } from './routing-core';
 import { downloadPack, isPackInstalled, refreshRoutingCatalog, useRoutingCatalog } from './routing-packs';
 import type { MapItem } from './useMapSources';
 
 const ACTIVE = new Set(['queued', 'running', 'paused', 'processing']);
-
-export const COUNTRIES = REGIONS.filter((r) => r.type === 'country' && r.continent !== 'antarctica');
 
 export type CountryOffer = {
   region: Region;

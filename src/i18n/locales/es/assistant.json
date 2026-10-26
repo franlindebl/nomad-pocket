@@ -44,13 +44,8 @@
     "generating": "Escribiendo…"
   },
   "sources": "Fuentes",
-  "sourcesCount_one": "{{count}} fuente",
-  "sourcesCount_other": "{{count}} fuentes",
   "searchLibrary": "Buscar en mi biblioteca",
   "searchLibraryHint": "Volver a responder buscando en tu biblioteca sin conexión",
-  "stopped": "Detenido",
-  "copy": "Copiar",
-  "copied": "Copiado",
   "errors": {
     "noModel": "Primero elige un modelo.",
     "notInstalled": "El modelo elegido ya no está instalado. Elige otro.",
@@ -92,7 +87,6 @@
     "fitTight": "Puede ir lento",
     "fitTooBig": "Necesita {{ram}} GB de RAM",
     "ramNeeded": "{{ram}} GB RAM",
-    "license": "Licencia {{license}}",
     "delete": "Eliminar modelo",
     "deleteConfirm": "Se eliminará {{title}} ({{size}}). Puedes volver a descargarlo cuando quieras.",
     "privacy": "Los modelos nunca envían tus preguntas a ningún sitio. Las descargas vienen de Hugging Face.",

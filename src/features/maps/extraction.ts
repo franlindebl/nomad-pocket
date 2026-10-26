@@ -125,10 +125,6 @@ export function notifyMapInstalled(itemId: string) {
   }
 }
 
-export function isMapJobRunning(key: string) {
-  return running.has(key);
-}
-
 export function startMapDownload(input: StartMapDownload) {
   const jobId = `job-${mapItemId(input.key)}`;
   if (running.has(input.key)) return;

@@ -17,9 +17,6 @@
     "resetBody": "Se borrarán tus contactos, puntos de encuentro, notas, el kit y sus recordatorios. No se puede deshacer."
   },
   "home": {
-    "title": "Preparación ante emergencias",
-    "empty": "Crea tu plan familiar y prepara tu kit para estar listo sin conexión.",
-    "kit": "Kit: {{done}} de {{total}}",
     "attention_one": "{{count}} caduca pronto",
     "attention_other": "{{count}} caducan pronto",
     "expired_one": "{{count}} ha caducado",

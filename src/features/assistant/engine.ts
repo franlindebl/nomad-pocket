@@ -400,10 +400,6 @@ export async function releaseIfModel(modelId: string) {
   if (active?.modelId === modelId) await releaseEngine();
 }
 
-export function isEngineLoaded(modelId: string): boolean {
-  return active?.modelId === modelId;
-}
-
 let appStateHooked = false;
 
 /**

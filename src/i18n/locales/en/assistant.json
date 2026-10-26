@@ -44,13 +44,8 @@
     "generating": "Writing…"
   },
   "sources": "Sources",
-  "sourcesCount_one": "{{count}} source",
-  "sourcesCount_other": "{{count}} sources",
   "searchLibrary": "Search my library",
   "searchLibraryHint": "Answer again searching your offline library",
-  "stopped": "Stopped",
-  "copy": "Copy",
-  "copied": "Copied",
   "errors": {
     "noModel": "Choose a model first.",
     "notInstalled": "The selected model is no longer installed. Choose another one.",
@@ -92,7 +87,6 @@
     "fitTight": "May run slowly",
     "fitTooBig": "Needs {{ram}} GB of RAM",
     "ramNeeded": "{{ram}} GB RAM",
-    "license": "License {{license}}",
     "delete": "Delete model",
     "deleteConfirm": "{{title}} ({{size}}) will be deleted. You can download it again later.",
     "privacy": "Models never send your questions anywhere. Downloads come from Hugging Face.",
