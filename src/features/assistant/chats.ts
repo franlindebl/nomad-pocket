@@ -241,9 +241,9 @@ export async function searchLibraryFor(messageId: string) {
   const i = st.messages.findIndex((m) => m.id === messageId);
   const question = st.messages[i - 1];
   if (i < 1 || st.messages[i].role !== 'assistant' || question?.role !== 'user') return;
-  db().runSync('DELETE FROM chat_messages WHERE id = ?', messageId);
+  // Hidden while the new answer is written; only deleted once that one is stored.
   useChat.setState({ messages: st.messages.slice(0, i), error: null });
-  await answer(st.activeSessionId, question.content, toTurns(st.messages.slice(0, i - 1)), true);
+  await answer(st.activeSessionId, question.content, toTurns(st.messages.slice(0, i - 1)), true, st.messages[i]);
 }
 
 function toTurns(messages: ChatMessage[]): Turn[] {
@@ -254,8 +254,10 @@ function toTurns(messages: ChatMessage[]): Turn[] {
  * Generates the assistant's reply to `text`. Whether the library is searched:
  * library off or small talk → no; `forceSearch` → yes; otherwise the model decides
  * when it can (tool call or router), and a question is searched when it can't.
+ * `replaces` is an earlier answer to the same question: deleted once this one is
+ * stored, shown again if this one ends up empty (stopped early, or failed).
  */
-async function answer(sessionId: string, text: string, history: Turn[], forceSearch: boolean) {
+async function answer(sessionId: string, text: string, history: Turn[], forceSearch: boolean, replaces?: ChatMessage) {
   const st = useChat.getState();
   const modelId = useSettings.getState().aiModelId;
   const library = st.useLibrary && libraryItemIds().length > 0;
@@ -376,14 +378,22 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
       searched,
     };
     insertMessage(msg);
+    if (replaces) db().runSync('DELETE FROM chat_messages WHERE id = ?', replaces.id);
     useChat.setState({
       streaming: null,
-      messages: cur.activeSessionId === sessionId ? [...cur.messages, msg] : cur.messages,
+      // The conversation may have been reopened meanwhile, reloading the old answer.
+      messages: cur.activeSessionId === sessionId ? [...cur.messages.filter((m) => m.id !== replaces?.id), msg] : cur.messages,
       error: failed,
       sessions: listSessions(),
     });
   } else {
-    useChat.setState({ streaming: null, error: failed, sessions: listSessions() });
+    const restore = replaces && sessionAlive && cur.activeSessionId === sessionId && !cur.messages.some((m) => m.id === replaces.id);
+    useChat.setState({
+      streaming: null,
+      ...(restore ? { messages: [...cur.messages, replaces] } : {}),
+      error: failed,
+      sessions: listSessions(),
+    });
   }
 }
 
