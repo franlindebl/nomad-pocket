@@ -1,0 +1,25 @@
+src/features/maps/country-core.test.ts
+  s_9f5316f88b2e79::t_1169325472f737 52-61
+src/features/maps/country-core.ts
+  s_9f5316f88b2e79::t_3880aadff06e07 40-44,53-54,58-60
+src/features/maps/routing-core.test.ts
+  s_9f5316f88b2e79::t_d82a28ae27b6e9 248-258
+src/features/maps/routing-core.ts
+  s_9f5316f88b2e79::t_25a55c391cb191 294-297,306-307,313-314
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8063ecfc9a35d013aa7dc531a36f8208f46c6746",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
