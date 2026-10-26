@@ -11,6 +11,7 @@ import { contentDir, deleteFile, fileSize, partialDir, resolveContentUri } from 
 
 import { NomadZim, isNomadZimAvailable } from '../../../modules/nomad-zim';
 
+import { looksMedical } from './medical';
 import { fallbackZimId, retargetSources, zimFileStem, zimRegistrationId } from './register-core';
 import { closeArchive, excludeFromBackup, openArchive, type ZimInfo } from './zim';
 
@@ -152,7 +153,12 @@ export async function registerZimFile(
       mainPath: info.mainPath,
       illustration: info.illustration,
       subject: m.subject ?? cat?.subject ?? (previous?.meta.subject as string | undefined) ?? null,
-      medical: m.medical ?? cat?.medical ?? (previous?.meta.medical as boolean | undefined) ?? false,
+      // Archives the catalog doesn't know (Explore, Files) get the reader's disclaimer when they look medical.
+      medical:
+        m.medical ??
+        cat?.medical ??
+        (previous?.meta.medical === true ||
+          looksMedical({ names: [str(m.catalogId), info.name, zimFileStem(fileUri)], category: str(m.category) ?? previous?.category })),
     },
     installedAt: previous?.installedAt ?? Date.now(),
   };

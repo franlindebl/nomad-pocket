@@ -6,10 +6,12 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 
 import { Chip, EmptyState, PressableScale, ProgressRing, Row, SearchField, Text } from '@/components/ui';
+import { getResource } from '@/features/catalog';
 import { showDownloadError, LanguageTag } from '@/features/catalog/DownloadButton';
 import { searchKiwix, shortLanguage, type KiwixEntry } from '@/features/catalog/opds';
 import { useContent } from '@/features/content/items';
 import { enqueueDownload, useDownload } from '@/features/downloads/manager';
+import { looksMedical } from '@/features/library/medical';
 import { formatBytes } from '@/lib/format';
 import { useSettings } from '@/stores/settings';
 import { layout, radius, space, useTheme } from '@/theme';
@@ -91,6 +93,10 @@ function EntryRow({ entry }: { entry: KiwixEntry }) {
   const active = download && ['queued', 'running', 'paused', 'processing'].includes(download.status);
 
   const start = () => {
+    // A bundled catalog entry keeps its own category, course flag and medical flag (registerZimFile
+    // reads them from the catalog); Kiwix's would override them. Only archives outside it carry Kiwix's.
+    const known = !!getResource(entry.name);
+    const medical = looksMedical({ names: [entry.name], category: entry.category, tags: entry.tags });
     try {
       enqueueDownload({
         id: entry.name,
@@ -104,8 +110,7 @@ function EntryRow({ entry }: { entry: KiwixEntry }) {
           title: entry.title,
           description: entry.description,
           language: shortLanguage(entry.language),
-          category: entry.category,
-          isCourse: false,
+          ...(known ? null : { category: entry.category, medical: medical || undefined }),
           version: entry.version,
           sourceUrl: entry.url,
         },
@@ -137,7 +142,10 @@ function EntryRow({ entry }: { entry: KiwixEntry }) {
         </Text>
       </View>
       {installed ? (
-        <PressableScale onPress={() => router.push({ pathname: '/reader/[itemId]', params: { itemId: installed.id } })}>
+        <PressableScale
+          onPress={() => router.push({ pathname: '/reader/[itemId]', params: { itemId: installed.id } })}
+          accessibilityRole="button"
+          accessibilityLabel={t('actions.open')}>
           <Check size={22} color={colors.success} />
         </PressableScale>
       ) : active && download ? (
