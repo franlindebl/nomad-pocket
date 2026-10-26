@@ -66,7 +66,7 @@ workflow has never run, so the app extracts on the phone (z15 by bbox) until it 
 1. **Maps by country.** Country catalog (maps manifest + routing manifest), one row per
    country with combined size and progress, one delete; country picker without
    subdivisions; confirm sheet without a detail picker; routing packs sheet removed from
-   the UI; bundled world map; CI workflow `country-maps.yml` (pmtiles extract z15 + points +
+   the UI; bundled world map; CI workflow `country-packages.yml` (pmtiles extract z15 + points +
    street names for countries without a routing pack).
 2. **Onboarding.** Welcome (crisis message, language) → country (preselected from the
    phone's region) → your kit (country package, essential guides, Wikipedia sized to free

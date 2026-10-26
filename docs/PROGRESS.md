@@ -48,9 +48,9 @@ can pick up without re-deriving anything.
 Roughly by value. Items U and 0 are in progress; the rest are not started.
 
 U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): on main as ebafcdd (owner approved
-   2026-10-26), TestFlight build 11. Country maps: first run 40281825369 (es pt ad fr de
-   it gb) to validate, then the rest by continent; routing packs re-run 40281828336 for
-   places/addresses. Test build 11 on a real iPhone (onboarding kit, a country download,
+   2026-10-26), TestFlight build 11. CI: one workflow, `country-packages.yml` (owner,
+   2026-10-26), replaced `routing-packs.yml` + `country-maps.yml`; first test Spain alone,
+   then all countries. Test build 11 on a real iPhone (onboarding kit, a country download,
    assembly of a multi-GB map, places import). Follow-ups: bundled quick cards (first aid, water, radio) and
    emergency numbers per country, Android check of the bundled world map. (Preparedness was added
 on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
@@ -141,6 +141,24 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-26 — CI: one workflow per country package
+
+- Owner: why two workflows for one download? `country-packages.yml` replaces
+  `routing-packs.yml` and `country-maps.yml`: one job per country builds the routing pack
+  (build-country.sh in the Valhalla image, packs.json countries) and then the map
+  (build-country-map.sh), and the run publishes both catalogs in their current formats
+  (build 11 reads them unchanged). Kept from the routing workflow: one tag per run (now the
+  run id), index uploaded last, partial runs publish, carry + clip, prune of releases
+  neither the new nor the previous catalog points at (both families, read back from the
+  indexes), one concurrency group, max-parallel 8 (Overpass). Inputs: countries, parts
+  (all / maps / routing).
+- First runs of the old workflows: Country maps 40281825369 (es pt ad fr de it gb) ran to
+  the end (7 maps at z15: es 2.29 GB, fr and de 5.47 GB, it 2.73, gb 2.62, pt 0.58);
+  gb came out without side files (the map script took `ie`'s `IE,GB` for a pack covering
+  the UK: now it uses the app's rule, own pack or `ht` → `do`). Routing packs 40281828336 was cancelled at 17/61 (the unified run rebuilds them
+  with places and house numbers). Runner disk: `/` has ~104 GB free, more than the plan's
+  14 GB estimate.
 
 ### 2026-10-26 — UX redesign: a survival kit (branch `ux-survival`)
 

@@ -1,0 +1,242 @@
+name: Country packages
+
+# Everything a country download brings (docs/UX_SURVIVAL_PLAN.md), built in one job per
+# country of src/features/maps/regions.json:
+#   1. its routing pack, for the countries of scripts/routing/packs.json
+#      (scripts/routing/build-country.sh in the Valhalla image): Valhalla tiles plus the
+#      emergency points, street names, places and house numbers of its Geofabrik extract;
+#   2. its map (scripts/maps/build-country-map.sh): the Protomaps planet build cut by the
+#      country's outline at z15, with the same side files from Geofabrik when no pack
+#      brought them.
+# Publishes the two catalogs the app reads, in their formats: routing-index/routing-manifest.json
+# (files in `routing-<date>-<run id>`) and maps-index/maps-manifest.json (files in
+# `maps-<date>-<run id>-<continent>`: GitHub stops at 1000 assets per release). Each index is
+# updated last, so the app only ever sees complete releases; releases no catalog points at
+# are pruned. Countries not rebuilt keep last month's entries.
+
+on:
+  workflow_dispatch:
+    inputs:
+      countries:
+        description: 'Country ids from src/features/maps/regions.json, space separated (empty: all)'
+        required: false
+        default: ''
+      parts:
+        description: 'What to build'
+        type: choice
+        options: [all, maps, routing]
+        default: all
+  schedule:
+    - cron: '0 3 5 * *' # monthly, after Geofabrik's daily extracts settle
+
+permissions:
+  contents: write
+
+concurrency:
+  group: country-packages
+  cancel-in-progress: false
+
+env:
+  # Must match the engine the app embeds (modules/nomad-route: valhalla-mobile 0.6.4).
+  VALHALLA_IMAGE: ghcr.io/valhalla/valhalla:3.9.1
+  PARTS: ${{ github.event.inputs.parts || 'all' }}
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      countries: ${{ steps.plan.outputs.countries }}
+      stamp: ${{ steps.plan.outputs.stamp }}
+      build: ${{ steps.plan.outputs.build }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        env:
+          INPUT: ${{ github.event.inputs.countries }}
+        run: |
+          # Antarctica has no roads or towns worth a download.
+          countries=$(python3 -I -c 'import json, sys; all = [r["id"] for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["type"] == "country" and r["continent"] != "antarctica"]; want = sys.argv[1].split(); bad = [c for c in want if c not in all]; sys.exit(f"unknown: {bad}") if bad else print(json.dumps(want or all))' "$INPUT")
+          echo "countries=$countries" >> "$GITHUB_OUTPUT"
+          # One stamp per run: a re-run never replaces files a live catalog points at.
+          echo "stamp=$(date -u +%Y%m%d)-${{ github.run_id }}" >> "$GITHUB_OUTPUT"
+          # Every map of a run comes from the same planet build.
+          key=$(curl -fsSL https://build-metadata.protomaps.dev/builds.json | python3 -I -c 'import json, re, sys; print(sorted(b["key"] for b in json.load(sys.stdin) if re.match(r"^\d{8}\.pmtiles$", b["key"]))[-1])')
+          echo "build=https://build.protomaps.com/$key" >> "$GITHUB_OUTPUT"
+      - name: Create the releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STAMP: ${{ steps.plan.outputs.stamp }}
+          COUNTRIES: ${{ steps.plan.outputs.countries }}
+        run: |
+          want() { [[ "$PARTS" == all || "$PARTS" == "$1" ]]; }
+          if want routing && python3 -I -c 'import json, sys; sys.exit(0 if set(json.loads(sys.argv[1])) & set(json.load(open("scripts/routing/packs.json"))["countries"]) else 1)' "$COUNTRIES"; then
+            gh release create "routing-$STAMP" --prerelease --title "Routing packs routing-$STAMP" \
+              --notes "Offline routing packs (Valhalla 3.9.1 tiles), emergency points, street names, places and house numbers. Data © OpenStreetMap contributors, ODbL."
+          fi
+          if want maps; then
+            for c in $(python3 -I -c 'import json, sys; want = set(json.loads(sys.argv[1])); print(" ".join(sorted({r["continent"] for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["id"] in want and r["type"] == "country"})))' "$COUNTRIES"); do
+              gh release create "maps-$STAMP-$c" --prerelease --title "Country maps maps-$STAMP-$c" \
+                --notes "Offline country maps (Protomaps basemap, PMTiles), emergency points, street names, places and house numbers. Data © OpenStreetMap contributors, ODbL."
+            done
+          fi
+
+  build:
+    needs: plan
+    runs-on: ubuntu-latest
+    # GitHub's cap is 6 h; Spain's pack takes ~45 min, its map ~10.
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      # Pack jobs ask the public Overpass servers for admin boundaries once: keep it polite.
+      max-parallel: 8
+      matrix:
+        country: ${{ fromJson(needs.plan.outputs.countries) }}
+    env:
+      COUNTRY: ${{ matrix.country }}
+      STAMP: ${{ needs.plan.outputs.stamp }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Plan the job
+        id: what
+        run: |
+          # The routing pack only for the countries packs.json lists.
+          routing=$(python3 -I -c 'import json, os, sys; print("true" if os.environ["COUNTRY"] in json.load(open("scripts/routing/packs.json"))["countries"] and os.environ["PARTS"] in ("all", "routing") else "false")')
+          echo "routing=$routing" >> "$GITHUB_OUTPUT"
+          echo "maps=$([[ "$PARTS" == routing ]] && echo false || echo true)" >> "$GITHUB_OUTPUT"
+          echo "continent=$(python3 -I -c 'import json, os; print(next(r["continent"] for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["id"] == os.environ["COUNTRY"] and r["type"] == "country"))')" >> "$GITHUB_OUTPUT"
+      - name: Disk and tools
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          df -h / /mnt
+          # Work on whichever disk has more room.
+          if (( $(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0) > $(df --output=avail -B1 / | tail -1) )); then
+            sudo mkdir -p /mnt/pack && sudo chown "$(id -u):$(id -g)" /mnt/pack && echo "WORK=/mnt/pack" >> "$GITHUB_ENV"
+          else
+            mkdir -p "$HOME/pack" && echo "WORK=$HOME/pack" >> "$GITHUB_ENV"
+          fi
+          sudo apt-get update -qq && sudo apt-get install -y -qq osmium-tool python3-pyosmium python3-shapely >/dev/null
+          curl -fsSL https://github.com/protomaps/go-pmtiles/releases/download/v1.31.2/go-pmtiles_1.31.2_Linux_x86_64.tar.gz | sudo tar -xz -C /usr/local/bin pmtiles
+
+      # 1. Routing pack
+      - name: Build the routing pack
+        if: steps.what.outputs.routing == 'true'
+        run: |
+          docker run --rm -e CONC=4 -v "$PWD:/repo:ro" -v "$WORK:/work" "$VALHALLA_IMAGE" bash -c \
+            "apt-get update -qq && apt-get install -y -qq osmium-tool python3-pyosmium >/dev/null && bash /repo/scripts/routing/build-country.sh $COUNTRY /work/routing && chown -R $(id -u):$(id -g) /work"
+          ls -la "$WORK/routing/out"
+      - name: Upload the routing pack
+        if: steps.what.outputs.routing == 'true'
+        run: |
+          cd "$WORK/routing/out"
+          # Exactly the files the fragment lists (it drops empty packs and side files).
+          python3 -I -c 'import json, sys; [print(f["name"]) for p in json.load(open(sys.argv[1])) for f in p["parts"] + [x for x in (p["pois"], p.get("streets"), p.get("places"), p.get("addresses")) if x]]' \
+            "$COUNTRY.packs.json" | xargs gh release upload "routing-$STAMP" --clobber --repo "$GITHUB_REPOSITORY"
+          mkdir -p "$WORK/fragments" && cp "$COUNTRY.packs.json" "$WORK/fragments/"
+          # Uploaded: the map needs the disk.
+          rm -rf "$WORK/routing"
+      - uses: actions/upload-artifact@v4
+        if: steps.what.outputs.routing == 'true'
+        with:
+          name: packs-${{ matrix.country }}
+          path: ${{ env.WORK }}/fragments/${{ matrix.country }}.packs.json
+
+      # 2. Map (also when the pack failed: the catalog keeps last month's pack)
+      - name: Build the map
+        if: ${{ !cancelled() && steps.what.outputs.maps == 'true' }}
+        run: bash scripts/maps/build-country-map.sh "$COUNTRY" "$WORK/map" "${{ needs.plan.outputs.build }}"
+      - name: Upload the map
+        if: ${{ !cancelled() && steps.what.outputs.maps == 'true' }}
+        env:
+          TAG: maps-${{ needs.plan.outputs.stamp }}-${{ steps.what.outputs.continent }}
+        run: |
+          cd "$WORK/map/out"
+          # The fragment names its release (the catalog keeps one per map).
+          python3 -I -c 'import json, sys; p = sys.argv[1]; m = json.load(open(p)); m["release"] = sys.argv[2]; json.dump(m, open(p, "w"), indent=1)' "$COUNTRY.maps.json" "$TAG"
+          python3 -I -c 'import json, sys; m = json.load(open(sys.argv[1])); [print(f["name"]) for f in m["parts"] + [x for x in (m["pois"], m["streets"], m.get("places"), m.get("addresses")) if x]]' \
+            "$COUNTRY.maps.json" | xargs gh release upload "$TAG" --clobber --repo "$GITHUB_REPOSITORY"
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.what.outputs.maps == 'true' }}
+        with:
+          name: maps-${{ matrix.country }}
+          path: ${{ env.WORK }}/map/out/${{ matrix.country }}.maps.json
+
+  publish:
+    needs: [plan, build]
+    # Publish what was built even if some countries failed; the others keep last month's.
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      STAMP: ${{ needs.plan.outputs.stamp }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: packs-*
+          path: fragments/routing
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: maps-*
+          path: fragments/maps
+          merge-multiple: true
+      - name: Routing catalog
+        run: |
+          if ! ls fragments/routing/*.packs.json >/dev/null 2>&1; then echo "no routing pack built"; exit 0; fi
+          # If the index exists, its catalog must be read: else a partial run would drop every
+          # country it did not rebuild.
+          if gh release view routing-index >/dev/null 2>&1; then
+            gh release download routing-index --pattern routing-manifest.json --dir previous
+          fi
+          python3 -I scripts/routing/manifest.py merge "routing-$STAMP" fragments/routing/*.packs.json > routing-manifest.json
+          if [ -f previous/routing-manifest.json ]; then
+            python3 -I scripts/routing/manifest.py carry previous/routing-manifest.json routing-manifest.json scripts/routing/packs.json > merged.json
+            mv merged.json routing-manifest.json
+          fi
+          # Coverage within each extract's polygon (ferry lines leave it), carried packs too.
+          python3 -I scripts/routing/manifest.py clip routing-manifest.json scripts/routing/packs.json > clipped.json
+          mv clipped.json routing-manifest.json
+          gh release upload "routing-$STAMP" --clobber routing-manifest.json
+          gh release view routing-index >/dev/null 2>&1 || gh release create routing-index --prerelease \
+            --title "Routing catalog" --notes "routing-manifest.json: the current offline routing packs (read by the app)."
+          gh release upload routing-index --clobber routing-manifest.json
+      - name: Maps catalog
+        run: |
+          if ! ls fragments/maps/*.maps.json >/dev/null 2>&1; then echo "no map built"; exit 0; fi
+          if gh release view maps-index >/dev/null 2>&1; then
+            gh release download maps-index --pattern maps-manifest.json --dir previous
+          fi
+          python3 -I scripts/maps/maps-manifest.py merge "maps-$STAMP" fragments/maps/*.maps.json > maps-manifest.json
+          if [ -f previous/maps-manifest.json ]; then
+            python3 -I scripts/maps/maps-manifest.py carry previous/maps-manifest.json maps-manifest.json src/features/maps/regions.json > merged.json
+            mv merged.json maps-manifest.json
+          fi
+          gh release view maps-index >/dev/null 2>&1 || gh release create maps-index --prerelease \
+            --title "Country maps catalog" --notes "maps-manifest.json: the current offline country maps (read by the app)."
+          gh release upload maps-index --clobber maps-manifest.json
+      - name: Prune old releases
+        run: |
+          # Keep every release the catalogs now published point at (read back from the indexes,
+          # also the one this run didn't touch) plus those of the previous ones (a phone may
+          # still be downloading with the catalog it cached); runs that never reached a
+          # catalog go. Without an index, nothing of its family is pruned.
+          mkdir -p current
+          for idx in routing maps; do
+            gh release download "$idx-index" --pattern "$idx-manifest.json" --dir current --clobber || touch "current/no-$idx"
+          done
+          keep=$(python3 -I -c '
+          import json, os, sys
+          keep = set()
+          for f in sys.argv[1:]:
+              if os.path.exists(f):
+                  d = json.load(open(f))
+                  keep |= {x["release"] for x in d.get("packs", []) + d.get("maps", [])}
+          print("\n".join(sorted(keep)))' current/routing-manifest.json current/maps-manifest.json previous/routing-manifest.json previous/maps-manifest.json)
+          echo "keeping: $keep"
+          families="$( [[ -f current/no-routing ]] || echo routing ) $( [[ -f current/no-maps ]] || echo maps )"
+          for fam in $families; do
+            gh release list --limit 1000 --json tagName --jq '.[].tagName' | grep -E "^$fam-[0-9]{8}-[0-9]+(-[a-z-]+)?\$" | while read -r tag; do
+              grep -qxF "$tag" <<<"$keep" || { echo "deleting $tag"; gh release delete "$tag" --yes --cleanup-tag; }
+            done
+          done

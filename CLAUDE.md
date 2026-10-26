@@ -147,7 +147,7 @@ docs/               the docs above + screenshots/ + store/
   Its `route_action` also turns any C++ exception into 171: attach lldb with a
   breakpoint on `__cxa_throw` to see the real one.
 - Routing packs only work with the Valhalla version that built them: keep
-  `VALHALLA_IMAGE` (`.github/workflows/routing-packs.yml`, `scripts/routing/build-country.sh`)
+  `VALHALLA_IMAGE` (`.github/workflows/country-packages.yml`, `scripts/routing/build-country.sh`)
   in step with valhalla-mobile's bundled Valhalla (3.9.1).
 
 ## Working on this repo

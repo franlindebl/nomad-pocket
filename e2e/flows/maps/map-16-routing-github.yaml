@@ -1,6 +1,6 @@
 # MAP-16 — a country download with the published routing pack: the same path as MAP-15,
 # but the routing catalog is a copy of the live routing-manifest.json and the Andorra pack
-# (3 MB, built by .github/workflows/routing-packs.yml) downloads from GitHub Releases (the
+# (3 MB, built by .github/workflows/country-packages.yml) downloads from GitHub Releases (the
 # map still comes from the local catalog). Catches a broken release, a manifest the app
 # can't read, or a CI-built pack the on-device engine rejects.
 appId: com.fjlinde.nomadpocket

@@ -1,5 +1,5 @@
 {
-  "//": "Countries built by .github/workflows/routing-packs.yml, one pack each. geofabrik: extract path, or a list of extracts merged into one build (Geofabrik's Spain leaves out the Canary Islands); iso: ISO 3166-1 code(s) for the admin boundaries, comma separated when the extract spans countries (haiti-and-domrep, ireland-and-northern-ireland).",
+  "//": "Countries with a routing pack, built by .github/workflows/country-packages.yml, one pack each. geofabrik: extract path, or a list of extracts merged into one build (Geofabrik's Spain leaves out the Canary Islands); iso: ISO 3166-1 code(s) for the admin boundaries, comma separated when the extract spans countries (haiti-and-domrep, ireland-and-northern-ireland).",
   "countries": {
     "es": { "geofabrik": ["europe/spain", "africa/canary-islands"], "iso": "ES" },
     "pt": { "geofabrik": "europe/portugal", "iso": "PT" },

@@ -1,5 +1,5 @@
 // Downloadable routing packs: the catalog (routing-manifest.json, published with the
-// packs on GitHub Releases by .github/workflows/routing-packs.yml), downloads through
+// packs on GitHub Releases by .github/workflows/country-packages.yml), downloads through
 // the download manager (one per tar part plus the pack's emergency points and its search
 // side files: street names, named places, house numbers), and assembling the parts into
 // content/routing/<id>.tar.

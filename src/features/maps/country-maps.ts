@@ -1,4 +1,4 @@
-// Country maps built in CI (.github/workflows/country-maps.yml): the catalog
+// Country maps built in CI (.github/workflows/country-packages.yml): the catalog
 // (maps-manifest.json on the fixed release `maps-index`), downloads through the download
 // manager (one per archive part, plus the country's emergency points, street names, named
 // places and house numbers where no routing pack brings them) and assembling the parts into

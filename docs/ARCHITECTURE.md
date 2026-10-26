@@ -312,7 +312,10 @@ then queues the prebuilt map (`downloadCountryMap`) or starts the extraction fal
 the pack (`downloadPack`). `useCountries` groups installed items and downloads in flight by
 country (one row: size, combined progress, failed → retry); `removeCountry` cancels and
 deletes both. Maps that aren't a country (older community/state or visible-area maps) are
-listed as "Otros mapas". **Prebuilt maps**: `.github/workflows/country-maps.yml` (monthly)
+listed as "Otros mapas". **Prebuilt maps**: `.github/workflows/country-packages.yml` (monthly, or by hand with a
+country list and `parts` = all / maps / routing; one job per country builds its routing pack
+first, see Routing, then its map, and the run publishes both catalogs and prunes both families
+of releases)
 runs `scripts/maps/build-country-map.sh` per country: `pmtiles extract` of the planet build
 over the country's outline (`country-region.py`: Natural Earth 10m polygons with islands and
 exclaves within 10°, grown 5 km; Spain then carries Canarias and no Portugal: 2.3 GB instead
@@ -320,7 +323,7 @@ of the bbox's 3.2 GB) at z15 (the highest zoom whose archive is ≤ 10 GB), spli
 ≤ 1900 MiB parts; for countries without a routing pack also `<id>.{pois,streets,places,addresses}.tsv`
 from the Geofabrik extract (scripts/routing/emergency-points.py, streets.py, places.py: the
 same side files as a routing pack). `scripts/maps/maps-manifest.py` writes `maps-manifest.json` (release
-`maps-index`, files in one release per continent, `maps-YYYYMMDD-N-<continent>`: GitHub stops at
+`maps-index`, files in one release per continent, `maps-YYYYMMDD-<run id>-<continent>`: GitHub stops at
 1000 assets per release). The job builds the side files first and deletes the extract before
 writing the map, cuts the parts off the end of the archive (the ~14 GB runner disk never holds
 it twice) and skips the side files when the extract doesn't fit (the USA's 11 GB: Overpass then). The app downloads parts as `kind: 'map'`
@@ -457,7 +460,7 @@ around the user, so a common street name nearby isn't lost among thousands. A
 kill mid-assembly is recovered by the manager re-finalizing the last part (all parts are
 still on disk); 4 s after startup `sweepRoutingFiles` deletes temp files and parts/POI/
 street files no active download belongs to. sha256 is in the manifest but not verified yet. Removing a pack closes the router
-and drops its POIs. **Packs are built** by `.github/workflows/routing-packs.yml` (monthly
+and drops its POIs. **Packs are built** by `.github/workflows/country-packages.yml` (monthly
 + manual): `scripts/routing/build-country.sh` per country of `packs.json` inside
 `ghcr.io/valhalla/valhalla:3.9.1` — Geofabrik PBF(s) (md5-checked; several are
 `osmium merge`d: Spain + Canary Islands) + admin boundaries (levels 2/4) from Overpass →
@@ -466,7 +469,7 @@ and drops its POIs. **Packs are built** by `.github/workflows/routing-packs.yml`
 (`osmium tags-filter` + `emergency-points.py`, same columns as the Overpass TSV) → street
 names (`streets.py`, one row per name per ~1 km) → split → `manifest.py` (bbox, cells,
 parts with sha256; empty side files dropped).
-Each run gets its own tag (`routing-YYYYMMDD-<run>`) and each pack records its release,
+Each run gets its own tag (`routing-YYYYMMDD-<run id>`) and each pack records its release,
 so countries not rebuilt in a run keep their previous files (a rebuilt country replaces
 all its packs; countries no longer in `packs.json` are dropped); `routing-index` is updated
 last, and the run fails rather than drop countries if the previous manifest can't be
@@ -649,7 +652,7 @@ familiar" action and the plan/kit rows of "Tu preparación" (`features/home/read
 | `build-metadata.protomaps.dev/builds.json`, `build.protomaps.com` | daily planet build, HTTP Range extraction |
 | `huggingface.co` | GGUF models |
 | `overpass-api.de`, `overpass.private.coffee`, `maps.mail.ru/osm/tools/overpass` | emergency points per region (only the region bbox is sent; public servers, best effort) |
-| `github.com/franlindebl/nomad-pocket/releases` (`routing-index`, `routing-YYYYMMDD`; `maps-index`, `maps-YYYYMMDD`) | routing catalog and packs (`.github/workflows/routing-packs.yml`), country maps catalog and archives (`.github/workflows/country-maps.yml`): our only hosted data |
+| `github.com/franlindebl/nomad-pocket/releases` (`routing-index`, `routing-YYYYMMDD`; `maps-index`, `maps-YYYYMMDD`) | routing catalog and packs, country maps catalog and archives, all built by `.github/workflows/country-packages.yml`: our only hosted data |
 | `franlindebl.github.io/nomad-pocket` | privacy policy / support page (`site/`) |
 
 ## Testing

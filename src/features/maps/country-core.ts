@@ -89,6 +89,7 @@ export function mapAssetUrl(manifest: Pick<MapsManifest, 'release' | 'baseUrl'>,
  * Countries routed by a pack built from an extract they share with a neighbour
  * (scripts/routing/packs.json `iso`). Not the UK: `ie` lists GB for Northern Ireland only.
  */
+// Keep in step with SHARED in scripts/maps/build-country-map.sh.
 const SHARED_PACKS: Record<string, string> = { ht: 'do' };
 
 /** The routing pack of a country, if the catalog has one. */

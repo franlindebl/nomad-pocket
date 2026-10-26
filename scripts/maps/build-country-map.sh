@@ -56,8 +56,11 @@ fi
 #    Overpass for their points by itself.
 if [[ "${SKIP_POINTS:-}" != "1" ]] && ! python3 -I - "$ROOT/scripts/routing/packs.json" "$ID" <<'PY'
 import json, sys
-countries = json.load(open(sys.argv[1]))["countries"].values()
-sys.exit(0 if any(sys.argv[2].upper() in c["iso"].split(",") for c in countries) else 1)
+# A pack of its own, or one whose extract covers the whole country (routePackFor in
+# src/features/maps/country-core.ts). Not the UK: `ie` lists GB for Northern Ireland only.
+SHARED = {"ht": "do"}
+packs = json.load(open(sys.argv[1]))["countries"]
+sys.exit(0 if sys.argv[2] in packs or SHARED.get(sys.argv[2]) in packs else 1)
 PY
 then
   PBF_URL="$(curl -fsSL --retry 3 -A "$UA" https://download.geofabrik.de/index-v1-nogeom.json | python3 -I -c '
