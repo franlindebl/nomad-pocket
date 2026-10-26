@@ -120,7 +120,12 @@ up from the manifest with no app release. Order the owner agreed:
    Virgin Islands (their OSM boundaries are admin level 4 of the USA: no level-2 admins);
    territories without a Geofabrik extract of their own (Kosovo, Vatican, San Marino,
    small Caribbean islands).
-4. **Rest of the world**, with the big countries as whole packs where they fit (Italy,
+4. **Rest of the world** — added to `packs.json` 2026-10-26 (owner approved): every
+   country and territory of `regions.json` but the uninhabited ones, Haiti (routed by `do`)
+   and the USA, 232 in all, as whole packs (Germany, France, Canada, Russia included: the
+   runner has ~100 GB of disk). Places without an extract of their own are cut from the
+   one that holds them (`clip`). The USA (12 GB PBF) needs several packs per country in the
+   app first. Originally planned: with the big countries as whole packs where they fit (Italy,
    UK, Poland, Brazil ~3.5 GB; Germany, France ~7.5 GB) and the huge ones (USA, Russia,
    Canada) split coarsely: a few Geofabrik sub-extracts merged per quarter (e.g. US
    West/Central/East from its state extracts), as `geofabrik` lists in `packs.json` and

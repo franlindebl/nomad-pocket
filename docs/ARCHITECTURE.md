@@ -643,20 +643,26 @@ street files no active download belongs to. size and sha-256 are verified (count
 and drops its POIs. **Packs are built** by `.github/workflows/country-packages.yml` (monthly
 + manual): `scripts/routing/build-country.sh` per country of `packs.json` inside
 `ghcr.io/valhalla/valhalla:3.9.1` — Geofabrik PBF(s) (md5-checked; several are
-`osmium merge`d: Spain + Canary Islands) + admin boundaries (levels 2/4) from Overpass →
+`osmium merge`d: Spain + Canary Islands; `clip` cuts a bigger extract to the country's
+`regions.json` bbox: Saudi Arabia from gcc-states, Caribbean islands from central-america)
++ admin boundaries (levels 2/4) from Overpass, by ISO 3166-1 at level 2, else at any level,
+else ISO 3166-2 (territories: Puerto Rico, Aruba), else none (right-hand traffic) →
 `valhalla_build_admins` → `valhalla_build_tiles` (retried: 3.9.1 segfaults now and then)
 → one tar per country (the owner wants whole-country packs only) → emergency points
 (`osmium tags-filter` + `emergency-points.py`, same columns as the Overpass TSV) → street
 names (`streets.py`, one row per name per ~1 km) → split → `manifest.py` (bbox, cells,
 parts with sha256; empty side files dropped).
-Each run gets its own tag (`routing-YYYYMMDD-<run id>`) and each pack records its release,
+Each run gets its own tags, one per continent (`routing-YYYYMMDD-<run id>-<continent>`:
+GitHub stops at 1000 assets per release), and each pack records its release,
 so countries not rebuilt in a run keep their previous files (a rebuilt country replaces
 all its packs; countries no longer in `packs.json` are dropped); `routing-index` is updated
 last, and the run fails rather than drop countries if the previous manifest can't be
 read. Before publishing, every pack's cells are clipped to its Geofabrik extract's
 `.poly` (`manifest.py clip`: extracts keep whole ways that leave them, ferry lines above
 all, which would make Ireland's pack "cover" Bilbao). Then releases that neither the new
-nor the previous manifest points at are deleted.
+nor the previous manifest points at are deleted. A country that gains a pack keeps its map
+from an earlier run, with its own side files: `manifest.py unshare` drops those from
+`maps-manifest.json`, so the app downloads and indexes the pack's only.
 
 **Service roads on the map** (`style.ts`, `tameServiceRoads`): Protomaps draws every
 `highway=service` almost like a street, private and underground ones included. The tiles
