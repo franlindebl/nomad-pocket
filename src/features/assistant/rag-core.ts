@@ -577,13 +577,20 @@ export function searchToolSpec(lang: Lang) {
   };
 }
 
-/** The search query in a tool call's JSON arguments (models sometimes send a bare string). */
+/**
+ * The search query in a tool call's JSON arguments. Models sometimes send a bare string,
+ * or name the argument differently ({"keywords": "…"}): its only string value is used.
+ */
 export function parseToolQuery(args: string | undefined): string {
   if (!args) return '';
   try {
     const v: unknown = JSON.parse(args);
     if (typeof v === 'string') return v.trim();
-    if (v && typeof v === 'object' && typeof (v as { query?: unknown }).query === 'string') return (v as { query: string }).query.trim();
+    if (v && typeof v === 'object') {
+      if (typeof (v as { query?: unknown }).query === 'string') return (v as { query: string }).query.trim();
+      const strings = Object.values(v).filter((x): x is string => typeof x === 'string');
+      if (strings.length === 1) return strings[0].trim();
+    }
   } catch {
     // not JSON: use as is
   }

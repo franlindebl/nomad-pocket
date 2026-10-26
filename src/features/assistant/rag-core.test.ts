@@ -431,6 +431,8 @@ describe('tool calls', () => {
     assert.equal(parseToolQuery('"Michael Jackson"'), 'Michael Jackson');
     assert.equal(parseToolQuery('capital de Australia'), 'capital de Australia');
     assert.equal(parseToolQuery('{"q":1}'), '{"q":1}');
+    assert.equal(parseToolQuery('{"keywords":" hipotermia niños "}'), 'hipotermia niños');
+    assert.equal(parseToolQuery('{"a":"x","b":"y"}'), '{"a":"x","b":"y"}');
     assert.equal(parseToolQuery(undefined), '');
   });
 

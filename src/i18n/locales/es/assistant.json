@@ -55,6 +55,16 @@
     "noModel": "Primero elige un modelo.",
     "notInstalled": "El modelo elegido ya no está instalado. Elige otro.",
     "systemUnavailable": "El modelo integrado no está disponible ahora mismo.",
+    "tooLong": "Es demasiado largo para el modelo. Acorta la pregunta o empieza un chat nuevo.",
+    "declined": "El modelo integrado se ha negado a responder. Prueba a reformular la pregunta o usa un modelo descargado.",
+    "language": "El modelo integrado aún no admite este idioma.",
+    "notReady": "El modelo integrado aún no está listo. Inténtalo de nuevo en unos minutos.",
+    "busy": "El modelo está ocupado. Inténtalo de nuevo en un momento.",
+    "batteryQuota": "El sistema ha pausado el modelo integrado para ahorrar batería. Inténtalo más tarde.",
+    "background": "El modelo integrado solo funciona con la app abierta.",
+    "diskFull": "No hay espacio libre suficiente para el modelo integrado.",
+    "systemUpdate": "El modelo integrado necesita una actualización del sistema.",
+    "empty": "El modelo no ha escrito ninguna respuesta. Inténtalo de nuevo o reformula la pregunta.",
     "generic": "El modelo no ha podido responder: {{message}}"
   },
   "conversations": {

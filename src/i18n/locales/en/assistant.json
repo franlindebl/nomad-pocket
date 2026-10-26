@@ -55,6 +55,16 @@
     "noModel": "Choose a model first.",
     "notInstalled": "The selected model is no longer installed. Choose another one.",
     "systemUnavailable": "The built-in model isn't available right now.",
+    "tooLong": "This is too long for the model. Shorten the question or start a new chat.",
+    "declined": "The built-in model declined to answer this. Try rephrasing it or use a downloaded model.",
+    "language": "The built-in model doesn't support this language yet.",
+    "notReady": "The built-in model isn't ready yet. Try again in a few minutes.",
+    "busy": "The model is busy. Try again in a moment.",
+    "batteryQuota": "The system paused the built-in model to save battery. Try again later.",
+    "background": "The built-in model only works while the app is open.",
+    "diskFull": "There isn't enough free space for the built-in model.",
+    "systemUpdate": "The built-in model needs a system update.",
+    "empty": "The model didn't write an answer. Try again or rephrase the question.",
     "generic": "The model couldn't answer: {{message}}"
   },
   "conversations": {

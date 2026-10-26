@@ -222,22 +222,25 @@ class LlamaEngine implements Engine {
       tool_choice: 'auto',
       ...(this.toolThinking ? { enable_thinking: true, thinking_budget_tokens: DECISION_THINKING_TOKENS } : {}),
     });
-    const call = first.toolCalls?.find((c) => c.function?.name === SEARCH_TOOL_NAME);
+    // search_library is the only tool offered: a small model that misspells its name
+    // still meant it (and streaming stops at the call, so there is no text to fall back on).
+    const call = first.toolCalls?.find((c) => c.function?.name === SEARCH_TOOL_NAME) ?? first.toolCalls?.[0];
     if (!call || first.stopped) return { text: first.text, stopped: first.stopped };
 
     // Pass 2: answer from the search results. Tools stay declared so the chat template
     // renders the call the same way; tool_choice "none" keeps the model from searching again.
     req.onText('');
-    const query = parseToolQuery(call.function.arguments);
+    const query = parseToolQuery(call.function?.arguments);
     const result = await tool.run(query);
     if (this.stopRequested) return { text: '', stopped: true, toolQuery: query };
     const id = call.id || 'call_0';
+    const fn = call.function?.name === SEARCH_TOOL_NAME ? call.function : { name: SEARCH_TOOL_NAME, arguments: JSON.stringify({ query }) };
     const second = await this.complete(
       req,
       [
         ...messages,
-        { role: 'assistant', content: '', tool_calls: [{ id, type: 'function', function: { name: call.function.name, arguments: call.function.arguments } }] },
-        { role: 'tool', tool_call_id: id, name: call.function.name, content: result },
+        { role: 'assistant', content: '', tool_calls: [{ id, type: 'function', function: fn }] },
+        { role: 'tool', tool_call_id: id, name: SEARCH_TOOL_NAME, content: result },
       ],
       { tools: [tool.spec], tool_choice: 'none' },
     );
