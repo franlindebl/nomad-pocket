@@ -189,6 +189,7 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 - Onboarding: the bottom button sat on the screen's edge on every step. The
   KeyboardAvoidingView (added with the country search) overwrites its own paddingBottom in
   'padding' mode; the safe-area inset is now a spacer view.
+- Build 12 (TestFlight) carries this plus 27fb184 and 159f565.
 
 ### 2026-10-26 — Android check of the redesign (emulator)
 

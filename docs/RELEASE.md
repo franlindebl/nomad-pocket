@@ -24,9 +24,9 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 
 - Marketing version: `expo.version` (currently **1.1.0**). Keep `package.json`'s
   `version` equal (not used by the build, but it's what people read).
-- iOS build number: `expo.ios.buildNumber` (currently **"11"**) → `CFBundleVersion`. Bump it
+- iOS build number: `expo.ios.buildNumber` (currently **"12"**) → `CFBundleVersion`. Bump it
   for every upload: App Store Connect rejects a build number it has already seen.
-- Android: `expo.android.versionCode` (currently **11**, nothing published yet). Must grow
+- Android: `expo.android.versionCode` (currently **12**, nothing published yet). Must grow
   with every Play upload.
 - After changing any of them, run `npx expo prebuild` (it can regenerate `ios/` and
   `android/` from scratch: then `cd ios && pod install`).
@@ -43,6 +43,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.1.0 | 9 | TestFlight 2026-10-25: routes never start in garages or tunnels, mountain trails on foot, thinner service roads |
 | 1.1.0 | 10 | TestFlight 2026-10-25: search finds nearby schools and shops, street addresses ("Calle Alcalá 50") and abbreviations |
 | 1.1.0 | 11 | TestFlight 2026-10-26: survival-kit redesign (country downloads with everything, new onboarding and Home, 4 tabs, bundled world map), every place and house number in the packs |
+| 1.1.0 | 12 | TestFlight 2026-10-26: a country is one download (one row, one notice), the Maps tab shows a country on its way, onboarding buttons off the screen's edge, friendlier download errors, "couldn't check" vs "no navigation" |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.
