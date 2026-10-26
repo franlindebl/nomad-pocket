@@ -146,9 +146,9 @@ prebuild). A Play release needs an upload keystore (configured through a config 
 never committed), a Play listing and its data-safety form.
 
 **TODO before any Play release** (owner decision 2026-10-26, details in `docs/PROGRESS.md`):
-remove ML Kit GenAI (Gemini Nano; proprietary, sends diagnostics to Google) from the Android build
-and try to drop Firebase (pulled by expo-notifications) from the APK, so the app has no
-third-party analytics-capable SDK and the privacy policy's claim holds; list the full transitive
+ML Kit GenAI (Gemini Nano) is removed and Firebase is kept out of the APK
+(`plugins/with-android-no-firebase.js`; re-check it after an expo-notifications update), so the app
+has no third-party analytics-capable SDK. Still to do: list the full transitive
 Android notice set (a Gradle licence plugin) in Credits; decide how the proprietary Play Services
 pieces sit next to GPL libkiwix (ideally ask Kiwix); re-read `site/privacy.html` for Android and
 fill the Data safety form to match it.

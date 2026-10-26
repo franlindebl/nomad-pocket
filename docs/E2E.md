@@ -233,6 +233,7 @@ By hand:
 | settings | `set-01-language` | SET-01 | smoke | — |
 | settings | `set-02-theme` | SET-02 | full | — |
 | settings | `set-03-storage` | SET-03, SET-04 | full | seeded |
+| settings | `set-05-credits` | SET-05 | full | — (GPL notice, source/licence links, libkiwix, a JS package's licence via search) |
 | library | `lib-01-open` | LIB-01, RDR-01 | smoke | seeded |
 | library | `lib-02-delete` | LIB-02, LIB-05 | smoke | seeded |
 | library | `lib-03-category` | LIB-03 | full | — |
@@ -261,6 +262,7 @@ By hand:
 | maps | `map-15-routing-download` | MAP-15 | full | routing-server, maps-server (country download from guidance: map + pack; also searches a street, a place and an address from the pack's side files) |
 | maps | `map-16-routing-github` | MAP-16 | nightly | routing-live, maps-server (published routing catalog, Andorra pack from GitHub, 3 MB) |
 | maps | `map-17-follow` | MAP-17 | full | seeded-route (navigation view; drives the CG-1 with Maestro `travel`) |
+| maps | `map-18-credit` | MAP-18 | full | — (OSM credit shown when the map first appears, then fades) |
 | courses | `crs-01-empty` | CRS-01 | smoke | — |
 | courses | `crs-02-course` | CRS-02, CRS-03, CRS-04 | full | seeded |
 | assistant | `ai-01-no-model` | AI-01, AI-02 | smoke | — |

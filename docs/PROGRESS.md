@@ -29,7 +29,7 @@ can pick up without re-deriving anything.
 | Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
 | Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 60 whole-country packs live since 2026-10-25 (Europe + Latin America up to Spain's size; more countries in the 2026-10-26 full run); E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
-| Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: Gemini Nano (ML Kit) is being removed, downloadable models only (owner decision 2026-10-26) |
+| Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
 | Preparedness (family plan, emergency kit with expiry reminders, printable PDF, offline guides) | done — iOS sim + Android emulator (E2E) |
 | E2E suite (Maestro) + pre-commit hook | done |
@@ -41,7 +41,7 @@ can pick up without re-deriving anything.
 - MVP: ZIM library, offline maps, courses, local AI. UI + content in ES and EN.
 - GPL-3.0 open source (libkiwix). Public GitHub repo `franlindebl/nomad-pocket`.
 - Maps: in-app extraction from the Protomaps daily build (bbox/country).
-- AI: system models (Apple FM / Gemini Nano) + downloadable GGUF via llama.rn.
+- AI: Apple Foundation Models (iOS) + downloadable GGUF via llama.rn (both platforms).
 - Courses: educational ZIMs + progress layer (Kolibri not in MVP).
 - Name "Nomad Pocket", bundle id `com.fjlinde.nomadpocket`, iOS 16.4+ / Android 8+.
 - Later: E2E suite run by hand (no CI, no E2E git hook), flows in Spanish; iPad covered
@@ -63,10 +63,11 @@ A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check
    - The git history rewrite that removes the owner's old location examples (pending a quiet window).
      **Then tag the store builds** (`v1.1.0-12` for build 12, and every later build: GPL section 6).
    Owner decisions still open or to carry out:
-   - Android before any Play release: remove ML Kit GenAI (Gemini Nano) from the Android build
-     (option A) and try to drop Firebase (expo-notifications) from the APK; list the full transitive
-     Android notices (Gradle licence plugin); see `docs/RELEASE.md`. Until done the Android privacy
-     claims (no third-party SDKs) are not guaranteed.
+   - Android before any Play release: ML Kit GenAI is removed and Firebase kept out of the APK
+     (done 2026-10-26). Still to do: list the full transitive Android notices (Gradle licence
+     plugin), and decide how the proprietary Play services libraries that expo-location and
+     MapLibre need (play-services-location/base/basement/tasks) sit next to GPL libkiwix; see
+     `docs/RELEASE.md`.
    - Store prebuild gated by an env var (LEGAL-9): the generated `Info.plist` is shared by Debug and
      Release, so dev-launcher keys can reach a store build.
    - A planned index rebuild to reclaim the space of existing users' old index file.
@@ -146,12 +147,12 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
    (small native module) instead of restarting from zero.
 4. Map extraction: resume after a kill (persist the plan + written ranges) and move it off
    the JS thread.
-5. Android release: upload keystore, Play listing + data safety; the ML Kit / Firebase removal of
-   item A comes first.
+5. Android release: upload keystore, Play listing + data safety; the Android notices and the Play
+   services question of item A come first.
 6. Reader: auto-hiding toolbar on scroll (style guide), syllabus for SPA course ZIMs read
    from the rendered DOM.
 7. Assistant: copy / regenerate an answer; better small-model citations; check the
-   conversational flow on Android (llama.cpp tools + Gemini Nano heuristics) and on a
+   conversational flow on Android (llama.cpp tools) and on a
    real iPhone (tool-call latency with Metal).
 8. Preparedness follow-ups: share ZIMs/maps phone to phone (share sheet export, import
    exists); "Ready.gov"-style quick cards bundled in the app (radio frequencies, first aid)
@@ -192,14 +193,9 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
   (expo-file-system tasks don't survive relaunch); on iOS the background session keeps
   transferring but is not reattached after the app is terminated (BUG-CORE-16: needs a small
   native hook), so the bytes may be fetched twice.
-- The Downloads sheet's group cancel skips a member that is mid-assembly (`processing`), so a country
-  deleted from there can still finish assembling; removing or cancelling from the regions screen
-  does abort it (BUG-CORE-9 / BUG-MAPS-12 partly).
 - Compass heading in landscape: iOS reports an orientation of UNKNOWN until the first rotation after
   launch, so the heading is withheld in landscape until then; Android tablets whose natural
   orientation is landscape stay 90° off.
-- Android: the Gemini Nano (ML Kit) bridge and Firebase are still in the build until the removal of
-  item A; the Android privacy claims depend on it.
 - The generated `Info.plist` is shared by Debug and Release (LEGAL-9, item A).
 - Map extraction runs on the JS thread in the foreground (screen kept awake) and does
   not resume after the app is killed.
@@ -230,8 +226,14 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 - An independent audit of the whole repo (code, native modules, CI scripts, docs, legal) produced
   findings; the verified ones were fixed in nine code packages and one docs pass, merged on
-  `audit-fixes`. Nothing was run on a physical device and the Maestro suite was not re-run: see the
-  device checks of backlog item A.
+  `audit-fixes`. Final verification on simulators/emulators (not physical devices): iOS Release
+  build, Maestro smoke (21/21) and full suite all pass, including the new `set-05-credits` and
+  `map-18-credit`; Android `assembleRelease` with no ML Kit and no Firebase in the runtime
+  classpath, and android-01/03/04/05 pass on an Android 16 emulator (a kit reminder fired with
+  Firebase excluded). Device checks still pending: backlog item A.
+- Android: ML Kit GenAI (Gemini Nano) removed, `nomad-llm` is Apple-only; Firebase kept out of the
+  APK (`plugins/with-android-no-firebase.js`); a Downloads-sheet group cancel now stops a country
+  part mid-assembly (`EnqueueInput.abortable`).
 - Downloads: Wi-Fi only is enforced in the manager (held records wait, one question per country or
   kit, a running transfer that reaches mobile data pauses); size and sha-256 checks (Kiwix metalink,
   manifests) with the bad copy deleted; network errors keep the bytes and retry with backoff;

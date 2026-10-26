@@ -22,6 +22,10 @@ How to set up, build, run and check Nomad Pocket. Architecture is in
 npm install
 ```
 
+- `npm ci --ignore-scripts` (or any install that skips scripts) also skips llama.rn's own
+  postinstall, which fetches `rnllama.xcframework` and the Android `jniLibs`: the iOS build then
+  fails with `'rnllama/rn-llama.h' file not found`. Run a normal `npm install` / `npm ci`.
+
 - `postinstall` runs `scripts/postinstall.mjs` (no bash needed; it skips both iOS fetches off
   macOS): `modules/nomad-zim/scripts/fetch-ios-libs.sh` downloads the pinned
   libkiwix xcframework (14.2.1-2, sha256-checked, ~200 MB unpacked) into
@@ -143,6 +147,6 @@ Unit tests import with `.ts` extensions and no `@/` aliases (Node loads them dir
 - `llama.rn` is a release candidate (0.13.0-rc.8): `stopCompletion()`/`release()` may not
   return promises, so don't chain `.catch` on them directly (`engine.ts` wraps them).
 - Apple Intelligence fails every request on the iOS 26.5 simulator (`GenerationError -1`):
-  use iOS 27. (Android's Gemini Nano bridge is being removed: the Android assistant uses downloadable models only.)
+  use iOS 27. (Android has no system model: the assistant uses downloadable models only.)
 - `xcodebuild` builds for a simulator need `ios/` from `npx expo prebuild`; the E2E runner
   builds `ios/build/sim/…/NomadPocket.app` itself when it is missing.
