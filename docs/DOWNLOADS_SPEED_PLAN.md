@@ -1,6 +1,6 @@
 # Faster downloads: analysis and plan
 
-Status: **analysis only** (2026-10-26). Nothing implemented. Pick it up **after `audit-fixes`
+Status: **analysis only** (2026-10-26; Kiwix, GitHub, Hugging Face and Protomaps measured). Nothing implemented. Pick it up **after `audit-fixes`
 is merged into `main`**: that branch rewrites `src/features/downloads/manager.ts`
 (network gate, retries that keep the bytes, sha-256 check, `avoidMirrors`), and this plan
 builds on that version. The references below are to `audit-fixes` unless they say `main`.
@@ -207,6 +207,62 @@ downloading all 13–36 GB again.
 | Screen locked, Android | **Pauses** | Pauses | With A: doesn't happen while the app is open |
 | Bad file (hash) | — | Deleted. Retry downloads it all from another mirror | Same. With D, only the bad pieces |
 
+## Other downloads: courses, maps, routing packs, models
+
+Measured the same day (18:00 UTC), from the same Mac. The link peaked at ~30–39 MB/s.
+
+| What | Comes from | Size | How it downloads today |
+|---|---|---|---|
+| Courses, medicine, survival, DIY, books; anything from Explore | `download.kiwix.org` + metalink mirrors (Explore's OPDS links are the same `.zim` URLs, `.meta4` stripped) | 101 catalog items (372 GB), 42 over 1 GB. Courses: 14 items, 11 GB, biggest 2.6 GB. TED conference: 18 GB | Same path as Wikipedia |
+| Country maps | GitHub Releases → `release-assets.githubusercontent.com` | 241 countries, median 118 MB. Spain 2.29 GB in 2 parts; largest 8.5 GB (Canada) in 5 parts of ≤ 2 GiB | Manager, one group of files, 2 files at a time, sha-256 from the manifest |
+| Routing packs + search files (points, streets, places, addresses) | GitHub Releases | Spain: 2.27 GB in 2 parts + TSVs | Same |
+| AI models | Hugging Face → `us.aws.cdn.hf.co` | 0.53–3.1 GB (4 models) | Manager |
+| Map extraction (fallback for a country the catalog lacks) | `build.protomaps.com` (planet, 139 GB) | A region | External job: its own range requests, 4–6 at a time, ≤ 4 MiB each, keep-awake already |
+| Manifests, OPDS feeds, Overpass (emergency points) | Various | KB–MB | `fetch`. Nothing to gain |
+
+| Source | 1 connection | 4 | 8 |
+|---|---|---|---|
+| GitHub Releases, `es.pmtiles.part00` | 16.4 MB/s (again: 15.9) | 18.1 | 24.1 |
+| GitHub Releases, `es.tar.part00` | 16.1 MB/s | 26.7 | 28.1 |
+| Hugging Face, Qwen3.5-2B | 27.8 MB/s (again: 29.6) | 26.7 | 27.9 |
+| Protomaps planet build | 28.2 MB/s | 29.5 | 30.0 |
+| *For comparison, Kiwix: best mirror / default mirror* | *12–23 / 0.3–0.5* | | |
+
+What this means:
+
+1. **Courses and every other Kiwix archive have Wikipedia's problem**, and the same fix
+   covers them. A–D apply as they are, Explore included. Nothing extra to build.
+2. **GitHub (maps, routing packs)**: one connection gives ~16 MB/s, about half this link,
+   and 4–8 connections reach the link (~1.6×). A country already downloads 2 files at a
+   time, so it runs near link speed except at the end, when one big part is left alone.
+   Spain (~4.7 GB) takes ~3–4 min on this link. C would gain maybe 20–30% there: not a
+   reason to build C, but once C exists, GitHub assets over ~64 MB can use it with 4
+   connections at little cost. Check on the device first.
+3. **Hugging Face and Protomaps**: one connection already fills the link. C gains nothing
+   in speed. (Extraction's own parallel requests are about latency, and they already
+   exist. Its resume after a kill is backlog item 4 in PROGRESS.)
+4. **Maps and models need robustness, not speed:**
+   - A (keep-awake) covers them too: today, locking an Android phone pauses a country
+     download as well.
+   - **Signed redirects expire after 1 h.** GitHub's redirect URL carries `se=` about an
+     hour ahead, Hugging Face's `Expires=` exactly 1 h ahead. To verify on iOS: resume
+     data after a pause longer than an hour probably points at the expired URL. The
+     server would answer 403, which `audit-fixes` treats as stale resume data, so the
+     download restarts from zero (a 2 GB part, a 3 GB model). Android resumes from the
+     original URL (a fresh redirect), so it is fine. C avoids this: every chunk asks the
+     original URL. Without C: on a 4xx when resuming on iOS, retry once with a new task to
+     the original URL before throwing the bytes away. The bytes live only in the resume
+     data, so check whether expo-file-system lets us swap the URL in it.
+   - A kill on iOS restarts the current file from zero (≤ 2 GiB for maps, ≤ 3.1 GB for
+     models). Either C or PROGRESS backlog item 3 (reattach the background `URLSession`)
+     fixes it.
+
+Recommendation: the order stays A → B → spike → C → D. A covers every kind from the
+manager at once. B is Kiwix-only (it needs the metalink). Build C with a source that is a
+**list of URLs**: Kiwix gives several mirrors; GitHub and Hugging Face give one URL with
+several connections. Turn it on for Kiwix first, for GitHub assets if the spike shows a
+gain, and for models only if a device measurement says so.
+
 ## Device spike before C (half a day)
 
 On a real iPhone and an Android phone, Release build, behind a debug flag:
@@ -219,6 +275,9 @@ On a real iPhone and an Android phone, Release build, behind a debug flag:
 3. iOS: go to background mid-download. Check what the reserve tasks do over 10 minutes and
    what is left when the app comes back.
 4. Run B's probe on the phone: compare its ranking with the sustained speeds.
+5. iOS: pause a GitHub map part and a Hugging Face model for more than an hour, then
+   resume. Does it get a 403 and start from zero? Also: GitHub with 1, 4 and 8 connections
+   from the phone.
 
 For repeatable tests without real mirrors, a small Node "mirror simulator" (`scripts/`)
 can serve one file on several ports, with a per-connection speed limit, random 5xx and a
@@ -240,5 +299,6 @@ port that ignores `Range`. The scheduler's unit tests can use the same scenarios
   aria2 (libkiwix's downloader) with the metalink: check which per-server limits they
   pass. Up to 3 per mirror seems polite. Worth asking upstream before shipping.
 - Mobile data: same engine with fewer connections, or single-connection only?
-- Should models (Hugging Face) and country packs (GitHub Releases) use C from the start, or
-  only Kiwix files? Both CDNs take ranges, but they are not Kiwix's volunteer mirrors.
+- GitHub and Hugging Face: measured above. Kiwix first, GitHub if the device spike shows a
+  gain, Hugging Face only for resume robustness. To verify on iOS: resuming after the
+  signed redirect has expired (> 1 h paused).
