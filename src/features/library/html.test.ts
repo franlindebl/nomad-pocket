@@ -44,6 +44,22 @@ test('htmlToText truncates at a word boundary', () => {
   assert.ok(text.endsWith('word…'));
 });
 
+test('htmlToText reads sloppy attributes', () => {
+  const { text } = htmlToText('<p class="a"id=\'b\' data-x=1/2 title="q"style="display:none">kept</p><p hidden>gone</p><a href=x/>y</a>');
+  assert.equal(text, 'y');
+  assert.equal(htmlToText('<p title="a"lang=es>uno</p><p>dos</p>').text, 'uno\n\ndos');
+});
+
+test('htmlToText stays fast on a tag with many attributes and a broken close', () => {
+  const attrs = Array.from({ length: 30 }, (_, i) => `a${i}="v${i}"`).join(' ');
+  const start = performance.now();
+  const { text } = htmlToText(`<p>before</p><img ${attrs} / ><p>after</p>`);
+  // Backtracking over every quoted/unquoted reading took seconds at 24 attributes.
+  assert.ok(performance.now() - start < 200, `took ${Math.round(performance.now() - start)} ms`);
+  assert.match(text, /^before\n\n/);
+  assert.match(text, /after$/);
+});
+
 test('resolveZimHref resolves relative paths', () => {
   assert.equal(resolveZimHref('Foo', 'A/Bar'), 'A/Foo');
   assert.equal(resolveZimHref('../-/s.css', 'A/Bar'), '-/s.css');

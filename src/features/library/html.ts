@@ -50,7 +50,13 @@ const BLOCK_TAGS = new Set([
   'center', 'address', 'hr', 'br', 'body', 'html',
 ]);
 
-const TOKEN = /<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<![^>]*>|<\/?([a-zA-Z][a-zA-Z0-9:-]*)((?:\s+[^\s/>=]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?)*)\s*(\/?)>|[^<]+|</g;
+// An attribute value is quoted when its closing quote ends the attribute (whitespace, `>`
+// or `/>` follows), unquoted otherwise (`a="x"b="y"` stays one sloppy value). The two
+// alternatives must never both match: if a quoted value could also be read as an
+// unquoted one, a tag with many attributes and a broken close backtracks 2^n ways
+// (24 attributes froze the JS thread for a second).
+const TOKEN =
+  /<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<![^>]*>|<\/?([a-zA-Z][a-zA-Z0-9:-]*)((?:\s+[^\s/>=]+(?:\s*=\s*(?:"[^"]*"(?=\s|\/?>)|'[^']*'(?=\s|\/?>)|(?!"[^"]*"(?:\s|\/?>)|'[^']*'(?:\s|\/?>))[^\s>]+))?)*)\s*(\/?)>|[^<]+|</g;
 const ATTR = /([^\s/>=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g;
 
 function attrs(raw: string): Record<string, string> {
