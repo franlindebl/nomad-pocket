@@ -6,7 +6,7 @@ import { Alert } from 'react-native';
 import { Badge, IconBadge, IconButton, ListGroup, ListRow, ProgressBar, Screen, SectionHeader, Text } from '@/components/ui';
 import { removeItem } from '@/features/content/items';
 import { NotEnoughStorageError } from '@/features/downloads/manager';
-import { countryOffer, downloadCountry, removeCountry, useCountries, type CountryState } from '@/features/maps/countries';
+import { countryOffer, downloadCountry, planCountry, removeCountry, retryCountry, useCountries, type CountryState } from '@/features/maps/countries';
 import { useMapUi } from '@/features/maps/store';
 import { useMapItems } from '@/features/maps/useMapSources';
 import { formatBytes } from '@/lib/format';
@@ -40,12 +40,12 @@ export default function MapsSheet() {
     const offer = countryOffer(c.regionId);
     if (!offer) return;
     // A prebuilt map resumes from the parts on disk; an on-device extraction needs its estimate again.
-    if (!offer.map) {
+    if (!offer.map && !c.map) {
       router.push({ pathname: '/maps/download', params: { regionId: c.regionId } });
       return;
     }
     try {
-      downloadCountry(offer);
+      retryCountry(c);
     } catch (e) {
       if (e instanceof NotEnoughStorageError)
         Alert.alert(c.title, t('common:storage.notEnough', { needed: formatBytes(e.needed), free: formatBytes(freeBytes()) }));
@@ -55,7 +55,8 @@ export default function MapsSheet() {
   // A newer monthly build: update it (or delete the country) from one dialog.
   const manage = (c: CountryState) => {
     const offer = countryOffer(c.regionId);
-    Alert.alert(c.title, t('regions.updateBody', { size: formatBytes(offer?.map?.size ?? 0) }), [
+    const plan = offer ? planCountry(offer, undefined, { update: true }) : null;
+    Alert.alert(c.title, t('regions.updateBody', { size: formatBytes(plan?.bytes ?? 0) }), [
       { text: t('common:actions.cancel'), style: 'cancel' },
       { text: t('common:actions.delete'), style: 'destructive', onPress: () => confirmDelete(c.title, c.sizeBytes, () => void removeCountry(c)) },
       {
