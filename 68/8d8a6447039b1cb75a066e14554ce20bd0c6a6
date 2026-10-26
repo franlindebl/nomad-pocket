@@ -1,0 +1,29 @@
+CLAUDE.md
+  s_9f5316f88b2e79::t_033607b32d8143 36,78
+docs/ARCHITECTURE.md
+  s_9f5316f88b2e79::t_dfe881f95f8eb9 38-40,101,289-292,755-756,758,760-763
+docs/DEVELOPMENT.md
+  s_9f5316f88b2e79::t_9c673e43da37a2 25-28,150
+docs/E2E.md
+  s_9f5316f88b2e79::t_67b71f38b89154 236,265
+docs/PROGRESS.md
+  s_9f5316f88b2e79::t_e2abfc05f7d2c4 32,44,66-70,150-151,155,229-236
+docs/RELEASE.md
+  s_9f5316f88b2e79::t_eba2c6da0430da 149-151
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "688d8a6447039b1cb75a066e14554ce20bd0c6a6",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
