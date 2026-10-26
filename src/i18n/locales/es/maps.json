@@ -126,6 +126,7 @@
     "toward": "Hacia {{name}}",
     "straightLine": "En línea recta: no sigue calles ni caminos",
     "arrived": "Has llegado",
+    "arrivedEnds": "La guía terminará sola en un minuto.",
     "stop": "Terminar",
     "waiting": "Buscando señal GPS…",
     "accuracy": "Precisión ± {{meters}} m",

@@ -126,6 +126,7 @@
     "toward": "To {{name}}",
     "straightLine": "As the crow flies: it doesn’t follow roads or paths",
     "arrived": "You have arrived",
+    "arrivedEnds": "Guidance will end on its own in a minute.",
     "stop": "End",
     "waiting": "Waiting for GPS…",
     "accuracy": "Accuracy ± {{meters}} m",

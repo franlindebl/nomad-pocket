@@ -2,6 +2,9 @@
 // routing pack covering both ends the way follows roads (Valhalla on the device:
 // next maneuver, remaining distance, reroute when the user leaves the route);
 // without one it falls back to a straight line, which works anywhere.
+// Keep-awake holds for the whole app, so a trip nobody ended kept the screen, GPS and
+// compass on for hours: guidance ends by itself a minute after arriving, and keeps the
+// screen awake only while the Maps tab is in front and the user is on the move.
 import * as Location from 'expo-location';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { Alert, Linking } from 'react-native';
@@ -9,7 +12,8 @@ import { create } from 'zustand';
 
 import i18n from '@/i18n';
 
-import type { LatLon } from './geo';
+import { hasArrived, hasMoved } from './follow-core';
+import { distanceMeters, type LatLon } from './geo';
 import { watchScreenHeading } from './heading';
 import { computeRoute, packFor, RoutingError } from './routing';
 import { cumulativeDistances, isOffRoute, routeProgress, type Costing, type Route, type RouteProgress } from './routing-core';
@@ -40,13 +44,21 @@ type GuidanceState = {
   setCosting: (costing: Costing) => void;
   /** A routing pack was installed: try roads again if guidance is on a straight line. */
   retryRoute: () => void;
+  /** The Maps tab came to the front or left it (a sheet over the map keeps it in front). */
+  setMapFocused: (focused: boolean) => void;
   stop: () => void;
 };
 
 const KEEP_AWAKE_TAG = 'maps-guidance';
 /** Don't reroute more often than this, whatever the GPS does. */
 const REROUTE_MS = 10_000;
-let subscriptions: { remove: () => void }[] = [];
+/** Arrived and still there after this: guidance ends (the panel says so meanwhile). */
+const ARRIVED_STOP_MS = 60_000;
+/** Not moving on for this long (a rest, a shelter, no GPS signal): the screen may sleep again. */
+const IDLE_MS = 10 * 60_000;
+let gps: Location.LocationSubscription | null = null;
+/** The compass watcher (it starts asynchronously); only while the Maps tab is in front. */
+let compass: Promise<{ remove: () => void }> | null = null;
 /** Bumped by every start/stop, so a slow start that was superseded cleans up after itself. */
 let session = 0;
 /** Bumped by every route request: a late answer for an older request is dropped. */
@@ -58,20 +70,31 @@ let offRouteFixes = 0;
 let course: number | null = null;
 /** A last-known fix older than this is not a starting point (it may be another town). */
 const STALE_FIX_MS = 2 * 60_000;
+let arrivalTimer: ReturnType<typeof setTimeout> | null = null;
+let idleTimer: ReturnType<typeof setTimeout> | null = null;
+/** Where the user stood when the idle countdown last restarted. */
+let idleAnchor: Position | null = null;
+let idle = false;
+let mapFocused = true;
+let awake = false;
 
-function remove(subs: { remove: () => void }[]) {
-  for (const s of subs) {
-    try {
-      s.remove();
-    } catch {
-      // already removed
-    }
-  }
+function stopCompass() {
+  const pending = compass;
+  compass = null;
+  pending?.then((s) => s.remove()).catch(() => {});
 }
 
 function unsubscribe() {
-  remove(subscriptions);
-  subscriptions = [];
+  try {
+    gps?.remove();
+  } catch {
+    // already removed
+  }
+  gps = null;
+  stopCompass();
+  if (arrivalTimer) clearTimeout(arrivalTimer);
+  if (idleTimer) clearTimeout(idleTimer);
+  arrivalTimer = idleTimer = null;
 }
 
 export const useGuidance = create<GuidanceState>((set, get) => {
@@ -122,6 +145,62 @@ export const useGuidance = create<GuidanceState>((set, get) => {
     if (offRouteFixes >= 2 && Date.now() - lastRouteAt > REROUTE_MS) requestRoute();
   }
 
+  /** The screen stays on only for a trip in progress, on the Maps tab, while moving. */
+  function syncAwake() {
+    const want = !!get().target && mapFocused && !idle;
+    if (want === awake) return;
+    awake = want;
+    if (want) activateKeepAwakeAsync(KEEP_AWAKE_TAG).catch(() => {});
+    else deactivateKeepAwake(KEEP_AWAKE_TAG).catch(() => {});
+  }
+
+  function startCompass(mine: number) {
+    if (compass) return;
+    const pending = watchScreenHeading((h) => {
+      if (session === mine) set({ heading: h.deg });
+    });
+    compass = pending;
+    // No compass (some emulators): the panel falls back to a north-up arrow.
+    pending.catch((e) => {
+      console.warn('[maps] guidance compass', e);
+      if (compass === pending) compass = null;
+    });
+  }
+
+  function armIdle(mine: number) {
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+      idleTimer = null;
+      if (session !== mine) return;
+      idle = true;
+      syncAwake();
+    }, IDLE_MS);
+  }
+
+  /** Every fix: arriving ends guidance a minute later; moving on keeps the screen awake. */
+  function watchProgress(p: Position, mine: number) {
+    const { target } = get();
+    if (!target) return;
+    if (!hasArrived(distanceMeters(p, target), p.accuracy)) {
+      if (arrivalTimer) clearTimeout(arrivalTimer);
+      arrivalTimer = null;
+    } else if (!arrivalTimer) {
+      // Standing still brings no more fixes (distanceInterval): a timer, not the next fix.
+      arrivalTimer = setTimeout(() => {
+        arrivalTimer = null;
+        if (session === mine) get().stop();
+      }, ARRIVED_STOP_MS);
+    }
+    if (!idleAnchor || hasMoved(distanceMeters(idleAnchor, p), p.accuracy)) {
+      idleAnchor = p;
+      armIdle(mine);
+      if (idle) {
+        idle = false;
+        syncAwake();
+      }
+    }
+  }
+
   return {
     target: null,
     position: null,
@@ -141,12 +220,18 @@ export const useGuidance = create<GuidanceState>((set, get) => {
       request++;
       cumulative = [];
       lastRouteAt = 0;
+      idle = false;
+      idleAnchor = null;
       // Never start from the previous session's fix or route.
       set({ target, position: null, heading: null, route: null, progress: null, routing: 'loading', routeError: null, navigating: false });
-      activateKeepAwakeAsync(KEEP_AWAKE_TAG).catch(() => {});
+      syncAwake();
+      // No fix at all for that long (indoors, no signal) also lets the screen sleep.
+      armIdle(mine);
+      if (mapFocused) startCompass(mine);
       let routed = false;
       const firstFix = (p: Position) => {
         set({ position: p });
+        watchProgress(p, mine);
         if (!routed && session === mine) {
           routed = true;
           requestRoute();
@@ -154,32 +239,29 @@ export const useGuidance = create<GuidanceState>((set, get) => {
       };
       course = null;
       const last = await Location.getLastKnownPositionAsync({ maxAge: STALE_FIX_MS }).catch(() => null);
-      if (last && session === mine && Date.now() - last.timestamp < STALE_FIX_MS) firstFix({ lat: last.coords.latitude, lon: last.coords.longitude, accuracy: last.coords.accuracy });
-      const subs: { remove: () => void }[] = [];
+      if (last && session === mine && Date.now() - last.timestamp < STALE_FIX_MS)
+        firstFix({ lat: last.coords.latitude, lon: last.coords.longitude, accuracy: last.coords.accuracy });
       try {
-        subs.push(
-          await Location.watchPositionAsync({ accuracy: Location.Accuracy.BestForNavigation, distanceInterval: 3, timeInterval: 2000 }, (p) => {
+        const sub = await Location.watchPositionAsync(
+          { accuracy: Location.Accuracy.BestForNavigation, distanceInterval: 3, timeInterval: 2000 },
+          (p) => {
             if (session !== mine) return;
             course = (p.coords.speed ?? 0) > 2 && (p.coords.heading ?? -1) >= 0 ? p.coords.heading : null;
             const speed = p.coords.speed !== null && p.coords.speed >= 0 ? p.coords.speed : null;
             const fix = { lat: p.coords.latitude, lon: p.coords.longitude, accuracy: p.coords.accuracy, course, speed };
             if (!routed) firstFix(fix);
-            else onPosition(fix);
-          }),
+            else {
+              onPosition(fix);
+              watchProgress(fix, mine);
+            }
+          },
         );
-        subs.push(
-          // Turned to the screen: in landscape the arrow and the camera follow its top.
-          await watchScreenHeading((h) => {
-            if (session === mine) set({ heading: h.deg });
-          }),
-        );
+        // stop() or another start() may have run while the watcher was starting.
+        if (session === mine) gps = sub;
+        else sub.remove();
       } catch (e) {
-        // No compass (some emulators): the panel falls back to a north-up arrow.
-        console.warn('[maps] guidance sensors', e);
+        console.warn('[maps] guidance GPS', e);
       }
-      // stop() or another start() may have run while the watchers were starting.
-      if (session === mine) subscriptions = subs;
-      else remove(subs);
       return true;
     },
     startNavigation: () => {
@@ -201,13 +283,22 @@ export const useGuidance = create<GuidanceState>((set, get) => {
         requestRoute();
       }
     },
+    setMapFocused: (focused) => {
+      if (focused === mapFocused) return;
+      mapFocused = focused;
+      syncAwake();
+      // The compass only feeds the panel and the camera, both on the map.
+      if (!get().target) return;
+      if (focused) startCompass(session);
+      else stopCompass();
+    },
     stop: () => {
       session++;
       request++;
       unsubscribe();
-      deactivateKeepAwake(KEEP_AWAKE_TAG);
       cumulative = [];
       set({ target: null, position: null, heading: null, route: null, progress: null, routing: 'none', routeError: null, navigating: false });
+      syncAwake();
     },
   };
 });
