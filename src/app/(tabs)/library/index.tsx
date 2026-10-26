@@ -5,48 +5,54 @@ import { router } from 'expo-router';
 import { Compass, FileDown, Globe, GraduationCap } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, Platform, StyleSheet, View } from 'react-native';
 
+import { showToast } from '@/components/Toast';
 import { Card, IconBadge, ListGroup, ListRow, PressableScale, Screen, SearchField, SectionHeader, Text } from '@/components/ui';
 import { catalog, loc, matchesLanguages, sumMB, tierResources } from '@/features/catalog';
 import { categoryHue, iconByName } from '@/features/catalog/icons';
 import { removeItem, useItems, type InstalledItem } from '@/features/content/items';
 import { NotEnoughStorageError } from '@/features/downloads/manager';
-import { registerZimFile } from '@/features/library/register';
+import { AlreadyInstalledError, registerZimFile } from '@/features/library/register';
 import { formatBytes, formatMB } from '@/lib/format';
 import { contentDir, deleteFile, freeBytes, hasRoomFor, partialDir } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
 import { radius, space, useTheme } from '@/theme';
 
-
 /**
- * Copy a picked file into content/zim and register it. Files already inside
- * content/zim (visible through the Files app) are registered in place; existing
- * archives are never overwritten, and a failed import leaves nothing behind.
+ * Bring a picked file into content/zim and register it. Existing archives are never
+ * overwritten, the same archive twice is refused (AlreadyInstalledError), and a failed
+ * import leaves nothing behind.
+ *
+ * iOS always hands over its own copy of the pick (tmp/<bundle>-Inbox, even for a file that
+ * is already in the app's folder): move it, never copy it again, and never leave it behind.
+ * Android hands over a content:// URI, which has to be copied.
  */
 async function importZimFile(asset: DocumentPicker.DocumentPickerAsset) {
-  const dir = contentDir('zim');
-  const norm = (u: string) => decodeURIComponent(u.replace(/^file:\/\//, ''));
-  if (norm(asset.uri).startsWith(norm(dir.uri))) {
-    await registerZimFile(asset.uri);
-    return;
-  }
-  const size = Number(asset.size ?? 0);
-  if (size && !hasRoomFor(size)) throw new NotEnoughStorageError(size);
-
-  const base = asset.name.replace(/\.zim$/i, '').replace(/[^\w.-]+/g, '_') || 'import';
-  let dest = new File(dir, `${base}.zim`);
-  for (let n = 1; dest.exists; n++) dest = new File(dir, `${base}-${n}.zim`);
-
-  const tmp = new File(partialDir(), `import-${Date.now()}.zim.part`);
+  const ownCopy = Platform.OS === 'ios';
   try {
-    await new File(asset.uri).copy(tmp);
-    await tmp.move(dest);
-    await registerZimFile(dest.uri);
-  } catch (e) {
-    deleteFile(tmp.uri);
-    deleteFile(dest.uri);
-    throw e;
+    const dir = contentDir('zim');
+    const size = Number(asset.size ?? 0);
+    // Moving iOS's copy takes no space; it was taken before the picker returned.
+    if (!ownCopy && size && !hasRoomFor(size)) throw new NotEnoughStorageError(size);
+
+    const base = asset.name.replace(/\.zim$/i, '').replace(/[^\w.-]+/g, '_') || 'import';
+    let dest = new File(dir, `${base}.zim`);
+    for (let n = 1; dest.exists; n++) dest = new File(dir, `${base}-${n}.zim`);
+
+    const tmp = new File(partialDir(), `import-${Date.now()}.zim.part`);
+    try {
+      if (ownCopy) await new File(asset.uri).move(tmp);
+      else await new File(asset.uri).copy(tmp);
+      await tmp.move(dest);
+      return await registerZimFile(dest.uri, undefined, { rejectDuplicate: true });
+    } catch (e) {
+      deleteFile(tmp.uri);
+      deleteFile(dest.uri);
+      throw e;
+    }
+  } finally {
+    if (ownCopy) deleteFile(asset.uri);
   }
 }
 
@@ -68,6 +74,10 @@ export default function LibraryScreen() {
     try {
       await importZimFile(res.assets[0]);
     } catch (e) {
+      if (e instanceof AlreadyInstalledError) {
+        showToast(t('importDuplicate', { title: e.item.title }));
+        return;
+      }
       Alert.alert(t('importFailed'), e instanceof NotEnoughStorageError ? tc('storage.notEnough', { needed: formatBytes(e.needed), free: formatBytes(freeBytes()) }) : String((e as Error)?.message ?? e));
     } finally {
       setImporting(false);

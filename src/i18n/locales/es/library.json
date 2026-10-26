@@ -14,6 +14,7 @@
   "importBody": "Desde Archivos o una tarjeta SD",
   "importing": "Importando…",
   "importFailed": "No se pudo importar el archivo",
+  "importDuplicate": "{{title}} ya está en tu biblioteca",
   "tiers": "Niveles",
   "tierIncludes": "Incluye todo lo de {{tier}}",
   "recommended": "Recomendado",
