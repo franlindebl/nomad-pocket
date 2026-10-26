@@ -28,9 +28,13 @@ tags: [android, network]
 - assertVisible: "Andorra"
 - takeScreenshot: 01-country-sheet
 - tapOn: { id: "country-download" }
+# The runner keeps the emulator on mobile data: "Wi-Fi only" must ask before the country
+# downloads (they wait for Wi-Fi otherwise).
+- extendedWaitUntil:
+    visible: "Descargas solo con Wi.Fi"
+    timeout: 10000
 - tapOn:
     text: "(?i)usar datos móviles"
-    optional: true
 - extendedWaitUntil:
     visible: { id: "guidance-next" }
     timeout: 300000

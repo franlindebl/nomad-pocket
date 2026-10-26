@@ -41,7 +41,7 @@
   "storage": {
     "free": "{{size}} free",
     "of": "{{used}} of {{total}}",
-    "notEnough": "Not enough space. You need {{needed}} and have {{free}} free.",
+    "notEnough": "Not enough space: this needs {{needed}} free (counting what's already queued and a margin for the system) and you have {{free}}.",
     "notEnoughShort": "Not enough storage"
   },
   "downloads": {
@@ -56,10 +56,24 @@
     "queuedCount_other": "{{count}} queued",
     "finished": "{{title}} is ready to use offline",
     "needsConnection": "You need an internet connection to download.",
+    "waiting": {
+      "wifi": "Waiting for Wi‑Fi",
+      "offline": "Waiting for a connection"
+    },
+    "wifi": {
+      "title": "Wi‑Fi only downloads",
+      "bodyOne": "You're on mobile data. “{{title}}” will download once you're on a Wi‑Fi network.",
+      "bodyMany_one": "You're on mobile data. {{count}} download will start once you're on a Wi‑Fi network.",
+      "bodyMany_other": "You're on mobile data. {{count}} downloads will start once you're on a Wi‑Fi network.",
+      "wait": "Wait for Wi‑Fi",
+      "useMobileData": "Use mobile data",
+      "useMobileDataAll": "Use mobile data for all"
+    },
     "error": {
       "secure": "Couldn't connect securely. This network may be blocking it: try another Wi‑Fi or mobile data.",
       "offline": "No connection. Retry once you're online.",
       "server": "The server didn't answer (error {{status}}). Retry later.",
+      "integrity": "The file arrived damaged and was discarded. Retry.",
       "other": "The download stopped. Retry."
     }
   },

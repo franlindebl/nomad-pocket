@@ -1,42 +1,37 @@
 import { router } from 'expo-router';
-import { ArrowDown, Check, Pause, Play } from 'lucide-react-native';
+import { ArrowDown, Check, Pause, Play, WifiOff } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Alert, StyleSheet, View } from 'react-native';
 
 import { PressableScale, ProgressRing, Text } from '@/components/ui';
 import { useContent } from '@/features/content/items';
-import { NotEnoughStorageError, pauseDownload, resumeDownload, useDownload } from '@/features/downloads/manager';
+import { askMobileData, NotEnoughStorageError, pauseDownload, resumeDownload, useDownload, useWaitingReason } from '@/features/downloads/manager';
 import { formatBytes, formatMB } from '@/lib/format';
 import { freeBytes } from '@/lib/storage';
-import { useSettings } from '@/stores/settings';
 import { radius, space, useTheme } from '@/theme';
 
-import { downloadResource, OfflineError, WifiRequiredError } from './index';
+import { downloadResource, OfflineError } from './index';
 import type { CatalogResource } from './types';
 
-/** Explain a failed download start. `retry` is offered after allowing mobile data. */
+/**
+ * Explain a failed download start. `retry` is offered when there was no connection.
+ * (Mobile data with "Wi-Fi only" on is not a failure: the download manager queues it and asks.)
+ */
 export function showDownloadError(e: unknown, t: (k: string, o?: Record<string, unknown>) => string, retry?: () => void) {
   if (e instanceof NotEnoughStorageError) {
     Alert.alert(t('errors.generic'), t('storage.notEnough', { needed: formatBytes(e.needed), free: formatBytes(freeBytes()) }));
-  } else if (e instanceof WifiRequiredError) {
-    Alert.alert(t('library:wifiTitle'), t('library:wifiRequired'), [
-      { text: t('actions.cancel'), style: 'cancel' },
-      {
-        text: t('library:useMobileData'),
-        onPress: () => {
-          useSettings.getState().setWifiOnly(false);
-          retry?.();
-        },
-      },
-    ]);
   } else if (e instanceof OfflineError) {
-    Alert.alert(t('errors.generic'), t('downloads.needsConnection'));
+    Alert.alert(
+      t('errors.generic'),
+      t('downloads.needsConnection'),
+      retry ? [{ text: t('actions.cancel'), style: 'cancel' }, { text: t('actions.retry'), onPress: retry }] : undefined,
+    );
   } else {
     Alert.alert(t('errors.generic'), String((e as Error)?.message ?? e));
   }
 }
 
-/** Start a download, explaining failures (and retrying after allowing mobile data). */
+/** Start a download, explaining failures (and offering a retry when offline). */
 export function startResourceDownload(resource: CatalogResource, t: (k: string, o?: Record<string, unknown>) => string) {
   const go = () => {
     downloadResource(resource).catch((e) => showDownloadError(e, t, go));
@@ -58,6 +53,7 @@ export function DownloadButton({ resource, onOpen }: { resource: CatalogResource
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { installed, download } = useResourceState(resource.id);
+  const waiting = useWaitingReason(download ? [download] : []);
 
   if (installed) {
     return (
@@ -79,16 +75,24 @@ export function DownloadButton({ resource, onOpen }: { resource: CatalogResource
   if (active && download) {
     const progress = download.totalBytes ? download.bytesWritten / download.totalBytes : 0;
     const paused = download.status === 'paused';
+    // Queued on mobile data with "Wi-Fi only" on: a tap asks again whether to use mobile data.
+    const wifi = waiting === 'wifi';
     return (
       <PressableScale
         testID={`download-${resource.id}`}
         haptic="selection"
         accessibilityRole="button"
-        accessibilityLabel={paused ? t('actions.resume') : t('actions.pause')}
-        onPress={() => (paused ? resumeDownload(resource.id) : pauseDownload(resource.id))}
+        accessibilityLabel={wifi ? t('downloads.waiting.wifi') : paused ? t('actions.resume') : t('actions.pause')}
+        onPress={() => (wifi ? askMobileData([resource.id]) : paused ? resumeDownload(resource.id) : pauseDownload(resource.id))}
         pressedScale={0.92}>
         <ProgressRing value={download.status === 'processing' ? 1 : progress} size={36} stroke={3}>
-          {paused ? <Play size={14} color={colors.text} fill={colors.text} /> : <Pause size={14} color={colors.text} fill={colors.text} />}
+          {wifi ? (
+            <WifiOff size={14} color={colors.text} />
+          ) : paused ? (
+            <Play size={14} color={colors.text} fill={colors.text} />
+          ) : (
+            <Pause size={14} color={colors.text} fill={colors.text} />
+          )}
         </ProgressRing>
       </PressableScale>
     );

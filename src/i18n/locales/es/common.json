@@ -41,7 +41,7 @@
   "storage": {
     "free": "{{size}} libres",
     "of": "{{used}} de {{total}}",
-    "notEnough": "No hay espacio suficiente. Necesitas {{needed}} y tienes {{free}} libres.",
+    "notEnough": "No hay espacio suficiente: hacen falta {{needed}} libres (con lo que ya está en cola y un margen para el sistema) y tienes {{free}}.",
     "notEnoughShort": "No hay espacio suficiente"
   },
   "downloads": {
@@ -56,10 +56,24 @@
     "queuedCount_other": "{{count}} en cola",
     "finished": "{{title}} está listo para usar sin conexión",
     "needsConnection": "Necesitas conexión a internet para descargar.",
+    "waiting": {
+      "wifi": "Esperando Wi‑Fi",
+      "offline": "Esperando conexión"
+    },
+    "wifi": {
+      "title": "Descargas solo con Wi‑Fi",
+      "bodyOne": "Estás usando datos móviles. «{{title}}» se descargará cuando te conectes a una red Wi‑Fi.",
+      "bodyMany_one": "Estás usando datos móviles. {{count}} descarga empezará cuando te conectes a una red Wi‑Fi.",
+      "bodyMany_other": "Estás usando datos móviles. {{count}} descargas empezarán cuando te conectes a una red Wi‑Fi.",
+      "wait": "Esperar al Wi‑Fi",
+      "useMobileData": "Usar datos móviles",
+      "useMobileDataAll": "Usar datos móviles para todas"
+    },
     "error": {
       "secure": "No se pudo conectar de forma segura. Esta red puede estar bloqueándolo: prueba con otra Wi‑Fi o con datos.",
       "offline": "Sin conexión. Reintenta cuando tengas internet.",
       "server": "El servidor no respondió (error {{status}}). Reintenta más tarde.",
+      "integrity": "El archivo llegó dañado y se ha descartado. Reintenta.",
       "other": "La descarga se interrumpió. Reintenta."
     }
   },

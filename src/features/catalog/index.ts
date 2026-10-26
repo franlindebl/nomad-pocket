@@ -3,7 +3,6 @@ import * as Network from 'expo-network';
 import rawCatalog from '@/data/catalog.json';
 import i18n from '@/i18n';
 import { enqueueDownload, type DownloadRecord } from '@/features/downloads/manager';
-import { useSettings } from '@/stores/settings';
 
 import { resolveLatest } from './opds';
 import type { Catalog, CatalogCategory, CatalogResource, CatalogTier, Localized } from './types';
@@ -63,22 +62,18 @@ export function courseResources(langs: string[]): CatalogResource[] {
   return catalog.courses.map((id) => catalog.resources[id]).filter((r): r is CatalogResource => !!r && matchesLanguages(r, langs));
 }
 
-export class WifiRequiredError extends Error {
-  constructor() {
-    super('WIFI_REQUIRED');
-  }
-}
-
 export class OfflineError extends Error {
   constructor() {
     super('OFFLINE');
   }
 }
 
+// "Wi-Fi only" is the download manager's to enforce (every download goes through it): on
+// mobile data the download is queued and waits for Wi-Fi, and the manager asks once whether
+// to use mobile data instead.
 async function checkNetwork() {
   const state = await Network.getNetworkStateAsync();
   if (state.isConnected === false || state.isInternetReachable === false) throw new OfflineError();
-  if (useSettings.getState().wifiOnly && state.type === Network.NetworkStateType.CELLULAR) throw new WifiRequiredError();
 }
 
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
@@ -104,6 +99,7 @@ export async function downloadResource(r: CatalogResource): Promise<DownloadReco
   } catch {
     // keep pinned URL
   }
+  // The manager reduces it to a plain file name (the href comes from a remote feed).
   const filename = decodeURIComponent(url.split('/').pop() ?? `${r.id}.zim`);
   return enqueueDownload({
     id: r.id,
