@@ -1,0 +1,33 @@
+docs/E2E.md
+  s_838c9370c44bfa::t_6585e924d4d831 74-83
+docs/PROGRESS.md
+  s_838c9370c44bfa::t_c106df618f0870 145-162
+scripts/e2e-android.sh
+  s_78b408ad093c39::t_1b803fa947bb27 28-30,35-46,69,73-74
+src/features/maps/register.ts
+  s_838c9370c44bfa::t_430a6c275a8254 130-132,138-141
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "71ad5ff4214d78563b20ec2333911334556469de",
+  "prompts": {},
+  "sessions": {
+    "s_78b408ad093c39": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e82e2e6d-65bd-4709-9859-f05fbe0b2151",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_838c9370c44bfa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65e8c9ca-b49f-4076-9462-02635ce8b6df",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
