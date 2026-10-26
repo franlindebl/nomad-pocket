@@ -212,13 +212,14 @@ Documents/                                   iOS: visible in Files; Android: fil
     models/<file>.gguf
     index/search.db        map search index + emergency points (derived, re-downloadable)
     partial/               in progress: <id>.part, map-<key>.pmtiles.part, import-<ts>.zim.part
-  map-assets/v4/           glyphs + sprites unpacked from the bundled zip (excluded from Android backup)
+  map-assets/v4/           glyphs + sprites unpacked from the bundled zip (excluded from backups)
 ```
 
 Backups (iOS, Android cloud backup and device transfer alike): **included** are the kv-store
 (settings, family plan, kit) and `nomad.db`; **excluded** are `content/` and `map-assets/`
-(`plugins/with-android-backup-rules.js` writes the Android rules; iOS marks `content/`
-excluded at startup). After a restore the registry rows come back without their files:
+(`plugins/with-android-backup-rules.js` writes the Android rules: an include of `SQLite/` only, so the
+rest of filesDir is left out without excludes, which Android lint rejects outside an include; iOS
+marks `content/` and `map-assets/` excluded at startup). After a restore the registry rows come back without their files:
 `content/register.ts` drops them at the next launch (Startup). Old installs had the databases
 in `Documents/SQLite` (Files-visible): `removeEmptyLegacyDir()` removes that folder once the
 move is done.
