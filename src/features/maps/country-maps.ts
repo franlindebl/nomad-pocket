@@ -26,7 +26,6 @@ import { mapAssetUrl, parseMapsManifest, type CountryMap, type MapsManifest } fr
 import { parseOverpassTsv } from './emergency-core';
 import { storeEmergencyPoints } from './emergency';
 import { mapItemId, notifyMapInstalled, type MapItemMeta } from './extraction';
-import { parseStreetsTsv } from './places-core';
 import { indexMapStreets, indexPackAddresses, indexPackPlaces } from './places';
 import { getRegion, regionName } from './regions';
 
@@ -165,8 +164,8 @@ export function countryMapProgress(records: Record<string, DownloadRecord>, map:
 
 const IMPORT: Record<SideFile, (itemId: string, file: File) => Promise<void>> = {
   pois: async (id, file) => storeEmergencyPoints(id, parseOverpassTsv(await file.text())),
-  streets: async (id, file) => indexMapStreets(id, parseStreetsTsv(await file.text())),
-  // Big files (Spain: 50 MB of places, 97 MB of doors): read in blocks by places.ts.
+  // Big files (France: 150 MB of streets, Germany: 780 MB of doors): read in blocks by places.ts.
+  streets: indexMapStreets,
   places: indexPackPlaces,
   addresses: indexPackAddresses,
 };

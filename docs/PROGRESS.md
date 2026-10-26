@@ -160,6 +160,19 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-26 — Maps: street files read in blocks; manifest spot check
+
+- Spot check of the published catalogs (run 40289348691): 240 maps, 60 packs; fr, de, it
+  maps and es, mx, ar packs carry places and doors, samples well formed. Big side files:
+  streets fr 151 MB, br 98, de 80; doors de 780 MB, ru 653, tw 415, nl 362, pl 304.
+- Street files were read whole (`file.text()` + `parseStreetsTsv`): 150 MB in one Hermes
+  string plus millions of rows could run an older iPhone out of memory. `indexPackStreets`
+  / `indexMapStreets` now take the file and read it in 4 MB blocks like places and doors.
+- `indexEmergencyPoints` deleted the map's `streets:<id>` rows: an emergency points
+  refresh of a country map would have dropped its street names from search. Removed.
+- Still to measure on a real iPhone: import time and DB size for Germany's doors
+  (Spain's ratio says ~400 MB).
+
 ### 2026-10-26 — Maps: Japanese addresses
 
 - Spot check of the first full country run: Italy, Mexico and Japan's places and doors

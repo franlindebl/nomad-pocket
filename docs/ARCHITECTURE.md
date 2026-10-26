@@ -463,8 +463,9 @@ under `route-<id>` (`storeEmergencyPoints`, batched, shared with the Overpass sy
 the street names into `map_places` / `map_localities` (`indexPackStreets`, batches of
 5000 with a yield; source `route-<id>`, and a `map_sources` row with `index_version` so
 search works with no map installed), the places (`indexPackPlaces`, source
-`places:route-<id>`) and the house numbers (`indexPackAddresses`); the last two are read
-from the file in 4 MB blocks of whole lines (Spain's are ~60 + ~160 MB of text). The map
+`places:route-<id>`) and the house numbers (`indexPackAddresses`); all three are read
+from the file in 4 MB blocks of whole lines (France's streets are 150 MB, Germany's doors
+780 MB: one string would be several times that in Hermes). The map
 index reads one zoom level under a tile budget, which for a big map holds only the main
 roads and important POIs: the pack's files fill that in. Packs installed before the
 catalog had a side file fetch just that file (`fetchMissingSideFiles`, after each catalog
