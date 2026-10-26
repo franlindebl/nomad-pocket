@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { Database, GraduationCap, Map, ShieldCheck, Sparkles, Trash2, Wand2 } from 'lucide-react-native';
+import { Database, GraduationCap, Map, Scale, ShieldCheck, Sparkles, Trash2, Wand2 } from 'lucide-react-native';
 import { Alert, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -162,6 +162,13 @@ export default function SettingsScreen() {
           leading={<IconBadge icon={ShieldCheck} hue="reference" size={36} />}
           chevron
           onPress={() => WebBrowser.openBrowserAsync(`${PRIVACY_URL}${s.language === 'en' ? '#en' : ''}`)}
+        />
+        <ListRow
+          testID="settings-credits"
+          title={t('credits')}
+          leading={<IconBadge icon={Scale} hue="reference" size={36} />}
+          chevron
+          onPress={() => router.push('/settings/credits')}
         />
         <View style={{ padding: space.lg, gap: space.sm }}>
           <Text variant="footnote" color="textSecondary">

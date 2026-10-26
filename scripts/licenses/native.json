@@ -1,0 +1,451 @@
+{
+  "_about": "Hand-kept credits for what package-lock.json can't see: prebuilt native libraries (modules/*/scripts/fetch-ios-libs.sh, modules/*/android/build.gradle, pods and Maven artifacts pulled by npm packages) and bundled data. Keep versions in step with those files, then run `node scripts/licenses.mjs`. `text` is a path relative to this folder (../../LICENSE is the app's own GPL-3.0); null means there is no text to reproduce and `url` says where the terms are.",
+  "app": {
+    "id": "nomad-pocket",
+    "name": "Nomad Pocket",
+    "license": "GPL-3.0-or-later",
+    "copyright": ["Copyright (C) 2026 Fran Linde Blázquez and contributors"],
+    "url": "https://github.com/franlindebl/nomad-pocket",
+    "text": "../../LICENSE"
+  },
+  "native": [
+    {
+      "id": "libkiwix",
+      "name": "libkiwix",
+      "version": "14.2.1",
+      "platforms": ["ios", "android"],
+      "license": "GPL-3.0-or-later",
+      "copyright": ["Copyright (C) 2011-2025 Emmanuel Engelhart, Matthieu Gautier, Maneesh P M and the Kiwix contributors"],
+      "url": "https://github.com/kiwix/libkiwix/tree/14.2.1",
+      "note": "iOS: prebuilt CoreKiwix.xcframework 14.2.1-2 from https://download.kiwix.org/release/libkiwix/ (built by kiwix-build: https://github.com/kiwix/kiwix-build), which also links libzim, Xapian, ICU, libcurl, libmicrohttpd, Zstandard, liblzma, zlib, pugixml and Mustache below. Android: org.kiwix:libkiwix 2.7.0 (https://github.com/kiwix/java-libkiwix/tree/2.7.0), the same libraries built for Android.",
+      "text": "../../LICENSE"
+    },
+    {
+      "id": "libzim",
+      "name": "libzim",
+      "version": "9.7.0",
+      "platforms": ["ios", "android"],
+      "license": "GPL-2.0-or-later",
+      "copyright": ["Copyright (C) 2006-2025 Tommi Maekitalo, Matthieu Gautier, Veloman Yunkan and the openZIM contributors"],
+      "url": "https://github.com/openzim/libzim/tree/9.7.0",
+      "text": "texts/GPL-2.0.txt"
+    },
+    {
+      "id": "xapian",
+      "name": "Xapian",
+      "version": "1.4.23",
+      "platforms": ["ios", "android"],
+      "license": "GPL-2.0-or-later",
+      "copyright": [
+        "Copyright (C) 1999-2023 BrightStation PLC, Ananova Ltd, Lemur Consulting Ltd, Richard Boulton, Olly Betts and the Xapian contributors"
+      ],
+      "url": "https://oligarchy.co.uk/xapian/1.4.23/xapian-core-1.4.23.tar.xz",
+      "text": "texts/GPL-2.0.txt"
+    },
+    {
+      "id": "icu",
+      "name": "ICU",
+      "version": "73.2",
+      "platforms": ["ios", "android"],
+      "license": "Unicode-DFS-2016 AND ICU",
+      "copyright": ["Copyright © 1991-2023 Unicode, Inc. and others"],
+      "url": "https://github.com/unicode-org/icu/releases/tag/release-73-2",
+      "text": "texts/icu-73.2.txt"
+    },
+    {
+      "id": "libcurl",
+      "name": "libcurl",
+      "version": "8.4.0",
+      "platforms": ["ios", "android"],
+      "license": "curl",
+      "copyright": ["Copyright (c) 1996 - 2023, Daniel Stenberg, <daniel@haxx.se>, and many contributors"],
+      "url": "https://curl.se/download/curl-8.4.0.tar.xz",
+      "text": "texts/curl-8.4.0.txt"
+    },
+    {
+      "id": "libmicrohttpd",
+      "name": "GNU libmicrohttpd",
+      "version": "0.9.76",
+      "platforms": ["ios", "android"],
+      "license": "LGPL-2.1-or-later",
+      "copyright": [
+        "Copyright (C) 2006-2021 Christian Grothoff (and other contributing authors)",
+        "Copyright (C) 2014-2021 Evgeny Grin (Karlson2k)"
+      ],
+      "url": "https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.76.tar.gz",
+      "note": "Statically linked. The complete source of Nomad Pocket (the work that uses the library) is published under GPL-3.0, so it can be rebuilt and relinked with a modified libmicrohttpd.",
+      "text": "texts/LGPL-2.1.txt"
+    },
+    {
+      "id": "zstd",
+      "name": "Zstandard",
+      "version": "1.5.7",
+      "platforms": ["ios", "android"],
+      "license": "BSD-3-Clause",
+      "copyright": ["Copyright (c) Meta Platforms, Inc. and affiliates"],
+      "url": "https://github.com/facebook/zstd/tree/v1.5.7",
+      "text": "texts/zstd-1.5.7.txt"
+    },
+    {
+      "id": "liblzma",
+      "name": "liblzma (XZ Utils)",
+      "version": "5.2.6",
+      "platforms": ["ios", "android"],
+      "license": "Public domain",
+      "copyright": [],
+      "url": "https://github.com/tukaani-project/xz/tree/v5.2.6",
+      "text": "texts/xz-5.2.6-COPYING.txt"
+    },
+    {
+      "id": "zlib",
+      "name": "zlib",
+      "version": "1.3.1",
+      "platforms": ["ios"],
+      "license": "Zlib",
+      "copyright": ["Copyright (C) 1995-2024 Jean-loup Gailly and Mark Adler"],
+      "url": "https://zlib.net/fossils/zlib-1.3.1.tar.gz",
+      "text": "texts/zlib-1.3.1.txt"
+    },
+    {
+      "id": "pugixml",
+      "name": "pugixml",
+      "version": "1.15",
+      "platforms": ["ios", "android"],
+      "license": "MIT",
+      "copyright": ["Copyright (c) 2006-2025 Arseny Kapoulkine"],
+      "url": "https://github.com/zeux/pugixml/tree/v1.15",
+      "text": "texts/pugixml-1.15.txt"
+    },
+    {
+      "id": "mustache",
+      "name": "Mustache (kainjow)",
+      "version": "4.1",
+      "platforms": ["ios", "android"],
+      "license": "BSL-1.0",
+      "copyright": ["Copyright 2015-2020 Kevin Wojniak"],
+      "url": "https://github.com/kainjow/Mustache",
+      "text": "texts/mustache-4.1.txt"
+    },
+    {
+      "id": "valhalla-mobile",
+      "name": "valhalla-mobile",
+      "version": "0.6.4",
+      "platforms": ["ios", "android"],
+      "license": "MIT",
+      "copyright": [
+        "Copyright (c) 2024 Adventure Consortium Inc (dba Rallista)",
+        "Copyright (c) 2018 Valhalla contributors",
+        "Copyright (c) 2015-2017 Mapillary AB, Mapzen"
+      ],
+      "url": "https://github.com/Rallista/valhalla-mobile/tree/0.6.4",
+      "note": "iOS: ValhallaWrapper.xcframework from the 0.6.4 release, with Valhalla, Protocol Buffers, Abseil, Boost, RapidJSON, unordered_dense, date and LZ4 below. Android: io.github.rallista:valhalla-mobile 0.6.4.",
+      "text": "texts/valhalla-mobile.txt"
+    },
+    {
+      "id": "valhalla",
+      "name": "Valhalla",
+      "version": "3.9.1",
+      "platforms": ["ios", "android"],
+      "license": "MIT",
+      "copyright": ["Copyright (c) 2018 Valhalla contributors", "Copyright (c) 2015-2017 Mapillary AB, Mapzen"],
+      "url": "https://github.com/valhalla/valhalla/tree/3.9.1",
+      "text": "texts/valhalla.txt"
+    },
+    {
+      "id": "protobuf",
+      "name": "Protocol Buffers",
+      "platforms": ["ios", "android"],
+      "license": "BSD-3-Clause",
+      "copyright": ["Copyright 2008 Google Inc."],
+      "url": "https://github.com/protocolbuffers/protobuf",
+      "text": "texts/protobuf.txt"
+    },
+    {
+      "id": "abseil",
+      "name": "Abseil C++",
+      "platforms": ["ios", "android"],
+      "license": "Apache-2.0",
+      "copyright": ["Copyright The Abseil Authors"],
+      "url": "https://github.com/abseil/abseil-cpp",
+      "note": "Abseil ships no NOTICE file.",
+      "text": "texts/Apache-2.0.txt"
+    },
+    {
+      "id": "boost",
+      "name": "Boost",
+      "version": "1.84.0",
+      "platforms": ["ios", "android"],
+      "license": "BSL-1.0",
+      "copyright": ["Copyright the Boost authors"],
+      "url": "https://www.boost.org",
+      "note": "Header-only parts, used by Valhalla and React Native.",
+      "text": "texts/BSL-1.0.txt"
+    },
+    {
+      "id": "rapidjson",
+      "name": "RapidJSON",
+      "platforms": ["ios", "android"],
+      "license": "MIT",
+      "copyright": ["Copyright (C) 2015 THL A29 Limited, a Tencent company, and Milo Yip"],
+      "url": "https://github.com/Tencent/rapidjson",
+      "text": "texts/rapidjson.txt"
+    },
+    {
+      "id": "unordered-dense",
+      "name": "unordered_dense",
+      "platforms": ["ios", "android"],
+      "license": "MIT",
+      "copyright": ["Copyright (c) 2022 Martin Leitner-Ankerl"],
+      "url": "https://github.com/martinus/unordered_dense",
+      "text": "texts/unordered_dense.txt"
+    },
+    {
+      "id": "date",
+      "name": "date (Howard Hinnant)",
+      "platforms": ["ios", "android"],
+      "license": "MIT",
+      "copyright": ["Copyright (c) 2015-2017 Howard Hinnant and the date contributors"],
+      "url": "https://github.com/HowardHinnant/date",
+      "text": "texts/date.txt"
+    },
+    {
+      "id": "lz4",
+      "name": "LZ4",
+      "platforms": ["ios", "android"],
+      "license": "BSD-2-Clause",
+      "copyright": ["Copyright (c) 2011-2020, Yann Collet"],
+      "url": "https://github.com/lz4/lz4",
+      "text": "texts/lz4.txt"
+    },
+    {
+      "id": "tzdata",
+      "name": "IANA Time Zone Database",
+      "platforms": ["ios"],
+      "license": "Public domain",
+      "copyright": [],
+      "url": "https://www.iana.org/time-zones",
+      "text": null
+    },
+    {
+      "id": "maplibre-native-ios",
+      "name": "MapLibre Native (iOS)",
+      "version": "6.31.0",
+      "platforms": ["ios"],
+      "license": "BSD-2-Clause",
+      "copyright": ["Copyright (c) 2021 MapLibre contributors", "Copyright (c) 2018-2021 MapTiler.com", "Copyright (c) 2014-2020 Mapbox"],
+      "url": "https://github.com/maplibre/maplibre-native/tree/ios-v6.31.0",
+      "note": "The text below also carries the notices of the third-party code MapLibre Native bundles.",
+      "text": "texts/maplibre-native-ios-6.31.0.md"
+    },
+    {
+      "id": "maplibre-native-android",
+      "name": "MapLibre Native (Android)",
+      "version": "13.6.1",
+      "platforms": ["android"],
+      "license": "BSD-2-Clause",
+      "copyright": ["Copyright (c) 2021 MapLibre contributors", "Copyright (c) 2018-2021 MapTiler.com", "Copyright (c) 2014-2020 Mapbox"],
+      "url": "https://github.com/maplibre/maplibre-native/tree/android-v13.6.1",
+      "note": "The text below also carries the notices of the third-party code MapLibre Native bundles.",
+      "text": "texts/maplibre-native-android-13.6.1.md"
+    },
+    {
+      "id": "llama.cpp",
+      "name": "llama.cpp / ggml",
+      "platforms": ["ios", "android"],
+      "license": "MIT",
+      "copyright": ["Copyright (c) 2023-2026 The ggml authors"],
+      "url": "https://github.com/ggml-org/llama.cpp",
+      "note": "Compiled from the copy inside llama.rn 0.13.0-rc.8 (https://github.com/mybigday/llama.rn).",
+      "text": "texts/llama.cpp.txt"
+    },
+    {
+      "id": "hermes",
+      "name": "Hermes",
+      "platforms": ["ios", "android"],
+      "license": "MIT",
+      "copyright": ["Copyright (c) Meta Platforms, Inc. and affiliates"],
+      "url": "https://github.com/facebook/hermes",
+      "text": "texts/hermes.txt"
+    },
+    {
+      "id": "folly",
+      "name": "Folly",
+      "version": "2024.11.18.00",
+      "platforms": ["ios", "android"],
+      "license": "Apache-2.0",
+      "copyright": ["Copyright (c) Meta Platforms, Inc. and affiliates"],
+      "url": "https://github.com/facebook/folly",
+      "text": "texts/Apache-2.0.txt"
+    },
+    {
+      "id": "glog",
+      "name": "glog",
+      "version": "0.3.5",
+      "platforms": ["ios", "android"],
+      "license": "BSD-3-Clause",
+      "copyright": ["Copyright (c) 2008, Google Inc."],
+      "url": "https://github.com/google/glog/tree/v0.3.5",
+      "text": "texts/glog.txt"
+    },
+    {
+      "id": "double-conversion",
+      "name": "double-conversion",
+      "version": "1.1.6",
+      "platforms": ["ios", "android"],
+      "license": "BSD-3-Clause",
+      "copyright": ["Copyright 2006-2011, the V8 project authors"],
+      "url": "https://github.com/google/double-conversion",
+      "text": "texts/double-conversion.txt"
+    },
+    {
+      "id": "fmt",
+      "name": "{fmt}",
+      "version": "12.1.0",
+      "platforms": ["ios", "android"],
+      "license": "MIT",
+      "copyright": ["Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors"],
+      "url": "https://github.com/fmtlib/fmt",
+      "text": "texts/fmt.txt"
+    },
+    {
+      "id": "fast-float",
+      "name": "fast_float",
+      "version": "8.0.0",
+      "platforms": ["ios", "android"],
+      "license": "MIT",
+      "copyright": ["Copyright (c) 2021 The fast_float authors"],
+      "url": "https://github.com/fastfloat/fast_float",
+      "text": "texts/fast_float.txt"
+    },
+    {
+      "id": "socketrocket",
+      "name": "SocketRocket",
+      "version": "0.7.1",
+      "platforms": ["ios"],
+      "license": "BSD-3-Clause",
+      "copyright": ["Copyright (c) 2016-present, Facebook, Inc."],
+      "url": "https://github.com/facebookincubator/SocketRocket",
+      "text": "texts/socketrocket.txt"
+    },
+    {
+      "id": "fresco",
+      "name": "Fresco",
+      "platforms": ["android"],
+      "license": "MIT",
+      "copyright": ["Copyright (c) Meta Platforms, Inc. and affiliates"],
+      "url": "https://github.com/facebook/fresco",
+      "text": "texts/fresco.txt"
+    },
+    {
+      "id": "glide",
+      "name": "Glide",
+      "platforms": ["android"],
+      "license": "BSD-2-Clause AND MIT AND Apache-2.0",
+      "copyright": ["Copyright 2014 Google, Inc."],
+      "url": "https://github.com/bumptech/glide",
+      "text": "texts/glide.txt"
+    },
+    {
+      "id": "okhttp",
+      "name": "OkHttp",
+      "platforms": ["android"],
+      "license": "Apache-2.0",
+      "copyright": ["Copyright 2019 Square, Inc."],
+      "url": "https://github.com/square/okhttp",
+      "text": "texts/Apache-2.0.txt"
+    },
+    {
+      "id": "kotlinx-coroutines",
+      "name": "kotlinx.coroutines",
+      "version": "1.10.2",
+      "platforms": ["android"],
+      "license": "Apache-2.0",
+      "copyright": ["Copyright 2016-2025 JetBrains s.r.o. and Kotlin Programming Language contributors"],
+      "url": "https://github.com/Kotlin/kotlinx.coroutines",
+      "text": "texts/kotlinx-coroutines.txt"
+    },
+    {
+      "id": "mlkit-genai",
+      "name": "Google ML Kit GenAI Prompt API",
+      "version": "1.0.0-beta4",
+      "platforms": ["android"],
+      "license": "Proprietary (ML Kit Terms of Service)",
+      "copyright": ["Copyright Google LLC"],
+      "url": "https://developers.google.com/ml-kit/terms",
+      "note": "Closed-source Google library used to reach Gemini Nano on supported phones. It is not covered by Nomad Pocket's GPL licence.",
+      "text": null
+    }
+  ],
+  "data": [
+    {
+      "id": "openstreetmap",
+      "name": "OpenStreetMap",
+      "license": "ODbL-1.0",
+      "copyright": ["© OpenStreetMap contributors"],
+      "url": "https://www.openstreetmap.org/copyright",
+      "note": "Map tiles, routing packs, points of interest and addresses. Licence: https://opendatacommons.org/licenses/odbl/1-0/",
+      "text": null
+    },
+    {
+      "id": "wikipedia-kiwix",
+      "name": "Wikipedia and Kiwix content",
+      "license": "CC-BY-SA-4.0",
+      "copyright": ["© Wikipedia contributors and the authors of each archive"],
+      "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "note": "Archives packaged by Kiwix (https://kiwix.org) and downloaded by you. Wikipedia text is CC BY-SA 4.0; other archives keep their own licence, stated in the archive.",
+      "text": null
+    },
+    {
+      "id": "natural-earth",
+      "name": "Natural Earth",
+      "license": "Public domain",
+      "copyright": [],
+      "url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "note": "Country and region outlines.",
+      "text": null
+    },
+    {
+      "id": "protomaps-basemaps",
+      "name": "Protomaps basemaps",
+      "license": "BSD-3-Clause AND CC0-1.0 AND MIT",
+      "copyright": ["Copyright 2019-2023 Protomaps LLC, Kelso Cartography", "Copyright (c) 2017 Mapzen (icons)"],
+      "url": "https://github.com/protomaps/basemaps",
+      "text": "texts/protomaps-basemaps.txt"
+    },
+    {
+      "id": "tangrams-icons",
+      "name": "Tangrams icons (map sprites)",
+      "license": "MIT",
+      "copyright": ["Copyright (c) 2017 Mapzen"],
+      "url": "https://github.com/tangrams/icons",
+      "text": "texts/tangrams-icons.txt"
+    },
+    {
+      "id": "noto-sans",
+      "name": "Noto Sans (map labels)",
+      "license": "OFL-1.1",
+      "copyright": ["Copyright 2022 The Noto Project Authors"],
+      "url": "https://github.com/notofonts/latin-greek-cyrillic",
+      "note": "Bundled as SDF glyph ranges from protomaps/basemaps-assets.",
+      "text": "texts/noto-sans-OFL.txt"
+    },
+    {
+      "id": "inter",
+      "name": "Inter (app font)",
+      "license": "OFL-1.1",
+      "copyright": ["Copyright (c) 2016 The Inter Project Authors"],
+      "url": "https://github.com/rsms/inter",
+      "text": "texts/inter-OFL.txt"
+    }
+  ],
+  "jsTexts": {
+    "@protomaps/basemaps": "texts/protomaps-basemaps.txt"
+  },
+  "spdxFallback": {
+    "MIT": "texts/spdx/MIT.txt",
+    "ISC": "texts/spdx/ISC.txt",
+    "BSD-3-Clause": "texts/spdx/BSD-3-Clause.txt",
+    "Unlicense": "texts/spdx/Unlicense.txt",
+    "Apache-2.0": "texts/Apache-2.0.txt"
+  }
+}
