@@ -250,6 +250,11 @@ export function pickPack<P extends RoutingPack>(packs: P[], from: LatLon, to: La
 
 export type ManifestFile = { name: string; size: number; sha256: string };
 
+/** What a catalog file promises, for the download manager to check before its handler runs (a hash that isn't one is left out). */
+export function fileIntegrity(f: ManifestFile): { size: number; sha256?: string } {
+  return /^[0-9a-f]{64}$/i.test(f.sha256 ?? '') ? { size: f.size, sha256: f.sha256 } : { size: f.size };
+}
+
 export type ManifestPack = {
   id: string;
   /** Release holding this pack's files (packs not rebuilt this month stay in an older one). */

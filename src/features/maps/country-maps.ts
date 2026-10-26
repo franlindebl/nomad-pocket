@@ -32,6 +32,7 @@ import { storeEmergencyPointsFile } from './emergency';
 import { mapItemId, notifyMapInstalled, type MapItemMeta } from './extraction';
 import { indexMapStreets, indexPackAddresses, indexPackPlaces } from './places';
 import { getRegion, regionName } from './regions';
+import { fileIntegrity } from './routing-core';
 import { expectedSideFiles, expectSideFiles, forgetSideFile, importSideFile, isImporting } from './side-files';
 
 const REPO = 'franlindebl/nomad-pocket';
@@ -167,6 +168,7 @@ const partInput = (manifest: MapsManifest, map: CountryMap, i: number, meta: Map
   url: mapAssetUrl(manifest, map, map.parts[i].name, REPO),
   filename: partName(map.id, i),
   expectedBytes: map.parts[i].size,
+  integrity: fileIntegrity(map.parts[i]),
   meta: { ...meta, role: 'part', index: i },
   group,
 });
@@ -178,6 +180,7 @@ const sideInput = (manifest: MapsManifest, map: CountryMap, role: SideFile, meta
   url: mapAssetUrl(manifest, map, map[role]!.name, REPO),
   filename: sideName(map.id, role),
   expectedBytes: map[role]!.size,
+  integrity: fileIntegrity(map[role]!),
   meta: { ...meta, role },
   group,
 });
