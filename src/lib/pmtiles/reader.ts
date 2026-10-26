@@ -1,7 +1,7 @@
 // Sequential reads from a local archive: list every tile of one zoom level and
 // read tile payloads. Used to build the offline place index from installed maps
 // (the extractor only copies tiles; this reads what is inside them).
-import { decompress, deserializeDirectory, type Header } from './format.ts';
+import { decompress, deserializeDirectory, FormatError, MAX_LEAF_DEPTH, type Header } from './format.ts';
 import { throwIfAborted, type RangeSource } from './io.ts';
 import { bboxTileRanges, firstRangeAfter, intersects, tileIdToZxy, zoomBase, type BBox, type TileRange } from './tileid.ts';
 import { readArchiveInfo } from './extract.ts';
@@ -32,8 +32,10 @@ export async function listZoomTiles(
   const ranges: TileRange[] = bbox ? bboxTileRanges(bbox, z, z) : [[zoomBase(z), zoomBase(z + 1)]];
   const tiles: TileEntry[] = [];
   const seenOffsets = new Set<number>();
+  // A corrupt archive can point a leaf back at itself or an ancestor: read each leaf once.
+  const seenLeaves = new Set<number>();
 
-  const walk = async (entries: ReturnType<typeof deserializeDirectory>, endBound: number) => {
+  const walk = async (entries: ReturnType<typeof deserializeDirectory>, endBound: number, depth: number) => {
     for (let i = 0; i < entries.length; i++) {
       const en = entries[i];
       const end = en.runLength > 0 ? en.tileId + en.runLength : i + 1 < entries.length ? entries[i + 1].tileId : endBound;
@@ -47,12 +49,16 @@ export async function listZoomTiles(
         tiles.push({ tileId: id, z: tz, x, y, offset: header.tileDataOffset + en.offset, length: en.length });
       } else {
         throwIfAborted(signal);
-        const raw = await source.getBytes(header.leafDirectoryOffset + en.offset, en.length, signal);
-        await walk(deserializeDirectory(decompress(raw, header.internalCompression)), end);
+        const at = header.leafDirectoryOffset + en.offset;
+        if (seenLeaves.has(at)) continue;
+        seenLeaves.add(at);
+        if (depth >= MAX_LEAF_DEPTH) throw new FormatError('leaf directories nest too deep');
+        const raw = await source.getBytes(at, en.length, signal);
+        await walk(deserializeDirectory(decompress(raw, header.internalCompression)), end, depth + 1);
       }
     }
   };
-  await walk(info.rootEntries, Infinity);
+  await walk(info.rootEntries, Infinity, 0);
   return { header, tiles };
 }
 

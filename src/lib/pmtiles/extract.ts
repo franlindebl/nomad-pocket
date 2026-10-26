@@ -15,6 +15,8 @@ import {
   concatBytes,
   decompress,
   deserializeDirectory,
+  FormatError,
+  MAX_LEAF_DEPTH,
   parseHeader,
   serializeHeader,
   type Entry,
@@ -235,7 +237,12 @@ export async function planExtract(source: RangeSource, opts: PlanOptions): Promi
 
   let leafRefs: LeafRef[] = [];
   scan(info.rootEntries, Infinity, leafRefs);
-  while (leafRefs.length) {
+  // A corrupt archive can point a leaf back at itself or nest leaves without end.
+  const seenLeaves = new Set<number>();
+  for (let depth = 1; leafRefs.length; depth++) {
+    leafRefs = leafRefs.filter((ref) => !seenLeaves.has(ref.offset) && seenLeaves.add(ref.offset));
+    if (!leafRefs.length) break;
+    if (depth > MAX_LEAF_DEPTH) throw new FormatError('leaf directories nest too deep');
     leafRefs.sort((a, b) => a.offset - b.offset);
     const groups = coalesce(leafRefs, 0.1, maxRequestBytes);
     dirTotal += groups.reduce((sum, g) => sum + g.length, 0);

@@ -6,6 +6,7 @@ import {
   ByteReader,
   ByteWriter,
   Compression,
+  FormatError,
   HEADER_SIZE,
   TileType,
   buildDirectories,
@@ -84,6 +85,10 @@ test('directory serialization round-trip (incl. offset elision and leaves)', () 
   entries.push({ tileId: 2 ** 40, offset: 2 ** 37, length: 10, runLength: 0 });
   assert.deepEqual(deserializeDirectory(serializeDirectory(entries)), entries);
   assert.deepEqual(deserializeDirectory(serializeDirectory([])), []);
+  // A corrupt entry count is refused before it allocates anything.
+  const w = new ByteWriter(8);
+  w.varint(1e9);
+  assert.throws(() => deserializeDirectory(w.bytes()), FormatError);
   assert.throws(() => serializeDirectory([entries[1], entries[0]]));
 });
 
