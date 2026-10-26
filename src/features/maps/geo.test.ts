@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { bearingDegrees, compassSector, distanceMeters, formatUtm, fromUtm, parseCoordinates, toUtm } from './geo.ts';
+import { bearingDegrees, compassSector, distanceMeters, formatUtm, fromUtm, parseCoordinates, screenHeading, toUtm } from './geo.ts';
 
 const near = (a: number, b: number, eps: number, msg?: string) => assert.ok(Math.abs(a - b) <= eps, `${msg ?? ''} ${a} ≉ ${b}`);
 
@@ -75,4 +75,15 @@ test('parseCoordinates: UTM', () => {
   const south = parseCoordinates('56H 334369 6250948')!;
   near(south.lat, -33.8688, 1e-3);
   near(south.lon, 151.2093, 1e-3);
+});
+
+test('screenHeading turns the compass to the screen top', () => {
+  // Facing north with the screen's top pointing north.
+  assert.equal(screenHeading(0, 'portraitUp'), 0);
+  assert.equal(screenHeading(90, 'landscapeLeft'), 0, 'device top points east');
+  assert.equal(screenHeading(270, 'landscapeRight'), 0, 'device top points west');
+  assert.equal(screenHeading(180, 'portraitDown'), 0);
+  assert.equal(screenHeading(45, 'unknown'), 45);
+  assert.equal(screenHeading(10, 'landscapeLeft'), 280);
+  assert.equal(screenHeading(300, 'landscapeRight'), 30);
 });
