@@ -14,11 +14,13 @@ import {
   detectLanguage,
   extractKeywords,
   followUpTopic,
+  formatSources,
   guessIntent,
   isHealthQuestion,
   normalize,
   packContext,
   parseToolQuery,
+  ragMessageFrame,
   rankChunks,
   relevantChunks,
   SEARCH_TOOL_NAME,
@@ -225,6 +227,20 @@ describe('context packing', () => {
     const none = buildRagUserMessage('What is X?', [], 'en');
     assert.match(none, /no articles about this/);
     assert.match(none, /Question: What is X\?/);
+  });
+
+  test('ragMessageFrame is everything but the sources; a long question goes once, last', () => {
+    const packed = packContext([scored(chunk('a', 0, 300), 2), scored(chunk('c', 1, 200), 1)], (k) => refs[k], 10_000);
+    const formatted = formatSources(packed.sources);
+    for (const q of ['¿Cómo curo una quemadura?', `Tengo estos síntomas: ${'dolor de cabeza y fiebre, '.repeat(40)}`]) {
+      const msg = buildRagUserMessage(q, packed.sources, 'es');
+      assert.equal(msg.length, ragMessageFrame(q, 'es').length + formatted.length);
+    }
+    const long = `Symptoms: ${'headache and fever, '.repeat(40)}`;
+    const msg = buildRagUserMessage(long, packed.sources, 'en');
+    assert.equal(msg.split(long).length - 1, 1);
+    assert.ok(msg.indexOf(long) > msg.indexOf('[2]'));
+    assert.equal(buildRagUserMessage('Short?', packed.sources, 'en').split('Question: Short?').length - 1, 2);
   });
 });
 

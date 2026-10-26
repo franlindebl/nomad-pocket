@@ -112,5 +112,7 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
     ranked = chunks.filter((c) => c.index === 0).map((c, i) => ({ item: c, score: 1 / (i + 1) }));
   }
   const { sources } = packContext(ranked, (k) => refs.get(k), budgetChars, 3);
+  // Found, but nothing fits the budget (a very long question): don't claim the library has nothing.
+  if (!sources.length && ranked.length) return { noLibrary: false, sources, userMessage: question };
   return { noLibrary: false, sources, userMessage: buildRagUserMessage(question, sources, lang) };
 }
