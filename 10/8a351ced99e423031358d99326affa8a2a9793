@@ -1,0 +1,27 @@
+src/features/downloads/manager-core.test.ts
+  s_9f5316f88b2e79::t_5f06b26b7831d2 4,99-107
+src/features/downloads/manager-core.ts
+  s_9f5316f88b2e79::t_4394d73f7375b7 3-4,95-105
+src/features/downloads/manager.ts
+  s_9f5316f88b2e79::t_0b2de55c6e162b 19-20,41,95-100,521,928-930
+src/features/maps/country-maps.ts
+  s_9f5316f88b2e79::t_a2eef84ed9a29d 174-175
+src/features/maps/routing-packs.ts
+  s_9f5316f88b2e79::t_8bd72252796462 132-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "108a351ced99e423031358d99326affa8a2a9793",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
