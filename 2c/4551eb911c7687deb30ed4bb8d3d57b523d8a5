@@ -1,0 +1,61 @@
+CLAUDE.md
+  s_78b408ad093c39::t_66dbf3d4270ae0 116
+docs/ARCHITECTURE.md
+  s_838c9370c44bfa::t_fe100f15bde5b6 187-194
+docs/E2E.md
+  s_78b408ad093c39::t_d8cad40a8ddf3d 333
+docs/PROGRESS.md
+  s_838c9370c44bfa::t_0b6ba19ee52e1f 177-192
+e2e/flows/onboarding/onb-04-pack.yaml
+  s_78b408ad093c39::t_053380a3ba1552 15
+src/app/(tabs)/(home)/index.tsx
+  s_78b408ad093c39::t_233ffca183e8e0 29,78-79
+src/app/(tabs)/maps/index.tsx
+  s_78b408ad093c39::t_3d468a9f84cf1e 10-12,16-17,26,526,533-586
+src/app/downloads.tsx
+  s_78b408ad093c39::t_394a30ab7abcb7 8,14,28
+src/app/onboarding.tsx
+  s_78b408ad093c39::t_9f77cbef5c49d2 182-185,188-189,393
+src/features/downloads/DownloadRow.tsx
+  s_78b408ad093c39::t_64916e5c3164c2 10-11,13-14,17,26,34,38-40,47-48,51,53-54,57-58,61
+src/features/downloads/manager.ts
+  s_78b408ad093c39::t_43b0e16a569e78 18,21-22,55-56,81-84,256,329-353,473-474,539,543-562
+src/features/maps/countries.ts
+  s_78b408ad093c39::t_39ebdc37f8a603 9,16-23,169-170,172,184,245-246,265-270
+src/features/maps/country-maps.ts
+  s_78b408ad093c39::t_e1830edd0a3c2a 15-21,79-87,110-115,131,145
+src/features/maps/routing-packs.ts
+  s_78b408ad093c39::t_fb0ac30ea89d33 27,99,120,132,135,140,150
+src/i18n/locales/en/maps.json
+  s_78b408ad093c39::t_499c06b042138f 17-23,71
+src/i18n/locales/es/maps.json
+  s_78b408ad093c39::t_c0747e7fc438a2 17-23,71
+src/features/downloads/groups.test.ts
+  s_78b408ad093c39::t_f67790da2b3882 1-65
+src/features/downloads/groups.ts
+  s_78b408ad093c39::t_a4ea2a6b5cde58 1-84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2c4551eb911c7687deb30ed4bb8d3d57b523d8a5",
+  "prompts": {},
+  "sessions": {
+    "s_78b408ad093c39": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e82e2e6d-65bd-4709-9859-f05fbe0b2151",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_838c9370c44bfa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65e8c9ca-b49f-4076-9462-02635ce8b6df",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

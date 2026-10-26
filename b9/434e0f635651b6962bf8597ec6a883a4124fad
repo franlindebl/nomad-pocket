@@ -1,0 +1,23 @@
+app.json
+  s_78b408ad093c39::t_c35a44805bc1de 13,28
+docs/PROGRESS.md
+  s_78b408ad093c39::t_5b92e010468fa0 9,22,50-54
+docs/RELEASE.md
+  s_78b408ad093c39::t_5ce16a3fa7464d 27,29,45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b9434e0f635651b6962bf8597ec6a883a4124fad",
+  "prompts": {},
+  "sessions": {
+    "s_78b408ad093c39": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e82e2e6d-65bd-4709-9859-f05fbe0b2151",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,119 @@
+.github/workflows/routing-packs.yml
+  s_838c9370c44bfa::t_cf8f71366e85fb 1-119
+.gitignore
+  s_838c9370c44bfa::t_e79cb3dbf7fdab 50
+CLAUDE.md
+  s_838c9370c44bfa::t_de95f0aaa247d2 35-37,47,75-76,115,117,144-151
+docs/ARCHITECTURE.md
+  s_838c9370c44bfa::t_b4269d6328e1bc 85,140,343-405,410,420-422,493
+docs/DEVELOPMENT.md
+  s_838c9370c44bfa::t_d74f5344e37b0a 26-33
+docs/E2E.md
+  s_838c9370c44bfa::t_23db9f8fa37402 5,43-45,124-127,134,152,189,235-236,268-270,293-297
+docs/MAPS_NAVIGATION_PLAN.md
+  s_838c9370c44bfa::t_d595c19eeb11d0 49-67,152
+docs/PROGRESS.md
+  s_838c9370c44bfa::t_079cb3b80abfe2 14-15,27-28,49-53,77-80,112-136
+e2e/fixtures/routing/ad.pois.tsv
+  s_838c9370c44bfa::t_e854d9e92eedb0 1-408
+e2e/flows/maps/map-14-route.yaml
+  s_838c9370c44bfa::t_fbfd68cd3afe5d 1-93
+e2e/flows/maps/map-15-routing-download.yaml
+  s_838c9370c44bfa::t_4f0327d43b5f05 1-56
+modules/nomad-route/android/build.gradle
+  s_838c9370c44bfa::t_d6f02835750acf 1-22
+modules/nomad-route/android/src/main/java/expo/modules/nomadroute/NomadRouteModule.kt
+  s_838c9370c44bfa::t_0e29c76e25acca 1-90
+modules/nomad-route/expo-module.config.json
+  s_838c9370c44bfa::t_fbab3b8afe30ab 1-9
+modules/nomad-route/index.ts
+  s_838c9370c44bfa::t_a23f56dee12450 1-4
+modules/nomad-route/ios/NRRouter.h
+  s_838c9370c44bfa::t_250c27c286bb8b 1-19
+modules/nomad-route/ios/NomadRoute.podspec
+  s_838c9370c44bfa::t_aa58b243b826f8 1-32
+modules/nomad-route/ios/NomadRouteModule.swift
+  s_838c9370c44bfa::t_a7dc12da423ec7 1-119
+modules/nomad-route/scripts/fetch-ios-libs.sh
+  s_838c9370c44bfa::t_b1ddd91caf4d81 1-67
+modules/nomad-route/src/NomadRoute.types.ts
+  s_838c9370c44bfa::t_314080160620e3 1-8
+modules/nomad-route/src/NomadRouteModule.ts
+  s_838c9370c44bfa::t_d911ecbf8bdf9b 1-18
+package.json
+  s_838c9370c44bfa::t_dc433b646a5fb9 68
+scripts/e2e.sh
+  s_838c9370c44bfa::t_a382d2f0c44543 11-13,61-64,78-101,114-116,123-125
+scripts/routing/build-country.sh
+  s_838c9370c44bfa::t_ba2939c8df08ff 1-138
+scripts/routing/emergency-points.py
+  s_838c9370c44bfa::t_9d0990aa6263a0 1-90
+scripts/routing/manifest.py
+  s_838c9370c44bfa::t_ded62424c3f34f 1-133
+scripts/routing/packs.json
+  s_838c9370c44bfa::t_97957b6e6aa83e 1-8
+scripts/routing/slice.py
+  s_838c9370c44bfa::t_9475a1ba149541 1-31
+site/privacy.html
+  s_838c9370c44bfa::t_ece1ee5de304f8 67-68,130-131
+src/app/(tabs)/maps/_layout.tsx
+  s_838c9370c44bfa::t_b2791fac935aae 23-24
+src/app/(tabs)/maps/index.tsx
+  s_838c9370c44bfa::t_5efc20f81759be 53,134-135,153-172,333-346
+src/app/(tabs)/maps/regions.tsx
+  s_838c9370c44bfa::t_83aee6554fcb55 2,109-120
+src/app/(tabs)/maps/route-steps.tsx
+  s_838c9370c44bfa::t_626456bbf599fe 1-50
+src/app/(tabs)/maps/routing-packs.tsx
+  s_838c9370c44bfa::t_8cbb5ee95a7053 1-174
+src/app/settings/index.tsx
+  s_838c9370c44bfa::t_357380647dfbb2 4,24
+src/features/maps/GuidancePanel.tsx
+  s_838c9370c44bfa::t_74f9d4240f030d 1-4,6-29,34,41,45-66,73-77,84-86,94-96,115-128,137-169,185-189,194-214
+src/features/maps/emergency.ts
+  s_838c9370c44bfa::t_f9d5bfc0832207 124-164,183
+src/features/maps/fixtures/route-madrid-auto.json
+  s_838c9370c44bfa::t_c4d592b9360e22 1
+src/features/maps/guidance.ts
+  s_838c9370c44bfa::t_f7b64c3d112ee6 1-4,10-11,15-19,22,25-30,32-34,39-40,44-52,69-82,84-90,92-108,110-200
+src/features/maps/register.ts
+  s_838c9370c44bfa::t_bd684e71c60128 1,7,17-18,91-100,109-114,135-145
+src/features/maps/routing-core.test.ts
+  s_838c9370c44bfa::t_85e5cb2cfa22a0 1-243
+src/features/maps/routing-core.ts
+  s_838c9370c44bfa::t_846e8442f40c6b 1-509
+src/features/maps/routing.ts
+  s_838c9370c44bfa::t_fbb4b32f3be85a 1-161
+src/features/maps/valhalla-defaults.json
+  s_838c9370c44bfa::t_022c4b9c124e52 1-350
+src/i18n/locales/en/maps.json
+  s_838c9370c44bfa::t_dc92f5e8092eb9 125-130,277-315
+src/i18n/locales/en/settings.json
+  s_838c9370c44bfa::t_de1a145b06a9b6 20-21
+src/i18n/locales/es/maps.json
+  s_838c9370c44bfa::t_fef72b50280de1 125-130,277-315
+src/i18n/locales/es/settings.json
+  s_838c9370c44bfa::t_5be310abdbe411 20-21
+src/lib/storage.ts
+  s_838c9370c44bfa::t_76cfb6e12dce37 5,8
+modules/nomad-route/ios/NRRouter.mm
+  s_838c9370c44bfa::t_7ca233dfea9e4e 1-86
+src/features/maps/routing-packs.ts
+  s_838c9370c44bfa::t_678d7afd0077d3 1-245
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "457def16b38fcaa133af5bab7e40883fa248060f",
+  "prompts": {},
+  "sessions": {
+    "s_838c9370c44bfa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65e8c9ca-b49f-4076-9462-02635ce8b6df",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

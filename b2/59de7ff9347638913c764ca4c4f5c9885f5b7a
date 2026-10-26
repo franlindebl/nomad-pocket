@@ -1,0 +1,23 @@
+docs/E2E.md
+  s_7f4d89e27550a2::t_0afdaaffec518c 5,47,67-70,232
+e2e/flows/android/android-02-map-scripts.yaml
+  s_7f4d89e27550a2::t_25bbff1a84b18b 1-155
+scripts/e2e-android.sh
+  s_7f4d89e27550a2::t_970e0b30b98a4d 21,27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b259de7ff9347638913c764ca4c4f5c9885f5b7a",
+  "prompts": {},
+  "sessions": {
+    "s_7f4d89e27550a2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "99f9ab25-1210-41a5-af44-46d9a81f8ba6",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
