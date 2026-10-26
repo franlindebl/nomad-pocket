@@ -1,0 +1,31 @@
+src/app/(tabs)/maps/index.tsx
+  s_9f5316f88b2e79::t_819df9877c3cf5 81-84
+src/features/maps/GuidancePanel.tsx
+  s_9f5316f88b2e79::t_09133cbf7d6460 41,104-105,157-164
+src/features/maps/follow-core.test.ts
+  s_9f5316f88b2e79::t_bd23b681da31ed 4,31-45
+src/features/maps/follow-core.ts
+  s_9f5316f88b2e79::t_9a6dc936df02ce 3,30-46
+src/features/maps/guidance.ts
+  s_9f5316f88b2e79::t_31f757c5e964c3 5-7,15-16,47-48,55-61,73-79,81-84,88-97,148-203,223-224,227-230,234,242-243,245-247,253-257,259-261,263,286-294,301
+src/i18n/locales/en/maps.json
+  s_9f5316f88b2e79::t_4a918ea37d0078 129
+src/i18n/locales/es/maps.json
+  s_9f5316f88b2e79::t_488f5b98ca35df 129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c30c41080a3be144a5c86a30e79cfc773f37cd89",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
