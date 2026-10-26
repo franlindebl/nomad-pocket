@@ -1,7 +1,7 @@
 // Country downloads, the pure part: the country maps catalog (maps-manifest.json, written by
 // scripts/maps/maps-manifest.py) and which routing pack belongs to which country. A country
 // download is its map plus, where one exists, its routing pack (docs/UX_SURVIVAL_PLAN.md).
-import type { ManifestFile, ManifestPack } from './routing-core.ts';
+import { engineReads, LEGACY_PACK_VALHALLA, type ManifestFile, type ManifestPack } from './routing-core.ts';
 
 export type CountryMap = {
   id: string;
@@ -116,6 +116,15 @@ export function countryOfGroup(groupId: string | null | undefined): string | nul
 /** YYYYMMDD build dates: whether `latest` is a newer build than `installed`. */
 export function isNewer(latest: string | null | undefined, installed: string | null | undefined): boolean {
   return !!latest && !!installed && latest > installed;
+}
+
+/**
+ * Whether an installed pack should be replaced by the catalog's: a newer build, or one built by
+ * a Valhalla this app's engine can't read (packs installed before the version was recorded
+ * were all built by LEGACY_PACK_VALHALLA).
+ */
+export function packOutdated(installed: { buildDate?: string | null; valhalla?: string | null }, latest: Pick<ManifestPack, 'buildDate'>): boolean {
+  return isNewer(latest.buildDate, installed.buildDate) || !engineReads(installed.valhalla ?? LEGACY_PACK_VALHALLA);
 }
 
 /** One file of an archive to download: already on disk, already queued, or still to fetch. */

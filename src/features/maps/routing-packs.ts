@@ -27,8 +27,8 @@ import { emergencySyncInfo, storeEmergencyPointsFile } from './emergency';
 import { useGuidance } from './guidance';
 import { hasPackAddresses, hasPackPlaces, hasPackStreets, indexPackAddresses, indexPackPlaces, indexPackStreets } from './places';
 import { getRegion, regionName } from './regions';
-import { routePackId, type RoutePackMeta } from './routing';
-import { assetUrl, parseManifest, type ManifestPack, type RoutingManifest } from './routing-core';
+import { closeRouter, routePackId, type RoutePackMeta } from './routing';
+import { assetUrl, ENGINE_VALHALLA, parseManifest, type ManifestPack, type RoutingManifest } from './routing-core';
 import { expectedSideFiles, expectSideFiles, forgetSideFile, importSideFile, isImporting } from './side-files';
 
 const REPO = 'franlindebl/nomad-pocket';
@@ -126,7 +126,7 @@ const partInput = (manifest: RoutingManifest, pack: ManifestPack, i: number, gro
   url: assetUrl(manifest, pack, pack.parts[i].name, REPO),
   filename: partName(pack.id, i),
   expectedBytes: pack.parts[i].size,
-  meta: { pack, role: 'part', index: i },
+  meta: { pack, valhalla: manifest.valhalla, role: 'part', index: i },
   group,
 });
 
@@ -137,7 +137,7 @@ const sideInput = (manifest: RoutingManifest, pack: ManifestPack, side: SideFile
   url: assetUrl(manifest, pack, pack[side]!.name, REPO),
   filename: sideName(pack.id, side),
   expectedBytes: pack[side]!.size,
-  meta: { pack, role: side },
+  meta: { pack, valhalla: manifest.valhalla, role: side },
   group,
 });
 
@@ -152,8 +152,8 @@ function dropUntrustedParts(pack: ManifestPack) {
 
 /**
  * Queues the files of a pack that are not on disk yet (a retry after a failure only fetches
- * what is missing) and returns the ids it queued. The caller checks the room first
- * (countries.ts planCountry).
+ * what is missing; an update fetches a newer build to replace the installed one) and returns
+ * the ids it queued. The caller checks the room first (countries.ts planCountry).
  */
 export function downloadPack(manifest: RoutingManifest, pack: ManifestPack, group = countryDownloadGroup(pack.regionId)): string[] {
   dropUntrustedParts(pack);
@@ -169,7 +169,7 @@ export function downloadPack(manifest: RoutingManifest, pack: ManifestPack, grou
     sides.map((side) => sideName(pack.id, side)),
   );
   // Everything was already on disk (a retry after the assembly itself failed).
-  if (!missing.length) assemblePack(pack).catch((e) => console.warn('[maps] routing pack', pack.id, e));
+  if (!missing.length) assemblePack(pack, manifest.valhalla).catch((e) => console.warn('[maps] routing pack', pack.id, e));
   return queued;
 }
 
@@ -253,8 +253,11 @@ function requeueLostParts(pack: ManifestPack, lost: number[], from: DownloadReco
   enqueueAll(lost.map((i) => partInput(manifest, pack, i, recordGroup(from) ?? countryDownloadGroup(pack.regionId))));
 }
 
-/** Builds <id>.tar from its parts and registers the pack, once every part is on disk. `from`: the part that just finished. */
-async function assemblePack(pack: ManifestPack, from?: DownloadRecord) {
+/**
+ * Builds <id>.tar from its parts and registers the pack, once every part is on disk. An
+ * update replaces the installed tar: the router has it mapped, so it is closed first.
+ */
+async function assemblePack(pack: ManifestPack, valhalla: string, from?: DownloadRecord) {
   if (assembling.has(pack.id)) return;
   const missing = pack.parts.map((_, i) => i).filter((i) => !partOnDisk(pack, i));
   if (missing.length) {
@@ -310,8 +313,12 @@ async function assemblePack(pack: ManifestPack, from?: DownloadRecord) {
     }
     if (sizeOf(tmp) !== pack.size) throw new Error(`assembled ${sizeOf(tmp)} bytes, expected ${pack.size}`);
     check();
-    if (dest.exists) dest.delete();
+    const replacing = dest.exists;
+    if (replacing) dest.delete();
     await tmp.move(dest);
+    // An update: Valhalla keeps the open pack by path and would go on routing on the deleted
+    // file (its space not freed either). Closed after the move, so the next route opens the new one.
+    if (replacing) await closeRouter().catch(() => {});
     try {
       check();
     } catch (e) {
@@ -324,6 +331,7 @@ async function assemblePack(pack: ManifestPack, from?: DownloadRecord) {
       cells: pack.cells ?? null,
       buildDate: pack.buildDate,
       regionId: getRegion(pack.regionId)?.id ?? null,
+      valhalla: valhalla || ENGINE_VALHALLA,
     };
     upsertItem({
       id: itemId,
@@ -367,7 +375,7 @@ export async function onRouteFileDownloaded(file: File, record: DownloadRecord) 
   }
   // Imported once the pack is installed (now, or after its assembly).
   if (isSideFile(role)) importPackSide(pack.id, role, true);
-  else await assemblePack(pack, record);
+  else await assemblePack(pack, String(record.meta.valhalla ?? ''), record);
 }
 
 /**

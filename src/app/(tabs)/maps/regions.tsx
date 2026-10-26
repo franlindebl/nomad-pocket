@@ -52,7 +52,7 @@ export default function MapsSheet() {
     }
   };
 
-  // A newer monthly build: update it (or delete the country) from one dialog.
+  // A newer monthly build (map, routing pack or both): update it (or delete the country) from one dialog.
   const manage = (c: CountryState) => {
     const offer = countryOffer(c.regionId);
     const plan = offer ? planCountry(offer, undefined, { update: true }) : null;
