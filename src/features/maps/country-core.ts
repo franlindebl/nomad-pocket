@@ -37,6 +37,11 @@ export type MapsManifest = {
 const isFile = (f: unknown): f is ManifestFile =>
   !!f && typeof (f as ManifestFile).name === 'string' && /^[\w.-]+$/.test((f as ManifestFile).name) && Number.isFinite((f as ManifestFile).size);
 
+// File names (`<regionId>.pmtiles`) and URLs are built from these: no paths, no other schemes.
+const isId = (v: unknown): v is string => typeof v === 'string' && /^[\w-]+$/.test(v);
+const isRelease = (v: unknown): v is string => typeof v === 'string' && /^[\w.-]+$/.test(v);
+const isBaseUrl = (v: unknown): v is string => typeof v === 'string' && /^https?:\/\/[^\s]+$/i.test(v);
+
 /** Validates a downloaded catalog; maps that don't look right are dropped. */
 export function parseMapsManifest(json: string): MapsManifest | null {
   let raw: Partial<MapsManifest>;
@@ -45,13 +50,14 @@ export function parseMapsManifest(json: string): MapsManifest | null {
   } catch {
     return null;
   }
-  if (raw?.version !== 1 || typeof raw.release !== 'string' || !Array.isArray(raw.maps)) return null;
+  if (raw?.version !== 1 || !isRelease(raw.release) || !Array.isArray(raw.maps)) return null;
+  if (raw.baseUrl != null && !isBaseUrl(raw.baseUrl)) return null;
   const maps = raw.maps.filter(
     (m) =>
       m &&
-      typeof m.id === 'string' &&
-      /^[\w-]+$/.test(m.id) &&
-      typeof m.regionId === 'string' &&
+      isId(m.id) &&
+      isId(m.regionId) &&
+      (m.release == null || isRelease(m.release)) &&
       Number.isFinite(m.maxZoom) &&
       Number.isFinite(m.size) &&
       Array.isArray(m.bbox) &&

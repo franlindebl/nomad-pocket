@@ -49,6 +49,16 @@ test('parseMapsManifest rejects other versions and garbage', () => {
   assert.equal(parseMapsManifest(JSON.stringify({ version: 1, release: 'r' })), null);
 });
 
+test('parseMapsManifest keeps paths and other schemes out of file names and URLs', () => {
+  const ad = manifest.maps[0];
+  const ids = (m: object) => parseMapsManifest(JSON.stringify(m))?.maps.map((x) => x.id);
+  // regionId names the installed file (<regionId>.pmtiles); release goes into the URL.
+  assert.deepEqual(ids({ ...manifest, maps: [{ ...ad, regionId: '../ad' }, { ...ad, id: 'fr', release: 'r/../x' }, ad] }), ['ad']);
+  assert.equal(parseMapsManifest(JSON.stringify({ ...manifest, release: '../r' })), null);
+  assert.equal(parseMapsManifest(JSON.stringify({ ...manifest, baseUrl: 'file:///etc' })), null);
+  assert.equal(parseMapsManifest(JSON.stringify({ ...manifest, baseUrl: 'http://localhost:8765' }))?.baseUrl, 'http://localhost:8765');
+});
+
 test('mapAssetUrl uses the map release, else the manifest one, else baseUrl', () => {
   const m = parseMapsManifest(JSON.stringify(manifest))!;
   assert.equal(mapAssetUrl(m, m.maps[0], 'ad.pmtiles', 'o/r'), 'https://github.com/o/r/releases/download/maps-20261025-1/ad.pmtiles');

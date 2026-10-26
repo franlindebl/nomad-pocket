@@ -291,6 +291,10 @@ const isFile = (f: unknown): f is ManifestFile =>
   /^[\w.-]+$/.test((f as ManifestFile).name) &&
   Number.isFinite((f as ManifestFile).size);
 
+// File names and URLs are built from these: no paths, no other schemes.
+const isRelease = (v: unknown): v is string => typeof v === 'string' && /^[\w.-]+$/.test(v);
+const isBaseUrl = (v: unknown): v is string => typeof v === 'string' && /^https?:\/\/[^\s]+$/i.test(v);
+
 /** Validates a downloaded manifest; packs that don't look right are dropped. */
 export function parseManifest(json: string): RoutingManifest | null {
   let raw: Partial<RoutingManifest>;
@@ -299,12 +303,15 @@ export function parseManifest(json: string): RoutingManifest | null {
   } catch {
     return null;
   }
-  if (raw?.version !== 1 || typeof raw.release !== 'string' || !Array.isArray(raw.packs)) return null;
+  if (raw?.version !== 1 || !isRelease(raw.release) || !Array.isArray(raw.packs)) return null;
+  if (raw.baseUrl != null && !isBaseUrl(raw.baseUrl)) return null;
   const packs = raw.packs.filter(
     (p) =>
       p &&
       typeof p.id === 'string' &&
       /^[\w-]+$/.test(p.id) &&
+      typeof p.regionId === 'string' &&
+      (p.release == null || isRelease(p.release)) &&
       Array.isArray(p.bbox) &&
       p.bbox.length === 4 &&
       p.bbox.every(Number.isFinite) &&
