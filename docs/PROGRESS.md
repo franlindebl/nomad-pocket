@@ -235,10 +235,15 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   the three persisted stores, so the first open is always synchronous; settings are
   hydrated when the store is created and `_layout.tsx` no longer waits for hydration.
   Checked: 50/50 fresh launches show the wizard (was 2 missing in 50), `android-04-prepare`
-  passes, and a relaunch keeps `onboarded` and the plan. iOS not re-run yet.
+  passes, and a relaunch keeps `onboarded` and the plan. iOS 27 simulator (Release): smoke
+  21/21, every flow through the wizard from a fresh install, `set-01`/`prep-01`/`prep-02`
+  included.
 - Seen on the way: on a fresh launch the emulator's JS thread stayed busy 4–8 s right
   after the wizard mounted (timers fired late), under heavy Mac load; not investigated.
   The long-running emulator's `system_server` also started crash-looping (cold boot fixed it).
+  The iOS Release build failed twice in `[Expo] Configure project`: expo-modules-autolinking
+  gives `ExpoModulesMacros scan-modules` a fixed 5 s, and with the Mac at load 45–73 it timed
+  out (under 1 s by hand); the third build passed. Retry the build when it says so.
 
 ### 2026-10-26 — A country can have several routing packs (the USA)
 
