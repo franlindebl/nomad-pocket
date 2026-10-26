@@ -17,6 +17,19 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+*.keystore
+credentials.json
+credentials/
+.netrc
+google-services.json
+GoogleService-Info.plist
+
+# store build outputs (docs/RELEASE.md writes them under ios/build, which /ios already covers)
+*.ipa
+*.apk
+*.aab
+*.xcarchive
+*.dSYM.zip
 
 # Metro
 .metro-health-check*
@@ -31,12 +44,14 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*.local
+.env
+.env.*
 
 # typescript
 *.tsbuildinfo
 
-example
+# a create-expo-module style example app at the repo root (the unanchored "example" this replaces also hid any src/**/example)
+/example/
 
 # generated native folders
 /ios

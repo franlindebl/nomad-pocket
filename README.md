@@ -14,7 +14,7 @@
 <p align="center">
   <img alt="iOS 16.4+" src="https://img.shields.io/badge/iOS-16.4%2B-black?logo=apple">
   <img alt="Android 8+" src="https://img.shields.io/badge/Android-8%2B-3DDC84?logo=android&logoColor=white">
-  <img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-blue">
+  <img alt="License: GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue">
   <img alt="Works offline" src="https://img.shields.io/badge/works-100%25%20offline-e8582a">
   <img alt="No tracking" src="https://img.shields.io/badge/tracking-none-2f8a4c">
 </p>
@@ -94,8 +94,8 @@ still have a connection.
 
 - **One download per country, with everything in it**: the map at full detail (every
   street, path and building), turn-by-turn routes by car, on foot and by bike, emergency
-  points, and every street, place and house number for search ("Calle de Alcalá 50" lands
-  on the door).
+  points, and every street, place and house number for search (a street address lands on
+  the door, or beside it when OpenStreetMap lacks that number).
 - **A world map built into the app**, so there is a map from the first second.
 - Navigation view that follows you, compass beam, saved places, coordinates and UTM.
 - Maps for every country; offline routing for the 60 countries of Europe and Latin
@@ -112,16 +112,17 @@ still have a connection.
 
 - **Wikipedia**, sized to your storage: from the most-read articles (~250 MB) to the whole
   encyclopedia.
-- **100+ curated collections**: medicine and first aid, survival, water and food,
-  agriculture, DIY and repairs, computing. Plus thousands more from the
+- **90+ curated collections**: medicine and first aid, survival, water and food,
+  agriculture, education, DIY and repairs, computing. Plus thousands more from the
   [Kiwix](https://kiwix.org) catalog, or your own ZIM files.
 - A reader with full-text search, bookmarks, find in page, text size and dark mode.
 - **14 courses** (health, science, maths, programming…) with progress tracking.
 
 ### ✨ An AI assistant that runs on your phone
 
-- Uses **Apple Intelligence** or **Gemini Nano** when your phone has them, or downloads an
-  open model (Qwen 3.5, Gemma 4) that runs locally with llama.cpp.
+- Uses **Apple Intelligence** when your iPhone or iPad has it, or downloads an open model
+  (Qwen 3.5, Gemma 4) that runs locally with llama.cpp. On Android, downloadable models are
+  the only option.
 - **Answers from your library, with sources** you can open: "How do I make water safe to
   drink?" works in the middle of nowhere.
 - Nothing you ask ever leaves the device.
@@ -143,14 +144,18 @@ still have a connection.
 ## Private by design
 
 No account. No ads. No analytics. No tracking. Your plan, your contacts, your location and
-your questions to the assistant stay on your phone. The app only goes online to download
-the content you choose, from public servers (Kiwix, GitHub Releases, Protomaps, Hugging
-Face). [Privacy policy](https://franlindebl.github.io/nomad-pocket/privacy.html).
+your questions to the assistant stay on your phone. The app has no server of its own: it only
+goes online to download the content you choose and to check the list of available country
+packages, from public servers (Kiwix and its mirrors, GitHub Releases, Protomaps, Hugging
+Face, and public Overpass servers, which only see a region's bounds). Pages of the
+books you read can't reach the network. When the app opens online it checks GitHub for the
+catalogs, so GitHub sees your IP address.
+[Privacy policy](https://franlindebl.github.io/nomad-pocket/privacy.html).
 
 ## Open source, open data
 
-Nomad Pocket is free software under the **GPL-3.0** license, built entirely on open
-knowledge:
+Nomad Pocket is free software under the **GPL-3.0-or-later** license, built entirely on open
+knowledge. The GPL covers the project's code; the data below keeps its own license:
 
 | Content | Source | License |
 |---|---|---|
@@ -158,7 +163,8 @@ knowledge:
 | Wikipedia and the library | [Wikipedia](https://www.wikipedia.org) and others, packaged by [Kiwix](https://kiwix.org) | CC BY-SA and others |
 | Routing engine | [Valhalla](https://github.com/valhalla/valhalla) | MIT |
 | Country outlines | [Natural Earth](https://www.naturalearthdata.com) | Public domain |
-| Local AI | [llama.cpp](https://github.com/ggml-org/llama.cpp), Qwen, Gemma | MIT, Apache-2.0, Gemma terms |
+| Local AI | [llama.cpp](https://github.com/ggml-org/llama.cpp), Qwen, Gemma | MIT, Apache-2.0 |
+| Reading engine | [libkiwix](https://github.com/kiwix/libkiwix), [libzim](https://github.com/openzim/libzim), [Xapian](https://xapian.org), libmicrohttpd | GPL-3.0+, GPL-2.0+, LGPL-2.1+ |
 
 The country packages are built in the open: a monthly
 [GitHub Actions workflow](.github/workflows/country-packages.yml) cuts each country's map,
@@ -168,23 +174,29 @@ Anyone can audit or rebuild them.
 
 ### Contributing
 
-Ideas, bug reports and pull requests are welcome. Good places to start:
+Ideas, bug reports and pull requests are welcome: read [CONTRIBUTING.md](CONTRIBUTING.md) first
+(GPL-3.0-or-later contributions, how to build from a clean clone, the checks to run).
+Security problems: [SECURITY.md](SECURITY.md). Good places to start:
 
-- **Test it on your phone** and [open an issue](https://github.com/franlindebl/nomad-pocket/issues)
-  with what broke or confused you.
+- **Try it on your phone** (build it from source, see below) and
+  [open an issue](https://github.com/franlindebl/nomad-pocket/issues) with what broke or
+  confused you.
 - **Translations**: the app speaks Spanish and English (`src/i18n/locales`).
 - **Content**: suggest collections for the catalog (`src/data/catalog.json`).
 - **Countries**: help bring offline routing to more of the world (`scripts/routing/packs.json`).
 
 ## Status
 
-Version **1.1.0** is in beta on TestFlight. The App Store release is in review and Google
-Play is coming soon. Progress, backlog and known limits: [docs/PROGRESS.md](docs/PROGRESS.md).
+This README describes version **1.1.0** (the country downloads and the survival-kit redesign),
+which is in beta on TestFlight for the maintainer's testers only. The version in App Store
+review is the earlier 1.0.1, without it; until 1.1.0 ships, build from source to try what is
+described here. Google Play is coming soon. Progress, backlog and known limits:
+[docs/PROGRESS.md](docs/PROGRESS.md).
 
 ## For developers
 
 Expo SDK 58 · React Native 0.88 (New Architecture) · TypeScript · Expo Router · native
-modules for libkiwix (ZIM), Valhalla (routing) and Apple Foundation Models / Gemini Nano ·
+modules for libkiwix (ZIM), Valhalla (routing) and Apple Foundation Models ·
 MapLibre with PMTiles · llama.rn · SQLite.
 
 ```bash
@@ -192,13 +204,16 @@ npm install            # also fetches the libkiwix and Valhalla iOS frameworks
 npx expo run:ios       # or: npx expo run:android  (dev build; Expo Go won't work)
 npm test               # unit tests
 npx tsc --noEmit && npx expo lint && npm run check:i18n
+npm run e2e:setup      # once: Maestro suite prerequisites
 npm run e2e            # Maestro functional suite on the iOS simulator
 ```
 
-Requires Xcode 26+, Android Studio and Node 22.6+. Docs:
+Requires Node 22.6+, Xcode (27+ for the iOS 27 simulator runtime that Apple Intelligence and
+the E2E suite need; plain builds may work on Xcode 26) and Android Studio. No accounts are
+needed for simulator and emulator builds. Docs:
 [Development](docs/DEVELOPMENT.md) · [Architecture](docs/ARCHITECTURE.md) ·
 [Style guide](docs/STYLE_GUIDE.md) · [E2E tests](docs/E2E.md) · [Release](docs/RELEASE.md) ·
-[Redesign plan](docs/UX_SURVIVAL_PLAN.md) · [Agent guide](CLAUDE.md)
+[Redesign plan](docs/UX_SURVIVAL_PLAN.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Agent guide](CLAUDE.md)
 
 ## Disclaimer
 
@@ -213,4 +228,8 @@ Inspired by [Project N.O.M.A.D.](https://github.com/Crosstalk-Solutions/project-
 Crosstalk Solutions. Made possible by Kiwix, Wikipedia, OpenStreetMap, Protomaps, MapLibre,
 Valhalla and llama.cpp.
 
-GPL-3.0-or-later. See [LICENSE](LICENSE).
+Copyright (C) 2026 Fran Linde Blázquez and contributors. GPL-3.0-or-later: see
+[LICENSE](LICENSE). Every bundled library, font and data set with its version, copyright and
+license text is listed in the app under **Settings › Credits & licenses** (generated by
+`node scripts/licenses.mjs`). Map data © OpenStreetMap contributors (ODbL); the files in
+`e2e/fixtures` are third-party test data, see [e2e/fixtures/README.md](e2e/fixtures/README.md).
