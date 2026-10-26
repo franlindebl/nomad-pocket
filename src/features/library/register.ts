@@ -7,7 +7,7 @@ import { registerInit } from '@/features/bootstrap';
 import { getResource, loc } from '@/features/catalog';
 import { getItem, listItems, onItemRemoved, upsertItem, type InstalledItem } from '@/features/content/items';
 import { registerCompletionHandler } from '@/features/downloads/manager';
-import { contentDir, deleteFile, fileSize, resolveContentUri } from '@/lib/storage';
+import { contentDir, deleteFile, fileSize, partialDir, resolveContentUri } from '@/lib/storage';
 
 import { NomadZim, isNomadZimAvailable } from '../../../modules/nomad-zim';
 
@@ -142,9 +142,16 @@ function unregisteredZimFiles(): File[] {
 
 registerInit(async () => {
   if (!isNomadZimAvailable()) return;
-  // Large, re-downloadable content stays out of iCloud backups.
-  const root = new Directory(Paths.document, 'content');
-  if (root.exists) excludeFromBackup(root.uri);
+  // Large, re-downloadable content stays out of iCloud backups. Create the folders first: on a
+  // fresh install none exist yet, and what this first session downloads (maps, routing packs,
+  // models) must be excluded too. Excluding the root covers everything below it.
+  try {
+    for (const kind of ['zim', 'map', 'model', 'route'] as const) contentDir(kind);
+    partialDir();
+    excludeFromBackup(new Directory(Paths.document, 'content').uri);
+  } catch (e) {
+    console.warn('[zim] cannot exclude content from backups', e);
+  }
 
   // Register stray archives in the background; never block startup on it.
   setTimeout(async () => {
