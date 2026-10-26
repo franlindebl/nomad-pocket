@@ -1,0 +1,47 @@
+src/app/(tabs)/(home)/prepare/entry.tsx
+  s_9f5316f88b2e79::t_dee29fbdaeefd1 39-40
+src/app/(tabs)/(home)/prepare/item.tsx
+  s_9f5316f88b2e79::t_196c6b0083ce04 41
+src/app/_layout.tsx
+  s_9f5316f88b2e79::t_abe361e8ece119 3,6,9,12,14,21-38,45,48,50
+src/components/navigation.ts
+  s_9f5316f88b2e79::t_f7be66d57eb00d 20-39
+src/features/prepare/kit.test.ts
+  s_9f5316f88b2e79::t_1c26c17dc3cb0a 4,56-94
+src/features/prepare/kit.ts
+  s_9f5316f88b2e79::t_f92e1cf4355370 140-182
+src/features/prepare/share.ts
+  s_9f5316f88b2e79::t_480b125ab0daff 5,8,14-30,46,50-56
+src/features/prepare/store.ts
+  s_9f5316f88b2e79::t_ce5f56b8484ce4 92-94
+src/i18n/locales/en/common.json
+  s_9f5316f88b2e79::t_f6ba4d5789c8d7 68
+src/i18n/locales/es/common.json
+  s_9f5316f88b2e79::t_a81c3a69958fc8 68
+src/features/prepare/reminders.ts
+  s_5cbe06e897afea::t_6819ed20561d1d 8-10,17,20,22,25-26,30,40-56,58-60,63-82,90-93,104-152,157-171,174-178,181-187
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8f4f46ec91e098783be1683ec2372a763d77631e",
+  "prompts": {},
+  "sessions": {
+    "s_5cbe06e897afea": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a3401b17a4260a145",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
