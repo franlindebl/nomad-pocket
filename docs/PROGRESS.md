@@ -269,6 +269,9 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 - Workflow: routing releases per continent (`routing-<stamp>-<continent>`, 1000-asset
   limit); `manifest.py unshare` drops a map's side files when its country's pack brings
   them (else the app would download and index both).
+- Run 40326036278 (the 173 new packs): Armenia failed after 3 rounds of Overpass 502/504
+  (8 builds at once), Germany on a Geofabrik 404 after a 7-minute download. Now 6 Overpass
+  rounds with growing pauses, and the extract download + md5 is retried 4 times.
 
 ### 2026-10-26 — Pre-release audit: findings fixed (branch `audit-fixes`)
 

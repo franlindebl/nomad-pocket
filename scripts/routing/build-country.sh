@@ -53,16 +53,24 @@ else
 fi
 
 # 1. Extracts (Geofabrik publishes an .md5 next to each file), merged when several.
+#    A mirror answers 404 now and then, and an extract replaced during the download fails
+#    its md5: start over a few minutes later (curl --retry skips both).
 SRCS=()
 STAMP=""
 for G in $GEOFABRIK; do
   URL="https://download.geofabrik.de/${G}-latest.osm.pbf"
   F="$WORK/src/$(basename "$G").osm.pbf"
-  log "downloading $URL"
-  curl -fsSL --retry 3 -A "$UA" -o "$F" "$URL"
-  EXPECTED="$(curl -fsSL --retry 3 -A "$UA" "$URL.md5" | cut -d' ' -f1)"
-  ACTUAL="$( (md5sum "$F" 2>/dev/null || md5 -r "$F") | cut -d' ' -f1)"
-  [[ "$EXPECTED" == "$ACTUAL" ]] || { log "md5 mismatch"; exit 1; }
+  fetched=0
+  for attempt in 1 2 3 4; do
+    log "downloading $URL (attempt $attempt)"
+    if curl -fsSL --retry 3 -A "$UA" -o "$F" "$URL" && EXPECTED="$(curl -fsSL --retry 3 -A "$UA" "$URL.md5" | cut -d' ' -f1)"; then
+      ACTUAL="$( (md5sum "$F" 2>/dev/null || md5 -r "$F") | cut -d' ' -f1)"
+      [[ "$EXPECTED" == "$ACTUAL" ]] && { fetched=1; break; }
+      log "md5 mismatch"
+    fi
+    [[ $attempt == 4 ]] || sleep $((attempt * 120))
+  done
+  [[ $fetched == 1 ]] || { log "download failed"; exit 1; }
   # The oldest extract dates the pack.
   S="$(osmium fileinfo -g header.option.osmosis_replication_timestamp "$F" || true)"
   [[ -z "$STAMP" || ( -n "$S" && "$S" < "$STAMP" ) ]] && STAMP="$S"
@@ -89,6 +97,8 @@ log "data of $BUILD_DATE"
 #    Territories are often not level 2 in OSM (Puerto Rico, Aruba, Åland): then the
 #    relation with that ISO 3166-1 code at any level, then by ISO 3166-2 ("US-PR"). With
 #    none at all the pack is built without them (right-hand traffic, default access).
+#    With 8 builds at once the public servers answer 502/504 for a while: rounds over
+#    all of them, waiting longer after each (half an hour of pauses in all).
 RE="${ISO//,/|}"
 admins_query() { # <tag filter of the country relation>
   echo "[out:xml][timeout:900];
@@ -101,13 +111,14 @@ out body;"
 ADMINS="-"
 for filter in "[\"admin_level\"=\"2\"][\"ISO3166-1\"~\"^($RE)\$\"]" "[\"ISO3166-1\"~\"^($RE)\$\"]" "[\"ISO3166-2\"~\"-($RE)\$\"]"; do
   answered=0
-  for attempt in 1 2 3; do
+  for attempt in 1 2 3 4 5 6; do
     for server in "${OVERPASS[@]}"; do
       log "admin boundaries $filter from $server (attempt $attempt)"
       if curl -fsS --max-time 1200 -A "$UA" --data-urlencode "data=$(admins_query "$filter")" -o "$WORK/src/admins.osm" "$server" \
         && grep -q '</osm>' "$WORK/src/admins.osm"; then answered=1; break 2; fi
       sleep 30
     done
+    [[ $attempt == 6 ]] || sleep $((attempt * 120))
   done
   [[ $answered == 1 ]] || { log "no answer from Overpass"; exit 1; }
   if grep -q '<relation' "$WORK/src/admins.osm"; then ADMINS=/w/admins.sqlite; break; fi
