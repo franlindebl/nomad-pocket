@@ -113,7 +113,7 @@ docs/               the docs above + screenshots/ + store/
   wrap in `Number()`. `File.move/copy` return Promises: await them. Hermes has no
   `Intl.RelativeTimeFormat` (see `lib/format.ts`).
 - **Pure, tested modules** (`src/lib/{pmtiles,mvt}`, `features/assistant/{rag-core,models,markdown}`,
-  `features/library/html`, `features/catalog/opds`, `features/downloads/{mirrors,errors}`,
+  `features/library/html`, `features/catalog/opds`, `features/downloads/{mirrors,errors,groups}`,
   `features/maps/{glyphs,geo,places-core,emergency-core,routing-core,follow-core,country-core}`, `features/prepare/{kit,document}`) use no `@/` aliases and import siblings with `.ts` extensions,
   so `node --test --experimental-strip-types` can load them. Keep it that way and add
   `*.test.ts` next to them.

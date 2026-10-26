@@ -14,7 +14,13 @@
     "title": "Download your country's map",
     "body": "You already have the world map. With your country you get streets, routes and emergency points offline.",
     "country": "Download {{name}}",
-    "pickCountry": "Choose a country"
+    "pickCountry": "Choose a country",
+    "downloadingTitle": "Downloading {{name}}",
+    "downloadingBody": "When it's done you'll have its streets, routes and emergency points here, offline. You can keep using the app meanwhile.",
+    "stoppedTitle": "{{name}} stopped downloading",
+    "stoppedBody": "What's already downloaded is kept: a retry picks up where it left off.",
+    "percent": "{{pct}}%",
+    "seeDownloads": "See downloads"
   },
   "loadingAssets": "Preparing offline map…",
   "location": {
@@ -62,6 +68,7 @@
     "antarctica": "Antarctica"
   },
   "download": {
+    "group": "{{name}} map",
     "titleWorld": "World map",
     "estimating": "Working out the size…",
     "size": "Download size",

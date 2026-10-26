@@ -26,6 +26,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Card, IconBadge, IconButton, ListGroup, ListRow, ProgressBar, Row, Screen, SectionHeader, Text } from '@/components/ui';
 import { useItems } from '@/features/content/items';
+import { groupDownloads } from '@/features/downloads/groups';
 import { useActiveDownloads } from '@/features/downloads/manager';
 import { ContinueCarousel } from '@/features/home/ContinueCarousel';
 import { useReadiness, type ReadinessKey } from '@/features/home/readiness';
@@ -74,7 +75,8 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const zims = useItems('zim');
   const all = useItems();
-  const downloads = useActiveDownloads().filter((d) => d.status !== 'done' && d.status !== 'failed');
+  // A country's files count as one download.
+  const downloads = groupDownloads(useActiveDownloads()).filter((d) => d.status !== 'done' && d.status !== 'failed');
   const net = Network.useNetworkState();
   const online = net.isInternetReachable ?? net.isConnected ?? true;
   const { items, done } = useReadiness();

@@ -14,7 +14,13 @@
     "title": "Descarga el mapa de tu país",
     "body": "Ya tienes el mapa del mundo. Con tu país tendrás calles, rutas y puntos de emergencia sin conexión.",
     "country": "Descargar {{name}}",
-    "pickCountry": "Elegir un país"
+    "pickCountry": "Elegir un país",
+    "downloadingTitle": "Descargando {{name}}",
+    "downloadingBody": "Cuando termine tendrás aquí sus calles, rutas y puntos de emergencia, sin conexión. Puedes seguir usando la app mientras tanto.",
+    "stoppedTitle": "La descarga de {{name}} se ha detenido",
+    "stoppedBody": "Lo ya descargado se conserva: al reintentar sigue donde lo dejó.",
+    "percent": "{{pct}} %",
+    "seeDownloads": "Ver descargas"
   },
   "loadingAssets": "Preparando el mapa sin conexión…",
   "location": {
@@ -62,6 +68,7 @@
     "antarctica": "Antártida"
   },
   "download": {
+    "group": "Mapa de {{name}}",
     "titleWorld": "Mapa del mundo",
     "estimating": "Calculando el tamaño…",
     "size": "Tamaño de la descarga",

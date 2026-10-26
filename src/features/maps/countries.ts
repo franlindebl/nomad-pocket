@@ -6,13 +6,21 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { getItem, removeItem, useItems } from '@/features/content/items';
+import { recordGroup, summarize } from '@/features/downloads/groups';
 import { cancelDownload, NotEnoughStorageError, useDownloads, type DownloadRecord } from '@/features/downloads/manager';
 import i18n from '@/i18n';
 import { HttpError } from '@/lib/pmtiles';
 import { hasRoomFor } from '@/lib/storage';
 
 import { routePackFor, type CountryMap } from './country-core';
-import { countryMapDownloadIds, countryMapProgress, downloadCountryMap, refreshMapsCatalog, useMapsCatalog } from './country-maps';
+import {
+  countryDownloadGroup,
+  countryMapDownloadIds,
+  countryMapProgress,
+  downloadCountryMap,
+  refreshMapsCatalog,
+  useMapsCatalog,
+} from './country-maps';
 import { bestZoom, estimateExtract, mapItemId, startMapDownload, WORLD_ID, type Estimate } from './extraction';
 import { getRegion, regionName, REGIONS, type Region } from './regions';
 import type { RoutePackItem } from './routing';
@@ -158,8 +166,10 @@ export function downloadCountry(o: CountryOffer, estimate?: Estimate, opts: { up
   const mapBytes = !wantMap ? 0 : o.map ? o.map.size : (estimate?.plan.archiveBytes ?? 0);
   const needed = mapBytes + (pack?.size ?? 0);
   if (!hasRoomFor(needed)) throw new NotEnoughStorageError(needed);
+  // One row in Downloads, even when the pack is another country's (Haiti uses the Dominican Republic's).
+  const group = countryDownloadGroup(o.region.id);
   // An installed map stays (a retry only fetches what failed or is missing: the pack).
-  if (wantMap && o.map && mapsManifest) downloadCountryMap(mapsManifest, o.map, !!o.pack?.pois);
+  if (wantMap && o.map && mapsManifest) downloadCountryMap(mapsManifest, o.map, !!o.pack?.pois, group);
   else if (wantMap)
     startMapDownload({
       key: o.region.id,
@@ -171,7 +181,7 @@ export function downloadCountry(o: CountryOffer, estimate?: Estimate, opts: { up
       bundledPoints: !!o.pack?.pois,
       estimate,
     });
-  if (pack && routing) downloadPack(routing, pack);
+  if (pack && routing) downloadPack(routing, pack, group);
 }
 
 export type CountryState = {
@@ -232,8 +242,8 @@ export function useCountries(): { countries: CountryState[]; otherMaps: MapItem[
       const latest = catalogMaps?.find((x) => x.regionId === c.regionId)?.buildDate;
       c.update = !!latest && !!m.meta.buildDate && latest > m.meta.buildDate;
     }
-    // Downloads in flight, by country.
-    const active = Object.values(records).filter((r) => ACTIVE.has(r.status) || r.status === 'failed');
+    // Downloads in flight, by country (finished files of a group stay until the last one).
+    const active = Object.values(records).filter((r) => ACTIVE.has(r.status) || r.status === 'failed' || r.status === 'done');
     const recordsBy = new Map<string, DownloadRecord[]>();
     for (const r of active) {
       const id = regionOfRecord(r);
@@ -252,6 +262,12 @@ export function useCountries(): { countries: CountryState[]; otherMaps: MapItem[
       const running = mine.filter((r) => ACTIVE.has(r.status));
       c.failed = !running.length && mine.some((r) => r.status === 'failed');
       if (!running.length) continue;
+      // Queued together as one group: its files' bytes, finished ones included.
+      if (mine.every((r) => recordGroup(r)?.id === countryDownloadGroup(c.regionId).id)) {
+        const { bytesWritten, totalBytes } = summarize(c.regionId, c.title, mine);
+        c.progress = totalBytes ? Math.min(1, bytesWritten / totalBytes) : 0;
+        continue;
+      }
       // Combined progress: prebuilt map parts, an extraction job and pack parts, by bytes.
       let done = 0;
       let total = 0;

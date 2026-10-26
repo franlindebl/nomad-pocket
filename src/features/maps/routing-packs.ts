@@ -24,6 +24,7 @@ import { parseStreetsTsv } from './places-core';
 import { hasPackAddresses, hasPackPlaces, hasPackStreets, indexPackAddresses, indexPackPlaces, indexPackStreets } from './places';
 import { getRegion, regionName } from './regions';
 import { routePackId, type RoutePackMeta } from './routing';
+import { countryDownloadGroup } from './country-maps';
 import { assetUrl, parseManifest, type ManifestPack, type RoutingManifest } from './routing-core';
 
 const REPO = 'franlindebl/nomad-pocket';
@@ -95,7 +96,7 @@ const partOnDisk = (pack: ManifestPack, i: number) => sizeOf(contentFile('route'
  * Queues the files of a pack that are not on disk yet (a retry after a failure only
  * fetches what is missing). Throws NotEnoughStorageError before queueing anything.
  */
-export function downloadPack(manifest: RoutingManifest, pack: ManifestPack) {
+export function downloadPack(manifest: RoutingManifest, pack: ManifestPack, group = countryDownloadGroup(pack.regionId)) {
   const missing = pack.parts.map((_, i) => i).filter((i) => !partOnDisk(pack, i));
   const wantPois = !!pack.pois && sizeOf(poisFile(pack.id)) !== pack.pois.size;
   const sides = SIDE_FILES.filter((side) => !!pack[side] && sizeOf(sideFile(pack.id, side)) !== pack[side]!.size);
@@ -116,6 +117,7 @@ export function downloadPack(manifest: RoutingManifest, pack: ManifestPack) {
       filename: partName(pack.id, i),
       expectedBytes: pack.parts[i].size,
       meta: { pack, role: 'part', index: i },
+      group,
     });
   }
   if (wantPois) {
@@ -127,14 +129,15 @@ export function downloadPack(manifest: RoutingManifest, pack: ManifestPack) {
       filename: `${pack.id}.pois.tsv`,
       expectedBytes: pack.pois!.size,
       meta: { pack, role: 'pois' },
+      group,
     });
   }
-  for (const side of sides) queueSideFile(manifest, pack, side);
+  for (const side of sides) queueSideFile(manifest, pack, side, group);
   // Everything was already on disk (a retry after the assembly itself failed).
   if (!missing.length) assemblePack(pack).catch((e) => console.warn('[maps] routing pack', pack.id, e));
 }
 
-function queueSideFile(manifest: RoutingManifest, pack: ManifestPack, side: SideFile) {
+function queueSideFile(manifest: RoutingManifest, pack: ManifestPack, side: SideFile, group = countryDownloadGroup(pack.regionId)) {
   const file = pack[side]!;
   enqueueDownload({
     id: sideId(pack.id, side),
@@ -144,6 +147,7 @@ function queueSideFile(manifest: RoutingManifest, pack: ManifestPack, side: Side
     filename: `${pack.id}.${side}.tsv`,
     expectedBytes: file.size,
     meta: { pack, role: side },
+    group,
   });
 }
 

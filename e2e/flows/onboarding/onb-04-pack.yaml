@@ -12,8 +12,7 @@ tags: [nightly, onboarding, network, routing-server, maps-server]
 - tapOn: "Buscar un país"
 - inputText: "Andorra"
 - tapOn: { id: "country-ad" }
-# The keyboard covers the wizard's buttons.
-- hideKeyboard
+# The wizard's buttons stay above the keyboard (Maestro's hideKeyboard taps whatever is below).
 - tapOn: { id: "onboarding-next" }
 - extendedWaitUntil:
     visible: "Mapa de Andorra.*"

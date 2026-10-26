@@ -174,6 +174,22 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 - `places.py` also cleans line breaks inside house numbers (3 broken rows in Japan).
 - Takes effect on the next country run.
 
+### 2026-10-26 — Build 11 on a real iPhone: a country is one download
+
+- Owner, after the onboarding on build 11 with Spain: Downloads listed "España (1/2)" twice,
+  "España (2/2)" and four plain "España" rows. Nothing was duplicated: Spain is the map (2
+  parts), the routing pack (2 parts, both titled by country) and the pack's points,
+  streets, places and doors. Now `enqueueDownload` takes a `group` and the sheet, the home
+  card and the toast treat a country as one download, "Mapa de España", with combined
+  bytes (`features/downloads/groups.ts`, tested). Before, every finished file also showed
+  "España (1/2) está listo", which wasn't true yet.
+- The Maps tab offered "Descargar España" while it was downloading: the empty card now
+  shows "Descargando España", its progress and "Ver descargas" (a retry when it stopped).
+  testID `maps-incoming`.
+- Onboarding: the bottom button sat on the screen's edge on every step. The
+  KeyboardAvoidingView (added with the country search) overwrites its own paddingBottom in
+  'padding' mode; the safe-area inset is now a spacer view.
+
 ### 2026-10-26 — Android check of the redesign (emulator)
 
 - Owner asked for an Android run while the country packages build. Pass: android-03
