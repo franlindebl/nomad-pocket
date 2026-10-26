@@ -1,0 +1,33 @@
+app.json
+  s_9f5316f88b2e79::t_954026700827ab 10-13,117-121,145-146
+locales/en.json
+  s_9f5316f88b2e79::t_c7442df3bdbf16 1-5
+locales/es.json
+  s_9f5316f88b2e79::t_efbdaa0369f515 1-5
+plugins/with-android-backup-rules.js
+  s_3a24319c87c126::t_ca9f6efb379abe 1-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "dab0f008f410062f96ae4a9d6cdab4ac3105e9e4",
+  "prompts": {},
+  "sessions": {
+    "s_3a24319c87c126": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a6434e6d0615b630f",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
