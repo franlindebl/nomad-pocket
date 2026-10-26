@@ -20,6 +20,7 @@ import { GuidancePanel } from '@/features/maps/GuidancePanel';
 import { HeadingBeam } from '@/features/maps/HeadingBeam';
 import { useGuidance } from '@/features/maps/guidance';
 import { CATEGORY_COLORS } from '@/features/maps/labels';
+import { CREDIT_MS, MapCredit } from '@/features/maps/MapCredit';
 import { MapFab } from '@/features/maps/MapFab';
 import { markersGeoJSON, useMarkers } from '@/features/maps/markers';
 import { PlaceCard } from '@/features/maps/PlaceCard';
@@ -77,6 +78,8 @@ export default function MapScreen() {
     const unsubscribe = [tab.addListener('focus', () => setTabFocused(true)), tab.addListener('blur', () => setTabFocused(false))];
     return () => unsubscribe.forEach((u) => u());
   }, [navigation]);
+  // The OpenStreetMap credit, until a few seconds pass or the first gesture (MapCredit).
+  const [credit, setCredit] = useState(true);
   const [locating, setLocating] = useState(false);
   // Navigation view ("Iniciar"): the camera follows the user, the way ahead up
   // (FollowCamera), until the user pans the map. Per trip: it holds the target.
@@ -100,6 +103,12 @@ export default function MapScreen() {
     () => (assets ? buildMapStyle({ scheme, lang: i18n.language, assets, sources: all.map((i) => ({ id: i.id, fileUri: i.fileUri })) }) : null),
     [assets, scheme, i18n.language, all],
   );
+
+  useEffect(() => {
+    if (!style || !credit) return;
+    const timer = setTimeout(() => setCredit(false), CREDIT_MS);
+    return () => clearTimeout(timer);
+  }, [style, credit]);
 
   // Where to open: last viewport, else the first region, else the whole world.
   const initialView = useMemo<InitialViewState>(() => {
@@ -299,9 +308,10 @@ export default function MapScreen() {
           attributionPosition={{ bottom: space.sm, left: space.sm }}
           tintColor={colors.location}
           onRegionWillChange={safe((e) => {
+            if (!e.nativeEvent.userInteraction) return;
+            setCredit(false);
             // A pan or a pinch: the user wants to look around, stop following.
-            if (!e.nativeEvent.userInteraction || !navigating) return;
-            setTouchedFor(target);
+            if (navigating) setTouchedFor(target);
           })}
           onRegionIsChanging={safe((e) => setBearing(Number(e.nativeEvent.bearing)))}
           onRegionDidChange={safe((e) => {
@@ -453,6 +463,8 @@ export default function MapScreen() {
       )}
 
       {style && following ? <FollowArrow x={size.width / 2} y={userY} /> : null}
+
+      {style && credit ? <MapCredit top={freeTop} /> : null}
 
       {style && !navigating ? (
         <PressableScale
