@@ -15,7 +15,10 @@ import { create } from 'zustand';
 import { db, parseJson } from '@/db';
 import { contentFile, deleteFile, hasRoomFor, partialDir, resolveContentUri, type ContentKind } from '@/lib/storage';
 
+import { recordGroup, type DownloadGroup } from './groups';
 import { fastestMirror } from './mirrors';
+
+export type { DownloadGroup } from './groups';
 
 export type DownloadStatus = 'queued' | 'running' | 'paused' | 'processing' | 'failed' | 'done' | 'cancelled';
 
@@ -49,6 +52,8 @@ export type EnqueueInput = {
   /** Expected size, for the storage check and progress before headers arrive. */
   expectedBytes: number;
   meta?: Record<string, unknown>;
+  /** Files that make one thing (a country's map, pack and search files): one row, one notice. */
+  group?: DownloadGroup;
 };
 
 export type CompletionHandler = (file: File, record: DownloadRecord) => Promise<void>;
@@ -73,7 +78,10 @@ export function registerCompletionHandler(kind: ContentKind, handler: Completion
   handlers[kind] = handler;
 }
 
-/** Called once per finished download (after the completion handler succeeded). */
+/**
+ * Called once per finished download (after the completion handler succeeded); for a group,
+ * once when its last file is done, with the group's title.
+ */
 export function onDownloadFinished(listener: (r: DownloadRecord) => void) {
   listeners.add(listener);
   return () => listeners.delete(listener);
@@ -245,7 +253,7 @@ export function enqueueDownload(input: EnqueueInput): DownloadRecord {
     bytesWritten: 0,
     status: 'queued',
     error: null,
-    meta: input.meta ?? {},
+    meta: input.group ? { ...input.meta, group: input.group } : (input.meta ?? {}),
     createdAt: now,
     updatedAt: now,
   };
@@ -318,9 +326,31 @@ async function finalize(id: string, dest: File) {
   await handlers[current.kind]?.(dest, { ...current, bytesWritten: size, totalBytes: size });
   setStatus(id, 'done', { bytesWritten: size, totalBytes: size }, { bytes_written: size, total_bytes: size });
   const done = useDownloads.getState().records[id];
-  if (done) listeners.forEach((l) => l(done));
-  // Finished downloads leave the active list after a moment.
-  setTimeout(() => useDownloads.getState().remove(id), 4000);
+  if (done) finished(done);
+}
+
+const groupMembers = (groupId: string) => Object.values(useDownloads.getState().records).filter((r) => recordGroup(r)?.id === groupId);
+
+/**
+ * Finished downloads leave the active list after a moment. A group's files wait for the
+ * last one, so the group's row keeps its total and the person hears about it once.
+ */
+function finished(done: DownloadRecord) {
+  const group = recordGroup(done);
+  if (!group) {
+    listeners.forEach((l) => l(done));
+    setTimeout(() => useDownloads.getState().remove(done.id), 4000);
+    return;
+  }
+  if (groupMembers(group.id).some((r) => r.status !== 'done')) return;
+  listeners.forEach((l) => l({ ...done, title: group.title }));
+  setTimeout(() => clearGroup(group.id), 4000);
+}
+
+/** Drops a group's finished files once nothing else in it is left to finish. */
+function clearGroup(groupId: string) {
+  const members = groupMembers(groupId);
+  if (members.every((r) => r.status === 'done')) members.forEach((r) => useDownloads.getState().remove(r.id));
 }
 
 async function run(id: string) {
@@ -440,6 +470,8 @@ export async function cancelDownload(id: string) {
   deleteFile(partialFile(id).uri);
   db().runSync('DELETE FROM downloads WHERE id = ?', id);
   useDownloads.getState().remove(id);
+  const group = recordGroup(rec);
+  if (group) clearGroup(group.id);
   pump();
 }
 
@@ -504,9 +536,30 @@ export function startExternalJob(input: {
 }
 
 export function dismissDownload(id: string) {
+  const rec = useDownloads.getState().records[id];
   deleteFile(partialFile(id).uri);
   db().runSync('DELETE FROM downloads WHERE id = ?', id);
   useDownloads.getState().remove(id);
+  const group = rec && recordGroup(rec);
+  if (group) clearGroup(group.id);
+}
+
+/** A row of the Downloads sheet (one download or a group): pause, resume, retry, cancel it all. */
+export async function pauseDownloads(records: DownloadRecord[]) {
+  // Queued ones first: pausing a running one starts the next queued file.
+  for (const r of records) if (r.status === 'queued') void pauseDownload(r.id);
+  await Promise.all(records.filter((r) => r.status === 'running').map((r) => pauseDownload(r.id)));
+}
+
+export function resumeDownloads(records: DownloadRecord[]) {
+  for (const r of records) if (r.status === 'paused' || r.status === 'failed') resumeDownload(r.id);
+}
+
+export async function cancelDownloads(records: DownloadRecord[]) {
+  for (const r of records) {
+    if (r.status === 'failed' || r.status === 'done') dismissDownload(r.id);
+    else if (r.status !== 'processing') await cancelDownload(r.id);
+  }
 }
 
 export function useActiveDownloads(): DownloadRecord[] {

@@ -179,10 +179,14 @@ export default function OnboardingScreen() {
   const anything = (on.country && !kit.countryInstalled) || (on.guides && kit.guides.length > 0) || (on.wikipedia && !!kit.wiki) || (on.assistant && !kit.systemModel && !kit.modelInstalled);
 
   return (
-    // The country search's keyboard must not cover the step's buttons.
+    // The country search's keyboard must not cover the step's buttons. The bottom inset is a
+    // spacer: in 'padding' mode KeyboardAvoidingView overwrites its own paddingBottom (0 with
+    // no keyboard), which left the buttons on the screen's edge. The offset keeps that inset
+    // from adding to the keyboard's height.
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={[styles.root, { backgroundColor: colors.bg, paddingTop: insets.top + space.lg, paddingBottom: insets.bottom + space.lg }]}>
+      keyboardVerticalOffset={insets.bottom}
+      style={[styles.root, { backgroundColor: colors.bg, paddingTop: insets.top + space.lg }]}>
       <Row style={styles.dots}>
         {[0, 1, 2, 3].map((i) => (
           <View key={i} style={[styles.dot, { backgroundColor: i <= step ? colors.accent : colors.surfaceAlt, width: i === step ? 24 : 8 }]} />
@@ -386,6 +390,7 @@ export default function OnboardingScreen() {
           <Button testID="onboarding-finish" title={t('onboarding.finish')} size="lg" fullWidth onPress={() => finish()} />
         </Animated.View>
       ) : null}
+      <View style={{ height: insets.bottom + space.lg }} />
     </KeyboardAvoidingView>
   );
 }

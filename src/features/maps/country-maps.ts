@@ -12,7 +12,13 @@ import Storage from 'expo-sqlite/kv-store';
 import { create } from 'zustand';
 
 import { getItem, upsertItem } from '@/features/content/items';
-import { enqueueDownload, NotEnoughStorageError, useDownloads, type DownloadRecord } from '@/features/downloads/manager';
+import {
+  enqueueDownload,
+  NotEnoughStorageError,
+  useDownloads,
+  type DownloadGroup,
+  type DownloadRecord,
+} from '@/features/downloads/manager';
 import i18n from '@/i18n';
 import { contentDir, contentFile, deleteFile, hasRoomFor } from '@/lib/storage';
 
@@ -70,6 +76,15 @@ const title = (map: CountryMap) => {
   return region ? regionName(region, i18n.language) : map.id;
 };
 
+/** A country's map, routing pack and search files are one row in Downloads ("Mapa de España"). */
+export function countryDownloadGroup(regionId: string): DownloadGroup {
+  const region = getRegion(regionId);
+  return {
+    id: `country-${regionId}`,
+    title: i18n.t('maps:download.group', { name: region ? regionName(region, i18n.language) : regionId }),
+  };
+}
+
 /** Files that come with a map (where no routing pack brings them), imported once it is installed. */
 const SIDE_FILES = ['pois', 'streets', 'places', 'addresses'] as const;
 type SideFile = (typeof SIDE_FILES)[number];
@@ -92,7 +107,12 @@ export function countryMapBytes(map: CountryMap): number {
  * country's points come with it (its own file or a routing pack), so no Overpass after.
  * Throws NotEnoughStorageError before queueing anything.
  */
-export function downloadCountryMap(manifest: MapsManifest, map: CountryMap, bundledPoints: boolean) {
+export function downloadCountryMap(
+  manifest: MapsManifest,
+  map: CountryMap,
+  bundledPoints: boolean,
+  group = countryDownloadGroup(map.regionId),
+) {
   const missing = map.parts.map((_, i) => i).filter((i) => !partOnDisk(map, i));
   // Room for the parts still to come, and for the assembled archive while the parts exist.
   const needed = countryMapBytes(map) + (map.parts.length > 1 ? map.size : 0);
@@ -108,6 +128,7 @@ export function downloadCountryMap(manifest: MapsManifest, map: CountryMap, bund
       filename: partName(map.id, i),
       expectedBytes: map.parts[i].size,
       meta: { ...meta, role: 'part', index: i },
+      group,
     });
   }
   for (const role of SIDE_FILES) {
@@ -121,6 +142,7 @@ export function downloadCountryMap(manifest: MapsManifest, map: CountryMap, bund
       filename: file.name,
       expectedBytes: file.size,
       meta: { ...meta, role },
+      group,
     });
   }
   // Every part was already on disk (a retry after the assembly itself failed).

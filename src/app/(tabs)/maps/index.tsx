@@ -7,10 +7,14 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Linking, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, Card, PressableScale, Text } from '@/components/ui';
+import { Button, Card, PressableScale, ProgressBar, Text } from '@/components/ui';
+import { recordGroup } from '@/features/downloads/groups';
+import { resumeDownloads, useDownloads } from '@/features/downloads/manager';
 import { ensureMapAssets, type MapAssets } from '@/features/maps/assets';
 import { emergencyPlacesIn, usePoiSync } from '@/features/maps/emergency';
 import { deviceCountry } from '@/features/maps/CountryList';
+import { useCountries } from '@/features/maps/countries';
+import { countryDownloadGroup } from '@/features/maps/country-maps';
 import { FollowArrow, useFollowCamera } from '@/features/maps/FollowCamera';
 import { GuidancePanel } from '@/features/maps/GuidancePanel';
 import { HeadingBeam } from '@/features/maps/HeadingBeam';
@@ -19,7 +23,7 @@ import { CATEGORY_COLORS } from '@/features/maps/labels';
 import { MapFab } from '@/features/maps/MapFab';
 import { markersGeoJSON, useMarkers } from '@/features/maps/markers';
 import { PlaceCard } from '@/features/maps/PlaceCard';
-import { getRegion, regionName } from '@/features/maps/regions';
+import { getRegion, regionName, type Region } from '@/features/maps/regions';
 import { showPlace, useMapUi } from '@/features/maps/store';
 import { buildMapStyle } from '@/features/maps/style';
 import { useMapItems } from '@/features/maps/useMapSources';
@@ -519,24 +523,64 @@ export default function MapScreen() {
 
       {style && !regions.length && !target && !selected ? (
         <View style={[styles.bottom, { bottom: cardBottom }]} pointerEvents="box-none">
-          <Card style={{ gap: space.md }} testID="maps-empty">
-            <Text variant="title3">{t('empty.title')}</Text>
-            <Text variant="callout" color="textSecondary">
-              {t('empty.body')}
-            </Text>
-            <View style={{ gap: space.sm }}>
-              {home ? (
-                <Button
-                  title={t('empty.country', { name: regionName(home, i18n.language) })}
-                  onPress={() => router.push({ pathname: '/maps/download', params: { regionId: home.id } })}
-                />
-              ) : null}
-              <Button title={t('empty.pickCountry')} variant={home ? 'secondary' : 'primary'} onPress={() => router.push('/maps/pick')} />
-            </View>
-          </Card>
+          <EmptyCard home={home} />
         </View>
       ) : null}
     </View>
+  );
+}
+
+/**
+ * No country map yet: offers the person's country, or shows the one on its way (the
+ * onboarding's kit) instead of offering it again. Its own component: download progress
+ * re-renders this card, not the map.
+ */
+function EmptyCard({ home }: { home: Region | undefined }) {
+  const { t, i18n } = useTranslation('maps');
+  const { countries } = useCountries();
+  const incoming = countries.find((c) => !c.map && (c.progress !== null || c.failed));
+  const retry = () => {
+    if (!incoming) return;
+    const group = countryDownloadGroup(incoming.regionId).id;
+    const records = Object.values(useDownloads.getState().records).filter((r) => recordGroup(r)?.id === group);
+    if (records.length) resumeDownloads(records);
+    else router.push({ pathname: '/maps/download', params: { regionId: incoming.regionId } });
+  };
+  return incoming ? (
+    <Card style={{ gap: space.md }} testID="maps-incoming">
+      <Text variant="title3">{t(incoming.failed ? 'empty.stoppedTitle' : 'empty.downloadingTitle', { name: incoming.title })}</Text>
+      <Text variant="callout" color="textSecondary">
+        {t(incoming.failed ? 'empty.stoppedBody' : 'empty.downloadingBody')}
+      </Text>
+      {incoming.progress !== null ? (
+        <View style={{ gap: space.xs }}>
+          <ProgressBar value={incoming.progress} />
+          <Text variant="caption" color="textSecondary" tabular>
+            {t('empty.percent', { pct: Math.floor(incoming.progress * 100) })}
+          </Text>
+        </View>
+      ) : null}
+      <View style={{ gap: space.sm }}>
+        {incoming.failed ? <Button title={t('regions.retry')} onPress={retry} /> : null}
+        <Button title={t('empty.seeDownloads')} variant="secondary" onPress={() => router.push('/downloads')} />
+      </View>
+    </Card>
+  ) : (
+    <Card style={{ gap: space.md }} testID="maps-empty">
+      <Text variant="title3">{t('empty.title')}</Text>
+      <Text variant="callout" color="textSecondary">
+        {t('empty.body')}
+      </Text>
+      <View style={{ gap: space.sm }}>
+        {home ? (
+          <Button
+            title={t('empty.country', { name: regionName(home, i18n.language) })}
+            onPress={() => router.push({ pathname: '/maps/download', params: { regionId: home.id } })}
+          />
+        ) : null}
+        <Button title={t('empty.pickCountry')} variant={home ? 'secondary' : 'primary'} onPress={() => router.push('/maps/pick')} />
+      </View>
+    </Card>
   );
 }
 

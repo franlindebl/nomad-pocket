@@ -5,12 +5,13 @@ import { Platform } from 'react-native';
 
 import { EmptyState, ListGroup, Screen, Text } from '@/components/ui';
 import { DownloadRow } from '@/features/downloads/DownloadRow';
+import { groupDownloads } from '@/features/downloads/groups';
 import { useActiveDownloads } from '@/features/downloads/manager';
 import { space } from '@/theme';
 
 export default function DownloadsScreen() {
   const { t } = useTranslation();
-  const downloads = useActiveDownloads();
+  const downloads = groupDownloads(useActiveDownloads());
   return (
     <Screen contentStyle={{ paddingTop: space.lg }}>
       {/* Android form sheets have no native header. */}
@@ -24,7 +25,7 @@ export default function DownloadsScreen() {
       ) : (
         <ListGroup>
           {downloads.map((d) => (
-            <DownloadRow key={d.id} record={d} />
+            <DownloadRow key={d.id} entry={d} />
           ))}
         </ListGroup>
       )}

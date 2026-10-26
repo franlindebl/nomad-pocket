@@ -184,6 +184,14 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
 - Completion: `.part` → `content/{zim,maps,models}/<filename>` → the kind's handler registered with
   `registerCompletionHandler(kind, async (file, record) => …)`, which must `upsertItem`.
   Then `onDownloadFinished` listeners (toast) fire.
+- Groups: `enqueueDownload({ …, group: { id, title } })` (stored as `meta.group`) marks
+  files that make one thing; a country is `countryDownloadGroup(regionId)` (map parts,
+  routing pack parts, points, streets, places, doors). `groupDownloads()` (`groups.ts`,
+  pure) turns records into rows: the Downloads sheet and the home card show "Mapa de
+  España" with the summed bytes and one set of buttons (`pauseDownloads`,
+  `resumeDownloads`, `cancelDownloads` act on the whole row). A group's finished files stay
+  in the store until the last one is done, so its total holds steady, and the listeners
+  fire once, with the group's title.
 - `pauseDownload`, `resumeDownload`, `cancelDownload` (deletes the partial file),
   `dismissDownload`, hooks `useActiveDownloads()`, `useDownload(id)`.
 - `startExternalJob({ id, kind, title, totalBytes, cancel })` → `{ update, finish, fail }`
