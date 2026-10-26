@@ -171,6 +171,8 @@ const partInput = (manifest: MapsManifest, map: CountryMap, i: number, meta: Map
   integrity: fileIntegrity(map.parts[i]),
   meta: { ...meta, role: 'part', index: i },
   group,
+  // A group cancel may stop the assembly: it checks that this record still exists.
+  abortable: true,
 });
 
 const sideInput = (manifest: MapsManifest, map: CountryMap, role: SideFile, meta: MapMeta, group: DownloadGroup): EnqueueInput => ({

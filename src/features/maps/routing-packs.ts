@@ -129,6 +129,8 @@ const partInput = (manifest: RoutingManifest, pack: ManifestPack, i: number, gro
   integrity: fileIntegrity(pack.parts[i]),
   meta: { pack, valhalla: manifest.valhalla, role: 'part', index: i },
   group,
+  // A group cancel may stop the assembly: it checks that this record still exists.
+  abortable: true,
 });
 
 const sideInput = (manifest: RoutingManifest, pack: ManifestPack, side: SideFile, group: DownloadGroup): EnqueueInput => ({
