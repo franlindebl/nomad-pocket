@@ -1,0 +1,17 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "72f259e6340c38e35221ad3a57c2ea5b7033ff6b",
+  "prompts": {},
+  "sessions": {
+    "s_5a372e6ad43b16": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "037c1280-203c-48a8-87c3-482a6e45bf75",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
