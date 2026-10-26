@@ -51,10 +51,14 @@ public final class NomadZimModule: Module {
       return ["path": info.path, "title": info.title, "mimeType": info.mimeType, "size": Double(info.size), "redirect": info.wasRedirect]
     }.runOnQueue(zimWorkQueue)
 
-    /// Text content (HTML, CSS, JSON…) of an entry, redirects resolved.
+    /// Text content (HTML, CSS, JSON…) of an entry, redirects resolved. Nil for binary or
+    /// oversized entries, checked before reading: the whole entry becomes one string
+    /// bridged to JS (a PDF or video the reader shows would otherwise be read and decoded
+    /// only to be thrown away).
     AsyncFunction("getContent") { (id: String, path: String) -> [String: Any?]? in
       let archive = try Self.archive(id)
-      guard let info = archive.entryInfo(atPath: path), let data = archive.data(atPath: info.path) else { return nil }
+      guard let info = archive.entryInfo(atPath: path), Self.isText(info.mimeType), info.size <= Self.maxContentBytes,
+            let data = archive.data(atPath: info.path) else { return nil }
       let text = String(data: data, encoding: .utf8) ?? String(decoding: data, as: UTF8.self)
       return ["path": info.path, "title": info.title, "mimeType": info.mimeType, "content": text]
     }.runOnQueue(zimWorkQueue)
@@ -134,6 +138,15 @@ public final class NomadZimModule: Module {
         view.clearFind()
       }.runOnQueue(.main)
     }
+  }
+
+  /// Largest entry getContent returns (articles are far smaller; HTML-wrapped books may
+  /// reach a few MB).
+  static let maxContentBytes: UInt64 = 8 * 1024 * 1024
+
+  static func isText(_ mimeType: String) -> Bool {
+    let mime = mimeType.lowercased()
+    return mime.hasPrefix("text/") || mime.contains("json") || mime.contains("xml") || mime.contains("javascript")
   }
 
   private static func archive(_ id: String) throws -> NZArchive {
