@@ -33,7 +33,7 @@ public final class NomadLlmModule: Module {
   public func definition() -> ModuleDefinition {
     Name("NomadLlm")
 
-    Events("onDelta", "onDone", "onError", "onDownloadProgress")
+    Events("onDelta", "onDone", "onError")
 
     AsyncFunction("getSystemModelStatus") { () -> [String: Any] in
       return Self.systemStatus()
@@ -49,11 +49,6 @@ public final class NomadLlmModule: Module {
 
     AsyncFunction("route") { (prompt: String, instructions: String, promise: Promise) in
       self.route(prompt: prompt, instructions: instructions, promise: promise)
-    }
-
-    // Apple manages model assets itself; nothing to download from the app.
-    AsyncFunction("downloadSystemModel") { () -> Bool in
-      return false
     }
 
     OnDestroy {

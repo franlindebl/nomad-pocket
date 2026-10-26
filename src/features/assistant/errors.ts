@@ -13,10 +13,6 @@ export const ERROR_KEYS = [
   'language',
   'notReady',
   'busy',
-  'batteryQuota',
-  'background',
-  'diskFull',
-  'systemUpdate',
   'empty',
 ] as const;
 
@@ -32,16 +28,6 @@ const BY_CODE: Record<string, ErrorKey> = {
   ERR_ASSETS: 'notReady',
   ERR_RATE_LIMITED: 'busy',
   ERR_BUSY: 'busy',
-  // ML Kit GenAI on Android: ERR_GENAI_<GenAiException.ErrorCode> (genai-common 1.0.0-beta4).
-  ERR_GENAI_8: 'systemUnavailable', // NOT_AVAILABLE
-  ERR_GENAI_9: 'busy', // BUSY
-  ERR_GENAI_12: 'tooLong', // REQUEST_TOO_LARGE
-  ERR_GENAI_16: 'systemUnavailable', // NOT_SUPPORTED
-  ERR_GENAI_27: 'batteryQuota', // PER_APP_BATTERY_USE_QUOTA_EXCEEDED
-  ERR_GENAI_30: 'background', // BACKGROUND_USE_BLOCKED
-  ERR_GENAI_501: 'diskFull', // NOT_ENOUGH_DISK_SPACE
-  ERR_GENAI_604: 'systemUpdate', // NEEDS_SYSTEM_UPDATE
-  'ERR_GENAI_-101': 'systemUpdate', // AICORE_INCOMPATIBLE
 };
 
 export function isErrorKey(value: string): value is ErrorKey {

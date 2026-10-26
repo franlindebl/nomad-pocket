@@ -1,5 +1,5 @@
 // One interface over the two local inference backends:
-//  - the OS model (Apple Foundation Models / Gemini Nano) via modules/nomad-llm
+//  - the OS model (Apple Foundation Models, iOS only) via modules/nomad-llm
 //  - downloaded GGUF models via llama.rn (llama.cpp, chat template from the GGUF)
 // Engines load lazily, stream text, can be stopped, and are released when the
 // app goes to the background or after a few idle minutes (GGUF contexts hold
@@ -77,7 +77,7 @@ let requestCounter = 0;
 class SystemEngine implements Engine {
   readonly modelId = SYSTEM_MODEL_ID;
   readonly kind = 'system' as const;
-  // Apple FM and Gemini Nano both have ~4k-token windows.
+  // Apple FM has a ~4k-token window.
   readonly contextTokens = 4000;
   decides: 'router' | null = null;
   private current: string | null = null;
@@ -85,7 +85,7 @@ class SystemEngine implements Engine {
   async load() {
     const info = await SystemLLM.getSystemModelStatus();
     if (info.status !== 'available') throw new EngineUnavailableError('systemUnavailable');
-    // Apple FM has guided generation; ML Kit's Gemini Nano prompt API has neither tools nor schemas.
+    // Apple FM decides itself, with guided generation, whether a message needs a library search.
     this.decides = info.provider === 'apple' ? 'router' : null;
   }
 

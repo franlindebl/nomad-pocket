@@ -1,4 +1,7 @@
-// JS API of the system-model bridge (Apple Foundation Models / Gemini Nano).
+// JS API of the system-model bridge (Apple Foundation Models). iOS only: Android has no
+// system model in this app. Gemini Nano is reachable only through Google's proprietary
+// ML Kit GenAI library, which can't ship inside this GPL-3 APK (next to libkiwix) and sends
+// usage data to Google; Android users get the downloadable GGUF models instead.
 import NomadLlm from './src/NomadLlmModule';
 import type { GenerateOptions, RouteDecision, SystemModelInfo } from './src/NomadLlm.types';
 
@@ -62,23 +65,4 @@ export async function route(prompt: string, instructions: string): Promise<Route
 
 export function cancel(requestId: string) {
   NomadLlm?.cancel(requestId);
-}
-
-export async function downloadSystemModel(onProgress?: (done: number, total: number) => void): Promise<boolean> {
-  if (!NomadLlm) return false;
-  const sub = onProgress
-    ? NomadLlm.addListener('onDownloadProgress', (e) => {
-        try {
-          // Longs may arrive as BigInt.
-          onProgress(Number(e.bytesDownloaded), Number(e.totalBytes));
-        } catch {
-          // never throw from a native event
-        }
-      })
-    : null;
-  try {
-    return await NomadLlm.downloadSystemModel();
-  } finally {
-    sub?.remove();
-  }
 }

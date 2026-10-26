@@ -1,13 +1,13 @@
 import * as Device from 'expo-device';
 import { ArrowDown, Check, Cpu, Pause, Play, ShieldCheck, Sparkles, Trash2, X } from 'lucide-react-native';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Platform, StyleSheet, View } from 'react-native';
 
 import { Badge, Button, Card, IconBadge, IconButton, ProgressBar, Row, Screen, SectionHeader, Text } from '@/components/ui';
 import { GGUF_MODELS, modelFit, ramGB, recommendModel, SYSTEM_MODEL_ID, type GgufModel } from '@/features/assistant/models';
 import { downloadModel, OfflineError } from '@/features/assistant/register';
-import { useSystemModel } from '@/features/assistant/system';
+import { HAS_SYSTEM_MODEL, useSystemModel } from '@/features/assistant/system';
 import { removeItem, useItems } from '@/features/content/items';
 import { cancelDownload, NotEnoughStorageError, pauseDownload, resumeDownload, useDownload } from '@/features/downloads/manager';
 import { formatPercent } from '@/features/assistant/format';
@@ -15,8 +15,6 @@ import { formatBytes } from '@/lib/format';
 import { freeBytes } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
 import { space, useTheme } from '@/theme';
-
-import { downloadSystemModel } from '../../../../modules/nomad-llm';
 
 export default function ModelsScreen() {
   const { t } = useTranslation('assistant');
@@ -32,8 +30,12 @@ export default function ModelsScreen() {
     <Screen>
       <DeviceCard ram={ram} />
 
-      <SectionHeader title={t('models.system')} />
-      <SystemModelCard />
+      {HAS_SYSTEM_MODEL ? (
+        <>
+          <SectionHeader title={t('models.system')} />
+          <SystemModelCard />
+        </>
+      ) : null}
 
       <SectionHeader title={t('models.downloadable')} />
       <Text variant="footnote" color="textSecondary" style={styles.lead}>
@@ -79,24 +81,9 @@ function DeviceCard({ ram }: { ram: number | null }) {
 function SystemModelCard() {
   const { t } = useTranslation('assistant');
   const info = useSystemModel((s) => s.info);
-  const refresh = useSystemModel((s) => s.refresh);
   const { aiModelId, setAiModelId } = useSettings();
-  const [progress, setProgress] = useState<number | null>(null);
   const active = aiModelId === SYSTEM_MODEL_ID;
   const status = info?.status;
-  const provider = info?.provider ? t(`models.systemProvider.${info.provider}`) : Platform.OS === 'ios' ? t('models.systemProvider.apple') : t('models.systemProvider.gemini');
-
-  const startDownload = async () => {
-    setProgress(0);
-    try {
-      await downloadSystemModel((done, total) => setProgress(total > 0 ? done / total : 0));
-    } catch (e) {
-      Alert.alert(t('common:errors.generic'), String((e as Error)?.message ?? e));
-    } finally {
-      setProgress(null);
-      refresh().catch(() => {});
-    }
-  };
 
   return (
     <Card style={{ gap: space.md }}>
@@ -104,7 +91,7 @@ function SystemModelCard() {
         <IconBadge icon={Sparkles} hue="ai" size={44} />
         <View style={{ flex: 1, gap: 4 }}>
           <Row gap={space.sm} style={{ flexWrap: 'wrap' }}>
-            <Text variant="headline">{provider}</Text>
+            <Text variant="headline">{t('models.systemProvider.apple')}</Text>
             {active && status === 'available' ? <Badge label={t('models.active')} tone="success" icon={Check} /> : null}
           </Row>
           <Text variant="footnote" color="textSecondary">
@@ -113,13 +100,6 @@ function SystemModelCard() {
         </View>
       </Row>
       {status === 'available' && !active ? <Button title={t('models.use')} size="sm" onPress={() => setAiModelId(SYSTEM_MODEL_ID)} style={styles.action} /> : null}
-      {status === 'downloadable' ? (
-        progress != null ? (
-          <ProgressBar value={progress} />
-        ) : (
-          <Button title={t('models.downloadSystem')} icon={ArrowDown} size="sm" variant="secondary" onPress={startDownload} style={styles.action} />
-        )
-      ) : null}
     </Card>
   );
 }

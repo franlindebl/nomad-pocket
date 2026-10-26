@@ -11,7 +11,7 @@ import { useSettings } from '@/stores/settings';
 import { cancelAnswer, refreshSessions } from './chats';
 import { installEngineLifecycle, releaseIfModel } from './engine';
 import { GGUF_MODELS, getModel, SYSTEM_MODEL_ID, type GgufModel } from './models';
-import { watchSystemModel } from './system';
+import { HAS_SYSTEM_MODEL, watchSystemModel } from './system';
 
 export class OfflineError extends Error {
   constructor() {
@@ -97,7 +97,8 @@ registerInit(() => {
   } catch (e) {
     console.warn('[assistant] model scan failed', e);
   }
-  // Forget a selected model whose file is gone.
+  // Forget a selected model whose file is gone, and the system model where there is none
+  // (Android builds before 1.1 offered Gemini Nano).
   const { aiModelId, setAiModelId } = useSettings.getState();
-  if (aiModelId && aiModelId !== SYSTEM_MODEL_ID && !getItem(aiModelId)) setAiModelId(null);
+  if (aiModelId === SYSTEM_MODEL_ID ? !HAS_SYSTEM_MODEL : aiModelId && !getItem(aiModelId)) setAiModelId(null);
 });
