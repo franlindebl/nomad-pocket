@@ -161,6 +161,9 @@ class LlamaEngine implements Engine {
   private ctx: LlamaContext | null = null;
   private loading: Promise<void> | null = null;
   private stopRequested = false;
+  // Set by release(), after which the manager no longer tracks this engine: loading
+  // again would leave a context nobody frees (hundreds of MB to GBs until the app dies).
+  private released = false;
 
   constructor(
     readonly modelId: string,
@@ -174,7 +177,7 @@ class LlamaEngine implements Engine {
   }
 
   load(onProgress?: (p: number) => void): Promise<void> {
-    if (this.ctx) return Promise.resolve();
+    if (this.ctx || this.released) return Promise.resolve();
     if (!this.loading) {
       this.loading = initLlama(
         {
@@ -205,8 +208,10 @@ class LlamaEngine implements Engine {
   }
 
   async generate(req: GenerateRequest): Promise<GenerateResult> {
-    await this.load();
     this.stopRequested = false;
+    await this.load();
+    // Released (app in the background, model switched or deleted) or stopped while loading.
+    if (this.released || !this.ctx || this.stopRequested) return { text: '', stopped: true };
     const messages: LlamaMessage[] = [{ role: 'system', content: req.system }, ...req.messages];
     const tool = this.decides === 'tools' ? req.tool : undefined;
     if (!tool) return this.complete(req, messages, {});
@@ -245,7 +250,9 @@ class LlamaEngine implements Engine {
     messages: LlamaMessage[],
     extra: { tools?: object[]; tool_choice?: string; enable_thinking?: boolean; thinking_budget_tokens?: number },
   ): Promise<{ text: string; stopped: boolean; toolCalls?: LlamaToolCall[] }> {
-    const ctx = this.ctx!;
+    const ctx = this.ctx;
+    // Released between two passes (while the tool searched the library).
+    if (!ctx || this.released) return { text: '', stopped: true };
     let raw = '';
     let text = '';
     let calling = false;
@@ -300,6 +307,8 @@ class LlamaEngine implements Engine {
   }
 
   async release() {
+    this.released = true;
+    this.stopRequested = true;
     // Let an in-flight load finish so its context can be freed too.
     if (this.loading) await this.loading.catch(() => {});
     const ctx = this.ctx;
@@ -394,12 +403,21 @@ export function isEngineLoaded(modelId: string): boolean {
 
 let appStateHooked = false;
 
-/** Free model memory when the app leaves the foreground (iOS kills big background apps). */
-export function installEngineLifecycle() {
+/**
+ * Free model memory when the app leaves the foreground (iOS kills big background apps).
+ * `onBackground` ends the answer in progress: while it loads or searches there is no
+ * completion to stop, and it must not carry on with a released engine.
+ */
+export function installEngineLifecycle(onBackground?: () => void) {
   if (appStateHooked) return;
   appStateHooked = true;
   AppState.addEventListener('change', (state) => {
     if (state === 'background') {
+      try {
+        onBackground?.();
+      } catch (e) {
+        console.warn('[assistant] background handler failed', e);
+      }
       const e = active;
       if (!e) return;
       // Stop any running answer first; the chat keeps the partial text.

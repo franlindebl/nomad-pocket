@@ -8,7 +8,7 @@ import { enqueueDownload, registerCompletionHandler } from '@/features/downloads
 import { contentDir } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
 
-import { refreshSessions } from './chats';
+import { cancelAnswer, refreshSessions } from './chats';
 import { installEngineLifecycle, releaseIfModel } from './engine';
 import { GGUF_MODELS, getModel, SYSTEM_MODEL_ID, type GgufModel } from './models';
 import { watchSystemModel } from './system';
@@ -93,7 +93,7 @@ onItemRemoved('model', async (item) => {
 });
 
 registerInit(() => {
-  installEngineLifecycle();
+  installEngineLifecycle(cancelAnswer);
   watchSystemModel();
   refreshSessions();
   try {
