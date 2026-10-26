@@ -22,6 +22,8 @@
     "kit": "Kit: {{done}} de {{total}}",
     "attention_one": "{{count}} caduca pronto",
     "attention_other": "{{count}} caducan pronto",
+    "expired_one": "{{count}} ha caducado",
+    "expired_other": "{{count}} han caducado",
     "contacts_one": "{{count}} contacto",
     "contacts_other": "{{count}} contactos"
   },

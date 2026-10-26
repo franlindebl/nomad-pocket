@@ -1,5 +1,5 @@
-# ONB-02 — the wizard in English, back to Spanish; reopened from Settings ("Revisar mi
-# kit"). Content languages follow the app language (no choice in the wizard any more).
+# ONB-02 — the wizard in English, back to Spanish; reopened from Settings ("Revisar
+# descargas recomendadas"). Content languages follow the app language (no choice in the wizard any more).
 appId: com.fjlinde.nomadpocket
 tags: [full, onboarding]
 ---
@@ -16,6 +16,6 @@ tags: [full, onboarding]
 - runFlow: ../../subflows/finish-onboarding.yaml
 - tapOn: { id: "open-settings" }
 - scrollUntilVisible:
-    element: "Revisar mi kit"
-- tapOn: "Revisar mi kit"
+    element: "Revisar descargas recomendadas"
+- tapOn: "Revisar descargas recomendadas"
 - assertVisible: "Tu kit para cuando no haya internet"

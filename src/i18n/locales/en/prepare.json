@@ -22,6 +22,8 @@
     "kit": "Kit: {{done}} of {{total}}",
     "attention_one": "{{count}} expiring soon",
     "attention_other": "{{count}} expiring soon",
+    "expired_one": "{{count}} expired",
+    "expired_other": "{{count}} expired",
     "contacts_one": "{{count}} contact",
     "contacts_other": "{{count}} contacts"
   },

@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useActiveModel } from '@/features/assistant/useActiveModel';
 import { catalog } from '@/features/catalog';
 import { useItems } from '@/features/content/items';
+import { useDownloads, type DownloadRecord } from '@/features/downloads/manager';
 import { useCountries } from '@/features/maps/countries';
 import { getRegion, regionName } from '@/features/maps/regions';
 import { guideResources } from '@/features/onboarding/kit';
@@ -32,6 +33,15 @@ export type ReadinessItem = {
 /** Map data older than this is worth refreshing while online. */
 const STALE_MONTHS = 6;
 
+const IN_FLIGHT = new Set(['queued', 'running', 'paused', 'processing']);
+
+/** 0–1 over the matching downloads in flight, or null when there are none. */
+function progressOf(records: Record<string, DownloadRecord>, match: (r: DownloadRecord) => boolean): number | null {
+  const active = Object.values(records).filter((r) => IN_FLIGHT.has(r.status) && match(r));
+  const total = active.reduce((sum, r) => sum + r.totalBytes, 0);
+  return active.length ? (total ? Math.min(1, active.reduce((sum, r) => sum + r.bytesWritten, 0) / total) : 0) : null;
+}
+
 function monthsSince(yyyymmdd: string | null | undefined): number {
   if (!yyyymmdd || yyyymmdd.length !== 8) return 0;
   const d = new Date(Number(yyyymmdd.slice(0, 4)), Number(yyyymmdd.slice(4, 6)) - 1, Number(yyyymmdd.slice(6, 8)));
@@ -46,6 +56,8 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
   const { countries } = useCountries();
   const model = useActiveModel();
   const { summary } = useKitGroups();
+  // Pieces still downloading show their progress instead of a to-do (Home doesn't offer them again).
+  const records = useDownloads((s) => s.records);
 
   return useMemo(() => {
     const region = country ? getRegion(country) : undefined;
@@ -57,6 +69,11 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
     const wikiIds = new Set(Object.values(catalog.wikipedia).flatMap((opts) => opts.map((o) => o.resourceId)));
     const wiki = zims.find((z) => wikiIds.has(z.catalogId ?? ''));
     const stale = !!mine?.map && (mine.update || monthsSince(mine.buildDate) > STALE_MONTHS);
+    const guideIds = new Set(guides.map((r) => r.id));
+    const guidesProgress = progressOf(records, (r) => guideIds.has(r.id));
+    const wikiProgress = wiki ? null : progressOf(records, (r) => wikiIds.has(r.id));
+    const modelProgress = model.ready ? null : progressOf(records, (r) => r.kind === 'model');
+    const downloading = (p: number) => t('ready.downloading', { pct: Math.round(p * 100) });
 
     const items: ReadinessItem[] = [
       {
@@ -81,27 +98,32 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
       {
         key: 'guides',
         title: t('ready.guides'),
-        detail: guidesHave ? t('ready.guidesDone', { count: guidesHave, total: guides.length }) : t('ready.guidesTodo'),
+        detail:
+          guidesProgress !== null
+            ? downloading(guidesProgress)
+            : guidesHave
+              ? t('ready.guidesDone', { count: guidesHave, total: guides.length })
+              : t('ready.guidesTodo'),
         done: guidesHave > 0,
-        progress: null,
+        progress: guidesProgress,
         warning: false,
         href: { pathname: '/library/category/[slug]', params: { slug: 'medicine' } },
       },
       {
         key: 'wikipedia',
         title: t('ready.wikipedia'),
-        detail: wiki ? wiki.title : t('ready.wikipediaTodo'),
+        detail: wiki ? wiki.title : wikiProgress !== null ? downloading(wikiProgress) : t('ready.wikipediaTodo'),
         done: !!wiki,
-        progress: null,
+        progress: wikiProgress,
         warning: false,
         href: '/library/wikipedia',
       },
       {
         key: 'assistant',
         title: t('ready.assistant'),
-        detail: model.ready && model.name ? model.name : t('ready.assistantTodo'),
+        detail: model.ready && model.name ? model.name : modelProgress !== null ? downloading(modelProgress) : t('ready.assistantTodo'),
         done: model.ready,
-        progress: null,
+        progress: modelProgress,
         warning: false,
         href: '/assistant/models',
       },
@@ -125,11 +147,13 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
       {
         key: 'kit',
         title: t('ready.kit'),
-        detail: summary.attention
-          ? t('ready.kitAttention', { count: summary.attention })
-          : summary.done
-            ? t('ready.kitProgress', { done: summary.done, total: summary.total })
-            : t('ready.kitTodo'),
+        detail: summary.expired
+          ? t('ready.kitExpired', { count: summary.expired })
+          : summary.attention
+            ? t('ready.kitAttention', { count: summary.attention })
+            : summary.done
+              ? t('ready.kitProgress', { done: summary.done, total: summary.total })
+              : t('ready.kitTodo'),
         done: summary.total > 0 && summary.done >= summary.total,
         progress: null,
         warning: summary.attention > 0,
@@ -137,5 +161,5 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
       },
     ];
     return { items, done: items.filter((i) => i.done).length };
-  }, [country, countries, zims, langs, model.ready, model.name, summary, t, i18n.language]);
+  }, [country, countries, zims, langs, model.ready, model.name, summary, records, t, i18n.language]);
 }

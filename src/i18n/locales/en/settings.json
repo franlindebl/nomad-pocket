@@ -25,7 +25,7 @@
   "aboutBody": "Nomad Pocket is open source (GPL‑3.0), inspired by Project N.O.M.A.D. by Crosstalk Solutions. Content from Kiwix, Wikipedia, OpenStreetMap and Protomaps.",
   "version": "Version {{version}}",
   "credits": "Credits & licenses",
-  "setupAgain": "Review my kit",
+  "setupAgain": "Review recommended downloads",
   "clearHistory": "Clear reading history",
   "historyCleared": "History cleared",
   "privacy": "Privacy policy",
