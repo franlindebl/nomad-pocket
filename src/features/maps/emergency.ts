@@ -27,11 +27,12 @@ import type { PlaceRow } from './places-core';
 import { forEachLineBlock } from './side-files';
 import type { MapItem } from './useMapSources';
 
-// Tried in order; the main instance is often busy.
+// Tried in order; the main instance is often busy. European operators only: the map area of
+// the request is all they see, but the owner wants it to stay with European operators.
 const SERVERS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
-  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
 ];
 // 112 works on any GSM phone and is the number across Europe; most of the Americas use 911.
 const NINE_ONE_ONE = new Set(['US', 'CA', 'MX', 'AR', 'CR', 'PA', 'PY', 'UY', 'SV', 'GT', 'HN', 'DO', 'EC', 'VE', 'PR', 'PH']);
