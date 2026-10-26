@@ -1,0 +1,33 @@
+scripts/check-i18n.mjs
+  s_9f5316f88b2e79::t_b8f4c22e3d76a0 14-16,69-71,78,123,137,153-167,177
+src/app/(tabs)/assistant/models.tsx
+  s_9f5316f88b2e79::t_5b40b5c6853d4b 9
+src/features/maps/MapFab.tsx
+  s_9f5316f88b2e79::t_98801f5e986ef2 3
+src/features/maps/countries.ts
+  s_9f5316f88b2e79::t_4cef0b93d4b0d6 25
+src/i18n/locales/en/common.json
+  s_9f5316f88b2e79::t_3b7ff5edb4e196 25,76
+src/i18n/locales/en/maps.json
+  s_9f5316f88b2e79::t_7c8d5d8a37d84f 103,113
+src/i18n/locales/es/common.json
+  s_9f5316f88b2e79::t_3ba7de6ed48f9b 25,76
+src/i18n/locales/es/maps.json
+  s_9f5316f88b2e79::t_ab9df271bdfaec 103,113
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "27b1f3677ab77942d67f7f34dc05220679390430",
+  "prompts": {},
+  "sessions": {
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
