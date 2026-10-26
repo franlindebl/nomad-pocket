@@ -1,6 +1,5 @@
 {
   "appName": "Nomad Pocket",
-  "tagline": "Knowledge that never goes offline",
   "tabs": {
     "home": "Home",
     "library": "Library",
@@ -21,11 +20,9 @@
     "close": "Close",
     "continue": "Continue",
     "seeAll": "See all",
-    "search": "Search",
     "clear": "Clear",
     "save": "Save",
-    "back": "Back",
-    "skip": "Skip"
+    "back": "Back"
   },
   "status": {
     "installed": "Installed",
@@ -39,8 +36,6 @@
     "notInstalled": "Not installed"
   },
   "storage": {
-    "free": "{{size}} free",
-    "of": "{{used}} of {{total}}",
     "notEnough": "Not enough space: this needs {{needed}} free (counting what's already queued and a margin for the system) and you have {{free}}.",
     "notEnoughShort": "Not enough storage"
   },
@@ -48,7 +43,6 @@
     "title": "Downloads",
     "empty": "No active downloads",
     "emptyBody": "Anything you download shows up here with its progress.",
-    "progress": "{{done}} of {{total}}",
     "eta": "{{time}} left",
     "active_one": "{{count}} active download",
     "active_other": "{{count}} active downloads",
@@ -79,8 +73,7 @@
   },
   "errors": {
     "generic": "Something went wrong",
-    "screenFailed": "This screen couldn't be shown. What you downloaded is still on your phone.",
-    "network": "You're offline. Try again when you have internet."
+    "screenFailed": "This screen couldn't be shown. What you downloaded is still on your phone."
   },
   "health": {
     "disclaimer": "Reference information, not medical advice. In an emergency, seek professional help."

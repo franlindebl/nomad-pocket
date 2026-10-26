@@ -48,7 +48,6 @@
     "retry": "Reintentar",
     "deleteTitle": "¿Eliminar {{name}}?",
     "deleteBody": "Liberarás {{size}}. Podrás volver a descargarlo cuando quieras.",
-    "downloading": "Descargando…",
     "update": "Actualizar",
     "updateAvailable": "Hay un mapa más reciente",
     "updateBody": "Hay una versión más reciente del mapa ({{size}}). Descárgala mientras tengas conexión."
@@ -101,8 +100,7 @@
     "noMaps": "Descarga un mapa para buscar sin conexión. Mientras tanto puedes pegar coordenadas.",
     "indexing": "Preparando la búsqueda en {{name}}… {{percent}} %",
     "noResults": "Nada coincide con «{{query}}» en tus mapas",
-    "coordinates": "Ir a estas coordenadas",
-    "saved": "Lugar guardado"
+    "coordinates": "Ir a estas coordenadas"
   },
   "place": {
     "takeMeThere": "Llévame",
@@ -112,8 +110,7 @@
     "close": "Cerrar",
     "emergencyYes": "Urgencias",
     "emergencyNo": "Sin urgencias",
-    "hours": "Horario: {{hours}}",
-    "away": "a {{distance}}"
+    "hours": "Horario: {{hours}}"
   },
   "call": {
     "failedTitle": "No se ha podido llamar",

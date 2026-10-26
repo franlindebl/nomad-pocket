@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react-native';
 import type { ReactNode } from 'react';
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 
 import { PressableScale } from '@/components/ui';
 import { useTheme } from '@/theme';
@@ -40,12 +40,6 @@ export function MapFab({
   );
 }
 
-/** Vertical group of controls sharing one pill background. */
-export function MapFabGroup({ children }: { children: ReactNode }) {
-  const { colors } = useTheme();
-  return <View style={[styles.group, { backgroundColor: colors.surface, shadowColor: colors.shadow, borderColor: colors.border }]}>{children}</View>;
-}
-
 const styles = StyleSheet.create({
   fab: {
     width: SIZE,
@@ -53,14 +47,6 @@ const styles = StyleSheet.create({
     borderRadius: SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
-    shadowOpacity: 1,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  group: {
-    borderRadius: SIZE / 2,
     borderWidth: StyleSheet.hairlineWidth,
     shadowOpacity: 1,
     shadowRadius: 12,

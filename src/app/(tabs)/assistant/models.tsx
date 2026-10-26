@@ -6,7 +6,7 @@ import { Alert, Platform, StyleSheet, View } from 'react-native';
 
 import { Badge, Button, Card, IconBadge, IconButton, ProgressBar, Row, Screen, SectionHeader, Text } from '@/components/ui';
 import { GGUF_MODELS, modelFit, ramGB, recommendModel, SYSTEM_MODEL_ID, type GgufModel } from '@/features/assistant/models';
-import { downloadModel, OfflineError, WifiRequiredError } from '@/features/assistant/register';
+import { downloadModel, OfflineError } from '@/features/assistant/register';
 import { useSystemModel } from '@/features/assistant/system';
 import { removeItem, useItems } from '@/features/content/items';
 import { cancelDownload, NotEnoughStorageError, pauseDownload, resumeDownload, useDownload } from '@/features/downloads/manager';
@@ -127,8 +127,6 @@ function SystemModelCard() {
 function showError(e: unknown, t: (k: string, o?: Record<string, unknown>) => string) {
   if (e instanceof NotEnoughStorageError) {
     Alert.alert(t('errors.generic'), t('storage.notEnough', { needed: formatBytes(e.needed), free: formatBytes(freeBytes()) }));
-  } else if (e instanceof WifiRequiredError) {
-    Alert.alert(t('errors.generic'), t('library:wifiRequired'));
   } else if (e instanceof OfflineError) {
     Alert.alert(t('errors.generic'), t('downloads.needsConnection'));
   } else {

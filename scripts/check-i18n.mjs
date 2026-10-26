@@ -11,6 +11,9 @@
 //  - plural keys: `key` is satisfied by key, key_one, key_other, key_zero, ... (i18next v21+ JSON v4)
 //  - template keys (`status.${s}`) are checked as patterns: at least one match per language,
 //    and the set of matches must be identical in es and en
+//  - unused keys are listed for information only (never fail): a key counts as used when a
+//    t() call or template matches it, or its text appears as a string literal ('ns:key' or
+//    'key') somewhere in src (keys kept in data, e.g. `{ labelKey: 'x.y' }`)
 //
 // Usage: node check-i18n.mjs [projectRoot]
 import fs from 'node:fs';
@@ -63,12 +66,16 @@ function matches(lang, ns, re) {
 }
 
 let checked = 0;
+const used = new Set(); // "ns:key" of static calls
+const usedPatterns = []; // { ns, re } of template calls
+let allSource = '';
 const missing = [];
 const dynamic = [];
 const unknownBinding = [];
 
 for (const file of walk(path.join(root, 'src'))) {
   const src = fs.readFileSync(file, 'utf8');
+  allSource += src;
   const rel = path.relative(root, file);
   const lines = src.split('\n');
   // Bindings: { name, ns, line }
@@ -113,6 +120,7 @@ for (const file of walk(path.join(root, 'src'))) {
     }
     if (isTemplate && raw.includes('${')) {
       const re = new RegExp('^' + raw.split(/\$\{[^}]*\}/).map((p) => p.replace(/[.*+?^()|[\]\\{}]/g, '\\$&')).join('[^.]+') + '$');
+      usedPatterns.push({ ns: keyNs, re });
       const per = Object.fromEntries(LANGS.map((l) => [l, [...new Set(matches(l, keyNs, re))].sort()]));
       const [a, b] = LANGS;
       const onlyA = per[a].filter((k) => !per[b].includes(k));
@@ -126,6 +134,7 @@ for (const file of walk(path.join(root, 'src'))) {
       );
       continue;
     }
+    used.add(`${keyNs}:${raw}`);
     const absent = LANGS.filter((l) => !has(l, keyNs, raw));
     if (absent.length) missing.push(`${rel}:${line}  ${keyNs}:${raw}  missing in ${absent.join(', ')}`);
   }
@@ -141,6 +150,21 @@ for (const ns of namespaces) {
   for (const k of B) if (!A.has(k)) asymmetric.push(`${ns}:${k} only in ${b}`);
 }
 
+// Keys nothing seems to use (informational: dynamic lookups the patterns above can't see).
+const literals = new Set([...allSource.matchAll(/'([^'\n]+)'|"([^"\n]+)"|`([^`$\n]+)`/g)].map((m) => m[1] ?? m[2] ?? m[3]));
+const unused = [];
+for (const ns of namespaces) {
+  for (const full of keys[LANGS[1]][ns] ?? []) {
+    const k = full.replace(/_(zero|one|two|few|many|other)$/, '');
+    const hit =
+      used.has(`${ns}:${k}`) ||
+      usedPatterns.some((p) => p.ns === ns && p.re.test(k)) ||
+      literals.has(`${ns}:${k}`) ||
+      literals.has(k);
+    if (!hit && !unused.includes(`${ns}:${k}`)) unused.push(`${ns}:${k}`);
+  }
+}
+
 const section = (title, list) => {
   console.log(`\n== ${title} (${list.length})`);
   for (const l of list) console.log('  ' + l);
@@ -150,4 +174,5 @@ section("Static keys missing", missing);
 section('Dynamic (template) keys', dynamic);
 section('Calls with unresolved t binding (check manually)', unknownBinding);
 section('Keys defined in only one language', asymmetric);
+section('Keys no t() call or string literal uses (informational)', unused);
 process.exitCode = missing.length || dynamic.some((d) => d.startsWith('!!')) ? 1 : 0;

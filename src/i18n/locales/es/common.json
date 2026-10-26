@@ -1,6 +1,5 @@
 {
   "appName": "Nomad Pocket",
-  "tagline": "El conocimiento que nunca se desconecta",
   "tabs": {
     "home": "Inicio",
     "library": "Biblioteca",
@@ -21,11 +20,9 @@
     "close": "Cerrar",
     "continue": "Continuar",
     "seeAll": "Ver todo",
-    "search": "Buscar",
     "clear": "Borrar",
     "save": "Guardar",
-    "back": "Atrás",
-    "skip": "Omitir"
+    "back": "Atrás"
   },
   "status": {
     "installed": "Instalado",
@@ -39,8 +36,6 @@
     "notInstalled": "No instalado"
   },
   "storage": {
-    "free": "{{size}} libres",
-    "of": "{{used}} de {{total}}",
     "notEnough": "No hay espacio suficiente: hacen falta {{needed}} libres (con lo que ya está en cola y un margen para el sistema) y tienes {{free}}.",
     "notEnoughShort": "No hay espacio suficiente"
   },
@@ -48,7 +43,6 @@
     "title": "Descargas",
     "empty": "No hay descargas activas",
     "emptyBody": "Lo que descargues aparecerá aquí con su progreso.",
-    "progress": "{{done}} de {{total}}",
     "eta": "{{time}} restantes",
     "active_one": "{{count}} descarga activa",
     "active_other": "{{count}} descargas activas",
@@ -79,8 +73,7 @@
   },
   "errors": {
     "generic": "Algo ha ido mal",
-    "screenFailed": "No se ha podido mostrar esta pantalla. Lo que has descargado sigue en tu móvil.",
-    "network": "Sin conexión. Inténtalo cuando tengas internet."
+    "screenFailed": "No se ha podido mostrar esta pantalla. Lo que has descargado sigue en tu móvil."
   },
   "health": {
     "disclaimer": "Información de referencia, no consejo médico. En una emergencia, busca ayuda profesional."

@@ -6,7 +6,6 @@
   "all": "Todos",
   "lessons_one": "{{count}} lección",
   "lessons_other": "{{count}} lecciones",
-  "progress": "{{done}} de {{total}} lecciones",
   "percent": "{{value}} % completado",
   "continue": "Continuar",
   "start": "Empezar curso",

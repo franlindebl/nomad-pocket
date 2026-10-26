@@ -17,9 +17,6 @@
     "resetBody": "Your contacts, meeting points, notes, kit and its reminders will be deleted. This can't be undone."
   },
   "home": {
-    "title": "Emergency preparedness",
-    "empty": "Make your family plan and get your kit ready to cope offline.",
-    "kit": "Kit: {{done}} of {{total}}",
     "attention_one": "{{count}} expiring soon",
     "attention_other": "{{count}} expiring soon",
     "expired_one": "{{count}} expired",

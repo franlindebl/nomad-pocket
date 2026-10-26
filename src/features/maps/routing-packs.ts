@@ -171,26 +171,6 @@ export function fetchMissingSideFiles(manifest: RoutingManifest) {
   }
 }
 
-export type PackState = { progress: number | null; failed: boolean };
-
-/** Progress of a pack being downloaded (from what is on disk plus the running parts). */
-export function usePackState(pack: ManifestPack): PackState {
-  const records = useDownloads((s) => s.records);
-  // Search side files are fetched later for installed packs, never a pack's progress.
-  const mine = Object.values(records).filter(
-    (r) => r.kind === 'route' && !isSideFile(r.meta.role) && (r.meta.pack as ManifestPack | undefined)?.id === pack.id,
-  );
-  const active = mine.filter((r) => ACTIVE.has(r.status));
-  const failed = !active.length && mine.some((r) => r.status === 'failed');
-  if (!active.length) return { progress: null, failed };
-  let done = 0;
-  pack.parts.forEach((part, i) => {
-    const rec = mine.find((r) => r.id === partId(pack.id, i));
-    done += partOnDisk(pack, i) ? part.size : rec && ACTIVE.has(rec.status) ? rec.bytesWritten : 0;
-  });
-  return { progress: Math.min(1, done / Math.max(1, pack.size)), failed: false };
-}
-
 export function isPackInstalled(packId: string): boolean {
   return !!getItem(routePackId(packId));
 }
