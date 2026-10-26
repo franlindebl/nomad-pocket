@@ -1,0 +1,31 @@
+modules/nomad-zim/ios/NomadZimModule.swift
+  s_9f5316f88b2e79::t_fcea29ef1c6a56 54-57,60-61,143-151
+modules/nomad-zim/src/NomadZim.types.ts
+  s_9f5316f88b2e79::t_62380892a947a1 41
+modules/nomad-zim/android/src/main/java/expo/modules/nomadzim/NomadZimModule.kt
+  s_836a109ce1b712::t_e890d3fd331b01 16-18,64-66,71,97-98,125-129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ab59ef1f91dcc3ee15ca6e05a028c36fbb00ddc9",
+  "prompts": {},
+  "sessions": {
+    "s_836a109ce1b712": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "agent-a7f5ce3f0984a67a1",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_9f5316f88b2e79": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b00dd1ae-7bcd-4bfa-8120-0e3b587756e9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
