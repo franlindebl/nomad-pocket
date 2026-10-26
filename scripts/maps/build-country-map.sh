@@ -82,12 +82,22 @@ PY
 then
   INDEX="$WORK/src/geofabrik-index.json"
   curl -fsSL --retry 3 -A "$UA" -o "$INDEX" https://download.geofabrik.de/index-v1-nogeom.json
-  # An extract of this country alone before one shared with neighbours.
-  PBF_URL="$(python3 -I - "$INDEX" "$ID" <<'PY'
-import json, sys
-iso = sys.argv[2].upper()
+  # An extract of this country alone before one shared with neighbours, and among those the
+  # one named after it: Geofabrik tags six Pacific extracts VU (American Oceania, Tokelau,
+  # French Polynesia…) and two MH. A tie left after that takes none (Overpass then), never
+  # another country's points.
+  PBF_URL="$(python3 -I - "$INDEX" "$ROOT/src/features/maps/regions.json" "$ID" <<'PY'
+import json, re, sys, unicodedata
+cid = sys.argv[3]
+iso = cid.upper()
+slug = lambda s: re.sub(r"[^a-z0-9]+", "-", unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower()).strip("-")
+names = {slug(n) for r in json.load(open(sys.argv[2]))["regions"] if r["id"] == cid for n in r["name"].values()}
 found = [f["properties"] for f in json.load(open(sys.argv[1]))["features"] if iso in f["properties"].get("iso3166-1:alpha2", [])]
-found.sort(key=lambda p: len(p["iso3166-1:alpha2"]))
+rank = lambda p: (len(p["iso3166-1:alpha2"]), not {slug(p["name"]), p["id"].rsplit("/", 1)[-1]} & names)
+found.sort(key=rank)
+if len(found) > 1 and rank(found[0]) == rank(found[1]):
+    print(f"[map {cid}] Geofabrik extracts tied: {', '.join(p['id'] for p in found if rank(p) == rank(found[0]))}", file=sys.stderr)
+    found = []
 print(found[0]["urls"]["pbf"] if found else "")
 PY
 )"
