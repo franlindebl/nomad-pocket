@@ -6,6 +6,7 @@ import { IconButton, ProgressBar, Row, Text } from '@/components/ui';
 import { formatBytes, formatDuration } from '@/lib/format';
 import { space, useTheme } from '@/theme';
 
+import { downloadErrorKind } from './errors';
 import { cancelDownload, dismissDownload, pauseDownload, resumeDownload, type DownloadRecord } from './manager';
 
 export function DownloadRow({ record }: { record: DownloadRecord }) {
@@ -18,10 +19,10 @@ export function DownloadRow({ record }: { record: DownloadRecord }) {
   let detail = `${formatBytes(bytesWritten)} / ${formatBytes(totalBytes)}`;
   if (status === 'running' && eta) detail += ` · ${t('downloads.eta', { time: formatDuration(eta) })}`;
   if (status !== 'running') detail = `${t(`status.${status}`)} · ${detail}`;
-  if (status === 'failed' && record.error) {
-    // Known error codes get a translated message; anything else is shown as reported.
-    const message = record.error === 'NOT_ENOUGH_STORAGE' ? t('storage.notEnoughShort') : record.error;
-    detail = `${t('status.failed')} · ${message}`;
+  if (status === 'failed') {
+    // A message a person can act on; the raw error stays in the logs.
+    const { kind, status: http } = downloadErrorKind(record.error);
+    detail = kind === 'storage' ? t('storage.notEnoughShort') : t(`downloads.error.${kind}`, { status: http });
   }
 
   return (

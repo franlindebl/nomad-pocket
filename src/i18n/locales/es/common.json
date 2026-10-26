@@ -55,7 +55,13 @@
     "queuedCount_one": "{{count}} en cola",
     "queuedCount_other": "{{count}} en cola",
     "finished": "{{title}} está listo para usar sin conexión",
-    "needsConnection": "Necesitas conexión a internet para descargar."
+    "needsConnection": "Necesitas conexión a internet para descargar.",
+    "error": {
+      "secure": "No se pudo conectar de forma segura. Esta red puede estar bloqueándolo: prueba con otra Wi‑Fi o con datos.",
+      "offline": "Sin conexión. Reintenta cuando tengas internet.",
+      "server": "El servidor no respondió (error {{status}}). Reintenta más tarde.",
+      "other": "La descarga se interrumpió. Reintenta."
+    }
   },
   "errors": {
     "generic": "Algo ha ido mal",

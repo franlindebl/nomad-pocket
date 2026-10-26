@@ -55,7 +55,13 @@
     "queuedCount_one": "{{count}} queued",
     "queuedCount_other": "{{count}} queued",
     "finished": "{{title}} is ready to use offline",
-    "needsConnection": "You need an internet connection to download."
+    "needsConnection": "You need an internet connection to download.",
+    "error": {
+      "secure": "Couldn't connect securely. This network may be blocking it: try another Wi‑Fi or mobile data.",
+      "offline": "No connection. Retry once you're online.",
+      "server": "The server didn't answer (error {{status}}). Retry later.",
+      "other": "The download stopped. Retry."
+    }
   },
   "errors": {
     "generic": "Something went wrong",
