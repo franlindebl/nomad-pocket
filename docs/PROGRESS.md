@@ -112,8 +112,14 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
      sheet → region list → download → Tus mapas "Noreste"); (2) Spain from a fresh install (build
      14 was killed while "Preparando"; build 16 copies and hashes natively, modules/nomad-files);
      (3) big side-file imports (Germany's 780 MB of house numbers, ~450 MB per US region).
-   - **Agent, when asked**: (1) E2E flow for a country in regions (local catalog with Andorra
-     split in two regions: tick, download, delete; testIDs in docs/E2E.md); (2) watch the monthly
+   - **Agent, when asked**: (1) E2E flows for countries in regions (owner wants them, 2026-10-27),
+     both kinds, against a local catalog (`scripts/e2e.sh` maps server; testIDs `region-*` in
+     docs/E2E.md): (a) a pack per region, as the USA (Andorra split in two regions, each with its
+     map and pack): tick, download, delete; (b) regions for the map only plus a national pack, as
+     Canada and Russia (two regional maps with outline `cells` + one country pack; the manual run
+     of 2026-10-27 used real Ontario/Quebec z8 maps and Andorra's pack as `ca`): the region ticked
+     from the location, the pack downloaded with the first region only, the second region
+     costing only its map, deleting the last region removing the pack; (2) watch the monthly
      run on 2026-11-05, the first full one with regions, the CI hardening and the retries
      (`gh run list --workflow country-packages.yml`; then spot-check both catalogs and their
      assets); (3) admin boundaries without Overpass (it often refuses GitHub runners: 502/504;
