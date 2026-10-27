@@ -239,7 +239,7 @@ export function countryMapProgress(records: Record<string, DownloadRecord>, map:
 }
 
 // Big files (France: 150 MB of streets, Germany: 780 MB of doors) are read in blocks.
-const IMPORT: Record<SideFile, (itemId: string, file: File) => Promise<void>> = {
+const IMPORT: Record<SideFile, (itemId: string, file: File, onProgress: (done: number) => void) => Promise<void>> = {
   pois: storeEmergencyPointsFile,
   streets: indexMapStreets,
   places: indexPackPlaces,
@@ -248,7 +248,7 @@ const IMPORT: Record<SideFile, (itemId: string, file: File) => Promise<void>> = 
 
 /** Imports a side file into the installed map (queued; nothing until the map is installed). `landed`: a download just put it there. */
 function importMapSide(mapId: string, role: SideFile, item = itemOfMap(mapId), landed = false) {
-  void importSideFile('map', sideName(mapId, role), item, (file) => IMPORT[role](item, file), landed);
+  void importSideFile('map', sideName(mapId, role), item, (file, onProgress) => IMPORT[role](item, file, onProgress), landed);
 }
 
 function importMapSides(map: CountryMap) {

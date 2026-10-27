@@ -81,17 +81,20 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
         title: name ? t('ready.map', { name }) : t('ready.mapAny'),
         detail: mine?.progress != null
           ? t('ready.downloading', { pct: Math.round(mine.progress * 100) })
-          : mine?.map
-            ? stale
-              ? mine.update
-                ? t('ready.mapUpdate')
-                : t('ready.mapStale')
-              : mine.packs.length
-                ? t('ready.mapDone')
-                : t('ready.mapDoneNoRouting')
-            : t('ready.mapTodo'),
-        done: !!mine?.map,
-        progress: mine?.progress ?? null,
+          : mine?.preparing != null
+            ? t('ready.preparing', { pct: Math.floor(mine.preparing * 100) })
+            : mine?.map
+              ? stale
+                ? mine.update
+                  ? t('ready.mapUpdate')
+                  : t('ready.mapStale')
+                : mine.packs.length
+                  ? t('ready.mapDone')
+                  : t('ready.mapDoneNoRouting')
+              : t('ready.mapTodo'),
+        // Ready once its search and points are in, not when its bytes are.
+        done: !!mine?.map && mine.preparing === null,
+        progress: mine?.progress ?? mine?.preparing ?? null,
         warning: stale,
         href: mine?.map || mine?.progress != null ? '/maps/regions' : country ? { pathname: '/maps/download', params: { regionId: country } } : '/maps/pick',
       },

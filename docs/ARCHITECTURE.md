@@ -602,7 +602,21 @@ tile-POI fallback.
   through a queue; the kv marker `maps.sideImports` lets a startup replay the `.tsv` files still on
   disk after a kill; 3 attempts, then it gives up (the next catalog refresh re-fetches a missing map
   side file or pack POIs file). Large files are read in blocks of whole lines (`forEachLineBlock`).
-  Emergency points stop when their map is removed.
+  Streets, places and doors go to SQLite as JSON (`import-core.ts`): each 1 MB block becomes one
+  JSON string (four string replacements in JS) that `json_each` parses into a temp table on the
+  index file's background connection, and the inserts read from there; JS only computes `nameKey` /
+  `houseNumberKey` once per distinct street and number, and `indexText` for rows that may hold CJK.
+  Parsing row by row in Hermes took ~2 min of the JS thread for Spain (5 M rows) and the app
+  stuttered; `import-core.test.ts` checks the SQL path writes the same rows as the TSV parsers
+  (also checked on Spain's full files). Emergency points (tags decide the kind) are still parsed in
+  JS, in 512 KB blocks, and written as JSON statements. They stop when their map is removed.
+- *Preparing* (`prepare.ts`, pure `prepare-core.ts`): once a country's bytes are in, its maps and packs
+  still have work queued: the tile index (`scheduleIndex`, weight ~10 KB per tile), each side file's
+  import (weight: its size, progress by bytes read) and, for a map without bundled points, its
+  Overpass points. Each registers a task when queued; an item's tasks stay until all are done, so the
+  country's `preparing` (0–1, `useCountries`) never goes back. The country shows "Preparando… %"
+  (countries sheet, Home card and readiness, Downloads, onboarding badge, search sheet) and is only
+  ready, with the "listo para usar sin conexión" toast, after it.
 - *Updates*: a pack update compares `buildDate`, downloads the new tar and replaces the pack, closing
   the router once the new file is in place (`closeRouter()` in `routing.ts`, serialised);
   `NomadRoute.open()` reopens when the file's inode/size/mtime changed.
@@ -637,9 +651,13 @@ style references the files with `file://` URLs. Regenerate with `scripts/maps/`
 furniture) and named `roads` (one row per name and tile; deduped within 1.5 km at query
 time). Reads one zoom: the archive's max zoom capped at 15, lowered until ≤ 40 000 tiles
 (`pickIndexZoom`; Spain at z14 is indexed at z12, so minor streets are missing there);
-the world basemap at z5. A queue indexes one map at a time, 24 tiles per batch with a
-`setTimeout(0)` between batches (JS thread stays responsive; ~1–6 ms per dense tile in
-V8, more in Hermes). Triggers: 4 s after startup for maps whose `map_sources.index_version`
+the world basemap at z5. A map whose country brings search files (`bundledSearch`, set at install
+from the catalogs in `register.ts`: its own or a pack's `places`) is read at z10 at most: the files
+hold every named place and street, the tiles add islands, regions and towns at a fraction of the
+tiles. A queue indexes one map at a time, decoding tiles for 12 ms, then inserting them as one JSON
+statement on the background connection and yielding (`LocalFileSource` also yields every 12 ms
+while listing a big archive's directories). Every bulk delete runs there too: a `DELETE … WHERE
+source = ?` reads the whole FTS table, which on the JS thread froze the app for seconds. Triggers: 4 s after startup for maps whose `map_sources.index_version`
 ≠ `INDEX_VERSION` (bump it when `tileRows` changes), and `onMapInstalled` after a download
 (re-index). Index writes take turns (one transaction at a time). Removing a map cancels its job and deletes its
 rows off the JS thread in one transaction; a removal a kill cut short is finished at the next launch
@@ -651,7 +669,10 @@ under `near:<item id>`: around the user 4 s after startup and after a map instal
 known position, or one coarse fix on a fresh install; only with permission already
 granted, else the last viewport) and around the map centre when the search sheet opens
 (viewports at zoom ≥ 9 only: a world view says nothing about where the user looks). It is redone when that point is ≥ 10 km from the last centre
-(kv-store `maps.detailIndex`); duplicates of the whole-map rows merge in `rankHits`.
+(kv-store `maps.detailIndex`); duplicates of the whole-map rows merge in `rankHits`. Skipped for
+maps their country's search files cover (`searchFilesCover`: `bundledSearch`, or an installed
+places file of the map or a pack of its country): it ran when search opened ("Preparando la
+búsqueda", ~10 s for Madrid at z15) and added nothing those files don't have.
 `searchPlaces(text, near)` runs on a second read connection (`getAllAsync`; the sheet
 debounces 200 ms and a newer search cancels the older) and caps the matches before ranking (20 000
 for queries under 3 letters, 50 000 otherwise, ordered by importance). Chinese and Japanese runs are

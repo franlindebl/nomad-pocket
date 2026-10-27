@@ -5,6 +5,7 @@ import { db } from '@/db';
 import { useContent } from '@/features/content/items';
 import { showToast } from '@/components/Toast';
 import { initDownloads, onDownloadFinished } from '@/features/downloads/manager';
+import { whenPrepared } from '@/features/maps/prepare';
 import i18n from '@/i18n';
 
 type InitFn = () => void | Promise<void>;
@@ -32,7 +33,12 @@ export function bootstrap(): Promise<void> {
       }
     }
     initDownloads();
-    onDownloadFinished((r) => showToast(i18n.t('downloads.finished', { title: r.title })));
+    onDownloadFinished((r) => {
+      const toast = () => showToast(i18n.t('downloads.finished', { title: r.title }));
+      // A map or routing pack is ready once its search and emergency points are in (maps/prepare.ts).
+      if (r.kind === 'map' || r.kind === 'route') void whenPrepared().then(toast);
+      else toast();
+    });
   })();
   return started;
 }

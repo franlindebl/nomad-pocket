@@ -78,6 +78,7 @@ export default function MapsSheet() {
   const subtitle = (c: CountryState) => {
     if (c.progress !== null) return t('regions.downloadingPct', { pct: Math.round(c.progress * 100) });
     if (c.failed) return t('regions.failed');
+    if (c.preparing !== null) return t('regions.preparingPct', { pct: Math.floor(c.preparing * 100) });
     if (c.update) return t('regions.updateAvailable');
     // A country in regions: which ones ("Sur, Noreste").
     const what = c.regions.length
@@ -112,7 +113,9 @@ export default function MapsSheet() {
                   : undefined
             }
             chevron={c.regions.length > 0 && c.progress === null}
-            trailing={c.progress !== null ? <ProgressBar value={c.progress} style={{ width: 56 }} /> : undefined}
+            trailing={
+              c.progress !== null || c.preparing !== null ? <ProgressBar value={c.progress ?? c.preparing ?? 0} style={{ width: 56 }} /> : undefined
+            }
             trailingAction={
               c.failed ? (
                 <IconButton testID="country-retry" icon={RefreshCw} size={36} variant="plain" accessibilityLabel={t('regions.retry')} onPress={() => retry(c)} />

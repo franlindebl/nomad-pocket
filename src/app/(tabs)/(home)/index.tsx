@@ -31,6 +31,7 @@ import { useActiveDownloads } from '@/features/downloads/manager';
 import { ContinueCarousel } from '@/features/home/ContinueCarousel';
 import { useReadiness, type ReadinessKey } from '@/features/home/readiness';
 import { callPhones } from '@/features/maps/call';
+import { usePreparingCountries } from '@/features/maps/countries';
 import { emergencyNumber } from '@/features/maps/emergency';
 import { formatBytes } from '@/lib/format';
 import { freeBytes } from '@/lib/storage';
@@ -78,6 +79,8 @@ export default function HomeScreen() {
   const all = useItems();
   // A country's files count as one download.
   const downloads = groupDownloads(useActiveDownloads()).filter((d) => d.status !== 'done' && d.status !== 'failed');
+  // A downloaded country is still being prepared (search, emergency points): the end of its download.
+  const preparing = usePreparingCountries();
   const net = Network.useNetworkState();
   const online = net.isInternetReachable ?? net.isConnected ?? true;
   const { items, done } = useReadiness();
@@ -121,14 +124,20 @@ export default function HomeScreen() {
         <QuickAction testID="home-call" icon={Phone} hue="medicine" title={t('crisis.call', { number })} onPress={() => callPhones(number)} />
       </View>
 
-      {downloads.length > 0 ? (
+      {downloads.length > 0 || preparing.length > 0 ? (
         <Card style={{ marginTop: space.md }} onPress={() => router.push('/downloads')} testID="home-downloads">
           <Row gap={space.md}>
             <IconBadge icon={Download} hue="survival" />
             <View style={{ flex: 1, gap: 6 }}>
-              <Text variant="headline">{downloadsLabel(downloads, tc)}</Text>
+              <Text variant="headline">
+                {downloads.length ? downloadsLabel(downloads, tc) : tc('downloads.preparingTitle', { name: preparing.map((c) => c.title).join(', ') })}
+              </Text>
               <ProgressBar
-                value={downloads.reduce((s, d) => s + d.bytesWritten, 0) / Math.max(1, downloads.reduce((s, d) => s + d.totalBytes, 0))}
+                value={
+                  downloads.length
+                    ? downloads.reduce((s, d) => s + d.bytesWritten, 0) / Math.max(1, downloads.reduce((s, d) => s + d.totalBytes, 0))
+                    : (preparing[0]?.preparing ?? 0)
+                }
               />
               <Text variant="caption" color="textSecondary">
                 {t('downloadsHint')}

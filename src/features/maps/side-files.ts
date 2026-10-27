@@ -1,17 +1,19 @@
 // Side files of country maps and routing packs (emergency points, street names, named places,
 // house numbers): downloaded next to the archive, imported into the search and emergency
 // tables once its item is registered, then deleted. An import is not part of its download
-// (a big country takes minutes and the download is done as soon as the file is in place), so
-// it must survive a kill: a file still on disk whose item is installed is an import to run
+// (the download is done as soon as the file is in place; the item shows as being prepared until
+// its imports are, prepare.ts), so it must survive a kill: a file still on disk whose item is installed is an import to run
 // again (country-maps.ts / routing-packs.ts replay them at startup and their sweeps keep them),
 // and kv-store remembers which files an item still expects, so the catalog refresh can fetch
 // again one that got lost. Imports run one at a time, each file once at a time; a file that
 // keeps failing (or taking the app down with it) is given up after a few tries.
 import { File, FileMode } from 'expo-file-system';
-import Storage from '@/db/kv';
 
+import Storage from '@/db/kv';
 import { getItem } from '@/features/content/items';
 import { contentFile, deleteFile } from '@/lib/storage';
+
+import { beginTask, endTask, updateTask } from './prepare';
 
 export type SideKind = 'map' | 'route';
 
@@ -93,19 +95,23 @@ export function isImporting(kind: SideKind, name: string): boolean {
  * runs, `landed` (a download just put a new copy in place) imports it once more after. A
  * failed import keeps the file for the next launch.
  */
-export function importSideFile(kind: SideKind, name: string, item: string, run: (file: File) => Promise<void>, landed = false): Promise<void> {
+export function importSideFile(kind: SideKind, name: string, item: string, run: ImportRun, landed = false): Promise<void> {
   const key = keyOf(kind, name);
   if (busy.has(key)) {
     if (running === key && landed) again.add(key);
     return chain;
   }
   busy.add(key);
+  // Part of getting the item ready (prepare.ts) from the moment it is queued.
+  const task = `side:${key}`;
+  const file = contentFile(kind, name);
+  beginTask(item, task, file.exists ? Number(file.size ?? 0) : 0);
   chain = chain
     .then(async () => {
       running = key;
       do {
         again.delete(key);
-        await importOnce(kind, name, item, run);
+        await importOnce(kind, name, item, (file) => run(file, (done) => updateTask(item, task, done)));
       } while (again.has(key));
     })
     .catch((e) => console.warn('[maps] import', name, e))
@@ -113,9 +119,13 @@ export function importSideFile(kind: SideKind, name: string, item: string, run: 
       busy.delete(key);
       again.delete(key);
       if (running === key) running = null;
+      endTask(item, task);
     });
   return chain;
 }
+
+/** Imports a side file; `onProgress` takes how much of it is done (0..1). */
+export type ImportRun = (file: File, onProgress: (done: number) => void) => Promise<void>;
 
 async function importOnce(kind: SideKind, name: string, item: string, run: (file: File) => Promise<void>) {
   const key = keyOf(kind, name);
@@ -148,20 +158,25 @@ async function importOnce(kind: SideKind, name: string, item: string, run: (file
   forgetSideFile(kind, name);
 }
 
-const LINE_BLOCK = 4 * 1024 * 1024;
-
 /**
- * Calls `onBlock` with the text of a big TSV file a few MB of whole lines at a time (a
+ * Calls `onBlock` with the text of a big TSV file `blockBytes` of whole lines at a time (a
  * country's file read in one string would be hundreds of MB in Hermes). `onBlock` returns
- * false to stop.
+ * false to stop; `onProgress` gets the share of the file read so far.
  */
-export async function forEachLineBlock(file: File, onBlock: (text: string) => Promise<boolean>) {
+export async function forEachLineBlock(
+  file: File,
+  onBlock: (text: string) => Promise<boolean>,
+  { blockBytes = 4 * 1024 * 1024, onProgress }: { blockBytes?: number; onProgress?: (done: number) => void } = {},
+) {
   const handle = file.open(FileMode.ReadOnly);
+  const size = Math.max(1, Number(file.size ?? 0));
   const decoder = new TextDecoder('utf-8');
   let carry = new Uint8Array(0);
+  let read = 0;
   try {
     for (;;) {
-      const chunk = await handle.readBytes(LINE_BLOCK);
+      const chunk = await handle.readBytes(blockBytes);
+      read += chunk.length;
       let data = chunk;
       if (carry.length) {
         data = new Uint8Array(carry.length + chunk.length);
@@ -178,6 +193,7 @@ export async function forEachLineBlock(file: File, onBlock: (text: string) => Pr
         continue;
       }
       if (!(await onBlock(decoder.decode(data.subarray(0, cut))))) return;
+      onProgress?.(read / size);
       carry = data.slice(cut + 1);
     }
   } finally {

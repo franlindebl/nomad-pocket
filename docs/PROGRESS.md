@@ -221,6 +221,31 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-27 — Maps: a country's search and points are prepared as the end of its download
+
+Owner, after downloading Spain: opening map search froze for 1–2 s, then said "Preparando la búsqueda
+en España" for ~10 s; asked for every deferred step to happen with the download, visibly.
+- Found deferred: the detail index around the view (z15 over 50 km, run when search opened and
+  again whenever the view moved 10 km) and, silently after the download, the tile index and the
+  side-file imports (~2 min of JS on an iPhone 14 Pro: points 7 s, streets 40, places 20, doors 50).
+  The freeze: all of it on the JS thread, plus `DELETE … WHERE source = ?` on the FTS table (reads
+  the whole table) run synchronously.
+- Detail index skipped for maps whose country brings search files (`searchFilesCover`): the files
+  hold every named place and street. Such maps (`bundledSearch`, set at install) index their tiles
+  at z10 at most (Spain: 9k rows instead of a z12 pass) for islands, regions and towns.
+- Imports in SQLite (`import-core.ts`): each 1 MB block goes in as one JSON string and `json_each`
+  does the parsing and inserts on the background connection; JS keeps `nameKey`/`houseNumberKey`
+  per distinct value and `indexText` for possible CJK rows. Same rows as the old parsers (unit tests,
+  and Spain's full files compared in node). Not native: no Swift/Kotlin, no second SQLite copy.
+  Tile indexing decodes 12 ms slices and inserts as JSON; every bulk delete is async.
+- "Preparando" (`prepare.ts`): tasks per item (tiles, each import, Overpass points), weighted by
+  size; the country shows "Preparando búsqueda y puntos… %" in Tus mapas, Home (card and readiness),
+  Downloads, the onboarding badge and the search sheet; ready and the "listo" toast only after it.
+- Simulator (Release, Spain from GitHub): imports points 2.9 s, streets 9.2, places 5.5, doors 13.1;
+  search opened during them with no wait; "Calle Alcala 50" → "Calle de Alcalá, 50 · Portal
+  aproximado". Smoke E2E 21/21. To do: time it on the owner's iPhone (expected well under the old ~2 min, and no
+  stutter) and check on Android.
+
 ### 2026-10-27 — Release: 1.1.0 build 18 to TestFlight (build 17 withdrawn)
 
 Build 18 = the download tuning below on top of build 16. Smoke E2E 21/21 on an iOS 27 simulator;

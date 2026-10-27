@@ -110,8 +110,22 @@ export function tileRows(
   return rows;
 }
 
+/** Place kinds that name a town or neighbourhood: the "· Soria" context of a result (map_localities). Keep in step with scripts/routing/streets.py. */
+export const LOCALITY_KINDS = new Set([
+  'city',
+  'town',
+  'village',
+  'hamlet',
+  'locality',
+  'suburb',
+  'neighbourhood',
+  'quarter',
+  'macrohood',
+  'isolated_dwelling',
+]);
+
 /** Protomaps-like min_zoom of a routing pack's place kinds (lower ranks first). */
-const PLACE_RANK: Record<string, number> = { city: 4, town: 7, village: 10, suburb: 11, borough: 11, isolated_dwelling: 14 };
+export const PLACE_RANK: Record<string, number> = { city: 4, town: 7, village: 10, suburb: 11, borough: 11, isolated_dwelling: 14 };
 
 /**
  * Rows of a routing pack's street index (scripts/routing/streets.py: kind, name, lat,
@@ -140,7 +154,7 @@ export function parseStreetsTsv(text: string): PlaceRow[] {
 }
 
 /** Protomaps-like min_zoom of a pack's POI kinds: what people look up from afar ranks first. */
-const POI_RANK: Record<string, number> = {
+export const POI_RANK: Record<string, number> = {
   aerodrome: 10,
   hospital: 12,
   station: 12,
@@ -327,7 +341,25 @@ export function ftsQuery(text: string): string | null {
 // trigram tokenizer would need three, and "机场" or "都庁" are two.
 
 // Han (with 々〆〇), hiragana, katakana without the ・ separator, half-width katakana.
-const CJK_CHAR = String.raw`[\u3005-\u3007\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u31f0-\u31ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f\u{20000}-\u{3134f}]`;
+const CJK_RANGES: [number, number][] = [
+  [0x3005, 0x3007],
+  [0x3040, 0x309f],
+  [0x30a0, 0x30fa],
+  [0x30fc, 0x30ff],
+  [0x31f0, 0x31ff],
+  [0x3400, 0x4dbf],
+  [0x4e00, 0x9fff],
+  [0xf900, 0xfaff],
+  [0xff66, 0xff9f],
+  [0x20000, 0x3134f],
+];
+const CJK_CHAR = `[${CJK_RANGES.map(([a, b]) => `\\u{${a.toString(16)}}-\\u{${b.toString(16)}}`).join('')}]`;
+/**
+ * An SQLite GLOB of text that may hold them: one range from the first to the last (ten ranges
+ * cost SQLite twice as much per row). import-core.ts sends those rows through indexText, which
+ * leaves text without CJK (Hangul, symbols in between) as it is.
+ */
+export const CJK_GLOB = `*[${String.fromCodePoint(CJK_RANGES[0][0])}-${String.fromCodePoint(CJK_RANGES[CJK_RANGES.length - 1][1])}]*`;
 const CJK_RUNS = new RegExp(`${CJK_CHAR}+`, 'gu');
 
 const pairsOf = (run: string) => {

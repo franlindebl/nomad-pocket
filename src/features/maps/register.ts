@@ -10,14 +10,15 @@ import { getItem, listItems, onItemRemoved, upsertItem } from '@/features/conten
 import { HEADER_SIZE, parseHeader } from '@/lib/pmtiles/format';
 import { contentDir, deleteFile, partialDir } from '@/lib/storage';
 
-import { onMapFileDownloaded, refreshMapsCatalog, resumeMapImports, sweepCountryMapFiles } from './country-maps';
+import { routePacksFor } from './country-core';
+import { onMapFileDownloaded, refreshMapsCatalog, resumeMapImports, sweepCountryMapFiles, useMapsCatalog } from './country-maps';
 import { cancelEmergencySync, syncEmergencyPoints } from './emergency';
 import { forgetEstimates, mapItemId, onMapInstalled, WORLD_ID, type MapItemMeta } from './extraction';
 import { useMarkers } from './markers';
 import { forgetMapSource, indexDetailAround, indexDetailAroundView, indexStaleMaps, invalidateIndex } from './places';
 import { getRegion, regionName } from './regions';
 import { closeRouter, listRoutePacks, registerLoosePack, resolvePackFile } from './routing';
-import { onRouteFileDownloaded, refreshRoutingCatalog, resumePackImports, sweepRoutingFiles } from './routing-packs';
+import { onRouteFileDownloaded, refreshRoutingCatalog, resumePackImports, sweepRoutingFiles, useRoutingCatalog } from './routing-packs';
 import { forgetSideFilesOf } from './side-files';
 import { resolveMapFile, type MapItem } from './useMapSources';
 import { ensureWorldMap } from './world';
@@ -152,9 +153,22 @@ function indexDetailAroundUser() {
     .catch((e) => console.warn('[maps] cannot index the detail around the user', e));
 }
 
+/** Whether the catalogs give a map's country search files with every named place (its own, or a routing pack's). */
+function bringsSearchFiles(item: MapItem): boolean {
+  if (useMapsCatalog.getState().manifest?.maps.some((m) => mapItemId(m.id) === item.id && !!m.places)) return true;
+  const region = item.meta.regionId;
+  return !!region && routePacksFor(useRoutingCatalog.getState().manifest?.packs ?? [], region).some((p) => !!p.places);
+}
+
 onMapInstalled((id) => {
-  const item = getItem(id) as MapItem | null;
+  let item = getItem(id) as MapItem | null;
   if (!item) return;
+  // Said before indexing it: a map whose country brings search files is indexed lighter (places.ts).
+  const bundledSearch = item.meta.role === 'region' && bringsSearchFiles(item);
+  if (!!item.meta.bundledSearch !== bundledSearch) {
+    item = { ...item, meta: { ...item.meta, bundledSearch } };
+    upsertItem(item);
+  }
   invalidateIndex(item);
   indexDetailAroundUser();
   // The new region's emergency points (needs the connection the download just used),

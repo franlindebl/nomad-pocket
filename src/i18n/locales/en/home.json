@@ -77,6 +77,7 @@
     "mapStale": "Over 6 months old: update it while you're online",
     "mapTodo": "Download it: streets, routes and hospitals offline",
     "downloading": "Downloading… {{pct}}%",
+    "preparing": "Preparing search and points… {{pct}}%",
     "guides": "Survival guides",
     "guidesDone": "{{count}} of {{total}} guides",
     "guidesTodo": "First aid, medicine, water and food",

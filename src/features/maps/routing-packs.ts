@@ -227,7 +227,7 @@ function importPackSide(packId: string, side: SideFile, landed = false) {
   const item = routePackId(packId);
   // Streets, places and addresses are 100+ MB for a big country: read in blocks.
   const run = { pois: storeEmergencyPointsFile, streets: indexPackStreets, places: indexPackPlaces, addresses: indexPackAddresses }[side];
-  void importSideFile('route', sideName(packId, side), item, (file) => run(item, file), landed);
+  void importSideFile('route', sideName(packId, side), item, (file, onProgress) => run(item, file, onProgress), landed);
 }
 
 const assembling = new Set<string>();

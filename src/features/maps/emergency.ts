@@ -8,7 +8,7 @@ import type { File } from 'expo-file-system';
 import { getLocales } from 'expo-localization';
 import { create } from 'zustand';
 
-import { indexDb } from '@/db';
+import { indexDb, indexDbAsync } from '@/db';
 import { getItem } from '@/features/content/items';
 import { useSettings } from '@/stores/settings';
 
@@ -26,6 +26,7 @@ import type { LatLon } from './geo';
 import { distanceMeters } from './geo';
 import { exclusive, forgetMapSource, indexEmergencyPoints } from './places';
 import type { PlaceRow } from './places-core';
+import { beginTask, endTask, updateTask } from './prepare';
 import { forEachLineBlock } from './side-files';
 import type { MapItem } from './useMapSources';
 
@@ -127,8 +128,7 @@ const controllers = new Map<string, AbortController>();
 /** Asked again while running (region re-downloaded or removed and added back): run once more after. */
 const again = new Set<string>();
 
-/** Fetches (or refreshes) the emergency points of a map region. Needs a connection. */
-/** Rows per transaction: a country's points (300k for Spain) must not freeze the UI. */
+/** Points per statement: a country has 300k (Spain). */
 const STORE_BATCH = 5000;
 
 /**
@@ -141,9 +141,12 @@ export async function storeEmergencyPoints(source: string, pois: EmergencyPoi[])
   });
 }
 
-/** The same from a points file (Overpass TSV columns), read in blocks: a country's is tens of MB. */
-export async function storeEmergencyPointsFile(source: string, file: File) {
-  await storePoints(source, (put) => forEachLineBlock(file, (text) => put(parseOverpassTsv(text))));
+/**
+ * The same from a points file (Overpass TSV columns), read in blocks: a country's is tens of
+ * MB. Small ones: each is parsed in JS (the tags decide the kind), ~10k points.
+ */
+export async function storeEmergencyPointsFile(source: string, file: File, onProgress?: (done: number) => void) {
+  await storePoints(source, (put) => forEachLineBlock(file, (text) => put(parseOverpassTsv(text)), { blockBytes: 512 * 1024, onProgress }));
 }
 
 type Feed = (put: (pois: EmergencyPoi[]) => Promise<boolean>) => Promise<void>;
@@ -154,46 +157,41 @@ function storePoints(source: string, feed: Feed) {
 }
 
 /**
- * Writes the points `feed` hands over in transactions of STORE_BATCH with a yield in between.
- * Stops, leaving nothing behind, when the source's item is removed meanwhile (its removal
- * drops what was stored before).
+ * Writes the points `feed` hands over, STORE_BATCH at a time, as one statement each on the
+ * index file's background connection. Stops, leaving nothing behind, when the source's item is
+ * removed meanwhile (its removal drops what was stored before).
  */
 async function writePoints(source: string, feed: Feed) {
-  const d = indexDb();
-  const insert = d.prepareSync(
-    'INSERT OR REPLACE INTO map_pois (source, osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-  );
+  const d = indexDbAsync();
   const named: PlaceRow[] = [];
   let count = 0;
   let removed = false;
-  try {
-    d.runSync('DELETE FROM map_pois WHERE source = ?', source);
-    await feed(async (pois) => {
-      for (let i = 0; i < pois.length; i += STORE_BATCH) {
-        if (!getItem(source)) {
-          removed = true;
-          return false;
-        }
-        d.withTransactionSync(() => {
-          for (const p of pois.slice(i, i + STORE_BATCH)) {
-            insert.executeSync(source, p.osmId, p.kind, kindCategory(p.kind), p.name, p.operator, p.phone, p.openingHours, p.emergency, p.lat, p.lon);
-          }
-        });
-        await new Promise<void>((r) => setTimeout(r, 0));
+  await d.runAsync('DELETE FROM map_pois WHERE source = ?', source);
+  await feed(async (pois) => {
+    for (let i = 0; i < pois.length; i += STORE_BATCH) {
+      if (!getItem(source)) {
+        removed = true;
+        return false;
       }
-      for (const p of pois) if (p.name) named.push({ layer: 'poi', kind: p.kind, name: p.name, names: p.name, lat: p.lat, lon: p.lon, rank: 13 });
-      count += pois.length;
-      return true;
-    });
-  } finally {
-    insert.finalizeSync();
-  }
+      const rows = pois
+        .slice(i, i + STORE_BATCH)
+        .map((p) => [p.osmId, p.kind, kindCategory(p.kind), p.name, p.operator, p.phone, p.openingHours, p.emergency, p.lat, p.lon]);
+      await d.runAsync(
+        `INSERT OR REPLACE INTO map_pois (source, osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon)
+         SELECT $source, value->>0, value->>1, value->>2, value->>3, value->>4, value->>5, value->>6, value->>7, value->>8, value->>9 FROM json_each($json)`,
+        { $source: source, $json: JSON.stringify(rows) },
+      );
+    }
+    for (const p of pois) if (p.name) named.push({ layer: 'poi', kind: p.kind, name: p.name, names: p.name, lat: p.lat, lon: p.lon, rank: 13 });
+    count += pois.length;
+    return true;
+  });
   if (removed || !getItem(source)) {
     forgetMapSource(source);
     return;
   }
   indexEmergencyPoints(source, named);
-  d.runSync(
+  indexDb().runSync(
     `INSERT INTO map_sources (item_id, pois_at, pois_count) VALUES (?, ?, ?)
      ON CONFLICT(item_id) DO UPDATE SET pois_at = excluded.pois_at, pois_count = excluded.pois_count`,
     source,
@@ -203,6 +201,7 @@ async function writePoints(source: string, feed: Feed) {
   usePoiSync.setState((st) => ({ version: st.version + 1 }));
 }
 
+/** Fetches (or refreshes) the emergency points of a map region. Needs a connection. */
 export async function syncEmergencyPoints(item: MapItem): Promise<void> {
   if (item.meta.role === 'world') return;
   if (controllers.has(item.id)) {
@@ -213,11 +212,14 @@ export async function syncEmergencyPoints(item: MapItem): Promise<void> {
   controllers.set(item.id, ctrl);
   const cells = splitBBox(item.meta.bbox, CELL_DEGREES);
   setState(item.id, { status: 'running', done: 0, total: cells.length });
+  // Part of getting the map ready (prepare.ts): a cell takes about as long as a few MB of import.
+  beginTask(item.id, 'pois', cells.length * 5_000_000);
   try {
     const byId = new Map<string, EmergencyPoi>();
     for (let i = 0; i < cells.length; i++) {
       for (const p of await fetchCell(cells[i], ctrl.signal)) byId.set(p.osmId, p);
       setState(item.id, { status: 'running', done: i + 1, total: cells.length });
+      updateTask(item.id, 'pois', (i + 1) / cells.length);
     }
     // Removed while the last cell was in flight: store nothing for it.
     if (ctrl.signal.aborted) throw new AbortedError();
@@ -228,6 +230,7 @@ export async function syncEmergencyPoints(item: MapItem): Promise<void> {
     else setState(item.id, { status: 'failed', error: String((e as Error)?.message ?? e) });
   } finally {
     controllers.delete(item.id);
+    endTask(item.id, 'pois');
     if (again.delete(item.id)) {
       const fresh = getItem(item.id) as MapItem | null;
       if (fresh) syncEmergencyPoints(fresh).catch(() => {});
