@@ -266,6 +266,16 @@ and storage, Credits & licences, data out of the Files app, re-downloadable data
 auto-stop, translated permission prompt) and multi-pack countries (the USA). Smoke E2E 21/21 on an
 iOS 27 simulator; tagged `v1.1.0-13` (GPL section 6).
 
+### 2026-10-27 — Maps: ask for the location and start on the user
+
+Owner on the iPhone: the Maps tab opened where the map was left (or on the first country),
+search measured distances from that centre, and the location prompt only came with "show my
+location". Now the first time the map is in front in a session it asks (if undetermined) and
+flies to the user, unless they moved the map, opened a place or set a trip meanwhile. Checked on
+the simulator (prompt on opening Maps, then the map on the simulated position) and the maps
+E2E folder: 13/14; map-04 failed only because that ad-hoc build read the live catalogs (San
+Marino now has a pack), not the suite's local ones.
+
 ### 2026-10-27 — Routing packs for the whole world published; README coverage
 
 - Runs 40407657017 (am ag fr ioa je rw) and 40417397392 (de, with the dated-extract fallback

@@ -793,6 +793,10 @@ compass only runs while the Maps tab is focused (`setMapFocused`, whose initial 
 tab's `isFocused()`). Distances on the place card only use a recent fix. Timings approved by the
 owner on 2026-10-26.
 
+**Location on open**: the first time the map comes to the front in a session it asks for the
+location (only while undetermined; the setup wizard never asks) and flies to the user, unless
+they panned, a place was opened or a trip is set meanwhile. Search ranks and measures from the
+map's centre, so it starts from the user too.
 **Map screen extras**: search pill (opens `maps/search`), red Emergencias FAB
 (`maps/emergency`, also from a Home card via `unstable_settings.initialRouteName`), GeoJSON
 layers for emergency points (category colours, labels from z15, tap → place card), the
