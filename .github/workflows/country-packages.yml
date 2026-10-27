@@ -8,8 +8,9 @@ name: Country packages
 #   2. its map (scripts/maps/build-country-map.sh): the Protomaps planet build cut by the
 #      country's outline at z15, with the same side files from Geofabrik when no pack
 #      brought them.
-# A country split in regions (packs.json "region": the USA) has one job per region instead,
-# each building that region's pack and map (docs/COUNTRY_REGIONS_PLAN.md).
+# A country split in regions has one job per region instead (docs/COUNTRY_REGIONS_PLAN.md):
+# each building that region's pack and map (packs.json "region": the USA), or only its map
+# (scripts/maps/map-regions.json: Canada, Russia, whose country job then builds just the pack).
 # Publishes the two catalogs the app reads, in their formats: routing-index/routing-manifest.json
 # (files in `routing-<date>-<run id>`) and maps-index/maps-manifest.json (files in
 # `maps-<date>-<run id>-<continent>`: GitHub stops at 1000 assets per release). Each index is
@@ -20,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       countries:
-        description: 'Country ids from src/features/maps/regions.json, or region ids from scripts/routing/packs.json (us-west), space separated (empty: all)'
+        description: 'Country ids from src/features/maps/regions.json, or region ids from scripts/routing/packs.json (us-west) or scripts/maps/map-regions.json (ca-ontario), space separated (empty: all)'
         required: false
         default: ''
       parts:
@@ -61,12 +62,12 @@ jobs:
           INPUT: ${{ github.event.inputs.countries }}
         run: |
           # Antarctica has no roads or towns worth a download. A region of a split country
-          # (packs.json "region") can be asked for alone: "us-alaska".
-          countries=$(python3 -I -c 'import json, sys; all = [r["id"] for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["type"] == "country" and r["continent"] != "antarctica"]; regions = [k for k, v in json.load(open("scripts/routing/packs.json"))["countries"].items() if "region" in v]; want = sys.argv[1].split(); bad = [c for c in want if c not in all and c not in regions]; sys.exit(f"unknown: {bad}") if bad else print(json.dumps(want or all))' "$INPUT")
+          # (packs.json "region", map-regions.json) can be asked for alone: "us-alaska".
+          countries=$(python3 -I -c 'import json, sys; all = [r["id"] for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["type"] == "country" and r["continent"] != "antarctica"]; regions = [k for k, v in json.load(open("scripts/routing/packs.json"))["countries"].items() if "region" in v] + list(json.load(open("scripts/maps/map-regions.json"))["regions"]); want = sys.argv[1].split(); bad = [c for c in want if c not in all and c not in regions]; sys.exit(f"unknown: {bad}") if bad else print(json.dumps(want or all))' "$INPUT")
           echo "countries=$countries" >> "$GITHUB_OUTPUT"
-          # One job per country, plus one per regional pack of a country split in several
-          # (packs.json "region": us-west, us-south…): each builds in its own job.
-          echo "jobs=$(python3 -I -c 'import json, sys; want = json.loads(sys.argv[1]); packs = json.load(open("scripts/routing/packs.json"))["countries"]; print(json.dumps(want + [k for k, v in packs.items() if v.get("region") in want and k not in want]))' "$countries")" >> "$GITHUB_OUTPUT"
+          # One job per country, plus one per region of a country split in several (packs.json
+          # "region": us-west, us-south…; map-regions.json: ca-ontario…): each in its own job.
+          echo "jobs=$(python3 -I -c 'import json, sys; want = json.loads(sys.argv[1]); packs = json.load(open("scripts/routing/packs.json"))["countries"]; maps = json.load(open("scripts/maps/map-regions.json"))["regions"]; print(json.dumps(want + [k for k, v in packs.items() if v.get("region") in want and k not in want] + [k for k, v in maps.items() if v["country"] in want and k not in want]))' "$countries")" >> "$GITHUB_OUTPUT"
           # One stamp per run: a re-run never replaces files a live catalog points at.
           echo "stamp=$(date -u +%Y%m%d)-${{ github.run_id }}" >> "$GITHUB_OUTPUT"
           # Every map of a run comes from the same planet build.
@@ -81,7 +82,7 @@ jobs:
           want() { [[ "$PARTS" == all || "$PARTS" == "$1" ]]; }
           # One release per continent, for routing packs too: GitHub stops at 1000 assets per release.
           continents() { # <countries json> <only those with a routing pack: 1|0>
-            python3 -I -c 'import json, sys; packs = json.load(open("scripts/routing/packs.json"))["countries"]; want = {packs.get(c, {}).get("region", c) for c in json.loads(sys.argv[1])}; routed = set(packs) | {v["region"] for v in packs.values() if "region" in v}; print(" ".join(sorted({r["continent"] for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["id"] in want and r["type"] == "country" and (sys.argv[2] == "0" or r["id"] in routed)})))' "$1" "$2"
+            python3 -I -c 'import json, sys; packs = json.load(open("scripts/routing/packs.json"))["countries"]; maps = json.load(open("scripts/maps/map-regions.json"))["regions"]; want = {maps[c]["country"] if c in maps else packs.get(c, {}).get("region", c) for c in json.loads(sys.argv[1])}; routed = set(packs) | {v["region"] for v in packs.values() if "region" in v}; print(" ".join(sorted({r["continent"] for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["id"] in want and r["type"] == "country" and (sys.argv[2] == "0" or r["id"] in routed)})))' "$1" "$2"
           }
           if want routing; then
             for c in $(continents "$COUNTRIES" 1); do
@@ -121,17 +122,19 @@ jobs:
         run: |
           # A job is a country (its map, and its routing pack if packs.json lists one under
           # its id) or a region of a split country ("us-west": its routing pack and its map;
-          # the country itself then has no whole map).
+          # "ca-ontario": its map only, the country's job building the one pack). A split
+          # country has no whole map.
           python3 -I - >> "$GITHUB_OUTPUT" <<'PY'
           import json, os
           job, parts = os.environ["COUNTRY"], os.environ["PARTS"]
           packs = json.load(open("scripts/routing/packs.json"))["countries"]
+          maps = json.load(open("scripts/maps/map-regions.json"))["regions"]
           regions = {r["id"]: r for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["type"] == "country"}
           is_country = job in regions
-          split = any(p.get("region") == job for p in packs.values())
+          split = any(p.get("region") == job for p in packs.values()) or any(m["country"] == job for m in maps.values())
           print(f"routing={'true' if job in packs and parts in ('all', 'routing') else 'false'}")
           print(f"maps={'true' if (not is_country or not split) and parts != 'routing' else 'false'}")
-          print(f"continent={regions[job if is_country else packs[job]['region']]['continent']}")
+          print(f"continent={regions[job if is_country else maps[job]['country'] if job in maps else packs[job]['region']]['continent']}")
           PY
       - name: Disk and tools
         # A hung apt mirror once held ag, fr and je here for the job's whole 6 h.
@@ -254,7 +257,7 @@ jobs:
           fi
           python3 -I scripts/maps/maps-manifest.py merge "maps-$STAMP" fragments/maps/*.maps.json > maps-manifest.json
           if [ -f previous/maps-manifest.json ]; then
-            python3 -I scripts/maps/maps-manifest.py carry previous/maps-manifest.json maps-manifest.json src/features/maps/regions.json scripts/routing/packs.json > merged.json
+            python3 -I scripts/maps/maps-manifest.py carry previous/maps-manifest.json maps-manifest.json src/features/maps/regions.json scripts/routing/packs.json scripts/maps/map-regions.json > merged.json
             mv merged.json maps-manifest.json
           fi
           has_release maps-index || gh release create maps-index --prerelease \

@@ -345,6 +345,8 @@
     "routingUnknown": "No se ha podido comprobar sin conexión. Vuelve a intentarlo cuando tengas internet.",
     "regionsTitle": "Regiones",
     "regionsBody": "Cada región trae su mapa, su navegación y sus puntos de emergencia. Descarga la tuya y añade otras cuando quieras.",
+    "regionsBodyShared": "Cada región trae su mapa con el máximo detalle. La navegación, la búsqueda y los puntos de emergencia de todo {{name}} ({{size}}) vienen con la primera región, así que las rutas de una región a otra funcionan.",
+    "regionsBodySharedIn": "Cada región trae su mapa con el máximo detalle. La navegación, la búsqueda y los puntos de emergencia de todo {{name}} ya están en el teléfono.",
     "allRegions": "Todo {{name}}",
     "onPhone": "En el móvil",
     "chooseRegion": "Elige al menos una región",
@@ -375,6 +377,62 @@
     "us-hawaii": {
       "name": "Hawái",
       "states": ""
+    },
+    "ca-bc-yukon": {
+      "name": "Columbia Británica y Yukón",
+      "states": "Vancouver, Victoria, Kelowna y Whitehorse"
+    },
+    "ca-prairies": {
+      "name": "Praderas",
+      "states": "Alberta, Saskatchewan y Manitoba"
+    },
+    "ca-ontario": {
+      "name": "Ontario",
+      "states": ""
+    },
+    "ca-quebec": {
+      "name": "Quebec",
+      "states": ""
+    },
+    "ca-atlantic": {
+      "name": "Atlántico",
+      "states": "Nuevo Brunswick, Nueva Escocia, Isla del Príncipe Eduardo y Terranova y Labrador"
+    },
+    "ca-nwt": {
+      "name": "Territorios del Noroeste",
+      "states": ""
+    },
+    "ca-nunavut": {
+      "name": "Nunavut",
+      "states": ""
+    },
+    "ru-central": {
+      "name": "Centro",
+      "states": "Moscú, Vorónezh, Yaroslavl, Tula, Riazán y Smolensk"
+    },
+    "ru-northwest": {
+      "name": "Noroeste",
+      "states": "San Petersburgo, Kaliningrado, Múrmansk, Arcángel y Carelia"
+    },
+    "ru-south": {
+      "name": "Sur",
+      "states": "Rostov del Don, Krasnodar, Sochi, Volgogrado, Astracán y el Cáucaso Norte"
+    },
+    "ru-volga": {
+      "name": "Volga",
+      "states": "Nizhni Nóvgorod, Kazán, Samara, Ufá, Perm y Sarátov"
+    },
+    "ru-ural": {
+      "name": "Urales",
+      "states": "Ekaterimburgo, Cheliábinsk, Tiumén y Surgut"
+    },
+    "ru-siberia": {
+      "name": "Siberia",
+      "states": "Novosibirsk, Omsk, Krasnoyarsk, Irkutsk y Barnaúl"
+    },
+    "ru-far-east": {
+      "name": "Lejano Oriente",
+      "states": "Vladivostok, Jabárovsk, Yakutsk, Kamchatka y Sajalín"
     }
   }
 }

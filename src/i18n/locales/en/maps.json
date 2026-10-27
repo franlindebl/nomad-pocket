@@ -345,6 +345,8 @@
     "routingUnknown": "Couldn't check while offline. Try again once you're online.",
     "regionsTitle": "Regions",
     "regionsBody": "Each region brings its map, its navigation and its emergency points. Download yours and add others any time.",
+    "regionsBodyShared": "Each region brings its map at full detail. Navigation, search and emergency points for all of {{name}} ({{size}}) come with the first region, so routes from one region to another work.",
+    "regionsBodySharedIn": "Each region brings its map at full detail. Navigation, search and emergency points for all of {{name}} are already on the phone.",
     "allRegions": "All of {{name}}",
     "onPhone": "On this phone",
     "chooseRegion": "Choose at least one region",
@@ -375,6 +377,62 @@
     "us-hawaii": {
       "name": "Hawaii",
       "states": ""
+    },
+    "ca-bc-yukon": {
+      "name": "British Columbia and Yukon",
+      "states": "Vancouver, Victoria, Kelowna and Whitehorse"
+    },
+    "ca-prairies": {
+      "name": "Prairies",
+      "states": "Alberta, Saskatchewan and Manitoba"
+    },
+    "ca-ontario": {
+      "name": "Ontario",
+      "states": ""
+    },
+    "ca-quebec": {
+      "name": "Quebec",
+      "states": ""
+    },
+    "ca-atlantic": {
+      "name": "Atlantic",
+      "states": "New Brunswick, Nova Scotia, Prince Edward Island and Newfoundland and Labrador"
+    },
+    "ca-nwt": {
+      "name": "Northwest Territories",
+      "states": ""
+    },
+    "ca-nunavut": {
+      "name": "Nunavut",
+      "states": ""
+    },
+    "ru-central": {
+      "name": "Central",
+      "states": "Moscow, Voronezh, Yaroslavl, Tula, Ryazan and Smolensk"
+    },
+    "ru-northwest": {
+      "name": "Northwest",
+      "states": "Saint Petersburg, Kaliningrad, Murmansk, Arkhangelsk and Karelia"
+    },
+    "ru-south": {
+      "name": "South",
+      "states": "Rostov-on-Don, Krasnodar, Sochi, Volgograd, Astrakhan and the North Caucasus"
+    },
+    "ru-volga": {
+      "name": "Volga",
+      "states": "Nizhny Novgorod, Kazan, Samara, Ufa, Perm and Saratov"
+    },
+    "ru-ural": {
+      "name": "Urals",
+      "states": "Yekaterinburg, Chelyabinsk, Tyumen and Surgut"
+    },
+    "ru-siberia": {
+      "name": "Siberia",
+      "states": "Novosibirsk, Omsk, Krasnoyarsk, Irkutsk and Barnaul"
+    },
+    "ru-far-east": {
+      "name": "Far East",
+      "states": "Vladivostok, Khabarovsk, Yakutsk, Kamchatka and Sakhalin"
     }
   }
 }

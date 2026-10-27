@@ -26,7 +26,7 @@ can pick up without re-deriving anything.
 | UX redesign: survival kit (`docs/UX_SURVIVAL_PLAN.md`): onboarding country + kit, Home "En una emergencia" + "Tu preparación", 4 tabs, maps by country, bundled world map, simpler settings | done — iOS sim (E2E smoke + full), Android spot check; build 11; country maps CI first run 2026-10-26 |
 | ZIM library + reader (search, TOC, bookmarks, history, find, text size, dark mode) | done — iOS + Android |
 | Courses (14 courses, syllabus with fallbacks, progress; inside Library since the redesign) | done |
-| Maps (country downloads: prebuilt z15 map + routing pack + points; the USA by regions; on-device extraction as fallback; bundled world map; markers, GPS, multi-script labels; location asked on opening Maps) | done — iOS sim (Andorra and US regions, local catalogs); build 16 |
+| Maps (country downloads: prebuilt z15 map + routing pack + points; the USA by regions; Canada and Russia by regions for the map with one national pack; on-device extraction as fallback; bundled world map; markers, GPS, multi-script labels; location asked on opening Maps) | done — iOS sim (Andorra and US regions, local catalogs); build 16. Canada/Russia regions: code ready 2026-10-27, waiting for a build and a maps run (`docs/COUNTRY_REGIONS_PLAN.md`) |
 | Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
 | Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 237 packs live (every inhabited country; the USA in six regions) since 2026-10-27; E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
@@ -119,9 +119,17 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
      assets); (3) admin boundaries without Overpass (it often refuses GitHub runners: 502/504;
      `build-country.sh` step 2 takes any OSM file of the level-2/4 relations; reruns have
      always worked so far).
-   - **Deferred by decision**: routes across packs (between regions or countries: a straight
-     line today; stitching is a separate project); Canada and Russia in regions (would go z15;
-     whole they fit: 10.8 and 11.6 GB); bundled quick cards (first aid, water, radio; owner
+   - **Canada and Russia by regions** (owner, 2026-10-27, option B of `docs/COUNTRY_REGIONS_PLAN.md`):
+     seven map regions each at z15, routing pack and side files whole for the country (they come
+     with the first region, so routes between regions work); Crimea inside `ru-south` with no name
+     of its own. Code ready (CI `scripts/maps/map-regions.json`, app `CountryOffer.common`).
+     Checked on the simulator with a local catalog (two Canadian regions, a stand-in pack).
+     **Next**: a TestFlight build with it, then
+     `gh workflow run country-packages.yml -f countries="ca ru" -f parts=maps` (never before that
+     build: builds 16–19 would show region ids and download regions without routing).
+   - **Deferred by decision**: routes across packs (between US regions or countries: a straight
+     line today). Owner wants them later, ideally by joining the pieces: analysis and proposal
+     (one Valhalla graph, packs as tile subsets of it) in `docs/ROUTING_ACROSS_PACKS.md`; bundled quick cards (first aid, water, radio; owner
      reviews medical content first), emergency numbers per country.
    - **CI notes**: a failed country is relaunched alone with `gh workflow run
      country-packages.yml -f countries="<ids>" -f parts=routing|maps` (region ids work too:
@@ -220,6 +228,36 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-27 — Maps: Canada and Russia by regions for the map, one routing pack for the country
+
+Canada and Russia were the last maps below z15: whole at z15 they are 16 and 13 GB, over the
+10 GB cap, so the script took z14 (8.4 and 6.9 GB). Measured every province and federal district
+with pmtiles dry runs (build 20261026) and proposed two splits; the owner took option B: each
+region is its own z15 map, the routing pack and its side files stay whole for the country and
+come with the first region. Routes between regions keep working (Moscow–Saint Petersburg,
+Toronto–Montreal), unlike the USA, whose national pack would be ~21 GB. Regions: Canada
+`ca-bc-yukon` 2.2, `ca-prairies` 1.9, `ca-ontario` 2.0, `ca-quebec` 2.5, `ca-atlantic` 1.0,
+`ca-nwt` 1.6, `ca-nunavut` 4.8 GB; Russia `ru-central` 1.9, `ru-northwest` 2.4, `ru-south` 1.1
+(North Caucasus and Crimea, which Natural Earth puts in Russia, inside it with no name of its own:
+owner's call), `ru-volga` 2.1, `ru-ural` 1.3, `ru-siberia` 2.4, `ru-far-east` 2.1 GB. A typical
+download goes from 11–12 GB at z14 to ~4.4 GB (Toronto) or ~6.5 GB (Moscow) at z15.
+
+- CI: `scripts/maps/map-regions.json` lists them; `build-country-map.sh` cuts a region by the union
+  of its Geofabrik polygons (`region-outline.py` now takes several and writes the outline's 1° cells
+  into the map's catalog entry); the workflow builds the country's pack in its own job and one map
+  job per region; `maps-manifest.py carry` keeps them. `ru-south` and `us-hawaii` built locally end
+  to end (USA unchanged: Hawaii 32 MB at z15, as published).
+- App: `countryWidePacks` (country-core, tested) and `CountryOffer.common`: the national pack comes
+  with any region and goes with the last; `partAt` uses the map's outline cells (Ottawa is in both
+  Ontario's and Quebec's bboxes); the region list explains what comes with the first region, the
+  straight-line note is hidden for these countries; region names in es and en. Checked on the iOS
+  simulator (Release) against a local catalog: Ontario ticked from Toronto in the onboarding kit,
+  map + national pack downloaded, Quebec then costs only its map, deleting the last region removes
+  the pack too.
+- Future: the owner wants routes across packs (US regions, countries). `docs/ROUTING_ACROSS_PACKS.md`
+  explains why today's packs can't be joined on the phone (separate Valhalla builds, ids don't
+  match at the seams) and proposes one graph cut into tile subsets, with a spike to measure it.
 
 ### 2026-10-27 — Release: 1.1.0 build 19 to TestFlight
 

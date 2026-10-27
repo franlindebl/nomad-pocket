@@ -14,7 +14,19 @@ import i18n from '@/i18n';
 import { HttpError } from '@/lib/pmtiles';
 import { fileSize, hasRoomFor } from '@/lib/storage';
 
-import { countryNeed, countryOfGroup, countryParts, isNewer, packOutdated, partAt, pendingBytes, routePacksFor, type CountryMap, type CountryPart } from './country-core';
+import {
+  countryNeed,
+  countryOfGroup,
+  countryParts,
+  countryWidePacks,
+  isNewer,
+  packOutdated,
+  partAt,
+  pendingBytes,
+  routePacksFor,
+  type CountryMap,
+  type CountryPart,
+} from './country-core';
 import {
   abortCountryMap,
   countryDownloadGroup,
@@ -46,8 +58,13 @@ export type CountryOffer = {
   fallbackZoom: number;
   /** Routing packs (several for the USA); none where none is published yet (guidance is then a straight line). */
   packs: ManifestPack[];
-  /** A country downloaded region by region (the USA): its regions, each with its map and pack. */
+  /** A country downloaded region by region: its regions, each with its map and (the USA) its pack. */
   regions: CountryPart[] | null;
+  /**
+   * A country in regions for its map only (Canada, Russia): the whole country's pack, with its
+   * points, streets, places and house numbers, which comes with the first region. Else empty.
+   */
+  common: ManifestPack[];
 };
 
 /** Whether a country's points come with its routing packs (no Overpass, no map side files). */
@@ -58,13 +75,15 @@ function offer(regionId: string, maps: CountryMap[], packs: ManifestPack[]): Cou
   if (!region || region.type !== 'country') return null;
   const parts = countryParts(regionId, maps, packs);
   const split = parts.length > 1 || parts[0].id !== regionId;
+  const common = countryWidePacks(regionId, parts, packs);
   return {
     region,
     title: regionName(region, i18n.language),
     map: split ? null : parts[0].map,
     fallbackZoom: bestZoom(region.bbox),
-    packs: split ? parts.flatMap((p) => p.packs) : parts[0].packs,
+    packs: split ? [...common, ...parts.flatMap((p) => p.packs)] : parts[0].packs,
     regions: split ? parts : null,
+    common,
   };
 }
 
@@ -120,7 +139,8 @@ export function planCountry(o: CountryOffer, estimate?: Estimate, opts: { update
       const installed = getItem(mapItemId(p.id)) as MapItem | null;
       return p.map && maps && (!installed || (!!opts.update && isNewer(p.map.buildDate, installed.meta.buildDate))) ? [p.map] : [];
     });
-    const packs = routing ? parts.flatMap((p) => p.packs).filter((p) => packWanted(p, opts.update)) : [];
+    // The whole country's pack (Canada, Russia) comes with any region.
+    const packs = routing ? [...(parts.length ? o.common : []), ...parts.flatMap((p) => p.packs)].filter((p) => packWanted(p, opts.update)) : [];
     const need = countryNeed([...wanted.map(countryMapPlan), ...packs.map(packPlan)], pending);
     return { maps: wanted, extract: false, packs, bytes: need.bytes, needed: need.needed };
   }
@@ -180,9 +200,15 @@ export function useChosenRegions(o: CountryOffer | null, ask: boolean): string[]
   return chosen;
 }
 
-/** What each region of a country in regions still has to download (0: on the phone). */
+/** What the whole country's pack (Canada, Russia: CountryOffer.common) still has to download; 0 when there is none or it is in. */
+export function commonBytes(o: CountryOffer): number {
+  return useRoutingCatalog.getState().manifest ? countryNeed(o.common.filter((p) => packWanted(p)).map(packPlan)).bytes : 0;
+}
+
+/** What each region of a country in regions still has to download (0: on the phone), the whole country's pack aside (commonBytes). */
 export function regionBytes(o: CountryOffer): Record<string, number> {
-  return Object.fromEntries((o.regions ?? []).map((p) => [p.id, planCountry(o, undefined, { regions: [p.id] }).bytes]));
+  const common = commonBytes(o);
+  return Object.fromEntries((o.regions ?? []).map((p) => [p.id, Math.max(0, planCountry(o, undefined, { regions: [p.id] }).bytes - common)]));
 }
 
 /** Regions of a country whose downloads are queued, running or failed (a retry brings them). */
@@ -307,9 +333,9 @@ export function downloadCountry(o: CountryOffer, estimate?: Estimate, opts: { up
   const group = countryDownloadGroup(o.region.id);
   const queued: string[] = [];
   try {
-    // A region's points come with its pack; a region without one (none yet) asks Overpass.
-    for (const map of maps ? plan.maps : [])
-      queued.push(...downloadCountryMap(maps!, map, o.regions ? !!o.regions.find((p) => p.id === map.id)?.packs.some((x) => !!x.pois) : packsBringPoints(o), group));
+    // A region's points come with its pack or the whole country's (Canada); a region without one (none yet) asks Overpass.
+    const regionPoints = (id: string) => [...o.common, ...(o.regions?.find((p) => p.id === id)?.packs ?? [])].some((x) => !!x.pois);
+    for (const map of maps ? plan.maps : []) queued.push(...downloadCountryMap(maps!, map, o.regions ? regionPoints(map.id) : packsBringPoints(o), group));
     if (routing) for (const pack of plan.packs) queued.push(...downloadPack(routing, pack, group));
     if (opts.regions) useRegionChoice.getState().forget(o.region.id);
   } catch (e) {
@@ -525,7 +551,10 @@ export async function removeCountry(c: CountryState) {
 
 /** One region of a country in regions: cancels what is coming and deletes its map and pack (the last one takes the country). */
 export async function removeCountryRegion(c: CountryState, regionId: string) {
-  const part = countryOffer(c.regionId)?.regions?.find((p) => p.id === regionId);
+  const o = countryOffer(c.regionId);
+  // The last region takes the whole country's pack too (Canada, Russia).
+  if (o?.common.length && ![...installedRegions(o), ...regionsInFlight(o)].some((id) => id !== regionId)) return removeCountry(c);
+  const part = o?.regions?.find((p) => p.id === regionId);
   const packIds = new Set([regionId, ...(part?.packs.map((p) => p.id) ?? [])]);
   const records = countryRecords(c.regionId).filter(
     (r) => (r.meta.map as CountryMap | undefined)?.id === regionId || packIds.has((r.meta.pack as ManifestPack | undefined)?.id ?? ''),

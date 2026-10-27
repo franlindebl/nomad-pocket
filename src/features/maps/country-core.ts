@@ -1,7 +1,7 @@
 // Country downloads, the pure part: the country maps catalog (maps-manifest.json, written by
 // scripts/maps/maps-manifest.py) and which routing pack belongs to which country. A country
 // download is its map plus, where one exists, its routing pack (docs/UX_SURVIVAL_PLAN.md).
-import { covers, engineReads, LEGACY_PACK_VALHALLA, type ManifestFile, type ManifestPack } from './routing-core.ts';
+import { cellOf, covers, engineReads, LEGACY_PACK_VALHALLA, type ManifestFile, type ManifestPack } from './routing-core.ts';
 import type { LatLon } from './geo.ts';
 
 export type CountryMap = {
@@ -25,6 +25,8 @@ export type CountryMap = {
   /** Every named place, and every house number (places.ts indexPackPlaces / indexPackAddresses); same rule. */
   places?: ManifestFile | null;
   addresses?: ManifestFile | null;
+  /** A region's map: the 1° cells of its outline (routing-core cellOf), to tell where the person is. */
+  cells?: number[] | null;
 };
 
 export type MapsManifest = {
@@ -83,6 +85,7 @@ export function parseMapsManifest(json: string): MapsManifest | null {
       places: m.places ?? null,
       addresses: m.addresses ?? null,
       buildDate: String(m.buildDate ?? ''),
+      cells: Array.isArray(m.cells) && m.cells.every(Number.isFinite) ? m.cells : null,
     })),
   };
 }
@@ -114,8 +117,10 @@ export function routePacksFor<P extends Pick<ManifestPack, 'id' | 'regionId'>>(p
 
 /**
  * What a country download is made of: the whole country (`id` = the country's), or each
- * region of a country split in regions (the USA: us-west, us-alaska…), with its own map and
- * pack(s). A region's map has `id` = the region and `regionId` = the country.
+ * region of a country split in regions, with its own map and, for the USA (us-west,
+ * us-alaska…), its own pack(s). A region's map has `id` = the region and `regionId` = the
+ * country. Canada and Russia are split for their maps only (ca-ontario, ru-south…): their
+ * regions have no pack, the country's one comes with any of them (countryWidePacks).
  */
 export type CountryPart<M = CountryMap, P = ManifestPack> = { id: string; map: M | null; packs: P[] };
 
@@ -137,14 +142,36 @@ export function countryParts<M extends Pick<CountryMap, 'id' | 'regionId'>, P ex
   return ids.sort().map((id) => ({ id, map: regional.find((m) => m.id === id) ?? null, packs: packs.filter((p) => p.id === id) }));
 }
 
+/**
+ * The packs of a country split in regions that belong to none of them: the whole country's
+ * (Canada, Russia: their routing pack fits whole), so routes from one region to another work.
+ * They come with the first region and go with the last. None for the USA (a pack per region)
+ * or a country in one part.
+ */
+export function countryWidePacks<P extends Pick<ManifestPack, 'id' | 'regionId'>>(regionId: string, parts: CountryPart<unknown, P>[], packs: P[]): P[] {
+  if (parts.length === 1 && parts[0].id === regionId) return [];
+  const ids = new Set(parts.map((p) => p.id));
+  return routePacksFor(packs, regionId).filter((p) => !ids.has(p.id));
+}
+
 const inBox = (b: readonly number[], p: LatLon) => p.lon >= b[0] && p.lon <= b[2] && p.lat >= b[1] && p.lat <= b[3];
 
-/** The part a point is in: the one whose pack has roads there, else whose map covers it. */
-export function partAt<M extends Pick<CountryMap, 'bbox'>, P extends Pick<ManifestPack, 'bbox' | 'cells'>>(
+/**
+ * The part a point is in: the one whose pack has roads there, else whose map's outline
+ * touches its 1° cell (regions without a pack of their own: Canada, Russia), else whose map's
+ * bbox covers it (a catalog without cells).
+ */
+export function partAt<M extends Pick<CountryMap, 'bbox' | 'cells'>, P extends Pick<ManifestPack, 'bbox' | 'cells'>>(
   parts: CountryPart<M, P>[],
   p: LatLon,
 ): CountryPart<M, P> | null {
-  return parts.find((x) => x.packs.some((pack) => covers(pack, p))) ?? parts.find((x) => !!x.map && inBox(x.map.bbox, p)) ?? null;
+  const cell = cellOf(p);
+  return (
+    parts.find((x) => x.packs.some((pack) => covers(pack, p))) ??
+    parts.find((x) => !!x.map?.cells?.includes(cell)) ??
+    parts.find((x) => !!x.map && !x.map.cells?.length && inBox(x.map.bbox, p)) ??
+    null
+  );
 }
 
 // --- One download per country (map, pack and side files under one group) ------

@@ -10,9 +10,10 @@
 # places and house numbers from their Geofabrik extract, so a country download is complete
 # and never needs Overpass.
 #
-# A country split in regions (packs.json "region": us-west, us-alaska…) gets one map per
-# region instead, cut by the polygon its routing pack comes from (region-outline.py); that
-# pack brings its side files.
+# A country split in regions gets one map per region instead (region-outline.py): cut by the
+# polygon its routing pack comes from (packs.json "region": us-west, us-alaska…; that pack
+# brings its side files), or by the polygons map-regions.json lists (ca-ontario, ru-south…:
+# the country's one pack brings the side files of every region).
 #
 # Usage: scripts/maps/build-country-map.sh <country or region id> <work dir> <planet build url>
 # Needs pmtiles (go-pmtiles), curl, python3 with shapely; for the points, osmium-tool and pyosmium.
@@ -43,11 +44,17 @@ fetch() {
   return 1
 }
 
-# A region: its country and its Geofabrik extract ("north-america/us-west").
-read -r COUNTRY GEOFABRIK < <(python3 -I - "$ROOT/scripts/routing/packs.json" "$ID" <<'PY'
+# A region: its country and its Geofabrik extracts ("north-america/us-west"; several for
+# map-regions.json, whose country must have a pack of its own to bring the side files).
+read -r COUNTRY GEOFABRIK < <(python3 -I - "$ROOT/scripts/routing/packs.json" "$HERE/map-regions.json" "$ID" <<'PY'
 import json, sys
-p = json.load(open(sys.argv[1]))["countries"].get(sys.argv[2], {})
-print(p.get("region", sys.argv[2]), p.get("geofabrik", "") if "region" in p else "")
+packs = json.load(open(sys.argv[1]))["countries"]
+p = packs.get(sys.argv[3], {})
+m = json.load(open(sys.argv[2]))["regions"].get(sys.argv[3])
+if m and m["country"] not in packs:
+    sys.exit(f"{sys.argv[3]}: {m['country']} has no routing pack to bring its side files")
+g = m["geofabrik"] if m else p.get("geofabrik", "") if "region" in p else ""
+print(m["country"] if m else p.get("region", sys.argv[3]), ",".join(g if isinstance(g, list) else [g]))
 PY
 )
 BBOX="$(python3 -I - "$ROOT/src/features/maps/regions.json" "$COUNTRY" <<'PY'
@@ -76,8 +83,13 @@ if [[ "$NE_ACTUAL" != "$NE_SHA256" ]]; then
 fi
 REGION_STATUS=0
 if [[ -n "$GEOFABRIK" ]]; then
-  fetch "$WORK/src/$ID.poly" "https://download.geofabrik.de/$GEOFABRIK.poly"
-  REGION_BBOX="$(python3 -I "$HERE/region-outline.py" "$WORK/src/$ID.poly" "$NE" "$COUNTRY" "$WORK/src/$ID.geojson")" || REGION_STATUS=$?
+  POLYS=()
+  IFS=, read -r -a EXTRACTS <<< "$GEOFABRIK"
+  for i in "${!EXTRACTS[@]}"; do
+    fetch "$WORK/src/$ID.$i.poly" "https://download.geofabrik.de/${EXTRACTS[$i]}.poly"
+    POLYS+=("$WORK/src/$ID.$i.poly")
+  done
+  REGION_BBOX="$(python3 -I "$HERE/region-outline.py" "$NE" "$COUNTRY" "$WORK/src/$ID.geojson" "${POLYS[@]}")" || REGION_STATUS=$?
   (( REGION_STATUS == 0 )) || { log "region-outline.py failed ($REGION_STATUS)"; exit 1; }
 else
   REGION_BBOX="$(python3 -I "$HERE/country-region.py" "$ID" "$NE" "$WORK/src/$ID.geojson")" || REGION_STATUS=$?
@@ -98,7 +110,7 @@ fi
 #    country. Before the map, so the extract is gone when the map needs the disk (~14 GB
 #    on a runner). Countries with no Geofabrik extract of their own (Vatican, small
 #    islands) get none: the app then asks Overpass for their points by itself.
-if [[ "${SKIP_POINTS:-}" != "1" ]] && ! python3 -I - "$ROOT/scripts/routing/packs.json" "$ID" <<'PY'
+if [[ "${SKIP_POINTS:-}" != "1" ]] && ! python3 -I - "$ROOT/scripts/routing/packs.json" "$ID" "$COUNTRY" <<'PY'
 import json, sys
 # A pack of its own, or one whose extract covers the whole country (routePacksFor in
 # src/features/maps/country-core.ts). Not the UK: `ie` lists GB for Northern Ireland only.
@@ -106,7 +118,8 @@ SHARED = {"ht": "do"}
 packs = json.load(open(sys.argv[1]))["countries"]
 # Or packs of its own regions (the USA: us-west, us-south…, "region": "us").
 regional = any(p.get("region") == sys.argv[2] for p in packs.values())
-sys.exit(0 if sys.argv[2] in packs or SHARED.get(sys.argv[2]) in packs or regional else 1)
+# A region of map-regions.json (ca-ontario): its country's pack.
+sys.exit(0 if sys.argv[2] in packs or sys.argv[3] in packs or SHARED.get(sys.argv[2]) in packs or regional else 1)
 PY
 then
   INDEX="$WORK/src/geofabrik-index.json"
@@ -235,5 +248,8 @@ os.rename(path, f"{path}.part00")
 PY
 fi
 
-python3 -I "$HERE/maps-manifest.py" fragment "$OUT" "$ID" "$BUILD_DATE" "$ZOOM" "$BBOX" "$COUNTRY" > "$OUT/$ID.maps.json"
+# A region's map carries the 1° cells of its outline (where the person is: country-core.ts partAt).
+OUTLINE=()
+[[ -n "$GEOFABRIK" ]] && OUTLINE=("$WORK/src/$ID.geojson")
+python3 -I "$HERE/maps-manifest.py" fragment "$OUT" "$ID" "$BUILD_DATE" "$ZOOM" "$BBOX" "$COUNTRY" ${OUTLINE[@]+"${OUTLINE[@]}"} > "$OUT/$ID.maps.json"
 log "done"
