@@ -26,9 +26,9 @@ can pick up without re-deriving anything.
 | UX redesign: survival kit (`docs/UX_SURVIVAL_PLAN.md`): onboarding country + kit, Home "En una emergencia" + "Tu preparación", 4 tabs, maps by country, bundled world map, simpler settings | done — iOS sim (E2E smoke + full), Android spot check; build 11; country maps CI first run 2026-10-26 |
 | ZIM library + reader (search, TOC, bookmarks, history, find, text size, dark mode) | done — iOS + Android |
 | Courses (14 courses, syllabus with fallbacks, progress; inside Library since the redesign) | done |
-| Maps (country downloads: prebuilt z15 map + routing pack + points; on-device extraction as fallback; bundled world map; markers, GPS, multi-script labels) | done — iOS sim (Andorra, local catalog) |
+| Maps (country downloads: prebuilt z15 map + routing pack + points; the USA by regions; on-device extraction as fallback; bundled world map; markers, GPS, multi-script labels; location asked on opening Maps) | done — iOS sim (Andorra and US regions, local catalogs); build 16 |
 | Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
-| Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 60 whole-country packs live since 2026-10-25 (Europe + Latin America up to Spain's size; more countries in the 2026-10-26 full run); E2E vs the live catalog on iOS + Android |
+| Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 237 packs live (every inhabited country; the USA in six regions) since 2026-10-27; E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
 | Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
@@ -100,41 +100,39 @@ A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check
      iPad width of the new screens (Credits, onboarding); a real GGUF backgrounded mid-load/search;
      Apple FM error codes translated; the Maestro suite on the merged branch.
 
-U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owner approved
-   2026-10-26); TestFlight 1.1.0 build 11 = ebafcdd, build 12 (country as one download, friendlier
-   errors, "couldn't check" vs "no navigation") on TestFlight. State at 2026-10-26 10:45 UTC, in order:
-   1. **CI full run** `country-packages.yml` run 40289348691 (all 241 countries, parts=all,
-      started 08:00 UTC, ~55 countries/h): 157 ok, 1 failed (`us`), 83 left; it publishes
-      routing-index + maps-index at the end (~12:30 UTC). Check: `gh run view 40289348691`;
-      then spot-check the manifests (packs keep places/addresses; maps per continent release).
-   2. **US failed** (since addressed by a088642 and d430791: the USA's points are read state by state and a
-      country can have several routing packs; confirm in the next full run): the runner shut down while `build-country-map.sh` processed Geofabrik's
-      11 GB `us` extract (side files; likely OOM in pyosmium with node locations, 16 GB
-      runner). Plan: for extracts above ~4 GB use Geofabrik's sub-regions (us-west,
-      us-midwest, us-northeast, us-south, …), build side files per part and concatenate the
-      TSVs (or skip side files and let the app use Overpass); then re-run
-      `gh workflow run country-packages.yml -f countries="us" -f parts=maps`. Same for `ru`,
-      `ca` or others if they fail.
-   3. Owner: test build 11 on a real iPhone (onboarding kit, Spain ≈4.8 GB, assembly of a
-      multi-GB map, places/addresses import, Emergencias offline). This Mac is sometimes behind
-      a TLS-intercepting corporate proxy: simulators/emulators then fail
-      on protomaps.dev / Kiwix with TLS errors — the network, not the app.
-   4. Follow-ups: bundled quick cards (first aid, water, radio; owner reviews medical
-      content first), emergency numbers per country, updating an installed routing pack to a
-      newer build (maps already offer "Hay un mapa más reciente"), Hawaii (islands > 10° from
-      the rest are outside the US outline), measure on a phone.
+U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNTRY_REGIONS_PLAN.md`):
+   done and live. State at 2026-10-27 (resume point for the "rediseño" session, which also owns
+   `scripts/routing/*` and `scripts/maps/*` since the "navegador nomad" session closed):
+   - **Catalogs**: maps-index 246 maps (every country of regions.json at z15 except Canada and
+     Russia at z14; the USA as six regional maps at z15); routing-index 237 packs (every country
+     but `pm` and uninhabited territories: atc gs hm io kas pn tf; `ht` uses `do`; the USA as
+     us-west, us-midwest, us-northeast, us-south, us-alaska, us-hawaii). Every part and side file
+     checked in its release on 2026-10-27.
+   - **Owner, on a real iPhone with build 16**: (1) a US region end to end (Northeast, 5.5 GB:
+     sheet → region list → download → Tus mapas "Noreste"); (2) Spain from a fresh install (build
+     14 was killed while "Preparando"; build 16 copies and hashes natively, modules/nomad-files);
+     (3) big side-file imports (Germany's 780 MB of house numbers, ~450 MB per US region).
+   - **Agent, when asked**: (1) E2E flow for a country in regions (local catalog with Andorra
+     split in two regions: tick, download, delete; testIDs in docs/E2E.md); (2) watch the monthly
+     run on 2026-11-05, the first full one with regions, the CI hardening and the retries
+     (`gh run list --workflow country-packages.yml`; then spot-check both catalogs and their
+     assets); (3) admin boundaries without Overpass (it often refuses GitHub runners: 502/504;
+     `build-country.sh` step 2 takes any OSM file of the level-2/4 relations; reruns have
+     always worked so far).
+   - **Deferred by decision**: routes across packs (between regions or countries: a straight
+     line today; stitching is a separate project); Canada and Russia in regions (would go z15;
+     whole they fit: 10.8 and 11.6 GB); bundled quick cards (first aid, water, radio; owner
+     reviews medical content first), emergency numbers per country.
+   - **CI notes**: a failed country is relaunched alone with `gh workflow run
+     country-packages.yml -f countries="<ids>" -f parts=routing|maps` (region ids work too:
+     `us-alaska`); the `country-packages` concurrency group queues runs; this Mac's corporate VPN
+     breaks TLS to Protomaps/Kiwix/Overpass from simulators (E2E `map-04`, `map-13`), and `map-04`
+     needs another server-tagged flow in the same run for its local catalogs.
 
-0. Routing packs for the whole world (232 countries, all but the USA) are in `packs.json`
-   since 2026-10-26, waiting for a run. Before: 60 whole-country packs live since 2026-10-25 (20.6 GB, with street
-   names for search): Spain (incl. Canarias), Portugal, Andorra and 57 more countries of
-   Europe and Latin America (every one whose Geofabrik extract is ≤ Spain's). E2E against the live catalog passes on iOS
-   (`map-16-routing-github`) and Android (`android-05-routing`). Next, step 4 of the
-   coverage roadmap in `docs/MAPS_NAVIGATION_PLAN.md`: Brazil, Poland, Italy, UK,
-   Germany, France, Russia need sub-country packs (no subdivisions in `regions.json`
-   except Spain and the USA), then the rest of the world.
-   Measure on a real phone: route time/memory, assembling Spain (2.2 GB, JS copy), mmap of
-   a 2 GB tar on iOS (may need `com.apple.developer.kernel.extended-virtual-addressing`).
-   Then phase 3 (turn-by-turn: voice with expo-speech, background location).
+0. Routing packs for the whole world: **live** (237 packs, 2026-10-27; item U). Still to do from
+   `docs/MAPS_NAVIGATION_PLAN.md`: measure on a real phone (route time/memory, mmap of a 2 GB tar
+   on iOS, which may need `com.apple.developer.kernel.extended-virtual-addressing`), then phase 3
+   (turn-by-turn: voice with expo-speech, background location).
 1. Watch App Review for 1.0.1; test 1.1.0 (build 10, TestFlight) on a real iPhone: navigation view (driving and on foot), compass beam, street and school search, routing
    packs (download Spain 2.2 GB, route time/memory), Preparedness reminders, GPU
    llama.cpp, Apple Intelligence, background downloads, Files import, airplane mode.
