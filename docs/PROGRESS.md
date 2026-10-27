@@ -335,6 +335,10 @@ sheet, `removeCountryRegion` deletes one. Map items and files are keyed by map i
 every other country). Simulator, local catalog with six US regions (Hawaii real): picked in the
 kit, downloaded (map from the local server, pack from GitHub, 76 MB), listed, deleted. Next: a
 TestFlight build, then the USA's maps run (`countries=us parts=maps`), then a real iPhone.
+Live: build 16 reads regions; run 40482995938 published the six US regional maps at z15 (west
+4.65, midwest 3.93, northeast 2.09, south 5.68 GB, Alaska 0.73 GB, Hawaii 32 MB; parts checked
+in their releases) and the catalog dropped the whole-USA z14 map (246 maps). Owner: try a region
+on the iPhone with build 16.
 
 ### 2026-10-27 — Maps: ask for the location and start on the user
 
