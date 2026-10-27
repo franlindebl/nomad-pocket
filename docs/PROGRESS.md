@@ -221,6 +221,17 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-27 — UI: no more empty band at the end of scrolling screens
+
+Owner: Inicio and Biblioteca ended ~180 pt above the tab bar, which looked like a bug. `<Screen>`
+padded the bottom with `insets.bottom + 96`, but inside native tabs the screen already ends above
+the tab bar and iOS still reports the bar in `insets.bottom` (83 pt measured; Android reports only
+the 24 dp gesture bar and also ends above its bottom nav), so the bar was counted twice plus 96.
+Now `space.xxxl` (32), plus `insets.bottom` on Android only (modals draw under the gesture bar);
+outside tabs iOS' automatic content inset clears the home indicator. Explorar todo Kiwix (120 →
+32) and Credits › packages (120 → 48) lists too. Checked on the iOS 27 simulator (Inicio,
+Biblioteca, Ajustes modal) and the Android emulator (Inicio), Release builds.
+
 ### 2026-10-27 — Maps: the bundled world map is called "Mapa básico del mundo"
 
 Owner: "Mapa del mundo · Viene con la app" made people wonder why each country is a separate
@@ -263,7 +274,7 @@ en España" for ~10 s; asked for every deferred step to happen with the download
   aproximado". Smoke E2E 21/21. Android tour 3/4: Andorra's download, imports, search and
   Emergencias (android-03) and routing (android-05) pass; android-01 failed on the reader's find bar
   showing "2 de 26" where the flow expects "1 de N" (unrelated, the assertion is too strict). Shipped
-  in build 18. To do: time it on the owner's iPhone (expected well under the old ~2 min, no stutter).
+  in build 18; the owner tried it on their iPhone: "se comporta muy bien".
 
 ### 2026-10-27 — Release: 1.1.0 build 18 to TestFlight (build 17 withdrawn)
 

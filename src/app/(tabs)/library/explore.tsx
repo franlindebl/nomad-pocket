@@ -160,7 +160,7 @@ function EntryRow({ entry }: { entry: KiwixEntry }) {
 }
 
 const styles = StyleSheet.create({
-  list: { ...layout.column, paddingHorizontal: space.gutter, paddingTop: space.sm, paddingBottom: 120 },
+  list: { ...layout.column, paddingHorizontal: space.gutter, paddingTop: space.sm, paddingBottom: space.xxxl },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

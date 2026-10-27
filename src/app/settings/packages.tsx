@@ -68,7 +68,7 @@ export default function PackagesScreen() {
 }
 
 const styles = StyleSheet.create({
-  list: { ...layout.column, paddingHorizontal: space.gutter, paddingTop: space.sm, paddingBottom: 120 },
+  list: { ...layout.column, paddingHorizontal: space.gutter, paddingTop: space.sm, paddingBottom: space.huge },
   item: { borderLeftWidth: StyleSheet.hairlineWidth, borderRightWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
   first: { borderTopWidth: StyleSheet.hairlineWidth, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg },
   last: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomLeftRadius: radius.lg, borderBottomRightRadius: radius.lg },
