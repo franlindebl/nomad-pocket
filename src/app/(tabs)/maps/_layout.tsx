@@ -16,6 +16,7 @@ export default function Layout() {
       <Stack.Screen name="pick" options={{ ...sheet, title: t('picker.title'), sheetAllowedDetents: [1] }} />
       {/* Content-sized sheets draw their own title: a native header overlaps non-scroll-view content. */}
       <Stack.Screen name="download" options={{ ...sheet, headerShown: false, sheetAllowedDetents: 'fitToContents' }} />
+      <Stack.Screen name="points" options={{ ...sheet, title: t('points.title'), sheetAllowedDetents: [0.75, 1] }} />
       <Stack.Screen name="markers" options={{ ...sheet, title: t('markers.title'), sheetAllowedDetents: [0.5, 1] }} />
       <Stack.Screen name="marker" options={{ ...sheet, headerShown: false, sheetAllowedDetents: 'fitToContents' }} />
       <Stack.Screen name="search" options={{ ...sheet, title: t('controls.search'), sheetAllowedDetents: [1] }} />

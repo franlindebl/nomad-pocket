@@ -337,7 +337,8 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `lesson-<n>`, `lesson-check-<n>` | course lesson (1-based) and its done check |
   | `marker-name`, `marker-note` | fields of the place sheet |
   | `marker-delete`, `region-delete`, `conversation-delete` | delete buttons in lists |
-  | `map-search`, `map-emergency` | map search pill and Emergencias button |
+  | `map-search`, `map-emergency` | map search pill and the red "SOS" (Emergencias) button |
+  | `map-points`, `points-show`, `points-<category>` | Puntos (legend) map button, its show-on-map row and one row per category |
   | `search-input`, `search-result`, `search-coordinates` | search sheet field, result rows, "go to coordinates" row |
   | `place-card`, `place-guide`, `place-save`, `place-close` | selected place card and its actions |
   | `place-call` | one "Llamar" button per phone number of the place (several numbers = several buttons) |

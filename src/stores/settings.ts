@@ -20,6 +20,9 @@ type SettingsState = {
   aiModelId: string | null;
   /** The user's country (regions.json id), chosen in onboarding: its map, emergency number. */
   country: string | null;
+  /** Emergency points drawn on the map (the Puntos sheet), and the categories hidden from it. */
+  mapPoints: boolean;
+  hiddenPointCategories: string[];
   setLanguage: (l: AppLanguage) => void;
   setContentLanguages: (l: AppLanguage[]) => void;
   setTheme: (t: ThemePreference) => void;
@@ -28,6 +31,8 @@ type SettingsState = {
   setOnboarded: (v: boolean) => void;
   setAiModelId: (id: string | null) => void;
   setCountry: (id: string | null) => void;
+  setMapPoints: (v: boolean) => void;
+  setPointCategoryHidden: (category: string, hidden: boolean) => void;
 };
 
 function applyTheme(theme: ThemePreference) {
@@ -45,6 +50,8 @@ export const useSettings = create<SettingsState>()(
       onboarded: false,
       aiModelId: null,
       country: null,
+      mapPoints: true,
+      hiddenPointCategories: [],
       setLanguage: (language) => {
         setLanguage(language);
         set({ language });
@@ -59,11 +66,18 @@ export const useSettings = create<SettingsState>()(
       setOnboarded: (onboarded) => set({ onboarded }),
       setAiModelId: (aiModelId) => set({ aiModelId }),
       setCountry: (country) => set({ country }),
+      setMapPoints: (mapPoints) => set({ mapPoints }),
+      setPointCategoryHidden: (category, hidden) =>
+        set((st) => ({
+          hiddenPointCategories: hidden
+            ? [...new Set([...st.hiddenPointCategories, category])]
+            : st.hiddenPointCategories.filter((c) => c !== category),
+        })),
     }),
     {
       name: 'settings',
       storage: kvStorage(),
-      partialize: ({ language, contentLanguages, theme, wifiOnly, readerTextScale, onboarded, aiModelId, country }) => ({
+      partialize: ({
         language,
         contentLanguages,
         theme,
@@ -72,6 +86,19 @@ export const useSettings = create<SettingsState>()(
         onboarded,
         aiModelId,
         country,
+        mapPoints,
+        hiddenPointCategories,
+      }) => ({
+        language,
+        contentLanguages,
+        theme,
+        wifiOnly,
+        readerTextScale,
+        onboarded,
+        aiModelId,
+        country,
+        mapPoints,
+        hiddenPointCategories,
       }),
       onRehydrateStorage: () => (state) => {
         if (!state) return;

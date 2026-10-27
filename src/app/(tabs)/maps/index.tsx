@@ -1,7 +1,7 @@
 import { Camera, GeoJSONSource, Layer, Map, NativeUserLocation, type CameraRef, type InitialViewState } from '@maplibre/maplibre-react-native';
 import * as Location from 'expo-location';
 import { router, useNavigation } from 'expo-router';
-import { Layers, LocateFixed, MapPin, Navigation, Navigation2, Route, Search, Siren } from 'lucide-react-native';
+import { Layers, LocateFixed, MapPin, Navigation, Navigation2, Route, Search } from 'lucide-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Linking, StyleSheet, View } from 'react-native';
@@ -12,6 +12,7 @@ import { recordGroup } from '@/features/downloads/groups';
 import { resumeDownloads, useDownloads } from '@/features/downloads/manager';
 import { ensureMapAssets, type MapAssets } from '@/features/maps/assets';
 import { emergencyPlacesIn, usePoiSync } from '@/features/maps/emergency';
+import { EMERGENCY_CATEGORIES } from '@/features/maps/emergency-core';
 import { deviceCountry } from '@/features/maps/CountryList';
 import { useCountries } from '@/features/maps/countries';
 import { countryDownloadGroup } from '@/features/maps/country-maps';
@@ -24,6 +25,7 @@ import { CREDIT_MS, MapCredit } from '@/features/maps/MapCredit';
 import { MapFab } from '@/features/maps/MapFab';
 import { markersGeoJSON, useMarkers } from '@/features/maps/markers';
 import { PlaceCard } from '@/features/maps/PlaceCard';
+import { PointsGlyph } from '@/features/maps/PointDot';
 import { getRegion, regionName, type Region } from '@/features/maps/regions';
 import { showPlace, useMapUi } from '@/features/maps/store';
 import { buildMapStyle } from '@/features/maps/style';
@@ -57,6 +59,8 @@ export default function MapScreen() {
     return id ? getRegion(id) : undefined;
   }, [chosen]);
   const markers = useMarkers((s) => s.markers);
+  const pointsShown = useSettings((st) => st.mapPoints);
+  const hiddenCategories = useSettings((st) => st.hiddenPointCategories);
   const request = useMapUi((s) => s.request);
   const selected = useMapUi((s) => s.selected);
   const viewport = useMapUi((s) => s.viewport);
@@ -145,9 +149,9 @@ export default function MapScreen() {
 
   // Emergency points in view, straight from SQLite (indexed bbox query, a few ms).
   const poiData = useMemo<GeoJSON.FeatureCollection>(() => {
-    if (!viewport || viewport.zoom < POI_MIN_ZOOM) return EMPTY;
+    if (!pointsShown || !viewport || viewport.zoom < POI_MIN_ZOOM) return EMPTY;
     try {
-      const places = emergencyPlacesIn(viewport.bounds);
+      const places = emergencyPlacesIn(viewport.bounds, hiddenCategories);
       return {
         type: 'FeatureCollection',
         features: places.map((p) => ({
@@ -161,7 +165,7 @@ export default function MapScreen() {
     }
     // poiVersion: refetch after a region's points finish downloading.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewport, poiVersion]);
+  }, [viewport, poiVersion, pointsShown, hiddenCategories]);
 
   const selectedData = useMemo<GeoJSON.FeatureCollection>(
     () =>
@@ -524,12 +528,22 @@ export default function MapScreen() {
 
       {/* Navigating: under the maneuver banner, only what matters on the road. */}
       <View style={[styles.controls, { top: navigating ? freeTop : top }]} pointerEvents="box-none">
-        <MapFab testID="map-emergency" accessibilityLabel={t('controls.emergency')} onPress={() => router.push('/maps/emergency')}>
-          <Siren size={21} color={colors.danger} strokeWidth={2} />
+        {/* "SOS" in red reads as the emergency button at a glance; a siren icon on the map's grey didn't. */}
+        <MapFab
+          testID="map-emergency"
+          accessibilityLabel={t('controls.emergency')}
+          onPress={() => router.push('/maps/emergency')}
+          style={{ backgroundColor: colors.danger, borderColor: colors.danger }}>
+          <Text variant="footnote" weight="800" color="onAccent" style={styles.sos}>
+            SOS
+          </Text>
         </MapFab>
         {!navigating ? (
           <>
             <MapFab icon={Layers} accessibilityLabel={t('controls.regions')} onPress={() => router.push('/maps/regions')} />
+            <MapFab testID="map-points" accessibilityLabel={t('controls.points')} onPress={() => router.push('/maps/points')}>
+              <PointsGlyph off={!pointsShown || hiddenCategories.length >= EMERGENCY_CATEGORIES.length} />
+            </MapFab>
             <MapFab icon={MapPin} accessibilityLabel={t('controls.markers')} onPress={() => router.push('/maps/markers')} />
           </>
         ) : null}
@@ -660,6 +674,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   bottom: { position: 'absolute', left: space.lg, right: space.lg },
+  sos: { letterSpacing: 0.5 },
   recenter: {
     position: 'absolute',
     left: space.lg,

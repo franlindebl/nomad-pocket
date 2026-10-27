@@ -33,7 +33,8 @@ import { bearingDegrees, compassSector, type LatLon } from './geo';
 
 export const CATEGORY_COLORS: Record<EmergencyCategory, string> = {
   health: hues.medicine,
-  security: hues.education,
+  // Not blue: next to water's blue (and the user's blue dot) the two were one colour on the map.
+  security: hues.computing,
   water: hues.reference,
   supplies: hues.agriculture,
   official: hues.neutral,

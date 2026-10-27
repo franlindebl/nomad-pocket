@@ -8,7 +8,8 @@
     "search": "Search",
     "emergency": "Emergency",
     "recenter": "Re-centre",
-    "overview": "Route overview"
+    "overview": "Route overview",
+    "points": "Points on the map"
   },
   "empty": {
     "title": "Download your country's map",
@@ -78,6 +79,20 @@
     "offline": "You need an internet connection to download maps. They work offline afterwards.",
     "estimateFailed": "Couldn't work out the size: {{error}}",
     "action": "Download · {{size}}"
+  },
+  "points": {
+    "title": "Points on the map",
+    "show": "Show on the map",
+    "showBody": "Hospitals, water, shelters and more from your downloaded maps. They appear as you zoom in.",
+    "legend": "What each colour means",
+    "kinds": {
+      "health": "Hospitals, health centres, pharmacies, defibrillators and ambulances",
+      "security": "Police, fire stations and military sites",
+      "water": "Drinking water, springs, shelters and assembly points",
+      "supplies": "Supermarkets, hardware shops and fuel stations",
+      "official": "Town halls, embassies and consulates"
+    },
+    "footer": "Tap a point to see what it is, call it or go there. The full list, sorted by distance, is under SOS."
   },
   "markers": {
     "title": "Saved places",
