@@ -480,6 +480,20 @@ Home show progress while a piece downloads. Nothing else is asked.
   (h2/h3), find in page (iOS JS highlighter with counts, Android native find),
   library/history sheet, medical disclaimer for `medical` items, dark mode, spinner until
   the first page loads.
+- Document collections (`library/collection.ts` pure + `components/CollectionView.tsx`): the zimgit-*
+  archives come from Kiwix's nautilus scraper, whose main page is a desktop Bootstrap app around
+  `database.js` (one JS/Python literal array: `ti`, `aut`, `dsc`, `fp` files under `files/`).
+  `getCollection(itemId)` (zim.ts, cached per item) parses it; when it parses, the reader without a
+  `path` shows a native list (search on title/author/description, multi-file documents expand)
+  instead of the web page. A document opens as a new reader route (`?path=files/…&title=…`, the
+  title stands in for the PDF's missing one); "Main page" goes back to the list (`dismissTo`).
+- PDFs on Android: its WebView can't show them, so `ZimWebView.load` and tapped links hand a
+  `application/pdf` entry to `ZimExternalOpen` (copy to `cache/zim-open/`, only the last one kept,
+  `ACTION_VIEW` through the module's own `ZimFileProvider`), and `onLoadEnd {error: 'noViewer'}`
+  when no app can show it. JS calls the same through `openExternally` (collection rows, a PDF route
+  from search or history). iOS shows PDFs in the WKWebView.
+- Page titles: libzim gives an entry without a title its path (nautilus' `home`); native then
+  reports the page's `<title>` instead.
 
 ### Courses (`src/features/courses/courses.ts`)
 - A course is an installed ZIM with `isCourse`. `ensureCourse(itemId)` enrols (idempotent)

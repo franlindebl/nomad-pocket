@@ -116,8 +116,19 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
     }
     path = path.removePrefix("/")
     if (path.isEmpty()) path = h.mainPath ?: ""
-    h.entryInfo(path)?.let { path = it.path }
+    val info = h.entryInfo(path)
+    if (info != null && ZimExternalOpen.wants(info.mimeType)) return openInViewer(h, info.path)
+    info?.let { path = it.path }
     webView.loadUrl(zimUrl(h.uuid, path, fragment))
+  }
+
+  /** A PDF goes to the system viewer (the WebView would stay blank); `onLoadEnd` reports `noViewer`. */
+  private fun openInViewer(h: ZimHandle, path: String) {
+    Thread {
+      if (!ZimExternalOpen.open(context, appContext.currentActivity, h, path)) {
+        post { onLoadEnd(mapOf("path" to path, "error" to "noViewer")) }
+      }
+    }.start()
   }
 
   /** The only archive this view serves: its own item's, by id, never another item that shares the UUID. */
@@ -204,7 +215,11 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
 
   private fun emitNavigation(url: String? = webView.url) {
     val path = currentPath(url) ?: return
-    val title = handle?.entryInfo(path)?.title?.takeIf { it.isNotEmpty() } ?: (webView.title ?: "")
+    // libzim gives an entry without a title its path ("home" on nautilus collections): the
+    // page's own <title> is better then.
+    val entryTitle = handle?.entryInfo(path)?.title.orEmpty()
+    val pageTitle = webView.title.orEmpty()
+    val title = if (entryTitle.isEmpty() || (entryTitle == path && pageTitle.isNotEmpty())) pageTitle else entryTitle
     val payload = mapOf(
       "path" to path,
       "title" to title,
@@ -226,6 +241,10 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
           val h = handleFor(uri) ?: return false
           val path = pathOf(uri)
           val info = h.entryInfo(path)
+          if (info != null && ZimExternalOpen.wants(info.mimeType)) {
+            openInViewer(h, info.path)
+            return true
+          }
           if (info != null && info.path != path) {
             view.loadUrl(zimUrl(h.uuid, info.path, uri.fragment))
             return true

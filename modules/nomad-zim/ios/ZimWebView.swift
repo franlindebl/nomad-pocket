@@ -199,10 +199,14 @@ final class ZimWebView: ExpoView, WKNavigationDelegate, WKUIDelegate {
 
   private func emitNavigation() {
     guard let path = currentPath() else { return }
-    let title = archive?.entryInfo(atPath: path)?.title ?? webView.title ?? ""
+    // libzim gives an entry without a title its path ("home" on nautilus collections): the
+    // page's own <title> is better then.
+    let entryTitle = archive?.entryInfo(atPath: path)?.title ?? ""
+    let pageTitle = webView.title ?? ""
+    let title = entryTitle.isEmpty || (entryTitle == path && !pageTitle.isEmpty) ? pageTitle : entryTitle
     let payload: [String: AnyHashable] = [
       "path": path,
-      "title": title.isEmpty ? (webView.title ?? "") : title,
+      "title": title,
       "canGoBack": webView.canGoBack,
       "canGoForward": webView.canGoForward,
     ]

@@ -6,6 +6,7 @@ import { toNativePath } from '@/lib/storage';
 
 import { NomadZim, isNomadZimAvailable, type NativeZimHit, type NativeZimInfo } from '../../../modules/nomad-zim';
 
+import { parseCollection, type CollectionDoc } from './collection';
 import { decodeEntities, extractHeadings, extractLinks, htmlToText, metaRefreshTarget, stripTags, type Heading } from './html';
 
 export type ZimInfo = {
@@ -46,6 +47,8 @@ const infos = new Map<string, ZimInfo>();
 const opening = new Map<string, Promise<ZimInfo>>();
 /** Bumped on close so opens that finish afterwards know they are stale. */
 const generation = new Map<string, number>();
+/** Parsed nautilus databases (null: not a collection), per item. */
+const collections = new Map<string, CollectionDoc[] | null>();
 
 function toInfo(n: NativeZimInfo): ZimInfo {
   return {
@@ -93,6 +96,7 @@ export async function openArchive(itemId: string, fileUri: string): Promise<ZimI
 
 export function closeArchive(itemId: string): void {
   generation.set(itemId, (generation.get(itemId) ?? 0) + 1);
+  collections.delete(itemId);
   opening.delete(itemId);
   infos.delete(itemId);
   if (isNomadZimAvailable()) NomadZim.closeArchive(itemId);
@@ -256,6 +260,31 @@ export async function randomPath(itemId: string): Promise<string | null> {
     return await NomadZim.randomPath(itemId);
   } catch {
     return null;
+  }
+}
+
+/** Documents of a nautilus collection (zimgit-*), or null when the archive is anything else. */
+export async function getCollection(itemId: string): Promise<CollectionDoc[] | null> {
+  if (collections.has(itemId)) return collections.get(itemId) ?? null;
+  if (!(await ensureOpen(itemId))) return null;
+  let docs: CollectionDoc[] | null = null;
+  try {
+    const db = await NomadZim.getContent(itemId, 'database.js');
+    docs = db ? parseCollection(db.content) : null;
+  } catch {
+    docs = null;
+  }
+  collections.set(itemId, docs);
+  return docs;
+}
+
+/** Android: opens an entry (a PDF) in the system viewer. False when no app can. */
+export async function openExternally(itemId: string, path: string): Promise<boolean> {
+  if (!(await ensureOpen(itemId))) return false;
+  try {
+    return await NomadZim.openExternally(itemId, path);
+  } catch {
+    return false;
   }
 }
 

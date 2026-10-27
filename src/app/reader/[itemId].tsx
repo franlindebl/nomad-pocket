@@ -1,4 +1,4 @@
-import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { Stack, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   ALargeSmall,
   BookOpen,
@@ -16,18 +16,21 @@ import {
 } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, BackHandler, Linking, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, BackHandler, Linking, Platform, StyleSheet, View } from 'react-native';
 
 import { EmptyState, Text, triggerHaptic } from '@/components/ui';
 import Storage from '@/db/kv';
+import { categoryHue } from '@/features/catalog/icons';
 import { useItems } from '@/features/content/items';
+import { fileKind, type CollectionDoc } from '@/features/library/collection';
 import { ArchiveSearchSheet } from '@/features/library/components/ArchiveSearchSheet';
+import { CollectionView } from '@/features/library/components/CollectionView';
 import { DisclaimerBanner, FindBar, MenuItem, Popover, ReaderToolbar, TextSizeControl } from '@/features/library/components/ReaderChrome';
 import { ReaderLibrarySheet } from '@/features/library/components/ReaderLibrarySheet';
 import { ReaderTocSheet } from '@/features/library/components/ReaderTocSheet';
 import { isBookmarked, recordVisit, toggleBookmark } from '@/features/library/history';
 import { pageTitle } from '@/features/library/titles';
-import { ensureArchive, randomPath } from '@/features/library/zim';
+import { ensureArchive, getCollection, openExternally, randomPath } from '@/features/library/zim';
 import { useSettings } from '@/stores/settings';
 import { space, useTheme } from '@/theme';
 
@@ -45,15 +48,19 @@ type SheetKind = null | 'search' | 'library' | 'toc';
 const disclaimerKey = (id: string) => `reader.disclaimerDismissed.${id}`;
 
 export default function ReaderScreen() {
-  const { itemId, path } = useLocalSearchParams<{ itemId: string; path?: string }>();
+  // `title`: the document's name when a collection opens one of its files (a PDF has no <title>).
+  const { itemId, path, title: docTitle } = useLocalSearchParams<{ itemId: string; path?: string; title?: string }>();
   const { t } = useTranslation('reader');
   const { t: tc } = useTranslation();
   const { colors, scheme } = useTheme();
   const item = useItems('zim').find((i) => i.id === itemId);
 
-  const [openState, setOpenState] = useState<{ itemId: string; status: 'ready' | 'error' } | { itemId: null; status: 'loading' }>({
+  const [openState, setOpenState] = useState<
+    { itemId: string; status: 'ready' | 'error'; collection: CollectionDoc[] | null } | { itemId: null; status: 'loading'; collection: null }
+  >({
     itemId: null,
     status: 'loading',
+    collection: null,
   });
   const [nav, setNav] = useState<ZimNavigationEvent | null>(null);
   const [bookmarked, setBookmarked] = useState(false);
@@ -73,12 +80,32 @@ export default function ReaderScreen() {
 
   useEffect(() => {
     let alive = true;
-    ensureArchive(itemId).then((info) => alive && setOpenState({ itemId, status: info ? 'ready' : 'error' }));
+    Promise.all([ensureArchive(itemId), getCollection(itemId)]).then(
+      ([info, collection]) => alive && setOpenState({ itemId, status: info ? 'ready' : 'error', collection }),
+    );
     return () => {
       alive = false;
     };
   }, [itemId]);
   const status = openState.itemId === itemId ? openState.status : 'loading';
+  const collection = openState.itemId === itemId ? openState.collection : null;
+  // Android's WebView can't show PDFs: a PDF route (search, history) opens in the system viewer.
+  const externalPdf = Platform.OS === 'android' && !!path && fileKind(path) === 'pdf';
+
+  const openInViewer = useCallback(
+    async (p: string, docName: string) => {
+      recordVisit(itemId, p, docName);
+      if (!(await openExternally(itemId, p))) Alert.alert(t('noViewer'), t('noViewerBody'));
+    },
+    [itemId, t],
+  );
+
+  useEffect(() => {
+    if (!externalPdf || status !== 'ready' || !path) return;
+    openInViewer(path, docTitle || item?.title || path).finally(() => router.canGoBack() && router.back());
+    // Once per route.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalPdf, status]);
 
   const dismissedBefore = useMemo(() => {
     try {
@@ -115,7 +142,7 @@ export default function ReaderScreen() {
       const n = e.nativeEvent;
       setNav(n);
       setBookmarked(isBookmarked(itemId, n.path));
-      const title = pageTitle(n.title, n.path) || item?.title || n.path;
+      const title = titleOf(n) || n.path;
       const key = `${n.path}\u0000${title}`;
       if (n.path && key !== lastRecorded.current) {
         lastRecorded.current = key;
@@ -154,6 +181,18 @@ export default function ReaderScreen() {
   const onLoadEnd = (e: { nativeEvent: ZimLoadEndEvent }) => {
     setFirstLoad(false);
     if (e.nativeEvent.crashed) Alert.alert(t('pageCrashed'), t('pageCrashedBody'));
+    else if (e.nativeEvent.error === 'noViewer') Alert.alert(t('noViewer'), t('noViewerBody'));
+  };
+
+  const openDocument = (p: string, docName: string) => {
+    if (Platform.OS === 'android' && fileKind(p) === 'pdf') openInViewer(p, docName);
+    else router.push({ pathname: '/reader/[itemId]', params: { itemId, path: p, title: docName } });
+  };
+
+  const goHome = () => {
+    if (!collection) return go('');
+    setPanel(null);
+    router.dismissTo({ pathname: '/reader/[itemId]', params: { itemId } });
   };
 
   const go = (p: string) => {
@@ -165,7 +204,7 @@ export default function ReaderScreen() {
   const onBookmark = () => {
     if (!nav?.path) return;
     triggerHaptic('selection');
-    setBookmarked(toggleBookmark(itemId, nav.path, pageTitle(nav.title, nav.path) || item?.title || nav.path));
+    setBookmarked(toggleBookmark(itemId, nav.path, titleOf(nav) || nav.path));
   };
 
   const onRandom = async () => {
@@ -183,7 +222,11 @@ export default function ReaderScreen() {
     }
   };
 
-  const title = pageTitle(nav?.title, nav?.path) || item?.title || '';
+  function titleOf(n: { title: string; path: string } | null): string {
+    if (!n) return item?.title ?? '';
+    return pageTitle(n.title, n.path) || (docTitle && n.path === path ? docTitle : '') || item?.title || '';
+  }
+  const title = titleOf(nav);
 
   if (!item) {
     return (
@@ -194,7 +237,7 @@ export default function ReaderScreen() {
     );
   }
 
-  if (status !== 'ready') {
+  if (status !== 'ready' || externalPdf) {
     return (
       <View style={[styles.center, { backgroundColor: colors.bg }]}>
         <Stack.Screen options={{ title: item.title }} />
@@ -208,6 +251,17 @@ export default function ReaderScreen() {
         ) : (
           <EmptyState icon={BookOpen} title={t('openFailed')} body={t('openFailedBody')} />
         )}
+      </View>
+    );
+  }
+
+  // A nautilus collection's own main page is a desktop web app: its documents are listed natively.
+  if (collection && !path) {
+    return (
+      <View style={[styles.flex, { backgroundColor: colors.bg }]}>
+        <Stack.Screen options={{ title: item.title }} />
+        {showDisclaimer ? <DisclaimerBanner text={tc('health.disclaimer')} onDismiss={dismissDisclaimer} /> : null}
+        <CollectionView docs={collection} hue={categoryHue(item.category)} onOpen={openDocument} />
       </View>
     );
   }
@@ -248,7 +302,7 @@ export default function ReaderScreen() {
                 setSheet('toc');
               }}
             />
-            <MenuItem icon={House} label={t('mainPage')} onPress={() => go('')} />
+            <MenuItem icon={House} label={t('mainPage')} onPress={goHome} />
             <MenuItem icon={Shuffle} label={t('random')} onPress={onRandom} />
             <MenuItem
               icon={TextSearch}
