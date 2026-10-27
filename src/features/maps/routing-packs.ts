@@ -294,7 +294,9 @@ async function assemblePack(pack: ManifestPack, valhalla: string, from?: Downloa
       await parts[0].move(tmp);
     } else {
       // Waits for another country's assembly: room for one copy at a time (assembly.ts).
+      const start = Date.now();
       await oneAssemblyAtATime(async () => {
+        console.log(`[dltrace] assemble ${pack.id} waited ${Date.now() - start} ms`);
         tmp.create();
         // Natively, one block in memory at a time (nomad-files): a part takes seconds, so the
         // country's removal is checked between parts.
@@ -304,6 +306,7 @@ async function assemblePack(pack: ManifestPack, valhalla: string, from?: Downloa
           offset += await copyInto(part.uri, tmp.uri, offset);
         }
       });
+      console.log(`[dltrace] assemble ${pack.id} ${Date.now() - start} ms`);
     }
     if (sizeOf(tmp) !== pack.size) throw new Error(`assembled ${sizeOf(tmp)} bytes, expected ${pack.size}`);
     check();

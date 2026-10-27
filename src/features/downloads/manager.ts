@@ -46,7 +46,17 @@ import {
 import { useSettings } from '@/stores/settings';
 import { sha256 } from '../../../modules/nomad-files';
 
-import { canStartFile, connectionsFor, decide, hostHasRoom, initialBudget, WINDOW_MS, type Budget, type NetworkKind } from './budget-core';
+import {
+  canStartFile,
+  connectionsFor,
+  decide,
+  hostHasRoom,
+  initialBudget,
+  WINDOW_MS,
+  yieldsToCdn,
+  type Budget,
+  type NetworkKind,
+} from './budget-core';
 import { recordGroup, type DownloadGroup } from './groups';
 import { keepAwakeWhileDownloading } from './keep-awake';
 import {
@@ -63,6 +73,7 @@ import {
 import { isKiwixUrl, planSources, type ProbeFetch, type SourcePlan } from './mirrors';
 import { SEGMENTS_IN_BACKGROUND, SegmentedTransfer } from './segmented';
 import { chunkBytesFor, MiB, MIN_SEGMENTED_BYTES } from './segments-core';
+import { timed, trace } from './trace';
 import { askAboutMobileData } from './wifi-prompt';
 
 export type { DownloadGroup } from './groups';
@@ -127,16 +138,23 @@ export class NotEnoughStorageError extends Error {
 
 /**
  * Connections per host, summed over every download: the mirrors are volunteers' servers, at
- * most 3 each, so the load spreads over them. One URL (GitHub, Hugging Face) takes 6. How many
- * connections and files run in all is the adaptive budget (budget-core.ts).
+ * most 3 each, so the load spreads over them. One URL (GitHub, Hugging Face: CDNs) takes 12.
+ * With 6, a country's map and pack shared 6 connections while Wikipedia held 16–24 on a full
+ * line: the map, the first thing the setup kit lists, came last. With 12 they want more and
+ * the budget's fair shares give them most of the line. How many connections and files run in
+ * all is the adaptive budget (budget-core.ts).
  */
 const PER_MIRROR = 3;
-const PER_URL = 6;
+const PER_URL = 12;
 /** How long a mirror's measured speed stands in for a new probe (in memory). */
 const MIRROR_SCORES_MS = 10 * 60 * 1000;
 const mirrorScores = new Map<string, { bps: number; at: number }>();
-/** Disk a segmented download may use for ranges that finished ahead of the prefix. */
-const AHEAD_BYTES = 1024 * MiB;
+/**
+ * Disk a segmented download may use for ranges that finished ahead of the prefix. 1 GiB is 32
+ * chunks of 32 MiB: with 16–32 connections and one slow range at the head, the window filled
+ * and new ranges stopped (seen on a phone: 4 of 12 connections busy).
+ */
+const AHEAD_BYTES = 2048 * MiB;
 const AHEAD_BYTES_BACKGROUND = 2048 * MiB;
 const PERSIST_INTERVAL_MS = 2000;
 /** Network events flap while a phone switches networks: act once it has settled. */
@@ -494,7 +512,12 @@ export function initDownloads() {
       refreshFreeBytes();
       readNetwork();
     }
-    if (SEGMENTS_IN_BACKGROUND && state !== 'inactive') for (const t of transfers.values()) t.setBackground(state === 'background');
+    if (SEGMENTS_IN_BACKGROUND) {
+      for (const t of transfers.values()) {
+        if (state === 'inactive') t.prepareBackground();
+        else t.setBackground(state === 'background');
+      }
+    }
     if (Platform.OS !== 'android') return;
     if (state === 'background') {
       backgrounded = true;
@@ -629,6 +652,7 @@ function pump() {
   const queued = Object.values(useDownloads.getState().records)
     .filter((r) => r.status === 'queued' && !r.external && (retryAt.get(r.id) ?? 0) <= now && gateOf(r) === 'go')
     .sort((a, b) => a.createdAt - b.createdAt);
+  const cdnBytesLeft = [...running(), ...queued].filter((r) => !isKiwixUrl(r.url)).reduce((n, r) => n + Math.max(0, r.totalBytes - r.bytesWritten), 0);
   for (const rec of queued) {
     const active = running();
     // Still choosing its sources: no transfer yet.
@@ -638,6 +662,7 @@ function pump() {
     const host = urlHost(rec.url);
     const sameHost = active.filter((r) => urlHost(r.url) === host).length;
     if (!hostHasRoom({ sameHost, multiMirror: isKiwixUrl(rec.url) })) continue;
+    if (yieldsToCdn({ kiwix: isKiwixUrl(rec.url), bytes: rec.totalBytes, cdnBytesLeft })) continue;
     run(rec.id).catch(() => {});
   }
   if (running().length) startSampler();
@@ -697,6 +722,7 @@ function startSampler() {
   sampler.windowSamples = 0;
   sampler.windowIds = runningKey();
   sampler.changedAt = sampler.windowStart;
+  traced.at = 0;
   sampler.timer = setInterval(sample, SAMPLE_MS);
 }
 
@@ -725,9 +751,11 @@ function sample() {
     seen.set(r.id, r.bytesWritten);
     const before = sampler.bytes.get(r.id);
     if (before !== undefined) sampler.windowBytes += Math.max(0, r.bytesWritten - before);
+    if (before !== undefined) traced.bytes += Math.max(0, r.bytesWritten - before);
   }
   sampler.bytes = seen;
   const inUse = connectionsInUse();
+  traceSample(active, inUse);
   sampler.windowSamples++;
   if (inUse >= budget.conns - 1) sampler.windowFull++;
   const now = Date.now();
@@ -735,7 +763,8 @@ function sample() {
     const bps = (sampler.windowBytes * 1000) / (now - sampler.windowStart);
     const saturated = sampler.windowFull * 2 > sampler.windowSamples;
     // New transfers ramp up (connections, TCP slow start) for a few seconds after a change too.
-    const stable = sampler.windowIds !== 'changed' && sampler.windowStart - sampler.changedAt >= SETTLE_MS;
+    // A window that spans a suspension (iOS, the app in the background) measured nothing.
+    const stable = sampler.windowIds !== 'changed' && sampler.windowStart - sampler.changedAt >= SETTLE_MS && now - sampler.windowStart < 2 * WINDOW_MS;
     const next = decide(budget, { now, bps, saturated, stable });
     if (next.conns !== budget.conns) console.log(`[downloads] budget ${budget.conns} → ${next.conns} connections at ${(bps / 1e6).toFixed(1)} MB/s`);
     budget = next;
@@ -747,6 +776,29 @@ function sample() {
     for (const t of transfers.values()) t.poke();
   }
   pump();
+}
+
+const fileLabel = (r: DownloadRecord) => r.destUri.split('/').pop() ?? r.id;
+
+const traced = { at: 0, bytes: 0 };
+
+/** Every ~10 s: the total speed, connections and how many files are in each state. */
+function traceSample(active: DownloadRecord[], inUse: number) {
+  const now = Date.now();
+  if (traced.at && now - traced.at < 10_000) return;
+  if (traced.at) {
+    const all = Object.values(useDownloads.getState().records);
+    const count = (s: DownloadStatus) => all.filter((r) => r.status === s).length;
+    trace(
+      'rate',
+      `${(traced.bytes / 1e3 / (now - traced.at)).toFixed(1)} MB/s`,
+      `conns ${inUse}/${budget.conns}`,
+      `running ${active.length} (${active.map((r) => `${fileLabel(r)} ${transfers.get(r.id)?.describe() ?? (tasks.has(r.id) ? 'single' : 'planning')}`).join(', ')})`,
+      `queued ${count('queued')} processing ${count('processing')} done ${count('done')}`,
+    );
+  }
+  traced.at = now;
+  traced.bytes = 0;
 }
 
 function onProgress(id: string, bytesWritten: number, totalBytes: number) {
@@ -784,7 +836,10 @@ async function checkIntegrity(id: string, file: File, rec: DownloadRecord) {
   let problem = integrityProblem({ size }, expected);
   // Hashing streams the file natively, off the JS thread (seconds per GB). Not File.digest: on
   // iOS it held the whole file in memory and a 2 GB map part got the app killed (nomad-files).
-  if (!problem && expected.sha256) problem = integrityProblem({ size, sha256: await sha256(file.uri) }, expected);
+  // A segmented download whose every piece matched the metalink as it was appended is checked already.
+  if (!problem && expected.sha256 && !rec.meta.piecesChecked) {
+    problem = integrityProblem({ size, sha256: await timed(`verify ${file.name}`, () => sha256(file.uri)) }, expected);
+  }
   if (!problem) return;
   deleteFile(file.uri);
   const host = urlHost(String(rec.meta.source ?? ''));
@@ -803,7 +858,7 @@ async function finalize(id: string, dest: File) {
   await checkIntegrity(id, dest, current);
   const size = Number(dest.size ?? current.totalBytes);
   try {
-    await handlers[current.kind]?.(dest, { ...current, bytesWritten: size, totalBytes: size });
+    await timed(`install ${dest.name}`, async () => handlers[current.kind]?.(dest, { ...current, bytesWritten: size, totalBytes: size }));
   } catch (e) {
     // A file its feature can't use (a truncated or unsupported archive) would stay in the
     // content dir, invisible and retried at every launch: drop it, Retry fetches it again.
@@ -811,6 +866,7 @@ async function finalize(id: string, dest: File) {
     throw e;
   }
   setStatus(id, 'done', { bytesWritten: size, totalBytes: size }, { bytes_written: size, total_bytes: size });
+  trace('done', dest.name, `${(size / 1e6).toFixed(0)} MB`);
   const done = useDownloads.getState().records[id];
   if (done) finished(done);
 }
@@ -888,7 +944,7 @@ async function runSegmented(id: string, plan: SourcePlan, seg: { size: number; c
   const prev = useDownloads.getState().records[id]?.meta.segments as { size: number } | undefined;
   // Another file's bytes (a newer version under the same id).
   if (prev && prev.size !== seg.size) deletePartial(id);
-  updateMeta(id, { segments: seg, source: undefined });
+  updateMeta(id, { segments: seg, source: undefined, piecesChecked: undefined });
   const several = plan.sources.length > 1;
   const transfer: SegmentedTransfer = new SegmentedTransfer({
     partial: partialFile(id),
@@ -904,7 +960,9 @@ async function runSegmented(id: string, plan: SourcePlan, seg: { size: number; c
   transfers.set(id, transfer);
   if (SEGMENTS_IN_BACKGROUND && AppState.currentState === 'background') transfer.setBackground(true);
   try {
-    return await transfer.run();
+    const file = await transfer.run();
+    if (file && transfer.piecesChecked) updateMeta(id, { piecesChecked: true });
+    return file;
   } catch (e) {
     transfers.delete(id);
     // Cancelled (the record is gone, or about to be).
@@ -921,6 +979,7 @@ async function run(id: string) {
   if (!rec) return;
   retryAt.delete(id);
   setStatus(id, 'running', { error: null }, { error: null });
+  trace('start', fileLabel(rec), `${(rec.totalBytes / 1e6).toFixed(0)} MB`, rec.url);
   // Paused and resumed while probing mirrors: a newer run() owns the download then.
   const token = Symbol(id);
   runs.set(id, token);
@@ -950,7 +1009,7 @@ async function run(id: string) {
       resumed = true;
       task = DownloadTask.fromSavable(saved, options);
     } else {
-      const plan = await pickSources(id);
+      const plan = await timed(`sources ${fileLabel(rec)}`, () => pickSources(id));
       // Paused, cancelled or held back by the network while mirrors were being probed.
       const now = useDownloads.getState().records[id];
       if (!plan || now?.status !== 'running' || runs.get(id) !== token) return;
@@ -972,7 +1031,7 @@ async function run(id: string) {
         updateMeta(id, { segments: undefined });
       }
       const url = plan.sources[0].url;
-      updateMeta(id, { source: url });
+      updateMeta(id, { source: url, piecesChecked: undefined });
       const part = partialFile(id);
       // Android writes straight into the .part file: a transfer that failed or died with the
       // process continues from what is on disk (its resume data is just that offset).
@@ -1011,7 +1070,7 @@ async function complete(id: string, rec: DownloadRecord, file: File) {
     setStatus(id, 'processing', {}, { pause_state: null });
     const dest = new File(rec.destUri);
     if (dest.exists) dest.delete();
-    await file.move(dest);
+    await timed(`move ${fileLabel(rec)}`, () => file.move(dest));
     deletePartial(id);
     await finalize(id, dest);
   } catch (e) {

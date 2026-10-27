@@ -1,7 +1,8 @@
 # Faster downloads: analysis and plan
 
 Status: **A, B, C and piece checks implemented** (2026-10-26, branch `worktree-downloads-speed`),
-verified on the iOS 27 simulator (Release). The contract now lives in `docs/ARCHITECTURE.md`
+verified on the iOS 27 simulator (Release), then **tuned on a real iPhone** (2026-10-27, build 17:
+the kit went from 13:04 to ~6:30, see "On a real iPhone"). The contract now lives in `docs/ARCHITECTURE.md`
 (Downloads); this file keeps the analysis, the measurements and what is still open. The
 "How downloads work today" section below describes the code before this work.
 
@@ -76,13 +77,62 @@ Simulator, same kit (Spain 4.8 GB + 12 guides, 1.4 GB), fresh installs:
 The total is this Mac's link (~22–25 MB/s together); what changed is that the small archives no
 longer wait behind the map.
 
+## On a real iPhone (2026-10-27, build 17)
+
+The owner's iPhone 14 Pro (iOS 27.0.1) on USB to the Mac, next to the router (fast.com: 480–530
+Mb/s, ~60–66 MB/s), a Release build installed with `xcodebuild` + `devicectl` and the system log
+recorded with `idevicesyslog -p NomadPocket` (`[dltrace]` lines, `downloads/trace.ts`). Same
+scenario every run, from a fresh install: the setup kit with Spain's map (4.8 GB: map, routing
+pack, search files, GitHub), the 12 survival guides (1.4 GB, Kiwix), Wikipedia es nopic (13.3 GB,
+Kiwix) and Qwen3.5 2B (1.3 GB, Hugging Face): 20.7 GB.
+
+| Run | Build change | Map ready | Everything ready | Wikipedia |
+|---|---|---|---|---|
+| 1 | build 16 + traces | 2:26 | 13:04 | 18.8 MB/s |
+| 2 | budget 16–32, keep unless slower; 2 GiB window | 5:24 | 12:09 | 19.5 MB/s |
+| 3 | foreground URLSession; 15 s stall watchdog; slow mirrors out | 5:36 | 6:14 (imports to 8:00) | 46.4 MB/s |
+| 4 | 12 connections per CDN host | 5:38 | 6:17 (imports to 8:10) | ~46 MB/s |
+| 5 | big Kiwix archives wait for the CDN files | **1:48** | **6:40** | **55.1 MB/s** |
+| 6 | start at a 300 MB CDN tail; skip sha-256 when every piece was checked; 80 s in the background | 1:44 | 9:00 | 32.9 MB/s (with the background) |
+| 7 | reserve queued at `inactive`; never-started background ranges dropped without blame; 2 min in the background | 1:45 | 8:25 | 35.9 MB/s (with the background) |
+
+What the traces showed, in order:
+
+1. **The budget couldn't grow.** Keeping +2 connections needed a 15 % gain: impossible past 14
+   connections, and the mirrors swing ±40 % between 10 s windows. It sat at 10–14 while 7 mirrors
+   could each take 3 (fau 5.8, dotsrc 3.7, mirrorservice 3.2, accum 3.0 MB/s per connection).
+2. **iOS's background session held ranges at 0 % for 1–3 minutes.** With 20–30 ranges in
+   nsurlsessiond, some never started; the 2 GiB behind the head range filled and the download fell
+   to 2–4 connections and 2–10 MB/s every 2–3 minutes. Its total also topped out around 45–55
+   MB/s, shared by every source. In the in-process session (app open) no range stalled and the
+   total held 55–62 MB/s: the Wi-Fi.
+3. **GitHub and Hugging Face are one HTTP/2 connection each.** CFNetwork's task summaries
+   (`connection=7, protocol="h2"`) showed all 244 GitHub ranges on one TCP connection, so 6 or 12
+   "connections" to GitHub got one share of the line next to 20 to the mirrors: Spain's map came
+   last at ~7 MB/s, then did 57 MB/s alone. Running the CDN files first (big Kiwix archives wait)
+   keeps the total and brings the map to 1:48 and the search imports (~2 min of SQLite work) under
+   Wikipedia's download instead of after it.
+4. **A background-session task created in the background is discretionary.** Run 6's reserve,
+   queued on `background`, got no byte in 98 s on power and Wi-Fi; the return then blamed the
+   fastest mirrors for the "stall" and benched them (2.5 min to recover). Queued on `inactive`,
+   run 7's reserve fetched ~1 GB in 2 min and the return was at full speed in ~10 s. While
+   suspended nothing new can start, so a download at full speed needs the app open (keep-awake).
+
+Processing is not the bottleneck: joining a country's map parts takes 4–7 s, hashing a 2 GB part
+1.5 s, 13 GB 10 s (now skipped when every piece was checked), the search imports ~2 min (pois 7 s,
+streets 40 s, places 20 s, addresses 50 s) and they run while other files download.
+
+With the app open the kit now takes ~6:20–6:40 for 20.7 GB on this line (~5:45 is the line's
+floor), the map is ready in under 2 minutes, and every source runs at the Wi-Fi's speed.
+
 ## Still open
 
-- The adaptive budget's gains on a line faster than its first 8 connections are untested here
-  (this Mac's link is the limit): check on the owner's 300 Mb/s Wi-Fi.
-- Real devices: everything above is the simulator on a Mac's link. A phone's Wi-Fi, iOS's
-  background-session scheduling (discretionary tasks, per-host limits) and Android's process
-  death need checking on hardware (the device spike, items 1–3 and 5).
+- Android on hardware: the CDN-first order, the budget and the stall watchdog are shared code
+  (OkHttp also multiplexes HTTP/2); the foreground/background session switch is iOS only.
+- Separate TCP connections for GitHub ranges (a native downloader with several sessions) would
+  let a map share the line instead of going first; not needed while every source alone fills it.
+- The slow-head-range dips remain (a 32 MiB range on a 1–2 MB/s mirror fills the 2 GiB window
+  for ~10 s, two or three times per Wikipedia).
 - Kiwix's policy on parallel connections (open question below) is still unasked.
 
 ## The problem

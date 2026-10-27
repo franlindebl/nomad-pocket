@@ -221,6 +221,34 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-27 — Downloads tuned on a real iPhone: the setup kit in ~6:30 instead of 13 min
+
+Seven runs of the same setup kit (Spain's map + 12 guides + Wikipedia es nopic + Qwen3.5 2B,
+20.7 GB) on the owner's iPhone 14 Pro, next to a ~530 Mb/s Wi-Fi, each from a fresh install of a
+Release build (`xcodebuild` + `devicectl`), reading `[dltrace]` timing lines (new
+`downloads/trace.ts`) from `idevicesyslog`. Build 16 took 13:04 (Wikipedia at 18.8 MB/s, 40 % of
+the line); now ~6:20–6:40 with the app open, the map ready in ~1:45, Wikipedia at 55 MB/s, ~90 %
+of the line. Measurements and findings: `docs/DOWNLOADS_SPEED_PLAN.md` ("On a real iPhone");
+contract: ARCHITECTURE (Downloads). What changed:
+
+- Budget: Wi-Fi 16–32 connections, +4 per trial, kept unless the speed fell (the 15 % rule could
+  never pass 14). A window spanning an iOS suspension decides nothing.
+- iOS: ranges run in the in-process URLSession while the app is open (the background session held
+  ranges at 0 % for minutes and topped out lower); the background reserve is queued on `inactive`
+  (created in the background it was discretionary and got nothing); back in the foreground,
+  never-started background ranges are dropped without blaming their mirror.
+- Stall watchdog: a range with no byte for 15 s is fetched again. Sources under 25 % of the best
+  get no ranges (was 10 %). Up to 2 GiB may wait behind the head range (was 1).
+- CDN first: a Kiwix archive ≥ 1 GB waits while GitHub / Hugging Face files have ≥ 300 MB to go:
+  each of those hosts is one HTTP/2 connection and lost to 20 connections to the mirrors (the map
+  came last). 12 connections per CDN host (was 6).
+- The whole-file sha-256 is skipped when every metalink piece was checked in the run (10 s at the
+  end of a 13 GB file).
+
+Also seen: processing is not the bottleneck (map assembly 4–7 s, search imports ~2 min that now
+run under Wikipedia's download). In the background iOS lets the reserve finish (~1 GB in 2 min)
+but nothing new starts until the app is back. Android not run yet (next).
+
 ### 2026-10-27 — Onboarding: the country's map no longer drops out when a catalog fetch fails
 
 A fresh install has no cached maps/routing catalog, so one failed request (seen once in a Maestro

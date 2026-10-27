@@ -16,6 +16,8 @@ import {
   parseChunkKey,
   progressBytes,
   sortChunkFiles,
+  STALL_MS,
+  stalledJobs,
   startJob,
   stuck,
   validPrefix,
@@ -220,7 +222,7 @@ test('a mirror that measured well but crawls under load loses its work before it
 });
 
 test('at the end of a file, any crawling range is fetched again, not only the first', () => {
-  const slow = mirror('slow', 3e6, 1);
+  const slow = mirror('slow', 5e6, 1);
   const fast = mirror('fast', 16e6, 2);
   const s = newState({ size: 3 * C, chunkBytes: C, prefix: 0, sources: [slow, fast] });
   fill(s);
@@ -251,4 +253,19 @@ test('bigger ranges for the iOS background session stop where something else cov
   startJob(s, { start: 5 * C, end: 6 * C, source: s.sources[0], duplicate: false }, 0);
   const big = nextJob(s, 0, { maxConns: 8, aheadBytes: 20 * C, chunks: 8 })!;
   assert.deepEqual([big.start, big.end], [0, 5 * C]);
+});
+
+test('a range with no byte for STALL_MS is stalled; failing it frees the slot and the range goes elsewhere', () => {
+  const a = mirror('a.org', 5 * MiB);
+  const b = mirror('b.org', 4 * MiB);
+  const s = newState({ size: 10 * C, chunkBytes: C, prefix: 0, sources: [a, b] });
+  fill(s, 0, { maxConns: 2, aheadBytes: 1024 * MiB });
+  const [head, other] = s.jobs;
+  other.bytes = 1000;
+  other.progressAt = STALL_MS - 1;
+  assert.deepEqual(stalledJobs(s, STALL_MS - 1), []);
+  assert.deepEqual(stalledJobs(s, STALL_MS), [head]);
+  jobFailed(s, head, STALL_MS, 'error');
+  const next = nextJob(s, STALL_MS, { maxConns: 2, aheadBytes: 1024 * MiB });
+  assert.equal(next?.start, 0, 'the head is fetched again first');
 });

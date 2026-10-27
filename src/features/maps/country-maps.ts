@@ -323,7 +323,9 @@ async function assembleMap(map: CountryMap, bundledPoints: boolean, from?: Downl
       await parts[0].move(tmp);
     } else {
       // Waits for another country's assembly: room for one copy at a time (assembly.ts).
+      const start = Date.now();
       await oneAssemblyAtATime(async () => {
+        console.log(`[dltrace] assemble ${map.id} waited ${Date.now() - start} ms`);
         tmp.create();
         // Natively, one block in memory at a time (nomad-files): a part takes seconds, so the
         // country's removal is checked between parts.
@@ -333,6 +335,7 @@ async function assembleMap(map: CountryMap, bundledPoints: boolean, from?: Downl
           offset += await copyInto(part.uri, tmp.uri, offset);
         }
       });
+      console.log(`[dltrace] assemble ${map.id} ${Date.now() - start} ms`);
     }
     if (sizeOf(tmp) !== map.size) throw new Error(`assembled ${sizeOf(tmp)} bytes, expected ${map.size}`);
     check();
