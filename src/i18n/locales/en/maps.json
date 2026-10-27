@@ -12,7 +12,7 @@
   },
   "empty": {
     "title": "Download your country's map",
-    "body": "You already have the world map. With your country you get streets, routes and emergency points offline.",
+    "body": "You're seeing a basic world map, with no streets. Download your country to get streets, routes and emergency points offline.",
     "country": "Download {{name}}",
     "pickCountry": "Choose a country",
     "downloadingTitle": "Downloading {{name}}",
@@ -33,8 +33,8 @@
   "regions": {
     "title": "Your maps",
     "intro": "Each country comes with its map at full detail, offline navigation and its emergency points.",
-    "world": "World map",
-    "worldBody": "Countries, cities and main roads. Comes with the app.",
+    "world": "Basic world map",
+    "worldBody": "Only countries, big cities and main roads, no streets. Comes with the app.",
     "included": "Included",
     "addCountry": "Add a country",
     "addFirstCountry": "Download your country",
@@ -70,7 +70,7 @@
   },
   "download": {
     "group": "{{name}} map",
-    "titleWorld": "World map",
+    "titleWorld": "Basic world map",
     "estimating": "Working out the size…",
     "size": "Download size",
     "free": "{{size}} free on this device",

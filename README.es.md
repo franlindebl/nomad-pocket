@@ -98,7 +98,7 @@ aún tengas internet.
   calles, caminos y edificios), rutas paso a paso en coche, a pie y en bici, los puntos de
   emergencia, y todas las calles, lugares y portales para el buscador (una dirección te lleva
   a la puerta, o junto a ella si OpenStreetMap no tiene ese número).
-- **Mapa del mundo incluido en la app**: hay mapa desde el primer segundo.
+- **Mapa básico del mundo incluido en la app**: hay mapa desde el primer segundo; cada país se descarga con todo su detalle.
 - Vista de navegación que te sigue, haz de la brújula, lugares guardados, coordenadas y UTM.
 - Mapas y navegación sin conexión de todos los países (menos algunos territorios
   deshabitados). Canadá, Rusia y Estados Unidos vienen con un nivel de zoom menos (z14), para

@@ -12,7 +12,7 @@
   },
   "empty": {
     "title": "Descarga el mapa de tu país",
-    "body": "Ya tienes el mapa del mundo. Con tu país tendrás calles, rutas y puntos de emergencia sin conexión.",
+    "body": "Ahora ves un mapa básico del mundo, sin calles. Descarga tu país para tener calles, rutas y puntos de emergencia sin conexión.",
     "country": "Descargar {{name}}",
     "pickCountry": "Elegir un país",
     "downloadingTitle": "Descargando {{name}}",
@@ -33,8 +33,8 @@
   "regions": {
     "title": "Tus mapas",
     "intro": "Cada país trae su mapa con el máximo detalle, la navegación sin conexión y sus puntos de emergencia.",
-    "world": "Mapa del mundo",
-    "worldBody": "Países, ciudades y carreteras principales. Viene con la app.",
+    "world": "Mapa básico del mundo",
+    "worldBody": "Solo países, grandes ciudades y carreteras principales, sin calles. Viene con la app.",
     "included": "Incluido",
     "addCountry": "Añadir un país",
     "addFirstCountry": "Descargar tu país",
@@ -70,7 +70,7 @@
   },
   "download": {
     "group": "Mapa de {{name}}",
-    "titleWorld": "Mapa del mundo",
+    "titleWorld": "Mapa básico del mundo",
     "estimating": "Calculando el tamaño…",
     "size": "Tamaño de la descarga",
     "free": "{{size}} libres en este dispositivo",
