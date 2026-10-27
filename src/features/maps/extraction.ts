@@ -37,6 +37,11 @@ export type MapItemMeta = {
   regionId?: string | null;
   /** Emergency points came with the download (country map or routing pack): no Overpass. */
   bundledPoints?: boolean;
+  /**
+   * Every named place and street of its country comes in search files (country map or routing
+   * pack): its tiles are indexed at a low zoom, and never in detail around the user (places.ts).
+   */
+  bundledSearch?: boolean;
 };
 
 export type Build = { url: string; date: string };

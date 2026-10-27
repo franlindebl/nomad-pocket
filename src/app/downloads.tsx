@@ -8,6 +8,8 @@ import { DownloadRow } from '@/features/downloads/DownloadRow';
 import { groupDownloads } from '@/features/downloads/groups';
 import { keepsAwake } from '@/features/downloads/keep-awake';
 import { allowMobileData, useActiveDownloads, useDownloads, waitingReason } from '@/features/downloads/manager';
+import { usePreparingCountries } from '@/features/maps/countries';
+import { PreparingCountries } from '@/features/maps/PreparingCountries';
 import { useSettings } from '@/stores/settings';
 import { space, useTheme } from '@/theme';
 
@@ -20,6 +22,8 @@ export default function DownloadsScreen() {
   const wifiOnly = useSettings((s) => s.wifiOnly);
   const rows = downloads.map((d) => ({ entry: d, waiting: waitingReason(d.records, network, wifiOnly) }));
   const waitingForWifi = rows.filter((r) => r.entry.status === 'queued' && r.waiting === 'wifi');
+  // Downloaded countries still being prepared: the last step of their download.
+  const preparing = usePreparingCountries();
   return (
     <Screen contentStyle={{ paddingTop: space.lg }}>
       {/* Android form sheets have no native header. */}
@@ -49,15 +53,16 @@ export default function DownloadsScreen() {
           />
         </Card>
       ) : null}
-      {downloads.length === 0 ? (
+      {downloads.length === 0 && preparing.length === 0 ? (
         <EmptyState icon={Download} hue="survival" title={t('downloads.empty')} body={t('downloads.emptyBody')} />
-      ) : (
+      ) : downloads.length ? (
         <ListGroup>
           {rows.map(({ entry, waiting }) => (
             <DownloadRow key={entry.id} entry={entry} waiting={waiting} />
           ))}
         </ListGroup>
-      )}
+      ) : null}
+      <PreparingCountries countries={preparing} style={downloads.length ? { marginTop: space.md } : undefined} />
       {keepsAwake(records) ? (
         <Text variant="footnote" color="textSecondary" style={{ marginTop: space.md }} testID="downloads-keep-awake">
           {t('downloads.keepAwake')}

@@ -29,6 +29,8 @@ import {
 import { bestZoom, estimateExtract, mapItemId, startMapDownload, WORLD_ID, type Estimate } from './extraction';
 import { getRegion, regionName, type Region } from './regions';
 import { routePackId, type RoutePackItem } from './routing';
+import { usePreparing } from './prepare';
+import { preparedFraction } from './prepare-core';
 import type { ManifestPack } from './routing-core';
 import { abortPack, discardPackFiles, downloadPack, packPlan, refreshRoutingCatalog, useRoutingCatalog } from './routing-packs';
 import type { MapItem } from './useMapSources';
@@ -341,6 +343,11 @@ export type CountryState = {
   sizeBytes: number;
   /** 0–1 while something is downloading, else null. */
   progress: number | null;
+  /**
+   * 0–1 while its maps and packs are being prepared after the download (search index, side
+   * file imports, emergency points: prepare.ts), else null. Ready to use only after it.
+   */
+  preparing: number | null;
   failed: boolean;
   /** YYYYMMDD of the map data. */
   buildDate: string | null;
@@ -371,6 +378,7 @@ export function useCountries(): { countries: CountryState[]; otherMaps: MapItem[
   const records = useDownloads((s) => s.records);
   const catalogMaps = useMapsCatalog((s) => s.manifest?.maps);
   const catalogPacks = useRoutingCatalog((s) => s.manifest?.packs);
+  const preparing = usePreparing((s) => s.items);
 
   return useMemo(() => {
     const byCountry = new Map<string, CountryState>();
@@ -388,6 +396,7 @@ export function useCountries(): { countries: CountryState[]; otherMaps: MapItem[
           packs: [],
           sizeBytes: 0,
           progress: null,
+          preparing: null,
           failed: false,
           buildDate: null,
           update: false,
@@ -432,6 +441,7 @@ export function useCountries(): { countries: CountryState[]; otherMaps: MapItem[
     }
     for (const c of byCountry.values()) {
       c.sizeBytes = c.maps.reduce((sum, m) => sum + m.sizeBytes, 0) + c.packs.reduce((sum, p) => sum + p.sizeBytes, 0);
+      c.preparing = preparedFraction(preparing, [...c.maps, ...c.packs].map((i) => i.id));
       c.regions.sort();
       const mine = recordsBy.get(c.regionId) ?? [];
       const running = mine.filter((r) => ACTIVE.has(r.status));
@@ -461,7 +471,13 @@ export function useCountries(): { countries: CountryState[]; otherMaps: MapItem[
     }
     const countries = [...byCountry.values()].sort((a, b) => a.title.localeCompare(b.title, i18n.language));
     return { countries, otherMaps };
-  }, [maps, packs, records, catalogMaps, catalogPacks]);
+  }, [maps, packs, records, catalogMaps, catalogPacks, preparing]);
+}
+
+/** Countries whose files are in and that are still being prepared (search, emergency points). */
+export function usePreparingCountries(): CountryState[] {
+  const { countries } = useCountries();
+  return useMemo(() => countries.filter((c) => c.progress === null && c.preparing !== null), [countries]);
 }
 
 /**

@@ -274,6 +274,9 @@ export default function OnboardingScreen() {
     (on.assistant && !kit.systemModel && !kit.modelInstalled && !kit.modelDownloading);
   const installedBadge = { label: tc('status.installed'), tone: 'success' } as const;
   const downloadingBadge = { label: tc('status.running'), tone: 'accent' } as const;
+  const preparingBadge = { label: tc('status.processing'), tone: 'accent' } as const;
+  // Downloaded, its search and emergency points still on their way in.
+  const countryPreparing = countries.some((c) => c.regionId === country && c.progress === null && c.preparing !== null);
 
   return (
     // The country search's keyboard must not cover the step's buttons. The bottom inset is a
@@ -398,7 +401,9 @@ export default function OnboardingScreen() {
                 }
                 value={on.country}
                 onChange={kit.countryWanted ? (v) => setOn((o) => ({ ...o, country: v })) : undefined}
-                badge={kit.countryInstalled ? installedBadge : kit.countryDownloading ? downloadingBadge : undefined}
+                badge={
+                  kit.countryInstalled ? (countryPreparing ? preparingBadge : installedBadge) : kit.countryDownloading ? downloadingBadge : undefined
+                }
               />
               {offer?.regions && on.country && !kit.countryInstalled && !kit.countryDownloading ? (
                 <RegionList offer={offer} chosen={regions} />

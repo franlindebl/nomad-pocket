@@ -77,6 +77,7 @@
     "mapStale": "Tiene más de 6 meses: actualízalo mientras tengas conexión",
     "mapTodo": "Descárgalo: calles, rutas y hospitales sin conexión",
     "downloading": "Descargando… {{pct}} %",
+    "preparing": "Preparando búsqueda y puntos… {{pct}} %",
     "guides": "Guías de supervivencia",
     "guidesDone": "{{count}} de {{total}} guías",
     "guidesTodo": "Primeros auxilios, medicina, agua y comida",

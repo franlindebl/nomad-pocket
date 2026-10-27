@@ -10,6 +10,7 @@ import { distanceMeters, formatLatLon, formatUtm, parseCoordinates, toUtm, type 
 import { distanceWithDirection, kindColor, kindIcon, kindLabel } from '@/features/maps/labels';
 import { useMarkers } from '@/features/maps/markers';
 import { normalizeName } from '@/features/maps/places-core';
+import { usePreparingCountries } from '@/features/maps/countries';
 import { hasSearchIndex, indexDetailAroundView, searchPlaces, usePlaceIndex, type SearchResult } from '@/features/maps/places';
 import { showPlace, useMapUi, type SelectedPlace } from '@/features/maps/store';
 import { space, useTheme } from '@/theme';
@@ -33,7 +34,8 @@ export default function SearchSheet() {
     const c = useMapUi.getState().viewport?.center;
     return c ? { lon: c[0], lat: c[1] } : null;
   }, []);
-  // Big maps are indexed coarsely: add the detail (schools, shops…) of the area shown.
+  // Big maps are indexed coarsely: add the detail (schools, shops…) of the area shown (not for a
+  // country whose search files are in: places.ts).
   useEffect(() => indexDetailAroundView(), []);
 
   const coords = useMemo(() => parseCoordinates(deferred), [deferred]);
@@ -71,9 +73,13 @@ export default function SearchSheet() {
     router.back();
   };
   const away = (p: LatLon) => (near ? distanceWithDirection(t, i18n.language, near, p, distanceMeters(near, p)) : null);
-  const indexing = Object.entries(progress)
-    .map(([id, value]) => ({ name: maps.find((m) => m.id === id)?.title ?? id, value }))
-    .at(0);
+  // A country still being prepared after its download (all of its search), else a map's tiles being indexed.
+  const preparing = usePreparingCountries().at(0);
+  const indexing = preparing
+    ? { name: preparing.title, value: preparing.preparing ?? 0 }
+    : Object.entries(progress)
+        .map(([id, value]) => ({ name: maps.find((m) => m.id === id)?.title ?? id, value }))
+        .at(0);
 
   return (
     <Screen contentStyle={{ paddingTop: space.lg }}>
@@ -89,7 +95,7 @@ export default function SearchSheet() {
 
       {indexing ? (
         <Text variant="footnote" color="textSecondary" style={{ marginTop: space.md }}>
-          {t('search.indexing', { name: indexing.name, percent: Math.round(indexing.value * 100) })}
+          {t('search.indexing', { name: indexing.name, percent: Math.floor(indexing.value * 100) })}
         </Text>
       ) : null}
 

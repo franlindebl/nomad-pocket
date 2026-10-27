@@ -44,6 +44,7 @@
     "mapOnly": "Mapa",
     "routingOnly": "Solo navegación",
     "downloadingPct": "Descargando… {{pct}} %",
+    "preparingPct": "Preparando búsqueda y puntos… {{pct}} %",
     "failed": "La descarga se interrumpió",
     "retry": "Reintentar",
     "deleteTitle": "¿Eliminar {{name}}?",

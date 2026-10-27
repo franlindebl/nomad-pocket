@@ -1,10 +1,10 @@
 // Offline place search over installed maps. Each map item's tiles are decoded
-// once into a SQLite FTS5 index (map_places, in the index file: indexDb) in the
-// background, one map at a time, in small batches so the JS thread stays responsive.
-// Country files (places, streets, house numbers) and emergency points (emergency.ts)
-// go into the same index; the points themselves (map_pois) live in the same file. Writes
-// to it take turns (exclusive); searches and the big deletes of a removed map run off the
-// JS thread on a second connection.
+// once into a SQLite FTS5 index (map_places, in the index file: indexDb) right after its
+// download, one map at a time, in slices of a few ms so the JS thread stays responsive.
+// Country files (places, streets, house numbers: import-core.ts) and emergency points
+// (emergency.ts) go into the same index; the points themselves (map_pois) live in the same
+// file. Writes to it take turns (exclusive); every bulk write and delete, and the searches,
+// run off the JS thread on a second connection (a DELETE by source reads the whole FTS table).
 import { File, FileMode } from 'expo-file-system';
 import { create } from 'zustand';
 
@@ -16,20 +16,17 @@ import { countBBoxTiles, listZoomTiles, readTile, type Header, type RangeSource,
 
 import { kindCategory, tileEmergencyKind } from './emergency-core';
 import { bboxAround, distanceMeters, type LatLon } from './geo';
+import { addressImport, importPlacesBlock, importStreetsBlock, insertRows as insertRowsInto, type AsyncSql } from './import-core';
 import {
   ftsQuery,
   INDEX_LAYERS,
-  indexText,
   matchCap,
   nearestLocality,
   houseNumberKey,
   locateHouseNumber,
   nameKey,
   parseAddress,
-  parseAddressesTsv,
   parseJapaneseAddress,
-  parsePlacesTsv,
-  parseStreetsTsv,
   pickIndexZoom,
   rankHits,
   tileRows,
@@ -38,25 +35,13 @@ import {
   type PlaceLayer,
   type PlaceRow,
 } from './places-core';
+import { beginTask, endTask, updateTask } from './prepare';
+import { forEachLineBlock } from './side-files';
 import { useMapUi } from './store';
 import { resolveMapFile, type MapItem } from './useMapSources';
 
 /** Bump to rebuild every index after changing what tileRows extracts. */
 export const INDEX_VERSION = 1;
-
-const BATCH_TILES = 24;
-const LOCALITY_KINDS = new Set([
-  'city',
-  'town',
-  'village',
-  'hamlet',
-  'locality',
-  'suburb',
-  'neighbourhood',
-  'quarter',
-  'macrohood',
-  'isolated_dwelling',
-]);
 
 /** Indexing progress per map item id (0..1), and a counter bumped whenever an index changes (the search sheet re-queries). */
 export const usePlaceIndex = create<{ progress: Record<string, number>; version: number }>(() => ({ progress: {}, version: 0 }));
@@ -72,10 +57,20 @@ function setProgress(id: string, value: number | null) {
   });
 }
 
-/** Synchronous positional reads from a local archive. */
+/** JS work between two yields to the UI: a frame is ~16 ms. */
+const SLICE_MS = 12;
+
+const yieldToUi = () => new Promise<void>((r) => setTimeout(r, 0));
+
+/**
+ * Synchronous positional reads from a local archive. Every SLICE_MS of reading (and of what
+ * the caller does in between: listing a big map's directories decompresses hundreds of them)
+ * it yields to the UI.
+ */
 class LocalFileSource implements RangeSource {
   readonly key: string;
   private readonly handle: ReturnType<File['open']>;
+  private since = Date.now();
 
   constructor(file: File) {
     this.key = file.uri;
@@ -83,6 +78,10 @@ class LocalFileSource implements RangeSource {
   }
 
   async getBytes(offset: number, length: number): Promise<Uint8Array> {
+    if (Date.now() - this.since > SLICE_MS) {
+      await yieldToUi();
+      this.since = Date.now();
+    }
     this.handle.offset = offset;
     return this.handle.readBytesSync(length);
   }
@@ -95,8 +94,6 @@ class LocalFileSource implements RangeSource {
     }
   }
 }
-
-const yieldToUi = () => new Promise<void>((r) => setTimeout(r, 0));
 
 let writes: Promise<unknown> = Promise.resolve();
 
@@ -126,38 +123,25 @@ function markIndexed(itemId: string, zoom: number | null = null) {
 const isIndexed = (itemId: string) =>
   !!indexDb().getFirstSync('SELECT 1 FROM index_sources WHERE item_id = ? AND index_version IS NOT NULL', itemId);
 
-function insertRows(source: string, rows: PlaceRow[]) {
-  if (!rows.length) return;
-  const d = indexDb();
-  const place = d.prepareSync(
-    'INSERT INTO map_places (names, name, layer, kind, lat, lon, importance, source) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-  );
-  const locality = d.prepareSync('INSERT INTO map_localities (source, name, lat, lon) VALUES (?, ?, ?, ?)');
-  try {
-    d.withTransactionSync(() => {
-      for (const r of rows) {
-        // Unnamed emergency points (drinking water…) only feed the emergency list.
-        if (!r.name) continue;
-        place.executeSync(indexText(r.names), r.name, r.layer, r.kind, r.lat, r.lon, r.rank, source);
-        if (r.layer === 'place' && LOCALITY_KINDS.has(r.kind)) locality.executeSync(source, r.name, r.lat, r.lon);
-      }
-    });
-  } finally {
-    place.finalizeSync();
-    locality.finalizeSync();
-  }
+/** The index file's background connection, as import-core.ts takes it. */
+function background(): AsyncSql {
+  const d = indexDbAsync();
+  return { run: (sql, params) => d.runAsync(sql, params ?? {}), all: (sql, params) => d.getAllAsync(sql, params ?? {}) };
 }
 
-export function deletePlaceRows(source: string) {
-  indexDb().runSync('DELETE FROM map_places WHERE source = ?', source);
-  indexDb().runSync('DELETE FROM map_localities WHERE source = ?', source);
+const insertRows = (source: string, rows: PlaceRow[]) => insertRowsInto(background(), source, rows);
+
+export async function deletePlaceRows(source: string) {
+  const d = indexDbAsync();
+  await d.runAsync('DELETE FROM map_places WHERE source = ?', source);
+  await d.runAsync('DELETE FROM map_localities WHERE source = ?', source);
 }
 
 /** Adds emergency points to the search index under 'pois:<item id>' (replacing earlier ones), in turn with other writes. */
 export function indexEmergencyPoints(itemId: string, rows: PlaceRow[]) {
-  void exclusive(() => {
-    deletePlaceRows(`pois:${itemId}`);
-    insertRows(`pois:${itemId}`, rows);
+  void exclusive(async () => {
+    await deletePlaceRows(`pois:${itemId}`);
+    await insertRows(`pois:${itemId}`, rows);
     bumpVersion();
   });
 }
@@ -172,9 +156,9 @@ export function hasPackStreets(itemId: string): boolean {
  * inserted in batches with a yield in between, so the UI stays responsive. Counted as
  * a search index (hasSearchIndex) even without a map installed.
  */
-export function indexPackStreets(itemId: string, file: File): Promise<void> {
+export function indexPackStreets(itemId: string, file: File, onProgress?: (done: number) => void): Promise<void> {
   return exclusive(async () => {
-    if (!(await insertStreetsFile(itemId, itemId, file))) return;
+    if (!(await insertStreetsFile(itemId, itemId, file, onProgress))) return;
     markIndexed(itemId);
     bumpVersion();
   });
@@ -183,41 +167,8 @@ export function indexPackStreets(itemId: string, file: File): Promise<void> {
 // --- Every named place of a country (pack side files) ---------------------------
 
 const placesSource = (itemId: string) => `places:${itemId}`;
-const LINE_BLOCK = 4 * 1024 * 1024;
-
-/**
- * Calls `onBlock` with the text of a big TSV file a few MB of whole lines at a time: a
- * country's places file (~100 MB) read in one string would be several hundred MB in Hermes.
- */
-async function forEachLineBlock(file: File, onBlock: (text: string) => Promise<boolean>) {
-  const handle = file.open(FileMode.ReadOnly);
-  const decoder = new TextDecoder('utf-8');
-  let carry = new Uint8Array(0);
-  try {
-    for (;;) {
-      const chunk = await handle.readBytes(LINE_BLOCK);
-      let data = chunk;
-      if (carry.length) {
-        data = new Uint8Array(carry.length + chunk.length);
-        data.set(carry);
-        data.set(chunk, carry.length);
-      }
-      if (!chunk.length) {
-        if (data.length) await onBlock(decoder.decode(data));
-        return;
-      }
-      const cut = data.lastIndexOf(10);
-      if (cut < 0) {
-        carry = data;
-        continue;
-      }
-      if (!(await onBlock(decoder.decode(data.subarray(0, cut))))) return;
-      carry = data.slice(cut + 1);
-    }
-  } finally {
-    handle.close();
-  }
-}
+/** Import blocks: SQLite takes one at a time (~0.1–0.3 s on a phone), and a search waits for the one running. */
+const IMPORT_BLOCK = 1024 * 1024;
 
 /** Whether a country's places file was imported for this item. */
 export function hasPackPlaces(itemId: string): boolean {
@@ -230,21 +181,22 @@ export function hasPackPlaces(itemId: string): boolean {
  * of the country whatever the map's zoom. Batches with a yield in between; replaces an
  * earlier import; stops (leaving nothing) when the item is removed meanwhile.
  */
-export function indexPackPlaces(itemId: string, file: File): Promise<void> {
+export function indexPackPlaces(itemId: string, file: File, onProgress?: (done: number) => void): Promise<void> {
   return exclusive(async () => {
     const source = placesSource(itemId);
-    deletePlaceRows(source);
+    await deletePlaceRows(source);
     indexDb().runSync('DELETE FROM index_sources WHERE item_id = ?', source);
-    await forEachLineBlock(file, async (text) => {
-      const rows = parsePlacesTsv(text);
-      for (let i = 0; i < rows.length && getItem(itemId); i += 5000) {
-        insertRows(source, rows.slice(i, i + 5000));
-        await yieldToUi();
-      }
-      return !!getItem(itemId);
-    });
+    const db = background();
+    await forEachLineBlock(
+      file,
+      async (text) => {
+        await importPlacesBlock(db, source, text);
+        return !!getItem(itemId);
+      },
+      { blockBytes: IMPORT_BLOCK, onProgress },
+    );
     if (!getItem(itemId)) {
-      deletePlaceRows(source); // removed meanwhile
+      await deletePlaceRows(source); // removed meanwhile
       return;
     }
     // Its own index_sources row: counts as a search index, and never as the item's tile index.
@@ -259,9 +211,10 @@ const addressesSource = (itemId: string) => `addresses:${itemId}`;
 /** Coordinates are stored in 1e-5 degrees. */
 const E5 = 1e5;
 
-function deleteAddresses(itemId: string) {
-  indexDb().runSync('DELETE FROM map_addresses WHERE street IN (SELECT id FROM map_address_streets WHERE source = ?)', itemId);
-  indexDb().runSync('DELETE FROM map_address_streets WHERE source = ?', itemId);
+async function deleteAddresses(itemId: string) {
+  const d = indexDbAsync();
+  await d.runAsync('DELETE FROM map_addresses WHERE street IN (SELECT id FROM map_address_streets WHERE source = ?)', itemId);
+  await d.runAsync('DELETE FROM map_address_streets WHERE source = ?', itemId);
 }
 
 /** Whether a country's addresses file was imported for this item. */
@@ -271,48 +224,32 @@ export function hasPackAddresses(itemId: string): boolean {
 
 /**
  * Imports a country's house numbers (scripts/routing/places.py) for `itemId`, the routing
- * pack or map item they came with, replacing an earlier import. Millions of rows for a
- * big country: read in blocks, inserted in transactions of 5000 with a yield in between;
- * stops (leaving nothing) when the item is removed meanwhile.
+ * pack or map item they came with, replacing an earlier import. Millions of rows for a big
+ * country, read in blocks (import-core.ts); stops (leaving nothing) when the item is removed
+ * meanwhile.
  */
-export function indexPackAddresses(itemId: string, file: File): Promise<void> {
-  return exclusive(() => importAddresses(itemId, file));
+export function indexPackAddresses(itemId: string, file: File, onProgress?: (done: number) => void): Promise<void> {
+  return exclusive(() => importAddresses(itemId, file, onProgress));
 }
 
-async function importAddresses(itemId: string, file: File) {
-  const d = indexDb();
-  deleteAddresses(itemId);
-  d.runSync('DELETE FROM index_sources WHERE item_id = ?', addressesSource(itemId));
-  const streets = new Map<string, number>();
-  const street = d.prepareSync('INSERT INTO map_address_streets (source, key) VALUES (?, ?)');
-  // A door mapped twice (building + entrance node at the same spot) is kept once.
-  const door = d.prepareSync('INSERT OR IGNORE INTO map_addresses (street, lat, lon, number) VALUES (?, ?, ?, ?)');
+async function importAddresses(itemId: string, file: File, onProgress?: (done: number) => void) {
+  await deleteAddresses(itemId);
+  indexDb().runSync('DELETE FROM index_sources WHERE item_id = ?', addressesSource(itemId));
+  const job = addressImport(background(), itemId);
   try {
-    await forEachLineBlock(file, async (text) => {
-      const rows = parseAddressesTsv(text);
-      for (let i = 0; i < rows.length && getItem(itemId); i += 5000) {
-        d.withTransactionSync(() => {
-          for (const r of rows.slice(i, i + 5000)) {
-            const key = nameKey(r.street);
-            if (!key) continue;
-            let id = streets.get(key);
-            if (id === undefined) {
-              id = street.executeSync(itemId, key).lastInsertRowId;
-              streets.set(key, id);
-            }
-            door.executeSync(id, Math.round(r.lat * E5), Math.round(r.lon * E5), r.number);
-          }
-        });
-        await yieldToUi();
-      }
-      return !!getItem(itemId);
-    });
+    await forEachLineBlock(
+      file,
+      async (text) => {
+        await job.block(text);
+        return !!getItem(itemId);
+      },
+      { blockBytes: IMPORT_BLOCK, onProgress },
+    );
   } finally {
-    street.finalizeSync();
-    door.finalizeSync();
+    await job.finish();
   }
   if (!getItem(itemId)) {
-    deleteAddresses(itemId); // removed meanwhile
+    await deleteAddresses(itemId); // removed meanwhile
     return;
   }
   markIndexed(addressesSource(itemId));
@@ -338,9 +275,9 @@ async function doorsNear(streetName: string, near: LatLon, meters: number): Prom
  * A country map's street and locality names (country-maps.ts, where no routing pack brings
  * them), under 'streets:<item id>' so the map's own tile index keeps its rows.
  */
-export function indexMapStreets(itemId: string, file: File): Promise<void> {
+export function indexMapStreets(itemId: string, file: File, onProgress?: (done: number) => void): Promise<void> {
   return exclusive(async () => {
-    await insertStreetsFile(`streets:${itemId}`, itemId, file);
+    await insertStreetsFile(`streets:${itemId}`, itemId, file, onProgress);
     bumpVersion();
   });
 }
@@ -349,18 +286,19 @@ export function indexMapStreets(itemId: string, file: File): Promise<void> {
  * A streets file (France: 150 MB) into the index under `source`, read in blocks like the
  * places. False, leaving nothing, when the item is removed meanwhile.
  */
-async function insertStreetsFile(source: string, itemId: string, file: File): Promise<boolean> {
-  deletePlaceRows(source);
-  await forEachLineBlock(file, async (text) => {
-    const rows = parseStreetsTsv(text);
-    for (let i = 0; i < rows.length && getItem(itemId); i += 5000) {
-      insertRows(source, rows.slice(i, i + 5000));
-      await yieldToUi();
-    }
-    return !!getItem(itemId);
-  });
+async function insertStreetsFile(source: string, itemId: string, file: File, onProgress?: (done: number) => void): Promise<boolean> {
+  await deletePlaceRows(source);
+  const db = background();
+  await forEachLineBlock(
+    file,
+    async (text) => {
+      await importStreetsBlock(db, source, text);
+      return !!getItem(itemId);
+    },
+    { blockBytes: IMPORT_BLOCK, onProgress },
+  );
   if (getItem(itemId)) return true;
-  deletePlaceRows(source); // removed meanwhile
+  await deletePlaceRows(source); // removed meanwhile
   return false;
 }
 
@@ -398,17 +336,26 @@ const cancelled = new Set<string>();
 let queue: Promise<void> = Promise.resolve();
 const queued = new Set<string>();
 
+/**
+ * Highest zoom the whole map is indexed at when its country's search files bring every named
+ * place and street (bundledSearch): what they lack (islands, regions, big towns) is in the
+ * tiles from here up, at a fraction of the tiles (Spain: ~3k at z10 against ~40k at z12).
+ */
+const SEARCH_FILES_ZOOM = 10;
+/** What indexing one tile is worth next to a byte of a side file being imported (prepare.ts). */
+const TILE_WEIGHT = 10_000;
+
 /** Zoom the whole map is indexed at (big maps: a low one, see pickIndexZoom). */
 function indexZoomOf(meta: MapItem['meta']): number {
-  return meta.role === 'world'
-    ? Math.min(meta.maxZoom, 5)
-    : pickIndexZoom(meta.maxZoom, meta.minZoom, (zz) => countBBoxTiles(meta.bbox, zz, zz));
+  if (meta.role === 'world') return Math.min(meta.maxZoom, 5);
+  const z = pickIndexZoom(meta.maxZoom, meta.minZoom, (zz) => countBBoxTiles(meta.bbox, zz, zz));
+  return meta.bundledSearch ? Math.min(z, Math.max(meta.minZoom, SEARCH_FILES_ZOOM)) : z;
 }
 
 /**
- * Decodes `tiles` into the index under `source`, replacing its rows, in batches with a
- * yield in between (progress shows under the map's id). False when the map was removed
- * meanwhile (nothing is left behind).
+ * Decodes `tiles` into the index under `source`, replacing its rows, a few ms of JS at a time
+ * (progress shows under the map's id, and goes to `onProgress`). False when the map was
+ * removed meanwhile (nothing is left behind).
  */
 async function indexTiles(
   item: MapItem,
@@ -416,32 +363,37 @@ async function indexTiles(
   header: Header,
   tiles: TileEntry[],
   source: string,
-  onRows?: (rows: PlaceRow[]) => void,
+  { onRows, onProgress }: { onRows?: (rows: PlaceRow[]) => void; onProgress?: (done: number) => void } = {},
 ) {
-  deletePlaceRows(source);
+  await deletePlaceRows(source);
   setProgress(item.id, 0);
-  for (let i = 0; i < tiles.length; i += BATCH_TILES) {
-    if (cancelled.has(item.id)) break;
+  let i = 0;
+  while (i < tiles.length && !cancelled.has(item.id)) {
     const rows: PlaceRow[] = [];
-    for (const t of tiles.slice(i, i + BATCH_TILES)) {
+    const start = Date.now();
+    // A dense city tile takes a few ms to decode: a slice's worth, then SQLite inserts them
+    // on its own thread while the UI gets the JS thread back.
+    do {
+      const t = tiles[i++];
       try {
         rows.push(...tileRows(decodeTile(await readTile(file, header, t), INDEX_LAYERS), t.z, t.x, t.y, keepUnnamedEmergency));
       } catch (e) {
         console.warn('[maps] cannot index tile', t.z, t.x, t.y, e);
       }
-    }
-    insertRows(source, rows);
+    } while (i < tiles.length && Date.now() - start < SLICE_MS);
+    await insertRows(source, rows);
     onRows?.(rows);
-    setProgress(item.id, Math.min(1, (i + BATCH_TILES) / Math.max(1, tiles.length)));
+    setProgress(item.id, i / tiles.length);
+    onProgress?.(i / tiles.length);
     await yieldToUi();
   }
-  // Removed during a batch or the last batch's yield: don't record anything for it.
+  // Removed during a slice or the last insert: don't record anything for it.
   if (!cancelled.has(item.id)) return true;
-  deletePlaceRows(source);
+  await deletePlaceRows(source);
   return false;
 }
 
-async function indexItem(item: MapItem) {
+async function indexItem(item: MapItem, onProgress: (done: number) => void) {
   const file = new File(resolveMapFile(item));
   if (!file.exists) return;
   const source = new LocalFileSource(file);
@@ -449,8 +401,11 @@ async function indexItem(item: MapItem) {
     const z = indexZoomOf(item.meta);
     const { header, tiles } = await listZoomTiles(source, z);
     const emergencyRows: PlaceRow[] = [];
-    const done = await indexTiles(item, source, header, tiles, item.id, (rows) => {
-      for (const r of rows) if (r.layer === 'poi' && tileEmergencyKind(r.kind)) emergencyRows.push(r);
+    const done = await indexTiles(item, source, header, tiles, item.id, {
+      onRows: (rows) => {
+        for (const r of rows) if (r.layer === 'poi' && tileEmergencyKind(r.kind)) emergencyRows.push(r);
+      },
+      onProgress,
     });
     if (!done) return;
     markIndexed(item.id, z);
@@ -473,11 +428,16 @@ export function scheduleIndex(item: MapItem) {
     return;
   }
   queued.add(item.id);
+  // Part of getting the map ready (prepare.ts) from the moment it is queued.
+  const meta = item.meta;
+  beginTask(item.id, 'tiles', meta.role === 'world' ? 1 : countBBoxTiles(meta.bbox, indexZoomOf(meta), indexZoomOf(meta)) * TILE_WEIGHT);
+  const onProgress = (done: number) => updateTask(item.id, 'tiles', done);
   queue = queue
-    .then(() => (cancelled.has(item.id) ? undefined : exclusive(() => (cancelled.has(item.id) ? undefined : indexItem(item)))))
+    .then(() => (cancelled.has(item.id) ? undefined : exclusive(() => (cancelled.has(item.id) ? undefined : indexItem(item, onProgress)))))
     .catch((e) => console.warn('[maps] indexing failed', item.id, e))
     .finally(() => {
       queued.delete(item.id);
+      endTask(item.id, 'tiles');
       // Index the current file once more, read fresh from the registry.
       if (again.delete(item.id)) {
         const fresh = getItem(item.id) as MapItem | null;
@@ -502,9 +462,9 @@ export function indexStaleMaps() {
 
 /** A map item's file changed (re-downloaded): rebuild its index. */
 export function invalidateIndex(item: MapItem) {
-  void exclusive(() => {
+  void exclusive(async () => {
     indexDb().runSync('UPDATE index_sources SET index_version = NULL WHERE item_id = ?', item.id);
-    forgetDetail(item.id);
+    await forgetDetail(item.id);
   });
   scheduleIndex(item);
 }
@@ -573,7 +533,9 @@ function dropIndexRows(itemId: string) {
 // important POIs: no schools, shops or most streets. Around where the user is (at
 // startup) or looks (opening search), the map's own max zoom (at most 15) is indexed
 // too, under 'near:<item id>': a 50 km square is ~700 tiles at z14, ~2900 at z15.
-// Duplicates of the whole-map rows are merged by rankHits.
+// Duplicates of the whole-map rows are merged by rankHits. Not for a map whose country's
+// search files are in (searchFilesCover): they hold every named place and street already,
+// and this ran when search opened, ~10 s for Madrid at z15.
 
 const DETAIL_RADIUS = 25_000;
 /** This far from the last detail centre, the new surroundings are indexed instead. */
@@ -597,9 +559,20 @@ function readDetail(): DetailState | null {
   }
 }
 
-function forgetDetail(itemId: string) {
-  deletePlaceRows(detailSource(itemId));
+async function forgetDetail(itemId: string) {
+  await deletePlaceRows(detailSource(itemId));
   forgetDetailState(itemId);
+}
+
+/**
+ * Whether a map's country brings its named places (and streets) in search files: said at
+ * install (bundledSearch), or, for a map installed before that, its own places file or a
+ * routing pack's of the same country is in the index.
+ */
+function searchFilesCover(item: MapItem): boolean {
+  if (item.meta.bundledSearch || hasPackPlaces(item.id)) return true;
+  const region = item.meta.regionId;
+  return !!region && listItems('route').some((p) => (p.meta as { regionId?: string | null }).regionId === region && hasPackPlaces(p.id));
 }
 
 function forgetDetailState(itemId: string) {
@@ -637,11 +610,11 @@ async function refreshDetail(p: LatLon) {
   const [w, s, e, n] = box;
   const around = (listItems('map') as MapItem[]).filter((i) => {
     const [iw, is, ie, inn] = i.meta.bbox;
-    return i.meta.role === 'region' && iw < e && ie > w && is < n && inn > s;
+    return i.meta.role === 'region' && iw < e && ie > w && is < n && inn > s && !searchFilesCover(i);
   });
   const zooms: Record<string, number> = {};
   for (const id of Object.keys(state?.zooms ?? {})) {
-    if (!around.some((i) => i.id === id)) deletePlaceRows(detailSource(id));
+    if (!around.some((i) => i.id === id)) await deletePlaceRows(detailSource(id));
   }
   for (const item of around) {
     const z = Math.min(15, item.meta.maxZoom);
