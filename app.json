@@ -14,7 +14,7 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.fjlinde.nomadpocket",
-      "buildNumber": "13",
+      "buildNumber": "14",
       "supportsTablet": true,
       "infoPlist": {
         "CFBundleDevelopmentRegion": "es",
@@ -29,7 +29,7 @@
     },
     "android": {
       "package": "com.fjlinde.nomadpocket",
-      "versionCode": 13,
+      "versionCode": 14,
       "adaptiveIcon": {
         "backgroundColor": "#18171B",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
