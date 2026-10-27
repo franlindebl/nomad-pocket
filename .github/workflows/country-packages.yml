@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
     inputs:
       countries:
-        description: 'Country ids from src/features/maps/regions.json, space separated (empty: all)'
+        description: 'Country ids from src/features/maps/regions.json, or region ids from scripts/routing/packs.json (us-west), space separated (empty: all)'
         required: false
         default: ''
       parts:
@@ -58,8 +58,9 @@ jobs:
         env:
           INPUT: ${{ github.event.inputs.countries }}
         run: |
-          # Antarctica has no roads or towns worth a download.
-          countries=$(python3 -I -c 'import json, sys; all = [r["id"] for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["type"] == "country" and r["continent"] != "antarctica"]; want = sys.argv[1].split(); bad = [c for c in want if c not in all]; sys.exit(f"unknown: {bad}") if bad else print(json.dumps(want or all))' "$INPUT")
+          # Antarctica has no roads or towns worth a download. A region of a split country
+          # (packs.json "region") can be asked for alone: "us-alaska".
+          countries=$(python3 -I -c 'import json, sys; all = [r["id"] for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["type"] == "country" and r["continent"] != "antarctica"]; regions = [k for k, v in json.load(open("scripts/routing/packs.json"))["countries"].items() if "region" in v]; want = sys.argv[1].split(); bad = [c for c in want if c not in all and c not in regions]; sys.exit(f"unknown: {bad}") if bad else print(json.dumps(want or all))' "$INPUT")
           echo "countries=$countries" >> "$GITHUB_OUTPUT"
           # One job per country, plus one per regional pack of a country split in several
           # (packs.json "region": us-west, us-south…): each builds in its own job.
@@ -78,7 +79,7 @@ jobs:
           want() { [[ "$PARTS" == all || "$PARTS" == "$1" ]]; }
           # One release per continent, for routing packs too: GitHub stops at 1000 assets per release.
           continents() { # <countries json> <only those with a routing pack: 1|0>
-            python3 -I -c 'import json, sys; want = set(json.loads(sys.argv[1])); packs = json.load(open("scripts/routing/packs.json"))["countries"]; routed = set(packs) | {v["region"] for v in packs.values() if "region" in v}; print(" ".join(sorted({r["continent"] for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["id"] in want and r["type"] == "country" and (sys.argv[2] == "0" or r["id"] in routed)})))' "$1" "$2"
+            python3 -I -c 'import json, sys; packs = json.load(open("scripts/routing/packs.json"))["countries"]; want = {packs.get(c, {}).get("region", c) for c in json.loads(sys.argv[1])}; routed = set(packs) | {v["region"] for v in packs.values() if "region" in v}; print(" ".join(sorted({r["continent"] for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["id"] in want and r["type"] == "country" and (sys.argv[2] == "0" or r["id"] in routed)})))' "$1" "$2"
           }
           if want routing; then
             for c in $(continents "$COUNTRIES" 1); do
