@@ -1,7 +1,7 @@
 # Countries in regions: the United States
 
-Status: **approved by the owner 2026-10-27; built** (phases 1–4 on main, see "Phases"). The
-regional maps go live with the first CI run that builds them (after the release that reads them).
+Status: **live** (2026-10-27): app in build 16, regional maps published by run 40482995938.
+Left: a real iPhone check (phase 5).
 
 ## Why
 
@@ -150,5 +150,8 @@ nobody is meant to take all of it on a phone; one or two regions are 5–24 GB.
    country sheet, onboarding and Tus mapas. **Done**; checked on the simulator against a local
    catalog (Hawaii downloaded from the onboarding kit, shown in Tus mapas, deleted from the
    sheet).
-5. Next: a TestFlight build, then `gh workflow run country-packages.yml -f countries=us -f
-   parts=maps`, then a real iPhone check (a 5 GB region end to end).
+5. TestFlight build 16 (reads regions), then run 40482995938 (`countries=us parts=maps`):
+   maps-index has the six regions at z15 (west 4.65, midwest 3.93, northeast 2.09, south
+   5.68 GB, Alaska 0.73 GB, Hawaii 32 MB; every part checked in its release) and no whole-USA
+   map; 246 maps, every country of regions.json covered. **Next**: a real iPhone check (a
+   5 GB region end to end).
