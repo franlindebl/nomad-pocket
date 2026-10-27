@@ -110,5 +110,20 @@
     "title": "Respondiendo en otra conversación…",
     "action": "Ver",
     "hint": "Abre la conversación que se está respondiendo"
+  },
+  "dictation": {
+    "start": "Dictar",
+    "stop": "Dejar de escuchar",
+    "hint": "Habla y tu voz se convierte en texto, sin conexión y sin salir del móvil",
+    "listening": "Te escucho…",
+    "deniedTitle": "El micrófono está desactivado",
+    "deniedBody": "Permite el acceso al micrófono en Ajustes para dictar tus preguntas. Tu voz se procesa en el móvil y no se guarda.",
+    "openSettings": "Abrir Ajustes",
+    "packTitle": "Falta el idioma para dictar",
+    "packBody": "Para dictar sin conexión, el móvil necesita su paquete de voz de este idioma. Descárgalo una vez ahora, mientras tienes conexión.",
+    "packDownload": "Descargar",
+    "packStarted": "Descargando el idioma",
+    "packStartedBody": "El móvil lo descarga en segundo plano. Cuando termine, podrás dictar sin conexión.",
+    "packFailed": "No se ha podido descargar el idioma. Inténtalo de nuevo con conexión."
   }
 }

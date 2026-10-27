@@ -9,6 +9,8 @@ declare class NomadLlmNative extends NativeModule<NomadLlmEvents> {
   cancel(requestId: string): void;
   /** Asks the model, with guided generation, whether a message needs a library search. */
   route(prompt: string, instructions: string): Promise<RouteDecision>;
+  /** Whether the speech recognizer for `locale` works without the network. */
+  supportsOnDeviceDictation(locale: string): boolean;
 }
 
 /**

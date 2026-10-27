@@ -1,10 +1,13 @@
-import { ArrowUp, Library, Square } from 'lucide-react-native';
-import { useState } from 'react';
+import { ArrowUp, Library, Mic, Square } from 'lucide-react-native';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, TextInput, View } from 'react-native';
 
 import { PressableScale, Text } from '@/components/ui';
 import { fontFamily, radius, space, typography, useTheme } from '@/theme';
+
+import { joinDictation } from '../dictation-core';
+import { useDictation } from '../dictation';
 
 type Props = {
   /** This conversation's answer is being written: the send button stops it. */
@@ -23,11 +26,27 @@ export function Composer({ busy, disabled, blocked, useLibrary, onToggleLibrary,
   const { colors, scheme } = useTheme();
   const [text, setText] = useState('');
   const canSend = !!text.trim() && !busy && !blocked && !disabled;
+  // What was typed when dictation started: the spoken text goes after it.
+  const typed = useRef('');
+  const dictation = useDictation((spoken) => setText(joinDictation(typed.current, spoken)));
 
   const send = () => {
     if (!canSend) return;
+    dictation.cancel();
     onSend(text.trim());
     setText('');
+  };
+
+  const toggleDictation = () => {
+    if (dictation.listening) return dictation.stop();
+    typed.current = text;
+    dictation.start().catch((e) => console.warn('[dictation] start failed', e));
+  };
+
+  // Typing while listening means the person took over: stop and keep their text.
+  const edit = (value: string) => {
+    dictation.cancel();
+    setText(value);
   };
 
   return (
@@ -38,8 +57,10 @@ export function Composer({ busy, disabled, blocked, useLibrary, onToggleLibrary,
       ]}>
       <TextInput
         value={text}
-        onChangeText={setText}
-        placeholder={useLibrary ? t('composer.placeholderLibrary') : t('composer.placeholder')}
+        onChangeText={edit}
+        placeholder={
+          dictation.listening ? t('dictation.listening') : useLibrary ? t('composer.placeholderLibrary') : t('composer.placeholder')
+        }
         placeholderTextColor={colors.textTertiary}
         multiline
         editable={!disabled}
@@ -61,28 +82,51 @@ export function Composer({ busy, disabled, blocked, useLibrary, onToggleLibrary,
             {t('composer.useLibrary')}
           </Text>
         </PressableScale>
-        {busy ? (
-          <PressableScale
-            haptic="light"
-            accessibilityRole="button"
-            accessibilityLabel={t('composer.stop')}
-            onPress={onStop}
-            pressedScale={0.9}
-            style={[styles.send, { backgroundColor: colors.ink }]}>
-            <Square size={14} color={colors.onInk} fill={colors.onInk} />
-          </PressableScale>
-        ) : (
-          <PressableScale
-            haptic="light"
-            accessibilityRole="button"
-            accessibilityLabel={t('composer.send')}
-            accessibilityState={{ disabled: !canSend }}
-            onPress={send}
-            pressedScale={0.9}
-            style={[styles.send, { backgroundColor: canSend ? colors.ink : colors.surfaceAlt }]}>
-            <ArrowUp size={18} color={canSend ? colors.onInk : colors.textTertiary} strokeWidth={2.5} />
-          </PressableScale>
-        )}
+        <View style={styles.actions}>
+          {dictation.available && !disabled ? (
+            <PressableScale
+              testID="composer-mic"
+              haptic="selection"
+              accessibilityRole="button"
+              accessibilityLabel={dictation.listening ? t('dictation.stop') : t('dictation.start')}
+              accessibilityHint={dictation.listening ? undefined : t('dictation.hint')}
+              onPress={toggleDictation}
+              pressedScale={0.9}
+              style={styles.mic}>
+              {dictation.listening ? (
+                <View
+                  pointerEvents="none"
+                  style={[styles.halo, { backgroundColor: colors.accentSoft, transform: [{ scale: 1 + dictation.level * 0.45 }] }]}
+                />
+              ) : null}
+              <View style={[styles.send, { backgroundColor: dictation.listening ? colors.accent : colors.surfaceAlt }]}>
+                <Mic size={18} color={dictation.listening ? colors.onAccent : colors.textSecondary} strokeWidth={2.2} />
+              </View>
+            </PressableScale>
+          ) : null}
+          {busy ? (
+            <PressableScale
+              haptic="light"
+              accessibilityRole="button"
+              accessibilityLabel={t('composer.stop')}
+              onPress={onStop}
+              pressedScale={0.9}
+              style={[styles.send, { backgroundColor: colors.ink }]}>
+              <Square size={14} color={colors.onInk} fill={colors.onInk} />
+            </PressableScale>
+          ) : (
+            <PressableScale
+              haptic="light"
+              accessibilityRole="button"
+              accessibilityLabel={t('composer.send')}
+              accessibilityState={{ disabled: !canSend }}
+              onPress={send}
+              pressedScale={0.9}
+              style={[styles.send, { backgroundColor: canSend ? colors.ink : colors.surfaceAlt }]}>
+              <ArrowUp size={18} color={canSend ? colors.onInk : colors.textTertiary} strokeWidth={2.5} />
+            </PressableScale>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -113,5 +157,8 @@ const styles = StyleSheet.create({
   },
   toolbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   toggle: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 32, paddingHorizontal: space.md, borderRadius: radius.pill },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   send: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  mic: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  halo: { position: 'absolute', width: 36, height: 36, borderRadius: 18 },
 });

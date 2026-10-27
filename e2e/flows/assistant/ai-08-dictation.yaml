@@ -1,0 +1,16 @@
+# AI-08 — the composer offers dictation where the phone recognises the language on the device
+# (Spanish on the iOS 27 simulator). Presence only: on the simulator AVAudioEngine's input
+# deadlocks CoreAudio and the app is aborted, so the microphone is tested on a real phone.
+appId: com.fjlinde.nomadpocket
+tags: [nightly, assistant]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "sparkles" }
+- runFlow:
+    when:
+      visible: "Usar modelo integrado"
+    commands:
+      - tapOn: "Usar modelo integrado"
+- assertVisible: { id: "composer-mic" }
+- assertVisible: "Dictar"
+- takeScreenshot: 01-composer-mic

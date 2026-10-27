@@ -110,5 +110,20 @@
     "title": "Answering in another chat…",
     "action": "View",
     "hint": "Opens the chat being answered"
+  },
+  "dictation": {
+    "start": "Dictate",
+    "stop": "Stop listening",
+    "hint": "Speak and your voice becomes text, offline and without leaving your phone",
+    "listening": "Listening…",
+    "deniedTitle": "The microphone is off",
+    "deniedBody": "Allow microphone access in Settings to dictate your questions. Your voice is processed on your phone and never stored.",
+    "openSettings": "Open Settings",
+    "packTitle": "This language isn't ready for dictation",
+    "packBody": "To dictate offline, your phone needs its voice pack for this language. Download it once now, while you're online.",
+    "packDownload": "Download",
+    "packStarted": "Downloading the language",
+    "packStartedBody": "Your phone downloads it in the background. Once it's done you can dictate offline.",
+    "packFailed": "The language couldn't be downloaded. Try again with a connection."
   }
 }
