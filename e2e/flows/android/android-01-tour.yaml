@@ -49,12 +49,18 @@ tags: [android, network]
 - tapOn: "Más"
 - tapOn: "Buscar en la página"
 - inputText: "bash"
+# Typing searches as it goes, and Android's WebView may already sit on a later match when the
+# last letter lands ("2 de 26"): any "N de M", then "Siguiente" must move it.
 - extendedWaitUntil:
-    visible: "1 de \\d+"
+    visible: "\\d+ de \\d+"
     timeout: 5000
+- copyTextFrom: "\\d+ de \\d+"
+- evalScript: ${output.findCount = maestro.copiedText}
 - takeScreenshot: 05-find-keyboard
 - tapOn: "Siguiente coincidencia"
-- assertVisible: "2 de \\d+"
+- waitForAnimationToEnd
+- copyTextFrom: "\\d+ de \\d+"
+- assertTrue: ${maestro.copiedText != output.findCount}
 - tapOn: { id: "find-close" }
 - back
 - back
