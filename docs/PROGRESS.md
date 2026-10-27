@@ -144,8 +144,12 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
 2. Search side files: published (the 2026-10-26 full run; packs and country maps carry
    `.places.tsv` / `.addresses.tsv`). Still to measure the import on a real phone (Spain: 1.0 M
    places + 2.2 M doors).
-3. Resume downloads after the app is killed on iOS: reattach the background URLSession
-   (small native module) instead of restarting from zero.
+3. Faster, resumable downloads: plan in `docs/DOWNLOADS_SPEED_PLAN.md` (analysis and
+   measurements done 2026-10-26; Spanish Wikipedia nopic, 13.3 GB: ~2 h today, ~6–15 min
+   expected). A: keep the screen on while downloading. B: pick Kiwix mirrors by throughput.
+   C: segmented multi-mirror engine, after a device spike. D: piece-level repair. C also
+   resumes after the app is killed on iOS. The alternative for single-task downloads is to
+   reattach the background URLSession (small native module, BUG-CORE-16).
 4. Map extraction: resume after a kill (persist the plan + written ranges) and move it off
    the JS thread.
 5. Android release: upload keystore, Play listing + data safety; the Android notices and the Play
@@ -190,10 +194,10 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
 - After a backup restore the database comes back without the content (items are dropped at
   startup, see ARCHITECTURE), but the `downloads` rows are not reconciled: paused or queued rows
   return and the manager retries them (not fixed).
-- Downloads interrupted by app termination restart from zero unless paused first on Android
-  (expo-file-system tasks don't survive relaunch); on iOS the background session keeps
-  transferring but is not reattached after the app is terminated (BUG-CORE-16: needs a small
-  native hook), so the bytes may be fetched twice.
+- Downloads interrupted by app termination: Android continues from the `.part` on disk; on iOS
+  the file restarts from zero, because the background session keeps transferring but is not
+  reattached after the app is terminated (BUG-CORE-16: needs a small native hook), so the bytes
+  may be fetched twice.
 - Compass heading in landscape: iOS reports an orientation of UNKNOWN until the first rotation after
   launch, so the heading is withheld in landscape until then; Android tablets whose natural
   orientation is landscape stay 90° off.
@@ -220,6 +224,18 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-26 — Downloads: speed analysis (plan only)
+
+- The owner reported the Spanish Wikipedia without images (13.3 GB) estimating ~2 h on a fast
+  connection (~1.8 MB/s). Measured the 8 Kiwix metalink mirrors, plus GitHub Releases, Hugging Face and
+  Protomaps, with 1, 4 and 8 connections. Plan and data: `docs/DOWNLOADS_SPEED_PLAN.md`.
+- Findings: the 512 KB probe in `mirrors.ts` tracks latency, not throughput (it would pick a
+  3.5 MB/s mirror over a 23 MB/s one) and only tries the first 4 mirrors. Mirrors cap each
+  connection (the default one: 0.3–0.5 MB/s). 8 connections reached ~36–39 MB/s (this Mac's
+  link). Courses and every Kiwix archive share the problem. GitHub (maps, packs) gains ~1.6× with
+  more connections. Hugging Face and Protomaps fill the link with one.
+- Nothing implemented yet (backlog item 3). Checked against `main` after the audit merge.
 
 ### 2026-10-26 — Setup wizard missing on a fresh install: kv-store first-open race
 
