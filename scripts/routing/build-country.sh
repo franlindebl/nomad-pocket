@@ -57,20 +57,25 @@ fi
 
 # 1. Extracts (Geofabrik publishes an .md5 next to each file), merged when several.
 #    A mirror answers 404 now and then, and an extract replaced during the download fails
-#    its md5: start over a few minutes later (curl --retry skips both).
+#    its md5: start over a few minutes later (curl --retry skips both). "-latest" of a big
+#    extract redirects to a mirror, which may not hold it (Germany, all of run 40407657017):
+#    then the dated files of the last days, which Geofabrik serves itself.
+DAYS="$(python3 -I -c 'import datetime as d; t = d.datetime.now(d.timezone.utc); print(*((t - d.timedelta(days=n)).strftime("%y%m%d") for n in range(3)))')"
 SRCS=()
 STAMP=""
 for G in $GEOFABRIK; do
-  URL="https://download.geofabrik.de/${G}-latest.osm.pbf"
   F="$WORK/src/$(basename "$G").osm.pbf"
   fetched=0
   for attempt in 1 2 3 4; do
-    log "downloading $URL (attempt $attempt)"
-    if curl -fsSL --retry 3 -A "$UA" -o "$F" "$URL" && EXPECTED="$(curl -fsSL --retry 3 -A "$UA" "$URL.md5" | cut -d' ' -f1)"; then
-      ACTUAL="$( (md5sum "$F" 2>/dev/null || md5 -r "$F") | cut -d' ' -f1)"
-      [[ "$EXPECTED" == "$ACTUAL" ]] && { fetched=1; break; }
-      log "md5 mismatch"
-    fi
+    for V in latest $DAYS; do
+      URL="https://download.geofabrik.de/${G}-$V.osm.pbf"
+      log "downloading $URL (attempt $attempt)"
+      if curl -fsSL --retry 3 -A "$UA" -o "$F" "$URL" && EXPECTED="$(curl -fsSL --retry 3 -A "$UA" "$URL.md5" | cut -d' ' -f1)"; then
+        ACTUAL="$( (md5sum "$F" 2>/dev/null || md5 -r "$F") | cut -d' ' -f1)"
+        [[ "$EXPECTED" == "$ACTUAL" ]] && { fetched=1; break 2; }
+        log "md5 mismatch"
+      fi
+    done
     [[ $attempt == 4 ]] || sleep $((attempt * 120))
   done
   [[ $fetched == 1 ]] || { log "download failed"; exit 1; }

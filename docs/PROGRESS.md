@@ -355,6 +355,9 @@ Audit findings on `.github/workflows/country-packages.yml`, fixed before the nex
   40407657017). Saint-Pierre-et-Miquelon came out empty (20 KB, no roads: Newfoundland's
   extract stops short of it): dropped from `packs.json`, and a build with no road tiles
   now fails instead of publishing.
+- Germany failed again in rerun 40407657017: `germany-latest` redirects to a mirror that
+  lacks it (404 four times). The download now falls back to Geofabrik's own dated files
+  of the last 3 days (`<extract>-YYMMDD.osm.pbf` + .md5); tested with a forced miss.
 
 ### 2026-10-26 — Pre-release audit: findings fixed (branch `audit-fixes`)
 
