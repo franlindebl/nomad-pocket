@@ -243,6 +243,9 @@ Audit findings on `.github/workflows/country-packages.yml`, fixed before the nex
   on the two upload steps (apt packages, the Valhalla image and Overpass/Geofabrik data run
   without it); `VALHALLA_IMAGE` pinned by digest (`3.9.1@sha256:4fd114eb…`, checked against
   ghcr.io); go-pmtiles 1.31.2 checked against its SHA-256 (same value as GitHub's asset digest).
+- Run 40326036278: ag, fr and je hung in "Disk and tools" right after `df` (apt install or the
+  go-pmtiles download, output silenced) until the job's 340 min timeout. That step now has a
+  20 min timeout, apt network timeouts and retries, and curl `--retry 3 --max-time 300`.
 
 ### 2026-10-26 — Downloads: speed analysis (plan only)
 
