@@ -1,9 +1,9 @@
 # Countries in regions: the United States, Canada and Russia
 
 Status: **USA live** (2026-10-27): app in build 16, regional maps published by run 40482995938.
-Left: a real iPhone check (phase 5). **Canada and Russia**: approved and implemented on
-2026-10-27 (section "Canada and Russia" below); waiting for a build that reads them, then a
-maps run.
+Left: a real iPhone check (phase 5). **Canada and Russia**: implemented and published on
+2026-10-27 (section "Canada and Russia" below, run 40544693154); the app reads them from the
+first TestFlight build after 3c75852.
 
 ## Why
 
@@ -275,6 +275,10 @@ those who tick it take it.
    then cost only its map; deleting Ontario, the last region, removed the map and `ca.tar`.
 3. A TestFlight build with this code.
 4. Run `gh workflow run country-packages.yml -f countries="ca ru" -f parts=maps` (14 map
-   jobs; the packs are unchanged). Check that both catalogs have every region before telling
+   jobs; the packs are unchanged). **Done** 2026-10-27, run 40544693154, ahead of the build by
+   the owner's call: every region at z15 (ca-atlantic 1.03, ca-bc-yukon 2.17, ca-nunavut 4.82,
+   ca-nwt 1.59, ca-ontario 2.00, ca-prairies 1.94, ca-quebec 2.53; ru-central 1.95, ru-far-east
+   2.14, ru-northwest 2.44, ru-siberia 2.37, ru-south 1.07, ru-ural 1.36, ru-volga 2.14 GB), the
+   whole maps dropped, all 23 parts checked in their releases. Check that both catalogs have every region before telling
    testers; a failed region is relaunched alone (`-f countries=ca-nunavut -f parts=maps`).
 

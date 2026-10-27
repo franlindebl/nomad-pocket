@@ -124,9 +124,11 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
      with the first region, so routes between regions work); Crimea inside `ru-south` with no name
      of its own. Code ready (CI `scripts/maps/map-regions.json`, app `CountryOffer.common`).
      Checked on the simulator with a local catalog (two Canadian regions, a stand-in pack).
-     **Next**: a TestFlight build with it, then
-     `gh workflow run country-packages.yml -f countries="ca ru" -f parts=maps` (never before that
-     build: builds 16–19 would show region ids and download regions without routing).
+     **Published** (owner's call, ahead of the build): run 40544693154 (`countries="ca ru"
+     parts=maps`), maps-index now 258 maps: the 14 regions at z15 (Canada 16.1 GB, Russia
+     13.5 GB in all), no whole ca/ru map, packs unchanged; every part checked in its release.
+     Until a TestFlight build with 3c75852 is out, builds 16–19 show the region ids and download
+     regions without routing. **Next**: that build, then a real-phone check of one region.
    - **Deferred by decision**: routes across packs (between US regions or countries: a straight
      line today). Owner wants them later, ideally by joining the pieces: analysis and proposal
      (one Valhalla graph, packs as tile subsets of it) in `docs/ROUTING_ACROSS_PACKS.md`; bundled quick cards (first aid, water, radio; owner
