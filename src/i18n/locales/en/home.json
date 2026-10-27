@@ -36,7 +36,9 @@
       "assistantModel": "{{name}}, the recommended model for your phone.",
       "included": "Included",
       "total": "Total",
-      "skip": "Continue without downloading"
+      "skip": "Continue without downloading",
+      "countryRegions": "{{name}} map · {{regions}}",
+      "noRegion": "Choose which region to download."
     },
     "free": "You have {{size}} free",
     "tooBig": "Doesn't fit in your free space: remove something from the list.",

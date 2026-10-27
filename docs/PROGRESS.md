@@ -301,6 +301,14 @@ the country's Natural Earth polygons); `maps-manifest.py carry` keeps region map
 whole map once its regions have maps. Measured on build 20261026 at z15: west 4.6, midwest 3.9,
 northeast 2.1, south 5.7 GB, Alaska 722 MB, Hawaii 32 MB (built end to end locally). Today's
 whole-USA map has no Hawaii: country-region.py keeps islands within 10° of the mainland.
+App: a country in regions (`CountryOffer.regions`, from `countryParts` once the catalog has
+regional maps) is downloaded region by region. `RegionList` in the country sheet and in the
+onboarding kit (whole-country shortcut, the region you are in ticked from a fix ≤ 10 min old,
+location asked for there only for such a country), Tus mapas lists the regions and opens the
+sheet, `removeCountryRegion` deletes one. Map items and files are keyed by map id (unchanged for
+every other country). Simulator, local catalog with six US regions (Hawaii real): picked in the
+kit, downloaded (map from the local server, pack from GitHub, 76 MB), listed, deleted. Next: a
+TestFlight build, then the USA's maps run (`countries=us parts=maps`), then a real iPhone.
 
 ### 2026-10-27 — Maps: ask for the location and start on the user
 

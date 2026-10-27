@@ -1,7 +1,7 @@
 # Countries in regions: the United States
 
-Status: **approved by the owner 2026-10-27**, to start once the downloads session's TestFlight
-build is out. Open questions taken with the recommended answers (below).
+Status: **approved by the owner 2026-10-27; built** (phases 1–4 on main, see "Phases"). The
+regional maps go live with the first CI run that builds them (after the release that reads them).
 
 ## Why
 
@@ -48,13 +48,13 @@ routing pack and its emergency points, streets, places and house numbers.
 | Midwest | ND SD NE KS MN IA MO WI IL MI IN OH | 3.9 GB | 5.5 GB | 0.3 GB | **9.8 GB** |
 | Northeast | PA NY NJ CT RI MA VT NH ME | 2.1 GB | 2.8 GB | 0.6 GB | **5.5 GB** |
 | South | TX OK AR LA MS AL TN KY WV VA MD DE DC NC SC GA FL | 5.7 GB | 7.8 GB | 0.7 GB | **14.2 GB** |
-| Alaska | AK | 0.7 GB | ~0.25 GB* | ~0.03 GB* | **~1 GB** |
-| Hawaii | HI | 0.03 GB | ~0.05 GB* | ~0.01 GB* | **~0.1 GB** |
-| **Whole USA** | | 17.1 GB | ~21.3 GB | ~2.3 GB | **~41 GB** |
+| Alaska | AK | 0.72 GB | 0.06 GB | 0.005 GB | **0.79 GB** |
+| Hawaii | HI | 0.03 GB | 0.04 GB | 0.003 GB | **0.08 GB** |
+| **Whole USA** | | 17.1 GB | 21.1 GB | 2.2 GB | **~40.4 GB** |
 
-Map sizes are pmtiles dry runs of build 20261026 over Geofabrik's region polygons (a little
-high: the polygons reach over the border). Routing and side files are the published packs;
-\* estimated from the extract sizes (packs run 1.4–2.2× their extract). States per region:
+Map sizes are pmtiles dry runs of build 20261026 over each region's outline (region-outline.py;
+Hawaii built end to end). Routing and side files are the published packs (Alaska and Hawaii:
+run 40465215179). States per region:
 Geofabrik follows the US Census regions; to be confirmed from the polygons when built.
 
 The whole USA gets more detail (z15 like Spain) and becomes larger (41 GB instead of 31 GB):
@@ -140,9 +140,15 @@ nobody is meant to take all of it on a phone; one or two regions are 5–24 GB.
 
 ## Phases
 
-1. Alaska and Hawaii packs (packs.json + one run). ~1 h.
-2. Space check fix (`countryNeed`: download + biggest archive). ~1 h, with tests.
-3. CI: regional maps (script, workflow, manifest carry) and one run for the USA. ~3 h + run.
+1. Alaska and Hawaii packs (packs.json + one run). **Done** (24963d2, run 40465215179).
+2. Space check fix (`countryNeed`: download + biggest archive; assemblies one at a time).
+   **Done** (227b904).
+3. CI: regional maps (script, workflow, manifest carry). **Done** (6ac5011); the run waits for
+   the release that reads regions (TestFlight builds ≤ 15 would take the first regional map for
+   the whole USA).
 4. App: regions in the catalog model, download/remove/update per region, the checklist in the
-   country sheet, onboarding and Tus mapas, tests and E2E. ~1 day.
-5. Build, E2E, real iPhone check (a 5 GB region end to end).
+   country sheet, onboarding and Tus mapas. **Done**; checked on the simulator against a local
+   catalog (Hawaii downloaded from the onboarding kit, shown in Tus mapas, deleted from the
+   sheet).
+5. Next: a TestFlight build, then `gh workflow run country-packages.yml -f countries=us -f
+   parts=maps`, then a real iPhone check (a 5 GB region end to end).

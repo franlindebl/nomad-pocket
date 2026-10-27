@@ -19,10 +19,13 @@ import {
   useCatalogsState,
   useCountries,
   useCountryOffer,
+  useChosenRegions,
   useCountrySize,
   useInstalledCountryIds,
 } from '@/features/maps/countries';
+import { countryRegionName } from '@/features/maps/country-maps';
 import { CountryList, deviceCountry } from '@/features/maps/CountryList';
+import { RegionList } from '@/features/maps/RegionList';
 import { guideResources, pickModel, pickWikipedia } from '@/features/onboarding/kit';
 import { useItems } from '@/features/content/items';
 import type { AppLanguage } from '@/i18n';
@@ -128,7 +131,13 @@ export default function OnboardingScreen() {
     [records],
   );
   const offer = useCountryOffer(country ?? undefined);
-  const countrySize = useCountrySize(step >= 2 ? offer : null);
+  // A country in regions (the USA): the kit brings the ones ticked, the one the person is in
+  // to start with (the location is asked for on the kit step, only for such a country).
+  const regions = useChosenRegions(step >= 2 ? offer : null, true);
+  const regionSize = useCountrySize(step >= 2 ? offer : null, offer?.regions ? (regions ?? []) : undefined);
+  const sizing = !!offer?.regions && regions === undefined;
+  const countrySize = useMemo(() => (sizing ? { ...regionSize, status: 'loading' as const } : regionSize), [sizing, regionSize]);
+  const noRegion = !!offer?.regions && !regions?.length;
   const catalogs = useCatalogsState();
   const system = useSystemModel((st) => st.info);
   const refreshSystem = useSystemModel((st) => st.refresh);
@@ -148,7 +157,7 @@ export default function OnboardingScreen() {
     const free = freeBytes() - STORAGE_HEADROOM;
     const countryInstalled = !!country && installedCountries.has(country);
     const countryDownloading = !countryInstalled && countries.some((c) => c.regionId === country && c.progress !== null);
-    const countryWanted = !countryInstalled && !countryDownloading;
+    const countryWanted = !countryInstalled && !countryDownloading && !noRegion;
     const countryBytes = countryWanted && countrySize.status === 'ready' ? countrySize.bytes : 0;
     // What it takes on disk while it installs (a multi-part archive is assembled next to its parts).
     const countryNeeded = countryWanted && countrySize.status === 'ready' ? countrySize.needed : 0;
@@ -196,7 +205,7 @@ export default function OnboardingScreen() {
       total,
       needed,
     };
-  }, [country, installedCountries, countries, countrySize, s.contentLanguages, s.language, installedIds, pendingIds, system, on]);
+  }, [country, installedCountries, countries, countrySize, noRegion, s.contentLanguages, s.language, installedIds, pendingIds, system, on]);
 
   const countryPending = on.country && kit.countryWanted && countrySize.status === 'loading';
   const countryFailed = on.country && kit.countryWanted && (countrySize.status === 'offline' || countrySize.status === 'error');
@@ -208,7 +217,7 @@ export default function OnboardingScreen() {
     try {
       if (country) s.setCountry(country);
       if (on.country && offer && kit.countryWanted && countrySize.status === 'ready') {
-        downloadCountry(offer, countrySize.estimate);
+        downloadCountry(offer, countrySize.estimate, { regions: offer.regions ? regions : undefined });
         count++;
       }
       const resources = [...(on.guides ? kit.guides : []), ...(on.wikipedia && kit.wiki ? [kit.wiki.resource] : [])];
@@ -356,8 +365,19 @@ export default function OnboardingScreen() {
                 testID="kit-country"
                 icon={Map}
                 hue="maps"
-                title={t('onboarding.kit.country', { name: countryTitle })}
-                body={offer?.packs.length || catalogs !== 'ready' ? t('onboarding.kit.countryBody') : t('onboarding.kit.countryBodyNoRouting')}
+                title={
+                  // Some regions of a country in regions: which ones; all of them: the country.
+                  regions?.length && regions.length < (offer?.regions?.length ?? 0)
+                    ? t('onboarding.kit.countryRegions', { name: countryTitle, regions: regions.map(countryRegionName).join(', ') })
+                    : t('onboarding.kit.country', { name: countryTitle })
+                }
+                body={
+                  noRegion && !kit.countryInstalled && !kit.countryDownloading
+                    ? t('onboarding.kit.noRegion')
+                    : offer?.packs.length || catalogs !== 'ready'
+                      ? t('onboarding.kit.countryBody')
+                      : t('onboarding.kit.countryBodyNoRouting')
+                }
                 size={
                   !kit.countryWanted
                     ? null
@@ -371,6 +391,9 @@ export default function OnboardingScreen() {
                 onChange={kit.countryWanted ? (v) => setOn((o) => ({ ...o, country: v })) : undefined}
                 badge={kit.countryInstalled ? installedBadge : kit.countryDownloading ? downloadingBadge : undefined}
               />
+              {offer?.regions && on.country && !kit.countryInstalled && !kit.countryDownloading ? (
+                <RegionList offer={offer} chosen={regions} />
+              ) : null}
               <KitRow
                 testID="kit-guides"
                 icon={Stethoscope}

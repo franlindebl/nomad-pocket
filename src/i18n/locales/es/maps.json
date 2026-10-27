@@ -326,6 +326,39 @@
     "points": "Puntos de emergencia y calles",
     "pointsBody": "Hospitales, farmacias, policía, agua potable y refugios, y todas las calles en el buscador.",
     "wifiHint": "Mejor con Wi‑Fi y el móvil cargando. Puedes seguir usando la app mientras tanto.",
-    "routingUnknown": "No se ha podido comprobar sin conexión. Vuelve a intentarlo cuando tengas internet."
+    "routingUnknown": "No se ha podido comprobar sin conexión. Vuelve a intentarlo cuando tengas internet.",
+    "regionsTitle": "Regiones",
+    "regionsBody": "Cada región trae su mapa, su navegación y sus puntos de emergencia. Descarga la tuya y añade otras cuando quieras.",
+    "allRegions": "Todo {{name}}",
+    "onPhone": "En el móvil",
+    "chooseRegion": "Elige al menos una región",
+    "removeRegion": "Eliminar {{name}}",
+    "crossRegions": "Las rutas de una región a otra van en línea recta."
+  },
+  "parts": {
+    "us-west": {
+      "name": "Oeste",
+      "states": "California, Washington, Oregón, Nevada, Arizona, Utah, Colorado, Nuevo México, Idaho, Montana y Wyoming"
+    },
+    "us-midwest": {
+      "name": "Medio Oeste",
+      "states": "Illinois, Ohio, Míchigan, Indiana, Wisconsin, Minnesota, Iowa, Misuri, Kansas, Nebraska y las dos Dakotas"
+    },
+    "us-northeast": {
+      "name": "Noreste",
+      "states": "Nueva York, Pensilvania, Nueva Jersey, Massachusetts, Connecticut, Rhode Island, Vermont, Nuevo Hampshire y Maine"
+    },
+    "us-south": {
+      "name": "Sur",
+      "states": "Texas, Florida, Georgia, las Carolinas, Virginia, Tennessee, Alabama, Luisiana, Kentucky, Maryland, Washington D. C. y más"
+    },
+    "us-alaska": {
+      "name": "Alaska",
+      "states": ""
+    },
+    "us-hawaii": {
+      "name": "Hawái",
+      "states": ""
+    }
   }
 }

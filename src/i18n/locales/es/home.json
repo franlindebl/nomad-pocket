@@ -36,7 +36,9 @@
       "assistantModel": "{{name}}, el modelo recomendado para tu móvil.",
       "included": "Incluido",
       "total": "Total",
-      "skip": "Continuar sin descargar"
+      "skip": "Continuar sin descargar",
+      "countryRegions": "Mapa de {{name}} · {{regions}}",
+      "noRegion": "Elige qué región descargar."
     },
     "free": "Tienes {{size}} libres",
     "tooBig": "No cabe en tu espacio libre: quita algo de la lista.",

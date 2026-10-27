@@ -74,9 +74,14 @@ export async function refreshMapsCatalog(): Promise<void> {
   }
 }
 
+/** A region of a country split in regions ("us-west" → "Oeste"); the id when there is no name for it. */
+export const countryRegionName = (id: string) => i18n.t(`maps:parts.${id}.name`, { defaultValue: id });
+
+/** "España"; a region's map: "Estados Unidos · Oeste". */
 const title = (map: CountryMap) => {
   const region = getRegion(map.regionId);
-  return region ? regionName(region, i18n.language) : map.id;
+  const country = region ? regionName(region, i18n.language) : map.regionId;
+  return map.id === map.regionId ? country : `${country} · ${countryRegionName(map.id)}`;
 };
 
 /** A country's map, routing pack and search files are one row in Downloads ("Mapa de España"). */
@@ -142,9 +147,9 @@ function partsTrusted(map: CountryMap): boolean {
   return mine.length > 0 && mine.every((r) => (r.meta.map as CountryMap).buildDate === map.buildDate);
 }
 
-/** The map's item, from the `<map id>` its files are named after (the region's, as a rule). */
+/** The map's item, from the `<map id>` its files are named after (the country's, or its region's: us-west). */
 function itemOfMap(mapId: string): string {
-  return mapItemId(useMapsCatalog.getState().manifest?.maps.find((m) => m.id === mapId)?.regionId ?? mapId);
+  return mapItemId(mapId);
 }
 
 /** What a country map still needs from the network (countries.ts sizes and checks the whole country). */
@@ -214,7 +219,7 @@ export function downloadCountryMap(manifest: MapsManifest, map: CountryMap, bund
   ]);
   expectSideFiles(
     'map',
-    mapItemId(map.regionId),
+    mapItemId(map.id),
     sides.map((role) => sideName(map.id, role)),
   );
   // Every part was already on disk (a retry after the assembly itself failed).
@@ -250,7 +255,7 @@ function importMapSide(mapId: string, role: SideFile, item = itemOfMap(mapId), l
 }
 
 function importMapSides(map: CountryMap) {
-  for (const role of SIDE_FILES) if (map[role]) importMapSide(map.id, role, mapItemId(map.regionId));
+  for (const role of SIDE_FILES) if (map[role]) importMapSide(map.id, role, mapItemId(map.id));
 }
 
 const assembling = new Set<string>();
@@ -289,7 +294,7 @@ async function assembleMap(map: CountryMap, bundledPoints: boolean, from?: Downl
   const missing = map.parts.map((_, i) => i).filter((i) => !partOnDisk(map, i));
   if (missing.length) {
     // This build is in already (a part fetched again after a kill right at the end): nothing to build.
-    if (getItem(mapItemId(map.regionId))?.version === map.buildDate) {
+    if (getItem(mapItemId(map.id))?.version === map.buildDate) {
       map.parts.forEach((_, i) => deleteFile(contentFile('map', partName(map.id, i)).uri));
       return;
     }
@@ -305,11 +310,12 @@ async function assembleMap(map: CountryMap, bundledPoints: boolean, from?: Downl
     return;
   }
   assembling.add(map.id);
-  const itemId = mapItemId(map.regionId);
+  // Named after the map: the country's (as an on-device extraction of it: one item per
+  // country), or a region's (us-west: one item per region, `regionId` the country).
+  const itemId = mapItemId(map.id);
   const parts = map.parts.map((_, i) => contentFile('map', partName(map.id, i)));
   const tmp = contentFile('map', `${map.id}.pmtiles.tmp`);
-  // The same file name as an on-device extraction of the region: one item per country.
-  const dest = contentFile('map', `${map.regionId}.pmtiles`);
+  const dest = contentFile('map', `${map.id}.pmtiles`);
   // The country is being removed, or the part's download was cancelled while it was processing.
   const check = () => {
     if (aborted.has(map.id) || (from && !useDownloads.getState().records[from.id])) throw new AssemblyAborted();
@@ -374,7 +380,7 @@ async function assembleMap(map: CountryMap, bundledPoints: boolean, from?: Downl
       sizeBytes: map.size,
       version: map.buildDate,
       sourceUrl: null,
-      catalogId: map.regionId,
+      catalogId: map.id,
       meta,
     });
     for (const part of parts) deleteFile(part.uri);
@@ -404,7 +410,7 @@ export async function onMapFileDownloaded(file: File, record: DownloadRecord) {
   }
   if (role === 'part') await assembleMap(map, !!record.meta.bundledPoints, record);
   // Imported once the map is installed (now, or after its assembly).
-  else if (isSideFile(role)) importMapSide(map.id, role, mapItemId(map.regionId), true);
+  else if (isSideFile(role)) importMapSide(map.id, role, mapItemId(map.id), true);
 }
 
 /**
