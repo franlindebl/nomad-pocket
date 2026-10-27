@@ -722,7 +722,10 @@ indexing, emergency-kind POIs found in the tiles (named or not, e.g. drinking wa
 stored as `t…` rows unless the region already has Overpass points — at z15 that is most
 of them, at z12/14 only the important ones (Protomaps gives most POIs min_zoom 15–17).
 Queries: `nearestEmergencyPlaces(category, from)` (equirectangular ORDER BY, GROUP BY
-osm_id across overlapping regions), `emergencyPlacesIn(bbox)` for the map layer (zoom ≥ 11).
+osm_id across overlapping regions), `emergencyPlacesIn(bbox, hidden)` for the map layer (zoom ≥ 11,
+at most 600, hospitals/police/fire first, then by category). The Puntos sheet (`maps/points.tsx`, the
+three-dot map button) is its legend and settings: `settings.mapPoints` hides the layer,
+`settings.hiddenPointCategories` leaves categories out *in the SQL*, before the limit, so the others fill it.
 `emergencyNumber()`: 911 for the device region in most of the Americas, else 112.
 
 **Routing** (`modules/nomad-route`, `routing.ts`, `routing-packs.ts`, pure parts in

@@ -221,6 +221,17 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-27 — Maps: a legend for the dots, switches to hide them, and a red "SOS" button
+
+Owner: in a city the map is a cloud of coloured dots nobody can read, and the siren button
+didn't read as "emergency". A new map button (three coloured dots, grey when they're hidden)
+opens the Puntos sheet: what each colour is (category + the kinds in it), a switch for the whole
+layer and one per category, persisted in settings. Security was the same blue as water (and as the
+user's dot): now purple. The Emergencias button is a red disc with "SOS". Found while testing: the
+layer's query stops at 600 points with health first, so in central Madrid supermarkets never
+showed; hidden categories are left out in SQL, before the limit, so hiding Salud brings them in.
+Checked on the iOS simulator (Madrid, light and dark).
+
 ### 2026-10-27 — Library: document collections as a native list; PDFs on Android; no more "home" title
 
 Owner: the Medical Library opened on a desktop web page (huge PDF cards, its own search box, a

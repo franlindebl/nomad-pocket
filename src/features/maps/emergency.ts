@@ -182,7 +182,8 @@ async function writePoints(source: string, feed: Feed) {
         { $source: source, $json: JSON.stringify(rows) },
       );
     }
-    for (const p of pois) if (p.name) named.push({ layer: 'poi', kind: p.kind, name: p.name, names: p.name, lat: p.lat, lon: p.lon, rank: 13 });
+    for (const p of pois)
+      if (p.name) named.push({ layer: 'poi', kind: p.kind, name: p.name, names: p.name, lat: p.lat, lon: p.lon, rank: 13 });
     count += pois.length;
     return true;
   });
@@ -253,7 +254,9 @@ export function emergencySyncInfo(): Record<string, { at: number; count: number 
 
 /** Emergency points taken from each map's own tiles (offline fallback, ids 't…'). */
 export function tilePointCounts(): Record<string, number> {
-  const rows = indexDb().getAllSync<{ source: string; n: number }>("SELECT source, COUNT(*) AS n FROM map_pois WHERE osm_id LIKE 't%' GROUP BY source");
+  const rows = indexDb().getAllSync<{ source: string; n: number }>(
+    "SELECT source, COUNT(*) AS n FROM map_pois WHERE osm_id LIKE 't%' GROUP BY source",
+  );
   return Object.fromEntries(rows.map((r) => [r.source, r.n]));
 }
 
@@ -312,11 +315,12 @@ export function nearestEmergencyPlaces(category: EmergencyCategory, from: LatLon
 }
 
 /** Points inside a bbox, for the map layer. */
-export function emergencyPlacesIn(bbox: [number, number, number, number], limit = 600): EmergencyPlace[] {
+/** `hidden`: categories switched off in the Puntos sheet, left out before the limit so the others fill it. */
+export function emergencyPlacesIn(bbox: [number, number, number, number], hidden: readonly string[] = [], limit = 600): EmergencyPlace[] {
   const [w, s, e, n] = bbox;
   const rows = indexDb().getAllSync<PoiRow>(
     `SELECT osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon FROM map_pois
-     WHERE lat BETWEEN ? AND ? AND lon BETWEEN ? AND ? GROUP BY osm_id
+     WHERE lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?${hidden.length ? ` AND category NOT IN (${hidden.map(() => '?').join(',')})` : ''} GROUP BY osm_id
      ORDER BY CASE kind WHEN 'hospital' THEN 0 WHEN 'police' THEN 1 WHEN 'fire_station' THEN 1 WHEN 'ambulance_station' THEN 1 ELSE 2 END,
        CASE category WHEN 'health' THEN 0 WHEN 'security' THEN 1 WHEN 'water' THEN 2 WHEN 'official' THEN 3 ELSE 4 END
      LIMIT ?`,
@@ -324,6 +328,7 @@ export function emergencyPlacesIn(bbox: [number, number, number, number], limit 
     n,
     w,
     e,
+    ...hidden,
     limit,
   );
   return rows.map((r) => fromRow(r, null));

@@ -8,7 +8,8 @@
     "search": "Buscar",
     "emergency": "Emergencias",
     "recenter": "Recentrar",
-    "overview": "Ver toda la ruta"
+    "overview": "Ver toda la ruta",
+    "points": "Puntos en el mapa"
   },
   "empty": {
     "title": "Descarga el mapa de tu país",
@@ -78,6 +79,20 @@
     "offline": "Necesitas conexión a internet para descargar mapas. Después funcionan sin conexión.",
     "estimateFailed": "No se ha podido calcular el tamaño: {{error}}",
     "action": "Descargar · {{size}}"
+  },
+  "points": {
+    "title": "Puntos en el mapa",
+    "show": "Mostrar en el mapa",
+    "showBody": "Hospitales, agua, refugios y más de tus mapas descargados. Aparecen al acercar el mapa.",
+    "legend": "Qué es cada color",
+    "kinds": {
+      "health": "Hospitales, centros de salud, farmacias, desfibriladores y ambulancias",
+      "security": "Policía, bomberos e instalaciones militares",
+      "water": "Agua potable, manantiales, refugios y puntos de encuentro",
+      "supplies": "Supermercados, ferreterías y gasolineras",
+      "official": "Ayuntamientos, embajadas y consulados"
+    },
+    "footer": "Toca un punto para ver qué es, llamar o ir hasta él. La lista completa, ordenada por distancia, está en SOS."
   },
   "markers": {
     "title": "Lugares guardados",
