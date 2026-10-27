@@ -281,6 +281,11 @@ en España" for ~10 s; asked for every deferred step to happen with the download
   16" → "Rue de la Loi, 16", and the country row turned "Mapa y navegación" when it ended. A first try
   was spoiled by another session installing an old APK (versionCode 12) on the same emulator
   mid-import: its doors took 102 s, the old row-by-row path.
+- android-01-tour's find bar step now takes any "N de M" and checks that "Siguiente" changes it
+  (Android's WebView can land on the 2nd match while typing). Checked on iOS with the same steps
+  ("1 de 8" → "2 de 8"; the control without a tap fails). Not rerun on Android: that afternoon the
+  Mac's network sent download.kiwix.org through a TLS-inspecting proxy the emulator doesn't trust
+  ("Trust anchor for certification path not found"), so the flow's 1 MB archive can't download.
 
 ### 2026-10-27 — Release: 1.1.0 build 18 to TestFlight (build 17 withdrawn)
 
