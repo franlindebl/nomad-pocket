@@ -48,5 +48,10 @@
   "noArchivesBody": "Descarga un libro desde la biblioteca y búscalo aquí, sin conexión.",
   "toc": "Índice",
   "tocEmpty": "Esta página no tiene secciones",
-  "tocEmptyBody": "Las páginas cortas o las portadas no suelen tener índice."
+  "tocEmptyBody": "Las páginas cortas o las portadas no suelen tener índice.",
+  "collectionSearch": "Buscar en {{count}} documentos",
+  "collectionFiles_one": "{{count}} archivo",
+  "collectionFiles_other": "{{count}} archivos",
+  "noViewer": "Ninguna app puede abrir este PDF",
+  "noViewerBody": "Instala un lector de PDF en este dispositivo para leerlo."
 }

@@ -19,4 +19,6 @@ dependencies {
   // libkiwix + libzim JNI bindings (arm64-v8a, armeabi-v7a, x86, x86_64; minSdk 24).
   implementation 'org.kiwix:libkiwix:2.7.0'
   implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
+  // FileProvider, to hand a PDF to the system viewer.
+  implementation 'androidx.core:core:1.13.1'
 }

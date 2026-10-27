@@ -94,6 +94,12 @@ class NomadZimModule : Module() {
       withContext(Dispatchers.IO) { handle(id).listArticles(limit).map(::hit) }
     }
 
+    // The WebView can't show PDFs: the reader hands them to the system viewer (ZimExternalOpen).
+    AsyncFunction("openExternally") Coroutine { id: String, path: String ->
+      val h = handle(id)
+      withContext(Dispatchers.IO) { ZimExternalOpen.open(context, appContext.currentActivity, h, path) }
+    }
+
     // iOS-only (per-file iCloud backup flag). On Android the content folders are excluded by
     // path in the backup rules (plugins/with-android-backup-rules.js).
     AsyncFunction("excludeFromBackup") { _: String -> false }

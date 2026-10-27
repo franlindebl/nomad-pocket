@@ -221,6 +221,25 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-27 — Library: document collections as a native list; PDFs on Android; no more "home" title
+
+Owner: the Medical Library opened on a desktop web page (huge PDF cards, its own search box, a
+"home" title). The zimgit-* archives (medicine, water, food preparation, knots, post-disaster) are
+built by Kiwix's nautilus scraper: their main page is a Bootstrap app around `database.js`. The
+reader now parses that file (`library/collection.ts`, tested) and shows a native list instead:
+search on title/author/description, author and description per document, multi-file documents
+expand; a document opens as a reader route titled with its name. Android's WebView can't show PDFs
+(a tapped PDF stayed blank): PDF entries, from the list, links or a search/history route, are copied
+to the cache and opened in the system viewer (`ZimExternalOpen`, own FileProvider), with an alert
+when no app can. The "home" title came from libzim using the path as the title of an untitled
+entry; native now reports the page's `<title>` then (both platforms).
+Checked with zimgit-water (same format as the medical library) in Release builds: iOS 27 simulator
+(list, search, light/dark, a PDF in the reader titled with the document's name, "Página principal"
+back to the list) and the Android emulator (list; the PDF opened in Drive's viewer, back returns to the
+list). Not checked: a device without any PDF viewer (the alert), multi-file documents (no zimgit
+archive in the catalog has one), the medical archive itself on a phone. The Android `android/` folder
+was regenerated with `prebuild --clean` (it was still at versionCode 12).
+
 ### 2026-10-27 — UI: no more empty band at the end of scrolling screens
 
 Owner: Inicio and Biblioteca ended ~180 pt above the tab bar, which looked like a bug. `<Screen>`

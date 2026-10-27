@@ -44,12 +44,16 @@ export type NomadZimNativeModule = {
   randomPath(id: string): Promise<string | null>;
   /** HTML articles in title order (redirects skipped), at most `limit`. */
   listArticles(id: string, limit: number): Promise<NativeZimHit[]>;
+  /** Android: copies the entry to the cache and opens it in the system viewer (its WebView can't show
+   *  PDFs). False when no app handles it. iOS: no-op (returns false); the reader shows PDFs. */
+  openExternally(id: string, path: string): Promise<boolean>;
   /** iOS: sets NSURLIsExcludedFromBackupKey. Android: no-op (returns false). */
   excludeFromBackup(path: string): Promise<boolean>;
 };
 
 export type ZimNavigationEvent = { path: string; title: string; canGoBack: boolean; canGoForward: boolean };
 /** `crashed`: the page kept killing the web content process, so it was not reloaded again. */
+/** `error: 'noViewer'` (Android): a PDF was to open in the system viewer and no app can show it. */
 export type ZimLoadEndEvent = { path: string; title?: string; error?: string; crashed?: boolean };
 /**
  * A link the user tapped that leaves the app (http, https, mailto, tel, geo only). Nothing

@@ -83,6 +83,11 @@ public final class NomadZimModule: Module {
       return archive.listArticles(limit).map(Self.hit)
     }.runOnQueue(zimWorkQueue)
 
+    /// Android-only: WKWebView shows PDFs itself.
+    AsyncFunction("openExternally") { (_: String, _: String) -> Bool in
+      false
+    }
+
     /// Marks a file or directory as excluded from iCloud/iTunes backup.
     AsyncFunction("excludeFromBackup") { (path: String) -> Bool in
       var url = URL(fileURLWithPath: Self.plainPath(path))

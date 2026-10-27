@@ -76,6 +76,33 @@ class ZimHandle(val id: String, val filePath: String, val archive: Archive) {
     if (!archive.hasIllustration(size)) null else archive.getIllustrationItem(size).data.data
   }.getOrNull()
 
+  /** Copies an item to [out] (direct file reads for uncompressed items, so a big PDF never sits in memory). */
+  fun writeTo(path: String, out: java.io.File): Boolean = runCatching {
+    val item = archive.getEntryByPath(path).getItem(true)
+    val direct = runCatching { item.directAccessInformation }.getOrNull()
+    out.outputStream().use { os ->
+      if (direct != null && !direct.filename.isNullOrEmpty()) {
+        RandomAccessFile(direct.filename, "r").use { file ->
+          file.seek(direct.offset)
+          val buf = ByteArray(1 shl 20)
+          var left = item.size
+          while (left > 0) {
+            val n = file.read(buf, 0, minOf(buf.size.toLong(), left).toInt())
+            if (n < 0) error("short read")
+            os.write(buf, 0, n)
+            left -= n
+          }
+        }
+      } else {
+        os.write(item.data.data)
+      }
+    }
+    true
+  }.getOrElse {
+    out.delete()
+    false
+  }
+
   fun randomPath(): String? = runCatching { archive.randomEntry.getItem(true).path }.getOrNull()
 
   /** HTML articles in title order (redirects skipped), at most [limit]. */
