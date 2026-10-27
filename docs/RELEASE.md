@@ -24,9 +24,9 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 
 - Marketing version: `expo.version` (currently **1.1.0**). Keep `package.json`'s
   `version` equal (not used by the build, but it's what people read).
-- iOS build number: `expo.ios.buildNumber` (currently **"20"**) → `CFBundleVersion`. Bump it
+- iOS build number: `expo.ios.buildNumber` (currently **"21"**) → `CFBundleVersion`. Bump it
   for every upload: App Store Connect rejects a build number it has already seen.
-- Android: `expo.android.versionCode` (currently **20**, nothing published yet). Must grow
+- Android: `expo.android.versionCode` (currently **21**, nothing published yet). Must grow
   with every Play upload.
 - After changing any of them, run `npx expo prebuild` (it can regenerate `ios/` and
   `android/` from scratch: then `cd ios && pod install`).
@@ -52,6 +52,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.1.0 | 18 | TestFlight 2026-10-27: downloads tuned on a real iPhone (setup kit 20.7 GB in ~6:30 instead of 13 min, the country's map first, in-process sessions while the app is open, stall watchdog); a country's search and emergency points prepared as the end of its download ("Preparando… %", no freeze or wait when search opens); archived from a clean worktree of the release commit |
 | 1.1.0 | 19 | TestFlight 2026-10-27: document collections (medical, water, knots…) as a native list with search, PDFs open on Android, a legend and switches for the map's emergency dots, a red SOS button |
 | 1.1.0 | 20 | TestFlight 2026-10-27: dictation in the assistant (on-device speech recognition, never sent), a more capable installed model becomes the default, an answer keeps going while you open another chat; navigation view: the route is consumed behind the arrow, the map turns with your last metres, smooth camera, "Norte arriba" button; Canada and Russia as regional maps |
+| 1.1.0 | 21 | TestFlight 2026-10-27: build 20 plus `NSPhotoLibraryUsageDescription` (App Store Connect flagged build 20 with ITMS-90683: expo-image and expo-file-system's legacy module link the Photos framework; the app never asks for the photo library) |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.
