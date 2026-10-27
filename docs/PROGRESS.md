@@ -6,16 +6,16 @@ can pick up without re-deriving anything.
 
 ## Current state (2026-10-27)
 
-- **Version 1.1.0 (iOS build 14)** on TestFlight 2026-10-27: faster downloads (segmented multi-mirror
-  engine, adaptive connection budget, log entries 2026-10-26) on top of build 13 (the pre-release audit
-  fixes, multi-pack countries); **1.0.1 (build 3)** waiting for App Review. Release process and version
-  table: `docs/RELEASE.md`; store builds are tagged from build 13 on (`v1.1.0-14`).
+- **Version 1.1.0 (iOS build 15)** on TestFlight 2026-10-27: many downloads at once (log 2026-10-27) and
+  the map starting on the user, on top of build 14 (faster downloads: segmented multi-mirror engine,
+  adaptive connection budget); **1.0.1 (build 3)** waiting for App Review. Release process and version
+  table: `docs/RELEASE.md`; store builds are tagged from build 13 on (`v1.1.0-15`).
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
   tour). Not yet run on a physical device by the agent.
 - Checks: `npm test` (the count drifts: run it), `tsc` clean, lint clean, i18n keys complete. E2E: 54 Maestro flows
   (21 smoke, 17 full, 11 nightly, 1 iPad tour, 4 Android); which cases they cover is in the catalog of `docs/E2E.md`.
-  Build 14 passed the smoke suite (21/21, 2026-10-27); full and iPad suites not run on it yet.
+  Build 15 passed the smoke suite (21/21, 2026-10-27); full and iPad suites not run on it yet.
 
 | Area | Status |
 |---|---|
@@ -221,6 +221,13 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-27 — Release: 1.1.0 build 15 to TestFlight
+
+Build 15 = many downloads at once (up to 6, ≤ 2 per GitHub/Hugging Face host, mirror speeds
+remembered, segmented from 16 MB) on top of build 14, plus what landed on `main` meanwhile: the
+map asks for the location and starts on the user, USA routing packs (data). Smoke E2E 21/21 on an
+iOS 27 simulator; tagged `v1.1.0-15`.
 
 ### 2026-10-27 — Downloads: many files at once (a kit no longer waits behind a country map)
 
