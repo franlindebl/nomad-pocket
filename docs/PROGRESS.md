@@ -275,6 +275,12 @@ en España" for ~10 s; asked for every deferred step to happen with the download
   Emergencias (android-03) and routing (android-05) pass; android-01 failed on the reader's find bar
   showing "2 de 26" where the flow expects "1 de N" (unrelated, the assertion is too strict). Shipped
   in build 18; the owner tried it on their iPhone: "se comporta muy bien".
+- Android emulator (Release APK from a clean worktree; Spain doesn't fit its 3.4 GB free, so Belgium,
+  1.5 GB with 164 MB of doors): imports points 1.7 s, streets 4.6, places 7.9, doors 39.2; search
+  answered during them ("Preparando la búsqueda en Bélgica… 90 %" above the results), "Rue de la Loi
+  16" → "Rue de la Loi, 16", and the country row turned "Mapa y navegación" when it ended. A first try
+  was spoiled by another session installing an old APK (versionCode 12) on the same emulator
+  mid-import: its doors took 102 s, the old row-by-row path.
 
 ### 2026-10-27 — Release: 1.1.0 build 18 to TestFlight (build 17 withdrawn)
 
