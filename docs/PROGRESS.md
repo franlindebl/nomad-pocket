@@ -54,8 +54,6 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
 
 A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check in ~2 days, with the
    country-coverage work**:
-   - README country claims and "60 countries", and the US map (DOCS-PUBLIC-1, DOCS-PUBLIC-2,
-     DOCS-INTERNAL-8): the README's coverage lines stay as they are until that work lands.
    - Regenerate the store screenshots (DOCS-PUBLIC-3 / LEGAL-14); the map ones must show the OSM credit.
    - OSS-9: obsolete PNGs in the repo.
    - The git history rewrite that removes the owner's old location examples (pending a quiet window).
@@ -267,6 +265,18 @@ Build 13 = the pre-release audit fixes (reader without network, Wi-Fi-only enfor
 and storage, Credits & licences, data out of the Files app, re-downloadable data out of backups, OSM credit, guidance
 auto-stop, translated permission prompt) and multi-pack countries (the USA). Smoke E2E 21/21 on an
 iOS 27 simulator; tagged `v1.1.0-13` (GPL section 6).
+
+### 2026-10-27 — Routing packs for the whole world published; README coverage
+
+- Runs 40407657017 (am ag fr ioa je rw) and 40417397392 (de, with the dated-extract fallback
+  6bca652) published. routing-index: 231 packs (pm dropped, 73cb7af); maps-index: 241 maps,
+  238 at z15 and ca/ru/us at z14. Every part and side file checked in its 19 releases (name and
+  size). The de and fr maps no longer list side files (their packs bring them).
+- No pack, on purpose: us (four regional packs added to packs.json in f3efa4d, run 40426777070;
+  build 13+ reads several packs per country), ht (shares do), pm and the uninhabited
+  territories atc gs hm io kas pn tf.
+- README (en, es): routing everywhere but the USA (coming) and a few uninhabited territories;
+  ca/ru/us maps one zoom lower. Closes DOCS-PUBLIC-1/2 and DOCS-INTERNAL-8.
 
 ### 2026-10-26 — CI: country packages workflow hardened (SUPPLY-1/2/3)
 
