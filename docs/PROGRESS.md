@@ -6,16 +6,17 @@ can pick up without re-deriving anything.
 
 ## Current state (2026-10-27)
 
-- **Version 1.1.0 (iOS build 15)** on TestFlight 2026-10-27: many downloads at once (log 2026-10-27) and
-  the map starting on the user, on top of build 14 (faster downloads: segmented multi-mirror engine,
-  adaptive connection budget); **1.0.1 (build 3)** waiting for App Review. Release process and version
-  table: `docs/RELEASE.md`; store builds are tagged from build 13 on (`v1.1.0-15`).
+- **Version 1.1.0 (iOS build 16)** on TestFlight 2026-10-27: the fix for the app being killed while
+  "Preparando" a big download (log 2026-10-27) and the USA as regional maps, on top of build 15 (many
+  downloads at once) and build 14 (faster downloads); **1.0.1 (build 3)** waiting for App Review.
+  Release process and version table: `docs/RELEASE.md`; store builds are tagged from build 13 on
+  (`v1.1.0-16`).
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
   tour). Not yet run on a physical device by the agent.
 - Checks: `npm test` (the count drifts: run it), `tsc` clean, lint clean, i18n keys complete. E2E: 54 Maestro flows
   (21 smoke, 17 full, 11 nightly, 1 iPad tour, 4 Android); which cases they cover is in the catalog of `docs/E2E.md`.
-  Build 15 passed the smoke suite (21/21, 2026-10-27); full and iPad suites not run on it yet.
+  Build 16 passed the smoke suite (21/21, 2026-10-27); full and iPad suites not run on it yet.
 
 | Area | Status |
 |---|---|
@@ -221,6 +222,15 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-27 — Release: 1.1.0 build 16 to TestFlight
+
+Build 16 = the native sha-256 and file copies (`modules/nomad-files`; the app was killed while
+"Preparando" a big download, entry below) on top of build 15, plus the USA as regional maps (the
+other session's phase 4). Checked on the simulator first: Spain (map 2.29 GB + pack 2.27 GB, two
+parts each) downloaded, hashed and assembled with the app at ≤ 704 MB the whole time. Smoke E2E
+21/21 on an iOS 27 simulator; tagged `v1.1.0-16`. To verify on the owner's iPhone: build 14 left
+Spain in "Preparando"; opening build 16 should finish it without closing.
 
 ### 2026-10-27 — Fix: the app was killed while "Preparando" a big download (iOS, memory)
 
