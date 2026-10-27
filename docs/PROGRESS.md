@@ -248,12 +248,14 @@ en España" for ~10 s; asked for every deferred step to happen with the download
 
 ### 2026-10-27 — Release: 1.1.0 build 18 to TestFlight (build 17 withdrawn)
 
-Build 18 = the download tuning below on top of build 16. Smoke E2E 21/21 on an iOS 27 simulator;
+Build 18 = the download tuning (below) and a country's search and emergency points prepared as the
+end of its download (log entry above) on top of build 16. Smoke E2E 21/21 on an iOS 27 simulator;
 tagged `v1.1.0-18`. Build 17 was archived from the main checkout while another session was
 editing map search there: its JS bundle holds that half-done work (a `BATCH_TILES` with no
 definition, found by grepping the intermediate `main.jsbundle`). Build 18 was archived from a
-clean worktree of the commit; RELEASE.md now says so. Android check of the shared download
-changes is next (owner asked for it last).
+clean worktree of the release commit (the map-search session uploaded it once its work was
+committed; the commit that first said "build 18" had not uploaded it); RELEASE.md says to archive
+only from such a tree. Android check of the shared download and map-search changes is next.
 
 ### 2026-10-27 — Downloads tuned on a real iPhone: the setup kit in ~6:30 instead of 13 min
 
