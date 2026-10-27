@@ -1,7 +1,8 @@
 # MAP-17 offline — navigation view (Google Maps / Waze style), Andorra pack seeded: the
 # trip preview has "Iniciar"; then the next maneuver moves to a banner at the top, the
 # rest to a slim bar, and the map follows the user (way ahead up, tilted, an arrow instead
-# of the dot) while driving along the road; panning the map stops it ("Recentrar" brings
+# of the dot, the route behind it gone) while driving along the road; "Norte arriba" keeps
+# the map north up and turns the arrow; panning the map stops it ("Recentrar" brings
 # it back) and the route button shows the whole trip.
 appId: com.fjlinde.nomadpocket
 tags: [full, maps, seeded-route]
@@ -66,6 +67,16 @@ tags: [full, maps, seeded-route]
 - assertVisible: { id: "map-overview" }
 - assertVisible: { id: "guidance-next" }
 - takeScreenshot: 02-driving
+# North up: the map stops turning (the arrow turns instead); pressed again, it follows the way.
+- tapOn: { id: "map-north-up" }
+- travel:
+    points:
+      - "42.49650,1.50739"
+      - "42.49560,1.50570"
+    speed: 14
+- assertVisible: { id: "map-overview" }
+- takeScreenshot: 02b-north-up
+- tapOn: { id: "map-north-up" }
 - swipe:
     start: 50%, 45%
     end: 15%, 55%

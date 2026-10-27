@@ -161,11 +161,30 @@ test('routeProgress follows the route and spots leaving it', () => {
   const end = routeProgress(r, cum, { lat: r.shape[r.shape.length - 1][1], lon: r.shape[r.shape.length - 1][0] }, mid.segment);
   near(end.remainingM, 0, 1);
   assert.equal(end.next, r.maneuvers.length - 1);
-  assert.equal(end.aheadBearing, null, 'nothing ahead at the end');
+  assert.equal(end.roadBearing, null, 'nothing ahead at the end');
 
-  // The way ahead: towards the point 30 m further along.
+  // The road right here: from the start to 20 m along (by car; nothing behind the start).
   const here = { lat: r.shape[0][1], lon: r.shape[0][0] };
-  near(start.aheadBearing ?? -1, bearingDegrees(here, pointAlong(r.shape, cum, 30)!), 0.5);
+  near(start.roadBearing ?? -1, bearingDegrees(here, pointAlong(r.shape, cum, 20)!), 0.5);
+  near(start.alongM, 0, 0.5);
+  near(mid.alongM, cum[turn.begin + 2], 1);
+  near(mid.snapped!.lat, at.lat, 1e-6);
+});
+
+test('roadBearing turns at the corner, not before it', () => {
+  // East 200 m, then north 200 m (about 0.0018° each way at the equator).
+  const shape: [number, number][] = [
+    [0, 0],
+    [0.0018, 0],
+    [0.0018, 0.0018],
+  ];
+  const cum = cumulativeDistances(shape);
+  const route = { ...parseRoute(MADRID, 'pedestrian'), shape, maneuvers: [], costing: 'pedestrian' as const };
+  const at = (m: number) => routeProgress(route, cum, pointAlong(shape, cum, m)!).roadBearing ?? -1;
+  near(at(150), 90, 0.5, '50 m before the corner: still east');
+  near(at(cum[1] - 10), 90, 0.5, '10 m before: still east (a walker looks 8 m ahead)');
+  near(at(cum[1]), 26.6, 1.5, 'at the corner: turning (4 m behind, 8 m ahead)');
+  near(at(cum[1] + 10), 0, 0.5, 'past it: north');
 });
 
 test('pointAlong interpolates and clamps', () => {

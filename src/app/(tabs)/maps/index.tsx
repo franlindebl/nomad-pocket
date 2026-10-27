@@ -16,7 +16,7 @@ import { EMERGENCY_CATEGORIES } from '@/features/maps/emergency-core';
 import { deviceCountry } from '@/features/maps/CountryList';
 import { useCountries } from '@/features/maps/countries';
 import { countryDownloadGroup } from '@/features/maps/country-maps';
-import { FollowArrow, useFollowCamera } from '@/features/maps/FollowCamera';
+import { FollowArrow, FollowBeam, useFollowCamera } from '@/features/maps/FollowCamera';
 import { GuidancePanel } from '@/features/maps/GuidancePanel';
 import { HeadingBeam } from '@/features/maps/HeadingBeam';
 import { useGuidance } from '@/features/maps/guidance';
@@ -69,7 +69,12 @@ export default function MapScreen() {
   const target = useGuidance((s) => s.target);
   const position = useGuidance((s) => s.position);
   const route = useGuidance((s) => s.route);
+  const progress = useGuidance((s) => s.progress);
   const navigating = useGuidance((s) => s.navigating);
+  const northUp = useSettings((st) => st.navNorthUp);
+  const setNorthUp = useSettings((st) => st.setNavNorthUp);
+  /** The direction of travel the follow camera uses: the arrow turns by it when the map stays north up. */
+  const [travel, setTravel] = useState<number | null>(null);
   const cameraRef = useRef<CameraRef>(null);
   const [assets, setAssets] = useState<MapAssets | null>(null);
   const [bearing, setBearing] = useState(0);
@@ -206,13 +211,17 @@ export default function MapScreen() {
     };
   }, [target, position, route]);
 
-  const routeData = useMemo<GeoJSON.FeatureCollection>(
-    () =>
-      route
-        ? { type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: route.shape } }] }
-        : EMPTY,
-    [route],
-  );
+  // Navigating, the route is consumed like Google Maps': it starts where the user is on
+  // it, what is behind is gone (a sliced line, not line-gradient: MapLibre measures its
+  // progress in projected units and samples the gradient into a texture, too coarse to
+  // cut a long route at the arrow).
+  const cut = navigating && route && progress?.snapped ? progress : null;
+  const routeData = useMemo<GeoJSON.FeatureCollection>(() => {
+    if (!route) return EMPTY;
+    const coordinates = cut?.snapped ? [[cut.snapped.lon, cut.snapped.lat], ...route.shape.slice(cut.segment + 1)] : route.shape;
+    if (coordinates.length < 2) return EMPTY;
+    return { type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates } }] };
+  }, [route, cut]);
 
   const top = insets.top + space.sm;
   const cardBottom = insets.bottom + 72;
@@ -336,7 +345,7 @@ export default function MapScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openFix]);
 
-  useFollowCamera(cameraRef, following && tabFocused && size.height > 0, Math.max(0, shift), Math.max(0, -shift));
+  useFollowCamera(cameraRef, following && tabFocused && size.height > 0, Math.max(0, shift), Math.max(0, -shift), northUp, setTravel);
 
   return (
     <View
@@ -506,7 +515,8 @@ export default function MapScreen() {
         </View>
       )}
 
-      {style && following ? <FollowArrow x={size.width / 2} y={userY} /> : null}
+      {style && following ? <FollowBeam x={size.width / 2} y={userY} mapBearing={bearing} /> : null}
+      {style && following ? <FollowArrow x={size.width / 2} y={userY} rotation={northUp ? (travel ?? 0) : 0} /> : null}
 
       {style && credit ? <MapCredit top={freeTop} /> : null}
 
@@ -551,6 +561,19 @@ export default function MapScreen() {
           <MapFab
             accessibilityLabel={t('controls.north')}
             onPress={() => cameraRef.current?.setStop({ bearing: 0, duration: 400, easing: 'ease' })}>
+            <View style={{ transform: [{ rotate: `${-bearing}deg` }] }}>
+              <Navigation2 size={21} color={hues.medicine} fill={hues.medicine} strokeWidth={1.5} />
+            </View>
+          </MapFab>
+        ) : null}
+        {following ? (
+          // Where north is while the map turns with the user; pressed, the map stays north up.
+          <MapFab
+            testID="map-north-up"
+            accessibilityLabel={t('controls.northUp')}
+            selected={northUp}
+            onPress={() => setNorthUp(!northUp)}
+            style={northUp ? { borderColor: colors.accent, borderWidth: 2 } : undefined}>
             <View style={{ transform: [{ rotate: `${-bearing}deg` }] }}>
               <Navigation2 size={21} color={hues.medicine} fill={hues.medicine} strokeWidth={1.5} />
             </View>

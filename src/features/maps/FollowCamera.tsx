@@ -1,84 +1,164 @@
 // Navigation camera (Google Maps / Waze driving view): while following, every GPS fix
-// eases the map to the user with the way ahead pointing up, tilted, and the user low on
-// the screen (camera padding) so the road ahead shows above the guidance panel. Driven
-// from JS with easeTo, not MapLibre's tracking modes: those ignore the padding on iOS
-// (the user would sit under the panel) and turn the map by the raw GPS course rather
-// than the route. Each ease lasts about as long as the gap between fixes, so the map
-// glides instead of jumping, and the arrow is a plain view at the padded centre: it
-// stays put while the map moves under it (the native puck would lag the camera).
+// eases the map to the user with the way they go pointing up (or north up, the user's
+// choice), tilted, and the user low on the screen (camera padding) so the road ahead
+// shows above the guidance panel. Driven from JS with easeTo, not MapLibre's tracking
+// modes: those ignore the padding on iOS (the user would sit under the panel) and turn
+// the map by the raw GPS course. The user sits on the route (snapped), and each ease
+// goes to where they will be at the next fix and lasts until it comes, so the map glides
+// on instead of stopping at every fix one fix behind (follow-core). The arrow is a plain
+// view at the padded centre: it stays put while the map moves under it (the native puck
+// would lag the camera).
 import type { CameraRef } from '@maplibre/maplibre-react-native';
 import { Navigation2 } from 'lucide-react-native';
-import { useEffect, type RefObject } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState, type RefObject } from 'react';
+import { Image, StyleSheet } from 'react-native';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { useTheme } from '@/theme';
 
-import { FOLLOW_PITCH, followBearing, followZoom, turnBetween } from './follow-core';
+import { followBearing, followCenter, followPitch, followZoom, isWeakFix, movingBearing, smoothTurn } from './follow-core';
 import { useGuidance } from './guidance';
 
-/** Compass updates come many times a second: turn the map when it moved this much. */
-const MIN_TURN = 4;
 /** Shortest and longest glide between two fixes, ms. */
 const GLIDE_MIN = 400;
 const GLIDE_MAX = 2500;
 const ARROW = 44;
+/** The compass beam's image (scripts/maps/make-beam.py), its apex at the bottom centre. */
+const BEAM = { width: 80, height: 88 };
+const BEAMS = {
+  light: require('../../../assets/maps/beam/beam-narrow-light.png'),
+  dark: require('../../../assets/maps/beam/beam-narrow-dark.png'),
+};
 
-/** Moves the camera with the user while `active`; `top`/`bottom` padding put the user at the arrow. */
-export function useFollowCamera(camera: RefObject<CameraRef | null>, active: boolean, top: number, bottom: number) {
+/**
+ * Moves the camera with the user while `active`; `top`/`bottom` padding put the user at
+ * the arrow. onBearing gets the direction of travel the camera uses (for a north-up arrow).
+ */
+export function useFollowCamera(
+  camera: RefObject<CameraRef | null>,
+  active: boolean,
+  top: number,
+  bottom: number,
+  northUp: boolean,
+  onBearing: (bearing: number | null) => void,
+) {
+  const report = useRef(onBearing);
+  useEffect(() => {
+    report.current = onBearing;
+  }, [onBearing]);
   useEffect(() => {
     if (!active) return;
     let bearing: number | null = null;
     let fixAt = 0;
-    let glideEnd = 0;
+    /** Expected time between fixes, smoothed (iOS gives ~1 s driving, a fix every few metres walking). */
+    let gap = 1000;
     let first = true;
-    const move = (newFix: boolean) => {
+    const move = () => {
       const s = useGuidance.getState();
       const p = s.position;
       if (!p) return;
-      const b = followBearing({ costing: s.costing, course: p.course ?? null, heading: s.heading, progress: s.route ? s.progress : null, accuracy: p.accuracy });
       const now = Date.now();
-      if (!newFix && (b === null || (bearing !== null && turnBetween(bearing, b) < MIN_TURN))) return;
-      if (b !== null) bearing = b;
-      let duration: number;
-      if (first) duration = 900;
-      else if (newFix) duration = Math.min(GLIDE_MAX, Math.max(GLIDE_MIN, now - fixAt));
-      // A compass turn between fixes: finish the glide to the last fix, no faster than 300 ms.
-      else duration = Math.max(300, glideEnd - now);
-      if (newFix) fixAt = now;
-      glideEnd = now + duration;
+      const since = now - fixAt;
+      if (!first) gap = 0.7 * gap + 0.3 * Math.min(GLIDE_MAX, Math.max(GLIDE_MIN, since));
+      const progress = s.route ? s.progress : null;
+      const moving = movingBearing(s.costing, p.course ?? null, p.travel ?? null);
+      // Standing off the route keeps the map; the compass only sets the very first bearing on foot.
+      const next = followBearing({ moving, progress, accuracy: p.accuracy }) ?? (bearing === null && s.costing !== 'auto' ? s.heading : null);
+      if (next !== null) bearing = bearing === null ? next : smoothTurn(bearing, next, first ? 0 : since, s.costing);
+      const duration = first ? 900 : gap;
+      fixAt = now;
+      const center = followCenter({ position: p, route: s.route, cumulative: s.routeCumulative, progress, moving, gapMs: duration });
       camera.current?.easeTo({
-        center: [p.lon, p.lat],
-        zoom: followZoom(s.costing, p.speed ?? null),
-        pitch: FOLLOW_PITCH,
-        ...(bearing !== null ? { bearing } : {}),
+        center: [center.lon, center.lat],
+        zoom: followZoom(s.costing, p.speed ?? null, progress?.toNextM ?? null),
+        pitch: followPitch(s.costing),
+        ...(northUp ? { bearing: 0 } : bearing !== null ? { bearing } : {}),
         padding: { top, bottom, left: 0, right: 0 },
         duration,
         easing: first ? 'ease' : 'linear',
       });
+      report.current(bearing);
       first = false;
     };
-    move(true);
+    move();
     return useGuidance.subscribe((s, prev) => {
-      if (s.position !== prev.position) move(true);
-      else if (s.heading !== prev.heading || s.progress !== prev.progress) move(false);
+      if (s.position !== prev.position) move();
     });
-  }, [camera, active, top, bottom]);
+  }, [camera, active, top, bottom, northUp]);
 }
 
-/** The user while following: an arrow pointing up (the map turns, not the arrow). */
-export function FollowArrow({ x, y }: { x: number; y: number }) {
+/** A rotation style that eases the short way round (350° → 10° turns 20°, not back 340°). */
+function useTurning(deg: number) {
+  const angle = useSharedValue(deg);
+  useEffect(() => {
+    const delta = ((deg - angle.value + 540) % 360) - 180;
+    angle.value = withTiming(angle.value + delta, { duration: 300, easing: Easing.out(Easing.quad) });
+  }, [deg, angle]);
+  return useAnimatedStyle(() => ({ transform: [{ rotate: `${angle.value}deg` }] }));
+}
+
+/**
+ * The user while following: an arrow pointing the way they go (up when the map turns
+ * with them; turned when the map is north up), grey when the GPS fix is old or rough.
+ */
+export function FollowArrow({ x, y, rotation }: { x: number; y: number; rotation: number }) {
   const { colors } = useTheme();
+  const weak = useWeakFix();
+  const turning = useTurning(rotation);
   return (
-    <View
+    <Animated.View
       pointerEvents="none"
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={[styles.arrow, { left: x - ARROW / 2, top: y - ARROW / 2, shadowColor: colors.shadow }]}>
-      <Navigation2 size={ARROW} color={colors.onAccent} fill={colors.location} strokeWidth={1.6} />
-    </View>
+      style={[styles.arrow, { left: x - ARROW / 2, top: y - ARROW / 2, shadowColor: colors.shadow }, turning]}>
+      <Navigation2 size={ARROW} color={colors.onAccent} fill={weak ? colors.textTertiary : colors.location} strokeWidth={1.6} />
+    </Animated.View>
+  );
+}
+
+/** A rough fix, or none lately while moving: re-checked every couple of seconds (no fix comes to say so). */
+function useWeakFix() {
+  const check = () => {
+    const p = useGuidance.getState().position;
+    return !p || isWeakFix(p.at, p.accuracy, p.speed ?? null, Date.now());
+  };
+  const [weak, setWeak] = useState(check);
+  useEffect(() => {
+    const timer = setInterval(() => setWeak(check()), 2000);
+    const unsubscribe = useGuidance.subscribe((s, prev) => {
+      if (s.position !== prev.position) setWeak(check());
+    });
+    return () => {
+      clearInterval(timer);
+      unsubscribe();
+    };
+  }, []);
+  return weak;
+}
+
+/**
+ * On foot or by bike, the compass beam under the arrow: where the phone points, while the
+ * map keeps the way the user goes. A view, not the map's beam layer, so its apex stays on
+ * the arrow while the camera glides.
+ */
+export function FollowBeam({ x, y, mapBearing }: { x: number; y: number; mapBearing: number }) {
+  const { scheme } = useTheme();
+  const heading = useGuidance((s) => s.heading);
+  const costing = useGuidance((s) => s.costing);
+  const turning = useTurning(heading === null ? 0 : heading - mapBearing);
+  if (heading === null || costing === 'auto') return null;
+  return (
+    <Animated.View
+      pointerEvents="none"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={[styles.beam, { left: x - BEAM.width / 2, top: y - BEAM.height }, turning]}>
+      <Image source={BEAMS[scheme]} style={BEAM} />
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   arrow: { position: 'absolute', shadowOpacity: 1, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 6 },
+  beam: { position: 'absolute', transformOrigin: '50% 100%' },
 });
