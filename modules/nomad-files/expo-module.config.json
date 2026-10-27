@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["NomadFilesModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.nomadfiles.NomadFilesModule"]
+  }
+}

@@ -14,9 +14,10 @@
 // app is suspended. When the app leaves the foreground, a few bigger ranges are queued as a
 // reserve to keep it downloading, and each finished one is acknowledged only after the next
 // ranges were started (deferBackgroundSessionCompletion), so a wake-up keeps the chain going.
-import { Directory, DownloadTask, File, FileMode } from 'expo-file-system';
-import { CryptoDigestAlgorithm, digest } from 'expo-crypto';
+import { Directory, DownloadTask, File } from 'expo-file-system';
 import { Platform } from 'react-native';
+
+import { copyInto } from '../../../modules/nomad-files';
 
 import { downloadErrorKind } from './errors';
 import type { Pieces } from './mirrors';
@@ -26,7 +27,6 @@ import {
   jobDone,
   jobFailed,
   jobStopped,
-  MiB,
   newSource,
   newState,
   nextJob,
@@ -42,8 +42,6 @@ import {
   type SegState,
 } from './segments-core';
 
-/** Bytes moved per read while appending (a piece when the metalink has them). */
-const SLICE_BYTES = 4 * MiB;
 /** Ranges queued as the app leaves the foreground on iOS, each this many chunks long. */
 const RESERVE_RANGES = 4;
 const RESERVE_CHUNKS = 8;
@@ -64,9 +62,6 @@ export type SegmentedInput = {
   aheadBytes: (background: boolean) => number;
   onProgress: (bytesWritten: number, totalBytes: number) => void;
 };
-
-/** Hex of a digest. */
-const hex = (buf: ArrayBuffer) => Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, '0')).join('');
 
 /** A refused range (4xx other than 408/429) won't work on a retry from that source. */
 function refused(error: string): boolean {
@@ -367,27 +362,14 @@ export class SegmentedTransfer {
   private async append(r: Ready) {
     const src = new File(this.o.dir, r.key);
     const pieces = this.pieces;
-    const slice = pieces?.length ?? SLICE_BYTES;
     let ok = true;
     try {
-      const input = src.open(FileMode.ReadOnly);
-      const output = this.o.partial.open(FileMode.ReadWrite);
-      try {
-        output.offset = r.start;
-        for (let at = r.start; at < r.end; at += slice) {
-          const want = Math.min(slice, r.end - at);
-          const bytes = await input.readBytes(want);
-          if (bytes.length !== want) throw new Error(`short read in ${r.key}`);
-          if (pieces && hex(await digest(CryptoDigestAlgorithm.SHA1, bytes)) !== pieces.sha1[at / pieces.length]) {
-            ok = false;
-            break;
-          }
-          await output.writeBytes(bytes);
-        }
-      } finally {
-        input.close();
-        output.close();
-      }
+      // Natively, one block in memory at a time (nomad-files): the bytes never cross into JS.
+      const first = pieces ? r.start / pieces.length : 0;
+      const sha1 = pieces?.sha1.slice(first, first + Math.ceil((r.end - r.start) / pieces.length));
+      const result = await copyInto(src.uri, this.o.partial.uri, r.start, pieces && sha1 ? { length: pieces.length, sha1 } : undefined);
+      if (typeof result !== 'number') ok = false;
+      else if (result !== r.end - r.start) throw new Error(`short copy of ${r.key}: ${result} bytes`);
     } catch (e) {
       // Cancelled meanwhile (its files are gone), or the disk (full, gone): nothing to retry here.
       if (!this.stopped) this.fail(e);

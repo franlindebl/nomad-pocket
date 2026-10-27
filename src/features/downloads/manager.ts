@@ -44,6 +44,7 @@ import {
   type ContentKind,
 } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
+import { sha256 } from '../../../modules/nomad-files';
 
 import { canStartFile, connectionsFor, decide, hostHasRoom, initialBudget, WINDOW_MS, type Budget, type NetworkKind } from './budget-core';
 import { recordGroup, type DownloadGroup } from './groups';
@@ -781,8 +782,9 @@ async function checkIntegrity(id: string, file: File, rec: DownloadRecord) {
   if (!expected || (expected.size === undefined && !expected.sha256)) return;
   const size = Number(file.size ?? 0);
   let problem = integrityProblem({ size }, expected);
-  // Hashing streams the file natively, off the JS thread (seconds per GB).
-  if (!problem && expected.sha256) problem = integrityProblem({ size, sha256: await file.digest('SHA-256') }, expected);
+  // Hashing streams the file natively, off the JS thread (seconds per GB). Not File.digest: on
+  // iOS it held the whole file in memory and a 2 GB map part got the app killed (nomad-files).
+  if (!problem && expected.sha256) problem = integrityProblem({ size, sha256: await sha256(file.uri) }, expected);
   if (!problem) return;
   deleteFile(file.uri);
   const host = urlHost(String(rec.meta.source ?? ''));

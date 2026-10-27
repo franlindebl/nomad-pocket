@@ -11,7 +11,7 @@
 // files are imported after that, on their own (side-files.ts: replayed after a kill). Parts
 // and side files stay while any download of their pack is left, failed ones included; the
 // startup sweep deletes the rest.
-import { File, FileMode } from 'expo-file-system';
+import { File } from 'expo-file-system';
 import { create } from 'zustand';
 
 import Storage from '@/db/kv';
@@ -20,6 +20,7 @@ import { recordGroup } from '@/features/downloads/groups';
 import { cancelDownload, enqueueDownload, useDownloads, type DownloadGroup, type DownloadRecord, type EnqueueInput } from '@/features/downloads/manager';
 import i18n from '@/i18n';
 import { contentDir, contentFile, deleteFile } from '@/lib/storage';
+import { copyInto } from '../../../modules/nomad-files';
 
 import { oneAssemblyAtATime } from './assembly';
 import { routePacksFor, type PlannedArchive } from './country-core';
@@ -37,7 +38,6 @@ const REPO = 'franlindebl/nomad-pocket';
 const MANIFEST_URL =
   process.env.EXPO_PUBLIC_ROUTING_MANIFEST_URL ?? `https://github.com/${REPO}/releases/download/routing-index/routing-manifest.json`;
 const CACHE_KEY = 'maps.routingManifest';
-const COPY_CHUNK = 8 * 1024 * 1024;
 const ACTIVE = new Set(['queued', 'running', 'paused', 'processing']);
 
 type CatalogState = { manifest: RoutingManifest | null; status: 'idle' | 'loading' | 'error' };
@@ -299,23 +299,12 @@ async function assemblePack(pack: ManifestPack, valhalla: string, from?: Downloa
       // Waits for another country's assembly: room for one copy at a time (assembly.ts).
       await oneAssemblyAtATime(async () => {
         tmp.create();
-        const out = tmp.open(FileMode.Append);
-        try {
-          for (const part of parts) {
-            const input = part.open(FileMode.ReadOnly);
-            try {
-              for (;;) {
-                check();
-                const chunk = await input.readBytes(COPY_CHUNK);
-                if (!chunk.length) break;
-                await out.writeBytes(chunk);
-              }
-            } finally {
-              input.close();
-            }
-          }
-        } finally {
-          out.close();
+        // Natively, one block in memory at a time (nomad-files): a part takes seconds, so the
+        // country's removal is checked between parts.
+        let offset = 0;
+        for (const part of parts) {
+          check();
+          offset += await copyInto(part.uri, tmp.uri, offset);
         }
       });
     }
