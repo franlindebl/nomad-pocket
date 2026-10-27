@@ -45,7 +45,7 @@ import {
 } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
 
-import { canStartFile, connectionsFor, decide, initialBudget, WINDOW_MS, type Budget, type NetworkKind } from './budget-core';
+import { canStartFile, connectionsFor, decide, hostHasRoom, initialBudget, WINDOW_MS, type Budget, type NetworkKind } from './budget-core';
 import { recordGroup, type DownloadGroup } from './groups';
 import { keepAwakeWhileDownloading } from './keep-awake';
 import {
@@ -59,7 +59,7 @@ import {
   type NetworkGate,
   type NetworkSnapshot,
 } from './manager-core';
-import { planSources, type ProbeFetch, type SourcePlan } from './mirrors';
+import { isKiwixUrl, planSources, type ProbeFetch, type SourcePlan } from './mirrors';
 import { SEGMENTS_IN_BACKGROUND, SegmentedTransfer } from './segmented';
 import { chunkBytesFor, MiB, MIN_SEGMENTED_BYTES } from './segments-core';
 import { askAboutMobileData } from './wifi-prompt';
@@ -126,11 +126,14 @@ export class NotEnoughStorageError extends Error {
 
 /**
  * Connections per host, summed over every download: the mirrors are volunteers' servers, at
- * most 3 each, so the load spreads over them. One URL (GitHub, Hugging Face) takes 4. How many
+ * most 3 each, so the load spreads over them. One URL (GitHub, Hugging Face) takes 6. How many
  * connections and files run in all is the adaptive budget (budget-core.ts).
  */
 const PER_MIRROR = 3;
-const PER_URL = 4;
+const PER_URL = 6;
+/** How long a mirror's measured speed stands in for a new probe (in memory). */
+const MIRROR_SCORES_MS = 10 * 60 * 1000;
+const mirrorScores = new Map<string, { bps: number; at: number }>();
 /** Disk a segmented download may use for ranges that finished ahead of the prefix. */
 const AHEAD_BYTES = 1024 * MiB;
 const AHEAD_BYTES_BACKGROUND = 2048 * MiB;
@@ -629,9 +632,11 @@ function pump() {
     const active = running();
     // Still choosing its sources: no transfer yet.
     const planning = active.filter((r) => !transferring(r.id)).length;
-    if (!canStartFile({ network: budget.network, running: active.length, planning, spare: spareConnections() })) break;
-    // The connections it was going to find free are its own from now on.
-    sampler.spare = [];
+    if (!canStartFile({ network: budget.network, running: active.length, planning })) break;
+    // This host already has its files running: a later file from elsewhere may start instead.
+    const host = urlHost(rec.url);
+    const sameHost = active.filter((r) => urlHost(r.url) === host).length;
+    if (!hostHasRoom({ sameHost, multiMirror: isKiwixUrl(rec.url) })) continue;
     run(rec.id).catch(() => {});
   }
   if (running().length) startSampler();
@@ -639,7 +644,7 @@ function pump() {
 
 // ---------------------------------------------------------------------------
 // Connection budget (budget-core.ts): sampled every SAMPLE_MS while something runs; every
-// WINDOW_MS the total speed decides whether it grows, and spare connections start more files.
+// WINDOW_MS the total speed decides whether it grows.
 
 const SAMPLE_MS = 2000;
 /** A window counts only when it starts this long after the running downloads changed. */
@@ -656,8 +661,6 @@ const sampler = {
   windowIds: '',
   /** When the running downloads last changed. */
   changedAt: 0,
-  /** Connections left unused at each of the last few samples. */
-  spare: [] as number[],
 };
 
 /** Connections held now by every URL download (a single transfer is one). */
@@ -665,11 +668,6 @@ function connectionsInUse(): number {
   let n = tasks.size;
   for (const t of transfers.values()) n += t.connections();
   return n;
-}
-
-/** The fewest connections left unused over the last 3 samples (0 until there are 3). */
-function spareConnections(): number {
-  return sampler.spare.length >= 3 ? Math.min(...sampler.spare.slice(-3)) : 0;
 }
 
 function connectionsOf(transfer: SegmentedTransfer): number {
@@ -692,7 +690,6 @@ function resetBudget() {
 function startSampler() {
   if (sampler.timer) return;
   sampler.bytes.clear();
-  sampler.spare = [];
   sampler.windowStart = Date.now();
   sampler.windowBytes = 0;
   sampler.windowFull = 0;
@@ -730,7 +727,6 @@ function sample() {
   }
   sampler.bytes = seen;
   const inUse = connectionsInUse();
-  sampler.spare = [...sampler.spare.slice(-4), Math.max(0, budget.conns - inUse)];
   sampler.windowSamples++;
   if (inUse >= budget.conns - 1) sampler.windowFull++;
   const now = Date.now();
@@ -845,8 +841,16 @@ function clearGroup(groupId: string) {
 async function pickSources(id: string): Promise<SourcePlan | null> {
   const rec = useDownloads.getState().records[id];
   if (!rec) return null;
-  // expo/fetch streams the body (the throughput probe reads it as it arrives).
-  const plan = await planSources(rec.url, { fetch: expoFetch as unknown as ProbeFetch, avoid: (rec.meta.avoidMirrors as string[] | undefined) ?? [] });
+  const now = Date.now();
+  const known = new Map<string, number>();
+  for (const [host, m] of mirrorScores) if (now - m.at < MIRROR_SCORES_MS) known.set(host, m.bps);
+  const plan = await planSources(rec.url, {
+    // expo/fetch streams the body (the throughput probe reads it as it arrives).
+    fetch: expoFetch as unknown as ProbeFetch,
+    avoid: (rec.meta.avoidMirrors as string[] | undefined) ?? [],
+    known,
+  });
+  for (const m of plan.measured ?? []) mirrorScores.set(m.host, { bps: m.bps, at: Date.now() });
   // A feature's own promise (a manifest) wins over the metalink's.
   const { integrity } = plan;
   if (!rec.meta.integrity && (integrity.size !== undefined || integrity.sha256)) updateMeta(id, { integrity });

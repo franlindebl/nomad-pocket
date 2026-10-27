@@ -179,6 +179,34 @@ test('planSources: other URLs are one source; the range answer gives the size', 
   assert.equal((await planSources('https://cdn.example/f', { fetch: noRanges.fetch })).ranges, false);
 });
 
+test('planSources reuses recent measurements: no probe when they cover every mirror', async () => {
+  const name = 'knots_en_all.zim';
+  const meta = metalinkFor(name, 28e6, ['a', 'b', 'c']);
+  const net = fakeNet({ a: { bps: 5e6 }, b: { bps: 9e6 }, c: { bps: 1e6 } }, 28e6, meta);
+  const url = `https://download.kiwix.org/zim/other/${name}`;
+  const first = await planSources(url, { fetch: net.fetch });
+  assert.equal(first.measured?.length, 3);
+  // c failed last time: left out.
+  const known = new Map([
+    ['a', 5e6],
+    ['b', 9e6],
+    ['c', 0],
+  ]);
+  net.asked.length = 0;
+  const again = await planSources(url, { fetch: net.fetch, known });
+  assert.deepEqual(
+    again.sources.map((s) => s.host),
+    ['b', 'a'],
+  );
+  assert.equal(again.measured, undefined);
+  assert.deepEqual(net.asked, [`${url}.meta4`], 'only the metalink, no probes');
+  // A mirror never measured: everything is probed again.
+  known.delete('a');
+  net.asked.length = 0;
+  await planSources(url, { fetch: net.fetch, known });
+  assert.equal(net.asked.length, 4);
+});
+
 test('planSources falls back to the original URL when the metalink or every mirror fails', async () => {
   const url = 'https://download.kiwix.org/zim/w.zim';
   const noMeta = fakeNet({ 'download.kiwix.org': { bps: 1e6 } }, 1000);
