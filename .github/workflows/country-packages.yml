@@ -38,7 +38,8 @@ concurrency:
 
 env:
   # Must match the engine the app embeds (modules/nomad-route: valhalla-mobile 0.6.4).
-  VALHALLA_IMAGE: ghcr.io/valhalla/valhalla:3.9.1
+  # Pinned by digest: the job runs it with the repo mounted, so a re-pushed tag must not get in.
+  VALHALLA_IMAGE: ghcr.io/valhalla/valhalla:3.9.1@sha256:4fd114eb1d26b8fc2f43bcb3df234c1b63a0bf13c277405e5943d5361dc575de
   PARTS: ${{ github.event.inputs.parts || 'all' }}
 
 jobs:
@@ -51,6 +52,8 @@ jobs:
       build: ${{ steps.plan.outputs.build }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - id: plan
         env:
           INPUT: ${{ github.event.inputs.countries }}
@@ -104,9 +107,12 @@ jobs:
     env:
       COUNTRY: ${{ matrix.country }}
       STAMP: ${{ needs.plan.outputs.stamp }}
-      GH_TOKEN: ${{ github.token }}
+    # GH_TOKEN is set only on the upload steps: the others run third-party code (apt
+    # packages, the Valhalla image, go-pmtiles, Geofabrik and Overpass data).
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Plan the job
         id: what
         run: |
@@ -133,7 +139,9 @@ jobs:
             mkdir -p "$HOME/pack" && echo "WORK=$HOME/pack" >> "$GITHUB_ENV"
           fi
           sudo apt-get update -qq && sudo apt-get install -y -qq osmium-tool python3-pyosmium python3-shapely >/dev/null
-          curl -fsSL https://github.com/protomaps/go-pmtiles/releases/download/v1.31.2/go-pmtiles_1.31.2_Linux_x86_64.tar.gz | sudo tar -xz -C /usr/local/bin pmtiles
+          curl -fsSL -o /tmp/pmtiles.tgz https://github.com/protomaps/go-pmtiles/releases/download/v1.31.2/go-pmtiles_1.31.2_Linux_x86_64.tar.gz
+          echo "3ed7dbf4ec2e6dfe5e25b6f70d1ffc932729f93c86db353bf514dd71010a312f  /tmp/pmtiles.tgz" | sha256sum -c -
+          sudo tar -xzf /tmp/pmtiles.tgz -C /usr/local/bin pmtiles
 
       # 1. Routing pack
       - name: Build the routing pack
@@ -145,6 +153,7 @@ jobs:
       - name: Upload the routing pack
         if: steps.what.outputs.routing == 'true'
         env:
+          GH_TOKEN: ${{ github.token }}
           TAG: routing-${{ needs.plan.outputs.stamp }}-${{ steps.what.outputs.continent }}
         run: |
           cd "$WORK/routing/out"
@@ -167,8 +176,10 @@ jobs:
         if: ${{ !cancelled() && steps.what.outputs.maps == 'true' }}
         run: bash scripts/maps/build-country-map.sh "$COUNTRY" "$WORK/map" "${{ needs.plan.outputs.build }}"
       - name: Upload the map
+        id: upload-map
         if: ${{ !cancelled() && steps.what.outputs.maps == 'true' }}
         env:
+          GH_TOKEN: ${{ github.token }}
           TAG: maps-${{ needs.plan.outputs.stamp }}-${{ steps.what.outputs.continent }}
         run: |
           cd "$WORK/map/out"
@@ -176,8 +187,10 @@ jobs:
           python3 -I -c 'import json, sys; p = sys.argv[1]; m = json.load(open(p)); m["release"] = sys.argv[2]; json.dump(m, open(p, "w"), indent=1)' "$COUNTRY.maps.json" "$TAG"
           python3 -I -c 'import json, sys; m = json.load(open(sys.argv[1])); [print(f["name"]) for f in m["parts"] + [x for x in (m["pois"], m["streets"], m.get("places"), m.get("addresses")) if x]]' \
             "$COUNTRY.maps.json" | xargs gh release upload "$TAG" --clobber --repo "$GITHUB_REPOSITORY"
+      # The fragment goes to the catalog only once its files are in the release: a map whose
+      # upload failed keeps last month's entry.
       - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() && steps.what.outputs.maps == 'true' }}
+        if: ${{ !cancelled() && steps.upload-map.outcome == 'success' }}
         with:
           name: maps-${{ matrix.country }}
           path: ${{ env.WORK }}/map/out/${{ matrix.country }}.maps.json
@@ -192,6 +205,8 @@ jobs:
       STAMP: ${{ needs.plan.outputs.stamp }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
           pattern: packs-*
@@ -207,7 +222,8 @@ jobs:
           if ! ls fragments/routing/*.packs.json >/dev/null 2>&1; then echo "no routing pack built"; exit 0; fi
           # If the index exists, its catalog must be read: else a partial run would drop every
           # country it did not rebuild.
-          if gh release view routing-index >/dev/null 2>&1; then
+          source scripts/gh-releases.sh
+          if has_release routing-index; then
             gh release download routing-index --pattern routing-manifest.json --dir previous
           fi
           python3 -I scripts/routing/manifest.py merge "routing-$STAMP" fragments/routing/*.packs.json > routing-manifest.json
@@ -218,13 +234,14 @@ jobs:
           # Coverage within each extract's polygon (ferry lines leave it), carried packs too.
           python3 -I scripts/routing/manifest.py clip routing-manifest.json scripts/routing/packs.json > clipped.json
           mv clipped.json routing-manifest.json
-          gh release view routing-index >/dev/null 2>&1 || gh release create routing-index --prerelease \
+          has_release routing-index || gh release create routing-index --prerelease \
             --title "Routing catalog" --notes "routing-manifest.json: the current offline routing packs (read by the app)."
           gh release upload routing-index --clobber routing-manifest.json
       - name: Maps catalog
         run: |
           if ! ls fragments/maps/*.maps.json >/dev/null 2>&1; then echo "no map built"; exit 0; fi
-          if gh release view maps-index >/dev/null 2>&1; then
+          source scripts/gh-releases.sh
+          if has_release maps-index; then
             gh release download maps-index --pattern maps-manifest.json --dir previous
           fi
           python3 -I scripts/maps/maps-manifest.py merge "maps-$STAMP" fragments/maps/*.maps.json > maps-manifest.json
@@ -232,7 +249,7 @@ jobs:
             python3 -I scripts/maps/maps-manifest.py carry previous/maps-manifest.json maps-manifest.json src/features/maps/regions.json > merged.json
             mv merged.json maps-manifest.json
           fi
-          gh release view maps-index >/dev/null 2>&1 || gh release create maps-index --prerelease \
+          has_release maps-index || gh release create maps-index --prerelease \
             --title "Country maps catalog" --notes "maps-manifest.json: the current offline country maps (read by the app)."
           gh release upload maps-index --clobber maps-manifest.json
       - name: Map side files a routing pack brings
@@ -240,9 +257,11 @@ jobs:
           # A country that just got a routing pack keeps last month's map with its own points,
           # streets, places and doors: drop those from the maps catalog, or the app would
           # download and index both.
+          source scripts/gh-releases.sh
+          has_release maps-index && has_release routing-index || exit 0
           mkdir -p unshare
-          gh release download maps-index --pattern maps-manifest.json --dir unshare --clobber || exit 0
-          gh release download routing-index --pattern routing-manifest.json --dir unshare --clobber || exit 0
+          gh release download maps-index --pattern maps-manifest.json --dir unshare --clobber
+          gh release download routing-index --pattern routing-manifest.json --dir unshare --clobber
           python3 -I scripts/routing/manifest.py unshare unshare/maps-manifest.json unshare/routing-manifest.json > maps-manifest.json
           if python3 -I -c 'import json, sys; sys.exit(0 if json.load(open(sys.argv[1]))["maps"] == json.load(open(sys.argv[2]))["maps"] else 1)' unshare/maps-manifest.json maps-manifest.json; then
             echo "nothing to drop"
@@ -255,9 +274,14 @@ jobs:
           # also the one this run didn't touch) plus those of the previous ones (a phone may
           # still be downloading with the catalog it cached); runs that never reached a
           # catalog go. Without an index, nothing of its family is pruned.
+          source scripts/gh-releases.sh
           mkdir -p current
           for idx in routing maps; do
-            gh release download "$idx-index" --pattern "$idx-manifest.json" --dir current --clobber || touch "current/no-$idx"
+            if has_release "$idx-index"; then
+              gh release download "$idx-index" --pattern "$idx-manifest.json" --dir current --clobber
+            else
+              touch "current/no-$idx"
+            fi
           done
           keep=$(python3 -I -c '
           import json, os, sys

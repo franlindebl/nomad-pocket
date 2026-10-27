@@ -56,8 +56,6 @@ A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check
    country-coverage work**:
    - README country claims and "60 countries", and the US map (DOCS-PUBLIC-1, DOCS-PUBLIC-2,
      DOCS-INTERNAL-8): the README's coverage lines stay as they are until that work lands.
-   - CI supply-chain findings SUPPLY-1/2/3 in `country-packages.yml` (another session is changing
-     that workflow).
    - Regenerate the store screenshots (DOCS-PUBLIC-3 / LEGAL-14); the map ones must show the OSM credit.
    - OSS-9: obsolete PNGs in the repo.
    - The git history rewrite that removes the owner's old location examples (pending a quiet window).
@@ -224,6 +222,20 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-26 — CI: country packages workflow hardened (SUPPLY-1/2/3)
+
+Audit findings on `.github/workflows/country-packages.yml`, fixed before the next big run:
+- SUPPLY-1: every `gh release view` of an index went through `has_release`
+  (`scripts/gh-releases.sh`): only "release not found" means "no catalog yet"; any other
+  failure stops the step. Before, an API hiccup read as "no index", so the run published a
+  catalog with only the countries it rebuilt and the prune deleted the rest.
+- SUPPLY-2: a map's fragment is uploaded as an artifact only when its upload step succeeded
+  (before: `!cancelled()`, so a failed upload still reached the catalog with missing files).
+- SUPPLY-3: `persist-credentials: false` on every checkout; in the build job `GH_TOKEN` is only
+  on the two upload steps (apt packages, the Valhalla image and Overpass/Geofabrik data run
+  without it); `VALHALLA_IMAGE` pinned by digest (`3.9.1@sha256:4fd114eb…`, checked against
+  ghcr.io); go-pmtiles 1.31.2 checked against its SHA-256 (same value as GitHub's asset digest).
 
 ### 2026-10-26 — Downloads: speed analysis (plan only)
 
