@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { GGUF_MODELS, modelFit, ramGB, recommendModel } from './models.ts';
+import { bestModel, GGUF_MODELS, modelFit, modelRank, ramGB, recommendModel, SYSTEM_MODEL_ID } from './models.ts';
 
 test('catalog entries are consistent', () => {
   const ids = new Set<string>();
@@ -37,4 +37,18 @@ test('modelFit flags models that need more RAM', () => {
   assert.equal(modelFit(gemma, 7.5), 'tight');
   assert.equal(modelFit(gemma, 12), 'good');
   assert.equal(modelFit(gemma, null), 'good');
+});
+
+test('modelRank puts the system model between Qwen3.5 2B and 4B', () => {
+  assert.ok(modelRank('qwen3.5-4b-q4km') > modelRank(SYSTEM_MODEL_ID));
+  assert.ok(modelRank(SYSTEM_MODEL_ID) > modelRank('qwen3.5-2b-q4km'));
+  assert.ok(modelRank('qwen3.5-2b-q4km') > modelRank('qwen3.5-0.8b-q4km'));
+  assert.equal(modelRank(null), 0);
+  assert.equal(modelRank('unknown'), 0);
+});
+
+test('bestModel picks the most capable, the first one on a tie', () => {
+  assert.equal(bestModel([]), null);
+  assert.equal(bestModel(['qwen3.5-0.8b-q4km', SYSTEM_MODEL_ID, 'qwen3.5-4b-q4km']), 'qwen3.5-4b-q4km');
+  assert.equal(bestModel([SYSTEM_MODEL_ID, 'gemma-4-e2b-q4km']), SYSTEM_MODEL_ID);
 });

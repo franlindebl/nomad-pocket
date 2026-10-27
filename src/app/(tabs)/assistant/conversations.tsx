@@ -15,6 +15,7 @@ export default function ConversationsScreen() {
   const { colors } = useTheme();
   const sessions = useChat((s) => s.sessions);
   const activeId = useChat((s) => s.activeSessionId);
+  const answeringId = useChat((s) => s.streaming?.sessionId);
 
   useEffect(() => {
     refreshSessions();
@@ -39,7 +40,7 @@ export default function ConversationsScreen() {
     <ListRow
       key={s.id}
       title={s.title}
-      subtitle={[formatChatDate(s.updatedAt), s.preview?.replace(/\s+/g, ' ')].filter(Boolean).join(' · ')}
+      subtitle={[formatChatDate(s.updatedAt), s.id === answeringId ? t('conversations.answering') : s.preview?.replace(/\s+/g, ' ')].filter(Boolean).join(' · ')}
       titleLines={1}
       subtitleLines={1}
       style={s.id === activeId ? { backgroundColor: colors.surfaceAlt } : undefined}

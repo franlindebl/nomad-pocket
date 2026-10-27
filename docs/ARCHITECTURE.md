@@ -934,7 +934,10 @@ without them are fetched on their own when the sheet opens online) and `route-st
 
   `modelFit(model, ramGB)` and `recommendModel(ram)` (largest Qwen that fits). Items are
   `kind: 'model'`, id = model id; `useSettings.aiModelId` is a model id or `'system'`.
-  The first downloaded model becomes the active one. `tools`: how the model calls
+  `rank` orders answer quality (Qwen3.5 0.8B 1, 2B 2, Apple FM and Gemma 4 E2B 3, Qwen3.5 4B 4;
+  `modelRank`/`bestModel`): an installed model becomes the active one when it beats the current
+  choice (or nothing usable is selected); the user's pick in the models screen stays until then.
+  Removing the active model (or finding its file gone at startup) falls back to the best one left. `tools`: how the model calls
   search_library (`thinking` for Qwen3.5, which only calls tools with reasoning on;
   `direct` for Gemma 4). Catalog GGUF files copied into `content/models` by hand (exact
   name and size) are registered at startup, which is also how E2E seeds a model.
@@ -976,7 +979,10 @@ without them are fetched on their own when the sheet opens online) and `route-st
   the old answer until the new one is stored (restored if the new one is empty or fails). Native and
   llama.cpp errors map to translated keys (`errors.ts`: too long, declined, language, not ready,
   busy, quota, background, disk full, system update, empty); an empty answer shows `errors.empty`.
-  New chat, opening another conversation or deleting one stops the answer in progress.
+  New chat or opening another conversation leaves the answer in progress running: it is stored in
+  its own conversation, its error (if any) only shows there, and the others show "Respondiendo en
+  otra conversación · Ver" and can't send until it ends (one engine at a time); the conversations
+  sheet marks it "Respondiendo…". Deleting its conversation stops it; so does leaving the app.
 - UI: chat with streaming Markdown (`markdown.ts` parser, `ui/Markdown.tsx`), source chips
   → reader, stop, "use my library" toggle, starters, AI/health disclaimer; conversations
   sheet; models screen (system model status, downloads, fit badges).

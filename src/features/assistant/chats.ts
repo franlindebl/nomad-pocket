@@ -173,10 +173,11 @@ export function refreshSessions() {
   useChat.setState({ sessions: listSessions() });
 }
 
+/**
+ * Shows a conversation. An answer being written elsewhere keeps going: `answer()` stores it in
+ * its own conversation, and the others can't send until it ends (one engine at a time).
+ */
 export function openSession(id: string | null) {
-  const st = useChat.getState();
-  // The answer being written belongs to the conversation we leave: it ends there.
-  if (st.streaming && st.streaming.sessionId !== id) stopAnswer().catch(() => {});
   useChat.setState({ activeSessionId: id, messages: id ? loadMessages(id) : [], error: null });
 }
 
@@ -372,8 +373,9 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
   cancelledAnswers.delete(streaming.messageId);
   const cur = useChat.getState();
   const finalText = answerText.trim();
-  // A stopped answer reports nothing (the user may be in another conversation by now);
-  // one that came out empty (only reasoning, a call to an unknown tool) must not vanish silently.
+  // A stopped answer reports nothing, and an error only shows in its own conversation (the user
+  // may be reading another one by now); one that came out empty (only reasoning, a call to an
+  // unknown tool) must not vanish silently.
   if (wasCancelled) failed = null;
   else if (!finalText && !failed && !stopped) failed = 'empty';
   // The conversation may have been deleted while answering.
@@ -394,7 +396,7 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
       streaming: null,
       // The conversation may have been reopened meanwhile, reloading the old answer.
       messages: cur.activeSessionId === sessionId ? [...cur.messages.filter((m) => m.id !== replaces?.id), msg] : cur.messages,
-      error: failed,
+      error: cur.activeSessionId === sessionId ? failed : cur.error,
       sessions: listSessions(),
     });
   } else {
@@ -402,7 +404,7 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
     useChat.setState({
       streaming: null,
       ...(restore ? { messages: [...cur.messages, replaces] } : {}),
-      error: failed,
+      error: cur.activeSessionId === sessionId ? failed : cur.error,
       sessions: listSessions(),
     });
   }

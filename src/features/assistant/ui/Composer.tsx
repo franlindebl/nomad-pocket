@@ -7,19 +7,22 @@ import { PressableScale, Text } from '@/components/ui';
 import { fontFamily, radius, space, typography, useTheme } from '@/theme';
 
 type Props = {
+  /** This conversation's answer is being written: the send button stops it. */
   busy: boolean;
   disabled?: boolean;
+  /** Another conversation's answer is being written: typing works, sending waits. */
+  blocked?: boolean;
   useLibrary: boolean;
   onToggleLibrary: (v: boolean) => void;
   onSend: (text: string) => void;
   onStop: () => void;
 };
 
-export function Composer({ busy, disabled, useLibrary, onToggleLibrary, onSend, onStop }: Props) {
+export function Composer({ busy, disabled, blocked, useLibrary, onToggleLibrary, onSend, onStop }: Props) {
   const { t } = useTranslation('assistant');
   const { colors, scheme } = useTheme();
   const [text, setText] = useState('');
-  const canSend = !!text.trim() && !busy && !disabled;
+  const canSend = !!text.trim() && !busy && !blocked && !disabled;
 
   const send = () => {
     if (!canSend) return;

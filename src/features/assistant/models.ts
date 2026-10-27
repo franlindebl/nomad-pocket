@@ -27,6 +27,8 @@ export type GgufModel = {
   licenseUrl: string;
   /** Strengths blurb key in the `assistant` namespace (`models.blurb.<id>`). */
   blurbKey: string;
+  /** Rough answer quality, higher is better: decides which model becomes the default (`modelRank`). */
+  rank: number;
 };
 
 export const SYSTEM_MODEL_ID = 'system';
@@ -47,6 +49,7 @@ export const GGUF_MODELS: GgufModel[] = [
     license: 'Apache-2.0',
     licenseUrl: 'https://huggingface.co/Qwen/Qwen3.5-0.8B',
     blurbKey: 'tiny',
+    rank: 1,
   },
   {
     id: 'qwen3.5-2b-q4km',
@@ -63,6 +66,7 @@ export const GGUF_MODELS: GgufModel[] = [
     license: 'Apache-2.0',
     licenseUrl: 'https://huggingface.co/Qwen/Qwen3.5-2B',
     blurbKey: 'balanced',
+    rank: 2,
   },
   {
     id: 'qwen3.5-4b-q4km',
@@ -79,6 +83,7 @@ export const GGUF_MODELS: GgufModel[] = [
     license: 'Apache-2.0',
     licenseUrl: 'https://huggingface.co/Qwen/Qwen3.5-4B',
     blurbKey: 'smart',
+    rank: 4,
   },
   {
     id: 'gemma-4-e2b-q4km',
@@ -95,11 +100,32 @@ export const GGUF_MODELS: GgufModel[] = [
     license: 'Apache-2.0',
     licenseUrl: 'https://huggingface.co/google/gemma-4-E2B-it',
     blurbKey: 'multilingual',
+    rank: 3,
   },
 ];
 
 export function getModel(id: string | null | undefined): GgufModel | undefined {
   return GGUF_MODELS.find((m) => m.id === id);
+}
+
+/**
+ * Apple's on-device model (~3B, 2-bit) sits between Qwen3.5 2B and 4B: on par with
+ * Gemma 4 E2B, behind Qwen3.5 4B in reasoning, Spanish and tool use, and its guardrails
+ * refuse some medical questions.
+ */
+const SYSTEM_MODEL_RANK = 3;
+
+/** Answer quality of a model id ('system' included); 0 for nothing or an unknown id. */
+export function modelRank(id: string | null | undefined): number {
+  if (id === SYSTEM_MODEL_ID) return SYSTEM_MODEL_RANK;
+  return getModel(id)?.rank ?? 0;
+}
+
+/** The most capable of `ids` (the first one on a tie), null when empty. */
+export function bestModel(ids: string[]): string | null {
+  let best: string | null = null;
+  for (const id of ids) if (best == null || modelRank(id) > modelRank(best)) best = id;
+  return best;
 }
 
 /** Installed-memory reading (bytes, as reported by the OS) → GB, rounded up a bit. */

@@ -232,6 +232,28 @@ gesture (the simulator shows no on-screen keyboard) landed on "Añadir número" 
 the flow now taps the "Notas de casa" title instead. map-14 failed once in the full run, on a screen
 from another flow (the assistant), and passed alone.
 
+### 2026-10-27 — Assistant: an answer keeps going when you open another conversation
+
+Owner: asking something and opening another chat cancelled the answer. Now `openSession` no longer
+stops it: the answer is stored in its own conversation (which `answer()` already did), its error
+only shows there, the other conversations show a "Respondiendo en otra conversación · Ver" bar and
+can type but not send until it ends (one engine at a time), and the conversations sheet marks it
+"Respondiendo…". Leaving the app still ends it (iOS suspends the app and forbids GPU work in the
+background). Checked on the iOS 27 simulator (Release) with Qwen3.5 4B: bar, "Respondiendo…" in the
+sheet, the answer still streaming when reopened and stored complete while another chat was open.
+
+### 2026-10-27 — Assistant: a newly installed model becomes the default when it's more capable
+
+Owner: installing a better model should make it the default; a model the user picks stays as
+their choice. Each model has a `rank` (Qwen3.5 0.8B < 2B < Apple FM = Gemma 4 E2B < Qwen3.5 4B):
+Apple's ~3B 2-bit on-device model is ahead of Qwen3.5 2B but behind 4B in reasoning, Spanish
+and tool use, and its guardrails refuse some medical questions. A finished download switches the
+active model only when it outranks the current one (or nothing usable is selected), so on an
+iPhone with Apple Intelligence the setup kit's Qwen3.5 4B now takes over from the system model,
+while a smaller model downloaded later waits to be picked. Removing the active model, or finding
+its file gone at startup, now falls back to the best one left instead of "no model". Checked on the
+iOS 27 simulator: with Apple Intelligence active, seeding Qwen3.5 0.8B and 4B made 4B the active one.
+
 ### 2026-10-27 — Maps: a legend for the dots, switches to hide them, and a red "SOS" button
 
 Owner: in a city the map is a cloud of coloured dots nobody can read, and the siren button

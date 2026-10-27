@@ -2,12 +2,12 @@ import { router, Stack } from 'expo-router';
 import { AlertCircle, ChevronDown, Cpu, History, Library, SquarePen, X } from 'lucide-react-native';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dimensions, FlatList, ScrollView, StyleSheet, View, type HostInstance } from 'react-native';
+import { ActivityIndicator, Dimensions, FlatList, ScrollView, StyleSheet, View, type HostInstance } from 'react-native';
 import Animated, { useAnimatedKeyboard, useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Card, IconBadge, IconButton, PressableScale, Row, Text } from '@/components/ui';
-import { dismissError, newChat, searchLibraryFor, sendMessage, stopAnswer, useChat, type ChatMessage, type Streaming } from '@/features/assistant/chats';
+import { dismissError, newChat, openSession, searchLibraryFor, sendMessage, stopAnswer, useChat, type ChatMessage, type Streaming } from '@/features/assistant/chats';
 import { isErrorKey } from '@/features/assistant/errors';
 import { SYSTEM_MODEL_ID } from '@/features/assistant/models';
 import { AssistantMessage, UserMessage } from '@/features/assistant/ui/Message';
@@ -132,8 +132,10 @@ export default function AssistantScreen() {
 
       {model.ready ? (
         <Animated.View style={[styles.composer, bottomStyle]}>
+          {streaming && !sessionStreaming ? <AnsweringElsewhere sessionId={streaming.sessionId} /> : null}
           <Composer
-            busy={!!streaming}
+            busy={!!sessionStreaming}
+            blocked={!!streaming}
             useLibrary={useLibrary}
             onToggleLibrary={setUseLibrary}
             onSend={(q) => sendMessage(q)}
@@ -159,6 +161,28 @@ function ModelPill({ name }: { name: string | null }) {
         {name ?? t('noModel.action')}
       </Text>
       <ChevronDown size={14} color={colors.textSecondary} strokeWidth={2.5} />
+    </PressableScale>
+  );
+}
+
+/** Shown in a conversation while another one's answer is being written: tap to go there. */
+function AnsweringElsewhere({ sessionId }: { sessionId: string }) {
+  const { t } = useTranslation('assistant');
+  const { colors } = useTheme();
+  return (
+    <PressableScale
+      haptic="selection"
+      accessibilityRole="button"
+      accessibilityHint={t('answeringElsewhere.hint')}
+      onPress={() => openSession(sessionId)}
+      style={[styles.elsewhere, { backgroundColor: colors.surfaceAlt }]}>
+      <ActivityIndicator size="small" color={colors.textSecondary} />
+      <Text variant="footnote" color="textSecondary" style={{ flex: 1 }} numberOfLines={1}>
+        {t('answeringElsewhere.title')}
+      </Text>
+      <Text variant="footnote" weight="600" tint={colors.accent}>
+        {t('answeringElsewhere.action')}
+      </Text>
     </PressableScale>
   );
 }
@@ -245,5 +269,6 @@ const styles = StyleSheet.create({
   },
   composer: { ...layout.column, paddingHorizontal: space.md, paddingTop: space.sm },
   pill: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 30, paddingHorizontal: space.md, borderRadius: radius.pill, maxWidth: 220 },
+  elsewhere: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginBottom: space.sm, paddingVertical: space.sm, paddingHorizontal: space.md, borderRadius: radius.pill },
   error: { flexDirection: 'row', alignItems: 'center', gap: space.sm, padding: space.md, borderRadius: radius.md },
 });

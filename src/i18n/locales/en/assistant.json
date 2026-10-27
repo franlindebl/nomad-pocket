@@ -65,7 +65,8 @@
     "delete": "Delete conversation",
     "deleteConfirm": "“{{title}}” will be deleted from this device.",
     "today": "Today",
-    "earlier": "Earlier"
+    "earlier": "Earlier",
+    "answering": "Answering…"
   },
   "models": {
     "title": "Models",
@@ -104,5 +105,10 @@
       "unsupported": "There's no built-in model on this device.",
       "checking": "Checking…"
     }
+  },
+  "answeringElsewhere": {
+    "title": "Answering in another chat…",
+    "action": "View",
+    "hint": "Opens the chat being answered"
   }
 }
