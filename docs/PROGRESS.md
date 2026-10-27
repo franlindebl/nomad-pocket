@@ -6,11 +6,12 @@ can pick up without re-deriving anything.
 
 ## Current state (2026-10-27)
 
-- **Version 1.1.0 (iOS build 19)** on TestFlight 2026-10-27: document collections as a native list,
-  a legend and switches for the map's dots, a red SOS button, on top of build 18 (downloads tuned on
-  the owner's iPhone, a country's search prepared with its download); **1.0.1 (build 3)** waiting
-  for App Review. Release process and version table: `docs/RELEASE.md`; store builds are tagged
-  from build 13 on (`v1.1.0-19`). Build 17 shipped another session's unfinished edits: don't use it.
+- **Version 1.1.0 (iOS build 20)** on TestFlight 2026-10-27: dictation in the assistant, a more
+  capable model becomes the default, answers survive switching chats, the navigation view reworked,
+  Canada and Russia by regions, on top of build 19 (document collections, map legend, SOS button);
+  **1.0.1 (build 3)** waiting for App Review. Release process and version table: `docs/RELEASE.md`;
+  store builds are tagged from build 13 on (`v1.1.0-20`). Build 17 shipped another session's
+  unfinished edits: don't use it.
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
   tour). Downloads measured and tuned by the agent on the owner's iPhone 14 Pro (2026-10-27).
@@ -30,7 +31,7 @@ can pick up without re-deriving anything.
 | Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
 | Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 237 packs live (every inhabited country; the USA in six regions) since 2026-10-27; E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
-| Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
+| Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search; the most capable installed model is the default; on-device dictation) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
 | Preparedness (family plan, emergency kit with expiry reminders, printable PDF, offline guides) | done — iOS sim + Android emulator (E2E) |
 | E2E suite (Maestro) + pre-commit hook | done |
@@ -231,6 +232,17 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-27 — Release: 1.1.0 build 20 to TestFlight
+
+Build 20 = build 19 plus dictation in the assistant, the most capable installed model as the
+default, answers that keep going while another chat is open, the reworked navigation view (session
+"5-navegacion", d27bd7e) and Canada and Russia as regional maps (3c75852): until now builds 16–19
+showed those regions by their raw ids and without routes. One build for everyone after asking the
+other sessions working on the repo. Smoke E2E 21/21 on an iOS 27 simulator (lib-02 and x-01 first failed because a fresh worktree lacks the gitignored ZIM fixtures: copy them from the main checkout; ai-08 passes too; Maestro needs Bash outside the sandbox); archived from the clean
+worktree `.claude/worktrees/dictation` at the release commit, tagged `v1.1.0-20`. To check on the
+owner's iPhone: dictation (transcription never ran on this Mac's simulator or emulator) and the
+navigation view.
+
 ### 2026-10-27 — Assistant: dictate questions with the phone's own speech recognition
 
 Owner: a microphone in the AI chat that transcribes with the native dictation, not with an AI model
@@ -252,6 +264,7 @@ a "Micrófono y dictado" section; InfoPlist strings in `locales/`. Built in the 
   Apparently deadlocked", a known simulator AVAudioEngine input bug) and the Android emulator (host
   audio, QEMU hung) die as soon as they open the microphone. Pending on a real iPhone and Android
   phone; `ai-08-dictation` only checks the button is there.
+
 ### 2026-10-27 — Maps: a navigation view that reads like Google Maps'
 
 - Owner found the navigation view hard to read: the route never got consumed, the map turned
