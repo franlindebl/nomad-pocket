@@ -6,16 +6,16 @@ can pick up without re-deriving anything.
 
 ## Current state (2026-10-26)
 
-- **Version 1.1.0 (iOS build 12)** on TestFlight 2026-10-26: the survival-kit redesign (build 11) plus a country as
-  one download (builds 5–10 on 2026-10-25); **1.0.1 (build 3)** waiting for App Review. The fixes of the
-  pre-release audit (log entry 2026-10-26, branch `audit-fixes`) are in no build yet. Release process and
-  version table: `docs/RELEASE.md`.
+- **Version 1.1.0 (iOS build 13)** on TestFlight 2026-10-26: the pre-release audit fixes (log entry 2026-10-26)
+  and multi-pack countries (the USA) on top of build 12 (a country as one download) and build 11 (the
+  survival-kit redesign); **1.0.1 (build 3)** waiting for App Review. Release process and version table:
+  `docs/RELEASE.md`; store builds are tagged from build 13 on (`v1.1.0-13`).
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
   tour). Not yet run on a physical device by the agent.
 - Checks: `npm test` (the count drifts: run it), `tsc` clean, lint clean, i18n keys complete. E2E: 54 Maestro flows
   (21 smoke, 17 full, 11 nightly, 1 iPad tour, 4 Android); which cases they cover is in the catalog of `docs/E2E.md`.
-  The audit fixes were not run through the Maestro suite (see the log entry).
+  The audit fixes passed the smoke suite (21/21, build 13, 2026-10-26); full and iPad suites not run on them yet.
 
 | Area | Status |
 |---|---|
@@ -222,6 +222,13 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-26 — Release: 1.1.0 build 13 to TestFlight
+
+Build 13 = the pre-release audit fixes (reader without network, Wi-Fi-only enforced, safer downloads
+and storage, Credits & licences, data out of the Files app, re-downloadable data out of backups, OSM credit, guidance
+auto-stop, translated permission prompt) and multi-pack countries (the USA). Smoke E2E 21/21 on an
+iOS 27 simulator; tagged `v1.1.0-13` (GPL section 6).
 
 ### 2026-10-26 — CI: country packages workflow hardened (SUPPLY-1/2/3)
 
