@@ -23,7 +23,9 @@ export function DownloadRow({ entry, waiting }: { entry: DownloadEntry<DownloadR
   const held = status === 'queued' && waiting ? waiting : null;
 
   let detail = `${formatBytes(bytesWritten)} / ${formatBytes(totalBytes)}`;
-  if (status === 'running' && eta) detail += ` · ${t('downloads.eta', { time: formatDuration(eta) })}`;
+  // While running, the time left gets a line of its own, kept even before there is an estimate:
+  // it changes every second, and sharing a line made the row wrap and unwrap (and jump).
+  const timeLeft = status === 'running' ? (eta ? t('downloads.eta', { time: formatDuration(eta) }) : ' ') : null;
   if (status !== 'running') detail = `${held ? t(`downloads.waiting.${held}`) : t(`status.${status}`)} · ${detail}`;
   if (status === 'failed') {
     // A message a person can act on; the raw error stays in the logs.
@@ -43,9 +45,16 @@ export function DownloadRow({ entry, waiting }: { entry: DownloadEntry<DownloadR
             status === 'failed' ? colors.danger : status === 'done' ? colors.success : status === 'paused' ? colors.textTertiary : undefined
           }
         />
-        <Text variant="caption" color={status === 'failed' ? 'danger' : 'textSecondary'} numberOfLines={2} tabular>
-          {detail}
-        </Text>
+        <View>
+          <Text variant="caption" color={status === 'failed' ? 'danger' : 'textSecondary'} numberOfLines={timeLeft === null ? 2 : 1} tabular>
+            {detail}
+          </Text>
+          {timeLeft !== null ? (
+            <Text variant="caption" color="textSecondary" numberOfLines={1} tabular>
+              {timeLeft}
+            </Text>
+          ) : null}
+        </View>
         {held === 'wifi' ? (
           // Mobile data for this download only: the "Wi-Fi only" setting stays on.
           <Button

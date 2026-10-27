@@ -6,6 +6,7 @@ import { Platform, View } from 'react-native';
 import { Button, Card, EmptyState, ListGroup, Row, Screen, Text } from '@/components/ui';
 import { DownloadRow } from '@/features/downloads/DownloadRow';
 import { groupDownloads } from '@/features/downloads/groups';
+import { keepsAwake } from '@/features/downloads/keep-awake';
 import { allowMobileData, useActiveDownloads, useDownloads, waitingReason } from '@/features/downloads/manager';
 import { useSettings } from '@/stores/settings';
 import { space, useTheme } from '@/theme';
@@ -15,6 +16,7 @@ export default function DownloadsScreen() {
   const { colors } = useTheme();
   const downloads = groupDownloads(useActiveDownloads());
   const network = useDownloads((s) => s.network);
+  const records = useDownloads((s) => s.records);
   const wifiOnly = useSettings((s) => s.wifiOnly);
   const rows = downloads.map((d) => ({ entry: d, waiting: waitingReason(d.records, network, wifiOnly) }));
   const waitingForWifi = rows.filter((r) => r.entry.status === 'queued' && r.waiting === 'wifi');
@@ -56,6 +58,11 @@ export default function DownloadsScreen() {
           ))}
         </ListGroup>
       )}
+      {keepsAwake(records) ? (
+        <Text variant="footnote" color="textSecondary" style={{ marginTop: space.md }} testID="downloads-keep-awake">
+          {t('downloads.keepAwake')}
+        </Text>
+      ) : null}
     </Screen>
   );
 }

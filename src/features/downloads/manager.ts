@@ -7,6 +7,12 @@
 // from content/partial to its content dir, and the kind-specific completion handler
 // registers it as an installed item.
 //
+// Each run first plans its sources (mirrors.ts: Kiwix mirrors measured by throughput, or the
+// URL itself). A big file whose sources take ranges goes through the segmented engine
+// (segmented.ts: several connections, resumable from disk even after the app was killed);
+// anything else is one DownloadTask from the best source, as before. A record paused with
+// iOS resume data keeps the single path.
+//
 // Every URL download starts here, so the network rules live here too: nothing starts while
 // offline, and with "Wi-Fi only" on nothing starts (or keeps running) on mobile data unless
 // the person allowed it for that download. Held records stay 'queued' and start by
@@ -16,9 +22,11 @@
 // register themselves as "external jobs" so they show up in the same UI.
 //
 // Record meta the manager owns: group (groups.ts), allowCellular (mobile data allowed for
-// this download), integrity (promised size/sha-256), source (the URL actually fetched),
+// this download), integrity (promised size/sha-256), source (the URL a single transfer
+// fetched), segments (size and chunk size of a segmented one: its .part is a verified prefix),
 // avoidMirrors (hosts that served a bad copy) and abortable (EnqueueInput.abortable).
-import { DownloadTask, File, type DownloadPauseState } from 'expo-file-system';
+import { fetch as expoFetch } from 'expo/fetch';
+import { Directory, DownloadTask, File, type DownloadPauseState } from 'expo-file-system';
 import * as Network from 'expo-network';
 import { AppState, Platform } from 'react-native';
 import { create } from 'zustand';
@@ -27,6 +35,7 @@ import { db, parseJson } from '@/db';
 import {
   contentFile,
   deleteFile,
+  freeBytes,
   hasRoomFor,
   partialDir,
   refreshFreeBytes,
@@ -37,6 +46,7 @@ import {
 import { useSettings } from '@/stores/settings';
 
 import { recordGroup, type DownloadGroup } from './groups';
+import { keepAwakeWhileDownloading } from './keep-awake';
 import {
   cancelAction,
   integrityProblem,
@@ -48,7 +58,9 @@ import {
   type NetworkGate,
   type NetworkSnapshot,
 } from './manager-core';
-import { fastestMirror } from './mirrors';
+import { planSources, type ProbeFetch, type SourcePlan } from './mirrors';
+import { SEGMENTS_IN_BACKGROUND, SegmentedTransfer } from './segmented';
+import { chunkBytesFor, connectionShare, MiB, MIN_SEGMENTED_BYTES } from './segments-core';
 import { askAboutMobileData } from './wifi-prompt';
 
 export type { DownloadGroup } from './groups';
@@ -112,6 +124,17 @@ export class NotEnoughStorageError extends Error {
 }
 
 const MAX_CONCURRENT = 2;
+/**
+ * Connections the segmented downloads share: about what fills a fast link (measured: 8 over
+ * good Kiwix mirrors ≈ 36–39 MB/s), fewer on mobile data. The mirrors are volunteers'
+ * servers: at most 3 each, so the load spreads over them. One URL (GitHub, Hugging Face) takes 4.
+ */
+const CONNECTIONS = { wifi: 8, cellular: 4 };
+const PER_MIRROR = 3;
+const PER_URL = 4;
+/** Disk a segmented download may use for ranges that finished ahead of the prefix. */
+const AHEAD_BYTES = 1024 * MiB;
+const AHEAD_BYTES_BACKGROUND = 2048 * MiB;
 const PERSIST_INTERVAL_MS = 2000;
 /** Network events flap while a phone switches networks: act once it has settled. */
 const GATE_SETTLE_MS = 1500;
@@ -124,6 +147,8 @@ const EXTENSIONS: Record<ContentKind, string> = { zim: '.zim', map: '.pmtiles', 
 
 const handlers: Partial<Record<ContentKind, CompletionHandler>> = {};
 const tasks = new Map<string, DownloadTask>();
+/** Segmented downloads running now (instead of a task). */
+const transfers = new Map<string, SegmentedTransfer>();
 const lastPersist = new Map<string, number>();
 const lastSample = new Map<string, { t: number; bytes: number }>();
 const listeners = new Set<(r: DownloadRecord) => void>();
@@ -234,9 +259,30 @@ function updateMeta(id: string, fields: Record<string, unknown>) {
   if (!rec.external) persist(id, { meta: JSON.stringify(meta) });
 }
 
+const partialName = (id: string) => id.replace(/[^a-zA-Z0-9._-]/g, '_');
+
 function partialFile(id: string): File {
-  return new File(partialDir(), `${id.replace(/[^a-zA-Z0-9._-]/g, '_')}.part`);
+  return new File(partialDir(), `${partialName(id)}.part`);
 }
+
+/** Where a segmented download keeps the ranges that finished ahead of its .part file. */
+function chunksDir(id: string): Directory {
+  return new Directory(partialDir(), `${partialName(id)}.chunks`);
+}
+
+/** Drops every byte downloaded so far (the .part file and any finished ranges). */
+function deletePartial(id: string) {
+  deleteFile(partialFile(id).uri);
+  try {
+    const dir = chunksDir(id);
+    if (dir.exists) dir.delete();
+  } catch {
+    // already gone
+  }
+}
+
+/** A running transfer of either kind. */
+const transferring = (id: string) => tasks.has(id) || transfers.has(id);
 
 // ---------------------------------------------------------------------------
 // Network rules ("Wi-Fi only")
@@ -294,7 +340,7 @@ function onNetworkEvent(net: NetworkSnapshot) {
  * wait as 'queued' (resume data kept), and whatever may start now starts.
  */
 function applyGate() {
-  for (const id of [...tasks.keys()]) {
+  for (const id of [...tasks.keys(), ...transfers.keys()]) {
     const rec = useDownloads.getState().records[id];
     if (rec?.status === 'running' && gateOf(rec) === 'wifi') void suspend(id, 'queued').then((held) => held && pump());
   }
@@ -427,17 +473,24 @@ export function initDownloads() {
   useSettings.subscribe((s, prev) => {
     if (s.wifiOnly !== prev.wifiOnly) applyGate();
   });
+  keepAwakeWhileDownloading(
+    (listener) => useDownloads.subscribe((s, prev) => s.records !== prev.records && listener()),
+    () => useDownloads.getState().records,
+  );
 
   // Android stops transfers with the process: persist resume data when going to background
   // (the .part file would do too, but a clean pause is exact). iOS keeps going in its
-  // background session while the app is suspended. If iOS terminates the app (memory
-  // pressure), nsurlsessiond keeps the old task running, but expo-file-system can't adopt
-  // or cancel it: the 'running' row restarts from zero at the next launch beside it.
+  // background session while the app is suspended, and segmented downloads queue bigger
+  // ranges for that time. If iOS terminates the app (memory pressure), nsurlsessiond keeps
+  // the old tasks running, but expo-file-system can't adopt or cancel them: at the next launch
+  // a single transfer restarts from zero beside its old task (a segmented one continues from
+  // its verified prefix and finished ranges).
   AppState.addEventListener('change', (state) => {
     if (state === 'active') {
       refreshFreeBytes();
       readNetwork();
     }
+    if (SEGMENTS_IN_BACKGROUND && state !== 'inactive') for (const t of transfers.values()) t.setBackground(state === 'background');
     if (Platform.OS !== 'android') return;
     if (state === 'background') {
       backgrounded = true;
@@ -452,12 +505,13 @@ export function initDownloads() {
 /** Android only: no new transfers start while the app is in the background. */
 let backgrounded = false;
 
-/** Delete leftover `.part` files of URL downloads that no longer exist (map jobs clean their own). */
+/** Delete leftover `.part` files and range dirs of URL downloads that no longer exist (map jobs clean their own). */
 function sweepPartials(activeIds: string[]) {
-  const keep = new Set(activeIds.map((id) => partialFile(id).name));
+  const keep = new Set(activeIds.flatMap((id) => [partialFile(id).name, chunksDir(id).name]));
   try {
     for (const entry of partialDir().list()) {
-      if (entry instanceof File && entry.name.endsWith('.part') && !entry.name.startsWith('map-') && !keep.has(entry.name)) entry.delete();
+      if (entry.name.startsWith('map-') || keep.has(entry.name)) continue;
+      if ((entry instanceof File && entry.name.endsWith('.part')) || (entry instanceof Directory && entry.name.endsWith('.chunks'))) entry.delete();
     }
   } catch (e) {
     console.warn('[downloads] sweep failed', e);
@@ -470,7 +524,8 @@ function sweepPartials(activeIds: string[]) {
  */
 async function suspend(id: string, next: 'paused' | 'queued'): Promise<boolean> {
   const task = tasks.get(id);
-  if (!task) return false;
+  const transfer = transfers.get(id);
+  if (!task && !transfer) return false;
   if (suspending.has(id)) {
     // Already pausing (a second native pause would lose iOS's resume data): the person's pause wins.
     if (next === 'paused') suspending.set(id, 'paused');
@@ -478,8 +533,12 @@ async function suspend(id: string, next: 'paused' | 'queued'): Promise<boolean> 
   }
   suspending.set(id, next);
   try {
-    await task.pauseAsync();
-    persist(id, { pause_state: JSON.stringify(task.savable()) });
+    // A segmented download's state is on disk (its .part prefix and finished ranges).
+    if (transfer) await transfer.pause();
+    else if (task) {
+      await task.pauseAsync();
+      persist(id, { pause_state: JSON.stringify(task.savable()) });
+    }
   } catch {
     // Not pausable: it finished (or failed) meanwhile and run() handles that.
     suspending.delete(id);
@@ -488,12 +547,13 @@ async function suspend(id: string, next: 'paused' | 'queued'): Promise<boolean> 
   const status = suspending.get(id) ?? next;
   suspending.delete(id);
   tasks.delete(id);
+  transfers.delete(id);
   if (useDownloads.getState().records[id]?.status === 'running') setStatus(id, status);
   return true;
 }
 
 async function snapshotRunning() {
-  await Promise.all([...tasks.keys()].map((id) => suspend(id, 'queued')));
+  await Promise.all([...tasks.keys(), ...transfers.keys()].map((id) => suspend(id, 'queued')));
   // Back in the foreground before the pauses settled: the 'active' pump found no free slot.
   if (!backgrounded) pump();
 }
@@ -514,8 +574,10 @@ export function enqueueDownload(input: EnqueueInput): DownloadRecord {
   // (a newer version under the same id) must not be appended to them.
   const sameFile = existing?.status === 'failed' && existing.url === input.url;
   const pauseState = sameFile ? (db().getFirstSync<Row>('SELECT pause_state FROM downloads WHERE id = ?', input.id)?.pause_state ?? null) : null;
-  if (!sameFile) deleteFile(partialFile(input.id).uri);
+  if (!sameFile) deletePartial(input.id);
   const meta: Record<string, unknown> = { ...input.meta };
+  // The bytes kept for the same file: how its .part was written, so the retry continues it.
+  if (sameFile && existing.meta.segments) meta.segments = existing.meta.segments;
   if (input.group) meta.group = input.group;
   if (input.integrity) meta.integrity = input.integrity;
   if (input.abortable) meta.abortable = true;
@@ -662,15 +724,79 @@ function clearGroup(groupId: string) {
   if (members.every((r) => r.status === 'done')) members.forEach((r) => useDownloads.getState().remove(r.id));
 }
 
-/** The URL to fetch (the fastest Kiwix mirror), remembering what the source promises about the file. */
-async function pickSource(id: string): Promise<string> {
+/** Where to fetch the file from (mirrors.ts), remembering what the source promises about it. */
+async function pickSources(id: string): Promise<SourcePlan | null> {
   const rec = useDownloads.getState().records[id];
-  if (!rec) return '';
-  const { url, integrity } = await fastestMirror(rec.url, (rec.meta.avoidMirrors as string[] | undefined) ?? []);
+  if (!rec) return null;
+  // expo/fetch streams the body (the throughput probe reads it as it arrives).
+  const plan = await planSources(rec.url, { fetch: expoFetch as unknown as ProbeFetch, avoid: (rec.meta.avoidMirrors as string[] | undefined) ?? [] });
   // A feature's own promise (a manifest) wins over the metalink's.
-  const promised = !rec.meta.integrity && (integrity.size !== undefined || integrity.sha256);
-  updateMeta(id, promised ? { source: url, integrity } : { source: url });
-  return url;
+  const { integrity } = plan;
+  if (!rec.meta.integrity && (integrity.size !== undefined || integrity.sha256)) updateMeta(id, { integrity });
+  return plan;
+}
+
+/**
+ * How a file goes segmented (size and chunk size), or null for a single transfer: it must be
+ * big, of a known exact size, from sources that take ranges. A download whose .part was
+ * already written segmented stays so (its bytes past the last whole chunk aren't trustworthy
+ * for a single transfer continuing from the file's end).
+ */
+function segmentsFor(rec: DownloadRecord, plan: SourcePlan): { size: number; chunkBytes: number } | null {
+  const promised = (rec.meta.integrity as Integrity | undefined)?.size;
+  const prev = rec.meta.segments as { size: number; chunkBytes: number } | undefined;
+  if (prev && (promised ?? plan.size ?? prev.size) === prev.size) return prev;
+  const size = promised ?? plan.size;
+  if (!plan.ranges || !size || size < MIN_SEGMENTED_BYTES) return null;
+  // The server and the promise disagree: one transfer, and the size check after it, sort it out.
+  if (plan.size !== undefined && promised !== undefined && plan.size !== promised) return null;
+  return { size, chunkBytes: chunkBytesFor(size, plan.pieces?.length) };
+}
+
+/** Connections each segmented download may hold now. */
+function connectionsEach(): number {
+  const cellular = useDownloads.getState().network?.type === 'CELLULAR';
+  return connectionShare(cellular ? CONNECTIONS.cellular : CONNECTIONS.wifi, transfers.size);
+}
+
+/** Room for ranges finished ahead of the prefix: what the disk can spare beyond the rest of the file. */
+function aheadBytes(id: string, background: boolean): number {
+  const rec = useDownloads.getState().records[id];
+  const left = rec ? Math.max(0, rec.totalBytes - rec.bytesWritten) : 0;
+  return Math.max(0, Math.min(background ? AHEAD_BYTES_BACKGROUND : AHEAD_BYTES, freeBytes() - STORAGE_HEADROOM - left));
+}
+
+/** Runs a segmented download; resolves with the finished .part file, or null when it stopped (paused, failed, cancelled). */
+async function runSegmented(id: string, plan: SourcePlan, seg: { size: number; chunkBytes: number }): Promise<File | null> {
+  const prev = useDownloads.getState().records[id]?.meta.segments as { size: number } | undefined;
+  // Another file's bytes (a newer version under the same id).
+  if (prev && prev.size !== seg.size) deletePartial(id);
+  updateMeta(id, { segments: seg, source: undefined });
+  const several = plan.sources.length > 1;
+  const transfer = new SegmentedTransfer({
+    partial: partialFile(id),
+    dir: chunksDir(id),
+    size: seg.size,
+    chunkBytes: seg.chunkBytes,
+    sources: plan.sources.map((s) => ({ ...s, maxConns: several ? PER_MIRROR : PER_URL })),
+    pieces: plan.size === undefined || plan.size === seg.size ? plan.pieces : undefined,
+    maxConns: connectionsEach,
+    aheadBytes: (background) => aheadBytes(id, background),
+    onProgress: (bytes, total) => onProgress(id, bytes, total),
+  });
+  transfers.set(id, transfer);
+  if (SEGMENTS_IN_BACKGROUND && AppState.currentState === 'background') transfer.setBackground(true);
+  try {
+    return await transfer.run();
+  } catch (e) {
+    transfers.delete(id);
+    // Cancelled (the record is gone, or about to be).
+    const current = useDownloads.getState().records[id];
+    if (current && current.status !== 'cancelled') failed(id, e, false);
+    return null;
+  } finally {
+    if (transfers.get(id) === transfer) transfers.delete(id);
+  }
 }
 
 async function run(id: string) {
@@ -707,14 +833,29 @@ async function run(id: string) {
       resumed = true;
       task = DownloadTask.fromSavable(saved, options);
     } else {
-      const url = await pickSource(id);
+      const plan = await pickSources(id);
       // Paused, cancelled or held back by the network while mirrors were being probed.
       const now = useDownloads.getState().records[id];
-      if (now?.status !== 'running' || runs.get(id) !== token) return;
+      if (!plan || now?.status !== 'running' || runs.get(id) !== token) return;
       if (gateOf(now) !== 'go') {
         setStatus(id, 'queued');
         return;
       }
+      const seg = segmentsFor(now, plan);
+      if (seg) {
+        file = await runSegmented(id, plan, seg);
+        if (file) await complete(id, rec, file);
+        else pump();
+        return;
+      }
+      // A .part written segmented holds unverified bytes past its last whole chunk: a single
+      // transfer continuing from its end would keep them. Start over (the file changed size).
+      if (now.meta.segments) {
+        deletePartial(id);
+        updateMeta(id, { segments: undefined });
+      }
+      const url = plan.sources[0].url;
+      updateMeta(id, { source: url });
       const part = partialFile(id);
       // Android writes straight into the .part file: a transfer that failed or died with the
       // process continues from what is on disk (its resume data is just that offset).
@@ -744,12 +885,17 @@ async function run(id: string) {
     pump();
     return;
   }
+  await complete(id, rec, file);
+}
 
+/** A transfer finished: move the file into place and hand it to its feature. */
+async function complete(id: string, rec: DownloadRecord, file: File) {
   try {
     setStatus(id, 'processing', {}, { pause_state: null });
     const dest = new File(rec.destUri);
     if (dest.exists) dest.delete();
     await file.move(dest);
+    deletePartial(id);
     await finalize(id, dest);
   } catch (e) {
     console.warn('[downloads] failed', id, e);
@@ -770,7 +916,7 @@ function failed(id: string, e: unknown, resumed: boolean) {
   console.warn('[downloads] failed', id, plan.kind, error);
   if (plan.kind === 'restart') {
     persist(id, { pause_state: null });
-    deleteFile(partialFile(id).uri);
+    deletePartial(id);
     setStatus(id, 'queued');
   } else if (plan.kind === 'retry') {
     // Queued, so it also waits for the network to come back (pump checks it).
@@ -786,7 +932,7 @@ function failed(id: string, e: unknown, resumed: boolean) {
 export async function pauseDownload(id: string) {
   const rec = useDownloads.getState().records[id];
   if (!rec || rec.external) return;
-  if (!tasks.has(id)) {
+  if (!transferring(id)) {
     if (rec.status === 'queued') setStatus(id, 'paused');
     else if (rec.status === 'running') {
       // Still choosing its mirror: run() checks the status after the probe. Its slot is free now.
@@ -831,8 +977,10 @@ export async function cancelDownload(id: string) {
   } catch {
     // ignore
   }
+  transfers.get(id)?.cancel();
+  transfers.delete(id);
   forget(id);
-  deleteFile(partialFile(id).uri);
+  deletePartial(id);
   db().runSync('DELETE FROM downloads WHERE id = ?', id);
   useDownloads.getState().remove(id);
   const group = recordGroup(rec);
@@ -905,7 +1053,7 @@ export function startExternalJob(input: {
 export function dismissDownload(id: string) {
   const rec = useDownloads.getState().records[id];
   forget(id);
-  deleteFile(partialFile(id).uri);
+  deletePartial(id);
   db().runSync('DELETE FROM downloads WHERE id = ?', id);
   useDownloads.getState().remove(id);
   const group = rec && recordGroup(rec);

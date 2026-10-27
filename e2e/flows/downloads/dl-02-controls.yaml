@@ -14,9 +14,11 @@ tags: [nightly, downloads, network]
 - extendedWaitUntil:
     visible: "Pausar"
     timeout: 20000
+- assertVisible: { id: "downloads-keep-awake" }   # the screen stays on while it downloads
 - takeScreenshot: 01-downloading
 - tapOn: "Pausar"
 - assertVisible: "Reanudar"
+- assertNotVisible: { id: "downloads-keep-awake" }
 - tapOn: "Reanudar"
 - assertVisible: "Pausar"
 - tapOn: "Cancelar"

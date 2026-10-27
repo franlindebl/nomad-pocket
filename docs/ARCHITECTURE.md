@@ -262,24 +262,61 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
   these downloads only (`meta.allowCellular`; rows and the Downloads sheet offer the same).
   `downloadResource`/`downloadModel` don't throw for mobile data any more (`OfflineError`
   stays). `EnqueueInput.quiet` marks automatic downloads (a missing search file), which never ask.
-- Transfers use `DownloadTask` with `sessionType: 'background'` (iOS keeps going in the
-  background). Before a fresh Kiwix download, `fastestMirror()` reads the `.meta4`
-  metalink and times a 512 KB range request on the first 4 mirrors (pause works while it
-  probes: a run token). The metalink's `<size>` and sha-256 are kept: the finished file is
-  checked against them (`File.digest`, native, 64 KB chunks); a bad copy is deleted, the row
-  says it is damaged and the retry avoids that mirror. Manifest downloads pass
-  `EnqueueInput.integrity` (size + sha-256) and get the same check.
+- **Sources** (`mirrors.ts`, pure): every run starts with `planSources()` (pause works while
+  it probes: a run token). A download.kiwix.org file: its `.meta4` metalink, then **every**
+  https mirror is measured at once by throughput (up to 4 MiB from a random offset, bytes
+  counted for 2 s from the first byte, through `expo/fetch`, which streams) and ranked; the
+  quickest to answer is often a slow one. Any other URL (GitHub Releases, Hugging Face) is one
+  source, asked a one-byte range to learn whether it takes ranges and its exact size. The
+  metalink's `<size>`, sha-256 and 4 MiB sha-1 `<pieces>` are kept. The finished file is
+  checked against size + sha-256 (`File.digest`, native, 64 KB chunks); a bad copy is deleted,
+  the row says it is damaged and the retry avoids that mirror (single transfers only: a
+  segmented file has many). Manifest downloads pass `EnqueueInput.integrity` (size + sha-256)
+  and get the same check.
+- **Segmented engine** (`segmented.ts`, decisions in `segments-core.ts`, pure): used when the
+  file is ≥ 64 MB, of known exact size, and its sources answer ranges with 206. Ranges of
+  32 MiB (whole metalink pieces), each a `DownloadTask` with a `Range` header into
+  `partial/<id>.chunks/<start>-<end>.<n>`. Up to 8 connections on Wi-Fi, 4 on mobile data,
+  shared by the segmented downloads running; at most 3 per Kiwix mirror, 4 to a single URL.
+  A free connection takes the lowest missing range and the source whose connections measured
+  fastest (moving average; an unmeasured mirror gets one range to prove itself; sources under
+  10 % of the best get none). Two errors in a row bench a source for 2 min; a 4xx or a server
+  ignoring `Range` (iOS accepts any 2xx: the guard cancels when `totalBytes` isn't the range's
+  length) rules it out; 6 failures in a row with no progress end the run, and
+  `planAfterFailure` takes over. When nothing new can start and the range the file waits for
+  crawls (3× slower than the best source would be), it is fetched again elsewhere and the
+  first copy wins.
+  Finished ranges are appended **in order** to `partial/<id>.part` (`FileHandle`, 4 MiB
+  slices, each metalink piece's sha-1 checked with `expo-crypto` on the way; a corrupt range
+  rules its mirror out and is fetched again, more than 3 fail the download). So the `.part`
+  is always a verified prefix (`validPrefix`: whole chunks only) and, with the range files
+  already on disk, the whole resume state: nothing in `pause_state`, `meta.segments` holds
+  size and chunk size. Ranges may finish up to 1 GiB past the prefix (less when the disk is
+  short). Pause/hold = cancel the ranges in flight; resume = schedule the missing ones.
+- Everything else (small files, no ranges, a record paused with iOS resume data) is one
+  `DownloadTask` from the best source, `sessionType: 'background'` (iOS keeps going in the
+  background). A `.part` written segmented never continues as a single transfer (its bytes
+  past the last whole chunk aren't trusted): it starts over.
+- **Keep awake** (`keep-awake.ts`): while a record is `running` or `processing` and the app
+  is active, the screen stays on (tag `downloads`; the Downloads sheet says so). On Android a
+  locked screen sends the app to the background, which pauses every download.
 - Failures (`planAfterFailure`, `manager-core.ts`): network errors and 5xx keep the bytes and
   retry with backoff (5 s, 30 s, 2 min); only stale state (invalid resume data, 4xx on the
   range request) restarts from zero. Android continues from the `.part` length; the saved
   `.part` path follows iOS container moves.
 - Android stops transfers with the process: on background the manager pauses running
-  tasks and stores their resume data, and pumps the queue again on foreground.
+  tasks and stores their resume data (segmented ones: cancels their ranges), and pumps the
+  queue again on foreground. iOS: ranges run in the background `URLSession`; when the app goes
+  to the background a segmented download queues up to 4 bigger ranges (256 MiB) as a reserve,
+  and acknowledges each finished range (`deferBackgroundSessionCompletion`) only after it
+  started the next ones, so a background wake-up keeps it going.
 - Relaunch: downloads with stored resume data (paused, or snapshotted on Android
-  background) resume; running ones without it go back to the queue and restart from zero
-  (iOS: the background session isn't reattached after the app is terminated, see PROGRESS
-  known issues); a download that died while `processing` with its file in place is
-  finalised; orphan `.part` files are swept.
+  background) resume; segmented ones continue from their `.part` prefix and range files,
+  even after iOS terminated the app (the orphaned range tasks fetch at most what was in
+  flight again); single transfers without resume data go back to the queue and restart from
+  zero on iOS (the background session isn't reattached, see PROGRESS known issues); a
+  download that died while `processing` with its file in place is finalised; orphan `.part`
+  files and `.chunks` dirs are swept.
 - Completion: `.part` → `content/{zim,maps,models,routing}/<filename>` → the kind's handler registered with
   `registerCompletionHandler(kind, async (file, record) => …)`, which must `upsertItem`; a file
   the handler rejects (throws) is deleted. Then `onDownloadFinished` listeners (toast) fire.
