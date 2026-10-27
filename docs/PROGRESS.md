@@ -243,8 +243,10 @@ en España" for ~10 s; asked for every deferred step to happen with the download
   Downloads, the onboarding badge and the search sheet; ready and the "listo" toast only after it.
 - Simulator (Release, Spain from GitHub): imports points 2.9 s, streets 9.2, places 5.5, doors 13.1;
   search opened during them with no wait; "Calle Alcala 50" → "Calle de Alcalá, 50 · Portal
-  aproximado". Smoke E2E 21/21. To do: time it on the owner's iPhone (expected well under the old ~2 min, and no
-  stutter) and check on Android.
+  aproximado". Smoke E2E 21/21. Android tour 3/4: Andorra's download, imports, search and
+  Emergencias (android-03) and routing (android-05) pass; android-01 failed on the reader's find bar
+  showing "2 de 26" where the flow expects "1 de N" (unrelated, the assertion is too strict). Shipped
+  in build 18. To do: time it on the owner's iPhone (expected well under the old ~2 min, no stutter).
 
 ### 2026-10-27 — Release: 1.1.0 build 18 to TestFlight (build 17 withdrawn)
 
