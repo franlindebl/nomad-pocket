@@ -49,7 +49,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.1.0 | 15 | TestFlight 2026-10-27: many downloads at once (up to 6, a kit no longer waits behind a country map), small archives start without re-probing mirrors, the map asks for the location and starts on the user, USA routing packs |
 | 1.1.0 | 16 | TestFlight 2026-10-27: fix for the app being killed while "Preparando" a big download (sha-256 and file copies native, `modules/nomad-files`), the USA as regional maps |
 | 1.1.0 | 17 | uploaded 2026-10-27 by mistake with another session's unfinished map-search edits in its JS bundle (archived from a shared working tree): don't use, expire it |
-| 1.1.0 | 18 | TestFlight 2026-10-27: downloads tuned on a real iPhone (setup kit 20.7 GB in ~6:30 instead of 13 min, the country's map first, in-process sessions while the app is open, stall watchdog); archived from a clean worktree of the commit |
+| 1.1.0 | 18 | TestFlight 2026-10-27: downloads tuned on a real iPhone (setup kit 20.7 GB in ~6:30 instead of 13 min, the country's map first, in-process sessions while the app is open, stall watchdog); a country's search and emergency points prepared as the end of its download ("Preparando… %", no freeze or wait when search opens); archived from a clean worktree of the release commit |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.
