@@ -33,6 +33,10 @@ export function Screen({ children, static: isStatic, padded = true, contentStyle
   }
   // iOS native tabs already inset their screens below the status bar.
   const titleTop = (Platform.OS === 'ios' ? 0 : insets.top) + space.md;
+  // Native tabs already end the screen above the tab bar (iOS still reports the bar in
+  // insets.bottom: 83 pt, so adding it left a ~180 pt gap), and outside tabs iOS' automatic
+  // content inset clears the home indicator. Android modals draw under the gesture bar.
+  const bottom = (Platform.OS === 'android' ? insets.bottom : 0) + space.xxxl;
   return (
     <ScrollView
       contentInsetAdjustmentBehavior={title ? 'never' : 'automatic'}
@@ -43,7 +47,7 @@ export function Screen({ children, static: isStatic, padded = true, contentStyle
       contentContainerStyle={[
         layout.column,
         padded && { paddingHorizontal: space.gutter },
-        { paddingTop: title ? titleTop : space.sm, paddingBottom: insets.bottom + 96 },
+        { paddingTop: title ? titleTop : space.sm, paddingBottom: bottom },
         contentStyle,
       ]}>
       {title ? (
