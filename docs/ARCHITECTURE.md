@@ -647,7 +647,7 @@ still on disk); 4 s after startup `sweepRoutingFiles` deletes temp files and par
 street files no active download belongs to. size and sha-256 are verified (country download lifecycle above). Removing a pack closes the router
 and drops its POIs. **Packs are built** by `.github/workflows/country-packages.yml` (monthly
 + manual): `scripts/routing/build-country.sh` per country of `packs.json` inside
-`ghcr.io/valhalla/valhalla:3.9.1` — Geofabrik PBF(s) (md5-checked; several are
+`ghcr.io/valhalla/valhalla:3.9.1` (pinned by digest in `VALHALLA_IMAGE`) — Geofabrik PBF(s) (md5-checked; several are
 `osmium merge`d: Spain + Canary Islands; `clip` cuts a bigger extract to the country's
 `regions.json` bbox: Saudi Arabia from gcc-states, Caribbean islands from central-america)
 + admin boundaries (levels 2/4) from Overpass, by ISO 3166-1 at level 2, else at any level,
@@ -657,6 +657,12 @@ else ISO 3166-2 (territories: Puerto Rico, Aruba), else none (right-hand traffic
 (`osmium tags-filter` + `emergency-points.py`, same columns as the Overpass TSV) → street
 names (`streets.py`, one row per name per ~1 km) → split → `manifest.py` (bbox, cells,
 parts with sha256; empty side files dropped).
+The workflow keeps its token away from third-party code: checkouts don't persist
+credentials, `GH_TOKEN` is only on the steps that call `gh`, and go-pmtiles is checked against
+its SHA-256. The catalog steps tell "no index yet" (404) from any other `gh` failure
+(`scripts/gh-releases.sh`), which stops the job: a catalog published without last month's
+entries would drop every country the run didn't rebuild, and the prune would delete their files.
+A map's fragment reaches the catalog only if its upload succeeded.
 Each run gets its own tags, one per continent (`routing-YYYYMMDD-<run id>-<continent>`:
 GitHub stops at 1000 assets per release), and each pack records its release,
 so countries not rebuilt in a run keep their previous files (a rebuilt country replaces

@@ -161,7 +161,8 @@ docs/               the docs above + screenshots/ + store/
 - Routing packs only work with the Valhalla version that built them: keep
   `VALHALLA_IMAGE` (`.github/workflows/country-packages.yml`, `scripts/routing/build-country.sh`)
   and `ENGINE_VALHALLA` (`features/maps/routing-core.ts`, which hides packs of another version)
-  in step with valhalla-mobile's bundled Valhalla (3.9.1).
+  in step with valhalla-mobile's bundled Valhalla (3.9.1); the workflow pins it by digest,
+  so a bump needs the new tag's digest too.
 - kv-store: a zustand `persist` store uses `kvStorage()` (`src/lib/kv.ts`), never
   `createJSONStorage(() => Storage)`. Mixing its async and sync APIs on the first open
   breaks the migration transaction: on a fresh install the settings never hydrated and
