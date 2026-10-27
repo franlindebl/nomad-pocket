@@ -65,7 +65,8 @@
     "delete": "Eliminar conversación",
     "deleteConfirm": "Se eliminará «{{title}}» de este dispositivo.",
     "today": "Hoy",
-    "earlier": "Anteriores"
+    "earlier": "Anteriores",
+    "answering": "Respondiendo…"
   },
   "models": {
     "title": "Modelos",
@@ -104,5 +105,10 @@
       "unsupported": "Este dispositivo no tiene modelo integrado.",
       "checking": "Comprobando…"
     }
+  },
+  "answeringElsewhere": {
+    "title": "Respondiendo en otra conversación…",
+    "action": "Ver",
+    "hint": "Abre la conversación que se está respondiendo"
   }
 }
