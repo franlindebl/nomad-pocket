@@ -23,6 +23,7 @@ import { contentDir, contentFile, deleteFile } from '@/lib/storage';
 import { copyInto } from '../../../modules/nomad-files';
 
 import { oneAssemblyAtATime } from './assembly';
+import { fetchCatalog } from './catalog-fetch';
 import { routePacksFor, type PlannedArchive } from './country-core';
 import { countryDownloadGroup, enqueueAll } from './country-maps';
 import { emergencySyncInfo, storeEmergencyPointsFile } from './emergency';
@@ -58,11 +59,7 @@ export async function refreshRoutingCatalog(): Promise<void> {
   if (useRoutingCatalog.getState().status === 'loading') return;
   useRoutingCatalog.setState({ status: 'loading' });
   try {
-    const res = await fetch(MANIFEST_URL, { headers: { 'Cache-Control': 'no-cache' } });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const text = await res.text();
-    const manifest = parseManifest(text);
-    if (!manifest) throw new Error('bad manifest');
+    const { text, manifest } = await fetchCatalog(MANIFEST_URL, parseManifest);
     Storage.setItemSync(CACHE_KEY, text);
     useRoutingCatalog.setState({ manifest, status: 'idle' });
     fetchMissingSideFiles(manifest);
