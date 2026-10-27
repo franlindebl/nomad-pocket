@@ -465,8 +465,15 @@ export type RouteProgress = {
   next: number;
   /** Along the route to that maneuver's start, metres. */
   toNextM: number;
-  /** Which way the route goes from here (degrees from north, over the next ~30 m). */
-  aheadBearing: number | null;
+  /** From the route's start to the snapped point, metres. */
+  alongM: number;
+  /** The position snapped onto the route. */
+  snapped: LatLon | null;
+  /**
+   * Which way the road goes right here (degrees from north), over a few metres around
+   * the snapped point: it turns as the user goes round a corner, not before. null at the end.
+   */
+  roadBearing: number | null;
 };
 
 /** Cumulative distance along a shape (metres from its start to each vertex). */
@@ -507,7 +514,9 @@ export function routeProgress(route: Route, cumulative: number[], p: LatLon, fro
   const along = cumulative[best.segment] + best.t * segLen;
   const total = cumulative[cumulative.length - 1] ?? 0;
   const here = pointAlong(shape, cumulative, along);
-  const ahead = pointAlong(shape, cumulative, Math.min(total, along + AHEAD_M));
+  const [behindM, aheadM] = ROAD_WINDOW[route.costing];
+  const behind = pointAlong(shape, cumulative, Math.max(0, along - behindM));
+  const ahead = pointAlong(shape, cumulative, Math.min(total, along + aheadM));
   let next = route.maneuvers.findIndex((m) => cumulative[m.begin] > along + 1);
   if (next < 0) next = route.maneuvers.length - 1;
   return {
@@ -516,12 +525,18 @@ export function routeProgress(route: Route, cumulative: number[], p: LatLon, fro
     remainingM: Math.max(0, total - along),
     next,
     toNextM: Math.max(0, cumulative[route.maneuvers[next]?.begin ?? last] - along),
-    aheadBearing: here && ahead && distanceMeters(here, ahead) > 2 ? bearingDegrees(here, ahead) : null,
+    alongM: along,
+    snapped: here,
+    roadBearing: behind && ahead && total - along > 1 && distanceMeters(behind, ahead) > 2 ? bearingDegrees(behind, ahead) : null,
   };
 }
 
-/** Looking this far along the route for its direction: past GPS noise, short of the next corner. */
-const AHEAD_M = 30;
+/**
+ * The road's direction is read between these metres behind and ahead of the user: a
+ * short chord, so the map turns while going round a corner (about as fast as a car or a
+ * walker turns), not tens of metres before it with the arrow pointing at the buildings.
+ */
+const ROAD_WINDOW: Record<Costing, [number, number]> = { auto: [10, 20], bicycle: [6, 12], pedestrian: [4, 8] };
 
 /** The point `d` metres along a shape. */
 export function pointAlong(shape: [number, number][], cumulative: number[], d: number): LatLon | null {

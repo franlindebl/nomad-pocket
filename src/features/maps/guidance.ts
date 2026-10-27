@@ -12,7 +12,7 @@ import { create } from 'zustand';
 
 import i18n from '@/i18n';
 
-import { hasArrived, hasMoved } from './follow-core';
+import { hasArrived, hasMoved, isWrongWay, movingBearing, pushFix, travelBearing, type TrackFix } from './follow-core';
 import { distanceMeters, isFreshFix, type LatLon } from './geo';
 import { watchScreenHeading } from './heading';
 import { computeRoute, packFor, RoutingError } from './routing';
@@ -23,8 +23,11 @@ export type GuidanceTarget = LatLon & { name: string };
 /** none: no pack covers the trip (straight line). error: the engine found no way. */
 export type RoutingStatus = 'none' | 'loading' | 'ready' | 'error';
 
-/** course: GPS direction of travel while moving (degrees), else null. speed: m/s. */
-type Position = LatLon & { accuracy: number | null; course?: number | null; speed?: number | null };
+/**
+ * course: GPS direction of travel while moving (degrees), else null. travel: the direction
+ * of the user's last metres (follow-core's travelBearing). speed: m/s. at: when, ms.
+ */
+type Position = LatLon & { accuracy: number | null; at: number; course?: number | null; travel?: number | null; speed?: number | null };
 
 type GuidanceState = {
   target: GuidanceTarget | null;
@@ -34,6 +37,8 @@ type GuidanceState = {
   costing: Costing;
   routing: RoutingStatus;
   route: Route | null;
+  /** Metres from the route's start to each of its shape points. */
+  routeCumulative: number[];
   /** Why routing failed (RoutingError kind), for the panel's message. */
   routeError: string | null;
   progress: RouteProgress | null;
@@ -68,6 +73,8 @@ let lastRouteAt = 0;
 let offRouteFixes = 0;
 /** GPS course while moving (degrees), else null. */
 let course: number | null = null;
+/** The last fixes, for the direction of the user's last metres. */
+let track: TrackFix[] = [];
 /** A last-known fix older than this is not a starting point (it may be another town). */
 const STALE_FIX_MS = 2 * 60_000;
 let arrivalTimer: ReturnType<typeof setTimeout> | null = null;
@@ -112,13 +119,13 @@ export const useGuidance = create<GuidanceState>((set, get) => {
     offRouteFixes = 0;
     set({ routing: route ? 'ready' : 'loading', routeError: null });
     try {
-      // Start the way the user moves (GPS course); the compass only on foot or by bike,
-      // where the phone is in the hand (in a car it points anywhere).
-      const startHeading = course ?? (costing === 'auto' ? null : heading);
+      // Start the way the user moves; the compass only on foot or by bike, where the
+      // phone is in the hand (in a car it points anywhere).
+      const startHeading = movingBearing(costing, course, travelBearing(track, costing)) ?? (costing === 'auto' ? null : heading);
       const next = await computeRoute(position, target, costing, startHeading, !!route);
       if (mine !== request) return;
       cumulative = cumulativeDistances(next.shape);
-      set({ route: next, routing: 'ready', progress: routeProgress(next, cumulative, get().position ?? position) });
+      set({ route: next, routeCumulative: cumulative, routing: 'ready', progress: routeProgress(next, cumulative, get().position ?? position) });
     } catch (e) {
       if (mine !== request) return;
       const kind = e instanceof RoutingError ? e.kind : 'other';
@@ -130,7 +137,7 @@ export const useGuidance = create<GuidanceState>((set, get) => {
   }
 
   function onPosition(position: Position) {
-    const { route, progress, routing } = get();
+    const { route, progress, routing, costing } = get();
     if (!route) {
       set({ position });
       // On the straight line: try roads again now and then (back on a road, a fresh fix
@@ -140,8 +147,10 @@ export const useGuidance = create<GuidanceState>((set, get) => {
     }
     const next = routeProgress(route, cumulative, position, progress?.segment ?? 0);
     set({ position, progress: next });
-    // Two fixes in a row off the route, so one GPS jump doesn't trigger it.
-    offRouteFixes = isOffRoute(next.offRouteM, position.accuracy) ? offRouteFixes + 1 : 0;
+    // Two fixes in a row off the route (or going against it), so one GPS jump doesn't trigger it.
+    const moving = movingBearing(costing, position.course ?? null, position.travel ?? null);
+    const lost = isOffRoute(next.offRouteM, position.accuracy) || isWrongWay(next, position.accuracy, moving);
+    offRouteFixes = lost ? offRouteFixes + 1 : 0;
     if (offRouteFixes >= 2 && Date.now() - lastRouteAt > REROUTE_MS) requestRoute();
   }
 
@@ -210,6 +219,7 @@ export const useGuidance = create<GuidanceState>((set, get) => {
     costing: 'auto',
     routing: 'none',
     route: null,
+    routeCumulative: [],
     routeError: null,
     progress: null,
     navigating: false,
@@ -225,7 +235,7 @@ export const useGuidance = create<GuidanceState>((set, get) => {
       idle = false;
       idleAnchor = null;
       // Never start from the previous session's fix or route.
-      set({ target, position: null, heading: null, route: null, progress: null, routing: 'loading', routeError: null, navigating: false });
+      set({ target, position: null, heading: null, route: null, routeCumulative: [], progress: null, routing: 'loading', routeError: null, navigating: false });
       syncAwake();
       // No fix at all for that long (indoors, no signal) also lets the screen sleep.
       armIdle(mine);
@@ -240,9 +250,10 @@ export const useGuidance = create<GuidanceState>((set, get) => {
         }
       };
       course = null;
+      track = [];
       const last = await Location.getLastKnownPositionAsync({ maxAge: STALE_FIX_MS }).catch(() => null);
       if (last && session === mine && isFreshFix(last.timestamp, STALE_FIX_MS))
-        firstFix({ lat: last.coords.latitude, lon: last.coords.longitude, accuracy: last.coords.accuracy });
+        firstFix({ lat: last.coords.latitude, lon: last.coords.longitude, accuracy: last.coords.accuracy, at: last.timestamp });
       try {
         const sub = await Location.watchPositionAsync(
           { accuracy: Location.Accuracy.BestForNavigation, distanceInterval: 3, timeInterval: 2000 },
@@ -250,7 +261,9 @@ export const useGuidance = create<GuidanceState>((set, get) => {
             if (session !== mine) return;
             course = (p.coords.speed ?? 0) > 2 && (p.coords.heading ?? -1) >= 0 ? p.coords.heading : null;
             const speed = p.coords.speed !== null && p.coords.speed >= 0 ? p.coords.speed : null;
-            const fix = { lat: p.coords.latitude, lon: p.coords.longitude, accuracy: p.coords.accuracy, course, speed };
+            const here = { lat: p.coords.latitude, lon: p.coords.longitude, accuracy: p.coords.accuracy, at: p.timestamp };
+            track = pushFix(track, here);
+            const fix = { ...here, course, speed, travel: travelBearing(track, get().costing) };
             if (!routed) firstFix(fix);
             else {
               onPosition(fix);
@@ -271,7 +284,7 @@ export const useGuidance = create<GuidanceState>((set, get) => {
     },
     setCosting: (costing) => {
       if (costing === get().costing) return;
-      set({ costing, route: null, progress: null });
+      set({ costing, route: null, routeCumulative: [], progress: null });
       cumulative = [];
       if (get().target && get().position) {
         set({ routing: 'loading' });
@@ -299,7 +312,7 @@ export const useGuidance = create<GuidanceState>((set, get) => {
       request++;
       unsubscribe();
       cumulative = [];
-      set({ target: null, position: null, heading: null, route: null, progress: null, routing: 'none', routeError: null, navigating: false });
+      set({ target: null, position: null, heading: null, route: null, routeCumulative: [], progress: null, routing: 'none', routeError: null, navigating: false });
       syncAwake();
     },
   };

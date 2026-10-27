@@ -13,6 +13,7 @@ export function MapFab({
   onPress,
   accessibilityLabel,
   active,
+  selected,
   children,
   style,
   testID,
@@ -21,6 +22,8 @@ export function MapFab({
   onPress: () => void;
   accessibilityLabel: string;
   active?: boolean;
+  /** A toggle: announced as selected. */
+  selected?: boolean;
   children?: ReactNode;
   style?: StyleProp<ViewStyle>;
   testID?: string;
@@ -31,6 +34,7 @@ export function MapFab({
       testID={testID}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
+      accessibilityState={selected === undefined ? undefined : { selected }}
       onPress={onPress}
       haptic="selection"
       pressedScale={0.92}

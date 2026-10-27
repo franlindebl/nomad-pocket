@@ -23,6 +23,8 @@ type SettingsState = {
   /** Emergency points drawn on the map (the Puntos sheet), and the categories hidden from it. */
   mapPoints: boolean;
   hiddenPointCategories: string[];
+  /** Navigation keeps the map north up (the arrow turns) instead of turning it the way the user goes. */
+  navNorthUp: boolean;
   setLanguage: (l: AppLanguage) => void;
   setContentLanguages: (l: AppLanguage[]) => void;
   setTheme: (t: ThemePreference) => void;
@@ -33,6 +35,7 @@ type SettingsState = {
   setCountry: (id: string | null) => void;
   setMapPoints: (v: boolean) => void;
   setPointCategoryHidden: (category: string, hidden: boolean) => void;
+  setNavNorthUp: (v: boolean) => void;
 };
 
 function applyTheme(theme: ThemePreference) {
@@ -52,6 +55,7 @@ export const useSettings = create<SettingsState>()(
       country: null,
       mapPoints: true,
       hiddenPointCategories: [],
+      navNorthUp: false,
       setLanguage: (language) => {
         setLanguage(language);
         set({ language });
@@ -73,6 +77,7 @@ export const useSettings = create<SettingsState>()(
             ? [...new Set([...st.hiddenPointCategories, category])]
             : st.hiddenPointCategories.filter((c) => c !== category),
         })),
+      setNavNorthUp: (navNorthUp) => set({ navNorthUp }),
     }),
     {
       name: 'settings',
@@ -88,6 +93,7 @@ export const useSettings = create<SettingsState>()(
         country,
         mapPoints,
         hiddenPointCategories,
+        navNorthUp,
       }) => ({
         language,
         contentLanguages,
@@ -99,6 +105,7 @@ export const useSettings = create<SettingsState>()(
         country,
         mapPoints,
         hiddenPointCategories,
+        navNorthUp,
       }),
       onRehydrateStorage: () => (state) => {
         if (!state) return;

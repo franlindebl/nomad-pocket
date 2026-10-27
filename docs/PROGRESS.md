@@ -231,6 +231,26 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-27 — Maps: a navigation view that reads like Google Maps'
+
+- Owner found the navigation view hard to read: the route never got consumed, the map turned
+  before corners (bearing from the route 30 m ahead) and with the phone on foot (GPS course
+  ignored under 2 m/s), and the arrow sat on the raw fix. Analysis, research (Google Maps / Waze,
+  Mapbox's vanishing route line and following camera) and plan in `docs/NAVIGATION_VIEW_PLAN.md`.
+  Owner decisions: travelled part disappears like Google's; standing on foot the map holds (beam
+  under the arrow); "Norte arriba" ships now.
+- Built: direction of travel from the last 8/12/15 m of fixes (`travelBearing`); the road's
+  direction right at the snapped point (`RouteProgress.roadBearing`, replaces `aheadBearing`);
+  bearing smoothing and wrong-way rerouting; a camera that glides to where the user will be at the
+  next fix, on the route; zoom in before maneuvers, flatter pitch on foot; the route line starts
+  at the user; grey arrow on a rough fix or no fixes while moving; compass beam under the arrow
+  on foot/bike; `map-north-up` toggle (persisted `navNorthUp`).
+- Checked: tsc, lint, unit tests (new follow-core and routing-core cases), i18n; `map-17-follow`
+  passes on the iOS 27 simulator (Release), now also pressing "Norte arriba". Seen in its
+  screenshots: the line starts under the arrow; north up turns the arrow, not the map.
+- Next: a walk and a drive on the owner's iPhone (simulated fixes are perfect), and the Android
+  emulator with a route playback.
+
 ### 2026-10-27 — Maps: Canada and Russia by regions for the map, one routing pack for the country
 
 Canada and Russia were the last maps below z15: whole at z15 they are 16 and 13 GB, over the
