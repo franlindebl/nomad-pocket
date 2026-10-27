@@ -147,6 +147,9 @@ for attempt in 1 2 3; do
   tail -5 "$WORK/tiles.log"
 done
 [[ $built == 1 ]] || { log "valhalla_build_tiles failed"; exit 1; }
+# No roads at all (Saint-Pierre-et-Miquelon cut from Newfoundland's extract, which stops
+# short of it, gave an empty 20 KB pack): fail rather than publish a pack that routes nowhere.
+[[ -n "$(find "$WORK/tiles" -name '*.gph' -print -quit)" ]] || { log "no roads in the extract"; exit 1; }
 
 # 4. The pack: a tile extract (one tar, mmapped by the app).
 extract() { # <tile dir under WORK> <pack id>

@@ -315,6 +315,15 @@ Audit findings on `.github/workflows/country-packages.yml`, fixed before the nex
 - Run 40326036278 (the 173 new packs): Armenia failed after 3 rounds of Overpass 502/504
   (8 builds at once), Germany on a Geofabrik 404 after a 7-minute download. Now 6 Overpass
   rounds with growing pauses, and the extract download + md5 is retried 4 times.
+- Published (routing-index, 22:39 UTC): 225 packs = 59 of the first run + 166 of this one
+  (africa 56, asia 51, north-america 24, oceania 23, europe 10, south-america 2); every
+  part and side file is in its release at the listed size. Biggest: India 4.5 GB, Russia
+  3.8, China 3.75, Japan 3.6, Brazil 3.3. Clipped places look right (Saudi Arabia 715 MB,
+  Malaysia 682, Singapore 87, Vatican 22). `unshare` left side files only on maps whose
+  country has no pack (de, fr, am, rw, us…). Missing: ag am de fr ioa je rw (rerun
+  40407657017). Saint-Pierre-et-Miquelon came out empty (20 KB, no roads: Newfoundland's
+  extract stops short of it): dropped from `packs.json`, and a build with no road tiles
+  now fails instead of publishing.
 
 ### 2026-10-26 — Pre-release audit: findings fixed (branch `audit-fixes`)
 

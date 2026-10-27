@@ -122,7 +122,7 @@ up from the manifest with no app release. Order the owner agreed:
    small Caribbean islands).
 4. **Rest of the world** — added to `packs.json` 2026-10-26 (owner approved): every
    country and territory of `regions.json` but the uninhabited ones, Haiti (routed by `do`)
-   and the USA, 232 in all, as whole packs (Germany, France, Canada, Russia included: the
+   and the USA, 231 in all (Saint-Pierre-et-Miquelon dropped: no Geofabrik extract holds it), as whole packs (Germany, France, Canada, Russia included: the
    runner has ~100 GB of disk). Places without an extract of their own are cut from the
    one that holds them (`clip`). The USA (12 GB PBF) gets four packs from Geofabrik's
    regional extracts (us-west 3.4 GB incl. Alaska and Hawaii, us-midwest 2.5, us-northeast

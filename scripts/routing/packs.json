@@ -181,7 +181,6 @@
     "ph": { "geofabrik": "asia/philippines", "iso": "PH" },
     "pk": { "geofabrik": "asia/pakistan", "iso": "PK" },
     "pl": { "geofabrik": "europe/poland", "iso": "PL" },
-    "pm": { "geofabrik": "north-america/canada/newfoundland-and-labrador", "iso": "PM", "clip": true },
     "pr": { "geofabrik": "north-america/us/puerto-rico", "iso": "PR" },
     "ps": { "geofabrik": "asia/israel-and-palestine", "iso": "PS", "clip": true },
     "pw": { "geofabrik": "australia-oceania/palau", "iso": "PW" },
