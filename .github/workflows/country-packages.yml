@@ -129,6 +129,8 @@ jobs:
           print(f"continent={regions[job if is_country else packs[job]['region']]['continent']}")
           PY
       - name: Disk and tools
+        # A hung apt mirror once held ag, fr and je here for the job's whole 6 h.
+        timeout-minutes: 20
         run: |
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
           df -h / /mnt
@@ -138,8 +140,9 @@ jobs:
           else
             mkdir -p "$HOME/pack" && echo "WORK=$HOME/pack" >> "$GITHUB_ENV"
           fi
-          sudo apt-get update -qq && sudo apt-get install -y -qq osmium-tool python3-pyosmium python3-shapely >/dev/null
-          curl -fsSL -o /tmp/pmtiles.tgz https://github.com/protomaps/go-pmtiles/releases/download/v1.31.2/go-pmtiles_1.31.2_Linux_x86_64.tar.gz
+          apt="-o Acquire::Retries=3 -o Acquire::http::Timeout=60 -o Acquire::https::Timeout=60"
+          sudo apt-get $apt update -qq && sudo apt-get $apt install -y -qq osmium-tool python3-pyosmium python3-shapely >/dev/null
+          curl -fsSL --retry 3 --max-time 300 -o /tmp/pmtiles.tgz https://github.com/protomaps/go-pmtiles/releases/download/v1.31.2/go-pmtiles_1.31.2_Linux_x86_64.tar.gz
           echo "3ed7dbf4ec2e6dfe5e25b6f70d1ffc932729f93c86db353bf514dd71010a312f  /tmp/pmtiles.tgz" | sha256sum -c -
           sudo tar -xzf /tmp/pmtiles.tgz -C /usr/local/bin pmtiles
 
