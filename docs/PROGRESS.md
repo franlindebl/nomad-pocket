@@ -6,11 +6,11 @@ can pick up without re-deriving anything.
 
 ## Current state (2026-10-27)
 
-- **Version 1.1.0 (iOS build 18)** on TestFlight 2026-10-27: downloads tuned on the owner's iPhone
-  (setup kit in ~6:30 instead of 13 min, log 2026-10-27), on top of build 16 (no kill while
-  "Preparando", the USA as regional maps); **1.0.1 (build 3)** waiting for App Review.
-  Release process and version table: `docs/RELEASE.md`; store builds are tagged from build 13 on
-  (`v1.1.0-18`). Build 17 shipped another session's unfinished edits: don't use it.
+- **Version 1.1.0 (iOS build 19)** on TestFlight 2026-10-27: document collections as a native list,
+  a legend and switches for the map's dots, a red SOS button, on top of build 18 (downloads tuned on
+  the owner's iPhone, a country's search prepared with its download); **1.0.1 (build 3)** waiting
+  for App Review. Release process and version table: `docs/RELEASE.md`; store builds are tagged
+  from build 13 on (`v1.1.0-19`). Build 17 shipped another session's unfinished edits: don't use it.
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
   tour). Downloads measured and tuned by the agent on the owner's iPhone 14 Pro (2026-10-27).
@@ -220,6 +220,17 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-27 — Release: 1.1.0 build 19 to TestFlight
+
+Build 19 = build 18 plus document collections as a native list (PDFs open in the system viewer on
+Android), the map's legend and switches for the emergency dots, the red "SOS" button, the bundled
+world map renamed, the toast without the springy fade and no empty band at the end of scrolling
+screens. Smoke E2E 21/21 on an iOS 27 simulator; archived from a clean worktree of the release
+commit, tagged `v1.1.0-19`. prep-01 broke with the shorter bottom padding: Maestro's `hideKeyboard`
+gesture (the simulator shows no on-screen keyboard) landed on "Añadir número" and opened its sheet;
+the flow now taps the "Notas de casa" title instead. map-14 failed once in the full run, on a screen
+from another flow (the assistant), and passed alone.
 
 ### 2026-10-27 — Maps: a legend for the dots, switches to hide them, and a red "SOS" button
 

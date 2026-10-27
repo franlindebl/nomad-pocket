@@ -37,7 +37,9 @@ tags: [smoke, prepare]
     element: { id: "home-notes" }
 - tapOn: { id: "home-notes" }
 - inputText: "Llave de paso bajo el fregadero"
-- hideKeyboard
+# Not hideKeyboard: Maestro's dismiss gesture can land on "Añadir número" and open its sheet.
+# Tapping the section title (not pressable) ends editing.
+- tapOn: "NOTAS DE CASA"
 - takeScreenshot: 02-plan-filled
 # Edit and delete: the contact sheet opens with its values.
 - scrollUntilVisible:
