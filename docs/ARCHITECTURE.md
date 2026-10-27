@@ -562,8 +562,13 @@ shortcut ticks them all); `useChosenRegions` ticks the one the person is in (`pa
 pack's 1° cells, else the map's bbox, from a fix at most 10 min old; the location is asked
 for there, only for such a country). Without `regions`, a retry or an update covers the
 regions on the phone or on their way. `CountryState.maps`/`regions` list them;
-`removeCountryRegion` deletes one (the last one takes the country). A route between two
-regions is a straight line (one pack must cover both ends, as between countries). Maps that aren't a country (older community/state or visible-area maps) are
+`removeCountryRegion` deletes one (the last one takes the country). A route between two US
+regions is a straight line (one pack must cover both ends, as between countries;
+docs/ROUTING_ACROSS_PACKS.md). Canada and Russia are split for the map only (`ca-ontario`,
+`ru-south`…: regions without a pack): their national pack is `CountryOffer.common`
+(`countryWidePacks`), planned with any non-empty choice of regions and removed with the last
+one, so routes between their regions work; `partAt` tells their regions apart by the map's
+outline cells (`CountryMap.cells`). Maps that aren't a country (older community/state or visible-area maps) are
 listed as "Otros mapas". **Prebuilt maps**: `.github/workflows/country-packages.yml` (monthly, or by hand with a
 country list and `parts` = all / maps / routing; one job per country builds its routing pack
 first, see Routing, then its map, and the run publishes both catalogs and prunes both families
@@ -578,7 +583,10 @@ us-northeast, us-south, us-alaska, us-hawaii) gets one map per region instead (`
 `regionId` us; `region-outline.py`: the region's Geofabrik `.poly` ∩ every Natural Earth polygon of
 the country, so Hawaii is in) built in the region's job after its pack, and no whole map; the
 catalog's `carry` drops a country's whole map once its regions have maps
-(docs/COUNTRY_REGIONS_PLAN.md). For countries without a routing pack also `<id>.{pois,streets,places,addresses}.tsv`
+(docs/COUNTRY_REGIONS_PLAN.md). The regions of `scripts/maps/map-regions.json` (Canada, Russia) are
+maps only: the union of the Geofabrik polygons it lists ∩ the country, one job each, no side files
+(the country's own job builds its one pack, which brings them); their entries carry the outline's 1°
+`cells`. For countries without a routing pack also `<id>.{pois,streets,places,addresses}.tsv`
 from the Geofabrik extract named after the country, which wins a tie (an unresolved tie takes none,
 and the app falls back to Overpass; Geofabrik mis-tags `pf`, `wf`, `tk`, Clipperton and `pn`, and `as`,
 `gu`, `mp` have no extract of their own) (scripts/routing/emergency-points.py, streets.py, places.py: the

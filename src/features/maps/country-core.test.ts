@@ -6,6 +6,7 @@ import {
   countryNeed,
   countryOfGroup,
   countryParts,
+  countryWidePacks,
   isNewer,
   mapAssetUrl,
   packOutdated,
@@ -195,4 +196,55 @@ test('partAt: the region whose pack has roads there, else whose map covers it', 
   assert.equal(partAt(parts, { lat: 37.77, lon: -122.42 })?.id, 'us-west');
   assert.equal(partAt(parts, { lat: 61.2, lon: -149.9 })?.id, 'us-alaska');
   assert.equal(partAt(parts, { lat: 40.4, lon: -3.7 }), null);
+});
+
+test('countryParts and countryWidePacks: regions for the map only, one pack for the whole country (Canada)', () => {
+  const packs = [
+    { id: 'ca', regionId: 'ca' },
+    { id: 'us-west', regionId: 'us' },
+    { id: 'do', regionId: 'do' },
+  ];
+  const maps = [
+    { id: 'ca-quebec', regionId: 'ca' },
+    { id: 'ca-ontario', regionId: 'ca' },
+    { id: 'us-west', regionId: 'us' },
+  ];
+  const ca = countryParts('ca', maps, packs);
+  assert.deepEqual(
+    ca.map((p) => [p.id, p.map?.id, p.packs.map((x) => x.id)]),
+    [
+      ['ca-ontario', 'ca-ontario', []],
+      ['ca-quebec', 'ca-quebec', []],
+    ],
+  );
+  assert.deepEqual(
+    countryWidePacks('ca', ca, packs).map((p) => p.id),
+    ['ca'],
+  );
+  // The USA: every pack is a region's.
+  assert.deepEqual(countryWidePacks('us', countryParts('us', maps, packs), packs), []);
+  // A country in one part (its pack is the part's), and Haiti on the Dominican Republic's.
+  assert.deepEqual(countryWidePacks('ca', countryParts('ca', [{ id: 'ca', regionId: 'ca' }], packs), packs), []);
+  assert.deepEqual(countryWidePacks('ht', countryParts('ht', [{ id: 'ht', regionId: 'ht' }], packs), packs), []);
+});
+
+test('parseMapsManifest keeps a region map\'s cells, drops bad ones', () => {
+  const region = (cells: unknown) => ({ ...manifest.maps[0], id: 'ca-ontario', regionId: 'ca', cells });
+  const m = parseMapsManifest(JSON.stringify({ ...manifest, maps: [region([1, 2]), { ...region(['x']), id: 'ca-quebec' }, { ...region(undefined), id: 'ca-nwt' }] }));
+  assert.deepEqual(
+    m?.maps.map((x) => x.cells),
+    [[1, 2], null, null],
+  );
+});
+
+test('partAt: a region without a pack of its own by its outline cells, the bbox only when a map has none', () => {
+  const cell = (lat: number, lon: number) => (Math.floor(lat) + 90) * 360 + (Math.floor(lon) + 180);
+  // Ottawa is in both bboxes; its cell is only in Ontario's outline.
+  const ontario = { id: 'ca-ontario', map: { bbox: [-95.2, 41.7, -74.3, 56.9], cells: [cell(45.42, -75.7), cell(43.65, -79.38)] }, packs: [] };
+  const quebec = { id: 'ca-quebec', map: { bbox: [-79.8, 45, -57.1, 62.6], cells: [cell(45.5, -73.57)] }, packs: [] };
+  const parts = [quebec, ontario] as unknown as Parameters<typeof partAt>[0];
+  assert.equal(partAt(parts, { lat: 45.42, lon: -75.7 })?.id, 'ca-ontario');
+  assert.equal(partAt(parts, { lat: 45.5, lon: -73.57 })?.id, 'ca-quebec');
+  // In Quebec's bbox, outside both outlines (Hudson Bay): no region.
+  assert.equal(partAt(parts, { lat: 60, lon: -78 }), null);
 });

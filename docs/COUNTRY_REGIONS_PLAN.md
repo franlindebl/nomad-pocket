@@ -1,7 +1,9 @@
-# Countries in regions: the United States
+# Countries in regions: the United States, Canada and Russia
 
-Status: **live** (2026-10-27): app in build 16, regional maps published by run 40482995938.
-Left: a real iPhone check (phase 5).
+Status: **USA live** (2026-10-27): app in build 16, regional maps published by run 40482995938.
+Left: a real iPhone check (phase 5). **Canada and Russia**: approved and implemented on
+2026-10-27 (section "Canada and Russia" below); waiting for a build that reads them, then a
+maps run.
 
 ## Why
 
@@ -155,3 +157,124 @@ nobody is meant to take all of it on a phone; one or two regions are 5–24 GB.
    5.68 GB, Alaska 0.73 GB, Hawaii 32 MB; every part checked in its release) and no whole-USA
    map; 246 maps, every country of regions.json covered. **Next**: a real iPhone check (a
    5 GB region end to end).
+
+## Canada and Russia: regions for the map only (2026-10-27)
+
+### Why
+
+After the USA, Canada and Russia were the only maps of the catalog below z15: whole, at
+z15, they don't fit the 10 GB cap of one map (`build-country-map.sh` MAX_BYTES), so the
+script took z14. Every other country is at z15 (the biggest: Germany 5.5 GB, France 5.5 GB).
+
+| | Map today | Map at z15, whole | Routing pack | Side files | Download today |
+|---|---|---|---|---|---|
+| Canada | 8.4 GB (z14) | **16 GB** | 2.0 GB | 0.35 GB | 10.8 GB |
+| Russia | 6.9 GB (z14) | **13 GB** | 3.8 GB | 0.84 GB | 11.6 GB |
+
+### Decision (owner, 2026-10-27): option B
+
+Two ways were weighed:
+
+- **A. Like the USA**: each region its own map *and* routing pack. Smaller downloads (Moscow
+  ≈ 2.9 GB), but routes between regions go in a straight line (no stitching across packs:
+  finding 2 above), and today's whole-country packs route Moscow–Saint Petersburg,
+  Moscow–Kazan, Toronto–Montreal, Ottawa–Montreal, Halifax–Moncton. Grouping Canadian
+  provinces would also mean merging Geofabrik extracts for the packs.
+- **B. Regions for the map only (taken)**: each region is its own z15 map; the routing pack
+  and its side files (emergency points, streets, places, house numbers) stay whole, for the
+  whole country, and come with the first region. Every route inside the country keeps
+  working and search/Emergencias find things in the whole country. Cost: each download
+  carries the national pack (Moscow ≈ 1.9 + 3.8 + 0.84 ≈ 6.5 GB; Toronto ≈ 2.0 + 2.0 + 0.35 ≈
+  4.4 GB), still far under today's 11–12 GB with more detail.
+
+The USA keeps option A: a national pack there would be ~21 GB. Routing across packs is a
+separate future project (`docs/ROUTING_ACROSS_PACKS.md`).
+
+**Crimea** (owner's decision): Natural Earth v5.1.2, the outline the maps are cut by, puts
+it in Russia, so today it is in Russia's map and not in Ukraine's (unchanged by this work).
+It goes inside `ru-south` with no region or name of its own; the region's subtitle lists
+other places.
+
+### Regions
+
+Map sizes are pmtiles dry runs of build 20261026 over each region's outline (Geofabrik
+polygons ∩ Natural Earth, `region-outline.py`); every region fits at z15. The union of each
+country's regions covers its whole outline but for the ~5 km bands the outline reaches over
+its borders.
+
+| Region | Geofabrik extracts | Map z15 |
+|---|---|---|
+| `ca-bc-yukon` British Columbia and Yukon | british-columbia, yukon | 2.2 GB |
+| `ca-prairies` Prairies | alberta, saskatchewan, manitoba | 1.9 GB |
+| `ca-ontario` Ontario | ontario | 2.0 GB |
+| `ca-quebec` Quebec | quebec | 2.5 GB |
+| `ca-atlantic` Atlantic | new-brunswick, nova-scotia, prince-edward-island, newfoundland-and-labrador | 1.0 GB |
+| `ca-nwt` Northwest Territories | northwest-territories | 1.6 GB |
+| `ca-nunavut` Nunavut | nunavut | 4.8 GB |
+| **Canada** (+ pack 2.0 GB, side files 0.35 GB) | | **16 GB → ~18.4 GB** |
+| `ru-central` Central | central-fed-district | 1.9 GB |
+| `ru-northwest` Northwest (Kaliningrad included) | northwestern-fed-district | 2.4 GB |
+| `ru-south` South (North Caucasus, Crimea) | south-, north-caucasus-, crimean-fed-district | 1.1 GB |
+| `ru-volga` Volga | volga-fed-district | 2.1 GB |
+| `ru-ural` Urals | ural-fed-district | 1.3 GB |
+| `ru-siberia` Siberia | siberian-fed-district | 2.4 GB |
+| `ru-far-east` Far East | far-eastern-fed-district | 2.1 GB |
+| **Russia** (+ pack 3.8 GB, side files 0.84 GB) | | **13 GB → ~17.6 GB** |
+
+Nunavut is 30 % of Canada's map for ~40,000 people (ice, water and islands); split, only
+those who tick it take it.
+
+### Technical design
+
+- **`scripts/maps/map-regions.json`**: the map-only regions, `{ country, geofabrik: [...] }`
+  per region id. A country listed there must have a routing pack in `packs.json` (the
+  script refuses otherwise): it brings every region's side files.
+- **`build-country-map.sh <region>`**: reads the region from `packs.json` (USA) or
+  `map-regions.json`, fetches each `.poly`, and `region-outline.py` takes their union ∩ the
+  country's outline. The outline's `cells` (the 1° cells it touches, a pack's cell ids) go
+  into the map's fragment (`maps-manifest.py fragment … <outline>`): the app tells the
+  region a person is in from them, as it does from a regional pack's cells for the USA.
+  No side files for these maps (the country's pack has them).
+- **`country-packages.yml`**: a country with map regions builds only its pack in its own
+  job and one map job per region; region ids can be asked alone (`countries=ca-nunavut`).
+  `maps-manifest.py carry` keeps regions of `map-regions.json` and drops the country's whole
+  map once regional maps exist (as for the USA).
+- **App** (`country-core.ts`, `countries.ts`, `RegionList.tsx`):
+  - `countryWidePacks` (pure, tested): a split country's packs that belong to no region (the
+    national pack). `CountryOffer.common` holds them; `planCountry` adds them to any non-empty
+    choice of regions, so they come with the first region and never twice.
+  - `partAt`: regional pack cells first, then the map's outline cells, then the map bbox (a
+    catalog without cells). Ottawa sits in both Ontario's and Quebec's bboxes; the cells
+    decide.
+  - `regionBytes` leaves the national pack out of each region's figure; the list's text
+    says what comes with the first region and its size (`country.regionsBodyShared`), the
+    "Todo Canadá" row and the total include it, and the straight-line note
+    (`country.crossRegions`) is not shown.
+  - `removeCountryRegion`: the last region takes the national pack with it (removeCountry).
+  - Region names and subtitles: `maps:parts.<id>` (es, en).
+
+### Compatibility
+
+- App Store 1.0.1 reads no catalog: unaffected.
+- TestFlight builds ≤ 15 would take the first regional map for the whole country (as with
+  the USA). Build 16–19 split Canada and Russia but don't know `common`: they would download
+  regions without routing and show the region ids (`ca-ontario`) instead of names. Testers
+  only; the maps run waits for a build with this code.
+- Whole Canada/Russia maps already on a phone (z14) keep working; the catalog then offers
+  the regions.
+
+### Phases
+
+1. Code (CI + app + docs). **Done** 2026-10-27; `ru-south` and `us-hawaii` built locally
+   end to end with the new script (`MAX_BYTES` lowered for a quick check).
+2. Check on the simulator against a local catalog. **Done** 2026-10-27 (iOS 26.5, Release):
+   Canada as `ca-ontario` + `ca-quebec` (real outlines and cells, z8) and Andorra's pack standing
+   in for `ca`. From Toronto the onboarding kit ticked Ontario ("Mapa de Canadá · Ontario"); the
+   list said what comes with the first region and its size, Todo Canadá = both maps + the pack;
+   the download brought the map and the pack ("Ontario · 17,6 MB" in Tus mapas); ticking Quebec
+   then cost only its map; deleting Ontario, the last region, removed the map and `ca.tar`.
+3. A TestFlight build with this code.
+4. Run `gh workflow run country-packages.yml -f countries="ca ru" -f parts=maps` (14 map
+   jobs; the packs are unchanged). Check that both catalogs have every region before telling
+   testers; a failed region is relaunched alone (`-f countries=ca-nunavut -f parts=maps`).
+

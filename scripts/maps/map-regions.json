@@ -1,0 +1,27 @@
+{
+  "//": "Regions of countries whose map is too big for one download at z15 but whose routing pack fits whole (docs/COUNTRY_REGIONS_PLAN.md, Canada and Russia): one map per region, cut by the union of its Geofabrik polygons (region-outline.py) and built by .github/workflows/country-packages.yml; the country keeps one routing pack (scripts/routing/packs.json) with its emergency points, streets, places and house numbers, downloaded with the first region. A country split this way needs that pack. Regions with a pack of their own (the USA) live in packs.json instead. The key is the map id; country: the country's id in src/features/maps/regions.json; geofabrik: the extracts whose polygons make the region. Their names are maps:parts.<id> in the app's locales. Crimea goes in ru-south without a name of its own (owner's decision, 2026-10-27).",
+  "regions": {
+    "ca-bc-yukon": { "country": "ca", "geofabrik": ["north-america/canada/british-columbia", "north-america/canada/yukon"] },
+    "ca-prairies": { "country": "ca", "geofabrik": ["north-america/canada/alberta", "north-america/canada/saskatchewan", "north-america/canada/manitoba"] },
+    "ca-ontario": { "country": "ca", "geofabrik": ["north-america/canada/ontario"] },
+    "ca-quebec": { "country": "ca", "geofabrik": ["north-america/canada/quebec"] },
+    "ca-atlantic": {
+      "country": "ca",
+      "geofabrik": [
+        "north-america/canada/new-brunswick",
+        "north-america/canada/nova-scotia",
+        "north-america/canada/prince-edward-island",
+        "north-america/canada/newfoundland-and-labrador"
+      ]
+    },
+    "ca-nwt": { "country": "ca", "geofabrik": ["north-america/canada/northwest-territories"] },
+    "ca-nunavut": { "country": "ca", "geofabrik": ["north-america/canada/nunavut"] },
+    "ru-central": { "country": "ru", "geofabrik": ["russia/central-fed-district"] },
+    "ru-northwest": { "country": "ru", "geofabrik": ["russia/northwestern-fed-district"] },
+    "ru-south": { "country": "ru", "geofabrik": ["russia/south-fed-district", "russia/north-caucasus-fed-district", "russia/crimean-fed-district"] },
+    "ru-volga": { "country": "ru", "geofabrik": ["russia/volga-fed-district"] },
+    "ru-ural": { "country": "ru", "geofabrik": ["russia/ural-fed-district"] },
+    "ru-siberia": { "country": "ru", "geofabrik": ["russia/siberian-fed-district"] },
+    "ru-far-east": { "country": "ru", "geofabrik": ["russia/far-eastern-fed-district"] }
+  }
+}

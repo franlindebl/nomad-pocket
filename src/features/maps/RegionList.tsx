@@ -1,7 +1,8 @@
-// The regions of a country downloaded region by region (the USA), for the country sheet and
-// the onboarding kit: tick the ones to download (the one the person is in comes ticked:
-// useChosenRegions), all of them with the whole-country shortcut, and delete one that is on
-// the phone (docs/COUNTRY_REGIONS_PLAN.md).
+// The regions of a country downloaded region by region (the USA, Canada, Russia), for the
+// country sheet and the onboarding kit: tick the ones to download (the one the person is in
+// comes ticked: useChosenRegions), all of them with the whole-country shortcut, and delete one
+// that is on the phone (docs/COUNTRY_REGIONS_PLAN.md). Canada and Russia split only their map:
+// the whole country's navigation and points come with the first region (CountryOffer.common).
 import { Check, CheckSquare, Square, Trash2 } from 'lucide-react-native';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,13 +13,14 @@ import { useItems } from '@/features/content/items';
 import { formatBytes } from '@/lib/format';
 import { space, useTheme } from '@/theme';
 
-import { installedRegions, regionBytes, removeCountryRegion, useCountries, useRegionChoice, type CountryOffer } from './countries';
+import { commonBytes, installedRegions, regionBytes, removeCountryRegion, useCountries, useRegionChoice, type CountryOffer } from './countries';
 import { countryRegionName } from './country-maps';
 
 export function RegionList({ offer, chosen }: { offer: CountryOffer; chosen: string[] | undefined }) {
   const { t } = useTranslation('maps');
   const { colors } = useTheme();
   const installed = useItems('map');
+  const installedPacks = useItems('route');
   const { countries } = useCountries();
   const country = countries.find((c) => c.regionId === offer.region.id);
   const onPhone = useMemo(
@@ -30,15 +32,21 @@ export function RegionList({ offer, chosen }: { offer: CountryOffer; chosen: str
   const bytes = useMemo(
     () => regionBytes(offer),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [offer, installed],
+    [offer, installed, installedPacks],
   );
+  const common = useMemo(
+    () => commonBytes(offer),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [offer, installedPacks],
+  );
+  const shared = offer.common.length > 0;
   const regions = offer.regions ?? [];
   const choosable = regions.filter((p) => !onPhone.has(p.id)).map((p) => p.id);
   const picked = new Set(chosen ?? []);
   const all = choosable.length > 0 && choosable.every((id) => picked.has(id));
   const choose = (ids: string[]) => useRegionChoice.getState().choose(offer.region.id, ids);
   const toggle = (id: string) => choose(picked.has(id) ? [...picked].filter((x) => x !== id) : [...picked, id]);
-  const allBytes = choosable.reduce((sum, id) => sum + (bytes[id] ?? 0), 0);
+  const allBytes = choosable.reduce((sum, id) => sum + (bytes[id] ?? 0), common);
   const tick = (on: boolean) => (on ? <CheckSquare size={22} color={colors.accent} /> : <Square size={22} color={colors.textTertiary} />);
   const remove = (id: string) => {
     if (!country) return;
@@ -55,7 +63,11 @@ export function RegionList({ offer, chosen }: { offer: CountryOffer; chosen: str
         {t('country.regionsTitle')}
       </Text>
       <Text variant="footnote" color="textSecondary">
-        {t('country.regionsBody')}
+        {!shared
+          ? t('country.regionsBody')
+          : common
+            ? t('country.regionsBodyShared', { name: offer.title, size: formatBytes(common) })
+            : t('country.regionsBodySharedIn', { name: offer.title })}
       </Text>
       <ListGroup>
         {choosable.length > 1 ? (
@@ -101,9 +113,11 @@ export function RegionList({ offer, chosen }: { offer: CountryOffer; chosen: str
           );
         })}
       </ListGroup>
-      <Text variant="caption" color="textTertiary">
-        {t('country.crossRegions')}
-      </Text>
+      {shared ? null : (
+        <Text variant="caption" color="textTertiary">
+          {t('country.crossRegions')}
+        </Text>
+      )}
     </View>
   );
 }
