@@ -22,7 +22,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 IMAGE="${VALHALLA_IMAGE:-ghcr.io/valhalla/valhalla:3.9.1}"
 CONC="${CONC:-4}"
 PART_BYTES=$((1900 * 1024 * 1024))
-OVERPASS=(https://overpass-api.de/api/interpreter https://overpass.private.coffee/api/interpreter https://maps.mail.ru/osm/tools/overpass/api/interpreter)
+OVERPASS=(https://overpass-api.de/api/interpreter https://overpass.private.coffee/api/interpreter https://overpass.kumi.systems/api/interpreter)
 UA="NomadPocket-routing/1.0 (+https://github.com/franlindebl/nomad-pocket)"
 
 # geofabrik: one extract path, or a list merged into one build (Spain + Canary Islands).
