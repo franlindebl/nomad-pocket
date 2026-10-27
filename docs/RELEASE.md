@@ -24,9 +24,9 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 
 - Marketing version: `expo.version` (currently **1.1.0**). Keep `package.json`'s
   `version` equal (not used by the build, but it's what people read).
-- iOS build number: `expo.ios.buildNumber` (currently **"16"**) → `CFBundleVersion`. Bump it
+- iOS build number: `expo.ios.buildNumber` (currently **"18"**) → `CFBundleVersion`. Bump it
   for every upload: App Store Connect rejects a build number it has already seen.
-- Android: `expo.android.versionCode` (currently **16**, nothing published yet). Must grow
+- Android: `expo.android.versionCode` (currently **18**, nothing published yet). Must grow
   with every Play upload.
 - After changing any of them, run `npx expo prebuild` (it can regenerate `ios/` and
   `android/` from scratch: then `cd ios && pod install`).
@@ -48,11 +48,17 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.1.0 | 14 | TestFlight 2026-10-27: faster downloads (segmented multi-mirror engine, mirrors ranked by throughput, adaptive connection budget, per-piece checks, resume after the app is killed), screen kept on while downloading, steadier download rows |
 | 1.1.0 | 15 | TestFlight 2026-10-27: many downloads at once (up to 6, a kit no longer waits behind a country map), small archives start without re-probing mirrors, the map asks for the location and starts on the user, USA routing packs |
 | 1.1.0 | 16 | TestFlight 2026-10-27: fix for the app being killed while "Preparando" a big download (sha-256 and file copies native, `modules/nomad-files`), the USA as regional maps |
+| 1.1.0 | 17 | uploaded 2026-10-27 by mistake with another session's unfinished map-search edits in its JS bundle (archived from a shared working tree): don't use, expire it |
+| 1.1.0 | 18 | TestFlight 2026-10-27: downloads tuned on a real iPhone (setup kit 20.7 GB in ~6:30 instead of 13 min, the country's map first, in-process sessions while the app is open, stall watchdog); archived from a clean worktree of the commit |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.
 
 ## Before uploading
+
+Archive from a tree that holds exactly the commit: Metro bundles whatever is in the working tree,
+so another session's uncommitted edits ship too (build 17). With other work in the checkout,
+archive from a clean `git worktree` of the commit (`npm ci`, `npx expo prebuild --platform ios`).
 
 1. `npx tsc --noEmit && npx expo lint && npm test && npm run check:i18n` and
    `node scripts/licenses.mjs --check` (the Credits screen data is current).

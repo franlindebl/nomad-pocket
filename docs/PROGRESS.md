@@ -6,23 +6,23 @@ can pick up without re-deriving anything.
 
 ## Current state (2026-10-27)
 
-- **Version 1.1.0 (iOS build 16)** on TestFlight 2026-10-27: the fix for the app being killed while
-  "Preparando" a big download (log 2026-10-27) and the USA as regional maps, on top of build 15 (many
-  downloads at once) and build 14 (faster downloads); **1.0.1 (build 3)** waiting for App Review.
+- **Version 1.1.0 (iOS build 18)** on TestFlight 2026-10-27: downloads tuned on the owner's iPhone
+  (setup kit in ~6:30 instead of 13 min, log 2026-10-27), on top of build 16 (no kill while
+  "Preparando", the USA as regional maps); **1.0.1 (build 3)** waiting for App Review.
   Release process and version table: `docs/RELEASE.md`; store builds are tagged from build 13 on
-  (`v1.1.0-16`).
+  (`v1.1.0-18`). Build 17 shipped another session's unfinished edits: don't use it.
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
-  tour). Not yet run on a physical device by the agent.
+  tour). Downloads measured and tuned by the agent on the owner's iPhone 14 Pro (2026-10-27).
 - Checks: `npm test` (the count drifts: run it), `tsc` clean, lint clean, i18n keys complete. E2E: 54 Maestro flows
   (21 smoke, 17 full, 11 nightly, 1 iPad tour, 4 Android); which cases they cover is in the catalog of `docs/E2E.md`.
-  Build 16 passed the smoke suite (21/21, 2026-10-27); full and iPad suites not run on it yet.
+  The build 17/18 code passed the smoke suite (21/21, 2026-10-27); full and iPad suites not run on it yet.
 
 | Area | Status |
 |---|---|
 | Foundation (design system, nav, i18n, db, downloads core) | done |
 | Catalog (101 resources, 6 categories, Wikipedia picker, Kiwix OPDS explore, Files import) | done |
-| Downloads (queue, pause/resume, iOS background, Wi-Fi-only enforced in the manager, size + sha-256 checks, retry with backoff; segmented multi-mirror engine with throughput-ranked Kiwix mirrors, per-piece sha-1, resume from disk after a kill; adaptive connection budget; screen kept on) | done — iOS sim + Android emulator (Release); build 14 |
+| Downloads (queue, pause/resume, iOS background, Wi-Fi-only enforced in the manager, size + sha-256 checks, retry with backoff; segmented multi-mirror engine with throughput-ranked Kiwix mirrors, per-piece sha-1, resume from disk after a kill; adaptive connection budget; screen kept on; CDN files first, stall watchdog, in-process sessions on iOS while open) | done — tuned on a real iPhone 14 Pro (build 18); Android emulator check of the build 17 changes pending |
 | UX redesign: survival kit (`docs/UX_SURVIVAL_PLAN.md`): onboarding country + kit, Home "En una emergencia" + "Tu preparación", 4 tabs, maps by country, bundled world map, simpler settings | done — iOS sim (E2E smoke + full), Android spot check; build 11; country maps CI first run 2026-10-26 |
 | ZIM library + reader (search, TOC, bookmarks, history, find, text size, dark mode) | done — iOS + Android |
 | Courses (14 courses, syllabus with fallbacks, progress; inside Library since the redesign) | done |
@@ -220,6 +220,15 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-27 — Release: 1.1.0 build 18 to TestFlight (build 17 withdrawn)
+
+Build 18 = the download tuning below on top of build 16. Smoke E2E 21/21 on an iOS 27 simulator;
+tagged `v1.1.0-18`. Build 17 was archived from the main checkout while another session was
+editing map search there: its JS bundle holds that half-done work (a `BATCH_TILES` with no
+definition, found by grepping the intermediate `main.jsbundle`). Build 18 was archived from a
+clean worktree of the commit; RELEASE.md now says so. Android check of the shared download
+changes is next (owner asked for it last).
 
 ### 2026-10-27 — Downloads tuned on a real iPhone: the setup kit in ~6:30 instead of 13 min
 
