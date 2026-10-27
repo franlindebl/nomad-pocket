@@ -282,7 +282,7 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
   quickest to answer is often a slow one. Any other URL (GitHub Releases, Hugging Face) is one
   source, asked a one-byte range to learn whether it takes ranges and its exact size. The
   metalink's `<size>`, sha-256 and 4 MiB sha-1 `<pieces>` are kept. The finished file is
-  checked against size + sha-256 (`File.digest`, native, 64 KB chunks); a bad copy is deleted,
+  checked against size + sha-256 (`modules/nomad-files` `sha256`, native, 4 MiB blocks; not `File.digest`: see below); a bad copy is deleted,
   the row says it is damaged and the retry avoids that mirror (single transfers only: a
   segmented file has many). Manifest downloads pass `EnqueueInput.integrity` (size + sha-256)
   and get the same check. Mirror speeds are remembered by host for 10 min (in memory,
@@ -301,8 +301,8 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
   `planAfterFailure` takes over. When nothing new can start and the range the file waits for
   crawls (3× slower than the best source would be), it is fetched again elsewhere and the
   first copy wins.
-  Finished ranges are appended **in order** to `partial/<id>.part` (`FileHandle`, 4 MiB
-  slices, each metalink piece's sha-1 checked with `expo-crypto` on the way; a corrupt range
+  Finished ranges are appended **in order** to `partial/<id>.part` (`modules/nomad-files` `copyInto`, native, 4 MiB
+  blocks, each metalink piece's sha-1 checked natively on the way; a corrupt range
   rules its mirror out and is fetched again, more than 3 fail the download). So the `.part`
   is always a verified prefix (`validPrefix`: whole chunks only) and, with the range files
   already on disk, the whole resume state: nothing in `pause_state`, `meta.segments` holds
@@ -315,6 +315,13 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
 - **Keep awake** (`keep-awake.ts`): while a record is `running` or `processing` and the app
   is active, the screen stays on (tag `downloads`; the Downloads sheet says so). On Android a
   locked screen sends the app to the background, which pauses every download.
+- **Big files never go through JS or `File.digest`** (`modules/nomad-files`, Swift + Kotlin):
+  `sha256(path)` and `copyInto(src, dst, offset, pieces?)` read 4 MiB blocks, each inside its
+  own `autoreleasepool` on iOS. expo-file-system 58's `File.digest` reads in one native loop
+  with no pool, so every block stays alive until it ends: hashing a 2 GB map part held 2 GB and
+  iOS killed the app ("jetsam per-process-limit", an iPhone 15 Pro, build 14, Spain's map in
+  "Preparando", and again at every launch since the manager resumes `processing`). The
+  segmented engine's appends and the country map / routing pack assembly use `copyInto`.
 - Failures (`planAfterFailure`, `manager-core.ts`): network errors and 5xx keep the bytes and
   retry with backoff (5 s, 30 s, 2 min); only stale state (invalid resume data, 4xx on the
   range request) restarts from zero. Android continues from the `.part` length; the saved

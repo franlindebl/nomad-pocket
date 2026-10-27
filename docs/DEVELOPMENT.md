@@ -125,6 +125,12 @@ Unit tests import with `.ts` extensions and no `@/` aliases (Node loads them dir
 - iOS simulator logs: `xcrun simctl spawn booted log stream --predicate 'process == "NomadPocket"'`;
   JS `console.*` shows there in Release builds too.
 - Android: `adb logcat | grep -E "ReactNativeJS|nomad|kiwix|AndroidRuntime"`.
+- A physical iPhone with a TestFlight build (no Developer Mode needed): `brew install
+  libimobiledevice`, plug it in and unlock it. `idevicecrashreport -k <dir>` copies the crash and
+  jetsam reports (`-k` keeps them on the phone); `idevicesyslog > log.txt` records the live system
+  log while you reproduce. A kill for memory leaves no app crash report: look for
+  `NomadPocket … killed by jetsam reason per-process-limit` in the log.
+  (`xcrun devicectl` needs Developer Mode on the phone.)
 - Simulator app data: `xcrun simctl get_app_container booted com.fjlinde.nomadpocket data`
   → `Documents/content/…`; the databases are in `Library/Application Support/SQLite/nomad.db` (user data;
   open it with `sqlite3`) and `Documents/content/index/search.db` (map search index and emergency points). Drop a

@@ -222,6 +222,22 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-27 — Fix: the app was killed while "Preparando" a big download (iOS, memory)
+
+The owner's iPhone 15 Pro (build 14) closed while Spain's map was "Preparando", and again a few
+seconds after every launch (the manager resumes `processing`). No crash report: the device log
+(`idevicesyslog`, libimobiledevice, over USB without Developer Mode) said "Process NomadPocket
+killed by jetsam reason per-process-limit". Cause: expo-file-system 58's `File.digest`, used for
+the sha-256 check since build 13, reads 64 KB blocks in one native loop with no
+`autoreleasepool`, so it holds the whole file: a Swift copy of its loop peaked at 2064 MB on a
+2 GB file (7 MB with a pool per block). A 13 GB Wikipedia would die the same way. New local module
+`modules/nomad-files` (Swift + Kotlin): `sha256` and `copyInto` (copy at an offset, optional
+sha-1 pieces), 4 MiB blocks, one pool each. The manager's check, the segmented engine's appends
+and the country map / routing pack assembly use it; `expo-crypto` is gone. Per-call
+`readBytes` from Expo's queues doesn't accumulate (measured 14 MB), but the copies no longer cross
+into JS at all. Getting logs from a TestFlight install: `brew install libimobiledevice`, then
+`idevicecrashreport -k` and `idevicesyslog` (`docs/DEVELOPMENT.md`).
+
 ### 2026-10-27 — Release: 1.1.0 build 15 to TestFlight
 
 Build 15 = many downloads at once (up to 6, ≤ 2 per GitHub/Hugging Face host, mirror speeds
