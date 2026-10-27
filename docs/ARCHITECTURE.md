@@ -533,7 +533,8 @@ tile-POI fallback.
 **Country download lifecycle** (`countries.ts`, `country-maps.ts`, `routing-packs.ts`,
 `side-files.ts`, pure `country-core.ts` / `routing-core.ts`):
 - *Before queueing*: `planCountry` / `countryNeed` work out the room needed (assembly copy plus the
-  queued downloads) in one check before anything is queued; a refused enqueue cancels what already
+  queued downloads) in one check before anything is queued; the copy is the biggest multi-part archive
+  only, because assemblies (maps and packs) run one at a time (`assembly.ts`); a refused enqueue cancels what already
   went in. A country's records are grouped as `country-<id>` (Haiti and the Dominican Republic share
   a pack). Automatic re-fetches are quiet (no mobile-data question).
 - *Catalogs*: both manifests are validated before use (`parseManifest` and its maps twin reject paths and other URL schemes in names
