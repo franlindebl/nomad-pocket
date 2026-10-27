@@ -326,6 +326,39 @@
     "points": "Emergency points and streets",
     "pointsBody": "Hospitals, pharmacies, police, drinking water and shelters, and every street in search.",
     "wifiHint": "Best on Wi‑Fi with the phone charging. You can keep using the app meanwhile.",
-    "routingUnknown": "Couldn't check while offline. Try again once you're online."
+    "routingUnknown": "Couldn't check while offline. Try again once you're online.",
+    "regionsTitle": "Regions",
+    "regionsBody": "Each region brings its map, its navigation and its emergency points. Download yours and add others any time.",
+    "allRegions": "All of {{name}}",
+    "onPhone": "On this phone",
+    "chooseRegion": "Choose at least one region",
+    "removeRegion": "Delete {{name}}",
+    "crossRegions": "Routes from one region to another go in a straight line."
+  },
+  "parts": {
+    "us-west": {
+      "name": "West",
+      "states": "California, Washington, Oregon, Nevada, Arizona, Utah, Colorado, New Mexico, Idaho, Montana and Wyoming"
+    },
+    "us-midwest": {
+      "name": "Midwest",
+      "states": "Illinois, Ohio, Michigan, Indiana, Wisconsin, Minnesota, Iowa, Missouri, Kansas, Nebraska and the Dakotas"
+    },
+    "us-northeast": {
+      "name": "Northeast",
+      "states": "New York, Pennsylvania, New Jersey, Massachusetts, Connecticut, Rhode Island, Vermont, New Hampshire and Maine"
+    },
+    "us-south": {
+      "name": "South",
+      "states": "Texas, Florida, Georgia, the Carolinas, Virginia, Tennessee, Alabama, Louisiana, Kentucky, Maryland, Washington, D.C. and more"
+    },
+    "us-alaska": {
+      "name": "Alaska",
+      "states": ""
+    },
+    "us-hawaii": {
+      "name": "Hawaii",
+      "states": ""
+    }
   }
 }

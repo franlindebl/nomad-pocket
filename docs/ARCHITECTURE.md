@@ -504,7 +504,20 @@ without a prebuilt map, a dry-run estimate); `downloadCountry` checks room for e
 then queues the prebuilt map (`downloadCountryMap`) or starts the extraction fallback, and
 the packs (`downloadPack`). `useCountries` groups installed items and downloads in flight by
 country (one row: size, combined progress, failed → retry); `removeCountry` cancels and
-deletes both. Maps that aren't a country (older community/state or visible-area maps) are
+deletes both. **Countries in regions** (docs/COUNTRY_REGIONS_PLAN.md: the USA in us-west,
+us-midwest, us-northeast, us-south, us-alaska, us-hawaii): once the maps catalog has regional
+maps (`id` us-west, `regionId` us), `countryParts` (country-core) makes each region a part with
+its map and pack(s), and `CountryOffer.regions` lists them (null for every other country; until
+the first regional maps are published the USA stays one part: whole map, every pack). Map
+items and files are keyed by the map's id (`map-us-west`, `us-west.pmtiles`; the same as the
+country's for every other country). The regions to download (`planCountry`/`downloadCountry`
+`regions`) are picked in `RegionList` (country sheet and onboarding kit; a whole-country
+shortcut ticks them all); `useChosenRegions` ticks the one the person is in (`partAt`: the
+pack's 1° cells, else the map's bbox, from a fix at most 10 min old; the location is asked
+for there, only for such a country). Without `regions`, a retry or an update covers the
+regions on the phone or on their way. `CountryState.maps`/`regions` list them;
+`removeCountryRegion` deletes one (the last one takes the country). A route between two
+regions is a straight line (one pack must cover both ends, as between countries). Maps that aren't a country (older community/state or visible-area maps) are
 listed as "Otros mapas". **Prebuilt maps**: `.github/workflows/country-packages.yml` (monthly, or by hand with a
 country list and `parts` = all / maps / routing; one job per country builds its routing pack
 first, see Routing, then its map, and the run publishes both catalogs and prunes both families

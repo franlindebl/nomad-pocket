@@ -7,6 +7,7 @@ import { Badge, IconBadge, IconButton, ListGroup, ListRow, ProgressBar, Screen, 
 import { removeItem } from '@/features/content/items';
 import { NotEnoughStorageError } from '@/features/downloads/manager';
 import { countryOffer, downloadCountry, planCountry, removeCountry, retryCountry, useCountries, type CountryState } from '@/features/maps/countries';
+import { countryRegionName } from '@/features/maps/country-maps';
 import { useMapUi } from '@/features/maps/store';
 import { useMapItems } from '@/features/maps/useMapSources';
 import { formatBytes } from '@/lib/format';
@@ -40,7 +41,7 @@ export default function MapsSheet() {
     const offer = countryOffer(c.regionId);
     if (!offer) return;
     // A prebuilt map resumes from the parts on disk; an on-device extraction needs its estimate again.
-    if (!offer.map && !c.map) {
+    if (!offer.regions && !offer.map && !c.map) {
       router.push({ pathname: '/maps/download', params: { regionId: c.regionId } });
       return;
     }
@@ -78,7 +79,14 @@ export default function MapsSheet() {
     if (c.progress !== null) return t('regions.downloadingPct', { pct: Math.round(c.progress * 100) });
     if (c.failed) return t('regions.failed');
     if (c.update) return t('regions.updateAvailable');
-    const what = !c.map ? t('regions.routingOnly') : c.packs.length ? t('regions.withRouting') : t('regions.mapOnly');
+    // A country in regions: which ones ("Sur, Noreste").
+    const what = c.regions.length
+      ? c.regions.map(countryRegionName).join(', ')
+      : !c.map
+        ? t('regions.routingOnly')
+        : c.packs.length
+          ? t('regions.withRouting')
+          : t('regions.mapOnly');
     return [what, formatBytes(c.sizeBytes), dataDate(c.buildDate, i18n.language)].filter(Boolean).join(' · ');
   };
 
@@ -95,7 +103,15 @@ export default function MapsSheet() {
             leading={<IconBadge icon={MapIcon} hue="maps" />}
             title={c.title}
             subtitle={subtitle(c)}
-            onPress={c.map ? () => show(c.map?.meta.bbox) : undefined}
+            onPress={
+              // A country in regions opens its regions (add or delete one); any other shows its map.
+              c.regions.length
+                ? () => router.push({ pathname: '/maps/download', params: { regionId: c.regionId } })
+                : c.map
+                  ? () => show(c.map?.meta.bbox)
+                  : undefined
+            }
+            chevron={c.regions.length > 0 && c.progress === null}
             trailing={c.progress !== null ? <ProgressBar value={c.progress} style={{ width: 56 }} /> : undefined}
             trailingAction={
               c.failed ? (

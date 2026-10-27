@@ -2,11 +2,12 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { AlertTriangle, Check, WifiOff } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Button, Card, Row, Text } from '@/components/ui';
 import { NotEnoughStorageError } from '@/features/downloads/manager';
-import { downloadCountry, useCatalogsState, useCountryOffer, useCountrySize } from '@/features/maps/countries';
+import { downloadCountry, useCatalogsState, useChosenRegions, useCountryOffer, useCountrySize } from '@/features/maps/countries';
+import { RegionList } from '@/features/maps/RegionList';
 import { formatBytes } from '@/lib/format';
 import { freeBytes, hasRoomFor } from '@/lib/storage';
 import { space, useTheme } from '@/theme';
@@ -29,29 +30,37 @@ function Includes({ title, body, missing }: { title: string; body: string; missi
 
 /**
  * One country, everything in it: the map at full detail, offline navigation where a
- * pack exists, emergency points and street names (docs/UX_SURVIVAL_PLAN.md).
+ * pack exists, emergency points and street names (docs/UX_SURVIVAL_PLAN.md). A country in
+ * regions lists them (RegionList); `mode=choose` (the onboarding kit) only picks them.
  */
 export default function CountryDownloadSheet() {
   const { t } = useTranslation('maps');
   const { colors } = useTheme();
-  const { regionId, from } = useLocalSearchParams<{ regionId?: string; from?: string }>();
+  const { regionId, from, mode } = useLocalSearchParams<{ regionId?: string; from?: string; mode?: string }>();
   const offer = useCountryOffer(regionId);
-  const size = useCountrySize(offer);
+  const chosen = useChosenRegions(offer, true);
+  const size = useCountrySize(offer, offer?.regions ? (chosen ?? []) : undefined);
   const catalogs = useCatalogsState();
   const [error, setError] = useState<string | null>(null);
 
   if (!offer) return null;
+  const choosing = mode === 'choose';
+  const noRegion = !!offer.regions && !chosen?.length;
   const total = size.status === 'ready' ? size.bytes : null;
   // Room for the download plus its assembly copies and the rest of the queue (planCountry).
   const needed = size.status === 'ready' ? size.needed : null;
   const enough = needed === null || hasRoomFor(needed);
   const failed = size.status === 'offline' || size.status === 'error' ? size : null;
-  const loading = size.status === 'loading';
-  const zoom = offer.map?.maxZoom ?? offer.fallbackZoom;
+  const loading = size.status === 'loading' || (!!offer.regions && chosen === undefined);
+  const zoom = offer.map?.maxZoom ?? offer.regions?.find((p) => p.map)?.map?.maxZoom ?? offer.fallbackZoom;
 
   const start = () => {
+    if (choosing) {
+      router.back();
+      return;
+    }
     try {
-      downloadCountry(offer, size.status === 'ready' ? size.estimate : undefined);
+      downloadCountry(offer, size.status === 'ready' ? size.estimate : undefined, { regions: offer.regions ? chosen : undefined });
       // From the picker: back to the list of maps, where its progress shows.
       if (from === 'pick') router.dismissTo('/maps/regions');
       else router.back();
@@ -62,7 +71,7 @@ export default function CountryDownloadSheet() {
   };
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.bg, paddingBottom: space.xl }]}>
+    <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={[styles.root, { paddingBottom: space.xl }]}>
       <Text variant="title2" align="center" numberOfLines={2}>
         {offer.title}
       </Text>
@@ -77,6 +86,8 @@ export default function CountryDownloadSheet() {
         />
         <Includes title={t('country.points')} body={t('country.pointsBody')} />
       </Card>
+
+      {offer.regions ? <RegionList offer={offer} chosen={chosen} /> : null}
 
       <Card style={{ gap: space.xs }}>
         <Text variant="overline" color="textSecondary">
@@ -124,8 +135,16 @@ export default function CountryDownloadSheet() {
 
       <Button
         testID="country-download"
-        title={total !== null ? t('download.action', { size: formatBytes(total) }) : t('common:actions.download')}
-        disabled={loading || !!failed || total === null || !enough}
+        title={
+          choosing
+            ? t('common:actions.done')
+            : noRegion
+              ? t('country.chooseRegion')
+              : total !== null
+                ? t('download.action', { size: formatBytes(total) })
+                : t('common:actions.download')
+        }
+        disabled={!choosing && (loading || noRegion || !!failed || total === null || !enough)}
         onPress={start}
         size="lg"
         fullWidth
@@ -133,7 +152,7 @@ export default function CountryDownloadSheet() {
       <Text variant="caption" color="textTertiary" align="center">
         {t('country.wifiHint')}
       </Text>
-    </View>
+    </ScrollView>
   );
 }
 

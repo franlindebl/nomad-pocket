@@ -5,10 +5,12 @@ import {
   countryGroupId,
   countryNeed,
   countryOfGroup,
+  countryParts,
   isNewer,
   mapAssetUrl,
   packOutdated,
   parseMapsManifest,
+  partAt,
   pendingBytes,
   routePacksFor,
   type PlannedArchive,
@@ -156,4 +158,41 @@ test('isNewer and packOutdated compare build dates and the engine', () => {
   assert.ok(packOutdated({ buildDate: '20261105', valhalla: '3.8.0' }, { buildDate: '20261105' }));
   // No version recorded: the packs of that time, all 3.9.1.
   assert.ok(!packOutdated({ buildDate: '20261105' }, { buildDate: '20261105' }));
+});
+
+test('countryParts: a country is one part until the catalog has maps of its regions', () => {
+  const packs = [
+    { id: 'us-west', regionId: 'us' },
+    { id: 'us-south', regionId: 'us' },
+    { id: 'es', regionId: 'es' },
+  ];
+  // The catalog of an earlier run: the whole USA map, its regional packs.
+  const whole = countryParts('us', [{ id: 'us', regionId: 'us' }], packs);
+  assert.deepEqual(
+    whole.map((p) => [p.id, p.map?.id, p.packs.map((x) => x.id)]),
+    [['us', 'us', ['us-west', 'us-south']]],
+  );
+  // Regional maps: one part per region, a region without its map yet still listed.
+  const split = countryParts('us', [{ id: 'us-west', regionId: 'us' }, { id: 'us', regionId: 'us' }, { id: 'es', regionId: 'es' }], [...packs, { id: 'us-alaska', regionId: 'us' }]);
+  assert.deepEqual(
+    split.map((p) => [p.id, p.map?.id ?? null, p.packs.map((x) => x.id)]),
+    [
+      ['us-alaska', null, ['us-alaska']],
+      ['us-south', null, ['us-south']],
+      ['us-west', 'us-west', ['us-west']],
+    ],
+  );
+  assert.deepEqual(
+    countryParts('es', [{ id: 'es', regionId: 'es' }], packs).map((p) => p.id),
+    ['es'],
+  );
+});
+
+test('partAt: the region whose pack has roads there, else whose map covers it', () => {
+  const west = { id: 'us-west', map: { bbox: [-125, 31, -102, 49] as const }, packs: [{ bbox: [-125, 31, -102, 49] as [number, number, number, number], cells: [] }] };
+  const alaska = { id: 'us-alaska', map: { bbox: [-179, 51, -130, 71] as const }, packs: [] };
+  const parts = [west, alaska] as unknown as Parameters<typeof partAt>[0];
+  assert.equal(partAt(parts, { lat: 37.77, lon: -122.42 })?.id, 'us-west');
+  assert.equal(partAt(parts, { lat: 61.2, lon: -149.9 })?.id, 'us-alaska');
+  assert.equal(partAt(parts, { lat: 40.4, lon: -3.7 }), null);
 });
