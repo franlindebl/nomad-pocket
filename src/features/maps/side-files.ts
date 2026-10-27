@@ -134,7 +134,9 @@ async function importOnce(kind: SideKind, name: string, item: string, run: (file
   }
   all[key] = { item, attempts };
   save(all);
+  const start = Date.now();
   await run(file);
+  console.log(`[dltrace] import ${name} ${Date.now() - start} ms`);
   // A newer copy landed meanwhile: it is imported next, from a clean count.
   if (again.has(key)) {
     const fresh = load();

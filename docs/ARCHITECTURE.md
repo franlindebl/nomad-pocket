@@ -257,16 +257,24 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
   connection budget (below).
 - **Connection budget** (`budget-core.ts`, pure; sampled in `manager.ts` every 2 s while
   something runs): one budget of connections for every URL download (a single transfer counts
-  one). Wi-Fi starts at 8 (4–16), mobile data at 4 (2–6); a change of network type resets it.
-  Every 10 s window in which the downloads used it all, it tries +2 and keeps them only if the
-  total speed grew ≥ 15 % (the noise between windows is ~5–8 %), else gives them back and waits 1 min. A window in which a download
-  started or ended (hashing, probing dip the speed), or that began less than 5 s after such a
-  change (new transfers still ramping up), decides nothing. Up to 6 files run at once on Wi-Fi
+  one). Wi-Fi starts at 16 (8–32), mobile data at 4 (2–6); a change of network type resets it.
+  Every 10 s window in which the downloads used it all, it tries +4 and keeps them unless the
+  total speed fell below 90 % of the speed before, else gives them back and waits 1 min (it used
+  to keep them only on a ≥ 15 % gain: past 14 connections 2 more can't give that, and the mirrors
+  swing ±40 % between windows, so on a phone it sat at 10–14). A window in which a download
+  started or ended (hashing, probing dip the speed), that began less than 5 s after such a
+  change (new transfers still ramping up), or that spans an iOS suspension, decides nothing. Up to 6 files run at once on Wi-Fi
   (2 on mobile data), at most 2 still choosing their sources, and at most 2 from one
   single-host source (`hostHasRoom`: a country's GitHub parts share that host's connections,
   so a third part would only take a slot from a kit's Kiwix archives, which spread over many
   mirrors; the queue then starts a later file instead). Each segmented download takes what the
   others leave, or only its fair part while another wants more (`connectionsFor`).
+- **CDN files first** (`yieldsToCdn`): a Kiwix archive of 1 GB or more doesn't start while the
+  GitHub / Hugging Face files running or ready to start still have 300 MB or more to fetch. All
+  ranges to one of those hosts travel in **one HTTP/2 connection** (URLSession and OkHttp
+  multiplex them), which on a full line gets about one connection's share next to 20+ to the
+  mirrors (an iPhone: Spain's map at ~7 MB/s for 5.5 min beside Wikipedia, 57 MB/s alone).
+  One after the other the total is the same, and the map and its search imports come first.
 - **Wi-Fi only is enforced in the manager**, not by callers (`manager-core.ts`, pure):
   `networkGate()` reads `expo-network` (state + listener; reads carry a sequence number so a
   late iOS answer can't undo a newer one) and the setting. A held record stays `queued` and the
@@ -293,10 +301,14 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
   file is ≥ 16 MB, of known exact size, and its sources answer ranges with 206. Ranges of
   4–32 MiB (~48 per file, whole metalink pieces), each a `DownloadTask` with a `Range` header
   into `partial/<id>.chunks/<start>-<end>.<n>`. Connections come from the budget; per host at
-  most 3 to a Kiwix mirror and 6 to a single URL, summed over every download.
+  most 3 to a Kiwix mirror and 12 to a single URL, summed over every download.
+  On iOS the ranges run in the **in-process (foreground) URLSession while the app is open**: in
+  the background session (nsurlsessiond) an iPhone 14 Pro got ~25–45 MB/s in all on a 66 MB/s
+  Wi-Fi and ranges waited at 0 % for 1–3 min. A range with no byte for 15 s (`STALL_MS`, checked
+  every 5 s) is cancelled and counts as an error of its source.
   A free connection takes the lowest missing range and the source whose connections measured
   fastest (moving average; an unmeasured mirror gets one range to prove itself; sources under
-  10 % of the best get none). Two errors in a row bench a source for 2 min; a 4xx or a server
+  25 % of the best get none: the default Kiwix mirror, 0.4 MB/s, held the head for ~90 s). Two errors in a row bench a source for 2 min; a 4xx or a server
   ignoring `Range` (iOS accepts any 2xx: the guard cancels when `totalBytes` isn't the range's
   length) rules it out; 6 failures in a row with no progress end the run, and
   `planAfterFailure` takes over. When nothing new can start and the range the file waits for
@@ -307,8 +319,11 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
   rules its mirror out and is fetched again, more than 3 fail the download). So the `.part`
   is always a verified prefix (`validPrefix`: whole chunks only) and, with the range files
   already on disk, the whole resume state: nothing in `pause_state`, `meta.segments` holds
-  size and chunk size. Ranges may finish up to 1 GiB past the prefix (less when the disk is
-  short). Pause/hold = cancel the ranges in flight; resume = schedule the missing ones.
+  size and chunk size. Ranges may finish up to 2 GiB past the prefix (less when the disk is
+  short; 1 GiB filled behind one slow range with 16+ connections). Pause/hold = cancel the ranges
+  in flight; resume = schedule the missing ones. When every piece was checked in this run
+  (`piecesChecked`: metalink pieces for the whole file, started from zero) the whole-file sha-256
+  is skipped (`meta.piecesChecked`): it added 10 s for 13 GB at the very end.
 - Everything else (small files, no ranges, a record paused with iOS resume data) is one
   `DownloadTask` from the best source, `sessionType: 'background'` (iOS keeps going in the
   background). A `.part` written segmented never continues as a single transfer (its bytes
@@ -329,10 +344,19 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
   `.part` path follows iOS container moves.
 - Android stops transfers with the process: on background the manager pauses running
   tasks and stores their resume data (segmented ones: cancels their ranges), and pumps the
-  queue again on foreground. iOS: ranges run in the background `URLSession`; when the app goes
-  to the background a segmented download queues up to 4 bigger ranges (256 MiB) as a reserve,
-  and acknowledges each finished range (`deferBackgroundSessionCompletion`) only after it
-  started the next ones, so a background wake-up keeps it going.
+  queue again on foreground. iOS: when the app turns `inactive` (just before it leaves the
+  screen) a segmented download queues up to 4 bigger ranges (256 MiB) in the background
+  `URLSession` as a reserve (`prepareBackground`): a background-session task created once the app
+  is in the background is discretionary, and that reserve got no byte in 100 s on an iPhone on
+  power and Wi-Fi. On `background` its foreground ranges are dropped; each finished background
+  range is acknowledged (`deferBackgroundSessionCompletion`) only after it started the next ones,
+  so a background wake-up keeps it going. Back in the foreground, background ranges that never
+  started are dropped without blaming their mirror. Measured: ~1 GB in 2 min of background, full
+  speed again ~10 s after the return.
+- **Field traces** (`trace.ts`): `[dltrace]` lines in the system log (also in Release; on a
+  phone `idevicesyslog -p NomadPocket`): each file's start, source choice, move, hash and
+  install times, and every 10 s the total speed, connections and each segmented download's
+  state (ranges in flight, waiting behind the prefix, the head range, per-mirror slots).
 - Relaunch: downloads with stored resume data (paused, or snapshotted on Android
   background) resume; segmented ones continue from their `.part` prefix and range files,
   even after iOS terminated the app (the orphaned range tasks fetch at most what was in

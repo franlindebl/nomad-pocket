@@ -131,6 +131,18 @@ Unit tests import with `.ts` extensions and no `@/` aliases (Node loads them dir
   log while you reproduce. A kill for memory leaves no app crash report: look for
   `NomadPocket … killed by jetsam reason per-process-limit` in the log.
   (`xcrun devicectl` needs Developer Mode on the phone.)
+- A Release build on the owner's phone (Developer Mode on; a new phone must first be paired,
+  `xcrun devicectl manage pair --device <udid>`, before the Developer Mode switch appears in
+  Settings): `xcodebuild build -workspace ios/NomadPocket.xcworkspace -scheme NomadPocket
+  -configuration Release -destination 'id=<udid>' -derivedDataPath ios/build/dd-device
+  -packageAuthorizationProvider netrc DEVELOPMENT_TEAM=F3VY6C7GKX CODE_SIGN_STYLE=Automatic
+  -allowProvisioningUpdates -allowProvisioningDeviceRegistration` plus the App Store Connect key
+  flags (`docs/RELEASE.md`), then `xcrun devicectl device install app --device <udid>
+  ios/build/dd-device/Build/Products/Release-iphoneos/NomadPocket.app` and `xcrun devicectl device
+  process launch --device <udid> com.fjlinde.nomadpocket`. Downloads write `[dltrace]` lines
+  (per-file phases, total speed every 10 s): `idevicesyslog -u <udid> -p NomadPocket | grep
+  dltrace`. CFNetwork's `summary for task` lines in the same log give each request's TCP
+  connection and protocol (how the HTTP/2 multiplexing of GitHub ranges was found).
 - Simulator app data: `xcrun simctl get_app_container booted com.fjlinde.nomadpocket data`
   → `Documents/content/…`; the databases are in `Library/Application Support/SQLite/nomad.db` (user data;
   open it with `sqlite3`) and `Documents/content/index/search.db` (map search index and emergency points). Drop a

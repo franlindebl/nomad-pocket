@@ -10,10 +10,13 @@
 // reattach its background transfers), the download continues from it and from the range files
 // already on disk. A corrupt piece costs one range, refetched from another mirror.
 //
-// iOS: the ranges run in the background URLSession, so the ones in flight finish while the
-// app is suspended. When the app leaves the foreground, a few bigger ranges are queued as a
-// reserve to keep it downloading, and each finished one is acknowledged only after the next
-// ranges were started (deferBackgroundSessionCompletion), so a wake-up keeps the chain going.
+// iOS: while the app is open the ranges run in the in-process (foreground) URLSession. In the
+// background session (nsurlsessiond) an iPhone 14 Pro on a 66 MB/s Wi-Fi got ~25–45 MB/s in
+// all, and ranges waited at 0 % for minutes. When the app leaves the foreground, the ranges in
+// flight are dropped (iOS suspends that session) and a few bigger ranges are queued in the
+// background session as a reserve to keep it downloading; each finished one is acknowledged
+// only after the next ranges were started (deferBackgroundSessionCompletion), so a wake-up
+// keeps the chain going. A range that gets no byte for 15 s is fetched again (STALL_MS).
 import { Directory, DownloadTask, File } from 'expo-file-system';
 import { Platform } from 'react-native';
 
@@ -34,6 +37,7 @@ import {
   progressBytes,
   sortChunkFiles,
   sourceFailed,
+  stalledJobs,
   startJob,
   stuck,
   validPrefix,
@@ -48,6 +52,8 @@ const RESERVE_CHUNKS = 8;
 /** Corrupt pieces tolerated (each rules its mirror out) before the download gives up. */
 const MAX_CORRUPT = 3;
 const PROGRESS_MS = 250;
+/** How often stalled ranges are looked for. */
+const WATCHDOG_MS = 5000;
 
 export type SegmentedInput = {
   partial: File;
@@ -96,6 +102,9 @@ export class SegmentedTransfer {
   private settled = false;
   private background = false;
   private timer: ReturnType<typeof setTimeout> | null = null;
+  private watchdog: ReturnType<typeof setInterval> | null = null;
+  /** Ranges in flight in the in-process session (iOS suspends it with the app). */
+  private foreground = new Set<string>();
   private lastReport = 0;
   private lastError = '';
   private corrupt = 0;
@@ -120,6 +129,7 @@ export class SegmentedTransfer {
         return;
       }
       running.add(this);
+      this.watchdog = setInterval(this.unstall, WATCHDOG_MS);
       this.started = { at: Date.now(), bytes: progressBytes(this.s) };
       // One line per run, for field reports: where it resumes from and how the sources measured.
       const mb = (n: number) => (n / 1e6).toFixed(1);
@@ -139,6 +149,31 @@ export class SegmentedTransfer {
   /** Connections this download holds. */
   connections(): number {
     return this.s?.jobs.length ?? 0;
+  }
+
+  /** For field traces: ranges in flight (duplicates), finished ones waiting behind the prefix, and the slowest connection's age. */
+  describe(): string {
+    const s = this.s;
+    if (!s) return 'loading';
+    const now = Date.now();
+    const dups = s.jobs.filter((j) => j.duplicate).length;
+    const ahead = s.ready.reduce((n, r) => n + (r.end - r.start), 0);
+    const head = s.jobs.find((j) => j.start === s.prefix);
+    return (
+      `${s.jobs.length}${dups ? `(+${dups}dup)` : ''} conns, ${s.ready.length} waiting ${(ahead / 1e6).toFixed(0)} MB` +
+      (head ? `, head ${head.source.host} ${((now - head.startedAt) / 1000).toFixed(0)} s ${((head.bytes / (head.end - head.start)) * 100).toFixed(0)}%` : '') +
+      ` [${s.sources.map((x) => `${x.host.split('.').slice(-2, -1)[0]}:${x.inFlight}${x.bad ? 'x' : x.benchedUntil > now ? 'b' : ''}`).join(' ')}]`
+    );
+  }
+
+  /**
+   * Every byte of the file was checked against the metalink's piece hashes as it was appended,
+   * in this run (a prefix from an earlier run may not have been): the whole-file sha-256 after
+   * it adds nothing but time (10 s for 13 GB on an iPhone 14 Pro, at the end of everything).
+   */
+  get piecesChecked(): boolean {
+    const p = this.pieces;
+    return !!p && this.started.bytes === 0 && p.sha1.length === Math.ceil(this.o.size / p.length);
   }
 
   /** It would use another connection now if the budget gave it one. */
@@ -164,10 +199,46 @@ export class SegmentedTransfer {
     this.done(null);
   }
 
-  /** iOS: the app leaves the foreground. Queue bigger ranges that run while it is suspended. */
+  /**
+   * iOS: the app is about to leave the foreground (inactive). The reserve is queued now: a
+   * background-session task created once the app is in the background is discretionary, and on
+   * an iPhone the reserve queued then got no byte in 100 s of background, on power and Wi-Fi.
+   */
+  prepareBackground() {
+    if (this.background) return;
+    this.background = true;
+    if (this.s) this.tick();
+  }
+
+  /** iOS: the app leaves the foreground, or comes back to it. */
   setBackground(background: boolean) {
-    if (this.background === background) return;
-    this.background = background;
+    if (background) {
+      this.background = true;
+      // Its ranges would freeze with the app: the background session takes over from here.
+      if (this.s) {
+        for (const job of this.s.jobs.filter((j) => this.foreground.has(j.key))) {
+          this.drop(job.key);
+          jobStopped(this.s, job);
+        }
+      }
+    } else {
+      if (!this.background) return;
+      this.background = false;
+      if (this.s) {
+        const now = Date.now();
+        for (const job of [...this.s.jobs]) {
+          // Never started in the background (iOS held it): not the mirror's fault, and it would
+          // hold one of the mirror's slots for nothing.
+          if (!this.foreground.has(job.key) && job.bytes === 0) {
+            this.drop(job.key);
+            jobStopped(this.s, job);
+          } else {
+            // Got no events while the app was suspended: not stalled.
+            job.progressAt = Math.max(job.progressAt, now);
+          }
+        }
+      }
+    }
     // Before run() (iOS launched the app in the background for its session) the flag is enough.
     if (this.s) this.tick();
   }
@@ -191,6 +262,8 @@ export class SegmentedTransfer {
     const wasRunning = running.delete(this);
     this.stopped = true;
     if (this.timer) clearTimeout(this.timer);
+    if (this.watchdog) clearInterval(this.watchdog);
+    this.watchdog = null;
     for (const task of this.tasks.values()) {
       try {
         task.cancel();
@@ -272,6 +345,21 @@ export class SegmentedTransfer {
     this.report(true);
   };
 
+  /** Ranges that got no byte for a while: dropped and fetched again (from a better source if there is one). */
+  private unstall = () => {
+    if (this.stopped || !this.s || this.background) return;
+    const now = Date.now();
+    const stalled = stalledJobs(this.s, now);
+    if (!stalled.length) return;
+    for (const job of stalled) {
+      console.log(`[dltrace] stalled ${this.o.partial.name} ${job.source.host} ${job.start}: ${job.bytes} bytes in ${((now - job.startedAt) / 1000).toFixed(0)} s`);
+      this.drop(job.key);
+      jobFailed(this.s, job, now, 'error');
+    }
+    this.tick();
+    wakeOthers(this);
+  };
+
   private report(force = false) {
     const now = Date.now();
     if (!force && now - this.lastReport < PROGRESS_MS) return;
@@ -285,10 +373,12 @@ export class SegmentedTransfer {
     if (file.exists) file.delete();
     const len = job.end - job.start;
     let ignoredRange = false;
+    const foreground = !this.background;
+    if (foreground) this.foreground.add(job.key);
     const task = new DownloadTask(job.source.url, file, {
       headers: { Range: `bytes=${job.start}-${job.end - 1}` },
-      sessionType: 'background',
-      deferBackgroundSessionCompletion: true,
+      sessionType: foreground ? 'foreground' : 'background',
+      deferBackgroundSessionCompletion: !foreground,
       onProgress: ({ bytesWritten, totalBytes }) => {
         // An exception thrown from a native event callback is fatal in release builds.
         try {
@@ -299,7 +389,9 @@ export class SegmentedTransfer {
             task.cancel();
             return;
           }
-          job.bytes = Number(bytesWritten);
+          const bytes = Number(bytesWritten);
+          if (bytes > job.bytes) job.progressAt = Date.now();
+          job.bytes = bytes;
           this.report();
         } catch (e) {
           console.warn('[downloads] range progress', e);
@@ -310,6 +402,7 @@ export class SegmentedTransfer {
     task.downloadAsync().then(
       (got) => {
         this.tasks.delete(job.key);
+        this.foreground.delete(job.key);
         if (this.stopped) return;
         if (!got) jobStopped(this.s, job);
         else if (Number(got.size ?? 0) !== len) {
@@ -323,10 +416,11 @@ export class SegmentedTransfer {
         this.tick();
         wakeOthers(this);
         // The next ranges are started: iOS may suspend the app again.
-        task.acknowledgeBackgroundCompletionAsync().catch(() => {});
+        if (!foreground) task.acknowledgeBackgroundCompletionAsync().catch(() => {});
       },
       (e) => {
         this.tasks.delete(job.key);
+        this.foreground.delete(job.key);
         if (this.stopped || !this.s.jobs.includes(job)) return;
         const error = String((e as Error)?.message ?? e);
         // Android writes as it goes: a failed range leaves part of its file.
@@ -345,6 +439,7 @@ export class SegmentedTransfer {
   private drop(key: string) {
     const task = this.tasks.get(key);
     this.tasks.delete(key);
+    this.foreground.delete(key);
     try {
       task?.cancel();
     } catch {

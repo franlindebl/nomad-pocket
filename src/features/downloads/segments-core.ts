@@ -34,13 +34,23 @@ const EMA = 0.4;
 /** A source failing this many times in a row rests for BENCH_MS. */
 const BENCH_AFTER = 2;
 const BENCH_MS = 2 * 60 * 1000;
-/** A source this much slower than the best one gets no work. */
-const SLOW_RATIO = 0.1;
+/**
+ * A source this much slower than the best one gets no work. (0.1 let the default Kiwix mirror,
+ * 0.4 MB/s against 6, take 3 ranges at once on a phone: each held the head for ~90 s.)
+ */
+const SLOW_RATIO = 0.25;
 /** A range in flight is fetched again elsewhere once it would take this many times longer there. */
 const DUP_RATIO = 3;
 /** A range in flight says how fast its source is once it ran this long. */
 const LIVE_MIN_MS = 3000;
 const DUP_MIN_MS = 8000;
+/**
+ * A range that got no byte for this long is given up (an error for its source) and fetched
+ * again. Seen on an iPhone: ranges sat at 0 % for 1–3 minutes (a mirror holding the
+ * connection, or iOS queueing it), the 2 GiB window behind the head filled and the download
+ * fell to 2–4 connections until it landed, again and again.
+ */
+export const STALL_MS = 15_000;
 /** Failures in a row, over every source, without a byte of progress: the download stops (the manager retries). */
 export const GIVE_UP_AFTER = 6;
 
@@ -65,6 +75,8 @@ export type Job = Range & {
   source: SegSource;
   startedAt: number;
   bytes: number;
+  /** When its last byte arrived (its start until then). */
+  progressAt: number;
   /** A second fetch of a range already in flight (the first to finish wins). */
   duplicate: boolean;
 };
@@ -240,7 +252,7 @@ function duplicateJob(s: SegState, now: number, headOnly: boolean): NextJob | nu
 }
 
 export function startJob(s: SegState, next: NextJob, now: number): Job {
-  const job: Job = { ...next, key: chunkKey(next, ++s.seq), startedAt: now, bytes: 0 };
+  const job: Job = { ...next, key: chunkKey(next, ++s.seq), startedAt: now, bytes: 0, progressAt: now };
   next.source.inFlight++;
   s.jobs.push(job);
   return job;
@@ -294,6 +306,11 @@ export function sourceFailed(s: SegState, src: SegSource, now: number, why: 'err
     src.benchedUntil = now + BENCH_MS;
     src.errors = 0;
   }
+}
+
+/** Ranges that got no byte for STALL_MS: to cancel and count as errors of their sources. */
+export function stalledJobs(s: SegState, now: number): Job[] {
+  return s.jobs.filter((j) => now - j.progressAt >= STALL_MS);
 }
 
 /** A job stopped without an outcome (paused, cancelled): its source's slot is free again. */
