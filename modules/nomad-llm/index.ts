@@ -1,4 +1,4 @@
-// JS API of the system-model bridge (Apple Foundation Models). iOS only: Android has no
+// JS API of the system-model bridge (Apple Foundation Models, and the on-device dictation check). iOS only: Android has no
 // system model in this app. Gemini Nano is reachable only through Google's proprietary
 // ML Kit GenAI library, which can't ship inside this GPL-3 APK (next to libkiwix) and sends
 // usage data to Google; Android users get the downloadable GGUF models instead.
@@ -61,6 +61,15 @@ export async function route(prompt: string, instructions: string): Promise<Route
   if (!NomadLlm) throw new Error('System model not available');
   const r = await NomadLlm.route(prompt, instructions);
   return { search: !!r.search, query: String(r.query ?? '') };
+}
+
+/** iOS only: whether dictation in `locale` stays on the device (false where the module isn't linked). */
+export function supportsOnDeviceDictation(locale: string): boolean {
+  try {
+    return NomadLlm?.supportsOnDeviceDictation(locale) ?? false;
+  } catch {
+    return false;
+  }
 }
 
 export function cancel(requestId: string) {

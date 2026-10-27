@@ -1,5 +1,7 @@
 {
   "ios": {
-    "NSLocationWhenInUseUsageDescription": "Nomad Pocket uses your location to show you on the offline maps, measure distances and guide you to places and emergency points."
+    "NSLocationWhenInUseUsageDescription": "Nomad Pocket uses your location to show you on the offline maps, measure distances and guide you to places and emergency points.",
+    "NSMicrophoneUsageDescription": "Nomad Pocket uses the microphone only when you tap the dictate button in the assistant, to type your question by voice. The audio is processed on your device and is never stored or sent.",
+    "NSSpeechRecognitionUsageDescription": "Nomad Pocket turns your voice into text on your device, offline, when you dictate a question to the assistant."
   }
 }

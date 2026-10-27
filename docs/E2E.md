@@ -270,6 +270,7 @@ By hand:
 | assistant | `ai-05-conversations` | AI-05 | nightly | Apple Intelligence |
 | assistant | `ai-06-conversation` | AI-06 | nightly | seeded, Apple Intelligence |
 | assistant | `ai-07-gguf-tools` | AI-07 | nightly | seeded, seeded-model |
+| assistant | `ai-08-dictation` | AI-08 | nightly | — (microphone shown; not tapped: the simulator's audio input aborts the app) |
 | downloads | `dl-02-controls` | DL-02 | nightly | network |
 | prepare | `prep-01-plan` | PREP-01 | smoke | — |
 | prepare | `prep-02-kit` | PREP-02 | smoke | — |
@@ -337,6 +338,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `lesson-<n>`, `lesson-check-<n>` | course lesson (1-based) and its done check |
   | `marker-name`, `marker-note` | fields of the place sheet |
   | `marker-delete`, `region-delete`, `conversation-delete` | delete buttons in lists |
+  | `composer-mic` | assistant composer: dictate / stop listening |
   | `map-search`, `map-emergency` | map search pill and the red "SOS" (Emergencias) button |
   | `map-points`, `points-show`, `points-<category>` | Puntos (legend) map button, its show-on-map row and one row per category |
   | `search-input`, `search-result`, `search-coordinates` | search sheet field, result rows, "go to coordinates" row |
