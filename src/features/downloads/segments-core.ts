@@ -330,11 +330,3 @@ export function nextWake(s: SegState, now: number): number | null {
   const times = s.sources.filter((x) => !x.bad && x.benchedUntil > now).map((x) => x.benchedUntil);
   return times.length ? Math.min(...times) : null;
 }
-
-/**
- * Connections a download may hold: `total` for the network (more on Wi-Fi than on mobile
- * data), shared by the segmented downloads running at once.
- */
-export function connectionShare(total: number, running: number): number {
-  return Math.max(1, Math.floor(total / Math.max(1, running)));
-}

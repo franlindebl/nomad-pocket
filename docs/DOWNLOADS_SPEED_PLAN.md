@@ -26,8 +26,11 @@ verified on the iOS 27 simulator (Release). The contract now lives in `docs/ARCH
     file. The range the prefix waits for is duplicated as soon as it crawls (3× slower than
     another source would be), not only at the end.
   - Connection caps are **global per host** across downloads (2 archives at once still open ≤ 3
-    to a mirror), plus 8 connections on Wi-Fi / 4 on mobile data shared by the segmented ones.
-    The queue still runs 2 files at a time.
+    to a mirror). How many connections and files run in all is an **adaptive budget**
+    (`budget-core.ts`, added after the owner's question about a 300 Mb/s line): it starts at 8
+    on Wi-Fi, tries +2 whenever the downloads use it all and keeps them only if the total speed
+    grows; spare connections start a 3rd–6th file. On this Mac's ~30 MB/s link it tried 10 and
+    went back to 8 (no gain), as it should; on a faster line with slow mirrors it climbs.
   - Also used for GitHub (maps, packs) and Hugging Face (models), 4 connections per host: every
     range asks the original URL, so expired signed redirects no longer matter, and they resume
     after a kill.
@@ -53,10 +56,8 @@ exposed a bug (fixed) where a transfer was told it was in the background before 
 
 ## Still open
 
-- **Adaptive connection budget** (owner's question, 2026-10-26): instead of 2 files and 8
-  connections, grow the budget while the total speed grows (e.g. +2 connections every ~10 s up
-  to ~16) and back off when it doesn't, starting as many queued files as the budget allows. On a
-  300 Mb/s line (~37 MB/s) with mirrors at 5–8 MB/s per connection, 8 is short.
+- The adaptive budget's gains on a line faster than its first 8 connections are untested here
+  (this Mac's link is the limit): check on the owner's 300 Mb/s Wi-Fi.
 - Real devices: everything above is the simulator on a Mac's link. A phone's Wi-Fi, iOS's
   background-session scheduling (discretionary tasks, per-host limits) and Android's process
   death need checking on hardware (the device spike, items 1–3 and 5).
