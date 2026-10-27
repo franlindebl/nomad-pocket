@@ -271,6 +271,9 @@ commit, tagged `v1.1.0-19`. prep-01 broke with the shorter bottom padding: Maest
 gesture (the simulator shows no on-screen keyboard) landed on "Añadir número" and opened its sheet;
 the flow now taps the "Notas de casa" title instead. map-14 failed once in the full run, on a screen
 from another flow (the assistant), and passed alone.
+Android tour 4/4 with the same commit's APK (versionCode 19, VPN off so download.kiwix.org is
+reachable): android-01 passes with the "N de M" find-bar check. android-04 and -05 first hit an ANR
+on launch while another session booted a second emulator (Mac load average ~50) and passed rerun.
 
 ### 2026-10-27 — Assistant: an answer keeps going when you open another conversation
 
