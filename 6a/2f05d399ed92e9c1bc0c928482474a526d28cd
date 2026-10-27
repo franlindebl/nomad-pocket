@@ -1,0 +1,49 @@
+CLAUDE.md
+  s_dae816423ce6de::t_ef30cf09d241d7 38-39,79,124-126
+docs/ARCHITECTURE.md
+  s_dae816423ce6de::t_0a1d3a48351556 285,304-305,318-324
+docs/DEVELOPMENT.md
+  s_dae816423ce6de::t_e9505c414d3877 128-133
+docs/PROGRESS.md
+  s_dae816423ce6de::t_a27191863ec4f8 225-240
+modules/nomad-files/.gitignore
+  s_dae816423ce6de::t_10e1649b6e00ef 1-3
+modules/nomad-files/android/build.gradle
+  s_dae816423ce6de::t_90a653bb690130 1-15
+modules/nomad-files/android/src/main/java/expo/modules/nomadfiles/NomadFilesModule.kt
+  s_dae816423ce6de::t_f9b31b914f018f 1-81
+modules/nomad-files/expo-module.config.json
+  s_dae816423ce6de::t_f5ddbb7ae2397f 1-9
+modules/nomad-files/index.ts
+  s_dae816423ce6de::t_b40736d09ed29e 1-39
+modules/nomad-files/ios/NomadFiles.podspec
+  s_dae816423ce6de::t_e5468499757c42 1-21
+modules/nomad-files/ios/NomadFilesModule.swift
+  s_dae816423ce6de::t_02c33e248c276f 1-84
+src/data/licenses.json
+  s_dae816423ce6de::t_156c19d5fe70f9 1
+src/features/downloads/manager.ts
+  s_dae816423ce6de::t_8f2d1cc5d38ee2 47,785-787
+src/features/downloads/segmented.ts
+  s_dae816423ce6de::t_11693dc620d9ec 17,20-21,367-372
+src/features/maps/country-maps.ts
+  s_dae816423ce6de::t_a4f369650eac6e 13,29,331-336
+src/features/maps/routing-packs.ts
+  s_dae816423ce6de::t_51c484f16f81cc 14,23,302-307
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6a2f05d399ed92e9c1bc0c928482474a526d28cd",
+  "prompts": {},
+  "sessions": {
+    "s_dae816423ce6de": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b582f6fc-2f40-4b1f-b67a-6a2993dec875",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
