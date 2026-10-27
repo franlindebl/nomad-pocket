@@ -143,11 +143,10 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
    `.places.tsv` / `.addresses.tsv`). Still to measure the import on a real phone (Spain: 1.0 M
    places + 2.2 M doors).
 3. Faster, resumable downloads: built (log 2026-10-26, `docs/DOWNLOADS_SPEED_PLAN.md`); Spanish
-   Wikipedia nopic, 13.3 GB, in 8.6 min on the simulator instead of ~2 h. Next: measure on a
-   real iPhone and Android phone (background session scheduling, Wi-Fi speeds), then the
-   adaptive connection budget (grow past 8 connections / 2 files while total speed grows; the
-   owner has a 300 Mb/s line). Small single-task downloads (< 64 MB) still restart from zero
-   after an iOS kill (BUG-CORE-16), which is cheap now.
+   Wikipedia nopic, 13.3 GB, in 8.6 min on the simulator instead of ~2 h; adaptive connection
+   budget built. Next: measure on a real iPhone and Android phone (background session
+   scheduling, Wi-Fi speeds, the budget on the owner's 300 Mb/s line). Small single-task
+   downloads (< 64 MB) still restart from zero after an iOS kill (BUG-CORE-16), which is cheap now.
 4. Map extraction: resume after a kill (persist the plan + written ranges) and move it off
    the JS thread.
 5. Android release: upload keystore, Play listing + data safety; the Android notices and the Play
@@ -244,7 +243,16 @@ Downloads; what changed from the plan and the measurements in the plan file):
   pause/resume on Home both work. Found and fixed on the way: iOS relaunches the app in the
   background when orphaned range tasks finish, and a transfer told it was in the background
   before loading crashed the run.
-- Not done: real phones; the adaptive connection budget (backlog 3); E2E smoke not run on it.
+- Adaptive connection budget (`budget-core.ts`, pure, 7 tests), after the owner asked about
+  queuing 10 courses on a 300 Mb/s line: one budget for every download, 8 → up to 16 on Wi-Fi
+  while +2 connections raise the total speed ≥ 15 % (windows where a file started or ended, or
+  right after, don't count: they dip the speed and fooled the first version), 3rd–6th files start on spare
+  connections, fair sharing between segmented downloads. On the simulator (link-limited at
+  ~30 MB/s) 12 archives (13 GB) queued in two batches all finished, 2 at a time, at 25–31 MB/s
+  together; the budget tried 10 and went back to 8, but a build with an 8 % threshold also crept
+  up to 16 on noise (+3–7 % per step), hence 15 %. The final version was not re-measured on the
+  simulator (the E2E smoke ran on it).
+- Not done: real phones; the budget on a line faster than the mirrors.
 
 ### 2026-10-26 — Release: 1.1.0 build 13 to TestFlight
 

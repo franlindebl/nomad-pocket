@@ -5,7 +5,6 @@ import {
   appendable,
   appended,
   chunkBytesFor,
-  connectionShare,
   GIVE_UP_AFTER,
   jobDone,
   jobFailed,
@@ -252,11 +251,4 @@ test('bigger ranges for the iOS background session stop where something else cov
   startJob(s, { start: 5 * C, end: 6 * C, source: s.sources[0], duplicate: false }, 0);
   const big = nextJob(s, 0, { maxConns: 8, aheadBytes: 20 * C, chunks: 8 })!;
   assert.deepEqual([big.start, big.end], [0, 5 * C]);
-});
-
-test('connectionShare splits the connections between segmented downloads', () => {
-  assert.equal(connectionShare(8, 1), 8);
-  assert.equal(connectionShare(8, 2), 4);
-  assert.equal(connectionShare(4, 3), 1);
-  assert.equal(connectionShare(8, 0), 8);
 });

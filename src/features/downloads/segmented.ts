@@ -104,6 +104,7 @@ export class SegmentedTransfer {
   private lastReport = 0;
   private lastError = '';
   private corrupt = 0;
+  private wantsMore = false;
   private started = { at: 0, bytes: 0 };
   private pieces?: Pieces;
   private settle!: { resolve: (f: File | null) => void; reject: (e: Error) => void };
@@ -138,6 +139,16 @@ export class SegmentedTransfer {
   /** Connections this download holds to `host`. */
   connectionsTo(host: string): number {
     return this.s?.sources.reduce((n, x) => n + (x.host === host ? x.inFlight : 0), 0) ?? 0;
+  }
+
+  /** Connections this download holds. */
+  connections(): number {
+    return this.s?.jobs.length ?? 0;
+  }
+
+  /** It would use another connection now if the budget gave it one. */
+  get hungry(): boolean {
+    return this.wantsMore;
   }
 
   /** Another download freed a connection. */
@@ -253,6 +264,8 @@ export class SegmentedTransfer {
       x.maxConns = Math.max(0, (this.caps.get(x.host) ?? 1) - others);
     }
     for (let next = nextJob(s, now, opts); next; next = nextJob(s, now, opts)) this.launch(startJob(s, next, now));
+    // Held back by the budget only (not by the mirrors' caps or the window): the manager shares fairly then.
+    this.wantsMore = s.jobs.length >= opts.maxConns && nextJob(s, now, { ...opts, maxConns: opts.maxConns + 1 }) !== null;
     if (!s.jobs.length && !this.appending) {
       // Nothing can run now: every usable source is resting after errors, or its slots are
       // taken by other downloads (they poke this one as they free them).

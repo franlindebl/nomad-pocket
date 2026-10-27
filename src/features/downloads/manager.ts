@@ -45,6 +45,7 @@ import {
 } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
 
+import { canStartFile, connectionsFor, decide, initialBudget, WINDOW_MS, type Budget, type NetworkKind } from './budget-core';
 import { recordGroup, type DownloadGroup } from './groups';
 import { keepAwakeWhileDownloading } from './keep-awake';
 import {
@@ -60,7 +61,7 @@ import {
 } from './manager-core';
 import { planSources, type ProbeFetch, type SourcePlan } from './mirrors';
 import { SEGMENTS_IN_BACKGROUND, SegmentedTransfer } from './segmented';
-import { chunkBytesFor, connectionShare, MiB, MIN_SEGMENTED_BYTES } from './segments-core';
+import { chunkBytesFor, MiB, MIN_SEGMENTED_BYTES } from './segments-core';
 import { askAboutMobileData } from './wifi-prompt';
 
 export type { DownloadGroup } from './groups';
@@ -123,13 +124,11 @@ export class NotEnoughStorageError extends Error {
   }
 }
 
-const MAX_CONCURRENT = 2;
 /**
- * Connections the segmented downloads share: about what fills a fast link (measured: 8 over
- * good Kiwix mirrors ≈ 36–39 MB/s), fewer on mobile data. The mirrors are volunteers'
- * servers: at most 3 each, so the load spreads over them. One URL (GitHub, Hugging Face) takes 4.
+ * Connections per host, summed over every download: the mirrors are volunteers' servers, at
+ * most 3 each, so the load spreads over them. One URL (GitHub, Hugging Face) takes 4. How many
+ * connections and files run in all is the adaptive budget (budget-core.ts).
  */
-const CONNECTIONS = { wifi: 8, cellular: 4 };
 const PER_MIRROR = 3;
 const PER_URL = 4;
 /** Disk a segmented download may use for ranges that finished ahead of the prefix. */
@@ -311,6 +310,7 @@ let gateTimer: ReturnType<typeof setTimeout> | null = null;
 function setNetwork(net: NetworkSnapshot, settle: boolean) {
   const wait = settle && !!useDownloads.getState().network;
   useDownloads.setState({ network: { type: net.type, isConnected: net.isConnected, isInternetReachable: net.isInternetReachable } });
+  resetBudget();
   if (gateTimer) clearTimeout(gateTimer);
   gateTimer = wait ? setTimeout(applyGate, GATE_SETTLE_MS) : null;
   if (!wait) applyGate();
@@ -617,9 +617,7 @@ export function enqueueDownload(input: EnqueueInput): DownloadRecord {
   return rec;
 }
 
-function activeCount() {
-  return Object.values(useDownloads.getState().records).filter((r) => r.status === 'running' && !r.external).length;
-}
+const running = () => Object.values(useDownloads.getState().records).filter((r) => r.status === 'running' && !r.external);
 
 function pump() {
   if (backgrounded) return;
@@ -627,12 +625,131 @@ function pump() {
   const queued = Object.values(useDownloads.getState().records)
     .filter((r) => r.status === 'queued' && !r.external && (retryAt.get(r.id) ?? 0) <= now && gateOf(r) === 'go')
     .sort((a, b) => a.createdAt - b.createdAt);
-  let slots = MAX_CONCURRENT - activeCount();
   for (const rec of queued) {
-    if (slots <= 0) break;
-    slots--;
+    const active = running();
+    // Still choosing its sources: no transfer yet.
+    const planning = active.filter((r) => !transferring(r.id)).length;
+    if (!canStartFile({ network: budget.network, running: active.length, planning, spare: spareConnections() })) break;
+    // The connections it was going to find free are its own from now on.
+    sampler.spare = [];
     run(rec.id).catch(() => {});
   }
+  if (running().length) startSampler();
+}
+
+// ---------------------------------------------------------------------------
+// Connection budget (budget-core.ts): sampled every SAMPLE_MS while something runs; every
+// WINDOW_MS the total speed decides whether it grows, and spare connections start more files.
+
+const SAMPLE_MS = 2000;
+/** A window counts only when it starts this long after the running downloads changed. */
+const SETTLE_MS = 5000;
+let budget: Budget = initialBudget('wifi');
+const sampler = {
+  timer: null as ReturnType<typeof setInterval> | null,
+  bytes: new Map<string, number>(),
+  windowStart: 0,
+  windowBytes: 0,
+  windowFull: 0,
+  windowSamples: 0,
+  /** The downloads running when the window started (a change makes it unstable). */
+  windowIds: '',
+  /** When the running downloads last changed. */
+  changedAt: 0,
+  /** Connections left unused at each of the last few samples. */
+  spare: [] as number[],
+};
+
+/** Connections held now by every URL download (a single transfer is one). */
+function connectionsInUse(): number {
+  let n = tasks.size;
+  for (const t of transfers.values()) n += t.connections();
+  return n;
+}
+
+/** The fewest connections left unused over the last 3 samples (0 until there are 3). */
+function spareConnections(): number {
+  return sampler.spare.length >= 3 ? Math.min(...sampler.spare.slice(-3)) : 0;
+}
+
+function connectionsOf(transfer: SegmentedTransfer): number {
+  const others = [...transfers.values()].filter((t) => t !== transfer);
+  return connectionsFor({
+    budget: budget.conns,
+    othersInFlight: tasks.size + others.reduce((n, t) => n + t.connections(), 0),
+    segmented: transfers.size,
+    singles: tasks.size,
+    othersHungry: others.some((t) => t.hungry),
+  });
+}
+
+/** After the network changed: Wi-Fi and mobile data have budgets of their own. */
+function resetBudget() {
+  const kind: NetworkKind = useDownloads.getState().network?.type === 'CELLULAR' ? 'cellular' : 'wifi';
+  if (kind !== budget.network) budget = initialBudget(kind);
+}
+
+function startSampler() {
+  if (sampler.timer) return;
+  sampler.bytes.clear();
+  sampler.spare = [];
+  sampler.windowStart = Date.now();
+  sampler.windowBytes = 0;
+  sampler.windowFull = 0;
+  sampler.windowSamples = 0;
+  sampler.windowIds = runningKey();
+  sampler.changedAt = sampler.windowStart;
+  sampler.timer = setInterval(sample, SAMPLE_MS);
+}
+
+/** Which downloads run, and which of them are still choosing their sources. */
+const runningKey = () =>
+  running()
+    .map((r) => `${r.id}${transferring(r.id) ? '' : '?'}`)
+    .sort()
+    .join(' ');
+
+function sample() {
+  const active = running();
+  if (!active.length) {
+    if (sampler.timer) clearInterval(sampler.timer);
+    sampler.timer = null;
+    return;
+  }
+  const key = runningKey();
+  if (key !== sampler.windowIds) {
+    sampler.windowIds = 'changed';
+    sampler.changedAt = Date.now();
+  }
+  // Bytes since the last sample, over downloads running at both (a pause drops its ranges in flight).
+  const seen = new Map<string, number>();
+  for (const r of active) {
+    seen.set(r.id, r.bytesWritten);
+    const before = sampler.bytes.get(r.id);
+    if (before !== undefined) sampler.windowBytes += Math.max(0, r.bytesWritten - before);
+  }
+  sampler.bytes = seen;
+  const inUse = connectionsInUse();
+  sampler.spare = [...sampler.spare.slice(-4), Math.max(0, budget.conns - inUse)];
+  sampler.windowSamples++;
+  if (inUse >= budget.conns - 1) sampler.windowFull++;
+  const now = Date.now();
+  if (now - sampler.windowStart >= WINDOW_MS) {
+    const bps = (sampler.windowBytes * 1000) / (now - sampler.windowStart);
+    const saturated = sampler.windowFull * 2 > sampler.windowSamples;
+    // New transfers ramp up (connections, TCP slow start) for a few seconds after a change too.
+    const stable = sampler.windowIds !== 'changed' && sampler.windowStart - sampler.changedAt >= SETTLE_MS;
+    const next = decide(budget, { now, bps, saturated, stable });
+    if (next.conns !== budget.conns) console.log(`[downloads] budget ${budget.conns} → ${next.conns} connections at ${(bps / 1e6).toFixed(1)} MB/s`);
+    budget = next;
+    sampler.windowStart = now;
+    sampler.windowBytes = 0;
+    sampler.windowFull = 0;
+    sampler.windowSamples = 0;
+    sampler.windowIds = key;
+    for (const t of transfers.values()) t.poke();
+  }
+  pump();
 }
 
 function onProgress(id: string, bytesWritten: number, totalBytes: number) {
@@ -753,12 +870,6 @@ function segmentsFor(rec: DownloadRecord, plan: SourcePlan): { size: number; chu
   return { size, chunkBytes: chunkBytesFor(size, plan.pieces?.length) };
 }
 
-/** Connections each segmented download may hold now. */
-function connectionsEach(): number {
-  const cellular = useDownloads.getState().network?.type === 'CELLULAR';
-  return connectionShare(cellular ? CONNECTIONS.cellular : CONNECTIONS.wifi, transfers.size);
-}
-
 /** Room for ranges finished ahead of the prefix: what the disk can spare beyond the rest of the file. */
 function aheadBytes(id: string, background: boolean): number {
   const rec = useDownloads.getState().records[id];
@@ -773,14 +884,14 @@ async function runSegmented(id: string, plan: SourcePlan, seg: { size: number; c
   if (prev && prev.size !== seg.size) deletePartial(id);
   updateMeta(id, { segments: seg, source: undefined });
   const several = plan.sources.length > 1;
-  const transfer = new SegmentedTransfer({
+  const transfer: SegmentedTransfer = new SegmentedTransfer({
     partial: partialFile(id),
     dir: chunksDir(id),
     size: seg.size,
     chunkBytes: seg.chunkBytes,
     sources: plan.sources.map((s) => ({ ...s, maxConns: several ? PER_MIRROR : PER_URL })),
     pieces: plan.size === undefined || plan.size === seg.size ? plan.pieces : undefined,
-    maxConns: connectionsEach,
+    maxConns: (): number => connectionsOf(transfer),
     aheadBytes: (background) => aheadBytes(id, background),
     onProgress: (bytes, total) => onProgress(id, bytes, total),
   });

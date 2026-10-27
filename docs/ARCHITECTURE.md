@@ -252,7 +252,19 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
 - `enqueueDownload({ id, kind, title, url, filename, expectedBytes, meta, group?, integrity?,
   quiet? })` — no-op if the id is already active; `filename` goes through `safeFileName` (never
   a path); checks free space including what queued downloads still need plus the reserve
-  (`NotEnoughStorageError`, whose figure adds up); persists; at most 2 run at a time.
+  (`NotEnoughStorageError`, whose figure adds up); persists; how many run at once is the
+  connection budget (below).
+- **Connection budget** (`budget-core.ts`, pure; sampled in `manager.ts` every 2 s while
+  something runs): one budget of connections for every URL download (a single transfer counts
+  one). Wi-Fi starts at 8 (4–16), mobile data at 4 (2–6); a change of network type resets it.
+  Every 10 s window in which the downloads used it all, it tries +2 and keeps them only if the
+  total speed grew ≥ 15 % (the noise between windows is ~5–8 %), else gives them back and waits 1 min. A window in which a download
+  started or ended (hashing, probing dip the speed), or that began less than 5 s after such a
+  change (new transfers still ramping up), decides nothing. The queue always runs 2
+  files; a 3rd and more (up to 6 on Wi-Fi, 2 on mobile data) start while ≥ 2 connections sat
+  unused over the last 3 samples and no file is still choosing its sources. Each segmented
+  download takes what the others leave, or only its fair part while another wants more
+  (`connectionsFor`).
 - **Wi-Fi only is enforced in the manager**, not by callers (`manager-core.ts`, pure):
   `networkGate()` reads `expo-network` (state + listener; reads carry a sequence number so a
   late iOS answer can't undo a newer one) and the setting. A held record stays `queued` and the
@@ -275,9 +287,9 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
   and get the same check.
 - **Segmented engine** (`segmented.ts`, decisions in `segments-core.ts`, pure): used when the
   file is ≥ 64 MB, of known exact size, and its sources answer ranges with 206. Ranges of
-  32 MiB (whole metalink pieces), each a `DownloadTask` with a `Range` header into
-  `partial/<id>.chunks/<start>-<end>.<n>`. Up to 8 connections on Wi-Fi, 4 on mobile data,
-  shared by the segmented downloads running; at most 3 per Kiwix mirror, 4 to a single URL.
+  4–32 MiB (~48 per file, whole metalink pieces), each a `DownloadTask` with a `Range` header
+  into `partial/<id>.chunks/<start>-<end>.<n>`. Connections come from the budget; per host at
+  most 3 to a Kiwix mirror and 4 to a single URL, summed over every download.
   A free connection takes the lowest missing range and the source whose connections measured
   fastest (moving average; an unmeasured mirror gets one range to prove itself; sources under
   10 % of the best get none). Two errors in a row bench a source for 2 min; a 4xx or a server
