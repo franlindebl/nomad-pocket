@@ -24,9 +24,9 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 
 - Marketing version: `expo.version` (currently **1.1.0**). Keep `package.json`'s
   `version` equal (not used by the build, but it's what people read).
-- iOS build number: `expo.ios.buildNumber` (currently **"18"**) → `CFBundleVersion`. Bump it
+- iOS build number: `expo.ios.buildNumber` (currently **"19"**) → `CFBundleVersion`. Bump it
   for every upload: App Store Connect rejects a build number it has already seen.
-- Android: `expo.android.versionCode` (currently **18**, nothing published yet). Must grow
+- Android: `expo.android.versionCode` (currently **19**, nothing published yet). Must grow
   with every Play upload.
 - After changing any of them, run `npx expo prebuild` (it can regenerate `ios/` and
   `android/` from scratch: then `cd ios && pod install`).
@@ -50,6 +50,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.1.0 | 16 | TestFlight 2026-10-27: fix for the app being killed while "Preparando" a big download (sha-256 and file copies native, `modules/nomad-files`), the USA as regional maps |
 | 1.1.0 | 17 | uploaded 2026-10-27 by mistake with another session's unfinished map-search edits in its JS bundle (archived from a shared working tree): don't use, expire it |
 | 1.1.0 | 18 | TestFlight 2026-10-27: downloads tuned on a real iPhone (setup kit 20.7 GB in ~6:30 instead of 13 min, the country's map first, in-process sessions while the app is open, stall watchdog); a country's search and emergency points prepared as the end of its download ("Preparando… %", no freeze or wait when search opens); archived from a clean worktree of the release commit |
+| 1.1.0 | 19 | TestFlight 2026-10-27: document collections (medical, water, knots…) as a native list with search, PDFs open on Android, a legend and switches for the map's emergency dots, a red SOS button |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.
