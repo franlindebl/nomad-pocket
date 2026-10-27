@@ -21,7 +21,7 @@ English. User-facing strings are Spanish + English (i18n).
 | `docs/E2E.md` | Maestro functional suite: how to run, read and write flows |
 | `docs/RELEASE.md` | Versioning, TestFlight/App Store upload, store listing, privacy site |
 | `docs/MAPS_NAVIGATION_PLAN.md` | Approved plan for map search, Emergencias and routing/navigation (phases, decisions, measurements) |
-| `docs/DOWNLOADS_SPEED_PLAN.md` | Analysis + plan for faster downloads (mirror throughput, parallel chunks, resume, keep awake); waits for `audit-fixes` |
+| `docs/DOWNLOADS_SPEED_PLAN.md` | Analysis + plan for faster downloads (mirror throughput, parallel chunks, resume, keep awake); ready to pick up |
 | `AGENTS.md` | Generic Expo rules (kept for other agents; same rules repeated below) |
 
 ## Stack (exact versions matter)

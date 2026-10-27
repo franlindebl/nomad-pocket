@@ -1,9 +1,8 @@
 # Faster downloads: analysis and plan
 
-Status: **analysis only** (2026-10-26; Kiwix, GitHub, Hugging Face and Protomaps measured). Nothing implemented. Pick it up **after `audit-fixes`
-is merged into `main`**: that branch rewrites `src/features/downloads/manager.ts`
-(network gate, retries that keep the bytes, sha-256 check, `avoidMirrors`), and this plan
-builds on that version. The references below are to `audit-fixes` unless they say `main`.
+Status: **analysis only** (2026-10-26; Kiwix, GitHub, Hugging Face and Protomaps measured).
+Nothing implemented. Written against the pre-release audit's download manager, which is now
+on `main`, and checked again against `main` after the merge. Ready to pick up.
 
 ## The problem
 
@@ -26,9 +25,25 @@ The three requests:
   **first 4** https mirrors by priority, times a **512 KB** range request at **offset 0** on
   each (5 s timeout) and keeps the quickest. It decides once, before the first byte. A
   resumed transfer keeps that URL: iOS resume data is tied to its request.
-- On `audit-fixes`, the metalink's size and sha-256 are also kept. The finished file is
-  hashed, and a bad copy is deleted and its mirror avoided on the retry. Network errors and
-  5xx keep the bytes and retry with a backoff (`planAfterFailure`, `manager-core.ts`).
+- Since the pre-release audit, `manager.ts` uses decisions from `manager-core.ts` (pure,
+  tested):
+  - **Wi-Fi only** lives in the manager. Held records stay `queued` ("Esperando Wi-Fi"),
+    and there is one mobile-data question per batch (`meta.allowCellular`).
+  - **Failures**: `planAfterFailure`. Network errors and 5xx keep the bytes and retry
+    after 5 s, 30 s and 2 min. Only a stale state (unreadable resume data, a 4xx other than
+    408/429) starts over. Android continues from the `.part` length, even after a kill.
+  - **Integrity**: size and sha-256 from the Kiwix metalink or a manifest
+    (`EnqueueInput.integrity`, checked with the native `File.digest`). A bad copy is deleted
+    and its mirror goes into `meta.avoidMirrors`.
+  - Also `safeFileName`, one token per `run()` (a pause while mirrors are being probed
+    wins), network reads with a sequence number, and `EnqueueInput.quiet` / `abortable`
+    (`cancelAction`).
+- **Countries** (`country-maps.ts`, `routing-packs.ts`, `side-files.ts`): space checked up
+  front (`planCountry` / `countryNeed`), sha-256 per part, and a side-file import queue
+  replayed at startup.
+- **Known gaps** (PROGRESS): iOS doesn't reattach its background transfer after the app is
+  killed (BUG-CORE-16), so the file starts from zero and the old task may fetch the same
+  bytes alongside. `downloads` rows aren't reconciled after a backup restore.
 
 Timing 512 KB from the start of the file measures connection setup, TLS, TCP slow start and
 whatever the mirror has cached. It doesn't measure sustained throughput, which is what a
@@ -119,7 +134,7 @@ In `mirrors.ts` (keep it pure and tested):
   Keep the existing guard: anything other than a 206 is dropped unread.
 - Probe all candidates at once (~2.5 s in total). They share the link, which compresses
   the ranking but keeps it in order, and C corrects it while downloading anyway.
-- Remember scores per host (kv-store, decaying over ~24 h). The next download orders
+- Remember scores per host (`@/db/kv`, never `expo-sqlite/kv-store`; decaying over ~24 h). The next download orders
   candidates by them and can probe only the top few.
 - Score the host that actually serves the file (accum.se redirects elsewhere).
 - Without C this alone should take the 13 GB case from ~2 h to roughly 15–30 min.
@@ -160,21 +175,34 @@ help.
   slow or janky, add a native `copyRange(src, dst, offset)` to a local module (Swift
   `FileHandle`, Kotlin `FileChannel`). Extra space needed: about connections × chunk size
   (~256 MB) beyond the file itself.
-- **Integrity**: keep the whole-file sha-256 at the end (`audit-fixes`). Later (D), use the
-  piece hashes to find and refetch only the bad 4 MiB pieces, and to know which mirror sent
-  them.
-- **Persistence and resume**: store a bitmap of finished chunks with the download (a new
-  `segments` column through a migration, or `meta`), written as chunks land. After a
-  relaunch on either platform, **even after iOS killed the app**, it continues from the
-  chunks already in `.part`. Only in-flight chunks are lost, at most 8 × 32 MiB.
+- **Integrity**: keep the whole-file check at the end (`finalize` → `checkIntegrity`).
+  `meta.source` holds one URL, but a segmented file comes from several mirrors, so a
+  mismatch can't blame one of them. Record which host served each chunk. Until D, a
+  mismatch adds nothing to `avoidMirrors` and the retry starts over. With D, the piece
+  hashes find and refetch only the bad 4 MiB pieces, and name the mirror that sent them.
+- **Persistence and resume**: store a bitmap of finished chunks with the download, written
+  as chunks land. No migration needed: keep it in `pause_state` with a discriminant
+  (`{ kind: 'segments', chunkBytes, done }` beside expo's `DownloadPauseState`). Otherwise,
+  append a column to `MIGRATIONS` in `src/db/schema.ts`. After a relaunch on either
+  platform, **even after iOS killed the app** (BUG-CORE-16), it continues from the chunks
+  already in `.part`. Only in-flight chunks are lost, at most 8 × 32 MiB. The orphaned
+  background chunk tasks fetch at most that much again. Trust the bitmap only if `.part`
+  exists and is as long as its last finished chunk: after a backup restore the row returns
+  without the file, so start over then.
 - **Pause** = cancel the in-flight chunks. **Resume** = schedule the missing ones. There
   is no per-chunk resume data: Android's resume rewrites the header to `Range:
   bytes=<offset>-` (`FileSystemDownloadTask.kt`), which would break a chunk's range.
 - **Progress and speed**: sums over the chunks. The record's `speed` is unchanged for the UI.
 - **Queue**: a segmented file already fills the link, so count connections globally rather
   than files (or run one segmented file at a time).
-- **Network gate / Wi-Fi only**: same rules as `audit-fixes`. Holding a download cancels
-  its chunks and keeps the bitmap.
+- **Network gate / Wi-Fi only**: same rules as now (`applyGate` → `suspend(id, 'queued')`).
+  For a segmented record, holding it cancels its chunks and keeps the bitmap.
+- **Failures**: the scheduler handles a chunk's error itself: it retries the chunk on
+  another mirror and benches the bad one. `planAfterFailure` applies to the whole record
+  only when no mirror is left or the network is gone. Then `retry` keeps the bitmap, and
+  `restart` clears it with the `.part`.
+- **The `run()` token, `abortable` and countries' side files** are unaffected: C only
+  changes how the bytes reach `.part`. Every chunk callback checks it still owns the run.
 
 **Background behaviour:**
 
@@ -198,11 +226,11 @@ downloading all 13–36 GB again.
 
 ## Resuming: what each version does
 
-| Situation | `main` | `audit-fixes` | With C |
+| Situation | Before the audit | Now (`main`) | With C |
 |---|---|---|---|
 | Person pauses / resumes | Continues (iOS resume data, Android `.part`) | Same | Continues from the finished chunks |
 | Network drop, 5xx | Failed. Retry usually starts from zero | Keeps the bytes, retries by itself (5 s, 30 s, 2 min) | Only the chunk retries, on another mirror. The rest keeps going |
-| App killed, iOS | **Starts from zero.** The orphaned background task keeps downloading alongside | Same | Continues from the finished chunks |
+| App killed, iOS | **Starts from zero.** The orphaned background task keeps downloading alongside | Same (BUG-CORE-16) | Continues from the finished chunks |
 | App killed, Android | Starts from zero unless a background snapshot exists | Continues from the `.part` | Continues from the finished chunks |
 | Screen locked, Android | **Pauses** | Pauses | With A: doesn't happen while the app is open |
 | Bad file (hash) | — | Deleted. Retry downloads it all from another mirror | Same. With D, only the bad pieces |
@@ -214,7 +242,7 @@ Measured the same day (18:00 UTC), from the same Mac. The link peaked at ~30–3
 | What | Comes from | Size | How it downloads today |
 |---|---|---|---|
 | Courses, medicine, survival, DIY, books; anything from Explore | `download.kiwix.org` + metalink mirrors (Explore's OPDS links are the same `.zim` URLs, `.meta4` stripped) | 101 catalog items (372 GB), 42 over 1 GB. Courses: 14 items, 11 GB, biggest 2.6 GB. TED conference: 18 GB | Same path as Wikipedia |
-| Country maps | GitHub Releases → `release-assets.githubusercontent.com` | 241 countries, median 118 MB. Spain 2.29 GB in 2 parts; largest 8.5 GB (Canada) in 5 parts of ≤ 2 GiB | Manager, one group of files, 2 files at a time, sha-256 from the manifest |
+| Country maps | GitHub Releases → `release-assets.githubusercontent.com` | 241 countries, median 118 MB. Spain 2.29 GB in 2 parts; largest 8.5 GB (Canada) in 5 parts of ≤ 2 GiB | Manager, one group of files, 2 files at a time. Space checked up front, sha-256 per part, side files imported by a queue replayed at startup |
 | Routing packs + search files (points, streets, places, addresses) | GitHub Releases | Spain: 2.27 GB in 2 parts + TSVs | Same |
 | AI models | Hugging Face → `us.aws.cdn.hf.co` | 0.53–3.1 GB (4 models) | Manager |
 | Map extraction (fallback for a country the catalog lacks) | `build.protomaps.com` (planet, 139 GB) | A region | External job: its own range requests, 4–6 at a time, ≤ 4 MiB each, keep-awake already |
@@ -247,15 +275,15 @@ What this means:
    - **Signed redirects expire after 1 h.** GitHub's redirect URL carries `se=` about an
      hour ahead, Hugging Face's `Expires=` exactly 1 h ahead. To verify on iOS: resume
      data after a pause longer than an hour probably points at the expired URL. The
-     server would answer 403, which `audit-fixes` treats as stale resume data, so the
+     server would answer 403, which `isStaleResumeError` treats as stale resume data, so the
      download restarts from zero (a 2 GB part, a 3 GB model). Android resumes from the
      original URL (a fresh redirect), so it is fine. C avoids this: every chunk asks the
      original URL. Without C: on a 4xx when resuming on iOS, retry once with a new task to
      the original URL before throwing the bytes away. The bytes live only in the resume
      data, so check whether expo-file-system lets us swap the URL in it.
    - A kill on iOS restarts the current file from zero (≤ 2 GiB for maps, ≤ 3.1 GB for
-     models). Either C or PROGRESS backlog item 3 (reattach the background `URLSession`)
-     fixes it.
+     models). Either C or PROGRESS backlog item 3 / BUG-CORE-16 (reattach the background
+     `URLSession`) fixes it.
 
 Recommendation: the order stays A → B → spike → C → D. A covers every kind from the
 manager at once. B is Kiwix-only (it needs the metalink). Build C with a source that is a
@@ -287,9 +315,11 @@ port that ignores `Range`. The scheduler's unit tests can use the same scenarios
 
 - `src/features/downloads/keep-awake.ts` (A), the downloads init, i18n `downloads` es/en.
 - `src/features/downloads/mirrors.ts` + `mirrors.test.ts` (B).
-- `src/features/downloads/segments-core.ts` + test (C, pure), `segmented.ts` (transport,
-  assembly), `manager.ts` (`run()` picks the path; pause/cancel/hold/background for
-  segmented records), a DB migration if the bitmap gets its own column.
+- `src/features/downloads/segments-core.ts` + test (C, pure scheduler), `segmented.ts`
+  (transport, assembly), `manager-core.ts` (when a record goes segmented, failure plans for
+  segmented records), `manager.ts` (`run()` picks the path; pause/cancel/hold/background
+  for segmented records). A migration in `src/db/schema.ts` only if the bitmap gets its own
+  column.
 - Docs: ARCHITECTURE (Downloads contract), PROGRESS, DEVELOPMENT (mirror simulator), E2E
   if a flow needs a `testID`.
 
