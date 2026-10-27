@@ -1,0 +1,29 @@
+.github/workflows/country-packages.yml
+  s_78b408ad093c39::t_38befe6e0b53c8 11-12,123-124,131,133,257
+docs/ARCHITECTURE.md
+  s_78b408ad093c39::t_810dc1bce7c90e 517-522
+docs/PROGRESS.md
+  s_78b408ad093c39::t_2b686eddbd4d2e 298-303
+scripts/maps/build-country-map.sh
+  s_78b408ad093c39::t_50a6e0fc4531af 13-17,46-53,78-84,238
+scripts/maps/maps-manifest.py
+  s_78b408ad093c39::t_10f688137151a7 2-4,6-8,31,38,62,65,68-75,81,85
+scripts/maps/region-outline.py
+  s_78b408ad093c39::t_854a3174be848c 1-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6ac5011fd0fcd51604d50839131a2e8f247e583d",
+  "prompts": {},
+  "sessions": {
+    "s_78b408ad093c39": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e82e2e6d-65bd-4709-9859-f05fbe0b2151",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
