@@ -4,24 +4,24 @@ Living document: current status, backlog, known issues and a dated log. Update i
 the end of every work block (status table, a log entry, next steps) so the next session
 can pick up without re-deriving anything.
 
-## Current state (2026-10-26)
+## Current state (2026-10-27)
 
-- **Version 1.1.0 (iOS build 13)** on TestFlight 2026-10-26: the pre-release audit fixes (log entry 2026-10-26)
-  and multi-pack countries (the USA) on top of build 12 (a country as one download) and build 11 (the
-  survival-kit redesign); **1.0.1 (build 3)** waiting for App Review. Release process and version table:
-  `docs/RELEASE.md`; store builds are tagged from build 13 on (`v1.1.0-13`).
+- **Version 1.1.0 (iOS build 14)** on TestFlight 2026-10-27: faster downloads (segmented multi-mirror
+  engine, adaptive connection budget, log entries 2026-10-26) on top of build 13 (the pre-release audit
+  fixes, multi-pack countries); **1.0.1 (build 3)** waiting for App Review. Release process and version
+  table: `docs/RELEASE.md`; store builds are tagged from build 13 on (`v1.1.0-14`).
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
   tour). Not yet run on a physical device by the agent.
 - Checks: `npm test` (the count drifts: run it), `tsc` clean, lint clean, i18n keys complete. E2E: 54 Maestro flows
   (21 smoke, 17 full, 11 nightly, 1 iPad tour, 4 Android); which cases they cover is in the catalog of `docs/E2E.md`.
-  The audit fixes passed the smoke suite (21/21, build 13, 2026-10-26); full and iPad suites not run on them yet.
+  Build 14 passed the smoke suite (21/21, 2026-10-27); full and iPad suites not run on it yet.
 
 | Area | Status |
 |---|---|
 | Foundation (design system, nav, i18n, db, downloads core) | done |
 | Catalog (101 resources, 6 categories, Wikipedia picker, Kiwix OPDS explore, Files import) | done |
-| Downloads (queue, pause/resume, iOS background, Wi-Fi-only enforced in the manager, size + sha-256 checks, retry with backoff; segmented multi-mirror engine with throughput-ranked Kiwix mirrors, per-piece sha-1, resume from disk after a kill; screen kept on) | done — iOS sim + Android emulator (Release), branch `worktree-downloads-speed` not merged yet |
+| Downloads (queue, pause/resume, iOS background, Wi-Fi-only enforced in the manager, size + sha-256 checks, retry with backoff; segmented multi-mirror engine with throughput-ranked Kiwix mirrors, per-piece sha-1, resume from disk after a kill; adaptive connection budget; screen kept on) | done — iOS sim + Android emulator (Release); build 14 |
 | UX redesign: survival kit (`docs/UX_SURVIVAL_PLAN.md`): onboarding country + kit, Home "En una emergencia" + "Tu preparación", 4 tabs, maps by country, bundled world map, simpler settings | done — iOS sim (E2E smoke + full), Android spot check; build 11; country maps CI first run 2026-10-26 |
 | ZIM library + reader (search, TOC, bookmarks, history, find, text size, dark mode) | done — iOS + Android |
 | Courses (14 courses, syllabus with fallbacks, progress; inside Library since the redesign) | done |
@@ -223,6 +223,13 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-27 — Release: 1.1.0 build 14 to TestFlight
+
+Build 14 = the faster downloads (segmented multi-mirror engine, throughput-ranked mirrors, adaptive
+connection budget, per-piece checks, resume after a kill, screen kept on, two-line download rows) on
+top of build 13. The privacy policy now says the app measures every Kiwix mirror and downloads from
+several at once (es + en, dated 2026-10-27). Smoke E2E 21/21 on an iOS 27 simulator; tagged `v1.1.0-14`.
 
 ### 2026-10-26 — Downloads: segmented multi-mirror engine, throughput-ranked mirrors, screen kept on
 

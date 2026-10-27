@@ -24,14 +24,14 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 
 - Marketing version: `expo.version` (currently **1.1.0**). Keep `package.json`'s
   `version` equal (not used by the build, but it's what people read).
-- iOS build number: `expo.ios.buildNumber` (currently **"13"**) → `CFBundleVersion`. Bump it
+- iOS build number: `expo.ios.buildNumber` (currently **"14"**) → `CFBundleVersion`. Bump it
   for every upload: App Store Connect rejects a build number it has already seen.
-- Android: `expo.android.versionCode` (currently **13**, nothing published yet). Must grow
+- Android: `expo.android.versionCode` (currently **14**, nothing published yet). Must grow
   with every Play upload.
 - After changing any of them, run `npx expo prebuild` (it can regenerate `ios/` and
   `android/` from scratch: then `cd ios && pod install`).
 
-| Version | Build | State (2026-10-26) |
+| Version | Build | State (2026-10-27) |
 |---|---|---|
 | 1.0.0 | — | prepared, superseded by 1.0.1 |
 | 1.0.1 | 3 | submitted to App Review (auto-release after approval) |
@@ -45,6 +45,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.1.0 | 11 | TestFlight 2026-10-26: survival-kit redesign (country downloads with everything, new onboarding and Home, 4 tabs, bundled world map), every place and house number in the packs |
 | 1.1.0 | 12 | TestFlight 2026-10-26: a country is one download (one row, one notice), the Maps tab shows a country on its way, onboarding buttons off the screen's edge, friendlier download errors, "couldn't check" vs "no navigation" |
 | 1.1.0 | 13 | TestFlight 2026-10-26: pre-release audit fixes (reader without network, Wi-Fi-only enforced, safer downloads and storage, credits & licences screen, data out of the Files app and backups of re-downloadable data, OSM credit, guidance auto-stop, translated permission prompt), multi-pack countries (USA) |
+| 1.1.0 | 14 | TestFlight 2026-10-27: faster downloads (segmented multi-mirror engine, mirrors ranked by throughput, adaptive connection budget, per-piece checks, resume after the app is killed), screen kept on while downloading, steadier download rows |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.

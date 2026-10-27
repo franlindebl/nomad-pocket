@@ -944,7 +944,7 @@ Storage layout). `ios/` and `android/` are generated from it.
 | Service | Used for |
 |---|---|
 | `github.com/franlindebl/nomad-pocket/releases` (`routing-index`, `routing-<stamp>`; `maps-index`, `maps-<stamp>-<continent>`, stamp = `YYYYMMDD-<run id>`) | routing catalog and packs, country maps catalog and archives, all built by `.github/workflows/country-packages.yml`: our only hosted data. **The two manifests are fetched 4 s after every launch when online** and when a country screen opens; no gating, nothing is sent |
-| `download.kiwix.org` (+ the third-party mirrors of its metalinks) | ZIM files; up to 4 mirrors get a 512 KB probe |
+| `download.kiwix.org` (+ the third-party mirrors of its metalinks) | ZIM files; every https mirror gets a probe of up to 4 MiB, and files download in ranges from several at once |
 | `opds.library.kiwix.org/catalog/v2` | newest ZIM versions, Explore search (the typed text) and thumbnails |
 | `build-metadata.protomaps.dev/builds.json`, `build.protomaps.com` | daily planet build, HTTP Range extraction: fallback for a country without a prebuilt map |
 | `huggingface.co` | GGUF models |
