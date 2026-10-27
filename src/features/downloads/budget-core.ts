@@ -3,8 +3,10 @@
 // connection against a 300 Mb/s home line), and wastes nothing when the line is the limit.
 // So the budget climbs while it pays: when the downloads use all of it, try 2 more connections
 // for a window; keep them if the total speed grew, give them back (and wait a minute) if not.
-// Spare connections the running files can't use (a mirror's cap, GitHub's per-host limit, the
-// last ranges of a file) start the next file in the queue.
+// Up to 6 files run at once and share the budget fairly: a queue of small archives (a kit)
+// spreads over several mirrors at once instead of waiting behind a country map whose GitHub
+// host can't use more connections. (Starting files only on spare connections didn't: a full
+// budget never left any, and the queue ran 2 at a time.)
 // No `@/` imports: unit tests load this file directly.
 
 export type NetworkKind = 'wifi' | 'cellular';
@@ -13,8 +15,10 @@ const LIMITS: Record<NetworkKind, { start: number; min: number; max: number; fil
   wifi: { start: 8, min: 4, max: 16, files: 6 },
   cellular: { start: 4, min: 2, max: 6, files: 2 },
 };
-/** Files that always run at once (as before the budget), whatever the connections do. */
-export const MIN_FILES = 2;
+/** Files choosing their sources at once (each probes every mirror, which briefly loads the link). */
+const MAX_PLANNING = 2;
+/** Files from one single-host source running at once. */
+const FILES_PER_HOST = 2;
 const STEP = 2;
 /** A trial is kept when the total speed grew this much (the noise between windows is ~5–8 %). */
 const GAIN = 1.15;
@@ -22,8 +26,6 @@ const GAIN = 1.15;
 export const HOLD_MS = 60_000;
 /** How long a decision window lasts (the manager samples speed within it). */
 export const WINDOW_MS = 10_000;
-/** Spare connections that start another file. */
-const SPARE_FOR_FILE = 2;
 
 export type Budget = {
   network: NetworkKind;
@@ -66,12 +68,20 @@ export function connectionsFor(o: { budget: number; othersInFlight: number; segm
 }
 
 /**
- * Whether the queue may start another file. Always up to MIN_FILES; beyond that, while the
- * running ones leave connections unused (`spare`: the fewest free over the last samples) and
- * none is still choosing its sources (it would look idle for a few seconds).
+ * Whether the queue may start another file: up to 6 at once on Wi-Fi (2 on mobile data), and
+ * at most 2 still choosing their sources (`planning`).
  */
-export function canStartFile(o: { network: NetworkKind; running: number; planning: number; spare: number }): boolean {
-  if (o.running < MIN_FILES) return true;
-  if (o.running >= LIMITS[o.network].files || o.planning > 0) return false;
-  return o.spare >= SPARE_FOR_FILE;
+export function canStartFile(o: { network: NetworkKind; running: number; planning: number }): boolean {
+  return o.running < LIMITS[o.network].files && o.planning < MAX_PLANNING;
+}
+
+/**
+ * Whether one more file from a single-host source (GitHub, Hugging Face) may start, with
+ * `sameHost` of its files already running. Files from one host share its connection cap, so a
+ * third part of a country map adds nothing but takes a slot a kit's archives (Kiwix, spread
+ * over many mirrors: `multiMirror`) could use. Seen on the simulator: Spain's six map, pack and
+ * search files filled every slot while twelve guides waited.
+ */
+export function hostHasRoom(o: { sameHost: number; multiMirror: boolean }): boolean {
+  return o.multiMirror || o.sameHost < FILES_PER_HOST;
 }

@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { canStartFile, connectionsFor, decide, HOLD_MS, initialBudget, MIN_FILES } from './budget-core.ts';
+import { canStartFile, connectionsFor, decide, HOLD_MS, hostHasRoom, initialBudget } from './budget-core.ts';
+
+test('hostHasRoom: two files at a time from one host; Kiwix archives spread over mirrors', () => {
+  // Spain's map, pack and search files all come from github.com.
+  assert.equal(hostHasRoom({ sameHost: 1, multiMirror: false }), true);
+  assert.equal(hostHasRoom({ sameHost: 2, multiMirror: false }), false);
+  assert.equal(hostHasRoom({ sameHost: 5, multiMirror: true }), true);
+});
 
 const MB = 1e6;
 
@@ -77,11 +84,13 @@ test('connectionsFor: a download takes what the others leave, its fair part when
   assert.equal(connectionsFor({ budget: 8, othersInFlight: 9, segmented: 2, singles: 0, othersHungry: true }), 1);
 });
 
-test('canStartFile: two files always; more only while connections sit unused', () => {
-  assert.equal(canStartFile({ network: 'wifi', running: MIN_FILES - 1, planning: 1, spare: 0 }), true);
-  assert.equal(canStartFile({ network: 'wifi', running: 2, planning: 0, spare: 0 }), false);
-  assert.equal(canStartFile({ network: 'wifi', running: 2, planning: 0, spare: 4 }), true);
-  assert.equal(canStartFile({ network: 'wifi', running: 2, planning: 1, spare: 4 }), false, 'one still probing its mirrors');
-  assert.equal(canStartFile({ network: 'wifi', running: 6, planning: 0, spare: 10 }), false);
-  assert.equal(canStartFile({ network: 'cellular', running: 2, planning: 0, spare: 4 }), false);
+test('canStartFile: up to 6 files on Wi-Fi (2 on mobile data), at most 2 choosing their sources', () => {
+  // Seen on a phone: a country map (GitHub) and one archive filled the 8 connections, so with
+  // "start only on spare connections" a kit of small archives waited 2 at a time.
+  assert.equal(canStartFile({ network: 'wifi', running: 2, planning: 0 }), true);
+  assert.equal(canStartFile({ network: 'wifi', running: 5, planning: 1 }), true);
+  assert.equal(canStartFile({ network: 'wifi', running: 3, planning: 2 }), false, 'two still probing their mirrors');
+  assert.equal(canStartFile({ network: 'wifi', running: 6, planning: 0 }), false);
+  assert.equal(canStartFile({ network: 'cellular', running: 1, planning: 0 }), true);
+  assert.equal(canStartFile({ network: 'cellular', running: 2, planning: 0 }), false);
 });

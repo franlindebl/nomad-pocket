@@ -54,6 +54,28 @@ app in the background after it was killed, when the orphaned range tasks finishe
 (`sessionSendsLaunchEvents`): the manager starts the download again then, which is good, but it
 exposed a bug (fixed) where a transfer was told it was in the background before it had loaded.
 
+## After build 14: many files at once (2026-10-27)
+
+On the owner's phone (build 14), the setup kit (Spain's map + survival guides) ran 2 files at a
+time: GitHub's parts and one archive filled the 8 connections, so "start another file on spare
+connections" never fired, and the guides waited behind the map. Changed:
+
+- Up to 6 files at once on Wi-Fi (2 on mobile data), at most 2 choosing their sources, at most 2
+  from one single-host source (GitHub, Hugging Face); fair shares of the budget between them.
+- Segmented from 16 MB (was 64); 6 connections per single URL host (was 4).
+- Mirror speeds remembered for 10 min: the kit's archives start without re-probing.
+
+Simulator, same kit (Spain 4.8 GB + 12 guides, 1.4 GB), fresh installs:
+
+| | Guides done | Everything done |
+|---|---|---|
+| Build 14 (2 files at a time; guides alone, the map was unavailable that run) | 83 s | — |
+| 6 files, no per-host limit | > 130 s (Spain's 6 files took every slot) | ~4.7 min |
+| 6 files, ≤ 2 per host (final) | 50 s for 11, 80 s for 12 (one is 644 MB) | ~4.7 min |
+
+The total is this Mac's link (~22–25 MB/s together); what changed is that the small archives no
+longer wait behind the map.
+
 ## Still open
 
 - The adaptive budget's gains on a line faster than its first 8 connections are untested here

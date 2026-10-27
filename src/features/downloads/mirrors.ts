@@ -16,6 +16,9 @@
 import { urlHost, type Integrity } from './manager-core.ts';
 
 const KIWIX_HOST = /^https:\/\/(?:lb\.)?download\.kiwix\.org\//;
+
+/** A download.kiwix.org file: its metalink lists many mirrors. */
+export const isKiwixUrl = (url: string) => KIWIX_HOST.test(url);
 /** Bytes asked of each mirror while measuring (less for small files). */
 const PROBE_BYTES = 4 * 1024 * 1024;
 /** Time counted from a mirror's first byte. */
@@ -185,11 +188,14 @@ async function probeRanges(fetch: ProbeFetch, url: string): Promise<{ ranges: bo
  * Where to fetch `url` from. download.kiwix.org files: every https mirror of its metalink
  * (except `avoid`, hosts that served a bad copy), measured and sorted, plus what the metalink
  * promises. Other URLs: that URL alone, with whether it takes ranges.
+ * `known`: recent measurements by host (0 = failed). When they cover every mirror and the
+ * metalink gives the size, nothing is probed: a kit's twenty small archives start at once
+ * instead of each spending seconds measuring the same mirrors. `measured` returns what was probed.
  */
 export async function planSources(
   url: string,
-  o: { fetch: ProbeFetch; avoid?: readonly string[]; probe?: typeof probeThroughput },
-): Promise<SourcePlan> {
+  o: { fetch: ProbeFetch; avoid?: readonly string[]; probe?: typeof probeThroughput; known?: ReadonlyMap<string, number> },
+): Promise<SourcePlan & { measured?: { host: string; bps: number }[] }> {
   const probe = o.probe ?? probeThroughput;
   const single = async (integrity: Integrity = {}, pieces?: Pieces): Promise<SourcePlan> => {
     const { ranges, total } = await probeRanges(o.fetch, url);
@@ -208,16 +214,24 @@ export async function planSources(
     const avoid = o.avoid ?? [];
     const mirrors = parseMetalinkUrls(xml, filename).filter((m) => !avoid.includes(urlHost(m)));
     if (!mirrors.length) return single(integrity, pieces);
+    const rank = (bps: number[]) =>
+      mirrors
+        .map((m, i) => ({ url: m, host: urlHost(m), bps: bps[i] }))
+        .filter((s) => s.bps > 0)
+        .sort((a, b) => b.bps - a.bps);
+    const known = mirrors.map((m) => o.known?.get(urlHost(m)));
+    if (integrity.size !== undefined && known.every((b) => b !== undefined)) {
+      const sources = rank(known as number[]);
+      if (sources.length) return { sources, size: integrity.size, ranges: true, integrity, pieces };
+    }
     // All at once (~2–3 s in total). They share the link, which squeezes the ranking but keeps
     // its order; the segmented engine keeps measuring while it downloads.
     const probes = await Promise.all(mirrors.map((m) => probe(o.fetch, m, integrity.size)));
-    const sources = mirrors
-      .map((m, i) => ({ url: m, host: urlHost(m), bps: probes[i].bps }))
-      .filter((s) => s.bps > 0)
-      .sort((a, b) => b.bps - a.bps);
-    if (!sources.length) return single(integrity, pieces);
+    const measured = mirrors.map((m, i) => ({ host: urlHost(m), bps: probes[i].bps }));
+    const sources = rank(probes.map((p) => p.bps));
+    if (!sources.length) return { ...(await single(integrity, pieces)), measured };
     const size = integrity.size ?? probes.find((p) => p.total !== undefined)?.total;
-    return { sources, size, ranges: true, integrity, pieces };
+    return { sources, size, ranges: true, integrity, pieces, measured };
   } catch {
     return single(integrity, pieces);
   }

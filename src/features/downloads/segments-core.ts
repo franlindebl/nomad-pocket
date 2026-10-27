@@ -15,8 +15,12 @@
 // their speed drifts. No `@/` imports: unit tests load this file directly.
 
 export const MiB = 1024 * 1024;
-/** Below this a single transfer is as fast: the segmented engine isn't worth its requests. */
-export const MIN_SEGMENTED_BYTES = 64 * 1000 * 1000;
+/**
+ * Below this a single transfer is as fast. Above it (kits are full of 20–60 MB archives), ranges
+ * from several mirrors beat one connection to the single best one, which every small file used to
+ * share.
+ */
+export const MIN_SEGMENTED_BYTES = 16 * 1000 * 1000;
 /**
  * Chunk sizes: about CHUNKS_PER_FILE chunks, between 4 and 32 MiB. Big chunks keep requests
  * few on a 13 GB file; a 170 MB file in 32 MiB chunks would be 6 ranges, and the one on the

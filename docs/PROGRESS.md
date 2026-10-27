@@ -144,7 +144,7 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
    Wikipedia nopic, 13.3 GB, in 8.6 min on the simulator instead of ~2 h; adaptive connection
    budget built. Next: measure on a real iPhone and Android phone (background session
    scheduling, Wi-Fi speeds, the budget on the owner's 300 Mb/s line). Small single-task
-   downloads (< 64 MB) still restart from zero after an iOS kill (BUG-CORE-16), which is cheap now.
+   downloads (< 16 MB) still restart from zero after an iOS kill (BUG-CORE-16), which is cheap now.
 4. Map extraction: resume after a kill (persist the plan + written ranges) and move it off
    the JS thread.
 5. Android release: upload keystore, Play listing + data safety; the Android notices and the Play
@@ -189,7 +189,7 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
 - After a backup restore the database comes back without the content (items are dropped at
   startup, see ARCHITECTURE), but the `downloads` rows are not reconciled: paused or queued rows
   return and the manager retries them (not fixed).
-- Downloads interrupted by app termination: files ≥ 64 MB (segmented) continue from their
+- Downloads interrupted by app termination: files ≥ 16 MB (segmented) continue from their
   verified `.part` prefix and the ranges on disk on both platforms; only the ranges in flight are
   fetched again (on iOS the orphaned tasks also fetch them once more). Small single-task files on
   iOS still restart from zero (BUG-CORE-16: the background session isn't reattached).
@@ -221,6 +221,18 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-27 — Downloads: many files at once (a kit no longer waits behind a country map)
+
+The owner's phone (build 14) showed the setup kit running 2 files at a time: Spain's GitHub
+parts and one archive filled the connection budget, and "start another file on spare
+connections" never fired. Now up to 6 files run at once (2 on mobile data), ≤ 2 choosing their
+sources and ≤ 2 from one single-host source (`hostHasRoom`), sharing the budget fairly;
+segmented from 16 MB (was 64); 6 connections per GitHub/Hugging Face host (was 4); Kiwix
+mirror speeds remembered for 10 min so small archives start without re-probing. Simulator, the
+same kit (Spain + 12 guides): the guides finish in 80 s alongside the map instead of waiting
+behind its six files (measurements in `docs/DOWNLOADS_SPEED_PLAN.md`). Also seen: the maps
+catalog was briefly unavailable ("Ahora no se puede descargar el mapa") during one run.
 
 ### 2026-10-27 — Release: 1.1.0 build 14 to TestFlight
 
