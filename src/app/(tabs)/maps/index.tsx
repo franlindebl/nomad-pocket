@@ -86,6 +86,11 @@ export default function MapScreen() {
   // The OpenStreetMap credit, until a few seconds pass or the first gesture (MapCredit).
   const [credit, setCredit] = useState(true);
   const [locating, setLocating] = useState(false);
+  // Where the user was when the map first came to the front, and whether they have panned
+  // or pinched since (then they are looking somewhere on purpose).
+  const openedRef = useRef(false);
+  const [openFix, setOpenFix] = useState<{ lat: number; lon: number } | null>(null);
+  const [moved, setMoved] = useState(false);
   // Navigation view ("Iniciar"): the camera follows the user, the way ahead up
   // (FollowCamera), until the user pans the map. Per trip: it holds the target.
   const [touchedFor, setTouchedFor] = useState<typeof target>(null);
@@ -299,6 +304,34 @@ export default function MapScreen() {
     }
   }
 
+  // The first time the map is in front in a session: ask for the location here, in context
+  // (not in the setup wizard), and start where the user is, not where the map was left.
+  // Search ranks and measures from the map's centre, so that starts from them too.
+  useEffect(() => {
+    if (!tabFocused || !style || openedRef.current) return;
+    openedRef.current = true;
+    (async () => {
+      let perm = await Location.getForegroundPermissionsAsync();
+      if (!perm.granted && perm.status === 'undetermined') perm = await Location.requestForegroundPermissionsAsync();
+      if (!perm.granted) return;
+      setShowUser(true);
+      const pos =
+        (await Location.getLastKnownPositionAsync({ maxAge: 5 * 60_000 })) ??
+        (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced, mayShowUserSettingsDialog: false }));
+      setOpenFix({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+    })().catch((e) => console.warn('[maps] cannot show the user on open', e));
+  }, [tabFocused, style]);
+  useEffect(() => {
+    // Set once per mount.
+    if (!openFix) return;
+    // While the fix came, the user moved the map, opened a place or started a trip.
+    if (moved || request || target) return;
+    const zoom = Math.max(useMapUi.getState().viewport?.zoom ?? 0, 13);
+    cameraRef.current?.flyTo({ center: [openFix.lon, openFix.lat], zoom, duration: 1200 });
+    // Only when the fix arrives.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openFix]);
+
   useFollowCamera(cameraRef, following && tabFocused && size.height > 0, Math.max(0, shift), Math.max(0, -shift));
 
   return (
@@ -315,6 +348,7 @@ export default function MapScreen() {
           tintColor={colors.location}
           onRegionWillChange={safe((e) => {
             if (!e.nativeEvent.userInteraction) return;
+            setMoved(true);
             setCredit(false);
             // A pan or a pinch: the user wants to look around, stop following.
             if (navigating) setTouchedFor(target);
