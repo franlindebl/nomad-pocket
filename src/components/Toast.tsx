@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { CheckCircle2 } from 'lucide-react-native';
 import { useEffect } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
-import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
+import Animated, { FadeOutUp, withSpring, type EntryAnimationsValues } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { create } from 'zustand';
 
@@ -24,6 +24,16 @@ export function showToast(message: string, haptic = true) {
   if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibilityWithOptions(message, { queue: true });
 }
 
+// Slides down from just above the screen and bounces, fully opaque the whole time:
+// FadeInUp.springify() springs the opacity too, so the pill flickered translucent as it bounced.
+function enterFromTop(values: EntryAnimationsValues) {
+  'worklet';
+  return {
+    initialValues: { transform: [{ translateY: -(values.targetOriginY + values.targetHeight) }] },
+    animations: { transform: [{ translateY: withSpring(0, { damping: 18 }) }] },
+  };
+}
+
 /** Floating confirmation pill at the top of the screen. Mount once at the root. */
 export function ToastHost() {
   const toast = useToasts((s) => s.current);
@@ -41,7 +51,7 @@ export function ToastHost() {
   return (
     <Animated.View
       key={toast.id}
-      entering={FadeInUp.springify().damping(18)}
+      entering={enterFromTop}
       exiting={FadeOutUp.duration(200)}
       pointerEvents="none"
       accessibilityLiveRegion="polite"
