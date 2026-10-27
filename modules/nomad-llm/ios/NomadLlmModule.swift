@@ -2,6 +2,7 @@
 // Apple Intelligence). The app deploys to iOS 16.4, so the framework is
 // weak-linked (see NomadLlm.podspec) and every use is gated with #available.
 import ExpoModulesCore
+import Speech
 #if canImport(FoundationModels)
 import FoundationModels
 #endif
@@ -49,6 +50,13 @@ public final class NomadLlmModule: Module {
 
     AsyncFunction("route") { (prompt: String, instructions: String, promise: Promise) in
       self.route(prompt: prompt, instructions: instructions, promise: promise)
+    }
+
+    // Dictation (expo-speech-recognition) asks for on-device recognition, but on a locale
+    // without it iOS silently sends the audio to Apple's servers, and the library only checks
+    // the phone's own locale. The composer shows the microphone only where this is true.
+    Function("supportsOnDeviceDictation") { (locale: String) -> Bool in
+      SFSpeechRecognizer(locale: Locale(identifier: locale))?.supportsOnDeviceRecognition ?? false
     }
 
     OnDestroy {

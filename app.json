@@ -122,7 +122,12 @@
         }
       ],
       "@maplibre/maplibre-react-native",
-      ["llama.rn", { "enableOpenCLAndHexagon": true }],
+      [
+        "llama.rn",
+        {
+          "enableOpenCLAndHexagon": true
+        }
+      ],
       [
         "expo-build-properties",
         {
@@ -144,7 +149,14 @@
         }
       ],
       "./plugins/with-android-backup-rules",
-      "./plugins/with-android-no-firebase"
+      "./plugins/with-android-no-firebase",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Nomad Pocket usa el micrófono solo cuando tocas el botón de dictar en el asistente, para escribir tu pregunta con la voz. El audio se procesa en tu dispositivo y no se guarda ni se envía.",
+          "speechRecognitionPermission": "Nomad Pocket convierte tu voz en texto en tu dispositivo, sin conexión, cuando dictas una pregunta al asistente."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
