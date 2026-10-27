@@ -98,7 +98,7 @@ src/
     credits/                 data behind Settings › Credits & licenses (credits-core.ts pure, licenses.ts)
 modules/
   nomad-zim/                 libkiwix bridge + ZimWebView (Swift/Obj-C++ · Kotlin)
-  nomad-llm/                 Apple Foundation Models bridge (iOS only)
+  nomad-llm/                 Apple Foundation Models bridge + on-device dictation check (iOS only)
   nomad-route/               Valhalla routing (valhalla-mobile: iOS xcframework · Android AAR)
 plugins/                     config plugins (with-android-backup-rules.js)
 locales/                     InfoPlist strings (localised permission prompts), es + en
@@ -1008,6 +1008,19 @@ without them are fetched on their own when the sheet opens online) and `route-st
 - UI: chat with streaming Markdown (`markdown.ts` parser, `ui/Markdown.tsx`), source chips
   → reader, stop, "use my library" toggle, starters, AI/health disclaimer; conversations
   sheet; models screen (system model status, downloads, fit badges).
+- Dictation (`dictation.ts`, `dictation-core.ts` pure + tested): a microphone in the composer
+  (`composer-mic`) with the OS's speech recognizer through `expo-speech-recognition`, always
+  `requiresOnDeviceRecognition`: no audio leaves the phone and no model of ours is involved.
+  Shown only where it can stay on the device: iOS asks `nomad-llm`'s
+  `supportsOnDeviceDictation(locale)` (on a locale without on-device support iOS would silently
+  use Apple's servers, and the library only checks the phone's own locale); Android needs API 33+
+  (`createOnDeviceSpeechRecognizer`; below it the library would fall back to Google's online
+  recognizer) and `supportsOnDeviceRecognition()`, and offers the system's language-pack download
+  (`androidTriggerOfflineModelDownload`) when the pack is missing. Only the microphone permission
+  is requested (on-device needs no speech recognition permission). Locale: the app language with
+  the phone's region (`dictationLocale`, es-MX on a Mexican phone). Non-continuous: ends after a
+  pause; the text goes after what was typed (`joinDictation`), live, and is never sent by itself.
+  Typing, sending or leaving the app cancels it; results after a cancel are dropped.
 
 ### Preparedness (`src/features/prepare`, `src/app/(tabs)/(home)/prepare`)
 

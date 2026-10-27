@@ -15,6 +15,7 @@ Pod::Spec.new do |s|
 
   # FoundationModels only exists on iOS 26+: weak-link so the app still launches on 16.4.
   s.weak_frameworks = 'FoundationModels'
+  s.frameworks = 'Speech'
 
   s.source_files = '**/*.{h,m,swift}'
   s.pod_target_xcconfig = {

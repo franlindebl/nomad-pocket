@@ -231,6 +231,27 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-27 — Assistant: dictate questions with the phone's own speech recognition
+
+Owner: a microphone in the AI chat that transcribes with the native dictation, not with an AI model
+of ours. `expo-speech-recognition` 58 with `requiresOnDeviceRecognition`: the audio never leaves the
+phone. The button (`composer-mic`) only appears where that holds: iOS checks the locale with a new
+`nomad-llm` function, `supportsOnDeviceDictation` (on a locale without on-device support iOS would
+quietly use Apple's servers, and the library only checks the phone's own locale); Android needs 13+
+and offers the system's language-pack download when it's missing. Only the microphone permission is
+asked (on-device needs no speech permission: checked, iOS shows just the microphone prompt with our
+text). The spoken text goes after what was typed, live; it stops after a pause, on a second tap, when
+the person types, sends or leaves the app, and is never sent by itself. Privacy policy (es + en) has
+a "Micrófono y dictado" section; InfoPlist strings in `locales/`. Built in the worktree
+`.claude/worktrees/dictation`.
+
+- Checked: iOS 27 simulator (Release): the button shows for es-ES, the permission prompt, the
+  listening state ("Te escucho…", red button). Android 16 emulator (Release): the button shows, the
+  RECORD_AUDIO prompt.
+- Not checked: the transcription itself. On this Mac both the iOS simulator (CoreAudio "RPC timeout.
+  Apparently deadlocked", a known simulator AVAudioEngine input bug) and the Android emulator (host
+  audio, QEMU hung) die as soon as they open the microphone. Pending on a real iPhone and Android
+  phone; `ai-08-dictation` only checks the button is there.
 ### 2026-10-27 — Maps: a navigation view that reads like Google Maps'
 
 - Owner found the navigation view hard to read: the route never got consumed, the map turned
