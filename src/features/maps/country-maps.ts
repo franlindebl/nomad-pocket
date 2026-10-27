@@ -29,6 +29,7 @@ import { contentDir, contentFile, deleteFile } from '@/lib/storage';
 import { copyInto } from '../../../modules/nomad-files';
 
 import { oneAssemblyAtATime } from './assembly';
+import { fetchCatalog } from './catalog-fetch';
 import { countryGroupId, mapAssetUrl, parseMapsManifest, type CountryMap, type MapsManifest, type PlannedArchive } from './country-core';
 import { storeEmergencyPointsFile } from './emergency';
 import { mapItemId, notifyMapInstalled, type MapItemMeta } from './extraction';
@@ -60,11 +61,7 @@ export async function refreshMapsCatalog(): Promise<void> {
   if (useMapsCatalog.getState().status === 'loading') return;
   useMapsCatalog.setState({ status: 'loading' });
   try {
-    const res = await fetch(MANIFEST_URL, { headers: { 'Cache-Control': 'no-cache' } });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const text = await res.text();
-    const manifest = parseMapsManifest(text);
-    if (!manifest) throw new Error('bad manifest');
+    const { text, manifest } = await fetchCatalog(MANIFEST_URL, parseMapsManifest);
     Storage.setItemSync(CACHE_KEY, text);
     useMapsCatalog.setState({ manifest, status: 'idle' });
     fetchMissingMapSideFiles(manifest);

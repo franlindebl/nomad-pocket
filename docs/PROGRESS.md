@@ -221,6 +221,16 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-27 — Onboarding: the country's map no longer drops out when a catalog fetch fails
+
+A fresh install has no cached maps/routing catalog, so one failed request (seen once in a Maestro
+run: the network still waking up or a GitHub hiccup) made the kit step say "Ahora no se puede
+descargar el mapa" until the app restarted. The catalog fetch now tries 3 times (2 s, 5 s apart)
+with a 20 s timeout per try, so a hung request no longer spins forever (`maps/catalog-fetch.ts`).
+The kit step retries on arrival if the catalogs still failed, and its "download without the map"
+alert gains "Reintentar". Checked with a fake fetch (fails, 503, then succeeds; and gives up
+after 3); not run on the simulator.
+
 ### 2026-10-27 — Release: 1.1.0 build 16 to TestFlight
 
 Build 16 = the native sha-256 and file copies (`modules/nomad-files`; the app was killed while
@@ -263,7 +273,8 @@ segmented from 16 MB (was 64); 6 connections per GitHub/Hugging Face host (was 4
 mirror speeds remembered for 10 min so small archives start without re-probing. Simulator, the
 same kit (Spain + 12 guides): the guides finish in 80 s alongside the map instead of waiting
 behind its six files (measurements in `docs/DOWNLOADS_SPEED_PLAN.md`). Also seen: the maps
-catalog was briefly unavailable ("Ahora no se puede descargar el mapa") during one run.
+catalog was briefly unavailable ("Ahora no se puede descargar el mapa") during one run (fixed
+later the same day: catalog fetches retry).
 
 ### 2026-10-27 — Release: 1.1.0 build 14 to TestFlight
 

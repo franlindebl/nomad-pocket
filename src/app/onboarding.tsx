@@ -210,6 +210,15 @@ export default function OnboardingScreen() {
   const countryPending = on.country && kit.countryWanted && countrySize.status === 'loading';
   const countryFailed = on.country && kit.countryWanted && (countrySize.status === 'offline' || countrySize.status === 'error');
   const fits = kit.needed <= kit.free;
+  // The catalogs are fetched when the wizard opens: if that failed (a fresh install has no cached
+  // copy), the kit step tries again rather than offering the kit without the map.
+  const retryCountry = countrySize.retry;
+  const failedOnArrival = step === 2 && countryFailed;
+  useEffect(() => {
+    if (failedOnArrival) retryCountry();
+    // Once per arrival on the kit step; `retry` is a new function every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   const startKit = async () => {
     setStarting(true);
@@ -491,6 +500,7 @@ export default function OnboardingScreen() {
                       if (on.country && countryFailed)
                         Alert.alert(t('onboarding.kit.country', { name: countryTitle }), t('onboarding.kit.countryLater'), [
                           { text: tc('actions.cancel'), style: 'cancel' },
+                          { text: tc('actions.retry'), onPress: countrySize.retry },
                           { text: tc('actions.continue'), onPress: () => void startKit() },
                         ]);
                       else void startKit();

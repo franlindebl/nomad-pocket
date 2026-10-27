@@ -131,7 +131,8 @@ assets/                      fonts, icons, splash, maps/basemap-assets.zip, maps
      routing packs, copy the bundled world map; after 4 s: index maps whose index is stale,
      the detail around the user, sweep leftover routing/map files, resume interrupted side-file
      imports, and refresh the routing and maps catalogs from GitHub (unconditionally, whenever
-     online; also each time a country screen opens).
+     online; also each time a country screen opens). Each fetch tries 3 times with a 20 s timeout
+     (`maps/catalog-fetch.ts`); the onboarding kit step tries again on arrival if it still failed.
    - assistant: engine lifecycle (release on background), system-model status watcher,
      chat sessions, forget a selected model whose file is gone.
    - prepare: notification handler (foreground banners) and tap → `/prepare/kit` (also from a
