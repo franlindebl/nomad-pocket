@@ -12,7 +12,7 @@ tags: [smoke, maps]
 - assertVisible: "Elegir un país"
 - takeScreenshot: 01-maps-empty
 - tapOn: "Tus mapas"
-- assertVisible: "Mapa del mundo.*"
+- assertVisible: "Mapa básico del mundo.*"
 - assertVisible: "(?s).*Incluido.*"
 - assertVisible: { id: "add-country" }
 - assertVisible: "Descargar tu país.*"

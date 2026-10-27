@@ -221,6 +221,15 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-27 — Maps: the bundled world map is called "Mapa básico del mundo"
+
+Owner: "Mapa del mundo · Viene con la app" made people wonder why each country is a separate
+download. The bundled z0–5 map is now "Mapa básico del mundo" / "Basic world map" (Tus mapas row
+and item title), its row says it has no streets, and the Maps empty card says you are seeing a basic
+world map until you download your country. READMEs and MAP-01 updated. The stored item title of
+existing installs keeps the old name, but the world item is not listed anywhere else (Settings
+skips it), so nothing visible keeps it. Not looked at on a device yet.
+
 ### 2026-10-27 — Toast: the confirmation pill no longer flickers as it bounces in
 
 Owner: the "listo para usar sin conexión" pill bounced in fine but its opacity changed with each

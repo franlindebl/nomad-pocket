@@ -96,7 +96,7 @@ still have a connection.
   street, path and building), turn-by-turn routes by car, on foot and by bike, emergency
   points, and every street, place and house number for search (a street address lands on
   the door, or beside it when OpenStreetMap lacks that number).
-- **A world map built into the app**, so there is a map from the first second.
+- **A basic world map built into the app**, so there is a map from the first second; each country downloads with full detail.
 - Navigation view that follows you, compass beam, saved places, coordinates and UTM.
 - Maps and offline routing for every country (all but a few uninhabited territories).
   Canada, Russia and the United States come one zoom level lower (z14), which keeps their
