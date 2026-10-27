@@ -285,7 +285,11 @@ Marino now has a pack), not the suite's local ones.
 - No pack, on purpose: us (four regional packs added to packs.json in f3efa4d, run 40426777070;
   build 13+ reads several packs per country), ht (shares do), pm and the uninhabited
   territories atc gs hm io kas pn tf.
-- README (en, es): routing everywhere but the USA (coming) and a few uninhabited territories;
+- Run 40426777070 published the USA as four packs (235 in routing-index): us-west 4.9 GB,
+  us-midwest 5.5 GB, us-northeast 2.8 GB, us-south 7.8 GB (21 GB of routing tiles) plus 2.3 GB of
+  side files; the us map (8 GB, z14) no longer lists side files. **The whole USA is ~31 GB in one
+  download**: owner decision pending (keep, or let a phone take one region).
+- README (en, es): routing everywhere but a few uninhabited territories;
   ca/ru/us maps one zoom lower. Closes DOCS-PUBLIC-1/2 and DOCS-INTERNAL-8.
 
 ### 2026-10-26 — CI: country packages workflow hardened (SUPPLY-1/2/3)
