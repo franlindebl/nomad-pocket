@@ -6,11 +6,11 @@ can pick up without re-deriving anything.
 
 ## Current state (2026-10-27)
 
-- **Version 1.1.0 (iOS build 20)** on TestFlight 2026-10-27: dictation in the assistant, a more
+- **Version 1.1.0 (iOS build 21)** on TestFlight 2026-10-27 (build 20 plus a photo library purpose string): dictation in the assistant, a more
   capable model becomes the default, answers survive switching chats, the navigation view reworked,
   Canada and Russia by regions, on top of build 19 (document collections, map legend, SOS button);
   **1.0.1 (build 3)** waiting for App Review. Release process and version table: `docs/RELEASE.md`;
-  store builds are tagged from build 13 on (`v1.1.0-20`). Build 17 shipped another session's
+  store builds are tagged from build 13 on (`v1.1.0-21`). Build 17 shipped another session's
   unfinished edits: don't use it.
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
@@ -237,6 +237,18 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-27 — Release: 1.1.0 build 21 to TestFlight (photo library purpose string)
+
+App Store Connect answered build 20 with ITMS-90683: the binary references photo library APIs
+without `NSPhotoLibraryUsageDescription`. Not the dictation: `expo-image`
+(`Loaders/PhotoLibraryAssetLoader.swift`, `ph://` URIs) and `expo-file-system`'s legacy module
+(`FileSystemHelpers.swift`, `copyPHAsset`) `import Photos` and are always compiled in. The app never
+asks for the photo library, so the string (`app.json` + `locales/{es,en}.json`) says exactly that; it
+is never shown and the privacy policy stays true. Build 21 = build 20 plus that key; no JS or native
+code change, so no E2E run (build 20's smoke was 21/21). Archived from a clean worktree of the release
+commit, tagged `v1.1.0-21`. Also: the main checkout's `node_modules` lacked `expo-speech-recognition`
+(build 20 came from the dictation worktree); `npm install` there before building from it.
 
 ### 2026-10-27 — Release: 1.1.0 build 20 to TestFlight
 
