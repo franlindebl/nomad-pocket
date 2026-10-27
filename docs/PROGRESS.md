@@ -285,6 +285,14 @@ and storage, Credits & licences, data out of the Files app, re-downloadable data
 auto-stop, translated permission prompt) and multi-pack countries (the USA). Smoke E2E 21/21 on an
 iOS 27 simulator; tagged `v1.1.0-13` (GPL section 6).
 
+### 2026-10-27 — USA in regions: plan; Alaska and Hawaii packs
+
+The whole USA is 31 GB in one download (~60 GB free asked): the owner approved splitting it
+into regions that each bring map, routing and side files, with a whole-country shortcut
+(`docs/COUNTRY_REGIONS_PLAN.md`). Sizing found that Geofabrik's four US regions leave out
+Alaska and Hawaii: `us-alaska` and `us-hawaii` added to packs.json, and the workflow now takes
+region ids (`countries="us-alaska us-hawaii"`) so a region builds alone.
+
 ### 2026-10-27 — Maps: ask for the location and start on the user
 
 Owner on the iPhone: the Maps tab opened where the map was left (or on the first country),

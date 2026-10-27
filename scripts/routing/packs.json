@@ -89,6 +89,8 @@
     "us-midwest": { "geofabrik": "north-america/us-midwest", "iso": "US", "region": "us" },
     "us-northeast": { "geofabrik": "north-america/us-northeast", "iso": "US", "region": "us" },
     "us-south": { "geofabrik": "north-america/us-south", "iso": "US", "region": "us" },
+    "us-alaska": { "geofabrik": "north-america/us/alaska", "iso": "US", "region": "us" },
+    "us-hawaii": { "geofabrik": "north-america/us/hawaii", "iso": "US", "region": "us" },
     "cd": { "geofabrik": "africa/congo-democratic-republic", "iso": "CD" },
     "cf": { "geofabrik": "africa/central-african-republic", "iso": "CF" },
     "cg": { "geofabrik": "africa/congo-brazzaville", "iso": "CG" },
