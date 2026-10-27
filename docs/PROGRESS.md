@@ -221,6 +221,14 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-27 — Toast: the confirmation pill no longer flickers as it bounces in
+
+Owner: the "listo para usar sin conexión" pill bounced in fine but its opacity changed with each
+bounce. `FadeInUp.springify()` springs the opacity too, so it overshot and dipped below 1. The pill
+now slides down from just above the screen with the same spring (`damping: 18`), fully opaque the
+whole time; the exit (FadeOutUp, 200 ms) is unchanged. Not looked at on a device yet: check it in
+the next release build.
+
 ### 2026-10-27 — Maps: a country's search and points are prepared as the end of its download
 
 Owner, after downloading Spain: opening map search froze for 1–2 s, then said "Preparando la búsqueda
