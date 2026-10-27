@@ -100,8 +100,9 @@ aún tengas internet.
   a la puerta, o junto a ella si OpenStreetMap no tiene ese número).
 - **Mapa del mundo incluido en la app**: hay mapa desde el primer segundo.
 - Vista de navegación que te sigue, haz de la brújula, lugares guardados, coordenadas y UTM.
-- Mapas y navegación sin conexión de todos los países (menos algunos territorios deshabitados). Canadá, Rusia y Estados Unidos vienen con un
-  nivel de zoom menos (z14), para que la descarga no pase de 10 GB.
+- Mapas y navegación sin conexión de todos los países (menos algunos territorios
+  deshabitados). Canadá, Rusia y Estados Unidos vienen con un nivel de zoom menos (z14), para
+  que el mapa no pase de 10 GB.
 
 <table>
   <tr>

@@ -98,8 +98,9 @@ still have a connection.
   the door, or beside it when OpenStreetMap lacks that number).
 - **A world map built into the app**, so there is a map from the first second.
 - Navigation view that follows you, compass beam, saved places, coordinates and UTM.
-- Maps and offline routing for every country (all but a few uninhabited territories). Canada, Russia and the United States come one
-  zoom level lower (z14), which keeps their download under 10 GB.
+- Maps and offline routing for every country (all but a few uninhabited territories).
+  Canada, Russia and the United States come one zoom level lower (z14), which keeps their
+  map under 10 GB.
 
 <table>
   <tr>
