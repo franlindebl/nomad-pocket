@@ -8,6 +8,8 @@ name: Country packages
 #   2. its map (scripts/maps/build-country-map.sh): the Protomaps planet build cut by the
 #      country's outline at z15, with the same side files from Geofabrik when no pack
 #      brought them.
+# A country split in regions (packs.json "region": the USA) has one job per region instead,
+# each building that region's pack and map (docs/COUNTRY_REGIONS_PLAN.md).
 # Publishes the two catalogs the app reads, in their formats: routing-index/routing-manifest.json
 # (files in `routing-<date>-<run id>`) and maps-index/maps-manifest.json (files in
 # `maps-<date>-<run id>-<continent>`: GitHub stops at 1000 assets per release). Each index is
@@ -118,15 +120,17 @@ jobs:
         id: what
         run: |
           # A job is a country (its map, and its routing pack if packs.json lists one under
-          # its id) or a regional pack of a split country (routing only: "us-west").
+          # its id) or a region of a split country ("us-west": its routing pack and its map;
+          # the country itself then has no whole map).
           python3 -I - >> "$GITHUB_OUTPUT" <<'PY'
           import json, os
           job, parts = os.environ["COUNTRY"], os.environ["PARTS"]
           packs = json.load(open("scripts/routing/packs.json"))["countries"]
           regions = {r["id"]: r for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["type"] == "country"}
           is_country = job in regions
+          split = any(p.get("region") == job for p in packs.values())
           print(f"routing={'true' if job in packs and parts in ('all', 'routing') else 'false'}")
-          print(f"maps={'true' if is_country and parts != 'routing' else 'false'}")
+          print(f"maps={'true' if (not is_country or not split) and parts != 'routing' else 'false'}")
           print(f"continent={regions[job if is_country else packs[job]['region']]['continent']}")
           PY
       - name: Disk and tools
@@ -250,7 +254,7 @@ jobs:
           fi
           python3 -I scripts/maps/maps-manifest.py merge "maps-$STAMP" fragments/maps/*.maps.json > maps-manifest.json
           if [ -f previous/maps-manifest.json ]; then
-            python3 -I scripts/maps/maps-manifest.py carry previous/maps-manifest.json maps-manifest.json src/features/maps/regions.json > merged.json
+            python3 -I scripts/maps/maps-manifest.py carry previous/maps-manifest.json maps-manifest.json src/features/maps/regions.json scripts/routing/packs.json > merged.json
             mv merged.json maps-manifest.json
           fi
           has_release maps-index || gh release create maps-index --prerelease \

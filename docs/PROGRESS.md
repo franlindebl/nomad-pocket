@@ -295,6 +295,12 @@ region ids (`countries="us-alaska us-hawaii"`) so a region builds alone.
 Space check: `countryNeed` counted a temp copy for every multi-part archive at once (the USA
 asked ~60 GB free for 31 GB); assemblies now run one at a time (`assembly.ts`) and the check
 adds the biggest copy only (~39 GB).
+CI for regional maps (not run yet: TestFlight builds ≤ 15 would take the first regional map for
+the whole USA): a region job builds its map too, cut by `region-outline.py` (Geofabrik `.poly` ∩
+the country's Natural Earth polygons); `maps-manifest.py carry` keeps region maps and drops a
+whole map once its regions have maps. Measured on build 20261026 at z15: west 4.6, midwest 3.9,
+northeast 2.1, south 5.7 GB, Alaska 722 MB, Hawaii 32 MB (built end to end locally). Today's
+whole-USA map has no Hawaii: country-region.py keeps islands within 10° of the mainland.
 
 ### 2026-10-27 — Maps: ask for the location and start on the user
 
