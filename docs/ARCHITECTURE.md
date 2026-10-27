@@ -514,7 +514,12 @@ over the country's outline (`country-region.py`: Natural Earth 10m polygons with
 exclaves within 10°, grown 5 km; Spain then carries Canarias and no Portugal: 2.3 GB instead
 of the bbox's 3.2 GB; Natural Earth is pinned — v5.1.2, commit f1890d9 + sha256 — and a failed outline
 fails the job; the `regions.json` bbox is used only for countries Natural Earth lacks) at z15 (the highest zoom whose archive is ≤ 10 GB), split in
-≤ 1900 MiB parts; for countries without a routing pack also `<id>.{pois,streets,places,addresses}.tsv`
+≤ 1900 MiB parts. A country split in regions (packs.json `region`: the USA in us-west, us-midwest,
+us-northeast, us-south, us-alaska, us-hawaii) gets one map per region instead (`id` us-west,
+`regionId` us; `region-outline.py`: the region's Geofabrik `.poly` ∩ every Natural Earth polygon of
+the country, so Hawaii is in) built in the region's job after its pack, and no whole map; the
+catalog's `carry` drops a country's whole map once its regions have maps
+(docs/COUNTRY_REGIONS_PLAN.md). For countries without a routing pack also `<id>.{pois,streets,places,addresses}.tsv`
 from the Geofabrik extract named after the country, which wins a tie (an unresolved tie takes none,
 and the app falls back to Overpass; Geofabrik mis-tags `pf`, `wf`, `tk`, Clipperton and `pn`, and `as`,
 `gu`, `mp` have no extract of their own) (scripts/routing/emergency-points.py, streets.py, places.py: the

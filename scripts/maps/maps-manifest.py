@@ -1,8 +1,11 @@
 """Describes built country maps for the app (src/features/maps/country-maps.ts).
-  fragment <out dir> <country> <YYYYMMDD> <max zoom> <bbox>  → JSON object of this country's map
+  fragment <out dir> <id> <YYYYMMDD> <max zoom> <bbox> [<country>]
+                                                             → JSON object of this map (a country's,
+                                                               or a region's: id us-west, country us)
   merge <release tag> <fragment.json...>                     → maps-manifest.json
-  carry <previous manifest> <new manifest> <regions.json>    → new + previous maps of countries
-                                                               not rebuilt (still in regions.json)
+  carry <previous manifest> <new manifest> <regions.json> <packs.json>
+                                                             → new + previous maps not rebuilt (countries
+                                                               of regions.json, regions of packs.json)
 A map is one .pmtiles archive in one or more parts; the app downloads the parts in order
 and appends them. pois/streets/places/addresses are absent where a routing pack brings them."""
 import hashlib, json, os, sys, time, glob
@@ -25,14 +28,14 @@ def described(path):
     return {"name": os.path.basename(path), "size": os.path.getsize(path), "sha256": sha256(path)}
 
 
-def fragment(out_dir, country, build_date, zoom, bbox):
+def fragment(out_dir, country, build_date, zoom, bbox, region_id=None):
     whole = os.path.join(out_dir, f"{country}.pmtiles")
     parts = [whole] if os.path.exists(whole) else sorted(glob.glob(os.path.join(out_dir, f"{country}.pmtiles.part*")))
     if not parts:
         raise SystemExit(f"no map for {country}")
     json.dump({
         "id": country,
-        "regionId": country,
+        "regionId": region_id or country,
         "buildDate": build_date,
         "maxZoom": int(zoom),
         "bbox": [float(v) for v in bbox.split(",")],
@@ -56,20 +59,29 @@ def merge(release, files):
     }, sys.stdout, indent=1)
 
 
-def carry(previous, current, regions_json):
+def carry(previous, current, regions_json, packs_json):
     prev, cur = json.load(open(previous)), json.load(open(current))
     listed = {r["id"] for r in json.load(open(regions_json))["regions"] if r["type"] == "country"}
+    listed |= {k for k, v in json.load(open(packs_json))["countries"].items() if "region" in v}
     rebuilt = {m["id"] for m in cur["maps"]}
     kept = [dict(m, release=m.get("release", prev["release"])) for m in prev["maps"] if m["id"] not in rebuilt and m["id"] in listed]
+    # One kind of map per country, the one this run built: a country's whole map goes once its
+    # regions have maps (the USA's z14 map, after the regions' first run), and regions' maps
+    # go if the country is built whole again.
+    whole = lambda m: m["id"] == m["regionId"]
+    whole_rebuilt = {m["regionId"] for m in cur["maps"] if whole(m)}
+    kept = [m for m in kept if whole(m) or m["regionId"] not in whole_rebuilt]
+    split = {m["regionId"] for m in cur["maps"] + kept if not whole(m)}
+    kept = [m for m in kept if not whole(m) or m["regionId"] not in split]
     cur["maps"] = sorted(cur["maps"] + kept, key=lambda m: m["id"])
     json.dump(cur, sys.stdout, indent=1)
 
 
 if len(sys.argv) > 1 and sys.argv[1] == "fragment":
-    fragment(*sys.argv[2:7])
+    fragment(*sys.argv[2:8])
 elif len(sys.argv) > 1 and sys.argv[1] == "merge":
     merge(sys.argv[2], sys.argv[3:])
 elif len(sys.argv) > 1 and sys.argv[1] == "carry":
-    carry(sys.argv[2], sys.argv[3], sys.argv[4])
+    carry(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
 else:
     raise SystemExit(__doc__)

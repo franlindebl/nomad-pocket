@@ -10,7 +10,11 @@
 # places and house numbers from their Geofabrik extract, so a country download is complete
 # and never needs Overpass.
 #
-# Usage: scripts/maps/build-country-map.sh <country id> <work dir> <planet build url>
+# A country split in regions (packs.json "region": us-west, us-alaska…) gets one map per
+# region instead, cut by the polygon its routing pack comes from (region-outline.py); that
+# pack brings its side files.
+#
+# Usage: scripts/maps/build-country-map.sh <country or region id> <work dir> <planet build url>
 # Needs pmtiles (go-pmtiles), curl, python3 with shapely; for the points, osmium-tool and pyosmium.
 # Output: <work dir>/out/<id>.pmtiles[.partNN], <id>.{pois,streets,places,addresses}.tsv, <id>.maps.json
 set -euo pipefail
@@ -39,7 +43,14 @@ fetch() {
   return 1
 }
 
-BBOX="$(python3 -I - "$ROOT/src/features/maps/regions.json" "$ID" <<'PY'
+# A region: its country and its Geofabrik extract ("north-america/us-west").
+read -r COUNTRY GEOFABRIK < <(python3 -I - "$ROOT/scripts/routing/packs.json" "$ID" <<'PY'
+import json, sys
+p = json.load(open(sys.argv[1]))["countries"].get(sys.argv[2], {})
+print(p.get("region", sys.argv[2]), p.get("geofabrik", "") if "region" in p else "")
+PY
+)
+BBOX="$(python3 -I - "$ROOT/src/features/maps/regions.json" "$COUNTRY" <<'PY'
 import json, sys
 r = next((r for r in json.load(open(sys.argv[1]))["regions"] if r["id"] == sys.argv[2] and r["type"] == "country"), None)
 if not r:
@@ -64,7 +75,13 @@ if [[ "$NE_ACTUAL" != "$NE_SHA256" ]]; then
   exit 1
 fi
 REGION_STATUS=0
-REGION_BBOX="$(python3 -I "$HERE/country-region.py" "$ID" "$NE" "$WORK/src/$ID.geojson")" || REGION_STATUS=$?
+if [[ -n "$GEOFABRIK" ]]; then
+  fetch "$WORK/src/$ID.poly" "https://download.geofabrik.de/$GEOFABRIK.poly"
+  REGION_BBOX="$(python3 -I "$HERE/region-outline.py" "$WORK/src/$ID.poly" "$NE" "$COUNTRY" "$WORK/src/$ID.geojson")" || REGION_STATUS=$?
+  (( REGION_STATUS == 0 )) || { log "region-outline.py failed ($REGION_STATUS)"; exit 1; }
+else
+  REGION_BBOX="$(python3 -I "$HERE/country-region.py" "$ID" "$NE" "$WORK/src/$ID.geojson")" || REGION_STATUS=$?
+fi
 if (( REGION_STATUS == 0 )); then
   AREA=(--region="$WORK/src/$ID.geojson")
   BBOX="$REGION_BBOX"
@@ -218,5 +235,5 @@ os.rename(path, f"{path}.part00")
 PY
 fi
 
-python3 -I "$HERE/maps-manifest.py" fragment "$OUT" "$ID" "$BUILD_DATE" "$ZOOM" "$BBOX" > "$OUT/$ID.maps.json"
+python3 -I "$HERE/maps-manifest.py" fragment "$OUT" "$ID" "$BUILD_DATE" "$ZOOM" "$BBOX" "$COUNTRY" > "$OUT/$ID.maps.json"
 log "done"
