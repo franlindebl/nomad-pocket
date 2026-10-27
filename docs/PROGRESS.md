@@ -21,7 +21,7 @@ can pick up without re-deriving anything.
 |---|---|
 | Foundation (design system, nav, i18n, db, downloads core) | done |
 | Catalog (101 resources, 6 categories, Wikipedia picker, Kiwix OPDS explore, Files import) | done |
-| Downloads (queue, pause/resume, iOS background, fastest Kiwix mirror, Wi-Fi-only enforced in the manager, size + sha-256 checks, retry with backoff) | done |
+| Downloads (queue, pause/resume, iOS background, Wi-Fi-only enforced in the manager, size + sha-256 checks, retry with backoff; segmented multi-mirror engine with throughput-ranked Kiwix mirrors, per-piece sha-1, resume from disk after a kill; screen kept on) | done — iOS sim + Android emulator (Release), branch `worktree-downloads-speed` not merged yet |
 | UX redesign: survival kit (`docs/UX_SURVIVAL_PLAN.md`): onboarding country + kit, Home "En una emergencia" + "Tu preparación", 4 tabs, maps by country, bundled world map, simpler settings | done — iOS sim (E2E smoke + full), Android spot check; build 11; country maps CI first run 2026-10-26 |
 | ZIM library + reader (search, TOC, bookmarks, history, find, text size, dark mode) | done — iOS + Android |
 | Courses (14 courses, syllabus with fallbacks, progress; inside Library since the redesign) | done |
@@ -142,12 +142,12 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
 2. Search side files: published (the 2026-10-26 full run; packs and country maps carry
    `.places.tsv` / `.addresses.tsv`). Still to measure the import on a real phone (Spain: 1.0 M
    places + 2.2 M doors).
-3. Faster, resumable downloads: plan in `docs/DOWNLOADS_SPEED_PLAN.md` (analysis and
-   measurements done 2026-10-26; Spanish Wikipedia nopic, 13.3 GB: ~2 h today, ~6–15 min
-   expected). A: keep the screen on while downloading. B: pick Kiwix mirrors by throughput.
-   C: segmented multi-mirror engine, after a device spike. D: piece-level repair. C also
-   resumes after the app is killed on iOS. The alternative for single-task downloads is to
-   reattach the background URLSession (small native module, BUG-CORE-16).
+3. Faster, resumable downloads: built (log 2026-10-26, `docs/DOWNLOADS_SPEED_PLAN.md`); Spanish
+   Wikipedia nopic, 13.3 GB, in 8.6 min on the simulator instead of ~2 h. Next: measure on a
+   real iPhone and Android phone (background session scheduling, Wi-Fi speeds), then the
+   adaptive connection budget (grow past 8 connections / 2 files while total speed grows; the
+   owner has a 300 Mb/s line). Small single-task downloads (< 64 MB) still restart from zero
+   after an iOS kill (BUG-CORE-16), which is cheap now.
 4. Map extraction: resume after a kill (persist the plan + written ranges) and move it off
    the JS thread.
 5. Android release: upload keystore, Play listing + data safety; the Android notices and the Play
@@ -192,10 +192,12 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
 - After a backup restore the database comes back without the content (items are dropped at
   startup, see ARCHITECTURE), but the `downloads` rows are not reconciled: paused or queued rows
   return and the manager retries them (not fixed).
-- Downloads interrupted by app termination: Android continues from the `.part` on disk; on iOS
-  the file restarts from zero, because the background session keeps transferring but is not
-  reattached after the app is terminated (BUG-CORE-16: needs a small native hook), so the bytes
-  may be fetched twice.
+- Downloads interrupted by app termination: files ≥ 64 MB (segmented) continue from their
+  verified `.part` prefix and the ranges on disk on both platforms; only the ranges in flight are
+  fetched again (on iOS the orphaned tasks also fetch them once more). Small single-task files on
+  iOS still restart from zero (BUG-CORE-16: the background session isn't reattached).
+- The segmented engine is measured on the simulator and the emulator only (a Mac's link), not on
+  phones: iOS background-session scheduling and real Wi-Fi speeds are unverified.
 - Compass heading in landscape: iOS reports an orientation of UNKNOWN until the first rotation after
   launch, so the heading is withheld in landscape until then; Android tablets whose natural
   orientation is landscape stay 90° off.
@@ -222,6 +224,27 @@ U. **UX redesign** (`docs/UX_SURVIVAL_PLAN.md`): done and on main (ebafcdd, owne
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-26 — Downloads: segmented multi-mirror engine, throughput-ranked mirrors, screen kept on
+
+Built `docs/DOWNLOADS_SPEED_PLAN.md` A, B, C and per-piece checks (contract in ARCHITECTURE,
+Downloads; what changed from the plan and the measurements in the plan file):
+- `mirrors.ts` `planSources()`: every Kiwix metalink mirror measured by throughput; other URLs
+  probed for ranges and exact size. `segmented.ts` + `segments-core.ts` (pure, 17 tests): ranges
+  over up to 8 connections (4 on mobile data), ≤ 3 per mirror across all downloads, scores from
+  live pace, crawling ranges duplicated, ranges appended in order to `.part` with each metalink
+  sha-1 piece checked (`expo-crypto`, new dependency; licences regenerated). Used for Kiwix,
+  GitHub (maps, packs) and Hugging Face (models) files ≥ 64 MB.
+- `keep-awake.ts`: screen on while something runs or installs and the app is open; a note in
+  the Downloads sheet (`downloads-keep-awake`, DL-02). Download rows show the time left on a
+  line of its own (the row used to wrap and unwrap as the estimate changed).
+- Simulator (iOS 27, Release): Spanish Wikipedia nopic 13.3 GB in 8 min 38 s (~2 h before);
+  656 MB killed after 12 s resumed with its finished ranges; Portugal (1.2 GB, GitHub) ~65 s;
+  Qwen 0.8B 30.8 MB/s. Android emulator (API 36, release APK): resume after a force-stop and
+  pause/resume on Home both work. Found and fixed on the way: iOS relaunches the app in the
+  background when orphaned range tasks finish, and a transfer told it was in the background
+  before loading crashed the run.
+- Not done: real phones; the adaptive connection budget (backlog 3); E2E smoke not run on it.
 
 ### 2026-10-26 — Release: 1.1.0 build 13 to TestFlight
 

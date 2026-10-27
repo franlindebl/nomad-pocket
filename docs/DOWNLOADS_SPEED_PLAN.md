@@ -1,8 +1,66 @@
 # Faster downloads: analysis and plan
 
-Status: **analysis only** (2026-10-26; Kiwix, GitHub, Hugging Face and Protomaps measured).
-Nothing implemented. Written against the pre-release audit's download manager, which is now
-on `main`, and checked again against `main` after the merge. Ready to pick up.
+Status: **A, B, C and piece checks implemented** (2026-10-26, branch `worktree-downloads-speed`),
+verified on the iOS 27 simulator (Release). The contract now lives in `docs/ARCHITECTURE.md`
+(Downloads); this file keeps the analysis, the measurements and what is still open. The
+"How downloads work today" section below describes the code before this work.
+
+## What was built, and how it differs from the plan
+
+- **A** `downloads/keep-awake.ts`: as planned. Also counts `processing` (hashing 13 GB, assembling
+  a country). No Settings toggle.
+- **B** `mirrors.ts` `planSources()`: all https mirrors probed at once by throughput (4 MiB at a
+  random offset, 2 s from the first byte, `expo/fetch` streaming). No per-host score memory in
+  `kv`: probing is cheap (≤ 4 MiB per mirror, less for small files) and C keeps measuring while it
+  downloads. Non-Kiwix URLs get a one-byte range request (ranges? exact size?).
+- **C** `segmented.ts` + `segments-core.ts`. Differences from the plan:
+  - **Append in order instead of a sparse file + bitmap.** Finished ranges are written to
+    `.part` at their offset strictly in order; ranges that finish early wait as files in
+    `partial/<id>.chunks/`. The resume state is the `.part` length (whole chunks) plus those
+    files, so nothing goes in `pause_state` and no migration was needed.
+  - Chunk size: ~48 chunks per file, 4–32 MiB (a 171 MB archive in 32 MiB chunks was 6 ranges
+    and the one on the slowest mirror decided the end).
+  - A source's score is its finished ranges' average, **lowered by the live pace of its ranges
+    in flight**: on the simulator the probe ranked nluug first and it then crawled with 3
+    connections; with completion-only scores it kept getting work and held up the start of the
+    file. The range the prefix waits for is duplicated as soon as it crawls (3× slower than
+    another source would be), not only at the end.
+  - Connection caps are **global per host** across downloads (2 archives at once still open ≤ 3
+    to a mirror), plus 8 connections on Wi-Fi / 4 on mobile data shared by the segmented ones.
+    The queue still runs 2 files at a time.
+  - Also used for GitHub (maps, packs) and Hugging Face (models), 4 connections per host: every
+    range asks the original URL, so expired signed redirects no longer matter, and they resume
+    after a kill.
+- **D** (piece repair) became **piece checks while appending**: each 4 MiB metalink piece is
+  sha-1'd with `expo-crypto` as it is copied into `.part`; a bad range is refetched from another
+  mirror and its mirror ruled out. No native helper was needed. The whole-file sha-256 stays.
+
+## Measured on the iOS simulator (2026-10-26 evening, same Mac and link as below)
+
+| Download | Before (estimate / plan) | Now |
+|---|---|---|
+| Spanish Wikipedia nopic, 13.3 GB (Kiwix) | ~2 h (~1.8 MB/s) | **8 min 38 s**, 16.9 MB/s average including a pause and 1 min in the background; 26–37 MB/s sustained in the foreground. sha-256 of 13 GB: ~25 s |
+| Wikcionario, 656 MB, killed after 12 s and resumed | restart from zero (iOS) | resumed with the 9 ranges on disk, rest at ~18 MB/s |
+| Two archives at once (560 + 581 MB) | — | ~22 MB/s together, never more than 3 TCP connections per mirror |
+| Portugal (map 585 MB + pack 582 MB + search files, GitHub) | — | ~65 s in all; pack alone 18 MB/s |
+| Qwen3.5 0.8B, 532 MB (Hugging Face) | — | 17 s, 30.8 MB/s |
+
+Kiwix mirrors were slower this evening than at midday (dotsrc ~8 MB/s per connection instead of
+19), and the metalink listed new mirrors (mirror-sites-fr.mblibrary.info). iOS relaunched the
+app in the background after it was killed, when the orphaned range tasks finished
+(`sessionSendsLaunchEvents`): the manager starts the download again then, which is good, but it
+exposed a bug (fixed) where a transfer was told it was in the background before it had loaded.
+
+## Still open
+
+- **Adaptive connection budget** (owner's question, 2026-10-26): instead of 2 files and 8
+  connections, grow the budget while the total speed grows (e.g. +2 connections every ~10 s up
+  to ~16) and back off when it doesn't, starting as many queued files as the budget allows. On a
+  300 Mb/s line (~37 MB/s) with mirrors at 5–8 MB/s per connection, 8 is short.
+- Real devices: everything above is the simulator on a Mac's link. A phone's Wi-Fi, iOS's
+  background-session scheduling (discretionary tasks, per-host limits) and Android's process
+  death need checking on hardware (the device spike, items 1–3 and 5).
+- Kiwix's policy on parallel connections (open question below) is still unasked.
 
 ## The problem
 

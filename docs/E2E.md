@@ -357,6 +357,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `home-readiness`, `ready-<map\|guides\|wikipedia\|assistant\|plan\|kit>`, `home-downloads`, `home-network` | Home: "Tu preparación" card and rows, downloads card, connection line |
   | `onboarding-start`, `onboarding-next`, `onboarding-download`, `onboarding-finish`, `onboarding-plan`, `onboarding-close` | setup wizard buttons (`onboarding-close` only on a second run) |
   | `download-allow-cellular`, `downloads-waiting-wifi`, `downloads-allow-cellular-all` | download row: "use mobile data" for this download; Downloads sheet: the "waiting for Wi-Fi" card and its "use mobile data for all" button |
+  | `downloads-keep-awake` | Downloads sheet: the "the screen stays on while downloading" note (while something runs or installs; DL-02) |
   | `kit-country`, `kit-guides`, `kit-wikipedia`, `kit-assistant` | setup wizard kit rows (the whole row toggles) |
   | `open-courses` | Courses card in the Library |
   | `settings-country`, `settings-credits` | Settings: your country, Credits & licenses |
