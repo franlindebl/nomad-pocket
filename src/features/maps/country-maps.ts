@@ -27,6 +27,7 @@ import {
 import i18n from '@/i18n';
 import { contentDir, contentFile, deleteFile } from '@/lib/storage';
 
+import { oneAssemblyAtATime } from './assembly';
 import { countryGroupId, mapAssetUrl, parseMapsManifest, type CountryMap, type MapsManifest, type PlannedArchive } from './country-core';
 import { storeEmergencyPointsFile } from './emergency';
 import { mapItemId, notifyMapInstalled, type MapItemMeta } from './extraction';
@@ -318,25 +319,28 @@ async function assembleMap(map: CountryMap, bundledPoints: boolean, from?: Downl
     if (parts.length === 1) {
       await parts[0].move(tmp);
     } else {
-      tmp.create();
-      const out = tmp.open(FileMode.Append);
-      try {
-        for (const part of parts) {
-          const input = part.open(FileMode.ReadOnly);
-          try {
-            for (;;) {
-              check();
-              const chunk = await input.readBytes(COPY_CHUNK);
-              if (!chunk.length) break;
-              await out.writeBytes(chunk);
+      // Waits for another country's assembly: room for one copy at a time (assembly.ts).
+      await oneAssemblyAtATime(async () => {
+        tmp.create();
+        const out = tmp.open(FileMode.Append);
+        try {
+          for (const part of parts) {
+            const input = part.open(FileMode.ReadOnly);
+            try {
+              for (;;) {
+                check();
+                const chunk = await input.readBytes(COPY_CHUNK);
+                if (!chunk.length) break;
+                await out.writeBytes(chunk);
+              }
+            } finally {
+              input.close();
             }
-          } finally {
-            input.close();
           }
+        } finally {
+          out.close();
         }
-      } finally {
-        out.close();
-      }
+      });
     }
     if (sizeOf(tmp) !== map.size) throw new Error(`assembled ${sizeOf(tmp)} bytes, expected ${map.size}`);
     check();

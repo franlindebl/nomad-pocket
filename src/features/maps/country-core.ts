@@ -147,18 +147,18 @@ const toFetch = (f: PlannedFile) => (f.onDisk || f.queued ? 0 : f.size);
  * figure, so the sheet never offers what the download then refuses). Files already on disk
  * cost nothing; queued ones are in `pending` (the remaining bytes of every download in the
  * queue, as the download manager counts them before queueing another). A multi-part archive
- * is appended into a temp copy while its parts still exist: its whole size again.
+ * is appended into a temp copy while its parts still exist: its whole size again, for the
+ * biggest one only (assemblies run one at a time: assembly.ts).
  */
 export function countryNeed(archives: (PlannedArchive | null | undefined)[], pending = 0): CountryNeed {
   let bytes = 0;
-  let needed = pending;
+  let copy = 0;
   for (const a of archives) {
     if (!a) continue;
-    const fetch = a.parts.reduce((sum, f) => sum + toFetch(f), 0) + a.sides.reduce((sum, f) => sum + toFetch(f), 0);
-    bytes += fetch;
-    needed += fetch + (a.parts.length > 1 ? a.size : 0);
+    bytes += a.parts.reduce((sum, f) => sum + toFetch(f), 0) + a.sides.reduce((sum, f) => sum + toFetch(f), 0);
+    if (a.parts.length > 1) copy = Math.max(copy, a.size);
   }
-  return { bytes, needed };
+  return { bytes, needed: pending + bytes + copy };
 }
 
 type PendingRecord = { status: string; totalBytes: number; bytesWritten: number; external?: boolean };

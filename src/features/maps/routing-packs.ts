@@ -21,6 +21,7 @@ import { cancelDownload, enqueueDownload, useDownloads, type DownloadGroup, type
 import i18n from '@/i18n';
 import { contentDir, contentFile, deleteFile } from '@/lib/storage';
 
+import { oneAssemblyAtATime } from './assembly';
 import { routePacksFor, type PlannedArchive } from './country-core';
 import { countryDownloadGroup, enqueueAll } from './country-maps';
 import { emergencySyncInfo, storeEmergencyPointsFile } from './emergency';
@@ -295,25 +296,28 @@ async function assemblePack(pack: ManifestPack, valhalla: string, from?: Downloa
     if (parts.length === 1) {
       await parts[0].move(tmp);
     } else {
-      tmp.create();
-      const out = tmp.open(FileMode.Append);
-      try {
-        for (const part of parts) {
-          const input = part.open(FileMode.ReadOnly);
-          try {
-            for (;;) {
-              check();
-              const chunk = await input.readBytes(COPY_CHUNK);
-              if (!chunk.length) break;
-              await out.writeBytes(chunk);
+      // Waits for another country's assembly: room for one copy at a time (assembly.ts).
+      await oneAssemblyAtATime(async () => {
+        tmp.create();
+        const out = tmp.open(FileMode.Append);
+        try {
+          for (const part of parts) {
+            const input = part.open(FileMode.ReadOnly);
+            try {
+              for (;;) {
+                check();
+                const chunk = await input.readBytes(COPY_CHUNK);
+                if (!chunk.length) break;
+                await out.writeBytes(chunk);
+              }
+            } finally {
+              input.close();
             }
-          } finally {
-            input.close();
           }
+        } finally {
+          out.close();
         }
-      } finally {
-        out.close();
-      }
+      });
     }
     if (sizeOf(tmp) !== pack.size) throw new Error(`assembled ${sizeOf(tmp)} bytes, expected ${pack.size}`);
     check();

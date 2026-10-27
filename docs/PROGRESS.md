@@ -292,6 +292,9 @@ into regions that each bring map, routing and side files, with a whole-country s
 (`docs/COUNTRY_REGIONS_PLAN.md`). Sizing found that Geofabrik's four US regions leave out
 Alaska and Hawaii: `us-alaska` and `us-hawaii` added to packs.json, and the workflow now takes
 region ids (`countries="us-alaska us-hawaii"`) so a region builds alone.
+Space check: `countryNeed` counted a temp copy for every multi-part archive at once (the USA
+asked ~60 GB free for 31 GB); assemblies now run one at a time (`assembly.ts`) and the check
+adds the biggest copy only (~39 GB).
 
 ### 2026-10-27 — Maps: ask for the location and start on the user
 

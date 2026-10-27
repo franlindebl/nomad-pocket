@@ -109,8 +109,16 @@ test('countryNeed: a fresh two-part map and pack, side files included', () => {
   const pack: PlannedArchive = { size: 2.27 * GB, parts: [planned(2 * GB), planned(0.27 * GB)], sides: [planned(0.15 * GB)] };
   const need = countryNeed([map, pack]);
   assert.equal(Math.round(need.bytes / 1e6), 4870);
-  // Both assembly copies on top of the download.
-  assert.equal(Math.round(need.needed / 1e6), 4870 + 2300 + 2270);
+  // The biggest assembly copy on top of the download (assemblies run one at a time).
+  assert.equal(Math.round(need.needed / 1e6), 4870 + 2300);
+});
+
+test('countryNeed: several packs (the USA) take the room of one copy, the biggest', () => {
+  const map: PlannedArchive = { size: 8 * GB, parts: [planned(2 * GB), planned(2 * GB), planned(2 * GB), planned(2 * GB)], sides: [] };
+  const packs = [7.8, 5.5, 4.9, 2.8].map((g): PlannedArchive => ({ size: g * GB, parts: [planned(g * GB - 1), planned(1)], sides: [planned(0.5 * GB)] }));
+  const need = countryNeed([map, ...packs]);
+  assert.equal(Math.round(need.bytes / 1e8), 310);
+  assert.equal(Math.round(need.needed / 1e8), 310 + 80);
 });
 
 test('countryNeed: what is on disk or queued costs nothing; a single part needs no copy', () => {
