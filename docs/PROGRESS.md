@@ -15,7 +15,8 @@ can pick up without re-deriving anything.
   unfinished edits: don't use it.
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
-  tour). Downloads measured and tuned by the agent on the owner's iPhone 14 Pro (2026-10-27).
+  tour). Downloads measured and tuned by the agent on the owner's iPhone 14 Pro (2026-10-27), re-timed
+  2026-10-28 with segments from 4 MiB: the 20.7 GB kit in 6:47 (`docs/DOWNLOADS_SPEED_PLAN.md`, run 8).
 - Checks: `npm test` (the count drifts: run it), `tsc` clean, lint clean, i18n keys complete. E2E: 62 Maestro flows
   (21 smoke, 22 full, 13 nightly, 1 iPad tour, 4 Android, 1 by hand: `map-22`, its own build); which cases they cover
   is in the catalog of `docs/E2E.md`. On f4b32d4 (2026-10-28): smoke 21/21, full 20/20 after a stale `map-15`
@@ -32,15 +33,15 @@ can pick up without re-deriving anything.
 |---|---|
 | Foundation (design system, nav, i18n, db, downloads core) | done |
 | Catalog (101 resources, 6 categories, Wikipedia picker, Kiwix OPDS explore, Files import) | done |
-| Downloads (queue, pause/resume, iOS background, Wi-Fi-only enforced in the manager, size + sha-256 checks, retry with backoff; segmented multi-mirror engine with throughput-ranked Kiwix mirrors, per-piece sha-1, resume from disk after a kill; adaptive connection budget; screen kept on; CDN files first, stall watchdog, in-process sessions on iOS while open) | done — tuned on a real iPhone 14 Pro (build 18); Android emulator check of the build 17 changes pending |
+| Downloads (queue, pause/resume, iOS background, Wi-Fi-only enforced in the manager, size + sha-256 checks, retry with backoff; segmented multi-mirror engine with throughput-ranked Kiwix mirrors, per-piece sha-1, resume from disk after a kill; adaptive connection budget; screen kept on; CDN files first, stall watchdog, in-process sessions on iOS while open; segmented from 4 MiB; rows whose partial bytes didn't survive a backup restore marked failed) | done — tuned on a real iPhone 14 Pro (build 18), re-timed 2026-10-28 (run 8, 6:47); Android: the tour's downloads pass (2026-10-28), speed not measured |
 | UX redesign: survival kit (`docs/UX_SURVIVAL_PLAN.md`): onboarding country + kit, Home "En una emergencia" + "Tu preparación", 4 tabs, maps by country, bundled world map, simpler settings | done — iOS sim (E2E smoke + full), Android spot check; build 11; country maps CI first run 2026-10-26 |
 | ZIM library + reader (search, TOC, bookmarks, history, find, text size, dark mode) | done — iOS + Android |
 | Courses (14 courses, syllabus with fallbacks, progress; inside Library since the redesign) | done |
-| Maps (country downloads: prebuilt z15 map + routing pack + points; the USA by regions; Canada and Russia by regions for the map with one national pack; on-device extraction as fallback; bundled world map; markers, GPS, multi-script labels; location asked on opening Maps) | done — iOS sim (Andorra and US regions, local catalogs); build 16. Canada/Russia regions: maps published 2026-10-27 (run 40544693154) and the app code is in builds 20+ (3c75852); a real-phone check of one region is pending (`docs/COUNTRY_REGIONS_PLAN.md`) |
+| Maps (country downloads: prebuilt z15 map + routing pack + points; the USA by regions; Canada and Russia by regions for the map with one national pack; on-device extraction as fallback, resumed after a kill; bundled world map; markers, GPS, multi-script labels; location asked on opening Maps) | done — iOS sim (Andorra and US regions, local catalogs; E2E map-20/21 for both kinds of regions); build 16. Canada/Russia regions: maps published 2026-10-27 (run 40544693154) and the app code is in builds 20+ (3c75852); a real-phone check of one region is pending (`docs/COUNTRY_REGIONS_PLAN.md`) |
 | Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
 | Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 237 packs live (every inhabited country; the USA in six regions) since 2026-10-27; E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
-| Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search; the most capable installed model is the default; on-device dictation; reads the PDFs inside archives (document index) and the family plan) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
+| Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search; the most capable installed model is the default; on-device dictation; reads the PDFs inside archives (document index) and the family plan; copy and regenerate an answer) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
 | Preparedness (family plan, emergency kit with expiry reminders, printable PDF, offline guides) | done — iOS sim + Android emulator (E2E) |
 | E2E suite (Maestro) + pre-commit hook | done |

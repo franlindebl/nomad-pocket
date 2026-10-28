@@ -42,7 +42,8 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 |---|---|---|---|---|
 | `npm run e2e` | 21 | ~14 min | P0: every screen's main path (incl. map search, Emergencias, road routing and Preparedness) | nothing (offline) |
 | `npm run e2e:full` | 43 | ~27 min | + P1: secondary features (themes, markers, find in page, courses, reminders, PDF…) | nothing (offline) |
-| `npm run e2e:all` | 55 | ~38 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
+| `npm run e2e:all` | 56 | ~38 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
+| `PLANET_PORT=8766 scripts/e2e.sh --build e2e/flows/maps/map-22-extract-resume.yaml` | 1 | ~6 min | extraction resumed after a kill (tag `planet`, its own build: rebuild without `PLANET_PORT` before other suites) | nothing (local stand-in planet) |
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape, light and dark | nothing (offline) |
 | `npm run e2e:android` | 4 | ~15 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack | internet, Android emulator |
 
