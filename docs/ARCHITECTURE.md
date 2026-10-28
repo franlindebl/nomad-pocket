@@ -586,7 +586,7 @@ pack's 1° cells, else the map's bbox, from a fix at most 10 min old; the locati
 for there, only for such a country). Without `regions`, a retry or an update covers the
 regions on the phone or on their way. `CountryState.maps`/`regions` list them;
 `removeCountryRegion` deletes one (the last one takes the country). A route between two US
-regions is a straight line (one pack must cover both ends, as between countries;
+regions is stitched at a crossing of the region border, as between countries (Routing below;
 docs/ROUTING_ACROSS_PACKS.md). Canada and Russia are split for the map only (`ca-ontario`,
 `ru-south`…: regions without a pack): their national pack is `CountryOffer.common`
 (`countryWidePacks`), planned with any non-empty choice of regions and removed with the last
@@ -804,7 +804,24 @@ tile names in the tar (`tileCoverage`). `computeRoute(from, to, costing)` tries 
 covering both ends, smallest first, moving on after "no road" / "no path" (packs are
 whole countries; packs installed from the first catalogs may be Spanish regions, tile
 subsets of the country build, which lack the roads a trip needs past their edge). Engine calls are
-serialized in JS (open + route never interleave with another request or a close). **Catalog**: `routing-manifest.json` in the
+serialized in JS (open + route never interleave with another request or a close).
+**Routes across packs** (`stitch-core.ts`, pure, tested; docs/ROUTING_ACROSS_PACKS.md): each
+pack is its own Valhalla build, so with no pack covering both ends (or with an end inside
+another installed pack's margin, near a border) `computeRoute` stitches: chains of installed
+packs joined by **crossings** (`<pack>.crossings.tsv` next to the tar: where a road from
+motorway to tertiary crosses the pack's border, `scripts/routing/crossings.py`; by car only
+motorway…secondary, by bike or on foot primary…tertiary), a matrix per pack border by
+border (origin → seams, seams → seams for a pack crossed on the way, seams → destination;
+a request that fails on one bad location is halved until it's alone), the cheapest sum
+wins (`bestPath`), then one route per leg with the seam's heading, joined by `joinRoutes`
+(the first leg's "arrive" dropped, the next leg's "depart" folded into the manoeuvre before
+it), so guidance sees one route. Near a border both the single-pack route and the stitched
+one are computed and the faster wins. A reroute on a stitched trip only recomputes the leg
+to the next crossing ahead (`lastStitch`), unless more than 10 km off. `canRoute` (guidance's
+gate) is true for a stitchable trip too. Valhalla's `max_matrix_distance` (`valhalla-defaults.json`)
+is also where its matrix search gives up, not only a straight-line check: at 500 km a 472 km bike
+leg came back empty (Ourense → Lisboa), so it is 4× the route reach by bike and on foot (2000 and
+1000 km) and the route reach by car (5000 km). **Catalog**: `routing-manifest.json` in the
 fixed release `routing-index` (override: `EXPO_PUBLIC_ROUTING_MANIFEST_URL`, set by
 `scripts/e2e.sh` for its local pack server), cached in kv-store; each pack lists its tar
 parts (≤ 1900 MiB, GitHub's asset limit is 2 GiB), a `.pois.tsv` and the search side

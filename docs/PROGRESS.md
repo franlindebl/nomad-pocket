@@ -139,8 +139,9 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
      Until a TestFlight build with 3c75852 is out, builds 16–19 show the region ids and download
      regions without routing. **Next**: that build, then a real-phone check of one region.
    - **Deferred by decision**: routes across packs (between US regions or countries: a straight
-     line today). Owner wants them later, ideally by joining the pieces: analysis and proposal
-     (one Valhalla graph, packs as tile subsets of it) in `docs/ROUTING_ACROSS_PACKS.md`; bundled quick cards (first aid, water, radio; owner
+     line today). **Stitched at border crossings, built 2026-10-28 in worktree `../nomad-app-routing`
+     (branch `routing-across-packs`, not merged)**: needs a CI run for the crossings files, then Android;
+     the US stays split. `docs/ROUTING_ACROSS_PACKS.md`; bundled quick cards (first aid, water, radio; owner
      reviews medical content first), emergency numbers per country.
    - **CI notes**: a failed country is relaunched alone with `gh workflow run
      country-packages.yml -f countries="<ids>" -f parts=routing|maps` (region ids work too:
@@ -264,6 +265,33 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-28 — Maps: routes across routing packs, stitched at the border
+
+The owner wants real routes between countries (Madrid → Paris) and between US regions, the same to the
+person as a route inside one country, with no paid machines (open source, no income). One Valhalla graph for
+the planet was proven on the desktop (spike 1: packs as tile subsets of one build route exactly like the whole
+graph) but needs a ~17 h, 64–128 GB build a month: shelved. Built instead (`docs/ROUTING_ACROSS_PACKS.md`):
+
+- **Crossings** per pack (`scripts/routing/crossings.py`, step 6c of `build-country.sh`, manifest
+  `crossings`, uploaded by the workflow): where a road from motorway to tertiary crosses the pack's border
+  (a US region: its states' outline), with the bearing out and the one-way direction. A few KB.
+- **Stitching** (`stitch-core.ts`, pure, 9 tests; `routing.ts` `computeRoute`): with no pack covering both
+  ends, or an end in another pack's margin, chains of installed packs, a matrix per pack border by border
+  (car: motorway…secondary seams only; bike/foot: primary…tertiary), the cheapest sum wins, one route per
+  leg, joined into one `Route` (the seam's "arrive"/"depart" folded away). Reroutes recompute only the leg
+  to the next crossing (16–18 ms on the simulator). `canRoute` gates guidance.
+- `valhalla-defaults.json`: `max_matrix_distance` is where the matrix search gives up, not just a
+  straight-line check: 500 km lost a 472 km bike leg; now 2000 km by bike, 1000 km on foot.
+- Measured, desktop (Galicia and Portugal built apart vs one graph of both): by car all 8 trips equal the
+  true best route (−0.6…0 %); bike and foot equal in 11 of 16 (up to +8 % where the best route crosses on a
+  local road the rule leaves out). Simulator, Release, the same packs seeded: Santiago → Porto by car 0.3 s
+  (234 km, one route through Valença), on foot 1.7 s; Ourense → Lisboa by car 0.5 s, by bike 1.8 s (533 km).
+- E2E `map-19-stitch` (`seeded-stitch`: Andorra cut in two at 1.555°E, each half built apart,
+  `scripts/routing/stitch-fixture.sh`, 3.5 MB). Run on simulator NP-routing: map-14, map-17, map-19 pass.
+- Not done: a CI run (the published packs have no crossings yet: routes across packs start working after the
+  next `country-packages.yml` run; nothing changes before it); map-15 (local catalog download) not rerun;
+  Android not tried; ferries (Spain–Morocco, UK–France) aren't crossings yet.
 
 ### 2026-10-28 — Functional review on the simulator and its fixes (R1–R14)
 

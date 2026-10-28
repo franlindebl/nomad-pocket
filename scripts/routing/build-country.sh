@@ -8,11 +8,11 @@
 # Usage: scripts/routing/build-country.sh <pack id from packs.json> <work dir>
 # A pack id is a country id, or a part of a country too big for one pack ("us-west", with
 # "region": "us" in packs.json).
-# Needs curl, python3 with pyosmium and osmium-tool, and the Valhalla tools: run inside
-# ghcr.io/valhalla/valhalla (CI does: apt-get install osmium-tool python3-pyosmium), or
+# Needs curl, python3 with pyosmium and shapely, osmium-tool, and the Valhalla tools: run inside
+# ghcr.io/valhalla/valhalla (CI does: apt-get install osmium-tool python3-pyosmium python3-shapely), or
 # on a host with docker, which then runs each Valhalla tool in that image.
 # Output: <work dir>/out/<pack>.tar[.partNN], <pack>.pois.tsv, <pack>.streets.tsv,
-# <pack>.places.tsv, <pack>.addresses.tsv, <country>.packs.json
+# <pack>.places.tsv, <pack>.addresses.tsv, <pack>.crossings.tsv, <country>.packs.json
 set -euo pipefail
 
 COUNTRY="$1"
@@ -181,6 +181,23 @@ python3 -I "$HERE/streets.py" "$WORK/src/streets.osm.pbf" "$OUT/$COUNTRY.streets
 osmium tags-filter --overwrite "$PBF" nwr/name nwr/addr:housenumber nwr/addr:block_number -o "$WORK/src/places.osm.pbf"
 python3 -I "$HERE/places.py" "$WORK/src/places.osm.pbf" "$OUT/$COUNTRY.places.tsv" "$OUT/$COUNTRY.addresses.tsv"
 rm -f "$WORK/src/places.osm.pbf"
+
+# 6c. Where main roads cross the pack's border: the app joins routes across packs there
+#     (docs/ROUTING_ACROSS_PACKS.md). A part of a split country ("us-west") is bounded by its
+#     states inside its Geofabrik polygons. No boundaries, no crossings.
+if [[ "$ADMINS" != "-" ]]; then
+  osmium tags-filter --overwrite "$PBF" w/highway=motorway,trunk,primary,secondary,tertiary -o "$WORK/src/roads.osm.pbf"
+  osmium export --overwrite "$WORK/src/admins.osm.pbf" -f geojsonseq -o "$WORK/src/admins.geojsonseq"
+  POLYS=()
+  if [[ "$REGION" != "$COUNTRY" ]]; then
+    for G in $GEOFABRIK; do
+      curl -fsSL --retry 3 -A "$UA" -o "$WORK/src/$(basename "$G").poly" "https://download.geofabrik.de/$G.poly"
+      POLYS+=("$WORK/src/$(basename "$G").poly")
+    done
+  fi
+  python3 -I "$HERE/crossings.py" "$WORK/src/roads.osm.pbf" "$WORK/src/admins.geojsonseq" "$ISO" "$OUT/$COUNTRY.crossings.tsv" ${POLYS[@]+"${POLYS[@]}"}
+  rm -f "$WORK/src/roads.osm.pbf"
+fi
 
 # 7. Parts for GitHub's 2 GiB asset limit (the app appends them back together).
 for tar in "$OUT"/*.tar; do

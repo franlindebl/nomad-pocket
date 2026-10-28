@@ -1,0 +1,70 @@
+# MAP-19 offline — a route across two routing packs: Andorra cut in two at 1.555°E, each half
+# built on its own as neighbouring countries are, seeded with their border crossings
+# (e2e/fixtures/routing-stitch). From Andorra la Vella (west half) to Canillo (east half) the
+# route follows the roads across the cut as one route, by car and on foot.
+appId: com.fjlinde.nomadpocket
+tags: [full, maps, seeded-stitch]
+---
+- setLocation:
+    latitude: 42.5075
+    longitude: 1.5218
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: { id: "map-search" }
+    timeout: 20000
+- tapOn: { id: "map-search" }
+- inputText: "42.5676, 1.5976"
+- tapOn: { id: "search-coordinates" }
+- extendedWaitUntil:
+    visible: { id: "place-card" }
+    timeout: 10000
+- tapOn: { id: "place-guide" }
+- extendedWaitUntil:
+    visible: { id: "guidance-next" }
+    timeout: 30000
+- assertVisible: { id: "guidance-costing-auto", selected: true }
+- assertVisible: "(?s).*km · .*min · llegada.*"
+- assertNotVisible: "En línea recta.*"
+- takeScreenshot: 01-route-car
+- tapOn: { id: "guidance-steps" }
+- extendedWaitUntil:
+    visible: { id: "route-summary" }
+    timeout: 10000
+- takeScreenshot: 02-directions
+# One arrival, at the end: the list goes on across the cut with no "Ha llegado" in between.
+- repeat:
+    while:
+      notVisible: "(?s).*(Ha llegado a su destino|Su destino está a la).*"
+    times: 10
+    commands:
+      - swipe:
+          start: 50%, 85%
+          end: 50%, 25%
+          duration: 300
+- assertVisible: "(?s).*(Ha llegado a su destino|Su destino está a la).*"
+- takeScreenshot: 03-directions-end
+- repeat:
+    while:
+      visible: { id: "route-step" }
+    times: 12
+    commands:
+      - swipe:
+          start: 50%, 40%
+          end: 50%, 98%
+          duration: 300
+- extendedWaitUntil:
+    notVisible: { id: "route-summary" }
+    timeout: 10000
+- tapOn: { id: "guidance-costing-pedestrian" }
+- extendedWaitUntil:
+    visible: { id: "guidance-costing-pedestrian", selected: true }
+    timeout: 10000
+- extendedWaitUntil:
+    visible: { id: "guidance-next" }
+    timeout: 30000
+- assertVisible: "(?s).*km · .*min · llegada.*"
+- assertNotVisible: "En línea recta.*"
+- takeScreenshot: 04-route-foot
+- tapOn: { id: "guidance-stop" }
+- assertNotVisible: { id: "guidance-panel" }

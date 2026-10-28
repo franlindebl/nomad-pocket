@@ -17,7 +17,7 @@ import { forgetEstimates, mapItemId, onMapInstalled, WORLD_ID, type MapItemMeta 
 import { useMarkers } from './markers';
 import { forgetMapSource, indexDetailAround, indexDetailAroundView, indexStaleMaps, invalidateIndex } from './places';
 import { getRegion, regionName } from './regions';
-import { closeRouter, listRoutePacks, registerLoosePack, resolvePackFile } from './routing';
+import { closeRouter, crossingsFile, listRoutePacks, registerLoosePack, resolvePackFile } from './routing';
 import { onRouteFileDownloaded, refreshRoutingCatalog, resumePackImports, sweepRoutingFiles, useRoutingCatalog } from './routing-packs';
 import { forgetSideFilesOf } from './side-files';
 import { resolveMapFile, type MapItem } from './useMapSources';
@@ -197,5 +197,8 @@ onItemRemoved('route', (item) => {
   // Valhalla has the file mapped: release it first.
   closeRouter()
     .catch(() => {})
-    .finally(() => deleteFile(resolvePackFile(item)));
+    .finally(() => {
+      deleteFile(resolvePackFile(item));
+      deleteFile(crossingsFile(item).uri);
+    });
 });

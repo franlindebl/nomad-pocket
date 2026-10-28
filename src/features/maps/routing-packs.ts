@@ -2,7 +2,8 @@
 // packs on GitHub Releases by .github/workflows/country-packages.yml), downloads through
 // the download manager (one per tar part plus the pack's emergency points and its search
 // side files: street names, named places, house numbers), and assembling the parts into
-// content/routing/<id>.tar.
+// content/routing/<id>.tar. Its border crossings (<id>.crossings.tsv, routes across packs:
+// stitch-core.ts) stay next to the tar: a few KB, read when routing.
 //
 // Crash safety: parts are appended into <id>.tar.tmp, checked against the manifest size
 // and renamed; only then is the item registered and are the parts deleted, and the last
@@ -79,7 +80,7 @@ const SIDE_FILES = ['pois', 'streets', 'places', 'addresses'] as const;
 type SideFile = (typeof SIDE_FILES)[number];
 const isSideFile = (role: unknown): role is SideFile => SIDE_FILES.includes(role as SideFile);
 
-const FILE_RE = /^(.+?)\.(tar\.tmp|tar\.part\d+|pois\.tsv|streets\.tsv|places\.tsv|addresses\.tsv)$/;
+const FILE_RE = /^(.+?)\.(tar\.tmp|tar\.part\d+|pois\.tsv|streets\.tsv|places\.tsv|addresses\.tsv|crossings\.tsv)$/;
 const SIDE_RE = /^(.+?)\.(pois|streets|places|addresses)\.tsv$/;
 
 const partId = (pack: string, i: number) => `route-${pack}-p${i}`;
@@ -87,6 +88,8 @@ const sideId = (pack: string, side: SideFile) => `route-${pack}-${side}`;
 const partName = (pack: string, i: number) => `${pack}.tar.part${String(i).padStart(2, '0')}`;
 const sideName = (pack: string, side: SideFile) => `${pack}.${side}.tsv`;
 const sideFile = (pack: string, side: SideFile) => contentFile('route', sideName(pack, side));
+const crossingsId = (pack: string) => `route-${pack}-crossings`;
+const crossingsName = (pack: string) => `${pack}.crossings.tsv`;
 
 const sizeOf = (f: File) => (f.exists ? Number(f.size ?? 0) : -1);
 const partOnDisk = (pack: ManifestPack, i: number) => sizeOf(contentFile('route', partName(pack.id, i))) === pack.parts[i].size;
@@ -113,7 +116,18 @@ export function packPlan(pack: ManifestPack): PlannedArchive {
   return {
     size: pack.size,
     parts: pack.parts.map((p, i) => ({ size: p.size, onDisk: trusted && partOnDisk(pack, i), queued: queued(partId(pack.id, i)) })),
-    sides: SIDE_FILES.filter((side) => !!pack[side]).map((side) => ({ size: pack[side]!.size, onDisk: sideOnDisk(pack, side), queued: queued(sideId(pack.id, side)) })),
+    sides: [
+      ...SIDE_FILES.filter((side) => !!pack[side]).map((side) => ({ size: pack[side]!.size, onDisk: sideOnDisk(pack, side), queued: queued(sideId(pack.id, side)) })),
+      ...(pack.crossings
+        ? [
+            {
+              size: pack.crossings.size,
+              onDisk: contentFile('route', crossingsName(pack.id)).exists && getItem(routePackId(pack.id))?.version === pack.buildDate,
+              queued: queued(crossingsId(pack.id)),
+            },
+          ]
+        : []),
+    ],
   };
 }
 
@@ -143,6 +157,19 @@ const sideInput = (manifest: RoutingManifest, pack: ManifestPack, side: SideFile
   group,
 });
 
+/** The pack's border crossings: fetched with every download of the pack (a few KB, and an update may move them). */
+const crossingsInput = (manifest: RoutingManifest, pack: ManifestPack, group: DownloadGroup): EnqueueInput => ({
+  id: crossingsId(pack.id),
+  kind: 'route',
+  title: packTitle(pack),
+  url: assetUrl(manifest, pack, pack.crossings!.name, REPO),
+  filename: crossingsName(pack.id),
+  expectedBytes: pack.crossings!.size,
+  integrity: fileIntegrity(pack.crossings!),
+  meta: { pack, valhalla: manifest.valhalla, role: 'crossings' },
+  group,
+});
+
 /** Parts no download of this build vouches for (the catalog moved on before a retry): dropped with their downloads. */
 function dropUntrustedParts(pack: ManifestPack) {
   if (partsTrusted(pack)) return;
@@ -164,6 +191,7 @@ export function downloadPack(manifest: RoutingManifest, pack: ManifestPack, grou
   const queued = enqueueAll([
     ...missing.map((i) => partInput(manifest, pack, i, group)),
     ...sides.filter((side) => !sideOnDisk(pack, side)).map((side) => sideInput(manifest, pack, side, group)),
+    ...(pack.crossings ? [crossingsInput(manifest, pack, group)] : []),
   ]);
   expectSideFiles(
     'route',
@@ -201,6 +229,14 @@ export function fetchMissingSideFiles(manifest: RoutingManifest) {
   for (const pack of manifest.packs) {
     const item = routePackId(pack.id);
     if (!getItem(item)) continue;
+    const crossings = records[crossingsId(pack.id)];
+    if (pack.crossings && !contentFile('route', crossingsName(pack.id)).exists && !(crossings && ACTIVE.has(crossings.status))) {
+      try {
+        enqueueDownload({ ...crossingsInput(manifest, pack, countryDownloadGroup(packCountry(manifest, pack))), quiet: true });
+      } catch (e) {
+        console.warn('[maps] crossings file', pack.id, e); // no room: next catalog refresh
+      }
+    }
     for (const side of SIDE_FILES) {
       const name = sideName(pack.id, side);
       if (!pack[side] || gaveUp.has(name) || (!expected.has(name) && imported[side](item))) continue;
@@ -364,12 +400,14 @@ export async function onRouteFileDownloaded(file: File, record: DownloadRecord) 
   const pack = record.meta.pack as ManifestPack | undefined;
   if (!pack) return;
   const role = record.meta.role;
-  const expected = isSideFile(role) ? pack[role]?.size : pack.parts[record.meta.index as number]?.size;
+  const expected = role === 'crossings' ? pack.crossings?.size : isSideFile(role) ? pack[role]?.size : pack.parts[record.meta.index as number]?.size;
   // A truncated or replaced file: fail the download (the sheet offers a retry).
   if (expected !== undefined && sizeOf(file) !== expected) {
     deleteFile(file.uri);
     throw new Error(`${file.name}: ${sizeOf(file)} bytes, expected ${expected}`);
   }
+  // Crossings stay where they landed; routing reads them when it needs them.
+  if (role === 'crossings') return;
   // Imported once the pack is installed (now, or after its assembly).
   if (isSideFile(role)) importPackSide(pack.id, role, true);
   else await assemblePack(pack, String(record.meta.valhalla ?? ''), record);
@@ -395,7 +433,7 @@ export function sweepRoutingFiles() {
     const side = what.endsWith('.tsv');
     if (what === 'tar.tmp' ? assembling.has(id) : busy.has(id) || (side && getItem(routePackId(id)))) continue;
     deleteFile(entry.uri);
-    if (side) forgetSideFile('route', entry.name);
+    if (side && what !== 'crossings.tsv') forgetSideFile('route', entry.name);
   }
   // Expected by a pack that is neither installed nor downloading: its download is gone.
   for (const { name, item } of expectedSideFiles('route')) {
@@ -423,6 +461,6 @@ export function discardPackFiles(packId: string) {
     const m = entry instanceof File ? FILE_RE.exec(entry.name) : null;
     if (!m || m[1] !== packId || (m[2] === 'tar.tmp' && assembling.has(packId))) continue;
     deleteFile(entry.uri);
-    if (m[2].endsWith('.tsv')) forgetSideFile('route', entry.name);
+    if (m[2].endsWith('.tsv') && m[2] !== 'crossings.tsv') forgetSideFile('route', entry.name);
   }
 }

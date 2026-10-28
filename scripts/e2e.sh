@@ -131,7 +131,7 @@ reset_app() {
   local content
   content="$(xcrun simctl get_app_container "$UDID" "$BUNDLE" data)/Documents/content"
   # `seeded`: the ZIM fixtures; `seeded-map`: the map fixtures; `seeded-route`: the routing
-  # pack; `seeded-model`: the GGUF model. The app registers loose files in these folders at
+  # pack; `seeded-stitch`: two packs to route across; `seeded-model`: the GGUF model. The app registers loose files in these folders at
   # startup. APFS clones: instant.
   if grep -qE '^tags:.*[[ ,]seeded[],]' "$1"; then
     mkdir -p "$content/zim" && cp -c "$ROOT"/e2e/fixtures/*.zim "$content/zim/"
@@ -141,6 +141,10 @@ reset_app() {
   fi
   if grep -qE '^tags:.*[[ ,]seeded-route[],]' "$1"; then
     mkdir -p "$content/routing" && cp -c "$ROOT"/e2e/fixtures/routing/*.tar "$content/routing/"
+  fi
+  # Two packs built apart and their border crossings: routes across packs.
+  if grep -qE '^tags:.*[[ ,]seeded-stitch[],]' "$1"; then
+    mkdir -p "$content/routing" && cp -c "$ROOT"/e2e/fixtures/routing-stitch/* "$content/routing/"
   fi
   if grep -qE '^tags:.*[[ ,]seeded-model[],]' "$1"; then
     mkdir -p "$content/models" && cp -c "$ROOT"/e2e/fixtures/models/*.gguf "$content/models/"
