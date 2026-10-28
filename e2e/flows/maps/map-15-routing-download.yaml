@@ -50,7 +50,7 @@ tags: [full, maps, routing-server, maps-server]
 - tapOn: { id: "map-emergency" }
 - tapOn: { id: "emergency-cat-health" }
 - extendedWaitUntil:
-    visible: "(?s).*Mitjavila.*"
+    visible: "(?s).*Verge de Meritxell.*"
     timeout: 15000
 - takeScreenshot: 04-emergency
 - repeat:
