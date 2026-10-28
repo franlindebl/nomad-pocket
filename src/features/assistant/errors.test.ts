@@ -15,6 +15,14 @@ test('known system-model codes map to translated keys', () => {
   }
 });
 
+test('FoundationModels guardrail text under ERR_GENERATE maps to declined', () => {
+  assert.equal(errorFor(coded('ERR_GENERATE', "The model's safety guardrails were triggered.")), 'declined');
+  assert.equal(errorFor(coded('ERR_GENERATE', 'refusal(…)')), 'declined');
+  assert.equal(errorFor(coded('ERR_GENERATE', 'decodingFailure')), 'decodingFailure');
+  // Only the bridge's generic code is sniffed.
+  assert.equal(errorFor(new Error('declined by user')), 'declined by user');
+});
+
 test('anything else keeps its own message', () => {
   assert.equal(errorFor(coded('ERR_GENERATE', 'decodingFailure')), 'decodingFailure');
   assert.equal(errorFor(new TypeError("Cannot read property 'completion' of null")), "Cannot read property 'completion' of null");

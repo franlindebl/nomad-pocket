@@ -30,6 +30,10 @@ const BY_CODE: Record<string, ErrorKey> = {
   ERR_BUSY: 'busy',
 };
 
+// FoundationModels' own guardrail messages, for when the error reaches us as a
+// generic ERR_GENERATE (seen on iOS 27: not a GenerationError.guardrailViolation).
+const DECLINED_TEXT = /guardrail|declined|refus/i;
+
 export function isErrorKey(value: string): value is ErrorKey {
   return (ERROR_KEYS as readonly string[]).includes(value);
 }
@@ -39,5 +43,7 @@ export function errorFor(e: unknown): string {
   const code = (e as { code?: unknown } | null | undefined)?.code;
   if (typeof code === 'string' && BY_CODE[code]) return BY_CODE[code];
   const message = (e as { message?: unknown } | null | undefined)?.message;
-  return typeof message === 'string' && message ? message : String(e);
+  const text = typeof message === 'string' && message ? message : String(e);
+  if (code === 'ERR_GENERATE' && DECLINED_TEXT.test(text)) return 'declined';
+  return text;
 }

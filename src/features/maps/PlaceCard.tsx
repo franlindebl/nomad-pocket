@@ -36,7 +36,7 @@ export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: num
       place.osmId
         ? getEmergencyPlace(place.osmId, null)
         : isEmergencyKind(place.kind)
-          ? findEmergencyPlace(place.name, place.lat, place.lon)
+          ? findEmergencyPlace(place.nativeName ?? place.name, place.lat, place.lon)
           : null,
     [place],
   );
@@ -66,6 +66,7 @@ export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: num
   const subtitle = [
     force ? t(`police.${force}`) : kindLabel(t, kind),
     force ? null : poi?.operator && poi.operator !== place.name ? poi.operator : null,
+    place.nativeName && place.nativeName !== place.name ? place.nativeName : null,
     place.context,
     here ? distanceWithDirection(t, here, place, distanceMeters(here, place)) : null,
   ]

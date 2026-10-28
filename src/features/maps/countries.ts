@@ -183,17 +183,46 @@ export function useChosenRegions(o: CountryOffer | null, ask: boolean): string[]
     const pick = (ids: string[]) => {
       if (!useRegionChoice.getState().chosen[country]) useRegionChoice.getState().choose(country, ids);
     };
+    let sub: { remove: () => void } | undefined;
+    let gone = false;
+    const resolve = (lat: number, lon: number) => {
+      const here = partAt(o.regions!, { lat, lon });
+      pick(here && !installedRegions(o).includes(here.id) ? [here.id] : []);
+    };
     (async () => {
       let perm = await Location.getForegroundPermissionsAsync();
       if (ask && !perm.granted && perm.status === 'undetermined') perm = await Location.requestForegroundPermissionsAsync();
       if (!perm.granted) return pick([]);
       // A recent fix only: an old one may be from another trip (another region).
-      const pos =
-        (await Location.getLastKnownPositionAsync({ maxAge: 10 * 60_000 })) ??
-        (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low, mayShowUserSettingsDialog: false }));
-      const here = partAt(o.regions!, { lat: pos.coords.latitude, lon: pos.coords.longitude });
-      pick(here && !installedRegions(o).includes(here.id) ? [here.id] : []);
+      let pos = await Location.getLastKnownPositionAsync({ maxAge: 10 * 60_000 });
+      if (!pos) {
+        try {
+          pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low, mayShowUserSettingsDialog: false });
+        } catch {
+          // Timed out: show no region now, but take the first fix that arrives while this screen is open
+          // (a late fix indoors / on a cold GPS), one time, instead of leaving the region unticked for good.
+          pick([]);
+          const s = await Location.watchPositionAsync({ accuracy: Location.Accuracy.Low }, (p) => {
+            if (gone) return;
+            sub?.remove();
+            sub = undefined;
+            // Only if the person has not ticked anything meanwhile.
+            if (useRegionChoice.getState().chosen[country]?.length === 0) {
+              const here = partAt(o.regions!, { lat: p.coords.latitude, lon: p.coords.longitude });
+              if (here && !installedRegions(o).includes(here.id)) useRegionChoice.getState().choose(country, [here.id]);
+            }
+          });
+          if (gone) s.remove();
+          else sub = s;
+          return;
+        }
+      }
+      resolve(pos.coords.latitude, pos.coords.longitude);
     })().catch(() => pick([]));
+    return () => {
+      gone = true;
+      sub?.remove();
+    };
     // Once per country; `o` changes with every catalog refresh.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [country]);

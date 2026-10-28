@@ -22,12 +22,15 @@ import {
   normalize,
   packContext,
   parseToolQuery,
+  planRetrieval,
   ragMessageFrame,
+  readableDocTitle,
   rankChunks,
   relevantChunks,
   ROUTER_INSTRUCTIONS,
   SEARCH_TOOL_NAME,
   searchToolSpec,
+  sourcesToShow,
   splitSentences,
   stem,
   stripThinking,
@@ -38,6 +41,7 @@ import {
   type SourceRef,
   type Turn,
 } from './rag-core.ts';
+import { planPassages } from '../prepare/passages.ts';
 
 describe('tokenizer', () => {
   test('normalize strips accents and lowercases', () => {
@@ -503,4 +507,66 @@ test('splitSentences keeps decimals and Spanish opening marks', () => {
 
 test('citedNumbers expands ranges', () => {
   assert.deepEqual(citedNumbers('Ver [1-3] y [5, 7].'), [1, 2, 3, 5, 7]);
+});
+
+describe('planRetrieval (R1)', () => {
+  const data = {
+    meeting: { primary: { place: 'La plaza del pueblo, junto a la fuente', details: 'A las 18:00' }, secondary: null },
+    contacts: [],
+    people: [],
+    numbers: [],
+    homeNotes: '',
+  } as unknown as Parameters<typeof planPassages>[0];
+
+  const rankWith = (question: string, modelQuery: string | undefined, lang: 'es' | 'en') => {
+    const plan = planRetrieval(question, [], lang, modelQuery);
+    const chunks: Chunk[] = [
+      { sourceKey: 'w', title: 'Point', text: 'A point is a location in space. The meeting of two lines at a point.', index: 0 },
+      { sourceKey: 'j', title: 'The Jungle Book', text: 'A meeting point of the wolves is the Council Rock.', index: 0 },
+      ...planPassages(data, lang).map((p) => ({ sourceKey: p.section, title: p.title, text: p.text, index: 0 })),
+    ];
+    const ranked = relevantChunks(plan.relevanceTexts, rankChunks(plan.rankText, chunks, 16));
+    return ranked.map((r) => r.item.sourceKey);
+  };
+
+  test('a short English router query does not replace the Spanish question', () => {
+    for (const q of ['¿Dónde quedamos si no nos localizamos?', '¿Cuál es nuestro punto de encuentro?', 'Si no hay cobertura, ¿dónde nos reunimos la familia?']) {
+      assert.equal(rankWith(q, 'meeting point', 'es')[0], 'meeting', q);
+    }
+  });
+
+  test('a query positively in another language is dropped; one in the question language is kept', () => {
+    assert.equal(planRetrieval('How do I purify water?', [], 'en', 'purificación de agua').rankText, 'How do I purify water?');
+    assert.match(planRetrieval('And how is it treated?', [], 'en', 'snake bite for treatment is good').rankText, /snake bite/);
+  });
+});
+
+describe('relevantChunks strictness (R3)', () => {
+  test('a chunk sharing only generic words does not pass', () => {
+    const ranked = [
+      { item: { sourceKey: 'a', title: 'Dermatitis de contacto por urushiol', text: 'El urushiol es un aceite de la planta.', index: 0 }, score: 3 },
+      { item: { sourceKey: 'b', title: 'Quemaduras', text: 'Una quemadura en la mano con aceite hirviendo: enfríe con agua.', index: 0 }, score: 2 },
+    ] as { item: Chunk; score: number }[];
+    const out = relevantChunks('Mi hijo se ha quemado la mano con aceite hirviendo', ranked).map((r) => r.item.sourceKey);
+    assert.deepEqual(out, ['b']);
+  });
+});
+
+describe('sourcesToShow (R5)', () => {
+  const srcs = [1, 2, 3, 4, 5].map((n) => ({ n }));
+  test('cited ones; none for a not-found answer; top 3 otherwise', () => {
+    assert.deepEqual(sourcesToShow('Hierve el agua [2].', srcs), [{ n: 2 }]);
+    assert.deepEqual(sourcesToShow('No lo he encontrado en tu biblioteca. Pero...', srcs), []);
+    assert.deepEqual(sourcesToShow('Hierve el agua.', srcs), srcs.slice(0, 3));
+  });
+});
+
+describe('readableDocTitle (R5)', () => {
+  test('drops ids and falls back to the archive title', () => {
+    assert.equal(readableDocTitle('dead falls snares b00harduoft', 'Survival'), 'dead falls snares');
+    assert.equal(readableDocTitle('173165', 'Medicina militar'), 'Medicina militar · 173165');
+    assert.equal(readableDocTitle('Water purification', 'X'), 'Water purification');
+    // A year is part of the title, not an id.
+    assert.equal(readableDocTitle('FEMA REP Program Manual Dec 2019', 'X'), 'FEMA REP Program Manual Dec 2019');
+  });
 });

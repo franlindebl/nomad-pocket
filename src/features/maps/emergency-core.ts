@@ -187,3 +187,53 @@ export function policeForce(operator: string | null): 'guardiaCivil' | 'nacional
   if (/local|municipal|urbana/.test(o)) return 'local';
   return null;
 }
+
+/** Kinds that must never be crowded out of a category's list by closer, more common ones (R2). */
+export const PRIORITY_KINDS: Partial<Record<EmergencyCategory, readonly EmergencyKind[]>> = {
+  health: ['hospital'],
+  security: ['police', 'fire_station'],
+};
+/** How many of each priority kind lead the list (few: a defibrillator 30 m away must stay near the top). */
+export const PRIORITY_LIMIT = 3;
+
+/**
+ * Nearest-first list where the priority places (already nearest-first) come ahead of the rest,
+ * without duplicates: 40 pharmacies closer than the nearest hospital must not hide it.
+ */
+export function mergePriority<T extends { osmId: string }>(priority: readonly T[], rest: readonly T[], limit: number): T[] {
+  const seen = new Set<string>();
+  const out: T[] = [];
+  for (const p of [...priority, ...rest]) {
+    if (seen.has(p.osmId)) continue;
+    seen.add(p.osmId);
+    out.push(p);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+/** Kinds drawn at every zoom on the map. */
+const ALWAYS_SHOWN = new Set<EmergencyKind>(['hospital', 'police', 'fire_station', 'ambulance_station']);
+/** From this zoom on every point is drawn (streets are wide enough). */
+export const THIN_UNTIL_ZOOM = 17;
+const CELL_PIXELS = 48;
+
+/**
+ * Thins map points by zoom so dots don't cover the streets: key kinds always stay; the others keep
+ * one point per kind per ~48 px grid cell below THIN_UNTIL_ZOOM. Input order is kept (first wins).
+ */
+export function thinForZoom<T extends { kind: EmergencyKind; lat: number; lon: number }>(places: readonly T[], zoom: number): T[] {
+  if (zoom >= THIN_UNTIL_ZOOM) return [...places];
+  const cell = (360 / (256 * 2 ** zoom)) * CELL_PIXELS;
+  const taken = new Set<string>();
+  const out: T[] = [];
+  for (const p of places) {
+    if (!ALWAYS_SHOWN.has(p.kind)) {
+      const key = `${p.kind}:${Math.floor(p.lat / cell)}:${Math.floor(p.lon / cell)}`;
+      if (taken.has(key)) continue;
+      taken.add(key);
+    }
+    out.push(p);
+  }
+  return out;
+}

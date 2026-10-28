@@ -195,8 +195,17 @@ public final class NomadLlmModule: Module {
         return ("ERR_BUSY", "The system model is busy with another request")
       default:
         // Newer cases (refusal, decodingFailure…): keep the case name for diagnosis.
+        let name = "\(e)".lowercased()
+        if name.contains("guardrail") || name.hasPrefix("refusal") {
+          return ("ERR_GUARDRAIL", "The system model declined to answer this request")
+        }
         return ("ERR_GENERATE", "\(e)")
       }
+    }
+    // Not a GenerationError (iOS 27 streams other types): guardrail errors still say so in their text.
+    let text = "\(error.localizedDescription) \(String(describing: error))".lowercased()
+    if text.contains("guardrail") {
+      return ("ERR_GUARDRAIL", "The system model declined to answer this request")
     }
     return ("ERR_GENERATE", error.localizedDescription)
   }

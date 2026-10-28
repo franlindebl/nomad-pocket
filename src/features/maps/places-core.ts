@@ -25,8 +25,12 @@ export type PlaceRow = {
   rank: number;
 };
 
-/** Name variants indexed besides the local name (the app languages + English). */
-const NAME_KEYS = ['name', 'name:es', 'name:en', 'name2', 'name3'];
+/**
+ * Separates the name variants of a tile row's `names`: native, name:es, name:en, then the rest
+ * (a control character: the full-text tokenizer treats it as a space, so it is searchable as before).
+ * Rows from a routing pack's files keep plain space-separated names (their order is not known).
+ */
+export const NAME_SEP = '\u001f';
 
 // POI kinds that are never useful search results even when named.
 const SKIP_POI_KINDS = new Set([
@@ -43,14 +47,13 @@ const SKIP_POI_KINDS = new Set([
 ]);
 
 function namesOf(props: Record<string, unknown>): { name: string; names: string } | null {
-  const name = typeof props.name === 'string' ? props.name.trim() : '';
+  const str = (k: string) => (typeof props[k] === 'string' ? (props[k] as string).trim() : '');
+  const name = str('name');
   if (!name) return null;
-  const all = new Set<string>();
-  for (const k of NAME_KEYS) {
-    const v = props[k];
-    if (typeof v === 'string' && v.trim()) all.add(v.trim());
-  }
-  return { name, names: [...all].join(' ') };
+  const other = (k: string) => (str(k) === name ? '' : str(k));
+  const rest = [...new Set([other('name2'), other('name3')].filter(Boolean))].join(' ');
+  const names = [name, other('name:es'), other('name:en'), rest].join(NAME_SEP).replace(new RegExp(`${NAME_SEP}+$`), '');
+  return { name, names };
 }
 
 /**
@@ -328,7 +331,10 @@ export function ftsQuery(text: string): string | null {
       const cjk = cjkTerm(w);
       if (cjk) return cjk === term ? term : `(${term} OR ${cjk})`;
       const full = ABBREVIATIONS[normalizeName(w)];
-      return full ? `(${[term, ...full.map((f) => `"${f}"*`)].join(' OR ')})` : term;
+      // "mcdonalds" also finds McDonald's, which the index holds as the words "mcdonald" and "s".
+      const possessive = /^\p{L}{3,}s$/u.test(w) ? [`"${w.slice(0, -1)} s"`] : [];
+      const alts = [...(full ?? []).map((f) => `"${f}"*`), ...possessive];
+      return alts.length ? `(${[term, ...alts].join(' OR ')})` : term;
     })
     .join(' AND ');
 }
@@ -470,29 +476,88 @@ export const nameKey = (s: string) =>
     .join(' ');
 
 /**
+ * A name as ranked: nameKey without apostrophes, so "mcdonalds" is "McDonald's" and
+ * "queens medical" "Queen's Medical" (nameKey itself keys stored street names: don't change it).
+ */
+export const rankKey = (s: string) => nameKey(s.replace(/['\u2019\u02bc`]/g, ''));
+
+/** The name variants of a hit: split slots of a tile row, else its name (a pack row's words stay one string). */
+function variantsOf(h: Pick<PlaceRow, 'name' | 'names'>): string[] {
+  const v = h.names.includes(NAME_SEP) ? h.names.split(NAME_SEP) : [h.names];
+  return [h.name, ...v].filter(Boolean);
+}
+
+/** 0 exact, 1 starts with, 2 a word match; 0.5 a city found by a whole run of words of an alternative name. */
+function textRank(h: Pick<PlaceRow, 'name' | 'names' | 'layer'>, q: string): number {
+  let best = 2;
+  for (const v of variantsOf(h)) {
+    const n = rankKey(v);
+    if (n === q) return 0;
+    if (n.startsWith(q)) best = Math.min(best, 1);
+    // A pack row's alternative names are one string ("Tiflis Tbilisi"): a city found by any of them is the city.
+    else if (h.layer === 'place' && ` ${n} `.includes(` ${q} `)) best = Math.min(best, 0.5);
+  }
+  return best;
+}
+
+/** The name in the app language and the native one (null when they are the same or there is no other). */
+export function localizedName(h: Pick<PlaceRow, 'name' | 'names'>, lang: string): { name: string; native: string | null } {
+  if (!h.names.includes(NAME_SEP)) return { name: h.name, native: null };
+  const [, es = '', en = ''] = h.names.split(NAME_SEP);
+  // Spanish falls back to the English name only when the native one isn't in Latin letters (Tiflis; not "Seville" for Sevilla).
+  const pick = lang.startsWith('es') ? es || (/\p{Script=Latin}/u.test(h.name) ? '' : en) : en;
+  if (!pick || normalizeName(pick) === normalizeName(h.name)) return { name: h.name, native: null };
+  return { name: pick, native: h.name };
+}
+
+/** Same place under two spellings: same name without accents or apostrophes, layer and a short distance apart. */
+export function sameHit(a: Hit, b: Hit): boolean {
+  return !!a.name && !!b.name && rankKey(a.name) === rankKey(b.name) && near(a, b);
+}
+
+const near = (a: Hit, b: Hit) =>
+  a.layer === b.layer && distanceMeters(a, b) < (a.layer === 'road' ? 1500 : a.kind.startsWith('address') ? 300 : 150);
+
+/**
+ * Drops hits that repeat an earlier one (sameHit), keeping at most `limit`. Keys are computed once and
+ * compared by bucket: a common word ("farmacia") ranks thousands of rows, so pairwise rankKey calls froze search.
+ */
+export function dedupeHits(hits: Hit[], limit = Infinity): Hit[] {
+  const out: Hit[] = [];
+  const byKey = new Map<string, Hit[]>();
+  for (const h of hits) {
+    if (out.length >= limit) break;
+    if (h.name) {
+      const key = rankKey(h.name);
+      const same = byKey.get(key);
+      if (same?.some((o) => near(o, h))) continue;
+      if (same) same.push(h);
+      else byKey.set(key, [h]);
+    }
+    out.push(h);
+  }
+  return out;
+}
+
+/**
  * Orders hits: exact name, then name starting with the query, then word matches
  * ("de", "la"… left out); within each, more important features and nearer ones first. Streets of the same
  * name less than 1.5 km apart are one street (one row per tile in the index).
  */
 export function rankHits(hits: Hit[], query: string, near: LatLon | null, limit = 40): Hit[] {
-  const q = nameKey(query);
+  const q = rankKey(query);
   const scored = hits.map((h) => {
-    const n = nameKey(h.name);
-    const text = n === q ? 0 : n.startsWith(q) ? 1 : 2;
+    const text = textRank(h, q);
     const km = near ? distanceMeters(near, h) / 1000 : 0;
     // Distance matters on a log scale: 1 km vs 10 km is one step, 10 vs 100 another.
     const score = text * 10 + LAYER_WEIGHT[h.layer] * 2 + h.rank * 0.3 + Math.log10(1 + km) * 2.5;
     return { h, score };
   });
   scored.sort((a, b) => a.score - b.score);
-  const out: Hit[] = [];
-  for (const { h } of scored) {
-    const radius = h.layer === 'road' ? 1500 : 150;
-    if (out.some((o) => o.name === h.name && o.layer === h.layer && distanceMeters(o, h) < radius)) continue;
-    out.push(h);
-    if (out.length >= limit) break;
-  }
-  return out;
+  return dedupeHits(
+    scored.map((x) => x.h),
+    limit,
+  );
 }
 
 /** Nearest locality to a point among candidates, for a "Calle Mayor · Soria" context line. */
@@ -507,4 +572,46 @@ export function nearestLocality<T extends LatLon & { name: string }>(p: LatLon, 
     }
   }
   return best;
+}
+
+
+// ---------------------------------------------------------------------------
+// Category words ("hospital", "farmacia", "agua potable"): the nearest places of a kind
+
+/** Words (no accents) that name an emergency kind, Spanish and English, singular and plural. */
+const CATEGORY_WORDS: Record<string, string[]> = {
+  hospital: ['hospital', 'hospitales', 'urgencias', 'emergency room', 'emergency rooms', 'er'],
+  clinic: ['clinica', 'clinicas', 'centro de salud', 'centros de salud', 'centro medico', 'medico', 'medicos', 'doctor', 'doctors', 'clinic', 'clinics', 'health center', 'health centre'],
+  pharmacy: ['farmacia', 'farmacias', 'pharmacy', 'pharmacies', 'drugstore', 'chemist'],
+  police: ['policia', 'comisaria', 'comisarias', 'police', 'police station', 'police stations'],
+  fire_station: ['bomberos', 'parque de bomberos', 'fire station', 'fire stations', 'fire department'],
+  drinking_water: ['agua', 'agua potable', 'fuente', 'fuentes', 'fuente de agua', 'drinking water', 'water', 'water fountain', 'fountain', 'potable water'],
+  spring: ['manantial', 'manantiales', 'spring', 'springs'],
+  fuel: ['gasolinera', 'gasolineras', 'gasolina', 'estacion de servicio', 'gas station', 'gas stations', 'petrol station', 'fuel'],
+  supermarket: ['supermercado', 'supermercados', 'supermarket', 'supermarkets', 'grocery', 'groceries'],
+  hardware: ['ferreteria', 'ferreterias', 'bricolaje', 'hardware store', 'hardware'],
+  shelter: ['refugio', 'refugios', 'shelter', 'shelters'],
+  embassy: ['embajada', 'embajadas', 'consulado', 'consulados', 'embassy', 'embassies', 'consulate', 'consulates'],
+  townhall: ['ayuntamiento', 'ayuntamientos', 'town hall', 'city hall'],
+  defibrillator: ['desfibrilador', 'desfibriladores', 'defibrillator', 'defibrillators', 'aed'],
+  ambulance_station: ['ambulancia', 'ambulancias', 'ambulance', 'ambulances'],
+  assembly_point: ['punto de encuentro', 'puntos de encuentro', 'assembly point', 'assembly points'],
+};
+
+const CATEGORY_INDEX = new Map<string, string[]>();
+for (const [kind, words] of Object.entries(CATEGORY_WORDS)) {
+  for (const w of words) CATEGORY_INDEX.set(w, [...(CATEGORY_INDEX.get(w) ?? []), kind]);
+}
+
+/** Lead-ins that don't change what is asked: "farmacia cerca", "nearest hospital". */
+const CATEGORY_NOISE = /^(?:(?:el|la|los|las|the|a|un|una)\s+)?(?:(?:mas\s+)?cercan[oa]s?|nearest|closest|nearby|near me)\s+|\s+(?:(?:mas\s+)?cercan[oa]s?|cerca|nearby|near me|near)$/g;
+
+/**
+ * The emergency kinds a query names when the whole query is a category word ("hospitales",
+ * "pharmacy", "agua potable", "farmacia cerca"); null for anything else (a name, an address).
+ */
+export function categoryKinds(text: string): string[] | null {
+  let q = normalizeName(text).replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+  for (let i = 0; i < 2; i++) q = q.replace(CATEGORY_NOISE, '').trim();
+  return CATEGORY_INDEX.get(q) ?? null;
 }

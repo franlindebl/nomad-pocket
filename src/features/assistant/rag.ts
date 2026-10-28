@@ -5,20 +5,18 @@
 // top articles → chunk →
 // BM25 over chunks and passages → drop chunks that barely share terms with the question →
 // pack the best within the model's context budget → numbered sources, cited as [n].
-import { listItems } from '@/features/content/items';
+import { getItem, listItems } from '@/features/content/items';
 import { searchDocuments, type DocHit } from '@/features/library/documents';
 import { getArticleHtml, getArticleText, search, type ZimSearchHit } from '@/features/library/zim';
 import { PLAN_SOURCE, planPassages } from '@/features/prepare/passages';
 import { usePrepare } from '@/features/prepare/store';
 
 import {
-  buildConversationQueries,
   buildRagUserMessage,
-  buildSearchQueries,
   buildTitleCandidates,
-  detectLanguage,
   chunkText,
-  followUpTopic,
+  planRetrieval,
+  readableDocTitle,
   packContext,
   rankChunks,
   relevantChunks,
@@ -108,14 +106,10 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
 
   const history = opts.history ?? [];
   // A model's query in another language than the question ("purificación de agua" for an English
-  // question, from Apple's router) finds nothing in that library: search with the question's own words.
-  const modelQuery = opts.query?.trim();
-  const query = modelQuery && detectLanguage(modelQuery, lang) === lang ? modelQuery : undefined;
-  const queries = query ? buildSearchQueries(query) : buildConversationQueries(question, history);
-  // What chunks are ranked and filtered against: the model's query already carries the
-  // topic; a follow-up question gets the previous question's keywords.
-  const rankText = query || [...followUpTopic(question, history), question].join(' ');
-  const [first, second] = buildTitleCandidates(rankText);
+  // question, "meeting point" for a Spanish one) finds nothing in that library: planRetrieval
+  // keeps the question's own words whenever the query isn't positively in its language.
+  const { queries, rankText, relevanceTexts } = planRetrieval(question, history, lang, opts.query);
+  const [first, second] = buildTitleCandidates(relevanceTexts[0]);
   const [lists, titled, passages] = await Promise.all([
     Promise.all(queries.map((q) => search(itemIds, q, HITS_PER_QUERY).catch(() => [] as ZimSearchHit[]))),
     titleHits(itemIds, first).then(async (hits) => (hits.length ? hits : firstTitleHits(itemIds, second))),
@@ -150,7 +144,7 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
   // A document passage is its own source per page, so its citation says where to look.
   passages.forEach((p, rank) => {
     const key = `${keyOf(p.itemId, p.path)}\u0000${p.page}`;
-    if (!refs.has(key)) refs.set(key, { itemId: p.itemId, path: p.path, title: p.title, page: p.page });
+    if (!refs.has(key)) refs.set(key, { itemId: p.itemId, path: p.path, title: readableDocTitle(p.title, getItem(p.itemId)?.title ?? ''), page: p.page });
     // Distinct indexes (packContext keeps one chunk per index): a page can give two passages.
     chunks.push({ sourceKey: key, title: p.title, text: p.text, index: 1 + rank, hitRank: rank });
   });
@@ -165,7 +159,7 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
   let ranked = rankChunks(rankText, chunks, 16);
   if (ranked.length) {
     // Chunks that only share a word or two with a longer question are about something else.
-    ranked = relevantChunks(rankText, ranked);
+    ranked = relevantChunks(relevanceTexts, ranked);
   } else if (chunks.length) {
     // The search engine matched (stemming, synonyms, other language) but no chunk
     // shares a term with the question: fall back to the article leads, in hit order.

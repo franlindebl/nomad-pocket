@@ -15,9 +15,13 @@ import { useSettings } from '@/stores/settings';
 import {
   EMERGENCY_KINDS,
   kindCategory,
+  mergePriority,
   overpassQuery,
   parseOverpassTsv,
+  PRIORITY_KINDS,
+  PRIORITY_LIMIT,
   splitBBox,
+  thinForZoom,
   type EmergencyCategory,
   type EmergencyKind,
   type EmergencyPoi,
@@ -298,25 +302,39 @@ const fromRow = (r: PoiRow, from: LatLon | null): EmergencyPlace => ({
  */
 export function nearestEmergencyPlaces(category: EmergencyCategory, from: LatLon, limit = 60): EmergencyPlace[] {
   const k = Math.cos((from.lat * Math.PI) / 180);
-  const rows = indexDb().getAllSync<PoiRow>(
-    `SELECT osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon FROM map_pois
-     WHERE category = ? GROUP BY osm_id
+  const query = (kinds: readonly string[] | null, max: number) =>
+    indexDb()
+      .getAllSync<PoiRow>(
+        `SELECT osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon FROM map_pois
+     WHERE category = ?${kinds ? ` AND kind IN (${kinds.map(() => '?').join(',')})` : ''} GROUP BY osm_id
      ORDER BY (lat - ?) * (lat - ?) + ((lon - ?) * ?) * ((lon - ?) * ?) LIMIT ?`,
-    category,
-    from.lat,
-    from.lat,
-    from.lon,
-    k,
-    from.lon,
-    k,
-    limit,
-  );
-  return rows.map((r) => fromRow(r, from));
+        category,
+        ...(kinds ?? []),
+        from.lat,
+        from.lat,
+        from.lon,
+        k,
+        from.lon,
+        k,
+        max,
+      )
+      .map((r) => fromRow(r, from));
+  // Key kinds (hospitals...) lead the list even when many closer pharmacies or AEDs exist.
+  const kinds = PRIORITY_KINDS[category];
+  const priority = kinds
+    ? kinds.flatMap((kind) => query([kind], PRIORITY_LIMIT)).sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0))
+    : [];
+  return mergePriority(priority, query(null, limit), limit);
 }
 
 /** Points inside a bbox, for the map layer. */
 /** `hidden`: categories switched off in the Puntos sheet, left out before the limit so the others fill it. */
-export function emergencyPlacesIn(bbox: [number, number, number, number], hidden: readonly string[] = [], limit = 600): EmergencyPlace[] {
+export function emergencyPlacesIn(
+  bbox: [number, number, number, number],
+  hidden: readonly string[] = [],
+  zoom = 99,
+  limit = 600,
+): EmergencyPlace[] {
   const [w, s, e, n] = bbox;
   const rows = indexDb().getAllSync<PoiRow>(
     `SELECT osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon FROM map_pois
@@ -329,9 +347,13 @@ export function emergencyPlacesIn(bbox: [number, number, number, number], hidden
     w,
     e,
     ...hidden,
-    limit,
+    limit * 4,
   );
-  return rows.map((r) => fromRow(r, null));
+  // Thinned by zoom before the cap, so the cap only bites on genuinely dense views.
+  return thinForZoom(
+    rows.map((r) => fromRow(r, null)),
+    zoom,
+  ).slice(0, limit);
 }
 
 export function getEmergencyPlace(osmId: string, from: LatLon | null): EmergencyPlace | null {

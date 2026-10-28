@@ -4,6 +4,7 @@
 import type { BBox } from '@/lib/pmtiles';
 
 import data from './regions.json';
+import { aliasMatches } from './region-terms';
 
 export type Continent = 'europe' | 'africa' | 'asia' | 'north-america' | 'south-america' | 'oceania' | 'antarctica';
 
@@ -53,7 +54,7 @@ export function groupCountries(
   suggested?: string | null,
 ): RegionSection[] {
   const q = fold(query);
-  const match = (r: Region) => !q || fold(r.name.es).includes(q) || fold(r.name.en).includes(q) || r.id === q;
+  const match = (r: Region) => !q || fold(r.name.es).includes(q) || fold(r.name.en).includes(q) || r.id === q || aliasMatches(r.id, q);
   const sort = (a: Region, b: Region) => regionName(a, lang).localeCompare(regionName(b, lang), lang);
   const sections: RegionSection[] = [];
   const top = suggested ? byId.get(suggested) : undefined;

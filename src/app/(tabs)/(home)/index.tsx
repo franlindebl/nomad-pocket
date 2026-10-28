@@ -25,6 +25,7 @@ import { Platform, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Card, IconBadge, IconButton, ListGroup, ListRow, ProgressBar, Row, Screen, SectionHeader, Text } from '@/components/ui';
+import { searchIndexBytes } from '@/db';
 import { useItems } from '@/features/content/items';
 import { groupDownloads } from '@/features/downloads/groups';
 import { useActiveDownloads } from '@/features/downloads/manager';
@@ -106,7 +107,8 @@ export default function HomeScreen() {
       ? router.push({ pathname: '/reader/[itemId]', params: { itemId: firstAid.item.id, path: firstAid.path } })
       : router.navigate({ pathname: '/library/category/[slug]', params: { slug: 'medicine' } });
 
-  const used = all.reduce((sum, i) => sum + i.sizeBytes, 0);
+  // Same total as Settings: the map search index counts too.
+  const used = all.reduce((sum, i) => sum + i.sizeBytes, 0) + searchIndexBytes();
   const missing = items.filter((i) => !i.done && i.progress === null);
 
   return (
@@ -207,7 +209,7 @@ export default function HomeScreen() {
       <ContinueCarousel />
 
       <Text variant="caption" color="textTertiary" align="center" style={{ marginTop: space.xl }} tabular>
-        {t('storageLine', { used: formatBytes(used), free: formatBytes(freeBytes()) })}
+        {t('storageLine', { used: formatBytes(used, undefined, i18n.language), free: formatBytes(freeBytes(), undefined, i18n.language) })}
       </Text>
     </Screen>
   );
