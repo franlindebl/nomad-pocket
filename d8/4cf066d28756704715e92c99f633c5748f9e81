@@ -1,0 +1,31 @@
+.github/workflows/country-build.yml
+  s_b0f712d4b0ba52::t_0fd688b1222bbd 97,99,103-104
+.github/workflows/country-packages.yml
+  s_b0f712d4b0ba52::t_51a689bcc904ab 94,96
+scripts/routing/admins.sh
+  s_b0f712d4b0ba52::t_14b09005263923 1-64
+scripts/routing/build-country.sh
+  s_b0f712d4b0ba52::t_f6b84083dd64bd 3,97-101,103-113,115-120
+.github/workflows/admin-boundaries.yml
+  s_b0f712d4b0ba52::t_44dc9f134cc120 1-115
+docs/ARCHITECTURE.md
+  s_b0f712d4b0ba52::t_aee9ce96f7964f 860-864
+docs/PROGRESS.md
+  s_b0f712d4b0ba52::t_5553beb0cd82d2 149-150,305-308
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d84cf066d28756704715e92c99f633c5748f9e81",
+  "prompts": {},
+  "sessions": {
+    "s_b0f712d4b0ba52": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d8ad743a-8d7d-42bc-80fc-249dfe881782",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
