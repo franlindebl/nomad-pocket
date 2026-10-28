@@ -329,7 +329,7 @@ reviewed, corrected and re-tested by the lead:
   name:es and name:en columns (older apps read only the first columns, checked in `import-core.ts`'s SQL)
   and the import builds the NAME_SEP slots from them (`packNames`); checked with real Jerusalem files
   through the import, not yet in a published pack.
-- Checks: tsc, lint, 339 unit tests, i18n. E2E not run yet.
+- Checks: tsc, lint, unit tests, i18n; E2E smoke 21/21 on e27cbe4 (iOS 27 simulator, 2026-10-28).
 
 ### 2026-10-28 — Units: miles/feet and gallons for the US, US English copy
 
