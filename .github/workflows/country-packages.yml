@@ -50,7 +50,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       countries: ${{ steps.plan.outputs.countries }}
-      jobs: ${{ steps.plan.outputs.jobs }}
+      jobs1: ${{ steps.plan.outputs.jobs1 }}
+      jobs2: ${{ steps.plan.outputs.jobs2 }}
+      valhalla-image: ${{ env.VALHALLA_IMAGE }}
       stamp: ${{ steps.plan.outputs.stamp }}
       build: ${{ steps.plan.outputs.build }}
     steps:
@@ -67,7 +69,10 @@ jobs:
           echo "countries=$countries" >> "$GITHUB_OUTPUT"
           # One job per country, plus one per region of a country split in several (packs.json
           # "region": us-west, us-south…; map-regions.json: ca-ontario…): each in its own job.
-          echo "jobs=$(python3 -I -c 'import json, sys; want = json.loads(sys.argv[1]); packs = json.load(open("scripts/routing/packs.json"))["countries"]; maps = json.load(open("scripts/maps/map-regions.json"))["regions"]; print(json.dumps(want + [k for k, v in packs.items() if v.get("region") in want and k not in want] + [k for k, v in maps.items() if v["country"] in want and k not in want]))' "$countries")" >> "$GITHUB_OUTPUT"
+          jobs=$(python3 -I -c 'import json, sys; want = json.loads(sys.argv[1]); packs = json.load(open("scripts/routing/packs.json"))["countries"]; maps = json.load(open("scripts/maps/map-regions.json"))["regions"]; print(json.dumps(want + [k for k, v in packs.items() if v.get("region") in want and k not in want] + [k for k, v in maps.items() if v["country"] in want and k not in want]))' "$countries")
+          # In two halves, one per build call (≤ 256 jobs each); the second may be empty.
+          echo "jobs1=$(python3 -I -c 'import json, sys; j = json.loads(sys.argv[1]); print(json.dumps(j[:(len(j) + 1) // 2]))' "$jobs")" >> "$GITHUB_OUTPUT"
+          echo "jobs2=$(python3 -I -c 'import json, sys; j = json.loads(sys.argv[1]); print(json.dumps(j[(len(j) + 1) // 2:]))' "$jobs")" >> "$GITHUB_OUTPUT"
           # One stamp per run: a re-run never replaces files a live catalog points at.
           echo "stamp=$(date -u +%Y%m%d)-${{ github.run_id }}" >> "$GITHUB_OUTPUT"
           # Every map of a run comes from the same planet build.
@@ -97,117 +102,32 @@ jobs:
             done
           fi
 
-  build:
+  # Two halves: GitHub refuses a matrix of more than 256 jobs (a full run has 261). They run
+  # side by side, 4 jobs each: the 8 at once the Overpass servers put up with.
+  build-1:
     needs: plan
-    runs-on: ubuntu-latest
-    # GitHub's cap is 6 h; Spain's pack takes ~45 min, its map ~10.
-    timeout-minutes: 340
-    strategy:
-      fail-fast: false
-      # Pack jobs ask the public Overpass servers for admin boundaries once: keep it polite.
-      max-parallel: 8
-      matrix:
-        country: ${{ fromJson(needs.plan.outputs.jobs) }}
-    env:
-      COUNTRY: ${{ matrix.country }}
-      STAMP: ${{ needs.plan.outputs.stamp }}
-    # GH_TOKEN is set only on the upload steps: the others run third-party code (apt
-    # packages, the Valhalla image, go-pmtiles, Geofabrik and Overpass data).
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - name: Plan the job
-        id: what
-        run: |
-          # A job is a country (its map, and its routing pack if packs.json lists one under
-          # its id) or a region of a split country ("us-west": its routing pack and its map;
-          # "ca-ontario": its map only, the country's job building the one pack). A split
-          # country has no whole map.
-          python3 -I - >> "$GITHUB_OUTPUT" <<'PY'
-          import json, os
-          job, parts = os.environ["COUNTRY"], os.environ["PARTS"]
-          packs = json.load(open("scripts/routing/packs.json"))["countries"]
-          maps = json.load(open("scripts/maps/map-regions.json"))["regions"]
-          regions = {r["id"]: r for r in json.load(open("src/features/maps/regions.json"))["regions"] if r["type"] == "country"}
-          is_country = job in regions
-          split = any(p.get("region") == job for p in packs.values()) or any(m["country"] == job for m in maps.values())
-          print(f"routing={'true' if job in packs and parts in ('all', 'routing') else 'false'}")
-          print(f"maps={'true' if (not is_country or not split) and parts != 'routing' else 'false'}")
-          print(f"continent={regions[job if is_country else maps[job]['country'] if job in maps else packs[job]['region']]['continent']}")
-          PY
-      - name: Disk and tools
-        # A hung apt mirror once held ag, fr and je here for the job's whole 6 h.
-        timeout-minutes: 20
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
-          df -h / /mnt
-          # Work on whichever disk has more room.
-          if (( $(df --output=avail -B1 /mnt 2>/dev/null | tail -1 || echo 0) > $(df --output=avail -B1 / | tail -1) )); then
-            sudo mkdir -p /mnt/pack && sudo chown "$(id -u):$(id -g)" /mnt/pack && echo "WORK=/mnt/pack" >> "$GITHUB_ENV"
-          else
-            mkdir -p "$HOME/pack" && echo "WORK=$HOME/pack" >> "$GITHUB_ENV"
-          fi
-          apt="-o Acquire::Retries=3 -o Acquire::http::Timeout=60 -o Acquire::https::Timeout=60"
-          sudo apt-get $apt update -qq && sudo apt-get $apt install -y -qq osmium-tool python3-pyosmium python3-shapely >/dev/null
-          curl -fsSL --retry 3 --max-time 300 -o /tmp/pmtiles.tgz https://github.com/protomaps/go-pmtiles/releases/download/v1.31.2/go-pmtiles_1.31.2_Linux_x86_64.tar.gz
-          echo "3ed7dbf4ec2e6dfe5e25b6f70d1ffc932729f93c86db353bf514dd71010a312f  /tmp/pmtiles.tgz" | sha256sum -c -
-          sudo tar -xzf /tmp/pmtiles.tgz -C /usr/local/bin pmtiles
-
-      # 1. Routing pack
-      - name: Build the routing pack
-        if: steps.what.outputs.routing == 'true'
-        run: |
-          docker run --rm -e CONC=4 -v "$PWD:/repo:ro" -v "$WORK:/work" "$VALHALLA_IMAGE" bash -c \
-            "apt-get update -qq && apt-get install -y -qq osmium-tool python3-pyosmium python3-shapely >/dev/null && bash /repo/scripts/routing/build-country.sh $COUNTRY /work/routing && chown -R $(id -u):$(id -g) /work"
-          ls -la "$WORK/routing/out"
-      - name: Upload the routing pack
-        if: steps.what.outputs.routing == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: routing-${{ needs.plan.outputs.stamp }}-${{ steps.what.outputs.continent }}
-        run: |
-          cd "$WORK/routing/out"
-          # The fragment names its release (the catalog keeps one per pack).
-          python3 -I -c 'import json, sys; p = sys.argv[1]; m = json.load(open(p)); json.dump([dict(x, release=sys.argv[2]) for x in m], open(p, "w"), indent=1)' "$COUNTRY.packs.json" "$TAG"
-          # Exactly the files the fragment lists (it drops empty packs and side files).
-          python3 -I -c 'import json, sys; [print(f["name"]) for p in json.load(open(sys.argv[1])) for f in p["parts"] + [x for x in (p["pois"], p.get("streets"), p.get("places"), p.get("addresses"), p.get("crossings")) if x]]' \
-            "$COUNTRY.packs.json" | xargs gh release upload "$TAG" --clobber --repo "$GITHUB_REPOSITORY"
-          mkdir -p "$WORK/fragments" && cp "$COUNTRY.packs.json" "$WORK/fragments/"
-          # Uploaded: the map needs the disk.
-          rm -rf "$WORK/routing"
-      - uses: actions/upload-artifact@v4
-        if: steps.what.outputs.routing == 'true'
-        with:
-          name: packs-${{ matrix.country }}
-          path: ${{ env.WORK }}/fragments/${{ matrix.country }}.packs.json
-
-      # 2. Map (also when the pack failed: the catalog keeps last month's pack)
-      - name: Build the map
-        if: ${{ !cancelled() && steps.what.outputs.maps == 'true' }}
-        run: bash scripts/maps/build-country-map.sh "$COUNTRY" "$WORK/map" "${{ needs.plan.outputs.build }}"
-      - name: Upload the map
-        id: upload-map
-        if: ${{ !cancelled() && steps.what.outputs.maps == 'true' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: maps-${{ needs.plan.outputs.stamp }}-${{ steps.what.outputs.continent }}
-        run: |
-          cd "$WORK/map/out"
-          # The fragment names its release (the catalog keeps one per map).
-          python3 -I -c 'import json, sys; p = sys.argv[1]; m = json.load(open(p)); m["release"] = sys.argv[2]; json.dump(m, open(p, "w"), indent=1)' "$COUNTRY.maps.json" "$TAG"
-          python3 -I -c 'import json, sys; m = json.load(open(sys.argv[1])); [print(f["name"]) for f in m["parts"] + [x for x in (m["pois"], m["streets"], m.get("places"), m.get("addresses")) if x]]' \
-            "$COUNTRY.maps.json" | xargs gh release upload "$TAG" --clobber --repo "$GITHUB_REPOSITORY"
-      # The fragment goes to the catalog only once its files are in the release: a map whose
-      # upload failed keeps last month's entry.
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() && steps.upload-map.outcome == 'success' }}
-        with:
-          name: maps-${{ matrix.country }}
-          path: ${{ env.WORK }}/map/out/${{ matrix.country }}.maps.json
+    uses: ./.github/workflows/country-build.yml
+    with:
+      jobs: ${{ needs.plan.outputs.jobs1 }}
+      stamp: ${{ needs.plan.outputs.stamp }}
+      build: ${{ needs.plan.outputs.build }}
+      parts: ${{ github.event.inputs.parts || 'all' }}
+      valhalla-image: ${{ needs.plan.outputs.valhalla-image }}
+      max-parallel: 4
+  build-2:
+    needs: plan
+    if: ${{ needs.plan.outputs.jobs2 != '[]' }}
+    uses: ./.github/workflows/country-build.yml
+    with:
+      jobs: ${{ needs.plan.outputs.jobs2 }}
+      stamp: ${{ needs.plan.outputs.stamp }}
+      build: ${{ needs.plan.outputs.build }}
+      parts: ${{ github.event.inputs.parts || 'all' }}
+      valhalla-image: ${{ needs.plan.outputs.valhalla-image }}
+      max-parallel: 4
 
   publish:
-    needs: [plan, build]
+    needs: [plan, build-1, build-2]
     # Publish what was built even if some countries failed; the others keep last month's.
     if: ${{ !cancelled() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest

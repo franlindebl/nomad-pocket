@@ -595,7 +595,8 @@ outline cells (`CountryMap.cells`). Maps that aren't a country (older community/
 listed as "Otros mapas". **Prebuilt maps**: `.github/workflows/country-packages.yml` (monthly, or by hand with a
 country list and `parts` = all / maps / routing; one job per country builds its routing pack
 first, see Routing, then its map, and the run publishes both catalogs and prunes both families
-of releases)
+of releases; the jobs live in `country-build.yml`, called twice with half the list each: GitHub
+refuses a matrix over 256 jobs and a full run has 261)
 runs `scripts/maps/build-country-map.sh` per country: `pmtiles extract` of the planet build
 over the country's outline (`country-region.py`: Natural Earth 10m polygons with islands and
 exclaves within 10°, grown 5 km; Spain then carries Canarias and no Portugal: 2.3 GB instead
