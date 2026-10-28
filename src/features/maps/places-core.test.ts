@@ -9,9 +9,13 @@ import { BytesSource } from '../../lib/pmtiles/io.ts';
 import { listZoomTiles, readTile } from '../../lib/pmtiles/reader.ts';
 
 import {
+  categoryKinds,
+  dedupeHits,
   ftsQuery,
   INDEX_LAYERS,
   indexText,
+  localizedName,
+  NAME_SEP,
   matchCap,
   nearestLocality,
   normalizeName,
@@ -276,4 +280,87 @@ test('locateHouseNumber: the door, else between neighbours on the same side', ()
   assert.deepEqual(locateHouseNumber(doors, '56', near), { lat: 40.423, lon: -3.69, exact: false });
   assert.equal(locateHouseNumber(doors, '80', near), null);
   assert.equal(locateHouseNumber(doors, 's/n', near), null);
+});
+
+test('a name typed without its apostrophe matches (query side)', () => {
+  const d = new DatabaseSync(':memory:');
+  d.exec("CREATE VIRTUAL TABLE t USING fts5(names, tokenize = 'unicode61 remove_diacritics 2')");
+  const add = d.prepare('INSERT INTO t (names) VALUES (?)');
+  for (const n of ["McDonald's", "The Queen's Medical Center", 'Queen Street', 'Calle Mayor']) add.run(n);
+  const find = (q: string) => d.prepare('SELECT names FROM t WHERE t MATCH ?').all(ftsQuery(q)!).map((r) => String((r as { names: string }).names));
+  assert.deepEqual(find('mcdonalds'), ["McDonald's"]);
+  assert.deepEqual(find("mcdonald's"), ["McDonald's"]);
+  assert.deepEqual(find('queens medical'), ["The Queen's Medical Center"]);
+  assert.deepEqual(find('mayor'), ['Calle Mayor']);
+});
+
+test('rankHits ranks a name without apostrophe as exact, and a city by its alternative names first', () => {
+  const base = { rank: 12, lat: 21.3, lon: -157.8 };
+  const hits: Hit[] = [
+    { id: 1, layer: 'poi', kind: 'restaurant', name: "McDonald's Waikiki", names: "McDonald's Waikiki", ...base },
+    { id: 2, layer: 'poi', kind: 'restaurant', name: "McDonald's", names: "McDonald's", ...base },
+  ];
+  assert.equal(rankHits(hits, 'mcdonalds', null)[0].id, 2);
+  const city: Hit[] = [
+    { id: 1, layer: 'poi', kind: 'hotel', name: 'Tbilisi Marriott', names: 'Tbilisi Marriott', ...base, rank: 16 },
+    { id: 2, layer: 'place', kind: 'city', name: 'თბილისი', names: 'თბილისი Tiflis Tbilisi', ...base, rank: 4 },
+    { id: 3, layer: 'place', kind: 'city', name: 'תל אביב–יפו', names: `תל אביב–יפו${NAME_SEP}Tel Aviv${NAME_SEP}Tel Aviv`, ...base, rank: 4 },
+  ];
+  assert.equal(rankHits(city, 'Tbilisi', null)[0].id, 2);
+  assert.equal(rankHits(city, 'tel aviv', null)[0].id, 3);
+});
+
+test('localizedName: the app language, native as the other', () => {
+  const tbilisi = { name: 'თბილისი', names: `თბილისი${NAME_SEP}Tiflis${NAME_SEP}Tbilisi` };
+  assert.deepEqual(localizedName(tbilisi, 'es'), { name: 'Tiflis', native: 'თბილისი' });
+  assert.deepEqual(localizedName(tbilisi, 'en'), { name: 'Tbilisi', native: 'თბილისი' });
+  // No Spanish name: English only for a native name that is not Latin.
+  const gate = { name: 'שער יפו', names: `שער יפו${NAME_SEP}${NAME_SEP}Jaffa Gate` };
+  assert.equal(localizedName(gate, 'es').name, 'Jaffa Gate');
+  const sevilla = { name: 'Sevilla', names: `Sevilla${NAME_SEP}${NAME_SEP}Seville` };
+  assert.deepEqual(localizedName(sevilla, 'es'), { name: 'Sevilla', native: null });
+  assert.equal(localizedName(sevilla, 'en').name, 'Seville');
+  // Pack rows have no slots.
+  assert.deepEqual(localizedName({ name: 'Foo', names: 'Foo Bar' }, 'en'), { name: 'Foo', native: null });
+});
+
+test('dedupeHits: diacritic variants of a door at the same spot are one', () => {
+  const base = { names: '', rank: 0, layer: 'poi' as const, kind: 'address', lat: 21.28, lon: -157.83 };
+  const hits: Hit[] = [
+    { id: -1, name: 'Kalākaua Avenue, 2005', ...base },
+    { id: -2, name: 'Kalakaua Avenue, 2005', ...base },
+    { id: -3, name: 'Kalakaua Avenue, 2007', ...base, lat: 21.2801 },
+  ];
+  assert.deepEqual(
+    dedupeHits(hits).map((h) => h.id),
+    [-1, -3],
+  );
+  // Unnamed points are never merged by name.
+  const water = { ...base, kind: 'drinking_water', name: '' };
+  assert.equal(dedupeHits([{ id: 1, ...water }, { id: 2, ...water }]).length, 2);
+});
+
+test('categoryKinds: whole-query category words, es and en', () => {
+  assert.deepEqual(categoryKinds('Hospitales'), ['hospital']);
+  assert.deepEqual(categoryKinds('farmacia'), ['pharmacy']);
+  assert.deepEqual(categoryKinds('pharmacy'), ['pharmacy']);
+  assert.deepEqual(categoryKinds('Policía'), ['police']);
+  assert.deepEqual(categoryKinds('agua potable'), ['drinking_water']);
+  assert.deepEqual(categoryKinds('drinking water'), ['drinking_water']);
+  assert.deepEqual(categoryKinds('gasolinera'), ['fuel']);
+  assert.deepEqual(categoryKinds('nearest hospital'), ['hospital']);
+  assert.deepEqual(categoryKinds('farmacia cerca'), ['pharmacy']);
+  assert.equal(categoryKinds('farmacia sol'), null);
+  assert.equal(categoryKinds('Hospital Clínico San Carlos'), null);
+});
+
+test('tileRows keeps name variants in slots', () => {
+  const layers = {
+    places: {
+      extent: 4096,
+      features: [{ x: 10, y: 10, type: 1, geometry: [], properties: { name: 'თბილისი', 'name:es': 'Tiflis', 'name:en': 'Tbilisi', kind: 'city' } }],
+    },
+  };
+  const rows = tileRows(layers as never, 0, 0, 0);
+  assert.equal(rows[0].names, `თბილისი${NAME_SEP}Tiflis${NAME_SEP}Tbilisi`);
 });

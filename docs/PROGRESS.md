@@ -190,6 +190,18 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
   in a burn answer). Then (log 2026-10-28, units): distances in miles and feet for US users, yards in
   the UK, water in gallons in the US, and US English copy. All fixed.
 
+- **Functional review on the simulator** (2026-10-28, Release of 332b8ad against the live catalogs; sims
+  `NP-review` — Spanish, Spain kit in Madrid + Israel — and `NP-review-en` — US English, Hawaii). Full list,
+  repro, causes and fix status: `docs/FUNCTIONAL_REVIEW_2026-10-28.md` (R1–R15). Fixed the same day (log
+  2026-10-28, re-tested on both sims): R1 assistant ignoring Spanish questions' words behind Apple's
+  English router queries (family plan meeting point never found), R2 nearest hospital in SOS and category
+  search ("hospital", "farmacia"), R4 guardrail error in raw English + retry, R5 sources on "not found"
+  answers and PDF titles, R7 map dots thinned by zoom, R8 country aliases, R9–R12 small UI fixes, R14
+  duplicate address rows. Partial: R3 health content (stricter relevance + caution rule), R6 localized names
+  (tile rows and apostrophes yes; pack POIs/streets need es/en columns in `places.tsv`). Open: R13 reader
+  dark mode on already-dark archives (freeCodeCamp). The search index version went to 2: every installed
+  map re-indexes its tiles once after the update.
+
 ## Known issues / limitations
 
 - Map search: house numbers and far-away POIs come from the country package's side files
@@ -251,6 +263,33 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-28 — Functional review on the simulator and its fixes (R1–R14)
+
+The owner asked for a functional bug hunt across the app's main flows, in Spanish and English and several
+countries. Driven with axe on two iOS 27 sims (Release of 332b8ad, live catalogs): Spain kit in Madrid plus
+Israel and Georgia (scripts), and US English with Hawaii (miles, 911). Findings, repro, causes and status:
+`docs/FUNCTIONAL_REVIEW_2026-10-28.md`. Fixed by a Sonnet workflow (one agent per area in its own worktree),
+reviewed, corrected and re-tested by the lead:
+
+- Assistant: `planRetrieval` keeps the question's words when Apple's router writes a short query in another
+  language ("meeting point" for "¿Dónde quedamos…?": `detectLanguage` fell back to Spanish on two words);
+  stricter `relevantChunks`; health caution rule (only the condition asked, no tourniquet, 20 min cool
+  water); `sourcesToShow` (no sources on "not found"); readable PDF titles; guardrail errors map to
+  `declined` in Swift and JS, with a retry button (`assistant-retry`).
+- Maps: SOS lists lead with the 3 nearest hospitals (police/fire in Security); category words search the
+  nearest of that kind; map points thinned by zoom below z17; apostrophes optional; cities by their
+  English/Spanish names; tile rows keep name slots (`NAME_SEP`, `INDEX_VERSION` 2: one re-index per map
+  after the update, ~5 min for Spain on the sim) and show the app-language name with the native one under
+  it; duplicate rows from diacritic variants merged. Lead's fix: the agent's dedupe was O(n²) with regex
+  keys and made "farmacia" take 9 s (now ~1.6 s).
+- UI: country aliases (`region-terms.ts`), guides not "ready" while downloading, plan form sheets without
+  `automaticallyAdjustKeyboardInsets` (it opened them scrolled under the native header), storage total
+  shared by Home and Settings and formatted in the current language, onboarding region picked from a late
+  fix after a location timeout.
+- Partial: R3 (old manuals still in the library), R6 (pack POIs and streets: native names only until
+  `places.tsv` has es/en columns). Open: R13 (dark-mode invert on freeCodeCamp's dark header).
+- Checks: tsc, lint, 339 unit tests, i18n. E2E not run yet.
 
 ### 2026-10-28 — Units: miles/feet and gallons for the US, US English copy
 

@@ -15,7 +15,6 @@ import { libraryItemIds, retrieve } from './rag';
 import {
   buildRouterPrompt,
   buildToolResult,
-  citedNumbers,
   detectLanguage,
   estimateTokens,
   guessIntent,
@@ -23,6 +22,7 @@ import {
   ragMessageFrame,
   ROUTER_INSTRUCTIONS,
   searchToolSpec,
+  sourcesToShow,
   systemPrompt,
   tokensToChars,
   trimHistory,
@@ -211,13 +211,6 @@ function patchStreaming(patch: Partial<Streaming>) {
   if (s) useChat.setState({ streaming: { ...s, ...patch } });
 }
 
-/** Keeps only sources the answer cites (all of them if it cited none). */
-function citedSources(answer: string, sources: MessageSource[]): MessageSource[] {
-  const cited = new Set(citedNumbers(answer));
-  const used = sources.filter((s) => cited.has(s.n));
-  return used.length ? used : sources;
-}
-
 export async function sendMessage(question: string) {
   const text = question.trim();
   const st = useChat.getState();
@@ -248,6 +241,15 @@ export async function searchLibraryFor(messageId: string) {
   // Hidden while the new answer is written; only deleted once that one is stored.
   useChat.setState({ messages: st.messages.slice(0, i), error: null });
   await answer(st.activeSessionId, question.content, toTurns(st.messages.slice(0, i - 1)), true, st.messages[i]);
+}
+
+/** Retry after a failed answer: resends the last question (already stored) without duplicating it. */
+export async function retryLast() {
+  const st = useChat.getState();
+  const last = st.messages[st.messages.length - 1];
+  if (st.streaming || !st.activeSessionId || last?.role !== 'user') return;
+  useChat.setState({ error: null });
+  await answer(st.activeSessionId, last.content, toTurns(st.messages.slice(0, -1)), false);
 }
 
 function toTurns(messages: ChatMessage[]): Turn[] {
@@ -387,7 +389,7 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
       sessionId,
       role: 'assistant',
       content: finalText,
-      sources: citedSources(finalText, sources),
+      sources: sourcesToShow(finalText, sources),
       createdAt: Date.now(),
       searched,
     };

@@ -339,6 +339,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `marker-name`, `marker-note` | fields of the place sheet |
   | `marker-delete`, `region-delete`, `conversation-delete` | delete buttons in lists |
   | `composer-mic` | assistant composer: dictate / stop listening |
+  | `assistant-retry` | assistant error banner: resend the failed question (hidden when retrying can't help) |
   | `map-search`, `map-emergency` | map search pill and the red "SOS" (Emergencias) button |
   | `map-points`, `points-show`, `points-<category>` | Puntos (legend) map button, its show-on-map row and one row per category |
   | `search-input`, `search-result`, `search-coordinates` | search sheet field, result rows, "go to coordinates" row |

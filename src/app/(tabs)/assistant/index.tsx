@@ -7,7 +7,7 @@ import Animated, { useAnimatedKeyboard, useAnimatedStyle } from 'react-native-re
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Card, IconBadge, IconButton, PressableScale, Row, Text } from '@/components/ui';
-import { dismissError, newChat, openSession, searchLibraryFor, sendMessage, stopAnswer, useChat, type ChatMessage, type Streaming } from '@/features/assistant/chats';
+import { dismissError, newChat, openSession, retryLast, searchLibraryFor, sendMessage, stopAnswer, useChat, type ChatMessage, type Streaming } from '@/features/assistant/chats';
 import { isErrorKey } from '@/features/assistant/errors';
 import { SYSTEM_MODEL_ID } from '@/features/assistant/models';
 import { AssistantMessage, UserMessage } from '@/features/assistant/ui/Message';
@@ -235,16 +235,27 @@ function NoLibraryCard() {
   );
 }
 
+const NO_RETRY = new Set(['noModel', 'notInstalled', 'systemUnavailable', 'language', 'notReady']);
+
 function ErrorBanner({ code }: { code: string }) {
   const { t } = useTranslation('assistant');
   const { colors } = useTheme();
   const known = isErrorKey(code);
+  // Retrying can't help when there is no model to answer or it can't read the language.
+  const canRetry = !NO_RETRY.has(code);
   return (
     <View style={[styles.error, { backgroundColor: colors.dangerSoft }]}>
       <AlertCircle size={18} color={colors.danger} />
       <Text variant="footnote" color="danger" style={{ flex: 1 }}>
         {known ? t(`errors.${code}`) : t('errors.generic', { message: code })}
       </Text>
+      {canRetry && (
+        <PressableScale onPress={() => void retryLast()} accessibilityRole="button" accessibilityLabel={t('common:actions.retry')} testID="assistant-retry">
+          <Text variant="footnote" color="danger" style={{ fontWeight: '600' }}>
+            {t('common:actions.retry')}
+          </Text>
+        </PressableScale>
+      )}
       <IconButton icon={X} size={28} variant="plain" color={colors.danger} accessibilityLabel={t('common:actions.close')} onPress={dismissError} />
     </View>
   );

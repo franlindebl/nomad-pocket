@@ -1,7 +1,17 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { emergencyKind, kindCategory, overpassQuery, parseOverpassTsv, policeForce, splitBBox, tileEmergencyKind } from './emergency-core.ts';
+import {
+  emergencyKind,
+  kindCategory,
+  mergePriority,
+  overpassQuery,
+  parseOverpassTsv,
+  policeForce,
+  splitBBox,
+  thinForZoom,
+  tileEmergencyKind,
+} from './emergency-core.ts';
 
 // Real Overpass answer for central Soria (columns as in overpassQuery).
 const SORIA = [
@@ -93,4 +103,28 @@ test('tileEmergencyKind maps Protomaps POI kinds', () => {
   assert.equal(tileEmergencyKind('military'), 'military');
   assert.equal(tileEmergencyKind('spring'), 'spring');
   assert.equal(tileEmergencyKind('restaurant'), null);
+});
+
+test('mergePriority puts hospitals first and dedupes', () => {
+  const h = [{ osmId: 'h1' }, { osmId: 'h2' }];
+  const rest = [{ osmId: 'p1' }, { osmId: 'h1' }, { osmId: 'p2' }];
+  assert.deepEqual(
+    mergePriority(h, rest, 4).map((p) => p.osmId),
+    ['h1', 'h2', 'p1', 'p2'],
+  );
+  assert.deepEqual(
+    mergePriority(h, rest, 3).map((p) => p.osmId),
+    ['h1', 'h2', 'p1'],
+  );
+});
+
+test('thinForZoom keeps hospitals and one point per kind per cell', () => {
+  const ph = (i: number) => ({ kind: 'pharmacy' as const, lat: 40.4 + i * 1e-5, lon: -3.7 });
+  const hs = (lat: number) => ({ kind: 'hospital' as const, lat, lon: -3.7 });
+  const pts = [hs(40.4), hs(40.40001), ph(0), ph(1), ph(2)];
+  const thin = thinForZoom(pts, 14);
+  assert.equal(thin.filter((p) => p.kind === 'hospital').length, 2);
+  assert.equal(thin.filter((p) => p.kind === 'pharmacy').length, 1);
+  assert.equal(thinForZoom(pts, 17).length, pts.length);
+  assert.equal(thinForZoom([ph(0), { kind: 'pharmacy' as const, lat: 41.4, lon: -3.7 }], 14).length, 2);
 });

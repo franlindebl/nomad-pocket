@@ -725,8 +725,19 @@ indexed as overlapping character pairs and matched as a phrase, so a name is fou
 it; rows indexed before that change only match from their first character until the map is
 re-indexed (`INDEX_VERSION` was not bumped). The match = FTS prefix match (`"word"*` per word, ANDed; address
 abbreviations also match their word: `("avda"* OR "avenida"*)`, `ABBREVIATIONS`) →
-`rankHits` (exact > prefix > word match with "de/la/…" left out, place > POI > street,
-importance, log-distance from the map centre) → nearest locality as context. A query that
+`rankHits` (exact > prefix > word match with "de/la/…" left out, against every name variant of the row,
+so a city typed in English or Spanish ranks as exact; place > POI > street, importance, log-distance from
+the map centre; ranked by `rankKey`, `nameKey` without apostrophes, and deduplicated by it with
+`dedupeHits`, which stops at the limit: pairwise keys over thousands of rows froze "farmacia") → nearest
+locality as context. A word ending in s also matches its possessive ("mcdonalds" → McDonald's, which FTS
+holds as `mcdonald` + `s`). Tile rows keep their name variants in slots of `names` separated by `NAME_SEP`
+(U+001F, a space to the tokenizer): native, name:es, name:en, the rest (`INDEX_VERSION` 2); the search rows
+and the place card show `localizedName` (the app language's name, the native one as subtitle; Spanish
+falls back to English only for a non-Latin native name). Pack rows (`places.tsv`) keep one space-joined
+column of other names, so their POIs and streets show the native name only (separate es/en columns would
+need a pack format change). A query that is only a category word (`categoryKinds`: "hospital",
+"farmacias", "pharmacy", "agua potable", "farmacia cerca"…, es + en) puts the nearest `map_pois` of those
+kinds first (`nearestOfKinds`, growing radius), before the name matches. A query that
 reads as an address (`parseAddress`: "Calle Alcalá 50", "Alcalá, 50", "50 Alcalá") also
 brings the streets matching its street part, after the full-text hits, and before them
 the door itself on the best 8 of those streets (`doorHits`: the pack's house numbers of
@@ -753,8 +764,11 @@ indexing, emergency-kind POIs found in the tiles (named or not, e.g. drinking wa
 stored as `t…` rows unless the region already has Overpass points — at z15 that is most
 of them, at z12/14 only the important ones (Protomaps gives most POIs min_zoom 15–17).
 Queries: `nearestEmergencyPlaces(category, from)` (equirectangular ORDER BY, GROUP BY
-osm_id across overlapping regions), `emergencyPlacesIn(bbox, hidden)` for the map layer (zoom ≥ 11,
-at most 600, hospitals/police/fire first, then by category). The Puntos sheet (`maps/points.tsx`, the
+osm_id across overlapping regions; the nearest 3 of each `PRIORITY_KINDS` kind lead the list,
+hospitals in Health, police and fire stations in Security, so 40 closer pharmacies can't hide the
+nearest hospital: `mergePriority`), `emergencyPlacesIn(bbox, hidden, zoom)` for the map layer (zoom ≥ 11,
+at most 600, hospitals/police/fire first, then by category; below z17 `thinForZoom` keeps one point per
+kind per ~48 px cell, hospitals, police, fire and ambulance stations always). The Puntos sheet (`maps/points.tsx`, the
 three-dot map button) is its legend and settings: `settings.mapPoints` hides the layer,
 `settings.hiddenPointCategories` leaves categories out *in the SQL*, before the limit, so the others fill it.
 `emergencyNumber()`: 911 for the device region in most of the Americas, else 112.
@@ -1004,8 +1018,11 @@ without them are fetched on their own when the sheet opens online) and `route-st
   an engine that can't searches every question. The "Buscar en mi biblioteca" button
   forces a search (`searchLibraryFor`). The prompts were tuned on llama.cpp and Apple FM
   with a chat/search bench; the numbers are in the comments next to them.
-- RAG (`rag-core.ts` pure + tested, `rag.ts`): question (or the model's query) → language
-  detection and keyword queries (stopwords, light stemming, es/en; a follow-up such as
+- RAG (`rag-core.ts` pure + tested, `rag.ts`): question (or the model's query; `planRetrieval`: a
+  model query replaces the question's words only with positive evidence of the question's language,
+  `languageEvidence`; a short one with none, such as Apple's router's "meeting point" for "¿Dónde
+  quedamos…?", is searched too but chunks are ranked against the question; positive evidence of another
+  language drops it) → language detection and keyword queries (stopwords, light stemming, es/en; a follow-up such as
   "¿y cómo se trata?" inherits the previous question's keywords, `followUpTopic`, only when the
   question has at most one word of its own; the question's own queries are always searched; questions
   over 600 chars are searched once, after the sources, not twice) → libzim
@@ -1027,8 +1044,8 @@ without them are fetched on their own when the sheet opens online) and `route-st
   answer 768 tokens for GGUF / 600 for system, ~25 % of the rest for history, the rest for
   sources, counting the whole RAG frame (`ragMessageFrame`); phases loading → thinking (router / tool decision) → searching → generating;
   throttled streaming), `stopAnswer`
-  (also during search/load), only cited sources are kept on the message (all if none
-  cited), answers to a deleted conversation are dropped. `searched` (in memory only) marks
+  (also during search/load), only cited sources are kept on the message (`sourcesToShow`: if none is
+  cited, none for a "not found" answer, else the top 3; PDF titles cleaned by `readableDocTitle`), answers to a deleted conversation are dropped. `searched` (in memory only) marks
   answers given without the library: the latest one shows "Buscar en mi biblioteca", which keeps
   the old answer until the new one is stored (restored if the new one is empty or fails). Native and
   llama.cpp errors map to translated keys (`errors.ts`: too long, declined, language, not ready,

@@ -7,10 +7,11 @@ import { type MeasurementSystem, scaleBytes, scaleDistance, scaleWater } from '.
 export { formatDuration } from './units';
 
 /** Decimal (SI) units, like the OS storage screens: 1 GB = 1e9 bytes. */
-export function formatBytes(bytes: number, digits?: number): string {
+// `locale`: pass the app language read in render, so a memoised (React Compiler) screen formats again when it changes.
+export function formatBytes(bytes: number, digits?: number, locale: string = i18n.language): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return '0 MB';
   const { value, unit, fractionDigits } = scaleBytes(bytes, digits);
-  const formatted = new Intl.NumberFormat(i18n.language, { maximumFractionDigits: fractionDigits }).format(value);
+  const formatted = new Intl.NumberFormat(locale, { maximumFractionDigits: fractionDigits }).format(value);
   return `${formatted} ${unit}`;
 }
 

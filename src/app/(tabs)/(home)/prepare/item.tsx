@@ -43,8 +43,10 @@ export default function KitItemSheet() {
     }
   };
 
+  // No automaticallyAdjustKeyboardInsets here: in a form sheet it opens scrolled under the native
+  // header (first field hidden until dragged). These short forms fit above the keyboard.
   return (
-    <Screen automaticallyAdjustKeyboardInsets contentStyle={{ gap: space.lg, paddingTop: space.lg }}>
+    <Screen contentStyle={{ gap: space.lg, paddingTop: space.lg }}>
       <SheetHeader title={title} onSave={save} saveDisabled={!def && !name.trim()} saveTestID="item-save" />
       {def ? (
         <Text variant="callout" color="textSecondary">

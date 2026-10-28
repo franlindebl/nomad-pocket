@@ -107,7 +107,8 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
             : guidesHave
               ? t('ready.guidesDone', { count: guidesHave, total: guides.length })
               : t('ready.guidesTodo'),
-        done: guidesHave > 0,
+        // Not while any guide is still coming down: the first of 12 is not "ready".
+        done: guidesHave > 0 && guidesProgress === null,
         progress: guidesProgress,
         warning: false,
         href: { pathname: '/library/category/[slug]', params: { slug: 'medicine' } },

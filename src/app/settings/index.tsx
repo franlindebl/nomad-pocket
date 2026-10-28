@@ -24,6 +24,7 @@ export default function SettingsScreen() {
   const { t: tc } = useTranslation();
   const { colors } = useTheme();
   const s = useSettings();
+  const lang = i18n.language;
   const items = useItems();
   const { countries, otherMaps } = useCountries();
   // The map search index too: up to ~1 GB per country, and not part of any item's size.
@@ -40,7 +41,7 @@ export default function SettingsScreen() {
   };
 
   const confirm = (title: string, size: number, onDelete: () => void) =>
-    Alert.alert(title, t('deleteConfirm', { title, size: formatBytes(size) }), [
+    Alert.alert(title, t('deleteConfirm', { title, size: formatBytes(size, undefined, lang) }), [
       { text: tc('actions.cancel'), style: 'cancel' },
       { text: tc('actions.delete'), style: 'destructive', onPress: onDelete },
     ]);
@@ -95,19 +96,19 @@ export default function SettingsScreen() {
           <Row style={{ justifyContent: 'space-between' }}>
             <Text variant="headline">{t('storageUsed')}</Text>
             <Text variant="headline" tabular>
-              {formatBytes(used)}
+              {formatBytes(used, undefined, lang)}
             </Text>
           </Row>
           <ProgressBar value={total ? (total - free) / total : 0} />
           <Text variant="footnote" color="textSecondary" tabular>
-            {t('storageFree')}: {formatBytes(free)}
+            {t('storageFree')}: {formatBytes(free, undefined, lang)}
           </Text>
         </View>
         {countries.map((c) => (
           <ListRow
             key={c.regionId}
             title={c.title}
-            subtitle={`${t('countryKind')} · ${formatBytes(c.sizeBytes)}`}
+            subtitle={`${t('countryKind')} · ${formatBytes(c.sizeBytes, undefined, lang)}`}
             leading={<IconBadge icon={Map} hue="maps" size={36} />}
             trailing={trash}
             accessibilityHint={t('deleteHint')}
@@ -118,7 +119,7 @@ export default function SettingsScreen() {
           <ListRow
             key={item.id}
             title={item.title}
-            subtitle={`${t(`kind.${item.kind}`)} · ${formatBytes(item.sizeBytes)}`}
+            subtitle={`${t(`kind.${item.kind}`)} · ${formatBytes(item.sizeBytes, undefined, lang)}`}
             leading={
               <IconBadge
                 icon={item.kind === 'map' ? Map : item.kind === 'model' ? Sparkles : item.isCourse ? GraduationCap : Database}

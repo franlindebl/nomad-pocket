@@ -62,8 +62,10 @@ export default function EntrySheet() {
     router.back();
   };
 
+  // No automaticallyAdjustKeyboardInsets here: in a form sheet it opens scrolled under the native
+  // header (first field hidden until dragged). These short forms fit above the keyboard.
   return (
-    <Screen automaticallyAdjustKeyboardInsets contentStyle={{ gap: space.lg, paddingTop: space.lg }}>
+    <Screen contentStyle={{ gap: space.lg, paddingTop: space.lg }}>
       <SheetHeader title={titles[kind][existing ? 1 : 0]} onSave={save} saveTestID="entry-save" />
       {fields.map((f, i) => (
         <Field

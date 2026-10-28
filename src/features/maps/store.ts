@@ -13,6 +13,8 @@ export type CameraRequest = { center: [number, number]; zoom?: number } | { boun
 /** What the place card shows. `osmId` links an emergency point (details from map_pois). */
 export type SelectedPlace = {
   name: string;
+  /** The name in the data's own language when `name` is a translation (shown under it; emergency lookups match it). */
+  nativeName?: string | null;
   lat: number;
   lon: number;
   kind?: string | null;

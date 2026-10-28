@@ -59,8 +59,10 @@ export default function MeetingSheet() {
 
   const check = (on: boolean) => (on ? <CircleCheck size={22} color={colors.accent} /> : <Circle size={22} color={colors.textTertiary} />);
 
+  // No automaticallyAdjustKeyboardInsets here: in a form sheet it opens scrolled under the native
+  // header (first field hidden until dragged). These short forms fit above the keyboard.
   return (
-    <Screen automaticallyAdjustKeyboardInsets contentStyle={{ gap: space.lg, paddingTop: space.lg }}>
+    <Screen contentStyle={{ gap: space.lg, paddingTop: space.lg }}>
       <SheetHeader title={t(`meeting.${slot}`)} onSave={save} saveTestID="meeting-save" />
       <Text variant="footnote" color="textSecondary">
         {t(`meeting.${slot}Hint`)}

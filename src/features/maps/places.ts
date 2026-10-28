@@ -18,6 +18,8 @@ import { kindCategory, tileEmergencyKind } from './emergency-core';
 import { bboxAround, distanceMeters, type LatLon } from './geo';
 import { addressImport, importPlacesBlock, importStreetsBlock, insertRows as insertRowsInto, type AsyncSql } from './import-core';
 import {
+  categoryKinds,
+  dedupeHits,
   ftsQuery,
   INDEX_LAYERS,
   matchCap,
@@ -28,6 +30,7 @@ import {
   parseAddress,
   parseJapaneseAddress,
   pickIndexZoom,
+  rankKey,
   rankHits,
   tileRows,
   type AddressRow,
@@ -41,7 +44,8 @@ import { useMapUi } from './store';
 import { resolveMapFile, type MapItem } from './useMapSources';
 
 /** Bump to rebuild every index after changing what tileRows extracts. */
-export const INDEX_VERSION = 1;
+// 2: tile rows keep their name variants in slots (NAME_SEP), for names in the app language.
+export const INDEX_VERSION = 2;
 
 /** Indexing progress per map item id (0..1), and a counter bumped whenever an index changes (the search sheet re-queries). */
 export const usePlaceIndex = create<{ progress: Record<string, number>; version: number }>(() => ({ progress: {}, version: 0 }));
@@ -634,7 +638,7 @@ async function refreshDetail(p: LatLon) {
 
 export type SearchResult = Hit & { context: string | null };
 
-type HitRow = { id: number; name: string; layer: PlaceLayer; kind: string; lat: number; lon: number; importance: number };
+type HitRow = { id: number; name: string; names: string; layer: PlaceLayer; kind: string; lat: number; lon: number; importance: number };
 
 /**
  * Places, POIs and streets matching what the user typed, best first. An address
@@ -644,6 +648,9 @@ type HitRow = { id: number; name: string; layer: PlaceLayer; kind: string; lat: 
  */
 export async function searchPlaces(text: string, near: LatLon | null, limit = 40, current = () => true): Promise<SearchResult[]> {
   let hits = await matchPlaces(text, near, limit);
+  // A category word ("hospital", "farmacia"): the nearest places of that kind come before any name match.
+  const kinds = near ? categoryKinds(text) : null;
+  if (kinds && near) hits = dedupeHits([...(await nearestOfKinds(kinds, near, limit)), ...hits]);
   const address = parseAddress(text);
   if (address && current()) {
     const streets = await matchPlaces(address.street, near, limit, 'road');
@@ -654,7 +661,50 @@ export async function searchPlaces(text: string, near: LatLon | null, limit = 40
   const japanese = parseJapaneseAddress(text);
   if (japanese.length && current()) hits = [...(await japaneseDoorHits(japanese, near)), ...hits];
   if (!current()) return [];
+  // The same place in two spellings ("Kalākaua"/"Kalakaua") can come from different lookups.
+  hits = dedupeHits(hits);
   return Promise.all(hits.slice(0, limit).map(async (h) => ({ ...h, context: h.layer === 'place' ? null : await localityNear(h) })));
+}
+
+/** Radii (m) tried in turn for the nearest places of a kind: stop at the first that holds enough. */
+const KIND_RADII = [2_000, 8_000, 30_000, 120_000, 500_000];
+
+/**
+ * The nearest emergency points of the given kinds (map_pois: hospitals, pharmacies, police, water…),
+ * nearest first. An unnamed one (a fountain) has an empty name: the screen shows its kind.
+ */
+async function nearestOfKinds(kinds: string[], near: LatLon, limit: number): Promise<Hit[]> {
+  const lonScale = Math.cos((near.lat * Math.PI) / 180) ** 2;
+  const marks = kinds.map(() => '?').join(',');
+  let rows: { rowid: number; kind: string; name: string | null; lat: number; lon: number }[] = [];
+  for (const radius of KIND_RADII) {
+    const [w, s, e, n] = bboxAround(near, radius);
+    rows = await indexDbAsync().getAllAsync(
+      `SELECT rowid, kind, name, lat, lon FROM map_pois WHERE kind IN (${marks}) AND lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?
+       ORDER BY (lat - ?) * (lat - ?) + (lon - ?) * (lon - ?) * ? LIMIT ${limit * 3}`,
+      ...kinds,
+      s,
+      n,
+      w,
+      e,
+      near.lat,
+      near.lat,
+      near.lon,
+      near.lon,
+      lonScale,
+    );
+    rows = rows.filter((r) => distanceMeters(near, r) <= radius);
+    if (rows.length >= Math.min(limit, 10)) break;
+  }
+  rows.sort((a, b) => distanceMeters(near, a) - distanceMeters(near, b));
+  // Tiles and Overpass can both hold one place: the same kind within 40 m is one.
+  const out: Hit[] = [];
+  for (const r of rows) {
+    if (out.some((o) => o.kind === r.kind && distanceMeters(o, r) < 40)) continue;
+    out.push({ id: -1_000_000 - r.rowid, layer: 'poi', kind: r.kind, name: r.name ?? '', names: '', rank: 0, lat: r.lat, lon: r.lon });
+    if (out.length >= limit) break;
+  }
+  return out;
 }
 
 /** "Calle de Alcalá, 52" on each street hit that has doors (exact or approximate). */
@@ -665,7 +715,7 @@ async function doorHits(streets: Hit[], number: string): Promise<Hit[]> {
     if (!at) continue;
     const name = `${st.name}, ${houseNumberKey(number)}`;
     // Two index rows of the same street (one per tile) find the same door.
-    if (out.some((o) => o.name === name && distanceMeters(o, at) < 300)) continue;
+    if (out.some((o) => rankKey(o.name) === rankKey(name) && distanceMeters(o, at) < 300)) continue;
     out.push({ ...st, id: -1 - out.length, name, kind: at.exact ? 'address' : 'address_approx', lat: at.lat, lon: at.lon });
   }
   return out;
@@ -711,7 +761,7 @@ async function matchPlaces(text: string, near: LatLon | null, limit: number, lay
   if (!match) return [];
   let rows: HitRow[];
   const columns =
-    'rowid AS id, name, layer, kind, CAST(lat AS REAL) AS lat, CAST(lon AS REAL) AS lon, CAST(importance AS INTEGER) AS importance';
+    'rowid AS id, name, names, layer, kind, CAST(lat AS REAL) AS lat, CAST(lon AS REAL) AS lon, CAST(importance AS INTEGER) AS importance';
   const onLayer = layer ? 'AND layer = ?' : '';
   const layerArg = layer ? [layer] : [];
   // Ordering reads every match: "ca" matches 400k rows of a country. The first `cap` are
@@ -747,7 +797,7 @@ async function matchPlaces(text: string, near: LatLon | null, limit: number, lay
     return [];
   }
   return rankHits(
-    rows.map((r) => ({ id: r.id, name: r.name, names: '', layer: r.layer, kind: r.kind, lat: r.lat, lon: r.lon, rank: r.importance })),
+    rows.map((r) => ({ id: r.id, name: r.name, names: r.names, layer: r.layer, kind: r.kind, lat: r.lat, lon: r.lon, rank: r.importance })),
     text,
     near,
     limit,

@@ -91,6 +91,11 @@ export function tokenize(text: string): string[] {
 
 /** Guess Spanish vs English from stopwords and orthography. */
 export function detectLanguage(text: string, fallback: Lang = 'en'): Lang {
+  return languageEvidence(text) ?? fallback;
+}
+
+/** The language the text positively shows (stopwords, ¿ ¡ ñ, accents), or null for "meeting point" and the like. */
+export function languageEvidence(text: string): Lang | null {
   if (/[¿¡ñ]/i.test(text)) return 'es';
   let es = 0;
   let en = 0;
@@ -99,7 +104,7 @@ export function detectLanguage(text: string, fallback: Lang = 'en'): Lang {
     if (STOPWORDS_EN.has(w)) en++;
   }
   if (/[áéíóú]/i.test(text)) es += 1;
-  if (es === en) return fallback;
+  if (es === en) return null;
   return es > en ? 'es' : 'en';
 }
 
@@ -324,16 +329,74 @@ export function guessIntent(message: string, history: Turn[] = []): Intent {
 /**
  * Drops ranked chunks that share too few terms with the question: a library
  * without the topic still returns articles that mention one of its words. A chunk
- * needs 1 of 1–2 question terms, 2 of 3–5, 40 % of longer questions.
+ * needs 1 of 1–2 question terms, half (at least 2) of 3–8, 40 % of longer questions.
+ * (Two of five used to pass: "aceite" + "mano" pulled an article on poison ivy into a burn answer.)
+ * With several texts (the question and a model's query in another language) a chunk passes
+ * if it is relevant to any of them.
  */
-export function relevantChunks<T extends Chunk>(question: string, ranked: Scored<T>[]): Scored<T>[] {
-  const q = [...new Set(tokenize(question))];
-  if (!q.length) return ranked;
-  const need = q.length <= 2 ? 1 : Math.max(2, Math.ceil(q.length * 0.4));
+export function relevantChunks<T extends Chunk>(question: string | string[], ranked: Scored<T>[]): Scored<T>[] {
+  const texts = (Array.isArray(question) ? question : [question]).map((t) => [...new Set(tokenize(t))]).filter((q) => q.length);
+  if (!texts.length) return ranked;
   return ranked.filter(({ item }) => {
     const have = new Set([...tokenize(item.title), ...tokenize(item.text)]);
-    return q.filter((t) => have.has(t)).length >= need;
+    return texts.some((q) => {
+      const need = q.length <= 2 ? 1 : Math.max(2, Math.ceil(q.length * (q.length <= 8 ? 0.5 : 0.4)));
+      return q.filter((t) => have.has(t)).length >= need;
+    });
   });
+}
+
+export type RetrievalPlan = {
+  /** Keyword queries for the search engines. */
+  queries: string[];
+  /** What chunks are ranked against. */
+  rankText: string;
+  /** Texts a chunk must be relevant to (any of them). */
+  relevanceTexts: string[];
+};
+
+/**
+ * Which words drive a retrieval. A model's query (tool call / Apple's router) replaces the question's
+ * only when it is positively in the question's language, or is a short one with no evidence either way
+ * ("meeting point" for "¿Dónde quedamos…?"); in that unknown case the question's own words are searched too and are what
+ * chunks are ranked against (the query only widens the search), since the query may be in another language than the library text. Positive evidence of
+ * another language ("purificación de agua" for an English question) drops the query.
+ */
+export function planRetrieval(question: string, history: Turn[], lang: Lang, modelQuery?: string): RetrievalPlan {
+  const own = [...followUpTopic(question, history), question].join(' ');
+  const q = modelQuery?.trim();
+  const evidence = q ? languageEvidence(q) : null;
+  if (!q || (evidence && evidence !== lang)) {
+    return { queries: buildConversationQueries(question, history), rankText: own, relevanceTexts: [own] };
+  }
+  if (evidence === lang) return { queries: buildSearchQueries(q), rankText: q, relevanceTexts: [q] };
+  const queries = [...new Set([...buildSearchQueries(q), ...buildConversationQueries(question, history)])].slice(0, 6);
+  return { queries, rankText: own, relevanceTexts: [q, own] };
+}
+
+/** The title of a PDF source with archive.org-style ids dropped ("dead falls snares b00harduoft" → "dead falls snares"). */
+export function readableDocTitle(title: string, archiveTitle: string): string {
+  const isId = (w: string) => /^\d{5,}$/.test(w) || (/\d/.test(w) && /\p{L}/u.test(w) && w.length >= 7);
+  const kept = title.trim().split(/\s+/);
+  while (kept.length && isId(kept[kept.length - 1])) kept.pop();
+  const t = kept.join(' ');
+  if ((t.match(/\p{L}/gu)?.length ?? 0) >= 4) return t;
+  // Nothing readable left ("173165"): say which collection it comes from.
+  return archiveTitle && archiveTitle !== title ? `${archiveTitle} · ${title}` : title;
+}
+
+/** Answers that say the library had nothing ("No lo he encontrado en tu biblioteca"). */
+const NOT_FOUND_RE = /no lo he encontrado|no he encontrado|couldn['’]?t find|could not find|did not find|didn['’]?t find/i;
+
+/**
+ * The sources to attach to an answer: the ones it cites; if it cites none, nothing when it says it
+ * found nothing (the retrieved sources are unrelated), else the top 3 (the first are the best ranked).
+ */
+export function sourcesToShow<S extends { n: number }>(answer: string, sources: S[]): S[] {
+  const cited = new Set(citedNumbers(answer));
+  const used = sources.filter((s) => cited.has(s.n));
+  if (used.length) return used;
+  return NOT_FOUND_RE.test(answer) ? [] : sources.slice(0, 3);
 }
 
 // ---------------------------------------------------------------------------
@@ -730,8 +793,8 @@ const NO_HITS: Record<Lang, string> = {
 };
 
 const HEALTH_NOTE: Record<Lang, string> = {
-  es: 'Termina con una línea breve: «Información de referencia, no consejo médico.»',
-  en: 'End with one short line: "Reference information, not medical advice."',
+  es: 'Responde solo a la afección que pregunta el usuario: no mezcles otras enfermedades de las fuentes. Usa primeros auxilios actuales: en mordedura de serpiente nada de torniquete, cortes ni succión (inmoviliza y pide ayuda urgente); en quemaduras, agua corriente fresca unos 20 minutos. Si una fuente contradice esto, no la sigas. Termina con una línea breve: «Información de referencia, no consejo médico.»',
+  en: 'Answer only the condition the user asks about: do not mix in other conditions from the sources. Use current first aid: for snake bites no tourniquet, cutting or suction (keep still and get urgent help); for burns, cool running water for about 20 minutes. If a source contradicts this, do not follow it. End with one short line: "Reference information, not medical advice."',
 };
 
 const HEALTH_TERMS = [

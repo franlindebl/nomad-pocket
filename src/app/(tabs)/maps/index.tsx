@@ -156,7 +156,7 @@ export default function MapScreen() {
   const poiData = useMemo<GeoJSON.FeatureCollection>(() => {
     if (!pointsShown || !viewport || viewport.zoom < POI_MIN_ZOOM) return EMPTY;
     try {
-      const places = emergencyPlacesIn(viewport.bounds, hiddenCategories);
+      const places = emergencyPlacesIn(viewport.bounds, hiddenCategories, viewport.zoom);
       return {
         type: 'FeatureCollection',
         features: places.map((p) => ({

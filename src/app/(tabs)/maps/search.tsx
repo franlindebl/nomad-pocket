@@ -9,7 +9,7 @@ import { useItems } from '@/features/content/items';
 import { distanceMeters, formatLatLon, formatUtm, parseCoordinates, toUtm, type LatLon } from '@/features/maps/geo';
 import { distanceWithDirection, kindColor, kindIcon, kindLabel } from '@/features/maps/labels';
 import { useMarkers } from '@/features/maps/markers';
-import { normalizeName } from '@/features/maps/places-core';
+import { localizedName, normalizeName } from '@/features/maps/places-core';
 import { usePreparingCountries } from '@/features/maps/countries';
 import { hasSearchIndex, indexDetailAroundView, searchPlaces, usePlaceIndex, type SearchResult } from '@/features/maps/places';
 import { showPlace, useMapUi, type SelectedPlace } from '@/features/maps/store';
@@ -21,7 +21,7 @@ const SEARCH_DELAY = 200;
 // A plain scroll view (Screen) like the region picker: a virtualized list gets
 // no height inside a formSheet. Results are capped at 40.
 export default function SearchSheet() {
-  const { t } = useTranslation('maps');
+  const { t, i18n } = useTranslation('maps');
   const { colors } = useTheme();
   const [query, setQuery] = useState('');
   const deferred = useDeferredValue(query.trim());
@@ -67,6 +67,12 @@ export default function SearchSheet() {
     const q = normalizeName(deferred);
     return markers.filter((m) => normalizeName(m.name).includes(q)).slice(0, 5);
   }, [deferred, markers]);
+
+  // Name in the app language (native one as a subtitle); an unnamed point shows its kind.
+  const shown = (r: SearchResult) => {
+    const l = localizedName(r, i18n.language);
+    return { name: l.name || kindLabel(t, r.kind), native: l.native };
+  };
 
   const go = (p: SelectedPlace) => {
     showPlace(p);
@@ -135,16 +141,21 @@ export default function SearchSheet() {
         <View style={{ marginTop: coords || savedHits.length ? 0 : space.lg }}>
           {coords || savedHits.length ? <SectionHeader title={t('title')} /> : null}
           <ListGroup>
-            {results.map((r) => (
-              <ListRow
-                key={r.id}
-                testID="search-result"
-                leading={<IconBadge icon={kindIcon(r.kind, r.layer)} color={kindColor(r.kind)} />}
-                title={r.name}
-                subtitle={[kindLabel(t, r.kind), r.context, away(r)].filter(Boolean).join(' · ')}
-                onPress={() => go({ name: r.name, lat: r.lat, lon: r.lon, kind: r.kind, layer: r.layer, context: r.context })}
-              />
-            ))}
+            {results.map((r) => {
+              const { name, native } = shown(r);
+              return (
+                <ListRow
+                  key={r.id}
+                  testID="search-result"
+                  leading={<IconBadge icon={kindIcon(r.kind, r.layer)} color={kindColor(r.kind)} />}
+                  title={name}
+                  subtitle={[kindLabel(t, r.kind), native, r.context, away(r)].filter(Boolean).join(' · ')}
+                  onPress={() =>
+                    go({ name, nativeName: native ?? (r.name || null), lat: r.lat, lon: r.lon, kind: r.kind, layer: r.layer, context: r.context })
+                  }
+                />
+              );
+            })}
           </ListGroup>
         </View>
       ) : null}
