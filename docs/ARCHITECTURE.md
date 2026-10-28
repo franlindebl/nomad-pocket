@@ -300,7 +300,7 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
   `known`): a file whose mirrors were all measured recently starts without probing, which a
   kit of twenty small archives needs.
 - **Segmented engine** (`segmented.ts`, decisions in `segments-core.ts`, pure): used when the
-  file is ≥ 16 MB, of known exact size, and its sources answer ranges with 206. Ranges of
+  file is ≥ 4 MiB, of known exact size, and its sources answer ranges with 206. Ranges of
   4–32 MiB (~48 per file, whole metalink pieces), each a `DownloadTask` with a `Range` header
   into `partial/<id>.chunks/<start>-<end>.<n>`. Connections come from the budget; per host at
   most 3 to a Kiwix mirror and 12 to a single URL, summed over every download.

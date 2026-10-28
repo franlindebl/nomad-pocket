@@ -63,7 +63,7 @@ connections" never fired, and the guides waited behind the map. Changed:
 
 - Up to 6 files at once on Wi-Fi (2 on mobile data), at most 2 choosing their sources, at most 2
   from one single-host source (GitHub, Hugging Face); fair shares of the budget between them.
-- Segmented from 16 MB (was 64); 6 connections per single URL host (was 4).
+- Segmented from 4 MiB (was 16 MB, 64 before; small files now resume after an iOS kill); 6 connections per single URL host (was 4).
 - Mirror speeds remembered for 10 min: the kit's archives start without re-probing.
 
 Simulator, same kit (Spain 4.8 GB + 12 guides, 1.4 GB), fresh installs:
