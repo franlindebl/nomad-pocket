@@ -45,6 +45,9 @@
   },
   "sources": "Sources",
   "sourcePage": "{{title}} · p. {{page}}",
+  "copied": "Copied",
+  "copy": "Copy answer",
+  "regenerate": "Regenerate answer",
   "searchLibrary": "Search my library",
   "searchLibraryHint": "Answer again searching your offline library",
   "errors": {

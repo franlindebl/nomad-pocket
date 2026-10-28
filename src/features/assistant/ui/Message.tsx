@@ -1,15 +1,18 @@
 import { router } from 'expo-router';
-import { BookOpen, Library, Sparkles } from 'lucide-react-native';
+import * as Clipboard from 'expo-clipboard';
+import { BookOpen, Copy, Library, RefreshCw, Sparkles } from 'lucide-react-native';
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 
-import { Button, PressableScale, Text } from '@/components/ui';
+import { showToast } from '@/components/Toast';
+import { Button, IconButton, PressableScale, Text } from '@/components/ui';
 import { PLAN_SOURCE } from '@/features/prepare/passages';
 import { formatPercent } from '../format';
 import { radius, space, useTheme } from '@/theme';
 
 import type { ChatMessage, MessageSource, Phase } from '../chats';
+import { toPlainText } from '../markdown';
 import { Markdown } from './Markdown';
 
 export function openSource(s: MessageSource) {
@@ -90,6 +93,10 @@ type AssistantProps = {
   loadProgress?: number;
   /** Shown under an answer given without the library: answer it again searching it. */
   onSearchLibrary?: () => void;
+  /** Set only on the last answer of a conversation, when nothing is being written. */
+  onRegenerate?: () => void;
+  /** Show the copy button (finished answers). */
+  copyable?: boolean;
 };
 
 export const AssistantMessage = memo(function AssistantMessage({
@@ -99,6 +106,8 @@ export const AssistantMessage = memo(function AssistantMessage({
   phase,
   loadProgress,
   onSearchLibrary,
+  onRegenerate,
+  copyable,
 }: AssistantProps) {
   const { t } = useTranslation('assistant');
   const { colors } = useTheme();
@@ -107,6 +116,15 @@ export const AssistantMessage = memo(function AssistantMessage({
   const onCite = (n: number) => {
     const s = byN.get(n);
     if (s) openSource(s);
+  };
+
+  const copy = async () => {
+    try {
+      await Clipboard.setStringAsync(toPlainText(text));
+      showToast(t('copied'));
+    } catch {
+      // The clipboard is not available: nothing useful to tell the user.
+    }
   };
 
   const waiting = streaming && !text;
@@ -133,6 +151,14 @@ export const AssistantMessage = memo(function AssistantMessage({
           <Markdown text={text} onCite={onCite} citable={citable} caret={streaming} />
         )}
         {!waiting && sources.length ? <SourceChips sources={sources} /> : null}
+        {copyable && !streaming && text ? (
+          <View style={styles.actions}>
+            <IconButton icon={Copy} variant="plain" size={36} accessibilityLabel={t('copy')} onPress={copy} testID="assistant-copy" />
+            {onRegenerate ? (
+              <IconButton icon={RefreshCw} variant="plain" size={36} accessibilityLabel={t('regenerate')} onPress={onRegenerate} testID="assistant-regenerate" />
+            ) : null}
+          </View>
+        ) : null}
         {onSearchLibrary ? (
           <Button
             title={t('searchLibrary')}
@@ -164,6 +190,7 @@ const styles = StyleSheet.create({
   assistantBody: { flex: 1, gap: space.md, paddingTop: 2 },
   avatar: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginTop: 0 },
   status: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 24 },
+  actions: { flexDirection: 'row', gap: space.xs, marginLeft: -space.sm, marginTop: -space.sm },
   searchLibrary: { alignSelf: 'flex-start' },
   chipsScroll: { flexGrow: 0, marginRight: -space.gutter },
   chips: { gap: space.sm, paddingRight: space.gutter },

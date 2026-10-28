@@ -151,3 +151,44 @@ export function parseMarkdown(src: string): Block[] {
   flush();
   return blocks;
 }
+
+const inlineText = (nodes: Inline[]): string =>
+  nodes
+    .map((n) => {
+      switch (n.type) {
+        case 'text':
+        case 'code':
+          return n.text;
+        case 'bold':
+        case 'italic':
+          return inlineText(n.children);
+        case 'cite':
+          return '';
+      }
+    })
+    .join('')
+    // A citation removed from "agua [1]." leaves a stray space before the punctuation.
+    .replace(/[ \t]+([.,;:!?])/g, '$1')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim();
+
+/** Readable plain text of an answer for the clipboard: no Markdown syntax, no [n] citation markers. */
+export function toPlainText(src: string): string {
+  return parseMarkdown(src)
+    .map((b) => {
+      switch (b.type) {
+        case 'heading':
+        case 'paragraph':
+        case 'quote':
+          return inlineText(b.children);
+        case 'list':
+          return b.items.map((it, i) => `${b.ordered ? `${b.start + i}.` : '•'} ${inlineText(it)}`).join('\n');
+        case 'code':
+          return b.text;
+        case 'rule':
+          return '';
+      }
+    })
+    .filter(Boolean)
+    .join('\n\n');
+}

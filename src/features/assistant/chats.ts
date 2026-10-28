@@ -243,6 +243,21 @@ export async function searchLibraryFor(messageId: string) {
   await answer(st.activeSessionId, question.content, toTurns(st.messages.slice(0, i - 1)), true, st.messages[i]);
 }
 
+/**
+ * Regenerate: answers the question behind the last answer again, with the same model (the active
+ * one) and the same retrieval choice (searching the library if that answer did). The old answer
+ * stays hidden until the new one is stored, and comes back if the new one ends up empty.
+ */
+export async function regenerateLast() {
+  const st = useChat.getState();
+  const i = st.messages.length - 1;
+  const old = st.messages[i];
+  const question = st.messages[i - 1];
+  if (st.streaming || !st.activeSessionId || i < 1 || old.role !== 'assistant' || question?.role !== 'user') return;
+  useChat.setState({ messages: st.messages.slice(0, i), error: null });
+  await answer(st.activeSessionId, question.content, toTurns(st.messages.slice(0, i - 1)), old.searched === true, old);
+}
+
 /** Retry after a failed answer: resends the last question (already stored) without duplicating it. */
 export async function retryLast() {
   const st = useChat.getState();
