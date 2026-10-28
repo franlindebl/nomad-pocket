@@ -61,7 +61,8 @@ can pick up without re-deriving anything.
 
 ## Next steps / backlog
 
-Roughly by value. Items A, U and 0 are in progress; the rest are not started. (Preparedness was added
+Roughly by value. Items A, U and 0 are in progress; 3, 4 and 7 are partly done (see each); the rest are not
+started. (Preparedness was added
 on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
 
 A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check in ~2 days, with the
@@ -106,12 +107,14 @@ A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check
      update with routing active; sha-256 time on a 2 GB part; Wi-Fi-only on a phone (the question,
      waiting, mobile-data override).
    - Database split on an existing phone with a big index, on iOS and on Android (the Android split in
-     place is untested); removing a real installed country; phone timings of search and imports.
+     place is untested); removing a real installed country; phone timings of search (the imports were timed on
+     the iPhone 14 Pro on 2026-10-28: Spain's four side files in 51 s, log).
    - Reader on Android (new origin, CSP, external-link prompt, recovery after `chrome://crash`, an
      imported PouchDB archive); iOS reader with a remote image/fetch (verified blocked on the simulator).
    - Android build with the new native dependency (`expo-screen-orientation`); dark mode, VoiceOver and
      iPad width of the new screens (Credits, onboarding); a real GGUF backgrounded mid-load/search;
-     Apple FM error codes translated; the Maestro suite on the merged branch.
+     Apple FM error codes translated. (Done since: Android release builds with it and the Android tour pass,
+     2026-10-28; the Maestro suites run on main, smoke + full 43/43.)
 
 U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNTRY_REGIONS_PLAN.md`):
    done and live. State at 2026-10-27 (resume point for the "rediseño" session, which also owns
@@ -121,10 +124,10 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
      but `pm` and uninhabited territories: atc gs hm io kas pn tf; `ht` uses `do`; the USA as
      us-west, us-midwest, us-northeast, us-south, us-alaska, us-hawaii). Every part and side file
      checked in its release on 2026-10-27.
-   - **Owner, on a real iPhone with build 16**: (1) a US region end to end (Northeast, 5.5 GB:
-     sheet → region list → download → Tus mapas "Noreste"); (2) Spain from a fresh install (build
-     14 was killed while "Preparando"; build 16 copies and hashes natively, modules/nomad-files);
-     (3) big side-file imports (Germany's 780 MB of house numbers, ~450 MB per US region).
+   - **Owner, on a real iPhone**: (1) a US region end to end (Northeast, 5.5 GB:
+     sheet → region list → download → Tus mapas "Noreste"); (2) ~~Spain from a fresh install~~ done on the
+     iPhone 14 Pro (2026-10-27 runs 1–7, 2026-10-28 run 8: the whole kit in 6:47, search ready at 3:23);
+     (3) bigger side-file imports than Spain's (Germany's 780 MB of house numbers, ~450 MB per US region).
    - **Agent, when asked**: (1) ~~E2E flows for countries in regions~~ done 2026-10-28 (`map-20`, `map-21`) (owner wants them, 2026-10-27),
      both kinds, against a local catalog (`scripts/e2e.sh` maps server; testIDs `region-*` in
      docs/E2E.md): (a) a pack per region, as the USA (Andorra split in two regions, each with its
@@ -150,9 +153,10 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
      have the fix. **Next**: a real-phone check of one region.
    - **Routes across packs** (between countries and US regions): stitched at border crossings, on main
      and pushed since bdc1fae (2026-10-28). Works once the published packs carry `<pack>.crossings.tsv`: the first
-     `country-packages.yml` run after it (run 40681896621 was launched by hand on 2026-10-28 and still in
-     progress when checked; the monthly one is on 2026-11-05), and in app builds from bdc1fae on (store
-     builds up to 23 predate it). Then Android, ferries. The US stays split. `docs/ROUTING_ACROSS_PACKS.md`.
+     `country-packages.yml` run after it: run 40681896621 (`ad pt`, 2026-10-28) succeeded and both carry
+     crossings; a full run of every country (40691060942, launched by hand from c9a5176 on 2026-10-28, before
+     the `routing-admins` change) was in progress that evening (77 of 262 jobs done); the monthly one is on
+     2026-11-05. Needs app builds from bdc1fae on (store builds up to 23 predate it). Then Android, ferries. The US stays split. `docs/ROUTING_ACROSS_PACKS.md`.
    - **Deferred by decision**: bundled quick cards (first aid, water, radio; owner
      reviews medical content first), emergency numbers per country.
    - **CI notes**: a failed country is relaunched alone with `gh workflow run
@@ -171,12 +175,12 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
    packs (download Spain 2.2 GB, route time/memory), Preparedness reminders, GPU
    llama.cpp, Apple Intelligence, background downloads, Files import, airplane mode.
 2. Search side files: published (the 2026-10-26 full run; packs and country maps carry
-   `.places.tsv` / `.addresses.tsv`). Still to measure the import on a real phone (Spain: 1.0 M
-   places + 2.2 M doors).
+   `.places.tsv` / `.addresses.tsv`). ~~Measure the import on a real phone~~ done: Spain's on the iPhone 14 Pro
+   in 51 s (pois 4.6 s, streets 16 s, places 10 s, addresses 20 s; 2026-10-28). Not measured on an Android phone.
 3. Faster, resumable downloads: built (log 2026-10-26, `docs/DOWNLOADS_SPEED_PLAN.md`); Spanish
    Wikipedia nopic, 13.3 GB, in 8.6 min on the simulator instead of ~2 h; adaptive connection
-   budget built. Next: measure on a real iPhone and Android phone (background session
-   scheduling, Wi-Fi speeds, the budget on the owner's 300 Mb/s line). Since 2026-10-28 files
+   budget built. Measured and tuned on the owner's iPhone 14 Pro (2026-10-27, runs 1–7). Next: an Android phone
+   (and the emulator's speed), and iOS with the app in the background for long. Since 2026-10-28 files
    from 4 MiB go segmented and resume after an iOS kill; only one-chunk files (< 4 MiB) restart (BUG-CORE-16).
    The whole kit on the phone with it: 6:47 (run 8, 2026-10-28), no slower.
 4. Map extraction: resumes after a kill since 2026-10-28. Still to do: move it off the JS thread (a native
@@ -226,8 +230,8 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
   (published). Without them (a map from the extraction fallback), big regions are indexed at a
   lower zoom (≤ 40k tiles: Spain z14 → z12) with full detail only within ~25 km of the user or the
   searched area. House numbers are as complete as OSM (a missing number lands between its
-  neighbours, marked approximate). Indexing and imports run on the JS thread in batches (not yet
-  measured on a device); search itself runs on a second connection.
+  neighbours, marked approximate). Indexing and imports run on the JS thread in batches (Spain's side-file
+  imports: 51 s on an iPhone 14 Pro); search itself runs on a second connection.
 - Chinese and Japanese names: a map's tile index was rebuilt with the character-pair indexing when
   `INDEX_VERSION` went to 2 (2026-10-28). Country side-file imports (places, streets, addresses) are not
   covered by that bump: ones made before the pair indexing only match from their first character until the
@@ -257,8 +261,8 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
   verified `.part` prefix and the ranges on disk on both platforms; only the ranges in flight are
   fetched again (on iOS the orphaned tasks also fetch them once more). One-chunk files (< 4 MiB) and
   sources without ranges on iOS still restart from zero (BUG-CORE-16: the background session isn't reattached).
-- The segmented engine is measured on the simulator and the emulator only (a Mac's link), not on
-  phones: iOS background-session scheduling and real Wi-Fi speeds are unverified.
+- The segmented engine is measured on an iPhone 14 Pro (in the foreground, and 1–2 min in the background:
+  `docs/DOWNLOADS_SPEED_PLAN.md`), not on an Android phone; long stays in the background on iOS are unmeasured.
 - Compass heading in landscape: iOS reports an orientation of UNKNOWN until the first rotation after
   launch, so the heading is withheld in landscape until then; Android tablets whose natural
   orientation is landscape stay 90° off.
@@ -283,6 +287,15 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-28 — Docs: backlog checked against the day's work
+
+Another session's summary of the pending work (read from this file) still listed things done on 2026-10-28.
+Fixed here: item 2 (side-file imports timed on the phone), item 3 (the iPhone is measured; the Android phone
+is what's left), item U (Spain from a fresh install done on the phone; the `ad pt` CI run succeeded; the full
+run 40691060942 in progress), item A's device checks (Android build with expo-screen-orientation and the
+Maestro suites on main are done), the backlog header (3, 4, 7 partly done) and two known issues (imports and
+the segmented engine are measured on a phone).
 
 ### 2026-10-28 — The batch's leftovers: Android, map-22/ai-09, store plist, kit on the iPhone
 
