@@ -38,7 +38,8 @@ tags: [planet, maps, maps-server, planet-server]
     timeout: 300000
 - tapOn: { id: "map" }
 - tapOn: "Tus mapas"
+# Installed once the row prepares search and points (that can take minutes on a busy Mac) or is ready.
 - extendedWaitUntil:
-    visible: "(?s).*Mapa · .*"
+    visible: "(?s).*(Mapa · |Preparando búsqueda).*"
     timeout: 180000
 - takeScreenshot: 03-installed
