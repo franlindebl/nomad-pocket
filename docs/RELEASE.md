@@ -63,7 +63,7 @@ and update it here after each upload or review result.
 
 Archive from a tree that holds exactly the commit: Metro bundles whatever is in the working tree,
 so another session's uncommitted edits ship too (build 17). With other work in the checkout,
-archive from a clean `git worktree` of the commit (`npm ci`, `npx expo prebuild --platform ios`).
+archive from a clean `git worktree` of the commit (`npm ci`, `NOMAD_STORE_BUILD=1 npx expo prebuild --platform ios`).
 
 1. `npx tsc --noEmit && npx expo lint && npm test && npm run check:i18n` and
    `node scripts/licenses.mjs --check` (the Credits screen data is current).
@@ -71,15 +71,24 @@ archive from a clean `git worktree` of the commit (`npm ci`, `npx expo prebuild 
    `npm run e2e:full` and `npm run e2e:ipad` (look at the iPad screenshots), and the
    Android tour if shared code changed (`docs/E2E.md`).
 3. Bump `ios.buildNumber` (and `android.versionCode`) always, `version` (+ `package.json`)
-   for a new marketing version; then `npx expo prebuild` (+ `pod install` if it
-   regenerated `ios/`) and check `CFBundleVersion` in `ios/NomadPocket/Info.plist`.
+   for a new marketing version; then `NOMAD_STORE_BUILD=1 npx expo prebuild` (+ `pod install` if it
+   regenerated `ios/`; see the store prebuild note below) and check `CFBundleVersion` in `ios/NomadPocket/Info.plist`.
 4. Update `docs/PROGRESS.md` (log entry) and the table above.
 5. After the archive, check the generated `Info.plist` of the archived app: the localised
-   location string (from `locales/`) is there, and no dev-launcher keys leaked in (the plist is
-   shared by Debug and Release today; an env-gated store prebuild is an open item, PROGRESS).
+   location string (from `locales/`) is there, and no dev-launcher keys leaked in (`exp+` URL scheme,
+   `RCTMetroPort`, `NSAllowsLocalNetworking`, `NSBonjourServices`).
 6. **Tag every store build** (for example `v1.1.0-12`, the version and build number) on the
    commit it was built from and push the tag, so the corresponding source is identifiable (GPL
    section 6). Do it right after the upload.
+
+**Store prebuild.** The generated `Info.plist` and the main `AndroidManifest.xml` are shared by Debug and
+Release, so a plain prebuild carries the dev client's leftovers. `plugins/with-store-build.js` removes them
+when `NOMAD_STORE_BUILD=1` (iOS: the `exp+nomad-pocket` URL scheme, `RCTMetroPort`, `NSAllowsLocalNetworking`,
+`NSBonjourServices`, `NSLocalNetworkUsageDescription`; Android: the `exp+nomad-pocket` intent-filter scheme;
+the `src/debug` manifest only applies to debug builds). Use it for every archive that goes to a store, and
+**never** for dev builds or `npm run e2e`: the E2E Release builds read their manifests over plain http from
+localhost (`scripts/e2e.sh`), which needs `NSAllowsLocalNetworking`. Switching between the two needs
+`npx expo prebuild --clean`, because prebuild merges into the existing `ios/`.
 
 ## Upload to App Store Connect (iOS)
 
