@@ -3,8 +3,9 @@ tiles a phone can index hold only the main roads of a big area (places.ts reads 
 zoom level under a tile budget), the routing pack's extract has every named street.
 Usage: python3 -I streets.py <filtered.osm.pbf> <out.tsv>
 The input is `osmium tags-filter w/highway n/place` output (ways keep their nodes).
-Columns: kind, name, lat, lon; kind is 'street', 'path' or a place kind (city, town…),
-read by parseStreetsTsv in src/features/maps/routing-core.ts. A street split into many
+Columns: kind, name, lat, lon, name:es, name:en (the last two may be empty; appended on 2026-10-29,
+apps from before read only the first four); kind is 'street', 'path' or a place kind (city, town…),
+read by parseStreetsTsv in src/features/maps/places-core.ts. A street split into many
 ways is written once per ~1 km cell (where it is, not one point per segment)."""
 import sys
 
@@ -21,6 +22,10 @@ def clean(v):
     return v.replace("\t", " ").replace("\n", " ").replace("\r", " ").strip()
 
 
+def variants(tags):
+    return clean(tags.get("name:es", "")), clean(tags.get("name:en", ""))
+
+
 class Collect(osmium.SimpleHandler):
     def __init__(self):
         super().__init__()
@@ -31,7 +36,7 @@ class Collect(osmium.SimpleHandler):
         kind = n.tags.get("place")
         name = n.tags.get("name")
         if kind in PLACES and name and n.location.valid():
-            self.rows.append((kind, clean(name), n.location.lat, n.location.lon))
+            self.rows.append((kind, clean(name), n.location.lat, n.location.lon, *variants(n.tags)))
 
     def way(self, w):
         highway = w.tags.get("highway")
@@ -47,15 +52,15 @@ class Collect(osmium.SimpleHandler):
         if key in self.seen:
             return
         self.seen.add(key)
-        self.rows.append(("path" if highway in PATHS else "street", name, mid.lat, mid.lon))
+        self.rows.append(("path" if highway in PATHS else "street", name, mid.lat, mid.lon, *variants(w.tags)))
 
 
 def main():
     h = Collect()
     h.apply_file(sys.argv[1], locations=True)
     with open(sys.argv[2], "w", encoding="utf-8") as f:
-        for kind, name, lat, lon in h.rows:
-            f.write(f"{kind}\t{name}\t{lat:.6f}\t{lon:.6f}\n")
+        for kind, name, lat, lon, es, en in h.rows:
+            f.write(f"{kind}\t{name}\t{lat:.6f}\t{lon:.6f}\t{es}\t{en}\n")
     print(f"streets {sys.argv[2]}: {len(h.rows)} names")
 
 

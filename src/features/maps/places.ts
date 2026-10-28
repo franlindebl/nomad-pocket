@@ -25,6 +25,7 @@ import {
   matchCap,
   nearestLocality,
   houseNumberKey,
+  namesWithNumber,
   locateHouseNumber,
   nameKey,
   parseAddress,
@@ -716,7 +717,8 @@ async function doorHits(streets: Hit[], number: string): Promise<Hit[]> {
     const name = `${st.name}, ${houseNumberKey(number)}`;
     // Two index rows of the same street (one per tile) find the same door.
     if (out.some((o) => rankKey(o.name) === rankKey(name) && distanceMeters(o, at) < 300)) continue;
-    out.push({ ...st, id: -1 - out.length, name, kind: at.exact ? 'address' : 'address_approx', lat: at.lat, lon: at.lon });
+    const names = namesWithNumber(st.names, houseNumberKey(number));
+    out.push({ ...st, id: -1 - out.length, name, names, kind: at.exact ? 'address' : 'address_approx', lat: at.lat, lon: at.lon });
   }
   return out;
 }

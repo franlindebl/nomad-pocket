@@ -46,17 +46,29 @@ const LOCALITIES = `(${[...LOCALITY_KINDS].map(quote).join(', ')})`;
 // there: the files come from our own scripts.
 const FILLED = (...columns: string[]) => columns.map((c) => `${c} <> ''`).join(' AND ');
 
-// places.tsv: kind, name, other names, lat, lon (parsePlacesTsv).
-const PLACES = `SELECT kind, name, CASE WHEN other <> '' THEN name || ' ' || other ELSE name END AS names, 'poi' AS layer,
+// `names` of a pack row: places-core's packNames in SQL. With a name:es or name:en column (lines of
+// 2026-10-29 on; older lines have fewer columns, so the value is NULL) the NAME_SEP slots native, es, en, rest;
+// without, the plain text as before. `rest` is the other-names column minus the es and en values
+// (replace() with an empty pattern returns its input unchanged).
+const SEP = 'char(31)';
+const PACK_NAMES = `CASE WHEN es <> '' OR en <> '' THEN rtrim(name || ${SEP} || es || ${SEP} || en || ${SEP} || trim(replace(replace(other, es, ''), en, '')), ${SEP})
+  WHEN other <> '' THEN name || ' ' || other ELSE name END`;
+// An es or en name equal to the native one adds nothing.
+const VARIANT = (v: string) => `CASE WHEN ${v} IS NULL OR ${v} = name THEN '' ELSE ${v} END`;
+
+// places.tsv: kind, name, other names, lat, lon, name:es, name:en (parsePlacesTsv).
+const PLACES = `SELECT kind, name, ${PACK_NAMES} AS names, 'poi' AS layer,
   CAST(lat AS REAL) AS lat, CAST(lon AS REAL) AS lon, ${rankOf('kind', POI_RANK, 16)} AS rank
-  FROM (SELECT value->>0 AS kind, value->>1 AS name, value->>2 AS other, value->>3 AS lat, value->>4 AS lon FROM json_each($json))
+  FROM (SELECT kind, name, other, lat, lon, ${VARIANT('v5')} AS es, ${VARIANT('v6')} AS en
+    FROM (SELECT value->>0 AS kind, value->>1 AS name, value->>2 AS other, value->>3 AS lat, value->>4 AS lon, value->>5 AS v5, value->>6 AS v6 FROM json_each($json)))
   WHERE ${FILLED('kind', 'name', 'lat', 'lon')}`;
 
-// streets.tsv: kind, name, lat, lon (parseStreetsTsv): streets and paths, and the towns.
-const STREETS = `SELECT kind, name, name AS names, CASE WHEN kind IN ('street', 'path') THEN 'road' ELSE 'place' END AS layer,
+// streets.tsv: kind, name, lat, lon, name:es, name:en (parseStreetsTsv): streets and paths, and the towns.
+const STREETS = `SELECT kind, name, ${PACK_NAMES} AS names, CASE WHEN kind IN ('street', 'path') THEN 'road' ELSE 'place' END AS layer,
   CAST(lat AS REAL) AS lat, CAST(lon AS REAL) AS lon,
   CASE kind WHEN 'path' THEN 15 WHEN 'street' THEN 14 ELSE ${rankOf('kind', PLACE_RANK, 12)} END AS rank
-  FROM (SELECT value->>0 AS kind, value->>1 AS name, value->>2 AS lat, value->>3 AS lon FROM json_each($json))
+  FROM (SELECT kind, name, '' AS other, lat, lon, ${VARIANT('v4')} AS es, ${VARIANT('v5')} AS en
+    FROM (SELECT value->>0 AS kind, value->>1 AS name, value->>2 AS lat, value->>3 AS lon, value->>4 AS v4, value->>5 AS v5 FROM json_each($json)))
   WHERE ${FILLED('kind', 'name', 'lat', 'lon')}`;
 
 // addresses.tsv: street, house number, lat, lon (parseAddressesTsv).

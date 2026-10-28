@@ -198,8 +198,9 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
   search ("hospital", "farmacia"), R4 guardrail error in raw English + retry, R5 sources on "not found"
   answers and PDF titles, R7 map dots thinned by zoom, R8 country aliases, R9–R12 small UI fixes, R14
   duplicate address rows. Then R3 (relevance for title-less
-  chunks) and R13 (SVG images not re-inverted in dark mode). Partial: R6 localized names (tile rows and
-  apostrophes yes; pack POIs/streets need es/en columns in the side files). The search index version went to 2: every installed
+  chunks) and R13 (SVG images not re-inverted in dark mode). R6 localized names: tile rows and
+  apostrophes at once; pack POIs and streets once the monthly CI rebuilds the packs with the new name:es /
+  name:en columns (next run 2026-11-05). The search index version went to 2: every installed
   map re-indexes its tiles once after the update.
 
 ## Known issues / limitations
@@ -292,7 +293,10 @@ reviewed, corrected and re-tested by the lead:
 - Follow-up the same day: R3, a chunk whose title shares no root with a 4+ term question or query needs
   one more term (the router's "quemadura aceite hirviendo tratamiento" let the urushiol article in); R13,
   the dark-mode CSS no longer re-inverts SVG images (freeCodeCamp's white header logo stayed white on its
-  inverted bar). Both checked on the simulator.
+  inverted bar). Both checked on the simulator. R6, pack side files: places.py and streets.py append
+  name:es and name:en columns (older apps read only the first columns, checked in `import-core.ts`'s SQL)
+  and the import builds the NAME_SEP slots from them (`packNames`); checked with real Jerusalem files
+  through the import, not yet in a published pack.
 - Checks: tsc, lint, 339 unit tests, i18n. E2E not run yet.
 
 ### 2026-10-28 — Units: miles/feet and gallons for the US, US English copy

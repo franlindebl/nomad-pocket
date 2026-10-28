@@ -5,8 +5,9 @@ Usage: python3 -I places.py <filtered.osm.pbf> <places.tsv> <addresses.tsv>
 The input is `osmium tags-filter <extract> nwr/name nwr/addr:housenumber nwr/addr:block_number` output
 (referenced objects included, so ways have their nodes and relations their member ways).
 Ways and relations get the centre of their bounding box, as Overpass `out center` does.
-places.tsv columns: kind, name, other names (space separated, may be empty), lat, lon;
-kind is the OSM value of the first key of KEYS the object has (school, supermarket,
+places.tsv columns: kind, name, other names (space separated, may be empty), lat, lon, name:es,
+name:en (both may be empty; the last two were appended on 2026-10-29, apps from before read only
+the first five columns, and the other-names column still holds them); kind is the OSM value of the first key of KEYS the object has (school, supermarket,
 peak…), or the key itself for "yes". addresses.tsv columns: street, house number, lat,
 lon; a Japanese address (no streets: block numbers inside a chōme) is "台東2丁目" + "5-1".
 Both are read by parsePlacesTsv / parseAddressesTsv in src/features/maps/places-core.ts."""
@@ -134,7 +135,8 @@ class Collect(osmium.SimpleHandler):
                 v = tags.get(k)
                 if v and clean(v) != name and clean(v) not in other:
                     other.append(clean(v))
-            self.places.write(f"{kind}\t{name}\t{' '.join(other)}\t{lat:.6f}\t{lon:.6f}\n")
+            es, en = clean(tags.get("name:es", "")), clean(tags.get("name:en", ""))
+            self.places.write(f"{kind}\t{name}\t{' '.join(other)}\t{lat:.6f}\t{lon:.6f}\t{es}\t{en}\n")
             self.counts[0] += 1
         for street, number in addresses_of(tags):
             self.addresses.write(f"{street}\t{number}\t{lat:.6f}\t{lon:.6f}\n")

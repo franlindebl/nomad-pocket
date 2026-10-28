@@ -16,7 +16,10 @@ import {
   indexText,
   localizedName,
   NAME_SEP,
+  packNames,
   matchCap,
+  nameKey,
+  namesWithNumber,
   nearestLocality,
   normalizeName,
   locateHouseNumber,
@@ -304,7 +307,15 @@ test('rankHits ranks a name without apostrophe as exact, and a city by its alter
   const city: Hit[] = [
     { id: 1, layer: 'poi', kind: 'hotel', name: 'Tbilisi Marriott', names: 'Tbilisi Marriott', ...base, rank: 16 },
     { id: 2, layer: 'place', kind: 'city', name: 'თბილისი', names: 'თბილისი Tiflis Tbilisi', ...base, rank: 4 },
-    { id: 3, layer: 'place', kind: 'city', name: 'תל אביב–יפו', names: `תל אביב–יפו${NAME_SEP}Tel Aviv${NAME_SEP}Tel Aviv`, ...base, rank: 4 },
+    {
+      id: 3,
+      layer: 'place',
+      kind: 'city',
+      name: 'תל אביב–יפו',
+      names: `תל אביב–יפו${NAME_SEP}Tel Aviv${NAME_SEP}Tel Aviv`,
+      ...base,
+      rank: 4,
+    },
   ];
   assert.equal(rankHits(city, 'Tbilisi', null)[0].id, 2);
   assert.equal(rankHits(city, 'tel aviv', null)[0].id, 3);
@@ -320,8 +331,60 @@ test('localizedName: the app language, native as the other', () => {
   const sevilla = { name: 'Sevilla', names: `Sevilla${NAME_SEP}${NAME_SEP}Seville` };
   assert.deepEqual(localizedName(sevilla, 'es'), { name: 'Sevilla', native: null });
   assert.equal(localizedName(sevilla, 'en').name, 'Seville');
-  // Pack rows have no slots.
   assert.deepEqual(localizedName({ name: 'Foo', names: 'Foo Bar' }, 'en'), { name: 'Foo', native: null });
+});
+
+test('pack files with name:es / name:en columns keep NAME_SEP slots; old lines stay plain', () => {
+  const [gate, plain, same] = parsePlacesTsv(
+    [
+      'tourism\tשער יפו\tPuerta de Jaffa Jaffa Gate Bab al-Khalil\t31.7767\t35.2277\tPuerta de Jaffa\tJaffa Gate',
+      'school\tColegio\tCEIP\t40.4\t-3.7',
+      'museum\tMuseo\tMuseo\t40.4\t-3.7\tMuseo\tMuseo',
+    ].join('\n'),
+  );
+  assert.equal(gate.names, `שער יפו${NAME_SEP}Puerta de Jaffa${NAME_SEP}Jaffa Gate${NAME_SEP}Bab al-Khalil`);
+  assert.deepEqual(localizedName(gate, 'es'), { name: 'Puerta de Jaffa', native: 'שער יפו' });
+  assert.deepEqual(localizedName(gate, 'en'), { name: 'Jaffa Gate', native: 'שער יפו' });
+  assert.equal(plain.names, 'Colegio CEIP'); // an old line: as before
+  assert.deepEqual(localizedName(plain, 'es'), { name: 'Colegio', native: null });
+  assert.equal(same.names, 'Museo Museo'); // equal to the native name: no slots
+  // Only an English name: the Spanish slot is empty, the rest is whatever is left.
+  assert.equal(packNames('Museo', '', 'Museum', 'Museum Mus'), `Museo${NAME_SEP}${NAME_SEP}Museum${NAME_SEP}Mus`);
+  assert.equal(packNames('Museo', '', 'Museum'), `Museo${NAME_SEP}${NAME_SEP}Museum`);
+});
+
+test('streets with an English name are found by it, and their doors by the native street', () => {
+  const [st, old] = parseStreetsTsv('street\tרחוב יפו\t31.78\t35.22\tCalle Jaffa\tJaffa Road\nstreet\tCalle Mayor\t40.4\t-3.7\n');
+  assert.equal(st.names, `רחוב יפו${NAME_SEP}Calle Jaffa${NAME_SEP}Jaffa Road`);
+  assert.equal(old.names, 'Calle Mayor');
+  const d = new DatabaseSync(':memory:');
+  d.exec("CREATE VIRTUAL TABLE t USING fts5(names, tokenize = 'unicode61 remove_diacritics 2')");
+  d.prepare('INSERT INTO t (names) VALUES (?)').run(indexText(st.names));
+  const address = parseAddress('Jaffa Road 100')!;
+  assert.deepEqual([address.street, address.number], ['Jaffa Road', '100']);
+  assert.equal(d.prepare('SELECT count(*) AS n FROM t WHERE t MATCH ?').get(ftsQuery(address.street)!)?.n, 1);
+  // It ranks as an exact match on the English name and shows in the app language.
+  assert.equal(rankHits([{ id: 1, ...st }], 'jaffa road', null).length, 1);
+  assert.equal(localizedName(st, 'en').name, 'Jaffa Road');
+  // The door lookup keys by the native name (the row's `name`, which addresses.tsv's street matches).
+  const doors = parseAddressesTsv('רחוב יפו\t100\t31.781\t35.221\n');
+  assert.deepEqual(
+    locateHouseNumber(
+      doors.filter((x) => nameKey(x.street) === nameKey(st.name)),
+      '100',
+      st,
+    ),
+    {
+      lat: 31.781,
+      lon: 35.221,
+      exact: true,
+    },
+  );
+  // The door hit keeps the slots, with the number on each.
+  const door = namesWithNumber(st.names, '100');
+  assert.equal(door, `רחוב יפו, 100${NAME_SEP}Calle Jaffa, 100${NAME_SEP}Jaffa Road, 100`);
+  assert.deepEqual(localizedName({ name: 'רחוב יפו, 100', names: door }, 'en'), { name: 'Jaffa Road, 100', native: 'רחוב יפו, 100' });
+  assert.equal(namesWithNumber('Calle Mayor', '5'), 'Calle Mayor');
 });
 
 test('dedupeHits: diacritic variants of a door at the same spot are one', () => {
@@ -358,7 +421,9 @@ test('tileRows keeps name variants in slots', () => {
   const layers = {
     places: {
       extent: 4096,
-      features: [{ x: 10, y: 10, type: 1, geometry: [], properties: { name: 'თბილისი', 'name:es': 'Tiflis', 'name:en': 'Tbilisi', kind: 'city' } }],
+      features: [
+        { x: 10, y: 10, type: 1, geometry: [], properties: { name: 'თბილისი', 'name:es': 'Tiflis', 'name:en': 'Tbilisi', kind: 'city' } },
+      ],
     },
   };
   const rows = tileRows(layers as never, 0, 0, 0);
