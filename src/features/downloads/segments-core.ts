@@ -16,11 +16,12 @@
 
 export const MiB = 1024 * 1024;
 /**
- * Below this a single transfer is as fast. Above it (kits are full of 20–60 MB archives), ranges
- * from several mirrors beat one connection to the single best one, which every small file used to
- * share.
+ * Below this (one chunk) there is nothing to split and a single transfer is as fast. Above it,
+ * a file goes through the segmented engine even when it is small: its .part prefix is what
+ * resumes after iOS killed the app (a single DownloadTask restarts from zero, BUG-CORE-16),
+ * and kits are full of 5-60 MB archives whose ranges from several mirrors beat one connection.
  */
-export const MIN_SEGMENTED_BYTES = 16 * 1000 * 1000;
+export const MIN_SEGMENTED_BYTES = 4 * MiB;
 /**
  * Chunk sizes: about CHUNKS_PER_FILE chunks, between 4 and 32 MiB. Big chunks keep requests
  * few on a 13 GB file; a 170 MB file in 32 MiB chunks would be 6 ranges, and the one on the
