@@ -41,8 +41,8 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 | Command | Flows | Time | Covers | Needs |
 |---|---|---|---|---|
 | `npm run e2e` | 21 | ~14 min | P0: every screen's main path (incl. map search, Emergencias, road routing and Preparedness) | nothing (offline) |
-| `npm run e2e:full` | 38 | ~24 min | + P1: secondary features (themes, markers, find in page, courses, reminders, PDF…) | nothing (offline) |
-| `npm run e2e:all` | 49 | ~35 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
+| `npm run e2e:full` | 43 | ~27 min | + P1: secondary features (themes, markers, find in page, courses, reminders, PDF…) | nothing (offline) |
+| `npm run e2e:all` | 55 | ~38 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape, light and dark | nothing (offline) |
 | `npm run e2e:android` | 4 | ~15 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack | internet, Android emulator |
 
@@ -143,6 +143,8 @@ scripts/e2e.sh
  │   http://localhost:8765 the Andorra routing pack split in two parts + its emergency
  │   points and street names + routing-manifest.json, and the Andorra country map
  │   (e2e/fixtures/maps/ad.pmtiles, z0–10) split in two parts + maps-manifest.json;
+ │   the same catalogs also list two countries in regions with Andorra's files as stand-ins
+ │   (see "Countries in regions" below);
  │   before each `routing-live` flow the routing manifest is swapped for a copy of the
  │   published one (GitHub's routing-index), so that flow downloads a real pack
  ├─ boot NP-e2e, set its location to Madrid
@@ -266,7 +268,9 @@ By hand:
 | maps | `map-17-follow` | MAP-17 | full | seeded-route (navigation view; drives the CG-1 with Maestro `travel`) |
 | maps | `map-18-credit` | MAP-18 | full | — (OSM credit shown when the map first appears, then fades) |
 | maps | `map-19-stitch` | MAP-19 | full | seeded-stitch (a route across two packs built apart: Andorra cut in two, by car and on foot) |
-| maps | `map-20-extract-resume` | MAP-20 | full | maps-server, planet-server (an on-device extraction killed mid-way continues from its saved progress; app built with `PLANET_PORT=<port> scripts/e2e.sh --build`, which bakes `EXPO_PUBLIC_PLANET_BUILD_URL` and serves `scripts/dev-planet-server.ts` for the flow) |
+| maps | `map-20-regions-packs` | MAP-20 | full | routing-server, maps-server (country in regions with a pack per region, as the USA: tick, download, "Tus mapas", add the other region, delete each) |
+| maps | `map-21-regions-national-pack` | MAP-21 | full | routing-server, maps-server (regions for the map only + a national pack, as Canada/Russia: region ticked from the location, pack with the first region only, deleting the last region removes the pack) |
+| maps | `map-22-extract-resume` | MAP-22 | planet (by hand) | maps-server, planet-server (an on-device extraction killed mid-way continues from its saved progress). Its own build: `PLANET_PORT=8766 scripts/e2e.sh --build e2e/flows/maps/map-22-extract-resume.yaml` bakes `EXPO_PUBLIC_PLANET_BUILD_URL` and serves `scripts/dev-planet-server.ts`; that app no longer reaches Protomaps, so rebuild without `PLANET_PORT` before other suites |
 | courses | `crs-01-empty` | CRS-01 | smoke | — |
 | courses | `crs-02-course` | CRS-02, CRS-03, CRS-04 | full | seeded |
 | assistant | `ai-01-no-model` | AI-01, AI-02 | smoke | — |
@@ -285,6 +289,25 @@ By hand:
 | android | `android-03-search-emergency` | ANDROID-03 | android | network (Andorra country download) |
 | android | `android-04-prepare` | ANDROID-04 | android | — (offline) |
 | android | `android-05-routing` | ANDROID-05 | android | network (published catalog + Andorra pack from GitHub) |
+
+### Countries in regions (MAP-20, MAP-21)
+
+`scripts/e2e.sh` adds two countries in regions to the local catalogs it serves for `routing-server` /
+`maps-server` flows. They are stand-ins: every map is a copy of `maps/ad.pmtiles` and every pack a copy
+of `routing/ad.tar` (+ its four side files) under another file name, so a download is small (~2.5 MB per
+map, ~3 MB per pack) and the flows only check the app's logic, not the data.
+
+| Country | Catalog | Region ids | Flow |
+|---|---|---|---|
+| United States (`us`) | a map and a pack per region, like the real USA | `us-alaska`, `us-hawaii` | `map-20-regions-packs` |
+| Canada (`ca`) | two regional maps with outline `cells` (Ontario: Toronto/Ottawa, Quebec: Montreal) + one pack `ca` that belongs to no region | `ca-ontario`, `ca-quebec` | `map-21-regions-national-pack` |
+
+Region names come from `maps:parts.<id>` (Alaska, Hawái, Ontario, Quebec). Andorra stays a country in one
+part, so the other `*-server` flows are not affected. In `map-21` the location is set (Toronto) after the
+wizard: set before, the wizard would propose Canada's kit and open the region checklist. The flows are
+long-running by nature (downloads, preparing search files): their waits are 90 s. To add a region, add its
+id to the copy loops and to `maps` / `packs` in `scripts/e2e.sh`. `region-delete` (a row of "Tus mapas")
+removes a whole country; `region-delete-<id>` (inside the country sheet) one region.
 
 Not automated: LIB-08 (import from Files: the system picker is outside the app) and X-02
 (offline: the simulator has no airplane mode). Check them by hand on a device. Also by hand: map
