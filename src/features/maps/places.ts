@@ -765,16 +765,33 @@ async function matchPlaces(text: string, near: LatLon | null, limit: number, lay
   );
 }
 
+/** Boxes tried in turn for a result's locality: a near one is enough in towns and cheap; the wide one reaches the next village. */
+const LOCALITY_RADII = [2_000, 15_000];
+
 async function localityNear(p: LatLon): Promise<string | null> {
-  const [w, s, e, n] = bboxAround(p, 15_000);
-  const candidates = await indexDbAsync().getAllAsync<{ name: string; lat: number; lon: number }>(
-    'SELECT name, lat, lon FROM map_localities WHERE lat BETWEEN ? AND ? AND lon BETWEEN ? AND ? LIMIT 400',
-    s,
-    n,
-    w,
-    e,
-  );
-  return nearestLocality(p, candidates)?.name ?? null;
+  // Nearest first in SQL: a city's 15 km box holds over a thousand localities (Madrid ~1,000), and
+  // a plain LIMIT kept the first ones along the lat index, the box's southern edge ("Nudo Sur" for Calle de Alcalá).
+  const lonScale = Math.cos((p.lat * Math.PI) / 180) ** 2;
+  for (const radius of LOCALITY_RADII) {
+    const [w, s, e, n] = bboxAround(p, radius);
+    const nearest = await indexDbAsync().getAllAsync<{ name: string; lat: number; lon: number }>(
+      `SELECT name, lat, lon FROM map_localities WHERE lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?
+       ORDER BY (lat - ?) * (lat - ?) + (lon - ?) * (lon - ?) * ? LIMIT 1`,
+      s,
+      n,
+      w,
+      e,
+      p.lat,
+      p.lat,
+      p.lon,
+      p.lon,
+      lonScale,
+    );
+    // A box's corners lie beyond its radius: only a hit within it is surely the nearest.
+    const hit = nearestLocality(p, nearest, radius);
+    if (hit) return hit.name;
+  }
+  return null;
 }
 
 /** How far from a street hit its doors are looked up (a street row stands for ~1.5 km of it). */
