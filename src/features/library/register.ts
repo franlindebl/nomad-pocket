@@ -11,6 +11,7 @@ import { contentDir, deleteFile, fileSize, partialDir, resolveContentUri } from 
 
 import { NomadZim, isNomadZimAvailable } from '../../../modules/nomad-zim';
 
+import { dropDocuments, indexDocuments, reconcileDocuments } from './documents';
 import { looksMedical } from './medical';
 import { fallbackZimId, retargetSources, zimFileStem, zimRegistrationId } from './register-core';
 import { closeArchive, excludeFromBackup, openArchive, type ZimInfo } from './zim';
@@ -170,11 +171,15 @@ export async function registerZimFile(
 }
 
 registerCompletionHandler('zim', async (file, record) => {
-  await registerZimFile(file.uri, record.meta);
+  const item = await registerZimFile(file.uri, record.meta);
+  indexDocuments(item.id);
 });
 
 onItemRemoved('zim', (item) => {
   closeArchive(item.id);
+  // Not awaited: the delete may queue behind a long map import. The archive stops being read right
+  // away, and rows left by a kill are dropped at the next launch (reconcileDocuments).
+  void dropDocuments(item.id);
 });
 
 /** Files in content/zim that no item or pending download points to (e.g. copied in via Finder/Files). */
@@ -223,5 +228,7 @@ registerInit(async () => {
     for (const item of listItems('zim')) {
       if (!NomadZim.isOpen(item.id) && new File(item.fileUri).exists) openArchive(item.id, item.fileUri).catch(() => {});
     }
+    // The PDFs of new or half-read archives into the document index, once the app has settled.
+    setTimeout(() => reconcileDocuments().catch((e) => console.warn('[docs] reconcile failed', e)), 15_000);
   }, 500);
 });

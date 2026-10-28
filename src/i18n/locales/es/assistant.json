@@ -44,6 +44,7 @@
     "generating": "Escribiendo…"
   },
   "sources": "Fuentes",
+  "sourcePage": "{{title}} · pág. {{page}}",
   "searchLibrary": "Buscar en mi biblioteca",
   "searchLibraryHint": "Volver a responder buscando en tu biblioteca sin conexión",
   "errors": {

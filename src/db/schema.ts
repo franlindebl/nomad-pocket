@@ -273,4 +273,39 @@ export const INDEX_MIGRATIONS: string[] = [
     pois_count INTEGER
   );
   `,
+  // v2: the library's document index, the text of the PDFs inside installed archives
+  // (features/library/documents.ts), for the assistant.
+  `
+  -- One row per passage (~650 chars, never across pages). The porter stemmer suits the
+  -- collections, which are English ("boiling" finds "boil").
+  CREATE VIRTUAL TABLE IF NOT EXISTS doc_passages USING fts5(
+    text,
+    title,
+    item_id UNINDEXED,
+    path UNINDEXED,
+    page UNINDEXED,                -- 1-based
+    tokenize = 'porter unicode61 remove_diacritics 2'
+  );
+
+  -- Per archive: which file the index was built from, and whether every document is in.
+  CREATE TABLE IF NOT EXISTS doc_archives (
+    item_id TEXT PRIMARY KEY NOT NULL,
+    uuid TEXT NOT NULL,
+    version INTEGER NOT NULL,      -- DOC_INDEX_VERSION it was built with
+    documents INTEGER NOT NULL DEFAULT 0,
+    done_at INTEGER                -- NULL while documents are still being read
+  );
+
+  -- Per document, written in the same transaction as its passages.
+  CREATE TABLE IF NOT EXISTS doc_files (
+    item_id TEXT NOT NULL,
+    path TEXT NOT NULL,
+    title TEXT NOT NULL,
+    pages INTEGER NOT NULL,        -- pages read
+    text_pages INTEGER NOT NULL,   -- pages with a text layer (0: a scan)
+    passages INTEGER NOT NULL,
+    status TEXT NOT NULL,          -- done | locked | failed
+    PRIMARY KEY (item_id, path)
+  );
+  `,
 ];

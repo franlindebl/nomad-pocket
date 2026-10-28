@@ -63,6 +63,25 @@ public final class NomadZimModule: Module {
       return ["path": info.path, "title": info.title, "mimeType": info.mimeType, "content": text]
     }.runOnQueue(zimWorkQueue)
 
+    /// Entries whose MIME type starts with `mimePrefix` (the PDFs of a document collection),
+    /// looking at no more than `maxScan` entries.
+    AsyncFunction("listEntries") { (id: String, mimePrefix: String, maxScan: Int) -> [String: Any?] in
+      let archive = try Self.archive(id)
+      var complete: ObjCBool = false
+      let entries = archive.entries(withMimePrefix: mimePrefix, maxScan: UInt(max(0, maxScan)), complete: &complete)
+      return [
+        "entries": entries.map { ["path": $0.path, "title": $0.title, "mimeType": $0.mimeType, "size": Double($0.size)] },
+        "complete": complete.boolValue,
+      ]
+    }.runOnQueue(zimWorkQueue)
+
+    /// Text of a PDF entry, page by page (PdfText).
+    AsyncFunction("getPdfText") { (id: String, path: String, maxPages: Int) -> [String: Any?]? in
+      let archive = try Self.archive(id)
+      guard let info = archive.entryInfo(atPath: path), info.mimeType.lowercased().hasPrefix("application/pdf") else { return nil }
+      return PdfText.extract(archive: archive, path: info.path, maxPages: max(0, maxPages))
+    }.runOnQueue(PdfText.queue)
+
     AsyncFunction("getMainPath") { (id: String) -> String? in
       try Self.archive(id).mainPath
     }.runOnQueue(zimWorkQueue)

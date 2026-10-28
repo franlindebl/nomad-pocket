@@ -56,6 +56,14 @@ NS_ASSUME_NONNULL_BEGIN
 /** A byte range of an entry's content (redirects followed), or nil. */
 - (nullable NSData *)dataAtPath:(NSString *)path offset:(uint64_t)offset length:(uint64_t)length;
 
+/**
+ * Entries (redirects skipped) whose MIME type starts with `mimePrefix`, in path order,
+ * looking at no more than `maxScan` entries. `complete` says whether every entry was seen.
+ */
+- (NSArray<NZEntryInfo *> *)entriesWithMimePrefix:(NSString *)mimePrefix maxScan:(NSUInteger)maxScan complete:(BOOL *)complete;
+/** Writes an entry's content (redirects followed) to a file, a few MB at a time. */
+- (BOOL)writeEntryAtPath:(NSString *)path toFile:(NSString *)file;
+
 /** Path of a random article, or nil. */
 - (nullable NSString *)randomPath;
 

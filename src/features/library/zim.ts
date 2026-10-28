@@ -210,6 +210,33 @@ export async function getArticleHtml(itemId: string, path: string): Promise<{ ti
   }
 }
 
+export type ZimEntry = { path: string; title: string; mimeType: string; size: number };
+
+/**
+ * Entries whose MIME type starts with `mimePrefix` ("application/pdf"), looking at no more than
+ * `maxScan` entries; `complete` is false when the archive has more. Null when it can't be opened.
+ */
+export async function listEntries(itemId: string, mimePrefix: string, maxScan: number): Promise<{ entries: ZimEntry[]; complete: boolean } | null> {
+  if (!(await ensureOpen(itemId))) return null;
+  try {
+    const r = await NomadZim.listEntries(itemId, mimePrefix, maxScan);
+    return { entries: r.entries.map((e) => ({ ...e, size: Number(e.size) || 0 })), complete: !!r.complete };
+  } catch {
+    return null;
+  }
+}
+
+/** Text of a PDF entry, one string per page ("" for a scanned page). Null when unreadable. */
+export async function getPdfText(itemId: string, path: string, maxPages: number): Promise<{ pages: string[]; title: string | null; locked: boolean } | null> {
+  if (!(await ensureOpen(itemId))) return null;
+  try {
+    const r = await NomadZim.getPdfText(itemId, path, maxPages);
+    return r ? { pages: r.pages ?? [], title: r.title ?? null, locked: !!r.locked } : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Internal article links in document order (used to build course syllabi). */
 export async function getLinks(itemId: string, path: string): Promise<ZimLink[]> {
   const article = await getArticleHtml(itemId, path);

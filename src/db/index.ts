@@ -110,8 +110,8 @@ let indexBackground: SQLiteDatabase | null = null;
 
 /**
  * The index file: the map search index (map_places, map_localities, house numbers,
- * index_sources) and the emergency points (map_pois, map_sources). Writes take turns
- * through places.ts's exclusive().
+ * index_sources), the emergency points (map_pois, map_sources) and the library's document
+ * index (doc_passages, doc_files, doc_archives). Writes take turns through indexWrite().
  */
 export function indexDb(): SQLiteDatabase {
   if (indexInstance) return indexInstance;
@@ -146,6 +146,20 @@ export function indexDbAsync(): SQLiteDatabase {
   indexBackground = openAt(indexPath, { useNewConnection: true });
   indexBackground.execSync('PRAGMA busy_timeout = 5000;');
   return indexBackground;
+}
+
+let writes: Promise<unknown> = Promise.resolve();
+
+/**
+ * Runs `job` after every write to the index file queued before it (maps, emergency points,
+ * documents). One writer at a time: a long import and the deletes of a removed map, on two
+ * connections, would otherwise wait on each other's locks, the synchronous side blocking
+ * the JS thread. Never await one job from inside another.
+ */
+export function indexWrite<T>(job: () => Promise<T> | T): Promise<T> {
+  const run = writes.then(job);
+  writes = run.catch((e) => console.warn('[db] index write failed', e));
+  return run;
 }
 
 /** Bytes the index file (search index and emergency points) takes on disk (0 while still inside nomad.db). */

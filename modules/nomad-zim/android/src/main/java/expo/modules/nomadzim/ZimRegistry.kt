@@ -103,6 +103,35 @@ class ZimHandle(val id: String, val filePath: String, val archive: Archive) {
     false
   }
 
+  /**
+   * Entries (redirects skipped) whose MIME type starts with [mimePrefix], in path order, looking
+   * at no more than [maxScan] entries. The flag says whether every entry was seen.
+   */
+  fun entries(mimePrefix: String, maxScan: Int): Pair<List<ZimEntryInfo>, Boolean> {
+    val out = ArrayList<ZimEntryInfo>()
+    var complete = true
+    runCatching {
+      // Path order reads the directory as it is stored; cluster order (iterEfficient) first sorts every entry.
+      val it = archive.iterByPath()
+      try {
+        var seen = 0
+        while (it.hasNext()) {
+          if (seen++ >= maxScan) {
+            complete = false
+            break
+          }
+          val entry = it.next()
+          if (entry.isRedirect) continue
+          val item = entry.getItem(false)
+          if (item.mimetype.startsWith(mimePrefix)) out.add(ZimEntryInfo(item.path, item.title, item.mimetype, item.size, false))
+        }
+      } finally {
+        it.dispose()
+      }
+    }.onFailure { complete = false }
+    return out to complete
+  }
+
   fun randomPath(): String? = runCatching { archive.randomEntry.getItem(true).path }.getOrNull()
 
   /** HTML articles in title order (redirects skipped), at most [limit]. */

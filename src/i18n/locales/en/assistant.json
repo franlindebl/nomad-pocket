@@ -44,6 +44,7 @@
     "generating": "Writing…"
   },
   "sources": "Sources",
+  "sourcePage": "{{title}} · p. {{page}}",
   "searchLibrary": "Search my library",
   "searchLibraryHint": "Answer again searching your offline library",
   "errors": {

@@ -13,6 +13,7 @@ import { catalog, loc, matchesLanguages, sumMB, tierResources } from '@/features
 import { categoryHue, iconByName } from '@/features/catalog/icons';
 import { removeItem, useItems, type InstalledItem } from '@/features/content/items';
 import { NotEnoughStorageError } from '@/features/downloads/manager';
+import { indexDocuments } from '@/features/library/documents';
 import { AlreadyInstalledError, registerZimFile } from '@/features/library/register';
 import { formatBytes, formatMB } from '@/lib/format';
 import { contentDir, deleteFile, freeBytes, hasRoomFor, partialDir } from '@/lib/storage';
@@ -45,7 +46,9 @@ async function importZimFile(asset: DocumentPicker.DocumentPickerAsset) {
       if (ownCopy) await new File(asset.uri).move(tmp);
       else await new File(asset.uri).copy(tmp);
       await tmp.move(dest);
-      return await registerZimFile(dest.uri, undefined, { rejectDuplicate: true });
+      const item = await registerZimFile(dest.uri, undefined, { rejectDuplicate: true });
+      indexDocuments(item.id);
+      return item;
     } catch (e) {
       deleteFile(tmp.uri);
       deleteFile(dest.uri);

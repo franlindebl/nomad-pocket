@@ -31,6 +31,11 @@ export type NativeZimEntry = { path: string; title: string; mimeType: string; si
 
 export type NativeZimContent = { path: string; title: string; mimeType: string; content: string };
 
+export type NativeZimEntryList = { entries: { path: string; title: string; mimeType: string; size: number }[]; complete: boolean };
+
+/** `pages`: one string per page ("" for a page without text, e.g. a scan), at most `maxPages`. */
+export type NativePdfText = { pages: string[]; title: string | null; locked: boolean; pageCount?: number };
+
 export type NomadZimNativeModule = {
   openArchive(id: string, path: string): Promise<NativeZimInfo>;
   closeArchive(id: string): void;
@@ -40,6 +45,10 @@ export type NomadZimNativeModule = {
   getEntry(id: string, path: string): Promise<NativeZimEntry | null>;
   /** Text entry (HTML, CSS, JSON…) as a string, redirects resolved. Null when missing, not text, or over 8 MB. */
   getContent(id: string, path: string): Promise<NativeZimContent | null>;
+  /** Entries (redirects skipped) whose MIME type starts with `mimePrefix`, looking at no more than `maxScan` entries. */
+  listEntries(id: string, mimePrefix: string, maxScan: number): Promise<NativeZimEntryList>;
+  /** Text of a PDF entry, page by page. Null when the entry is missing or not a readable PDF. */
+  getPdfText(id: string, path: string, maxPages: number): Promise<NativePdfText | null>;
   getMainPath(id: string): Promise<string | null>;
   randomPath(id: string): Promise<string | null>;
   /** HTML articles in title order (redirects skipped), at most `limit`. */

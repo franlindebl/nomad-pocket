@@ -8,7 +8,7 @@
 import { File, FileMode } from 'expo-file-system';
 import { create } from 'zustand';
 
-import { indexDb, indexDbAsync } from '@/db';
+import { indexDb, indexDbAsync, indexWrite } from '@/db';
 import Storage from '@/db/kv';
 import { getItem, listItems } from '@/features/content/items';
 import { decodeTile } from '@/lib/mvt/decode';
@@ -95,19 +95,8 @@ class LocalFileSource implements RangeSource {
   }
 }
 
-let writes: Promise<unknown> = Promise.resolve();
-
-/**
- * Runs `job` after every write to the index file queued before it (emergency points
- * included). One writer at a time: a long import and the deletes of a removed map, on two
- * connections, would otherwise wait on each other's locks, the synchronous side blocking
- * the JS thread. Never await one job from inside another.
- */
-export function exclusive<T>(job: () => Promise<T> | T): Promise<T> {
-  const run = writes.then(job);
-  writes = run.catch((e) => console.warn('[maps] index write failed', e));
-  return run;
-}
+/** The index file's write queue (indexWrite), shared with emergency points and the library's documents. */
+export const exclusive = indexWrite;
 
 /** Index state rows (index_sources): a map's tile index, or a country file's import. */
 function markIndexed(itemId: string, zoom: number | null = null) {
