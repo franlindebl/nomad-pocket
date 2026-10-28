@@ -73,6 +73,7 @@
       "offline": "Sin conexión. Reintenta cuando tengas internet.",
       "server": "El servidor no respondió (error {{status}}). Reintenta más tarde.",
       "integrity": "El archivo llegó dañado y se ha descartado. Reintenta.",
+      "restored": "La descarga no volvió con la copia de seguridad. Reintenta para descargarla de nuevo.",
       "other": "La descarga se interrumpió. Reintenta."
     }
   },

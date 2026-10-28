@@ -366,6 +366,12 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
   zero on iOS (the background session isn't reattached, see PROGRESS known issues); a
   download that died while `processing` with its file in place is finalised; orphan `.part`
   files and `.chunks` dirs are swept.
+  After a backup restore `downloads` rows come back but `content/partial` does not: a queued,
+  running or paused segmented download (`meta.segments`) with neither `.part` nor `.chunks`, or a
+  `processing` one with no file anywhere, is marked `failed` with error `PARTIAL_LOST`
+  (`restore-core.ts`, row text `downloads.error.restored`), so nothing re-downloads gigabytes
+  behind the person's back; their Retry restarts it from zero. Rows that never started and single
+  transfers (< 16 MB) are left alone.
 - Completion: `.part` → `content/{zim,maps,models,routing}/<filename>` → the kind's handler registered with
   `registerCompletionHandler(kind, async (file, record) => …)`, which must `upsertItem`; a file
   the handler rejects (throws) is deleted. Then `onDownloadFinished` listeners (toast) fire.

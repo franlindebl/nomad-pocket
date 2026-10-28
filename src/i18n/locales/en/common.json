@@ -73,6 +73,7 @@
       "offline": "No connection. Retry once you're online.",
       "server": "The server didn't answer (error {{status}}). Retry later.",
       "integrity": "The file arrived damaged and was discarded. Retry.",
+      "restored": "The download didn't come back with your backup. Retry to download it again.",
       "other": "The download stopped. Retry."
     }
   },
