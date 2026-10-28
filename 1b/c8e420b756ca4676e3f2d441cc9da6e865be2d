@@ -1,0 +1,41 @@
+CLAUDE.md
+  s_4b0560f0970a92::t_769a930f7a9110 130
+docs/ARCHITECTURE.md
+  s_4b0560f0970a92::t_4e9f98e41e759c 567-578
+docs/E2E.md
+  s_4b0560f0970a92::t_6b730c085fe431 269
+e2e/flows/maps/map-20-extract-resume.yaml
+  s_4b0560f0970a92::t_6e94fd2b7e1da9 1-44
+scripts/dev-planet-server.ts
+  s_4b0560f0970a92::t_d13b6f5587cd2e 1-106
+scripts/e2e.sh
+  s_4b0560f0970a92::t_c2bd4907bb3da9 68-73,126-133
+src/features/maps/extraction-core.test.ts
+  s_4b0560f0970a92::t_5b6b6ae223952b 1-90
+src/features/maps/extraction-core.ts
+  s_4b0560f0970a92::t_cd2e3fa70dbb32 1-137
+src/features/maps/extraction.ts
+  s_4b0560f0970a92::t_4ae8d1c1229e7e 5-6,11,14-23,26-27,30-31,69,74-77,101-105,134-135,138-197,232,238-253,255-273,276,289-296,302,333,342,344
+src/features/maps/register.ts
+  s_4b0560f0970a92::t_8271694d93a170 11,16,76-77
+src/lib/pmtiles/extract.test.ts
+  s_4b0560f0970a92::t_e3cb186fd5f9e3 140-143,219-252
+src/lib/pmtiles/extract.ts
+  s_4b0560f0970a92::t_80920adb1eb0f2 375-378,384,396-402,412
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1bc8e420b756ca4676e3f2d441cc9da6e865be2d",
+  "prompts": {},
+  "sessions": {
+    "s_4b0560f0970a92": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b2c53080-88f8-4fbb-b393-9462237c3d5c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
