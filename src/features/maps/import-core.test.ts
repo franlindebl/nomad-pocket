@@ -44,6 +44,10 @@ const PLACES_TSV = [
   'hospital\tHospital del Mar\tHospital de Mar Barcelona\t41.3851\t2.1734',
   'cafe\t東京タワー\tTokyo Tower\t35.6586\t139.7454',
   'shop\tTienda\x01rara\t\t40.1\t-3.1\r',
+  // name:es and name:en columns (2026-10-29 on): slots, the other-names column minus both; old lines have none.
+  'tourism\tשער יפו\tPuerta de Jaffa Jaffa Gate Bab al-Khalil\t31.7767\t35.2277\tPuerta de Jaffa\tJaffa Gate',
+  'museum\tMuseo\t\t40.4\t-3.7\t\tMuseum',
+  'museum\tMuseo Same\tMuseo Same\t40.5\t-3.7\tMuseo Same\tMuseo Same',
   'bench\t\t\t40\t-3',
   'school\tSin coordenadas\t\t\t',
   'broken line',
@@ -70,6 +74,9 @@ const STREETS_TSV = [
   'borough\tSalamanca\t40.43\t-3.68',
   'village\t台東\t35.71\t139.78',
   'street\t銀座通り\t35.67\t139.76',
+  'street\tרחוב יפו\t31.78\t35.22\tCalle Jaffa\tJaffa Road',
+  'street\t銀座\t35.6\t139.7\t\tGinza Street',
+  'street\tCalle Mayor\t40.4\t-3.7\tCalle Mayor\t',
   'street\t\t40\t-3',
   '',
 ].join('\n');

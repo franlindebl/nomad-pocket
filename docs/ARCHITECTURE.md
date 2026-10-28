@@ -733,9 +733,10 @@ locality as context. A word ending in s also matches its possessive ("mcdonalds"
 holds as `mcdonald` + `s`). Tile rows keep their name variants in slots of `names` separated by `NAME_SEP`
 (U+001F, a space to the tokenizer): native, name:es, name:en, the rest (`INDEX_VERSION` 2); the search rows
 and the place card show `localizedName` (the app language's name, the native one as subtitle; Spanish
-falls back to English only for a non-Latin native name). Pack rows (`places.tsv`) keep one space-joined
-column of other names, so their POIs and streets show the native name only (separate es/en columns would
-need a pack format change). A query that is only a category word (`categoryKinds`: "hospital",
+falls back to English only for a non-Latin native name). Pack rows get the same slots when their side files carry
+the trailing name:es / name:en columns (packs built from 2026-10-29: `packNames`, and the same in SQL in
+`import-core.ts`); older files keep plain names until their pack updates. A door found on a street
+(`doorHits`) gets ", <number>" in every slot (`namesWithNumber`). A query that is only a category word (`categoryKinds`: "hospital",
 "farmacias", "pharmacy", "agua potable", "farmacia cerca"…, es + en) puts the nearest `map_pois` of those
 kinds first (`nearestOfKinds`, growing radius), before the name matches. A query that
 reads as an address (`parseAddress`: "Calle Alcalá 50", "Alcalá, 50", "50 Alcalá") also
@@ -807,8 +808,9 @@ serialized in JS (open + route never interleave with another request or a close)
 fixed release `routing-index` (override: `EXPO_PUBLIC_ROUTING_MANIFEST_URL`, set by
 `scripts/e2e.sh` for its local pack server), cached in kv-store; each pack lists its tar
 parts (≤ 1900 MiB, GitHub's asset limit is 2 GiB), a `.pois.tsv` and the search side
-files: `.streets.tsv` (street and locality names: kind, name, lat, lon), `.places.tsv`
-(every named POI whatever the map zoom: kind, name, other names, lat, lon) and
+files: `.streets.tsv` (street and locality names: kind, name, lat, lon, name:es, name:en), `.places.tsv`
+(every named POI whatever the map zoom: kind, name, other names, lat, lon, name:es, name:en; the two
+trailing columns since 2026-10-29, ignored by older apps, which read the first four or five) and
 `.addresses.tsv` (house numbers: street, number, lat, lon), both from
 `scripts/routing/places.py` (packs built before 2026-10-26 lack them). `downloadPack` checks the room needed
 up front and queues the parts, POIs and side files not on disk yet (a retry

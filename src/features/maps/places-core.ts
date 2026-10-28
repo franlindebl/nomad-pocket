@@ -28,9 +28,35 @@ export type PlaceRow = {
 /**
  * Separates the name variants of a tile row's `names`: native, name:es, name:en, then the rest
  * (a control character: the full-text tokenizer treats it as a space, so it is searchable as before).
- * Rows from a routing pack's files keep plain space-separated names (their order is not known).
+ * Rows from a routing pack's files use the same layout when the file has the name:es / name:en columns
+ * (packNames); older files keep plain space-separated names (their order is not known).
  */
 export const NAME_SEP = '\u001f';
+
+/**
+ * `names` of a row from a routing pack's side file: the NAME_SEP slots (native, es, en, rest) when the
+ * line carries a name:es or name:en column (appended by places.py and streets.py from 2026-10-29), else
+ * the old plain text (`rest` is places.tsv's other-names column, which still holds es and en in it, so
+ * they are taken out of it). import-core.ts does the same in SQL: keep them in step.
+ */
+export function packNames(name: string, es = '', en = '', other = ''): string {
+  const nes = es === name ? '' : es;
+  const nen = en === name ? '' : en;
+  if (!nes && !nen) return other ? `${name} ${other}` : name;
+  let rest = other;
+  for (const v of [nes, nen]) if (v) rest = rest.replaceAll(v, '');
+  return [name, nes, nen, rest.trim()].join(NAME_SEP).replace(new RegExp(`${NAME_SEP}+$`), '');
+}
+
+/** The same row's `names` with ", <number>" after every slot: a door found on a street, in each language. */
+export function namesWithNumber(names: string, number: string): string {
+  return names.includes(NAME_SEP)
+    ? names
+        .split(NAME_SEP)
+        .map((v, i) => (v && i < 3 ? `${v}, ${number}` : v))
+        .join(NAME_SEP)
+    : names;
+}
 
 // POI kinds that are never useful search results even when named.
 const SKIP_POI_KINDS = new Set([
@@ -132,13 +158,13 @@ export const PLACE_RANK: Record<string, number> = { city: 4, town: 7, village: 1
 
 /**
  * Rows of a routing pack's street index (scripts/routing/streets.py: kind, name, lat,
- * lon per line). Map tiles only hold the main roads of a big area at the zoom the phone
+ * lon, then name:es and name:en when the file has them, per line). Map tiles only hold the main roads of a big area at the zoom the phone
  * can index; the pack has every named street.
  */
 export function parseStreetsTsv(text: string): PlaceRow[] {
   const rows: PlaceRow[] = [];
   for (const line of text.split('\n')) {
-    const [kind, name, lat, lon] = line.split('\t');
+    const [kind, name, lat, lon, es, en] = line.split('\t');
     const y = Number(lat);
     const x = Number(lon);
     if (!kind || !name || !lat || !lon || !Number.isFinite(y) || !Number.isFinite(x)) continue;
@@ -147,7 +173,7 @@ export function parseStreetsTsv(text: string): PlaceRow[] {
       layer: road ? 'road' : 'place',
       kind,
       name,
-      names: name,
+      names: packNames(name, es, en),
       lat: y,
       lon: x,
       rank: road ? (kind === 'path' ? 15 : 14) : (PLACE_RANK[kind] ?? 12),
@@ -178,16 +204,16 @@ export const POI_RANK: Record<string, number> = {
 
 /**
  * Rows of a pack's places file (scripts/routing/places.py: kind, name, other names, lat,
- * lon per line): every named POI of the country, whatever the map's zoom.
+ * lon, then name:es and name:en when the file has them, per line): every named POI of the country, whatever the map's zoom.
  */
 export function parsePlacesTsv(text: string): PlaceRow[] {
   const rows: PlaceRow[] = [];
   for (const line of text.split('\n')) {
-    const [kind, name, other, lat, lon] = line.split('\t');
+    const [kind, name, other, lat, lon, es, en] = line.split('\t');
     const y = Number(lat);
     const x = Number(lon);
     if (!kind || !name || !lat || !lon || !Number.isFinite(y) || !Number.isFinite(x)) continue;
-    rows.push({ layer: 'poi', kind, name, names: other ? `${name} ${other}` : name, lat: y, lon: x, rank: POI_RANK[kind] ?? 16 });
+    rows.push({ layer: 'poi', kind, name, names: packNames(name, es, en, other), lat: y, lon: x, rank: POI_RANK[kind] ?? 16 });
   }
   return rows;
 }
