@@ -1,9 +1,9 @@
-# MAP-20 — an on-device map extraction (Switzerland, a country the maps catalog lacks) survives
+# MAP-22 — an on-device map extraction (Switzerland, a country the maps catalog lacks) survives
 # the app being killed: it continues from the saved progress instead of starting over, and ends
 # as one installed map. Needs the app built with PLANET_PORT (scripts/e2e.sh: the extraction
 # reads scripts/dev-planet-server.ts, slowed down so there is time to kill the app mid-way).
 appId: com.fjlinde.nomadpocket
-tags: [full, maps, maps-server, planet-server]
+tags: [planet, maps, maps-server, planet-server]
 ---
 - runFlow: ../../subflows/launch.yaml
 - tapOn: { id: "map" }

@@ -575,7 +575,7 @@ void (start over) if the server no longer has that build, the plan's shape diffe
 shorter than what the finished requests wrote. Cancel and failure delete the `.part` and the saved job;
 `.part` files without a saved job are deleted at startup. `EXPO_PUBLIC_PLANET_BUILD_URL` (dev/E2E) replaces
 the Protomaps build with `scripts/dev-planet-server.ts` (synthetic planet with Range and a delay;
-`PLANET_PORT` in `scripts/e2e.sh`, flow `map-20-extract-resume`). Loose `.pmtiles` files
+`PLANET_PORT` in `scripts/e2e.sh`, flow `map-22-extract-resume`). Loose `.pmtiles` files
 are registered at startup from their header (`register.ts`; a region id as file name
 gives the region's name).
 

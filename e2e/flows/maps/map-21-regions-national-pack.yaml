@@ -1,0 +1,76 @@
+# MAP-21 — a country in regions for its map only, with one national pack, as Canada and
+# Russia (Ontario and Quebec maps with outline cells + the "ca" pack; Andorra's files stand
+# in for them): the region the person is in comes ticked from the location, the national
+# pack (navigation, points, streets) comes with the first region only, the second region
+# costs just its map, and deleting the last region takes the pack away.
+appId: com.fjlinde.nomadpocket
+tags: [full, maps, routing-server, maps-server]
+---
+- runFlow: ../../subflows/launch.yaml
+# Toronto, set after the wizard: it would offer Canada's kit in the wizard otherwise.
+- setLocation:
+    latitude: 43.65
+    longitude: -79.38
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: "Elegir un país"
+    timeout: 20000
+- tapOn: "Elegir un país"
+- tapOn: "Buscar un país"
+- inputText: "Canadá"
+- tapOn: { id: "country-ca" }
+- extendedWaitUntil:
+    visible: { id: "region-ca-ontario" }
+    timeout: 30000
+# The pack is shared: the sheet says it comes with the first region.
+- assertVisible: "(?s).*vienen con la primera región.*"
+# Ontario's map (2.5 MB) + the national pack (3.4 MB).
+- assertVisible: "Descargar · 5,9 MB"
+- takeScreenshot: 01-ontario-from-location
+- tapOn: { id: "country-download" }
+- extendedWaitUntil:
+    visible: "Canadá.*Ontario · .*"
+    timeout: 90000
+- takeScreenshot: 02-your-maps
+# Back in the sheet: Ontario is on the phone and the pack with it, so Quebec costs its map only.
+- tapOn: { id: "country-row" }
+- extendedWaitUntil:
+    visible: { id: "region-delete-ca-ontario" }
+    timeout: 15000
+- assertVisible: "(?s).*ya están en el teléfono.*"
+- assertVisible: { id: "region-ca-quebec" }
+# Quebec: its map alone (2.5 MB), the pack's 3.4 MB already on the phone.
+- assertVisible: "2,5 MB"
+- takeScreenshot: 03-quebec-map-only
+- tapOn: { id: "region-ca-quebec" }
+- tapOn: { id: "country-download" }
+# The sheet closes on download: back in "Tus mapas", open it again once Quebec is in.
+- extendedWaitUntil:
+    visible: "Canadá.*Ontario, Quebec · .*"
+    timeout: 90000
+- tapOn: { id: "country-row" }
+- extendedWaitUntil:
+    visible: { id: "region-delete-ca-quebec" }
+    timeout: 15000
+# Delete Ontario: Quebec and the pack stay.
+- tapOn: { id: "region-delete-ca-ontario" }
+- assertVisible: "¿Eliminar Canadá · Ontario\\?"
+- tapOn: "Eliminar"
+- extendedWaitUntil:
+    notVisible: { id: "region-delete-ca-ontario" }
+    timeout: 15000
+- assertVisible: "(?s).*ya están en el teléfono.*"
+- takeScreenshot: 04-ontario-deleted
+# Delete Quebec, the last region: the pack goes too, so the sheet offers it again.
+# The picker's search keyboard comes back under the sheet after the first alert.
+- hideKeyboard
+- tapOn: { id: "region-delete-ca-quebec" }
+- assertVisible: "¿Eliminar Canadá · Quebec\\?"
+- tapOn: "Eliminar"
+- extendedWaitUntil:
+    notVisible: { id: "region-delete-ca-quebec" }
+    timeout: 15000
+# The pack (3.4 MB) is offered again with the first region: the whole country costs 8.3 MB.
+- assertVisible: "(?s).*3,4 MB.*vienen con la primera región.*"
+- assertVisible: "Todo Canadá.*8,3 MB"
+- takeScreenshot: 05-all-deleted

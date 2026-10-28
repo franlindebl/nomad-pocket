@@ -1,0 +1,73 @@
+# MAP-20 — a country in regions with a pack per region, as the USA: no region is ticked from
+# a location outside it ("Elige al menos una región"); tick one, download it (its map + its
+# pack, from the local catalogs scripts/e2e.sh serves; Andorra's files stand in for Alaska's
+# and Hawaii's), see it in "Tus mapas" with its region, add the other from the country's
+# sheet and delete one region at a time (the last one takes the country away).
+appId: com.fjlinde.nomadpocket
+tags: [full, maps, routing-server, maps-server]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: "Elegir un país"
+    timeout: 20000
+- tapOn: "Elegir un país"
+- tapOn: "Buscar un país"
+- inputText: "Estados Unidos"
+- tapOn: { id: "country-us" }
+- extendedWaitUntil:
+    visible: { id: "region-us-alaska" }
+    timeout: 30000
+- assertVisible: { id: "region-us-hawaii" }
+- assertVisible: { id: "region-all" }
+- assertVisible: "Elige al menos una región"
+- takeScreenshot: 01-nothing-ticked
+- tapOn: { id: "region-us-alaska" }
+- assertVisible: "Descargar · 5,9 MB"
+- takeScreenshot: 02-alaska-ticked
+- tapOn: { id: "country-download" }
+# The picker leaves for "Tus mapas", where the region shows once its map is on the phone.
+- extendedWaitUntil:
+    visible: "Estados Unidos.*Alaska · .*"
+    timeout: 90000
+- assertNotVisible: ".*Hawái.*"
+- takeScreenshot: 03-your-maps
+# The country's row opens its regions: Alaska is on the phone, Hawaii still to download.
+- tapOn: { id: "country-row" }
+- extendedWaitUntil:
+    visible: { id: "region-delete-us-alaska" }
+    timeout: 15000
+- assertVisible: "En el móvil"
+- assertVisible: { id: "region-us-hawaii" }
+- assertNotVisible: { id: "region-delete-us-hawaii" }
+- takeScreenshot: 04-regions
+- tapOn: { id: "region-us-hawaii" }
+- tapOn: { id: "country-download" }
+# The sheet closes on download: back in "Tus mapas", open it again once Hawaii is in.
+- extendedWaitUntil:
+    visible: "Estados Unidos.*Alaska, Hawái · .*"
+    timeout: 90000
+- tapOn: { id: "country-row" }
+- extendedWaitUntil:
+    visible: { id: "region-delete-us-hawaii" }
+    timeout: 15000
+- takeScreenshot: 05-both-regions
+# Delete Alaska: Hawaii stays.
+- tapOn: { id: "region-delete-us-alaska" }
+- assertVisible: "¿Eliminar Estados Unidos · Alaska\\?"
+- tapOn: "Eliminar"
+- extendedWaitUntil:
+    notVisible: { id: "region-delete-us-alaska" }
+    timeout: 15000
+- assertVisible: { id: "region-delete-us-hawaii" }
+- takeScreenshot: 06-alaska-deleted
+# Delete Hawaii, the last one: the country is gone from "Tus mapas".
+# The picker's search keyboard comes back under the sheet after the first alert.
+- hideKeyboard
+- tapOn: { id: "region-delete-us-hawaii" }
+- assertVisible: "¿Eliminar Estados Unidos · Hawái\\?"
+- tapOn: "Eliminar"
+- extendedWaitUntil:
+    notVisible: { id: "region-delete-us-hawaii" }
+    timeout: 15000
+- takeScreenshot: 07-all-deleted
