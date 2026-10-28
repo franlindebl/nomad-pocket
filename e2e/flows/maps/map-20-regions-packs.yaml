@@ -62,8 +62,9 @@ tags: [full, maps, routing-server, maps-server]
 - assertVisible: { id: "region-delete-us-hawaii" }
 - takeScreenshot: 06-alaska-deleted
 # Delete Hawaii, the last one: the country is gone from "Tus mapas".
-# The picker's search keyboard comes back under the sheet after the first alert.
-- hideKeyboard
+# The picker's search keyboard may come back under the sheet after the first alert (not on every simulator).
+- hideKeyboard:
+    optional: true
 - tapOn: { id: "region-delete-us-hawaii" }
 - assertVisible: "¿Eliminar Estados Unidos · Hawái\\?"
 - tapOn: "Eliminar"

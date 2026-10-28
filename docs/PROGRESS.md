@@ -20,7 +20,8 @@ can pick up without re-deriving anything.
   (21 smoke, 22 full, 13 nightly, 1 iPad tour, 4 Android, 1 by hand: `map-22`, its own build); which cases they cover
   is in the catalog of `docs/E2E.md`. On f4b32d4 (2026-10-28): smoke 21/21, full 20/20 after a stale `map-15`
   assertion was fixed (`map-19` flaked once on a tap), iPad tour 1/1. The flows added later (map-20/21/22, ai-09)
-  passed on their own branches; the integrated branch: see the log.
+  passed on their own branches; on main afb07af smoke + full passed 43/43 (2026-10-28, after making the region
+  flows' `hideKeyboard` optional).
 - Routes across routing packs (Madrid to Paris, US regions) are on main and pushed since bdc1fae/6f68b43
   (2026-10-28), but need packs that carry `<pack>.crossings.tsv`. The CI run that rebuilds them (run
   40681896621, launched by hand on 2026-10-28: `ad` and `pt` as the small check, under a Europe
@@ -314,7 +315,9 @@ integrated by the lead on branch `integrate-2026-10-28`:
 - **Docs** (item 10): stale status, backlog and known issues refreshed (separate entry below). CI run 40681896621
   (`ad pt`) succeeded: both packs carry crossings in the routing manifest.
 
-Not done: Android for any of this; the integrated branch's E2E result is below when run.
+E2E on the integrated build (main afb07af, NP-e2e): smoke + full 41/43; `map-20` and `map-21` failed on a
+`hideKeyboard` with no keyboard up (it shows on some simulators only): made optional, both pass. Not done:
+Android for any of this; `map-22` and `ai-09` were not rerun on the integrated build.
 
 ### 2026-10-28 — Docs: stale statements refreshed
 
