@@ -6,7 +6,7 @@ can pick up without re-deriving anything.
 
 ## Current state (2026-10-27)
 
-- **Version 1.1.0 (iOS build 21)** on TestFlight 2026-10-27 (build 20 plus a photo library purpose string): dictation in the assistant, a more
+- **Version 1.1.0 (iOS build 22)** on TestFlight 2026-10-27 (build 21 plus the right neighbourhood on search results, first aid in the app's language, an assistant that no longer greets every answer and empty image boxes gone; build 21 added a photo library purpose string): dictation in the assistant, a more
   capable model becomes the default, answers survive switching chats, the navigation view reworked,
   Canada and Russia by regions, on top of build 19 (document collections, map legend, SOS button);
   **1.0.1 (build 3)** waiting for App Review. Release process and version table: `docs/RELEASE.md`;
@@ -237,6 +237,16 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-27 — Release: 1.1.0 build 22 to TestFlight
+
+Build 22 = build 21 plus the right neighbourhood on map search results (c03c0cc) and the fixes seen
+while making the store screenshots (c7cf754): first aid in the app's language, the assistant without a
+greeting on every answer and finding articles named after the question, no empty image boxes in
+Wikipedia Médica. Smoke E2E 21/21 on an iOS 27 simulator at c7cf754 (worktree `e2e-21`); archived from
+a clean worktree of the release commit, tagged `v1.1.0-22`. The main checkout's `ios/` predates the
+dictation dependency (a Release build from it crashes on launch: `ExpoSpeechRecognition` missing):
+`npx expo prebuild --platform ios` there before building from it.
 
 ### 2026-10-27 — Fixes from the store screenshots: first aid in Spanish, assistant, empty image boxes
 
