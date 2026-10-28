@@ -279,6 +279,7 @@ By hand:
 | assistant | `ai-06-conversation` | AI-06 | nightly | seeded, Apple Intelligence |
 | assistant | `ai-07-gguf-tools` | AI-07 | nightly | seeded, seeded-model |
 | assistant | `ai-08-dictation` | AI-08 | nightly | — (microphone shown; not tapped: the simulator's audio input aborts the app) |
+| assistant | `ai-09-copy-regenerate` | AI-09 | nightly | seeded (system model: Copy shows "Copiado"; Regenerate answers the last question again) |
 | downloads | `dl-02-controls` | DL-02 | nightly | network |
 | prepare | `prep-01-plan` | PREP-01 | smoke | — |
 | prepare | `prep-02-kit` | PREP-02 | smoke | — |
@@ -367,6 +368,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `marker-name`, `marker-note` | fields of the place sheet |
   | `marker-delete`, `region-delete`, `conversation-delete` | delete buttons in lists |
   | `composer-mic` | assistant composer: dictate / stop listening |
+  | `assistant-copy`, `assistant-regenerate` | icon buttons under a finished answer: copy it as plain text; answer the last question again (last answer only) |
   | `assistant-retry` | assistant error banner: resend the failed question (hidden when retrying can't help) |
   | `map-search`, `map-emergency` | map search pill and the red "SOS" (Emergencias) button |
   | `map-points`, `points-show`, `points-<category>` | Puntos (legend) map button, its show-on-map row and one row per category |

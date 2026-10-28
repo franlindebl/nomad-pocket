@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { parseInline, parseMarkdown } from './markdown.ts';
+import { parseInline, parseMarkdown, toPlainText } from './markdown.ts';
 
 test('inline bold, italics, code and citations', () => {
   assert.deepEqual(parseInline('Hierve **el agua** *un minuto* con `x` [1][2, 3].'), [
@@ -48,4 +48,9 @@ test('unterminated code fence while streaming', () => {
     blocks.map((b) => b.type),
     ['paragraph', 'code'],
   );
+});
+
+test('toPlainText strips syntax and citation markers', () => {
+  const md = '## Agua\n\nHierve **el agua** un minuto [1].\n\n- Uno [1, 2]\n- Dos\n\n1. A\n2. B\n\n```\nx = 1\n```';
+  assert.equal(toPlainText(md), 'Agua\n\nHierve el agua un minuto.\n\n• Uno\n• Dos\n\n1. A\n2. B\n\nx = 1');
 });

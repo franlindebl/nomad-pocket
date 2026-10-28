@@ -7,7 +7,7 @@ import Animated, { useAnimatedKeyboard, useAnimatedStyle } from 'react-native-re
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Card, IconBadge, IconButton, PressableScale, Row, Text } from '@/components/ui';
-import { dismissError, newChat, openSession, retryLast, searchLibraryFor, sendMessage, stopAnswer, useChat, type ChatMessage, type Streaming } from '@/features/assistant/chats';
+import { dismissError, newChat, openSession, regenerateLast, retryLast, searchLibraryFor, sendMessage, stopAnswer, useChat, type ChatMessage, type Streaming } from '@/features/assistant/chats';
 import { isErrorKey } from '@/features/assistant/errors';
 import { SYSTEM_MODEL_ID } from '@/features/assistant/models';
 import { AssistantMessage, UserMessage } from '@/features/assistant/ui/Message';
@@ -53,6 +53,8 @@ export default function AssistantScreen() {
   const last = messages[messages.length - 1];
   const searchableId = !streaming && useLibrary && libraryItems.length && last?.role === 'assistant' && last.searched === false ? last.id : null;
 
+  const regenerableId = !streaming && last?.role === 'assistant' && messages.length > 1 ? last.id : null;
+
   const renderItem = useCallback(
     ({ item }: { item: Row_ }) => {
       if (item.streaming) {
@@ -62,10 +64,16 @@ export default function AssistantScreen() {
       const m = item.message!;
       if (m.role === 'user') return <UserMessage message={m} />;
       return (
-        <AssistantMessage text={m.content} sources={m.sources} onSearchLibrary={m.id === searchableId ? () => searchLibraryFor(m.id) : undefined} />
+        <AssistantMessage
+          text={m.content}
+          sources={m.sources}
+          copyable
+          onSearchLibrary={m.id === searchableId ? () => searchLibraryFor(m.id) : undefined}
+          onRegenerate={m.id === regenerableId ? () => void regenerateLast() : undefined}
+        />
       );
     },
-    [searchableId],
+    [searchableId, regenerableId],
   );
 
   const empty = rows.length === 0;

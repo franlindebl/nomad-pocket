@@ -1,0 +1,27 @@
+# AI-09 — a finished answer offers Copy (puts it on the clipboard, "Copiado" toast) and, being the last one, Regenerate
+# (answers the same question again; the buttons come back once it ends). Needs the system model
+# (Apple Intelligence, iOS 27 simulator). Asserts structure only: the answer text is not deterministic.
+appId: com.fjlinde.nomadpocket
+tags: [nightly, assistant, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "sparkles" }
+- tapOn:
+    text: "Usar modelo integrado"
+    optional: true
+- assertVisible: "¿En qué te ayudo\\?"
+- tapOn: "Pregunta .*"
+- inputText: "¿Quién fue Michael Jackson?"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: "Copiar respuesta"
+    timeout: 120000
+- tapOn: { id: "assistant-copy" }
+# The toast is a pointerEvents=none pill the accessibility tree doesn't expose: it shows in the screenshot.
+- takeScreenshot: 01-copied
+- tapOn: { id: "assistant-regenerate" }
+- extendedWaitUntil:
+    visible: "Volver a generar la respuesta"
+    timeout: 120000
+- assertVisible: "Copiar respuesta"
+- takeScreenshot: 02-regenerated
