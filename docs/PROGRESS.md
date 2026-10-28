@@ -138,10 +138,11 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
      13.5 GB in all), no whole ca/ru map, packs unchanged; every part checked in its release.
      Until a TestFlight build with 3c75852 is out, builds 16–19 show the region ids and download
      regions without routing. **Next**: that build, then a real-phone check of one region.
-   - **Deferred by decision**: routes across packs (between US regions or countries: a straight
-     line today). **Stitched at border crossings, built 2026-10-28 in worktree `../nomad-app-routing`
-     (branch `routing-across-packs`, not merged)**: needs a CI run for the crossings files, then Android;
-     the US stays split. `docs/ROUTING_ACROSS_PACKS.md`; bundled quick cards (first aid, water, radio; owner
+   - **Routes across packs** (between countries and US regions): stitched at border crossings, on main
+     since bdc1fae (2026-10-28). Works once the published packs carry `<pack>.crossings.tsv`: the first
+     `country-packages.yml` run after it (the monthly one on 2026-11-05, or by hand), and in app builds
+     from bdc1fae on. Then Android, ferries. The US stays split. `docs/ROUTING_ACROSS_PACKS.md`.
+   - **Deferred by decision**: bundled quick cards (first aid, water, radio; owner
      reviews medical content first), emergency numbers per country.
    - **CI notes**: a failed country is relaunched alone with `gh workflow run
      country-packages.yml -f countries="<ids>" -f parts=routing|maps` (region ids work too:
@@ -292,6 +293,9 @@ graph) but needs a ~17 h, 64–128 GB build a month: shelved. Built instead (`do
 - Not done: a CI run (the published packs have no crossings yet: routes across packs start working after the
   next `country-packages.yml` run; nothing changes before it); map-15 (local catalog download) not rerun;
   Android not tried; ferries (Spain–Morocco, UK–France) aren't crossings yet.
+- Merged to main (fast-forward, bdc1fae) after a rebase on the functional review fixes; map-14/17/19 passed
+  again on the merged code. Then: the crossings step in `build-country.sh` made never fatal (it has not run
+  in CI yet: a failure publishes the pack without crossings instead of losing it).
 
 ### 2026-10-28 — Functional review on the simulator and its fixes (R1–R14)
 
