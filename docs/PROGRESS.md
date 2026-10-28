@@ -4,7 +4,7 @@ Living document: current status, backlog, known issues and a dated log. Update i
 the end of every work block (status table, a log entry, next steps) so the next session
 can pick up without re-deriving anything.
 
-## Current state (2026-10-27)
+## Current state (2026-10-28)
 
 - **Version 1.1.0 (iOS build 23)** on TestFlight 2026-10-28 (build 22 plus assistant retrieval in English; build 22 = build 21 plus the right neighbourhood on search results, first aid in the app's language, an assistant that no longer greets every answer and empty image boxes gone; build 21 added a photo library purpose string): dictation in the assistant, a more
   capable model becomes the default, answers survive switching chats, the navigation view reworked,
@@ -16,9 +16,16 @@ can pick up without re-deriving anything.
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
   tour). Downloads measured and tuned by the agent on the owner's iPhone 14 Pro (2026-10-27).
-- Checks: `npm test` (the count drifts: run it), `tsc` clean, lint clean, i18n keys complete. E2E: 54 Maestro flows
-  (21 smoke, 17 full, 11 nightly, 1 iPad tour, 4 Android); which cases they cover is in the catalog of `docs/E2E.md`.
-  The build 17/18 code passed the smoke suite (21/21, 2026-10-27); full and iPad suites not run on it yet.
+- Checks: `npm test` (the count drifts: run it), `tsc` clean, lint clean, i18n keys complete. E2E: 62 Maestro flows
+  (21 smoke, 22 full, 13 nightly, 1 iPad tour, 4 Android, 1 by hand: `map-22`, its own build); which cases they cover
+  is in the catalog of `docs/E2E.md`. On f4b32d4 (2026-10-28): smoke 21/21, full 20/20 after a stale `map-15`
+  assertion was fixed (`map-19` flaked once on a tap), iPad tour 1/1. The flows added later (map-20/21/22, ai-09)
+  passed on their own branches; the integrated branch: see the log.
+- Routes across routing packs (Madrid to Paris, US regions) are on main and pushed since bdc1fae/6f68b43
+  (2026-10-28), but need packs that carry `<pack>.crossings.tsv`. The CI run that rebuilds them (run
+  40681896621, launched by hand on 2026-10-28: `ad` and `pt` as the small check, under a Europe
+  release tag) succeeded: the published `ad` and `pt` packs now carry `crossings` (264 B and 3.2 KB in the
+  routing manifest). Every other pack gets them with the monthly full run on 2026-11-05.
 
 | Area | Status |
 |---|---|
@@ -28,7 +35,7 @@ can pick up without re-deriving anything.
 | UX redesign: survival kit (`docs/UX_SURVIVAL_PLAN.md`): onboarding country + kit, Home "En una emergencia" + "Tu preparación", 4 tabs, maps by country, bundled world map, simpler settings | done — iOS sim (E2E smoke + full), Android spot check; build 11; country maps CI first run 2026-10-26 |
 | ZIM library + reader (search, TOC, bookmarks, history, find, text size, dark mode) | done — iOS + Android |
 | Courses (14 courses, syllabus with fallbacks, progress; inside Library since the redesign) | done |
-| Maps (country downloads: prebuilt z15 map + routing pack + points; the USA by regions; Canada and Russia by regions for the map with one national pack; on-device extraction as fallback; bundled world map; markers, GPS, multi-script labels; location asked on opening Maps) | done — iOS sim (Andorra and US regions, local catalogs); build 16. Canada/Russia regions: code ready 2026-10-27, waiting for a build and a maps run (`docs/COUNTRY_REGIONS_PLAN.md`) |
+| Maps (country downloads: prebuilt z15 map + routing pack + points; the USA by regions; Canada and Russia by regions for the map with one national pack; on-device extraction as fallback; bundled world map; markers, GPS, multi-script labels; location asked on opening Maps) | done — iOS sim (Andorra and US regions, local catalogs); build 16. Canada/Russia regions: maps published 2026-10-27 (run 40544693154) and the app code is in builds 20+ (3c75852); a real-phone check of one region is pending (`docs/COUNTRY_REGIONS_PLAN.md`) |
 | Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
 | Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 237 packs live (every inhabited country; the USA in six regions) since 2026-10-27; E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
@@ -36,7 +43,7 @@ can pick up without re-deriving anything.
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
 | Preparedness (family plan, emergency kit with expiry reminders, printable PDF, offline guides) | done — iOS sim + Android emulator (E2E) |
 | E2E suite (Maestro) + pre-commit hook | done |
-| Pre-release audit (2026-10-26): ~60 verified findings fixed in code and docs | done on branch `audit-fixes`; device checks and the deferred items below pending |
+| Pre-release audit (2026-10-26): ~60 verified findings fixed in code and docs | merged to main; device checks and the deferred items below pending |
 
 ## Decisions (kickoff 2026-10-24, by the owner)
 
@@ -59,17 +66,18 @@ A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check
    country-coverage work**:
    - ~~Regenerate the store screenshots (DOCS-PUBLIC-3 / LEGAL-14)~~ done 2026-10-27 for 1.1.0 (OSM credit
      under the map shots; `docs/RELEASE.md`, Screenshots).
-   - OSS-9: obsolete PNGs in the repo.
-   - The git history rewrite that removes the owner's old location examples (pending a quiet window).
-     **Then tag the store builds** (`v1.1.0-12` for build 12, and every later build: GPL section 6).
+   - ~~OSS-9: obsolete PNGs in the repo~~ done 2026-10-28 (12 unreferenced early screenshots removed).
+   - ~~The history rewrite that removes the owner's old location examples, then tagging the store
+     builds~~ done: main was rewritten (de6574b per the owner's notes) and the store builds are tagged and
+     pushed, `v1.1.0-12` to `v1.1.0-23` (no `-17`: that build is not to be used; GPL section 6).
    Owner decisions still open or to carry out:
    - Android before any Play release: ML Kit GenAI is removed and Firebase kept out of the APK
      (done 2026-10-26). Still to do: list the full transitive Android notices (Gradle licence
      plugin), and decide how the proprietary Play services libraries that expo-location and
      MapLibre need (play-services-location/base/basement/tasks) sit next to GPL libkiwix; see
      `docs/RELEASE.md`.
-   - Store prebuild gated by an env var (LEGAL-9): the generated `Info.plist` is shared by Debug and
-     Release, so dev-launcher keys can reach a store build.
+   - ~~Store prebuild gated by an env var (LEGAL-9)~~ done 2026-10-28: `NOMAD_STORE_BUILD=1 npx expo prebuild`
+     (`plugins/with-store-build.js`, `docs/RELEASE.md`); check the archived `Info.plist` on the next store build.
    - A planned index rebuild to reclaim the space of existing users' old index file.
    - Optionally ship `OFL.txt` and the sprites' MIT licence inside `basemap-assets.zip` (bump
      `features/maps/assets.ts` `VERSION`).
@@ -79,7 +87,7 @@ A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check
    - The pronoun threshold of the assistant (a follow-up inherits the previous topic only with at
      most one word of its own) loses some two-word English follow-ups ("Can I put ice on it?") on the
      heuristic search paths; long questions (> 600 chars) are searched once.
-   - Code cleanup: `places.ts` keeps a private `forEachLineBlock` that duplicates `side-files.ts`'s.
+   - ~~Code cleanup: `places.ts`'s private `forEachLineBlock`~~ already gone (it imports `side-files.ts`'s).
    Decisions already taken (2026-10-26): the OSM credit fades after 5 s (approved); guidance
    auto-stops 60 s after arrival and keeps the screen awake only with movement in the last 10 min
    (approved); copyright line "Copyright (C) 2026 Fran Linde Blázquez and contributors"; Northern
@@ -115,7 +123,7 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
      sheet → region list → download → Tus mapas "Noreste"); (2) Spain from a fresh install (build
      14 was killed while "Preparando"; build 16 copies and hashes natively, modules/nomad-files);
      (3) big side-file imports (Germany's 780 MB of house numbers, ~450 MB per US region).
-   - **Agent, when asked**: (1) E2E flows for countries in regions (owner wants them, 2026-10-27),
+   - **Agent, when asked**: (1) ~~E2E flows for countries in regions~~ done 2026-10-28 (`map-20`, `map-21`) (owner wants them, 2026-10-27),
      both kinds, against a local catalog (`scripts/e2e.sh` maps server; testIDs `region-*` in
      docs/E2E.md): (a) a pack per region, as the USA (Andorra split in two regions, each with its
      map and pack): tick, download, delete; (b) regions for the map only plus a national pack, as
@@ -136,12 +144,13 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
      **Published** (owner's call, ahead of the build): run 40544693154 (`countries="ca ru"
      parts=maps`), maps-index now 258 maps: the 14 regions at z15 (Canada 16.1 GB, Russia
      13.5 GB in all), no whole ca/ru map, packs unchanged; every part checked in its release.
-     Until a TestFlight build with 3c75852 is out, builds 16–19 show the region ids and download
-     regions without routing. **Next**: that build, then a real-phone check of one region.
+     Builds 16–19 show the region ids and download regions without routing; builds 20 and later (3c75852)
+     have the fix. **Next**: a real-phone check of one region.
    - **Routes across packs** (between countries and US regions): stitched at border crossings, on main
-     since bdc1fae (2026-10-28). Works once the published packs carry `<pack>.crossings.tsv`: the first
-     `country-packages.yml` run after it (the monthly one on 2026-11-05, or by hand), and in app builds
-     from bdc1fae on. Then Android, ferries. The US stays split. `docs/ROUTING_ACROSS_PACKS.md`.
+     and pushed since bdc1fae (2026-10-28). Works once the published packs carry `<pack>.crossings.tsv`: the first
+     `country-packages.yml` run after it (run 40681896621 was launched by hand on 2026-10-28 and still in
+     progress when checked; the monthly one is on 2026-11-05), and in app builds from bdc1fae on (store
+     builds up to 23 predate it). Then Android, ferries. The US stays split. `docs/ROUTING_ACROSS_PACKS.md`.
    - **Deferred by decision**: bundled quick cards (first aid, water, radio; owner
      reviews medical content first), emergency numbers per country.
    - **CI notes**: a failed country is relaunched alone with `gh workflow run
@@ -155,7 +164,8 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
    `docs/MAPS_NAVIGATION_PLAN.md`: measure on a real phone (route time/memory, mmap of a 2 GB tar
    on iOS, which may need `com.apple.developer.kernel.extended-virtual-addressing`), then phase 3
    (turn-by-turn: voice with expo-speech, background location).
-1. Watch App Review for 1.0.1; test 1.1.0 (build 10, TestFlight) on a real iPhone: navigation view (driving and on foot), compass beam, street and school search, routing
+1. Watch App Review for 1.1.0 (build 23, submitted 2026-10-28; 1.0.1 was folded into it); test it
+   (TestFlight) on a real iPhone: navigation view (driving and on foot), compass beam, street and school search, routing
    packs (download Spain 2.2 GB, route time/memory), Preparedness reminders, GPU
    llama.cpp, Apple Intelligence, background downloads, Files import, airplane mode.
 2. Search side files: published (the 2026-10-26 full run; packs and country maps carry
@@ -164,15 +174,17 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 3. Faster, resumable downloads: built (log 2026-10-26, `docs/DOWNLOADS_SPEED_PLAN.md`); Spanish
    Wikipedia nopic, 13.3 GB, in 8.6 min on the simulator instead of ~2 h; adaptive connection
    budget built. Next: measure on a real iPhone and Android phone (background session
-   scheduling, Wi-Fi speeds, the budget on the owner's 300 Mb/s line). Small single-task
-   downloads (< 16 MB) still restart from zero after an iOS kill (BUG-CORE-16), which is cheap now.
-4. Map extraction: resume after a kill (persist the plan + written ranges) and move it off
-   the JS thread.
+   scheduling, Wi-Fi speeds, the budget on the owner's 300 Mb/s line). Since 2026-10-28 files
+   from 4 MiB go segmented and resume after an iOS kill; only one-chunk files (< 4 MiB) restart (BUG-CORE-16).
+   Time a whole kit on the phone again: 4–16 MB files now take the segmented path.
+4. Map extraction: resumes after a kill since 2026-10-28. Still to do: move it off the JS thread (a native
+   range fetcher writing at offsets, background URLSession / foreground service; ~3–5 days with both
+   platforms), and a Retry for a failed extraction (today it continues on the next launch).
 5. Android release: upload keystore, Play listing + data safety; the Android notices and the Play
    services question of item A come first.
 6. Reader: auto-hiding toolbar on scroll (style guide), syllabus for SPA course ZIMs read
    from the rendered DOM.
-7. Assistant: copy / regenerate an answer; better small-model citations; check the
+7. Assistant: ~~copy / regenerate an answer~~ done 2026-10-28; better small-model citations; check the
    conversational flow on Android (llama.cpp tools) and on a
    real iPhone (tool-call latency with Metal). Document index follow-ups (log 2026-10-28): OCR for scanned
    PDFs, open a PDF at the cited page (native PDFKit view), English guides for Spanish questions, measure
@@ -214,8 +226,10 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
   searched area. House numbers are as complete as OSM (a missing number lands between its
   neighbours, marked approximate). Indexing and imports run on the JS thread in batches (not yet
   measured on a device); search itself runs on a second connection.
-- Chinese and Japanese names indexed before the pair-indexing change only match from their first
-  character until the map is re-indexed (`INDEX_VERSION` was not bumped).
+- Chinese and Japanese names: a map's tile index was rebuilt with the character-pair indexing when
+  `INDEX_VERSION` went to 2 (2026-10-28). Country side-file imports (places, streets, addresses) are not
+  covered by that bump: ones made before the pair indexing only match from their first character until the
+  country is downloaded or imported again.
 - The search index file of an existing phone doesn't shrink: the old `nomad.db` was renamed to become
   `search.db` and can't switch to incremental `auto_vacuum` without a full `VACUUM` (too risky); freed
   pages are reused by later imports but not returned. Fresh installs are fine. A planned index rebuild
@@ -226,27 +240,28 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
   still draws as a thin line (routes no longer start in it). Not modelled: low-emission
   zones (Madrid ZBE), live closures, traffic.
 - Road routing needs a routing pack for the area (else the straight line). No
-  isochrones (valhalla-mobile exposes none), no cross-pack routes (the country pack covers
-  them), no voice / background navigation yet. Pack and map files are verified against the
+  isochrones (valhalla-mobile exposes none), routes across packs only where the packs carry
+  crossings (see item U), no voice / background navigation yet. Pack and map files are verified against the
   manifest's size and sha-256. Maps downloaded as a country (map with the pack or its own points) no longer ask Overpass.
-- Bbox queries (map dots, locality context) don't handle regions across the antimeridian.
+- Across the antimeridian, route bounds (fitBounds) and map extraction clipping are not handled; search, map
+  points, locality context, routing coverage and Overpass cells are (2026-10-28).
 - Map screen first opens on the world when a region is registered after the first render
   (seeded/loose maps): pre-existing, cosmetic.
 - After a backup restore the database comes back without the content (items are dropped at
-  startup, see ARCHITECTURE), but the `downloads` rows are not reconciled: paused or queued rows
-  return and the manager retries them (not fixed).
-- Downloads interrupted by app termination: files ≥ 16 MB (segmented) continue from their
+  startup, see ARCHITECTURE). A segmented download whose partial bytes didn't come back is marked
+  failed ("didn't come back with your backup", Retry); a queued row that never started and one-chunk
+  files (< 4 MiB) can't be told apart from a relaunch and still download again.
+- Downloads interrupted by app termination: files ≥ 4 MiB (segmented) continue from their
   verified `.part` prefix and the ranges on disk on both platforms; only the ranges in flight are
-  fetched again (on iOS the orphaned tasks also fetch them once more). Small single-task files on
-  iOS still restart from zero (BUG-CORE-16: the background session isn't reattached).
+  fetched again (on iOS the orphaned tasks also fetch them once more). One-chunk files (< 4 MiB) and
+  sources without ranges on iOS still restart from zero (BUG-CORE-16: the background session isn't reattached).
 - The segmented engine is measured on the simulator and the emulator only (a Mac's link), not on
   phones: iOS background-session scheduling and real Wi-Fi speeds are unverified.
 - Compass heading in landscape: iOS reports an orientation of UNKNOWN until the first rotation after
   launch, so the heading is withheld in landscape until then; Android tablets whose natural
   orientation is landscape stay 90° off.
-- The generated `Info.plist` is shared by Debug and Release (LEGAL-9, item A).
-- Map extraction runs on the JS thread in the foreground (screen kept awake) and does
-  not resume after the app is killed.
+- Map extraction runs on the JS thread in the foreground (screen kept awake); after a kill or a network
+  failure it continues on the next launch (cancel or a 4xx starts over).
 - Qwen3.5 0.8B rarely emits `[n]` (all retrieved sources are shown then) and is
   unreliable for health answers — the app recommends 2B+ where RAM allows. In small talk
   it sometimes rambles or echoes its instructions, and it searches some chit-chat
@@ -255,7 +270,6 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
   photosynthesis?"); the "Buscar en mi biblioteca" button covers it. Apple FM tends to
   open every answer with "¡Hola!" once the chat started with a greeting.
 - Apple Intelligence fails on the iOS 26.5 simulator (works on iOS 27).
-- Kit reminder texts are written in the language active when the expiry was saved.
 - Map labels in Bengali, Tamil and other Indic scripts, Myanmar and Khmer are not drawn
   (MapLibre Native can't shape them); country bboxes skip far-flung territories.
 - ZIM media Range path untested with a real video archive.
@@ -267,6 +281,49 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-28 — Pending work batch: region E2E, full/iPad runs, three bugs, small extras
+
+The owner asked for the pending and postponed work that could be done now (items 1, 2, 4, 10 of a review of this
+file, plus six small extras), done by Sonnet agents in their own worktrees, simulators and ports, reviewed and
+integrated by the lead on branch `integrate-2026-10-28`:
+
+- **E2E for countries in regions** (item U): `scripts/e2e.sh` serves the USA (`us-alaska`, `us-hawaii`: a map and a pack
+  each) and Canada (`ca-ontario`, `ca-quebec`: maps with outline cells + one national pack `ca`) from Andorra's files.
+  `map-20-regions-packs` and `map-21-regions-national-pack` (full) passed 4 and 3 times in a row. Maestro can't read
+  `checked` on region rows (asserted through sizes); the picker's keyboard covers the last row after an alert.
+- **Full and iPad suites on f4b32d4**: full 18/20 on the first run; `map-15` was stale (R2 leads Salud with the
+  hospitals, the pharmacy fell off screen: now asserts the pack's clinic), `map-19` flaked once on a tap; iPad tour 1/1.
+- **Backup restore** (known issue): `restore-core.ts` marks a segmented download whose `.part`/`.chunks` are gone as
+  failed (`PARTIAL_LOST`, "didn't come back with your backup", Retry). Lead's fix: a failure that restarts a download
+  from zero now drops `meta.segments`, or a kill before the restart would read as a restore.
+- **BUG-CORE-16**: segmented from 4 MiB (was 16 MB), so 4–16 MB files resume after an iOS kill. Checked on the
+  simulator with a 9 MB file and `simctl terminate`: after relaunch the finished first range wasn't fetched again.
+- **Map extraction resume** (item 4): the job's inputs, the pinned planet build, a plan fingerprint and the finished
+  tile requests are kept in kv (every 1.5 s, `extraction-core.ts`); `resumeMapDownloads()` re-plans at startup and
+  skips them. `EXPO_PUBLIC_PLANET_BUILD_URL` + `scripts/dev-planet-server.ts` (a synthetic Swiss planet, slowed) stand in
+  for Protomaps, which the corporate VPN intercepts; `map-22-extract-resume` (by hand, its own build) relaunched at
+  ~28 % and ~75 %, never 0. Lead's fix: a network failure (offline at launch) keeps the saved progress instead of
+  deleting it. Off the JS thread: assessed only (~3–5 days, native).
+- **Small extras**: antimeridian-aware bbox queries (`geo.ts` `lonRanges`/`lonSql`/`nearOrderSql`, used by map dots,
+  nearest search, locality, routing coverage, country parts, Overpass cells); LEGAL-9 store prebuild
+  (`NOMAD_STORE_BUILD=1`, generated files diffed both ways); OSS-9 (12 screenshots); assistant Copy and Regenerate
+  under an answer (`expo-clipboard`, `toPlainText`, `regenerateLast`; `ai-09`, nightly, passed on the iOS 27 sim).
+  Already done in the code, only the docs were stale: the duplicate `forEachLineBlock` and the kit reminders'
+  language (`planReminders` rewrites them on `languageChanged` and at launch).
+- **Docs** (item 10): stale status, backlog and known issues refreshed (separate entry below). CI run 40681896621
+  (`ad pt`) succeeded: both packs carry crossings in the routing manifest.
+
+Not done: Android for any of this; the integrated branch's E2E result is below when run.
+
+### 2026-10-28 — Docs: stale statements refreshed
+
+Status, backlog and known issues checked against the code, the tags and `gh`: the Current state date and E2E
+counts (58 flows: 21 smoke, 20 full, 12 nightly, 1 iPad, 4 Android, counted from the flows' tags), the
+Canada/Russia and audit rows, backlog items 1 and A (store builds are tagged `v1.1.0-12`…`-23`), the
+cross-pack routing note (routes across packs exist since bdc1fae, but need packs with crossings), the CJK known
+issue (`INDEX_VERSION` is 2; only side-file imports made earlier are not re-indexed) and the README status
+(1.1.0 build 23 is in App Review). CI run 40681896621 succeeded afterwards (`ad` and `pt` carry crossings). Nothing else run.
 
 ### 2026-10-28 — Maps: routes across routing packs, stitched at the border
 
