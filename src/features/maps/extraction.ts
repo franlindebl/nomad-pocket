@@ -339,9 +339,15 @@ export function startMapDownload(input: StartMapDownload) {
       } catch {
         // already closed
       }
-      // Cancelled or failed: nothing to resume (a kill never gets here and keeps both).
-      deleteFile(part.uri);
-      forgetJob(input.key);
+      // A network failure (offline at launch, connection lost, a server error) keeps the saved
+      // progress: the next launch continues it. Cancelled, no room, or the build gone (4xx): nothing
+      // to resume. (A kill never gets here and keeps both.)
+      const transient =
+        !ctrl.signal.aborted && !(e instanceof NotEnoughStorageError) && !(e instanceof HttpError && e.status >= 400 && e.status < 500);
+      if (!transient || !loadSaved().some((j) => j.key === input.key && j.done)) {
+        deleteFile(part.uri);
+        forgetJob(input.key);
+      }
       if (ctrl.signal.aborted) useDownloads.getState().remove(jobId);
       else job.fail(e instanceof NotEnoughStorageError ? 'NOT_ENOUGH_STORAGE' : String((e as Error)?.message ?? e));
     } finally {

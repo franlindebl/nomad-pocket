@@ -371,7 +371,7 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
   `processing` one with no file anywhere, is marked `failed` with error `PARTIAL_LOST`
   (`restore-core.ts`, row text `downloads.error.restored`), so nothing re-downloads gigabytes
   behind the person's back; their Retry restarts it from zero. Rows that never started and single
-  transfers (< 16 MB) are left alone.
+  transfers (< 4 MiB) are left alone.
 - Completion: `.part` → `content/{zim,maps,models,routing}/<filename>` → the kind's handler registered with
   `registerCompletionHandler(kind, async (file, record) => …)`, which must `upsertItem`; a file
   the handler rejects (throws) is deleted. Then `onDownloadFinished` listeners (toast) fire.
