@@ -443,7 +443,8 @@ Home show progress while a piece downloads. Nothing else is asked.
   CORS), with HTTP Range (206) for media and redirects resolved. Ref: `goBack`, `goForward`,
   `reload`, `loadPath`, `findInPage`, `clearFind`, `setTextZoom`, `setDarkMode`. Dark mode =
   CSS invert with media re-inverted; the page always sees `prefers-color-scheme: light`; pages
-  dark by design get `data-nomad-native-dark` and are left alone.
+  dark by design get `data-nomad-native-dark` and are left alone. An always-on style hides the
+  transparent placeholders of image-less ("nopic") archives and the frames holding only them.
 - **Archive pages are offline by design** (the purpose is "no network", not script blocking):
   iOS compiles a `WKContentRuleList` (blocks `^https?:`, `^wss?:`, `^ftp:`; once per launch,
   loads wait for it) and every ZIM response on both platforms carries a CSP (`default-src
@@ -985,7 +986,8 @@ without them are fetched on their own when the sheet opens online) and `route-st
   "¿y cómo se trata?" inherits the previous question's keywords, `followUpTopic`, only when the
   question has at most one word of its own; the question's own queries are always searched; questions
   over 600 chars are searched once, after the sources, not twice) → libzim
-  full-text search across archives (reciprocal-rank fusion) → up to 6 distinct articles
+  full-text search across archives, plus the title index for articles named after the question
+  (`buildTitleQueries`: "potabilizo" → "potabilización", ranked first; reciprocal-rank fusion) → up to 6 distinct articles
   (redirects counted once) → chunks of 650 chars → BM25 (with title and search-rank
   boosts) → drop chunks sharing too few question terms (`relevantChunks`) → pack the
   best chunks into the model's budget as numbered sources → `[n]` citations, in the user

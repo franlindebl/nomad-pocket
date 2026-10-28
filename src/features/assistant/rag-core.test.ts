@@ -8,6 +8,7 @@ import {
   buildRagUserMessage,
   buildRouterPrompt,
   buildSearchQueries,
+  buildTitleQueries,
   buildToolResult,
   chunkText,
   citedNumbers,
@@ -17,6 +18,7 @@ import {
   formatSources,
   guessIntent,
   isHealthQuestion,
+  nominalize,
   normalize,
   packContext,
   parseToolQuery,
@@ -58,6 +60,28 @@ describe('tokenizer', () => {
     assert.equal(stem('purificaciones'), stem('purificación'.normalize('NFD').replace(/\p{M}/gu, '')));
     assert.equal(stem('sol'), 'sol');
     assert.equal(stem('2024'), '2024');
+  });
+
+  test('stem joins a process with its verb', () => {
+    assert.equal(stem('potabilizo'), stem('potabilizacion'));
+    assert.equal(stem('potabilizar'), stem('potabilizacion'));
+    assert.equal(stem('potabilizarla'), stem('potabilizaciones'));
+    assert.equal(stem('purifico'), stem('purificacion'));
+  });
+
+  test('nominalize turns -izar / -ificar verbs into their noun', () => {
+    assert.equal(nominalize('potabilizo'), 'potabilización');
+    assert.equal(nominalize('potabilizar'), 'potabilización');
+    assert.equal(nominalize('purifico'), 'purificación');
+    assert.equal(nominalize('esterilizarlos'), 'esterilización');
+    assert.equal(nominalize('agua'), 'agua');
+    assert.equal(nominalize('hervirla'), 'hervirla');
+  });
+
+  test('buildTitleQueries: the first queries with verbs as nouns', () => {
+    const queries = buildSearchQueries('¿Cómo potabilizo agua sin hervirla?');
+    assert.deepEqual(buildTitleQueries(queries), ['potabilización agua hervirla', 'potabilización agua']);
+    assert.deepEqual(buildTitleQueries(['hipotermia']), ['hipotermia']);
   });
 
   test('detectLanguage', () => {

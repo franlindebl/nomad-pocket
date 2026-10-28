@@ -1,15 +1,16 @@
 // Retrieval-augmented generation over the installed ZIM library.
 // question (or the model's own query) → keyword queries → libzim full-text search
-// across archives → fetch top articles → chunk → BM25 over chunks → drop chunks
+// across archives, plus articles titled after the question → fetch top articles → chunk → BM25 over chunks → drop chunks
 // that barely share terms with the question → pack the best within the model's
 // context budget → numbered sources, cited as [n].
 import { listItems } from '@/features/content/items';
-import { getArticleText, search, type ZimSearchHit } from '@/features/library/zim';
+import { getArticleText, search, suggest, type ZimSearchHit } from '@/features/library/zim';
 
 import {
   buildConversationQueries,
   buildRagUserMessage,
   buildSearchQueries,
+  buildTitleQueries,
   chunkText,
   followUpTopic,
   packContext,
@@ -37,6 +38,9 @@ const MAX_ARTICLES = 6;
 const ARTICLE_CHARS = 9000;
 const CHUNK_SIZE = 650;
 const CHUNK_OVERLAP = 120;
+/** Articles titled after the question, per title query; they go before the full-text hits. */
+const TITLE_HITS = 3;
+const TITLE_BONUS = 0.03;
 
 const keyOf = (itemId: string, path: string) => `${itemId}\u0000${path}`;
 
@@ -44,14 +48,13 @@ export function libraryItemIds(): string[] {
   return listItems('zim').map((i) => i.id);
 }
 
-/** Reciprocal-rank fusion of the hit lists of several queries. */
-function fuseHits(lists: ZimSearchHit[][]): ZimSearchHit[] {
+/** Reciprocal-rank fusion of the hit lists of several queries, each with a bonus for its hits. */
+function fuseHits(lists: { hits: ZimSearchHit[]; bonus: number }[]): ZimSearchHit[] {
   const score = new Map<string, { hit: ZimSearchHit; s: number }>();
-  lists.forEach((hits, qi) => {
+  lists.forEach(({ hits, bonus }) => {
     hits.forEach((hit, rank) => {
       const k = keyOf(hit.itemId, hit.path);
-      // Earlier (more specific) queries weigh a bit more.
-      const add = 1 / (60 + rank) + (qi === 0 ? 0.002 : 0);
+      const add = 1 / (60 + rank) + bonus;
       const prev = score.get(k);
       if (prev) prev.s += add;
       else score.set(k, { hit, s: add });
@@ -78,8 +81,15 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
   // What chunks are ranked and filtered against: the model's query already carries the
   // topic; a follow-up question gets the previous question's keywords.
   const rankText = query || [...followUpTopic(question, history), question].join(' ');
-  const lists = await Promise.all(queries.map((q) => search(itemIds, q, HITS_PER_QUERY).catch(() => [] as ZimSearchHit[])));
-  const hits = fuseHits(lists).slice(0, MAX_HITS);
+  const [lists, titled] = await Promise.all([
+    Promise.all(queries.map((q) => search(itemIds, q, HITS_PER_QUERY).catch(() => [] as ZimSearchHit[]))),
+    Promise.all(buildTitleQueries(queries).map((q) => suggest(itemIds, q, TITLE_HITS).catch(() => [] as ZimSearchHit[]))),
+  ]);
+  const hits = fuseHits([
+    ...titled.map((hits) => ({ hits, bonus: TITLE_BONUS })),
+    // Earlier (more specific) queries weigh a bit more.
+    ...lists.map((hits, qi) => ({ hits, bonus: qi === 0 ? 0.002 : 0 })),
+  ]).slice(0, MAX_HITS);
 
   const refs = new Map<string, SourceRef>();
   const chunks: Chunk[] = [];

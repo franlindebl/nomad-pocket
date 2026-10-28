@@ -293,7 +293,7 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
 
       if (mime == "text/html" && request.isForMainFrame) {
         val html = h.data(info.path) ?: return notFound()
-        val body = if (darkMode) injectDarkStyle(String(html, Charsets.UTF_8)).toByteArray(Charsets.UTF_8) else html
+        val body = injectStyles(String(html, Charsets.UTF_8), darkMode).toByteArray(Charsets.UTF_8)
         headers["Content-Length"] = body.size.toString()
         return WebResourceResponse(mime, encoding, 200, "OK", headers, ByteArrayInputStream(body))
       }
@@ -387,6 +387,14 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
       "html:not([data-nomad-native-dark]){filter:invert(1) hue-rotate(180deg)!important;background:#fff!important}" +
         "html:not([data-nomad-native-dark]) :is(img:not(.mwe-math-fallback-image-inline):not(.mwe-math-fallback-image-display),picture,video,canvas,iframe,embed,object,svg image,[style*=\"background-image\"]){filter:invert(1) hue-rotate(180deg)!important}"
 
+    // Always on. Image-less archives ("nopic" Wikipedia) keep each image as a transparent SVG of its
+    // size inside its bordered frame: empty boxes all over the article. Hide those placeholders and
+    // the frames (figures, template table cells) that hold nothing else: a caption says little without its picture.
+    private const val BASE_CSS =
+      "img[src^=\"data:image/svg+xml\"][src*=\"alt-text-clip\"]{display:none!important}" +
+        ":is(figure,.thumb,.tsingle,.gallerybox):has(img[src*=\"alt-text-clip\"]):not(:has(img:not([src*=\"alt-text-clip\"]))){display:none!important}" +
+        "td:has(> figure:only-child img[src*=\"alt-text-clip\"]):not(:has(img:not([src*=\"alt-text-clip\"]))){display:none!important}"
+
     /** Marks pages whose authored background (our style off) is already dark. */
     private const val NATIVE_DARK_JS = """(function(){
       var el = document.getElementById('nomad-dark'); if (!el || !document.body) return;
@@ -411,8 +419,8 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
 
     private val HEAD_TAG = Regex("<head[^>]*>", RegexOption.IGNORE_CASE)
 
-    fun injectDarkStyle(html: String): String {
-      val style = "<style id=\"nomad-dark\">$DARK_CSS</style>"
+    fun injectStyles(html: String, dark: Boolean): String {
+      val style = "<style id=\"nomad-base\">$BASE_CSS</style>" + if (dark) "<style id=\"nomad-dark\">$DARK_CSS</style>" else ""
       val m = HEAD_TAG.find(html) ?: return style + html
       return html.substring(0, m.range.last + 1) + style + html.substring(m.range.last + 1)
     }

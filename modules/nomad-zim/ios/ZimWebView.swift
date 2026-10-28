@@ -394,12 +394,23 @@ enum ZimWebScripts {
   html:not([data-nomad-native-dark]) :is(img:not(.mwe-math-fallback-image-inline):not(.mwe-math-fallback-image-display),picture,video,canvas,iframe,embed,object,svg image,[style*="background-image"]){filter:invert(1) hue-rotate(180deg)!important}
   """
 
+  /// Always on. Image-less archives ("nopic" Wikipedia) keep each image as a transparent SVG of its
+  /// size inside its bordered frame: empty boxes all over the article. Hide those placeholders and
+  /// the frames (figures, template table cells) that hold nothing else: a caption says little without its picture.
+  static let baseCSS = """
+  img[src^="data:image/svg+xml"][src*="alt-text-clip"]{display:none!important}
+  :is(figure,.thumb,.tsingle,.gallerybox):has(img[src*="alt-text-clip"]):not(:has(img:not([src*="alt-text-clip"]))){display:none!important}
+  td:has(> figure:only-child img[src*="alt-text-clip"]):not(:has(img:not([src*="alt-text-clip"]))){display:none!important}
+  """
+
   static func bootstrap(dark: Bool, zoom: Int) -> String {
     let css = darkCSS.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "`", with: "\\`")
+    let base = baseCSS.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "`", with: "\\`")
     return """
     (function(){
       var state = { dark: \(dark), zoom: \(zoom) };
       var css = `\(css)`;
+      var baseCss = `\(base)`;
       // Background luminance of the page as authored (our style off), or null when unknown.
       function pageLuminance(el){
         if (!document.body) return null;
@@ -420,12 +431,17 @@ enum ZimWebScripts {
           if (lum !== null) document.documentElement.toggleAttribute('data-nomad-native-dark', lum < 0.2);
         } else if (el) { el.remove(); }
       }
+      function applyBase(){
+        if (document.getElementById('nomad-base')) return;
+        var el = document.createElement('style'); el.id = 'nomad-base'; el.textContent = baseCss;
+        (document.head || document.documentElement).appendChild(el);
+      }
       function applyZoom(){
         var root = document.documentElement; if (!root) return;
         root.style.webkitTextSizeAdjust = state.zoom + '%';
         root.style.textSizeAdjust = state.zoom + '%';
       }
-      window.__nomadApply = function(){ applyDark(); applyZoom(); };
+      window.__nomadApply = function(){ applyBase(); applyDark(); applyZoom(); };
       window.__nomadSetDark = function(on){ state.dark = !!on; applyDark(); };
       window.__nomadSetZoom = function(z){ state.zoom = z; applyZoom(); };
       window.__nomadApply();
