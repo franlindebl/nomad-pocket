@@ -238,6 +238,16 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-27 — Maps: a search result's neighbourhood is the nearest one again
+
+The owner saw Calle de Alcalá as "· Nudo Sur" and Hospital Gregorio Marañón as "· Entrevías /
+Palomeras Bajas". `localityNear` took 400 localities of a 15 km box with no ORDER BY and picked the
+nearest among them, but Madrid's box holds ~1,000: SQLite walks the `lat` index, so the 400 were the
+box's southern band. Now the nearest is chosen in SQL (equirectangular distance, `ORDER BY … LIMIT 1`),
+first in a 2 km box (~5 ms on a Mac against the whole of Spain's index) and only then in the 15 km
+one; a hit counts only within the box's radius. Checked on a copy of a simulator's `search.db` for
+Spain: Alcalá 219 → Fuente del Berro, the hospital → Ibiza (Retiro). Not yet looked at in the app.
+
 ### 2026-10-27 — Release: 1.1.0 build 21 to TestFlight (photo library purpose string)
 
 App Store Connect answered build 20 with ITMS-90683: the binary references photo library APIs
