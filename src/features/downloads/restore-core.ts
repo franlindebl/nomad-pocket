@@ -25,7 +25,7 @@ export type RowFacts = {
  *
  * Only evidence that cannot be a plain relaunch counts: a segmented download whose `.part` is gone,
  * or a finished file ('processing') that is neither at its destination nor still a `.part`. Single
- * transfers (under 16 MB) carry no such evidence and restart cheaply, as they always did.
+ * transfers (under 4 MiB) carry no such evidence and restart cheaply, as they always did.
  */
 export function startupRowAction(f: RowFacts): 'keep' | 'lost' {
   if (f.status === 'failed') return 'keep';

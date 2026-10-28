@@ -1113,6 +1113,8 @@ function failed(id: string, e: unknown, resumed: boolean) {
   if (plan.kind === 'restart') {
     persist(id, { pause_state: null });
     deletePartial(id);
+    // No bytes left to continue: a kill before the restart must not read as a restored backup (restore-core.ts).
+    updateMeta(id, { segments: undefined });
     setStatus(id, 'queued');
   } else if (plan.kind === 'retry') {
     // Queued, so it also waits for the network to come back (pump checks it).
