@@ -194,9 +194,9 @@ compilar desde un clon limpio, las comprobaciones). Problemas de seguridad:
 ## Estado
 
 Este README describe la versión **1.1.0** (descargas por país y rediseño de kit de
-supervivencia), en beta en TestFlight solo para los probadores del autor. La versión en
-revisión en la App Store es la anterior, 1.0.1, sin ello; hasta que salga la 1.1.0, compila
-desde el código para probar lo descrito aquí. Google Play llegará pronto. Avance, pendientes
+supervivencia), en revisión en la App Store (build 23, desde el 28-10-2026; sustituyó a la 1.0.1
+en el mismo envío) y en TestFlight para los probadores del autor; hasta que salga, compila desde
+el código para probar lo descrito aquí. Google Play llegará pronto. Avance, pendientes
 y limitaciones conocidas: [docs/PROGRESS.md](docs/PROGRESS.md).
 
 ## Para desarrolladores

@@ -189,9 +189,9 @@ Security problems: [SECURITY.md](SECURITY.md). Good places to start:
 ## Status
 
 This README describes version **1.1.0** (the country downloads and the survival-kit redesign),
-which is in beta on TestFlight for the maintainer's testers only. The version in App Store
-review is the earlier 1.0.1, without it; until 1.1.0 ships, build from source to try what is
-described here. Google Play is coming soon. Progress, backlog and known limits:
+which is in App Store review (build 23, since 2026-10-28; it replaced 1.0.1 in the same
+submission) and on TestFlight for the maintainer's testers; until it ships, build from source to
+try what is described here. Google Play is coming soon. Progress, backlog and known limits:
 [docs/PROGRESS.md](docs/PROGRESS.md).
 
 ## For developers
