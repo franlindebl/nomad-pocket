@@ -1097,7 +1097,10 @@ without them are fetched on their own when the sheet opens online) and `route-st
   (also during search/load), only cited sources are kept on the message (`sourcesToShow`: if none is
   cited, none for a "not found" answer, else the top 3; PDF titles cleaned by `readableDocTitle`), answers to a deleted conversation are dropped. `searched` (in memory only) marks
   answers given without the library: the latest one shows "Buscar en mi biblioteca", which keeps
-  the old answer until the new one is stored (restored if the new one is empty or fails). Native and
+  the old answer until the new one is stored (restored if the new one is empty or fails). Every finished
+  answer has Copy (`toPlainText` in `markdown.ts`: no Markdown, no `[n]`, via `expo-clipboard`, "Copiado"
+  toast); the last one also Regenerate (`regenerateLast`: same question, active model, a search only if that
+  answer searched; same keep-until-stored rule). Native and
   llama.cpp errors map to translated keys (`errors.ts`: too long, declined, language, not ready,
   busy, quota, background, disk full, system update, empty); an empty answer shows `errors.empty`.
   New chat or opening another conversation leaves the answer in progress running: it is stored in
