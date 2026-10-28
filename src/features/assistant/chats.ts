@@ -30,7 +30,8 @@ import {
   type Turn,
 } from './rag-core';
 
-export type MessageSource = { n: number; itemId: string; path: string; title: string };
+/** `page`: the page of a PDF document the answer drew on. */
+export type MessageSource = { n: number; itemId: string; path: string; title: string; page?: number };
 
 export type ChatMessage = {
   id: string;
@@ -313,8 +314,8 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
       const turns = trimHistory(history, historyBudget);
       // Sources get what's left: none when a very long question fills the window.
       const contextBudget = Math.max(0, tokensToChars(free) - turns.reduce((s, t) => s + t.content.length + 16, 0));
-      const keep = (r: { sources: { n: number; itemId: string; path: string; title: string }[] }) => {
-        sources = r.sources.map(({ n, itemId, path, title }) => ({ n, itemId, path, title }));
+      const keep = (r: { sources: { n: number; itemId: string; path: string; title: string; page?: number }[] }) => {
+        sources = r.sources.map(({ n, itemId, path, title, page }) => (page ? { n, itemId, path, title, page } : { n, itemId, path, title }));
         searched = true;
         patchStreaming({ sources });
       };

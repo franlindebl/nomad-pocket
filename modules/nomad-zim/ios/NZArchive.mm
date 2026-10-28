@@ -176,6 +176,60 @@ static inline std::string NZStd(NSString *s) {
   }
 }
 
+- (NSArray<NZEntryInfo *> *)entriesWithMimePrefix:(NSString *)mimePrefix maxScan:(NSUInteger)maxScan complete:(BOOL *)complete {
+  NSMutableArray<NZEntryInfo *> *out = [NSMutableArray array];
+  const std::string prefix = NZStd(mimePrefix);
+  NSUInteger seen = 0;
+  BOOL all = YES;
+  try {
+    // Path order reads the directory as it is stored. Cluster order (iterEfficient) first sorts
+    // every entry: 13 s on a Mac for Wikipedia's millions, only to stop at maxScan.
+    for (const zim::Entry &entry : _archive->iterByPath()) {
+      if (seen++ >= maxScan) {
+        all = NO;
+        break;
+      }
+      if (entry.isRedirect()) continue;
+      zim::Item item = entry.getItem(false);
+      if (item.getMimetype().rfind(prefix, 0) != 0) continue;
+      [out addObject:[[NZEntryInfo alloc] initWithPath:NZString(item.getPath())
+                                                 title:NZString(item.getTitle())
+                                                  mime:NZString(item.getMimetype())
+                                                  size:item.getSize()
+                                              redirect:NO]];
+    }
+  } catch (...) {
+    all = NO;
+  }
+  if (complete) *complete = all;
+  return out;
+}
+
+- (BOOL)writeEntryAtPath:(NSString *)path toFile:(NSString *)file {
+  try {
+    zim::Item item = _archive->getEntryByPath(NZStd(path)).getItem(true);
+    if (![[NSFileManager defaultManager] createFileAtPath:file contents:nil attributes:nil]) return NO;
+    NSFileHandle *handle = [NSFileHandle fileHandleForWritingAtPath:file];
+    if (!handle) return NO;
+    const uint64_t size = item.getSize();
+    const uint64_t piece = 4 * 1024 * 1024;
+    BOOL ok = YES;
+    for (uint64_t offset = 0; offset < size && ok; offset += piece) {
+      @autoreleasepool {
+        zim::Blob blob = item.getData((zim::offset_type)offset, (zim::size_type)MIN(piece, size - offset));
+        NSError *error = nil;
+        ok = [handle writeData:[NSData dataWithBytesNoCopy:(void *)blob.data() length:blob.size() freeWhenDone:NO] error:&error];
+      }
+    }
+    [handle closeFile];
+    if (!ok) [[NSFileManager defaultManager] removeItemAtPath:file error:nil];
+    return ok;
+  } catch (...) {
+    [[NSFileManager defaultManager] removeItemAtPath:file error:nil];
+    return NO;
+  }
+}
+
 - (nullable NSString *)randomPath {
   try {
     zim::Entry entry = _archive->getRandomEntry();

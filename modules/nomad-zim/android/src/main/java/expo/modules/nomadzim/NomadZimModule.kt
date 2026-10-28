@@ -13,6 +13,9 @@ class ArchiveNotOpenException(id: String) : CodedException("ZIM archive '$id' is
 
 class OpenFailedException(message: String) : CodedException(message)
 
+/** PDF text extraction: one document at a time, off the IO pool the reader's requests use. */
+private val pdfDispatcher = Dispatchers.IO.limitedParallelism(1)
+
 /** Largest entry getContent returns (articles are far smaller; HTML-wrapped books may reach a few MB). */
 private const val MAX_CONTENT_BYTES = 8L * 1024 * 1024
 
@@ -71,6 +74,27 @@ class NomadZimModule : Module() {
         if (!isText(info.mimeType) || info.size > MAX_CONTENT_BYTES) return@withContext null
         val bytes = h.data(info.path) ?: return@withContext null
         mapOf("path" to info.path, "title" to info.title, "mimeType" to info.mimeType, "content" to String(bytes, Charsets.UTF_8))
+      }
+    }
+
+    // Entries whose MIME type starts with mimePrefix (the PDFs of a document collection).
+    AsyncFunction("listEntries") Coroutine { id: String, mimePrefix: String, maxScan: Int ->
+      withContext(Dispatchers.IO) {
+        val (entries, complete) = handle(id).entries(mimePrefix, maxScan)
+        mapOf(
+          "entries" to entries.map { mapOf("path" to it.path, "title" to it.title, "mimeType" to it.mimeType, "size" to it.size.toDouble()) },
+          "complete" to complete,
+        )
+      }
+    }
+
+    // Text of a PDF entry, page by page (PdfText). Indexing runs in the background: one at a time.
+    AsyncFunction("getPdfText") Coroutine { id: String, path: String, maxPages: Int ->
+      val h = handle(id)
+      withContext(pdfDispatcher) {
+        val info = h.entryInfo(path) ?: return@withContext null
+        if (!info.mimeType.lowercase().startsWith("application/pdf")) return@withContext null
+        PdfText.extract(context, h, info.path, maxOf(0, maxPages))
       }
     }
 

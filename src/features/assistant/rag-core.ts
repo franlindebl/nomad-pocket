@@ -501,7 +501,8 @@ export function rankChunks(question: string, chunks: Chunk[], limit = 12): Score
 // ---------------------------------------------------------------------------
 // Context packing
 
-export type SourceRef = { itemId: string; path: string; title: string };
+/** `page`: the page of a PDF document the passages come from (1-based). */
+export type SourceRef = { itemId: string; path: string; title: string; page?: number };
 
 export type PackedSource = SourceRef & { n: number; passages: string[] };
 
@@ -613,7 +614,7 @@ const RAG_RULES: Record<Lang, string> = {
 // harmless extra searches on small talk (0.8B) or famous facts answered from memory.
 const TOOL_RULES: Record<Lang, string> = {
   es: [
-    'El usuario tiene una biblioteca sin conexión (Wikipedia, medicina, supervivencia, bricolaje y más) donde puedes buscar con la herramienta search_library.',
+    'El usuario tiene una biblioteca sin conexión (Wikipedia, medicina, supervivencia, bricolaje y más, y su plan familiar: puntos de encuentro, contactos, salud de cada persona y notas de casa) donde puedes buscar con la herramienta search_library.',
     'Busca siempre que el usuario pida información nueva: hechos, personas, lugares, historia, ciencia, salud, técnicas o cómo hacer algo, también en preguntas de seguimiento como "¿y cómo se trata?" (busca el tema completo).',
     'Busca aunque creas saber la respuesta: la biblioteca es la fuente fiable.',
     'No busques para saludos, agradecimientos, chistes, charla o peticiones sobre tu respuesta anterior (resumir, aclarar, simplificar, traducir): responde directamente.',
@@ -621,7 +622,7 @@ const TOOL_RULES: Record<Lang, string> = {
     'Si los resultados no responden, dilo y añade lo que sepas indicando que no viene de la biblioteca.',
   ].join(' '),
   en: [
-    "The user has an offline library (Wikipedia, medicine, survival, DIY and more) that you can search with the search_library tool.",
+    "The user has an offline library (Wikipedia, medicine, survival, DIY and more, plus their family plan: meeting points, contacts, each person's health and home notes) that you can search with the search_library tool.",
     'Search whenever the user asks for new information: facts, people, places, history, science, health, techniques or how to do something, also in follow-up questions like "and how is it treated?" (search the full topic).',
     'Search even if you think you know the answer: the library is the trusted source.',
     "Don't search for greetings, thanks, jokes, small talk or requests about your previous answer (summarize, clarify, simplify, translate): reply directly.",
@@ -692,8 +693,8 @@ const NO_RESULTS: Record<Lang, string> = {
 // messages the heuristic missed): it decides search/chat in a short structured pass
 // (~0.7 s) instead, and writes a better query. English instructions work best.
 export const ROUTER_INSTRUCTIONS = [
-  "You route messages for an offline assistant. The assistant can search the user's offline library (Wikipedia, medicine, survival, DIY) before answering.",
-  'Set search to true only when the latest message asks for information the assistant should look up: facts, people, places, history, science, health, techniques or how to do something. Follow-up questions about a topic ("¿y cómo se trata?", "¿y en niños?") also need a search.',
+  "You route messages for an offline assistant. The assistant can search the user's offline library (Wikipedia, medicine, survival, DIY) and their family emergency plan (meeting points, contacts, each person's medication and allergies, home notes) before answering.",
+  'Set search to true only when the latest message asks for information the assistant should look up: facts, people, places, history, science, health, techniques, how to do something, or something about the family plan. Follow-up questions about a topic ("¿y cómo se trata?", "¿y en niños?") also need a search.',
   'Set search to false for everything else: greetings, how are you, thanks, okay/great, goodbye, jokes, small talk, questions about the assistant itself, and requests to rephrase, simplify, shorten, summarize, translate or continue the previous answer.',
   // With Spanish examples only, Apple's model wrote "purificación de agua" for an English question,
   // and an English library had nothing for it.
@@ -709,6 +710,9 @@ export const ROUTER_INSTRUCTIONS = [
   '"How do I tie a bowline?" → true, "bowline knot"',
   '"¿cómo hago un nudo as de guía?" → true, "nudo as de guía"',
   '"and what are the symptoms?" (after talking about scurvy) → true, "scurvy symptoms"',
+  // Without these, "Where do we meet if we can't reach each other?" was small talk (a joke about a park bench).
+  '"Where do we meet if we get separated?" → true, "meeting point"',
+  '"¿a qué es alérgica Marta?" → true, "alergias Marta"',
   '"¿y cuáles son los síntomas?" (after talking about scurvy) → true, "síntomas escorbuto"',
 ].join('\n');
 
@@ -765,7 +769,7 @@ export function systemPrompt(lang: Lang, mode: PromptMode, opts: { health?: bool
 
 /** Renders packed sources as the numbered context block. */
 export function formatSources(sources: PackedSource[]): string {
-  return sources.map((s) => `[${s.n}] ${s.title}\n${s.passages.join('\n…\n')}`).join('\n\n');
+  return sources.map((s) => `[${s.n}] ${s.title}${s.page ? ` (p. ${s.page})` : ''}\n${s.passages.join('\n…\n')}`).join('\n\n');
 }
 
 // A question longer than this (pasted text, a long description) is sent once, after

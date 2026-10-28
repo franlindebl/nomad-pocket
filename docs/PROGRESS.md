@@ -32,7 +32,7 @@ can pick up without re-deriving anything.
 | Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
 | Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 237 packs live (every inhabited country; the USA in six regions) since 2026-10-27; E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
-| Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search; the most capable installed model is the default; on-device dictation) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
+| Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search; the most capable installed model is the default; on-device dictation; reads the PDFs inside archives (document index) and the family plan) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
 | Preparedness (family plan, emergency kit with expiry reminders, printable PDF, offline guides) | done — iOS sim + Android emulator (E2E) |
 | E2E suite (Maestro) + pre-commit hook | done |
@@ -171,7 +171,10 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
    from the rendered DOM.
 7. Assistant: copy / regenerate an answer; better small-model citations; check the
    conversational flow on Android (llama.cpp tools) and on a
-   real iPhone (tool-call latency with Metal).
+   real iPhone (tool-call latency with Metal). Document index follow-ups (log 2026-10-28): OCR for scanned
+   PDFs, open a PDF at the cited page (native PDFKit view), English guides for Spanish questions, measure
+   the indexing time and memory on a real iPhone and Android phone, and search the passages from the
+   library's global search too.
 8. Preparedness follow-ups: share ZIMs/maps phone to phone (share sheet export, import
    exists); "Ready.gov"-style quick cards bundled in the app (radio frequencies, first aid)
    that need no download; optional Face ID lock for the plan; link the plan's meeting points to maps' Llévame
@@ -250,6 +253,45 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-28 — Assistant: the PDFs inside archives (document index) and the family plan as sources
+
+Asked by the owner ("¿tendría sentido hacer RAG de la documentación disponible?"). The assistant already
+did RAG over libzim's full-text search, but that index covers HTML only: the guides that are collections of
+PDFs (zimgit medicine/water/food/post-disaster/knots, FAS military medicine, a few in scoutwiki and the CDC
+archive) were invisible. Measured on the six English guides: ~25k pages, ~37 M characters, ~2,500 scanned
+pages without a text layer (among them the *Special Forces Medical Handbook* and *Bandaging and Splinting*).
+- **Document index** (`library/documents.ts` + pure `documents-core.ts`; native `listEntries` and
+  `getPdfText` in `modules/nomad-zim`: PDFKit on iOS, PdfBox-Android 2.0.27.0 on Android, credited in
+  Settings › Credits with Liberation Sans): each archive's PDFs are read once in the background after a
+  download or import (and at startup for what is missing), cleaned and cut into ~650-char passages that
+  never span pages, into `doc_passages` (FTS5, porter) in `search.db` (`INDEX_MIGRATIONS` v2). One
+  transaction per document through the index file's write queue, now shared with maps (`indexWrite` in
+  `src/db`). iOS simulator (US kit of the store screenshots: 11 archives, 13 GB Wikipedia mini included):
+  179 PDFs, 67,858 passages, 65 MB, ~80 s; Android emulator: water 7 documents in 2 s, military medicine 24
+  in 17 s. Wikipedia-size archives are scanned for PDFs only up to 50,000 entries, in path order (cluster
+  order sorted all of Wikipedia's entries first: 13 s for nothing).
+- **Retrieval**: up to 8 passages per question join the article chunks in the same BM25 ranking, found as
+  all the words of the first keyword query fused with any word of any query (the libzim-style narrowing
+  never tried "bleeding wound" for "heavy bleeding wound"); duplicate passages (the same guide in two
+  archives) dropped. A source is one page: the chip reads "First Aid · p. 52" ("pág." in Spanish) and opens
+  the document with its name (at page 1: WKWebView's PDF view ignores `#page=`).
+- **Family plan** (`prepare/passages.ts`): meeting points, contacts, each person's medication/allergies/blood
+  type, numbers and home notes are passages too (source `prepare:plan`, the chip opens the plan). Apple's
+  router took "Where do we meet if we can't reach each other?" for small talk until its instructions (and
+  the tool rules for GGUF) named the plan, with two examples.
+- Before/after on the same simulator (offline harness mirroring `retrieve()`, libzim through python-libzim):
+  "How do I treat diarrhea in a child?" had *Health effects of wine* and a CDC page on international adoption
+  as sources, now *Where There Is No Doctor* pp. 199–205; "How do I splint a broken leg?" had *Splints* (a
+  horse ailment), now *Hospital Corpsman* p. 48–49 and FM 21-76; "How much bleach per gallon?" had a sourdough
+  recipe, now *Purifying Water During an Emergency* and *Water Treatment*. Apple Intelligence answers to 12
+  practical questions and 6 plan questions checked by hand (all grounded; the plan ones exact), plus Qwen 0.8B
+  on Android (malaria, cited from the pocket guide's pages).
+- Not done / follow-ups (backlog item 7): OCR of scanned pages (Vision on iOS; Android has no on-device OCR
+  without ML Kit); opening a PDF at the cited page (needs a native PDFKit view); Spanish questions don't
+  reach the English-only guides (Spanish kits don't install them, but a bilingual user's would); old military
+  manuals carry dated advice (a 1980s snake-bite tourniquet) that the assistant now repeats with a citation.
+- Checks: tsc, lint, 319 unit tests, i18n, licences. Not run: E2E suites.
 
 ### 2026-10-28 — Store: 1.1.0 (build 23) submitted to App Review
 

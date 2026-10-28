@@ -249,6 +249,26 @@
       "text": "texts/maplibre-native-android-13.6.1.md"
     },
     {
+      "id": "pdfbox-android",
+      "name": "PdfBox-Android",
+      "version": "2.0.27.0",
+      "platforms": ["android"],
+      "license": "Apache-2.0",
+      "copyright": ["Copyright 2014 The Apache Software Foundation", "Copyright (c) 2002-2007, www.pdfbox.org", "Copyright (c) 2010 Atos Worldline SAS"],
+      "url": "https://github.com/TomRoush/PdfBox-Android/tree/v2.0.27.0",
+      "note": "Reads the text of the PDFs inside archives for the library's document index. Maven com.tom-roush:pdfbox-android 2.0.27.0 (without Bouncy Castle). It bundles Liberation Sans (below), Adobe's font metrics and glyph lists, and Unicode's Scripts.txt; their notices are in the text below.",
+      "text": "texts/pdfbox-android-2.0.27.0.txt"
+    },
+    {
+      "id": "liberation-sans",
+      "name": "Liberation Sans (in PdfBox-Android)",
+      "platforms": ["android"],
+      "license": "OFL-1.1",
+      "copyright": ["Digitized data copyright (c) 2010 Google Corporation with Reserved Font Arimo, Tinos and Cousine", "Copyright (c) 2012 Red Hat, Inc. with Reserved Font Name Liberation"],
+      "url": "https://github.com/liberationfonts/liberation-fonts",
+      "text": "texts/liberation-sans-OFL.txt"
+    },
+    {
       "id": "llama.cpp",
       "name": "llama.cpp / ggml",
       "platforms": ["ios", "android"],

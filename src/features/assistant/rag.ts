@@ -1,10 +1,15 @@
 // Retrieval-augmented generation over the installed ZIM library.
 // question (or the model's own query) → keyword queries → libzim full-text search
-// across archives, plus articles named after the question (exact path) → fetch top
-// articles → chunk → BM25 over chunks → drop chunks that barely share terms with the
-// question → pack the best within the model's context budget → numbered sources, cited as [n].
+// across archives, plus articles named after the question (exact path), plus passages of the
+// archives' PDF documents (the library's document index) and the user's family plan → fetch
+// top articles → chunk →
+// BM25 over chunks and passages → drop chunks that barely share terms with the question →
+// pack the best within the model's context budget → numbered sources, cited as [n].
 import { listItems } from '@/features/content/items';
+import { searchDocuments, type DocHit } from '@/features/library/documents';
 import { getArticleHtml, getArticleText, search, type ZimSearchHit } from '@/features/library/zim';
+import { PLAN_SOURCE, planPassages } from '@/features/prepare/passages';
+import { usePrepare } from '@/features/prepare/store';
 
 import {
   buildConversationQueries,
@@ -41,6 +46,8 @@ const CHUNK_SIZE = 650;
 const CHUNK_OVERLAP = 120;
 /** Articles titled after the question go before the full-text hits (one hit high in every query scores ~0.05). */
 const TITLE_BONUS = 0.1;
+/** Passages of PDF documents (guides, manuals) ranked with the article chunks. */
+const DOC_PASSAGES = 8;
 
 const keyOf = (itemId: string, path: string) => `${itemId}\u0000${path}`;
 
@@ -109,9 +116,10 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
   // topic; a follow-up question gets the previous question's keywords.
   const rankText = query || [...followUpTopic(question, history), question].join(' ');
   const [first, second] = buildTitleCandidates(rankText);
-  const [lists, titled] = await Promise.all([
+  const [lists, titled, passages] = await Promise.all([
     Promise.all(queries.map((q) => search(itemIds, q, HITS_PER_QUERY).catch(() => [] as ZimSearchHit[]))),
     titleHits(itemIds, first).then(async (hits) => (hits.length ? hits : firstTitleHits(itemIds, second))),
+    searchDocuments(itemIds, queries, DOC_PASSAGES).catch(() => [] as DocHit[]),
   ]);
   const hits = fuseHits([
     { hits: titled, bonus: TITLE_BONUS },
@@ -137,6 +145,21 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
     const hitRank = refs.size;
     refs.set(key, { itemId: hit.itemId, path, title });
     chunkText(text, CHUNK_SIZE, CHUNK_OVERLAP).forEach((c, index) => chunks.push({ sourceKey: key, title, text: c, index, hitRank, named: named.has(key) }));
+  }
+
+  // A document passage is its own source per page, so its citation says where to look.
+  passages.forEach((p, rank) => {
+    const key = `${keyOf(p.itemId, p.path)}\u0000${p.page}`;
+    if (!refs.has(key)) refs.set(key, { itemId: p.itemId, path: p.path, title: p.title, page: p.page });
+    // Distinct indexes (packContext keeps one chunk per index): a page can give two passages.
+    chunks.push({ sourceKey: key, title: p.title, text: p.text, index: 1 + rank, hitRank: rank });
+  });
+
+  // The family plan (meeting points, contacts, health, home notes) competes like any source.
+  for (const p of planPassages(usePrepare.getState(), lang)) {
+    const key = `${PLAN_SOURCE}\u0000${p.section}`;
+    refs.set(key, { itemId: PLAN_SOURCE, path: p.section, title: p.title });
+    chunks.push({ sourceKey: key, title: p.title, text: p.text, index: 0 });
   }
 
   let ranked = rankChunks(rankText, chunks, 16);

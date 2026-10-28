@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Button, PressableScale, Text } from '@/components/ui';
+import { PLAN_SOURCE } from '@/features/prepare/passages';
 import { formatPercent } from '../format';
 import { radius, space, useTheme } from '@/theme';
 
@@ -12,7 +13,15 @@ import type { ChatMessage, MessageSource, Phase } from '../chats';
 import { Markdown } from './Markdown';
 
 export function openSource(s: MessageSource) {
-  router.push({ pathname: '/reader/[itemId]', params: { itemId: s.itemId, path: s.path } });
+  if (s.itemId === PLAN_SOURCE) {
+    router.push('/prepare/plan');
+    return;
+  }
+  // A PDF's own title is often a file name: the reader shows the document's name instead.
+  router.push({
+    pathname: '/reader/[itemId]',
+    params: s.page ? { itemId: s.itemId, path: s.path, title: s.title } : { itemId: s.itemId, path: s.path },
+  });
 }
 
 export const UserMessage = memo(function UserMessage({ message }: { message: ChatMessage }) {
@@ -46,25 +55,28 @@ export function SourceChips({ sources }: { sources: MessageSource[] }) {
         {t('sources')}
       </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips} style={styles.chipsScroll}>
-        {sources.map((s) => (
-          <PressableScale
-            key={s.n}
-            haptic="selection"
-            accessibilityRole="link"
-            accessibilityLabel={`${s.n}. ${s.title}`}
-            onPress={() => openSource(s)}
-            style={[styles.chip, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <View style={[styles.chipNum, { backgroundColor: colors.accentSoft }]}>
-              <Text variant="caption" weight="700" tint={colors.accent} tabular>
-                {s.n}
+        {sources.map((s) => {
+          const label = s.page ? t('sourcePage', { title: s.title, page: s.page }) : s.title;
+          return (
+            <PressableScale
+              key={s.n}
+              haptic="selection"
+              accessibilityRole="link"
+              accessibilityLabel={`${s.n}. ${label}`}
+              onPress={() => openSource(s)}
+              style={[styles.chip, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <View style={[styles.chipNum, { backgroundColor: colors.accentSoft }]}>
+                <Text variant="caption" weight="700" tint={colors.accent} tabular>
+                  {s.n}
+                </Text>
+              </View>
+              <BookOpen size={14} color={colors.textSecondary} />
+              <Text variant="footnote" weight="600" numberOfLines={1} style={styles.chipTitle}>
+                {label}
               </Text>
-            </View>
-            <BookOpen size={14} color={colors.textSecondary} />
-            <Text variant="footnote" weight="600" numberOfLines={1} style={styles.chipTitle}>
-              {s.title}
-            </Text>
-          </PressableScale>
-        ))}
+            </PressableScale>
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -80,7 +92,14 @@ type AssistantProps = {
   onSearchLibrary?: () => void;
 };
 
-export const AssistantMessage = memo(function AssistantMessage({ text, sources, streaming, phase, loadProgress, onSearchLibrary }: AssistantProps) {
+export const AssistantMessage = memo(function AssistantMessage({
+  text,
+  sources,
+  streaming,
+  phase,
+  loadProgress,
+  onSearchLibrary,
+}: AssistantProps) {
   const { t } = useTranslation('assistant');
   const { colors } = useTheme();
   const byN = useMemo(() => new Map(sources.map((s) => [s.n, s])), [sources]);

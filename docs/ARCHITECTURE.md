@@ -172,9 +172,11 @@ and `expo-sqlite/kv-store` elsewhere): use `db()`, `indexDb()` and `@/db/kv`.
 | `index_sources` | Per source: index version/zoom/date, plus the `places:<id>` / `addresses:<id>` markers of imported side files |
 | `map_pois` | Emergency points per map item: OSM id (`n…`/`w…`/`r…`, or `t<lat>,<lon>` when taken from the tiles), kind, category, name, operator, phone, opening hours, emergency (ER yes/no) |
 | `map_sources` | Per map item: emergency points fetch date/count (`pois_at`, `pois_count`) |
+| `doc_passages` (FTS5) | The library's document index: passages (~650 chars, one page each) of the PDFs inside installed archives; `text` and `title` indexed (`porter unicode61 remove_diacritics 2`), `item_id`, `path`, `page` (1-based) |
+| `doc_archives`, `doc_files` | Document index state: per archive the ZIM uuid and `DOC_INDEX_VERSION` it was built with, the PDFs found, `done_at`; per document its title, pages, pages with text, passages, status (done/locked/failed) |
 
 Migrations: `MIGRATIONS` (user schema, v4 drops the index tables from `nomad.db`) and
-`INDEX_MIGRATIONS` (v1) in `src/db/schema.ts`; `PRAGMA user_version` tracks what ran. Add one
+`INDEX_MIGRATIONS` (v1 maps and points, v2 the document index) in `src/db/schema.ts`; `PRAGMA user_version` tracks what ran. Add one
 by appending a SQL string; never edit an old one (the kind comments inside v1 are history,
 the real list of kinds is `ContentKind` in `lib/storage.ts`). WAL mode.
 
@@ -495,6 +497,26 @@ Home show progress while a piece downloads. Nothing else is asked.
   from search or history). iOS shows PDFs in the WKWebView.
 - Page titles: libzim gives an entry without a title its path (nautilus' `home`); native then
   reports the page's `<title>` instead.
+- **Document index** (`library/documents.ts`, pure `documents-core.ts`, tested against node:sqlite):
+  libzim's full-text index covers HTML only, so the PDFs inside archives (the zimgit-* collections,
+  FAS military medicine, a few in scoutwiki: ~25k pages, ~37 M characters for the six English guides)
+  were invisible to search and the assistant. Each archive is read once in the background: native
+  `listEntries(id, 'application/pdf', 50 000)` (path order; Wikipedia-size archives stop there),
+  then `getPdfText(id, path, 1500)` per document (the entry is copied to a temp file a few MB at a time;
+  iOS PDFKit on a utility queue, Android PdfBox-Android one at a time) → pages cleaned (hyphenation,
+  wrapped lines) → passages of ~650 chars that never span pages (tables of contents dropped; pages
+  without a text layer, i.e. scans, give nothing: OCR is not done) → one transaction per document
+  (`doc_passages` + its `doc_files` row) through the index file's write queue (`indexWrite`, shared with
+  maps), so a kill loses at most the document being read. Names: the collection's title (nautilus
+  `database.js`, "Title (2/3)" for multi-file documents), else a main-page link text that says more than
+  "Part 1", else the PDF's own title unless it is a file name or a scanner code, else the file name.
+  Triggers: download completion and Files import (`indexDocuments`), startup reconcile 15 s after
+  launch (`reconcileDocuments`: archives that are gone are dropped, new, half-read, re-downloaded (other
+  uuid) or older-version ones are read); removal drops the rows (`dropDocuments`, also stops a read in
+  progress). Search: `searchDocuments(itemIds, queries, limit)` runs each keyword query as an
+  all-words FTS5 match (bm25, text weighted 4× the title), fuses them (reciprocal rank) and drops
+  duplicate passages (the same guide in two archives). Measured on a Mac: extraction ~35 s for the six
+  guides with PDFKit, 68k passages, 62 MB in `search.db`, 1–5 ms per question.
 
 ### Courses (`src/features/courses/courses.ts`)
 - A course is an installed ZIM with `isCourse`. `ensureCourse(itemId)` enrols (idempotent)
@@ -987,7 +1009,13 @@ without them are fetched on their own when the sheet opens online) and `route-st
   "¿y cómo se trata?" inherits the previous question's keywords, `followUpTopic`, only when the
   question has at most one word of its own; the question's own queries are always searched; questions
   over 600 chars are searched once, after the sources, not twice) → libzim
-  full-text search across archives, plus articles named after the question found by exact path
+  full-text search across archives, plus passages of the archives' PDF documents (the library's
+  document index: up to 8, each page its own source with `page`, shown as "Título · pág. 12" on the chip
+  and opened in the reader with the document's name, at its first page: WKWebView's PDF view ignores
+  `#page=`), plus the family plan (`prepare/passages.ts`: one passage per filled section and one per
+  person, in the question's language, labels carrying the words people ask with, "allergic", "dónde
+  quedamos", but no topic words; source id `prepare:plan`, its chip opens the plan; the router and tool
+  prompts name the plan, or "where do we meet?" was small talk), plus articles named after the question found by exact path
   (`buildTitleCandidates`: survival topics, word runs, the head word; ranked first and weighted when ranking
   chunks; reciprocal-rank fusion) → up to 6 distinct articles
   (redirects counted once) → chunks of 650 chars → BM25 (with title and search-rank
@@ -1051,6 +1079,8 @@ familiar" action and the plan/kit rows of "Tu preparación" (`features/home/read
   when the household or language changes, through one queue; a notification tapped from a cold
   start waits for the navigator (`whenNavigatorReady`); Android channel `reminders`. The expo-notifications plugin has
   `enableRemoteNotifications: false`, so there is no push entitlement.
+- Assistant (`passages.ts`, pure + tested): the plan as passages for the assistant's retrieval
+  (Assistant, RAG); they only reach the prompt of the on-device model.
 - PDF (`document.ts` pure + `share.ts`): A4 HTML (blank rows to fill by hand when a
   section is empty, then the kit checklist) → `Print.printToFileAsync` → renamed
   to "Plan de emergencia.pdf" in the cache → `Sharing.shareAsync` (print, Files, AirDrop). The
