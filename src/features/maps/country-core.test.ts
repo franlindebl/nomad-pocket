@@ -248,3 +248,10 @@ test('partAt: a region without a pack of its own by its outline cells, the bbox 
   // In Quebec's bbox, outside both outlines (Hudson Bay): no region.
   assert.equal(partAt(parts, { lat: 60, lon: -78 }), null);
 });
+
+test('partAt finds the part of a country across the antimeridian by map bbox', () => {
+  const part = { id: 'fj', map: { bbox: [176.8, -20.7, -178.2, -12.4] }, packs: [] } as never;
+  assert.ok(partAt([part], { lat: -18.14, lon: 178.44 }));
+  assert.ok(partAt([part], { lat: -16.8, lon: -179.9 }));
+  assert.equal(partAt([part], { lat: -18.14, lon: 0 }), null);
+});

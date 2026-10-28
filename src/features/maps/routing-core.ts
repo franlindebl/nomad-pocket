@@ -2,7 +2,7 @@
 // (modules/nomad-route) takes, reading its answers, choosing a routing pack, and
 // following a route from GPS fixes. Pure TypeScript (no `@/` aliases) so node's test
 // runner loads it.
-import { bearingDegrees, distanceMeters, type LatLon } from './geo.ts';
+import { bboxHas, bearingDegrees, distanceMeters, wrapLon, type LatLon } from './geo.ts';
 
 export const COSTINGS = ['auto', 'pedestrian', 'bicycle'] as const;
 export type Costing = (typeof COSTINGS)[number];
@@ -225,9 +225,10 @@ export function routingErrorKind(message: string): RoutingErrorKind {
  */
 export type Coverage = { bbox: [number, number, number, number]; cells?: number[] | null };
 
-export const cellOf = (p: LatLon) => (Math.floor(p.lat) + 90) * 360 + (Math.floor(p.lon) + 180);
+// lon 180 (or past it, unwrapped) is the first column again, not the next row's.
+export const cellOf = (p: LatLon) => (Math.floor(p.lat) + 90) * 360 + (Math.floor(p.lon >= 180 || p.lon < -180 ? wrapLon(p.lon) : p.lon) + 180);
 
-const inBBox = (b: [number, number, number, number], p: LatLon) => p.lon >= b[0] && p.lon <= b[2] && p.lat >= b[1] && p.lat <= b[3];
+const inBBox = bboxHas; // a pack across the antimeridian (Fiji) has west > east
 
 const cellSets = new WeakMap<number[], Set<number>>();
 

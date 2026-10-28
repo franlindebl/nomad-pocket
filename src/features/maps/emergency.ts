@@ -27,7 +27,7 @@ import {
   type EmergencyPoi,
 } from './emergency-core';
 import type { LatLon } from './geo';
-import { distanceMeters } from './geo';
+import { distanceMeters, lonSql } from './geo';
 import { exclusive, forgetMapSource, indexEmergencyPoints } from './places';
 import type { PlaceRow } from './places-core';
 import { beginTask, endTask, updateTask } from './prepare';
@@ -336,16 +336,16 @@ export function emergencyPlacesIn(
   limit = 600,
 ): EmergencyPlace[] {
   const [w, s, e, n] = bbox;
+  const lon = lonSql('lon', w, e);
   const rows = indexDb().getAllSync<PoiRow>(
     `SELECT osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon FROM map_pois
-     WHERE lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?${hidden.length ? ` AND category NOT IN (${hidden.map(() => '?').join(',')})` : ''} GROUP BY osm_id
+     WHERE lat BETWEEN ? AND ? AND ${lon.sql}${hidden.length ? ` AND category NOT IN (${hidden.map(() => '?').join(',')})` : ''} GROUP BY osm_id
      ORDER BY CASE kind WHEN 'hospital' THEN 0 WHEN 'police' THEN 1 WHEN 'fire_station' THEN 1 WHEN 'ambulance_station' THEN 1 ELSE 2 END,
        CASE category WHEN 'health' THEN 0 WHEN 'security' THEN 1 WHEN 'water' THEN 2 WHEN 'official' THEN 3 ELSE 4 END
      LIMIT ?`,
     s,
     n,
-    w,
-    e,
+    ...lon.params,
     ...hidden,
     limit * 4,
   );
@@ -366,14 +366,14 @@ export function getEmergencyPlace(osmId: string, from: LatLon | null): Emergency
 
 /** The stored point behind a search hit (search rows don't keep the OSM id). */
 export function findEmergencyPlace(name: string, lat: number, lon: number): EmergencyPlace | null {
+  const l = lonSql('lon', lon - 0.0005, lon + 0.0005);
   const row = indexDb().getFirstSync<PoiRow>(
     `SELECT osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon FROM map_pois
-     WHERE name = ? AND lat BETWEEN ? AND ? AND lon BETWEEN ? AND ? LIMIT 1`,
+     WHERE name = ? AND lat BETWEEN ? AND ? AND ${l.sql} LIMIT 1`,
     name,
     lat - 0.0005,
     lat + 0.0005,
-    lon - 0.0005,
-    lon + 0.0005,
+    ...l.params,
   );
   return row ? fromRow(row, null) : null;
 }

@@ -329,3 +329,19 @@ test('coverage cells: a pack covers where it has roads, not its whole bbox', () 
   assert.equal(cellOf({ lat: -90, lon: -180 }), 0);
   assert.equal(cellOf({ lat: 0.5, lon: 0.5 }), 90 * 360 + 180);
 });
+
+test('covers: a pack across the antimeridian (Fiji) with its bbox and with cells', () => {
+  const bbox: [number, number, number, number] = [176.8, -20.7, -178.2, -12.4];
+  const suva = { lat: -18.14, lon: 178.44 };
+  const taveuni = { lat: -16.8, lon: -179.9 };
+  const samoa = { lat: -13.8, lon: -172.1 };
+  assert.ok(covers({ bbox }, suva));
+  assert.ok(covers({ bbox }, taveuni));
+  assert.ok(!covers({ bbox }, samoa));
+  const cells = [suva, taveuni].map(cellOf);
+  assert.ok(covers({ bbox, cells }, suva));
+  assert.ok(covers({ bbox, cells }, taveuni));
+  assert.ok(!covers({ bbox, cells }, { lat: -14, lon: 178.44 }));
+  // Longitude 180 is the first column again, not the next row's.
+  assert.equal(cellOf({ lat: -17, lon: 180 }), cellOf({ lat: -17, lon: -180 }));
+});

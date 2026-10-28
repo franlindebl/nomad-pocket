@@ -771,6 +771,15 @@ approximate). The search sheet
 also matches saved places and parses coordinates (`geo.ts`: decimal, DMS with N/S/E/W/O,
 UTM with band letter). House numbers come only from a pack (Protomaps tiles carry none).
 
+**Boxes across the antimeridian.** A `[west, south, east, north]` box with west > east (Fiji,
+Chukotka, the Aleutians), or with a longitude past ±180 (a box around a point near 180°), is
+handled in `geo.ts`: `lonRanges` cuts it in two, `lonSql(column, w, e)` builds the SQL
+condition (`BETWEEN` or two joined by `OR`), `nearOrderSql` keeps nearest-first ordering right,
+and `bboxHas` / `bboxesOverlap` are the in-memory checks (routing pack coverage, country parts,
+detail indexing). Never write `lon BETWEEN w AND e` or `lon >= w && lon <= e` by hand.
+`splitBBox` (Overpass cells) cuts at 180° too. Pack coverage from tile names
+(`tileCoverage`) still reports a -180..180 bbox for such a pack; its 1° `cells` make it exact.
+
 **Emergency points** (`emergency.ts`, pure parts in `emergency-core.ts`): 17 kinds in 5
 categories (health, security, water & shelter, supplies, institutions) from OSM tags.
 After a region download (and from the Emergencias sheet) the app POSTs an Overpass query
