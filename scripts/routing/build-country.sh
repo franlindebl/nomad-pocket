@@ -107,6 +107,10 @@ log "data of $BUILD_DATE"
 #    none at all the pack is built without them (right-hand traffic, default access).
 #    With 8 builds at once the public servers answer 502/504 for a while: rounds over
 #    all of them, waiting longer after each (half an hour of pauses in all).
+#    Boundaries barely change in a month and Overpass is the slowest, flakiest part of a
+#    build (Portugal once waited 23 min for it): with ADMINS_CACHE (a base URL, CI's
+#    `routing-admins` release) they come from there, and an answer from Overpass is left in
+#    <work dir>/cache for CI to keep there. ADMINS_REFRESH=1 asks Overpass anyway.
 RE="${ISO//,/|}"
 admins_query() { # <tag filter of the country relation>
   echo "[out:xml][timeout:900];
@@ -117,7 +121,17 @@ relation[\"boundary\"=\"administrative\"]$1->.c;
 out body;"
 }
 ADMINS="-"
-for filter in "[\"admin_level\"=\"2\"][\"ISO3166-1\"~\"^($RE)\$\"]" "[\"ISO3166-1\"~\"^($RE)\$\"]" "[\"ISO3166-2\"~\"-($RE)\$\"]"; do
+KEY="admins-${ISO//,/_}"
+cached=0
+if [[ -n "${ADMINS_CACHE:-}" && "${ADMINS_REFRESH:-0}" != 1 ]]; then
+  if curl -fsSL --retry 3 -A "$UA" -o "$WORK/src/admins.osm.pbf" "$ADMINS_CACHE/$KEY.osm.pbf" \
+    && (( $(osmium fileinfo -e -g data.count.relations "$WORK/src/admins.osm.pbf" 2>/dev/null || echo 0) > 0 )); then
+    ADMINS=/w/admins.sqlite; cached=1; log "admin boundaries from the cache ($KEY)"
+  elif curl -fsSL --retry 3 -A "$UA" -o /dev/null "$ADMINS_CACHE/$KEY.none"; then
+    cached=1; log "no admin boundaries for $ISO (cached)"
+  fi
+fi
+(( cached )) || for filter in "[\"admin_level\"=\"2\"][\"ISO3166-1\"~\"^($RE)\$\"]" "[\"ISO3166-1\"~\"^($RE)\$\"]" "[\"ISO3166-2\"~\"-($RE)\$\"]"; do
   answered=0
   for attempt in 1 2 3 4 5 6; do
     for server in "${OVERPASS[@]}"; do
@@ -131,10 +145,15 @@ for filter in "[\"admin_level\"=\"2\"][\"ISO3166-1\"~\"^($RE)\$\"]" "[\"ISO3166-
   [[ $answered == 1 ]] || { log "no answer from Overpass"; exit 1; }
   if grep -q '<relation' "$WORK/src/admins.osm"; then ADMINS=/w/admins.sqlite; break; fi
 done
-if [[ "$ADMINS" == "-" ]]; then
-  log "no admin boundaries in OSM for $ISO: building without them"
-else
-  osmium cat --overwrite "$WORK/src/admins.osm" -o "$WORK/src/admins.osm.pbf"
+if (( ! cached )); then
+  mkdir -p "$WORK/cache"
+  if [[ "$ADMINS" == "-" ]]; then
+    log "no admin boundaries in OSM for $ISO: building without them"
+    echo none > "$WORK/cache/$KEY.none" # GitHub refuses empty assets
+  else
+    osmium cat --overwrite "$WORK/src/admins.osm" -o "$WORK/src/admins.osm.pbf"
+    cp "$WORK/src/admins.osm.pbf" "$WORK/cache/$KEY.osm.pbf"
+  fi
 fi
 
 # 3. Valhalla tiles. build_tiles segfaults now and then in "Enhancing local graph"
