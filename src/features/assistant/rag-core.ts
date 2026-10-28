@@ -331,16 +331,23 @@ export function guessIntent(message: string, history: Turn[] = []): Intent {
  * without the topic still returns articles that mention one of its words. A chunk
  * needs 1 of 1–2 question terms, half (at least 2) of 3–8, 40 % of longer questions.
  * (Two of five used to pass: "aceite" + "mano" pulled an article on poison ivy into a burn answer.)
- * With several texts (the question and a model's query in another language) a chunk passes
- * if it is relevant to any of them.
+ * With 4+ terms a chunk whose title shares none of them needs one term more. With several texts (the
+ * question and a model's query in another language) a chunk passes if it is relevant to any of them.
  */
+/** Stems of one word in two forms ("quemad" from quemado, "quemadur" from quemadura). */
+const sameRoot = (a: string, b: string) => a === b || (Math.min(a.length, b.length) >= 4 && (a.startsWith(b) || b.startsWith(a)));
+
 export function relevantChunks<T extends Chunk>(question: string | string[], ranked: Scored<T>[]): Scored<T>[] {
   const texts = (Array.isArray(question) ? question : [question]).map((t) => [...new Set(tokenize(t))]).filter((q) => q.length);
   if (!texts.length) return ranked;
   return ranked.filter(({ item }) => {
-    const have = new Set([...tokenize(item.title), ...tokenize(item.text)]);
+    const title = new Set(tokenize(item.title));
+    const have = new Set([...title, ...tokenize(item.text)]);
     return texts.some((q) => {
-      const need = q.length <= 2 ? 1 : Math.max(2, Math.ceil(q.length * (q.length <= 8 ? 0.5 : 0.4)));
+      let need = q.length <= 2 ? 1 : Math.max(2, Math.ceil(q.length * (q.length <= 8 ? 0.5 : 0.4)));
+      // An article whose title shares nothing with 4+ terms needs one more: the router's "quemadura aceite
+      // hirviendo tratamiento" matched "Dermatitis de contacto por urushiol" on two words of its text.
+      if (q.length >= 4 && !q.some((t) => [...title].some((x) => sameRoot(t, x)))) need = Math.min(q.length, need + 1);
       return q.filter((t) => have.has(t)).length >= need;
     });
   });

@@ -550,6 +550,15 @@ describe('relevantChunks strictness (R3)', () => {
     const out = relevantChunks('Mi hijo se ha quemado la mano con aceite hirviendo', ranked).map((r) => r.item.sourceKey);
     assert.deepEqual(out, ['b']);
   });
+
+  test("a router query's two words in an unrelated article's text are not enough", () => {
+    const ranked = [
+      { item: { sourceKey: 'u', title: 'Dermatitis de contacto por urushiol', text: 'El aceite de la planta provoca síntomas similares a una quemadura.', index: 2 }, score: 3 },
+      { item: { sourceKey: 'q', title: 'Quemadura térmica', text: 'Tratamiento: enfriar con agua corriente durante 20 minutos.', index: 0 }, score: 2 },
+    ] as { item: Chunk; score: number }[];
+    const out = relevantChunks('quemadura aceite hirviendo tratamiento', ranked).map((r) => r.item.sourceKey);
+    assert.deepEqual(out, ['q']);
+  });
 });
 
 describe('sourcesToShow (R5)', () => {

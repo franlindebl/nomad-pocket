@@ -197,9 +197,9 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
   English router queries (family plan meeting point never found), R2 nearest hospital in SOS and category
   search ("hospital", "farmacia"), R4 guardrail error in raw English + retry, R5 sources on "not found"
   answers and PDF titles, R7 map dots thinned by zoom, R8 country aliases, R9–R12 small UI fixes, R14
-  duplicate address rows. Partial: R3 health content (stricter relevance + caution rule), R6 localized names
-  (tile rows and apostrophes yes; pack POIs/streets need es/en columns in `places.tsv`). Open: R13 reader
-  dark mode on already-dark archives (freeCodeCamp). The search index version went to 2: every installed
+  duplicate address rows. Then R3 (relevance for title-less
+  chunks) and R13 (SVG images not re-inverted in dark mode). Partial: R6 localized names (tile rows and
+  apostrophes yes; pack POIs/streets need es/en columns in the side files). The search index version went to 2: every installed
   map re-indexes its tiles once after the update.
 
 ## Known issues / limitations
@@ -289,6 +289,10 @@ reviewed, corrected and re-tested by the lead:
   fix after a location timeout.
 - Partial: R3 (old manuals still in the library), R6 (pack POIs and streets: native names only until
   `places.tsv` has es/en columns). Open: R13 (dark-mode invert on freeCodeCamp's dark header).
+- Follow-up the same day: R3, a chunk whose title shares no root with a 4+ term question or query needs
+  one more term (the router's "quemadura aceite hirviendo tratamiento" let the urushiol article in); R13,
+  the dark-mode CSS no longer re-inverts SVG images (freeCodeCamp's white header logo stayed white on its
+  inverted bar). Both checked on the simulator.
 - Checks: tsc, lint, 339 unit tests, i18n. E2E not run yet.
 
 ### 2026-10-28 — Units: miles/feet and gallons for the US, US English copy
