@@ -171,8 +171,9 @@ for flow in "${FLOWS[@]}"; do
       > "$OUT/$name/maestro.log" 2>&1; then
     passed=$((passed + 1)); echo "  ✓"
   else
-    # Maestro's last result line: "[Failed] <flow> (46s) (<reason>)".
-    reason="$(grep -m1 '^\[Failed\]' "$OUT/$name/maestro.log" | sed -E 's/^\[Failed\] [^ ]+ \([^)]*\) //')"
+    # Maestro's last result line: "[Failed] <flow> (46s) (<reason>)". (`|| true`: under set -e a
+    # log without one, e.g. a driver that never started, would end the whole run.)
+    reason="$(grep -m1 '^\[Failed\]' "$OUT/$name/maestro.log" | sed -E 's/^\[Failed\] [^ ]+ \([^)]*\) //' || true)"
     failed+=("$name  ${reason:-see maestro.log}"); echo "  ✗ ${reason:-}"
   fi
   lift_output "$OUT/$name" "$name"
