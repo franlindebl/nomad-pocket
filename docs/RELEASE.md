@@ -139,10 +139,17 @@ testing so far.
 Raw simulator captures go to `docs/store/screenshots/<lang>/<iphone|ipad>/NN-name.png`
 (gitignored). `python3 scripts/store-screenshots.py` adds the headline (captions in the
 script, es + en) and writes `docs/store/marketing/<lang>/<device>/` at App Store sizes:
-iPhone 1320×2868, iPad 2064×2752. Current set: home, library, reader, map, assistant,
-courses, reader dark, search. The map screenshot must show the OSM credit (it fades after about
-5 s: capture right after the map appears); the current set predates that and needs regenerating
-(PROGRESS backlog).
+iPhone 1320×2868 (iPhone 17 Pro Max simulator), iPad 2064×2752 (iPad Pro 13-inch).
+
+Current set (2026-10-27, for 1.1.0; texts in `docs/store/listing-1.1.0.md`): home, emergency, route,
+first aid, assistant, family plan, library, kit (iPhone only). Spanish shots use the Spain kit in Madrid,
+English ones the US Northeast kit in New York, each on a simulator in that language and region, with
+fictional family-plan data (555 numbers in English). Screens with the map (`route`, `emergency`) get
+"© OpenStreetMap contributors" under the phone from the script: the in-app credit fades after five
+seconds. How they were made: a store Release build for the simulator with the real catalogs (no
+`EXPO_PUBLIC_*_MANIFEST_URL`), the kit downloaded once per language and cloned into the iPad's app
+container (`cp -c`), `simctl status_bar` at 9:41 (the route shots at the time that matches their
+arrival), `axe` taps and pasted text (`simctl pbcopy` + Cmd-V: `axe type` can't type accents).
 
 ## Privacy / support site
 

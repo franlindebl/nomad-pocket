@@ -23,26 +23,34 @@ ACCENT = (242, 100, 58)
 # Matched against the capture's file name (first key contained in the name wins).
 CAPTIONS = {
     'es': {
-        'home': ('Tu biblioteca, siempre contigo', 'Funciona sin internet'),
-        'library': ('Wikipedia, medicina y supervivencia', 'Descarga lo que necesites'),
-        'dark': ('También en modo oscuro', 'Lectura cómoda de noche'),
-        'reader': ('Lee y busca sin conexión', 'Búsqueda de texto completo'),
-        'search': ('Encuentra cualquier cosa', 'Búsqueda en toda tu biblioteca'),
-        'map': ('Mapas offline con GPS', 'Recorta cualquier región del mundo'),
-        'assistant': ('IA local con fuentes', 'Tus preguntas no salen del móvil'),
-        'course': ('Aprende a tu ritmo', 'Cursos educativos sin conexión'),
+        'home': ('Si cae internet, tú sigues', 'Tu kit de supervivencia, siempre a mano'),
+        'emergency': ('El hospital más cercano, sin red', 'Farmacias, agua potable y refugios cerca'),
+        'route': ('Mapas que no se apagan', 'Rutas en coche, a pie y en bici sin conexión'),
+        'address': ('Encuentra cualquier calle', 'Hasta el número de portal, sin internet'),
+        'firstaid': ('Primeros auxilios al instante', 'Guías médicas y de supervivencia offline'),
+        'assistant': ('Una IA que no necesita internet', 'Responde con tu biblioteca y cita fuentes'),
+        'plan': ('Tu plan familiar, a mano', 'Puntos de encuentro, contactos y datos médicos'),
+        'library': ('Todo el conocimiento, sin red', 'Wikipedia, medicina, supervivencia y más'),
+        'kit': ('Listo en un minuto', 'Elige tu país y descarga tu kit'),
     },
     'en': {
-        'home': ('Your library, always with you', 'Works with no internet'),
-        'library': ('Wikipedia, medicine & survival', 'Download what you need'),
-        'dark': ('Dark mode included', 'Easy reading at night'),
-        'reader': ('Read and search offline', 'Full-text search'),
-        'search': ('Find anything', 'Search your whole library'),
-        'map': ('Offline maps with GPS', 'Cut any region of the world'),
-        'assistant': ('On-device AI with sources', 'Your questions never leave your phone'),
-        'course': ('Learn at your own pace', 'Educational courses, offline'),
+        'home': ('When the internet fails, you don\'t', 'Your survival kit, always at hand'),
+        'emergency': ('The nearest hospital, offline', 'Pharmacies, drinking water and shelters nearby'),
+        'route': ('Maps that never switch off', 'Offline routes by car, on foot and by bike'),
+        'address': ('Find any street', 'Down to the house number, no internet'),
+        'firstaid': ('First aid in seconds', 'Medical and survival guides, offline'),
+        'assistant': ('An AI that needs no internet', 'Answers from your library, with sources'),
+        'plan': ('Your family plan, at hand', 'Meeting points, contacts and medical details'),
+        'library': ('All the knowledge, no network', 'Wikipedia, medicine, survival and more'),
+        'kit': ('Ready in a minute', 'Pick your country and download your kit'),
     },
 }
+
+
+# Screens that show the map carry the OpenStreetMap credit under the phone: the in-app pill fades
+# after five seconds (MapCredit), and OSMF's guidelines accept the credit next to a map image.
+MAP_SHOTS = ('route', 'emergency')
+OSM_CREDIT = {'es': 'Mapa © colaboradores de OpenStreetMap', 'en': 'Map © OpenStreetMap contributors'}
 
 
 def caption_for(lang: str, name: str):
@@ -105,6 +113,9 @@ def compose(src: Path, dst: Path, lang: str, device: str):
     canvas.alpha_composite(shot, (x, y))
     border = ImageDraw.Draw(canvas)
     border.rounded_rectangle((x, y, x + shot.width - 1, y + shot.height - 1), radius, outline=(227, 224, 217), width=3)
+    if any(key in src.stem for key in MAP_SHOTS):
+        credit_font = ImageFont.truetype(str(FONTS / 'Inter_500Medium.ttf'), int(W * 0.022))
+        border.text((W // 2, (y + shot.height + H) // 2), OSM_CREDIT[lang], font=credit_font, fill=SECONDARY, anchor='mm')
 
     dst.parent.mkdir(parents=True, exist_ok=True)
     canvas.convert('RGB').save(dst, 'PNG', optimize=True)

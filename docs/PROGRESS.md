@@ -56,7 +56,8 @@ on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.
 
 A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check in ~2 days, with the
    country-coverage work**:
-   - Regenerate the store screenshots (DOCS-PUBLIC-3 / LEGAL-14); the map ones must show the OSM credit.
+   - ~~Regenerate the store screenshots (DOCS-PUBLIC-3 / LEGAL-14)~~ done 2026-10-27 for 1.1.0 (OSM credit
+     under the map shots; `docs/RELEASE.md`, Screenshots).
    - OSS-9: obsolete PNGs in the repo.
    - The git history rewrite that removes the owner's old location examples (pending a quiet window).
      **Then tag the store builds** (`v1.1.0-12` for build 12, and every later build: GPL section 6).
@@ -176,6 +177,21 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
    guidance and the hub to the Emergencias sheet (both landed on main in parallel).
 
 
+- **Seen while making the 1.1.0 store screenshots** (2026-10-27, iOS 27 simulators with the Spain kit in
+  Madrid and the US Northeast kit in New York; build 21). Fixed in c03c0cc / c7cf754: wrong neighbourhood
+  on search rows, Home's first aid opening English PDFs for Spanish users, the assistant's greeting,
+  Spanish retrieval ("potabilizo"), empty image boxes in nopic archives. Still open:
+  - **Assistant retrieval in English** (en-US, English Wikipedia complete (compact) 14.4 GB + 10 guides,
+    Apple Intelligence, before c7cf754): "What are the signs of hypothermia and what should I do?" cited
+    "Una cepa de Salmonella…" and said the library had nothing; "How do I start a fire when everything is
+    wet?" cited a Billboard Year-End chart; "How do I make water safe to drink without boiling it?" found
+    nothing. **Still on build 22** (c7cf754's title lookup, same simulator): the water question gets "I
+    couldn't find this in your library" and a cloth-strainer tip. Fix before 1.1.0 reaches English users.
+  - Once (iPad, Spanish) a burn first-aid answer added a joke about burning yourself with coffee.
+  - Distances are metric only (`lib/format.ts`, guidance): an en-US user in New York sees "3.1 km" and
+    "10 m"; the US (and the UK for road distances) expect miles and feet/yards. English copy also uses
+    British words ("torch", "health centre") for US users.
+
 ## Known issues / limitations
 
 - Map search: house numbers and far-away POIs come from the country package's side files
@@ -237,6 +253,25 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-27 — Store: 1.1.0 listing approved, new screenshots
+
+App Store Connect showed 1.0.1 (build 3) rejected since 2026-10-24 (App Review didn't understand the
+monetization; the owner replied in the Resolution Center). Plan agreed with the owner: wait for that answer
+(fastest path to production), then submit 1.1.0 with the latest build. Meanwhile:
+- **Listing** (`docs/store/listing-1.1.0.md`), approved by the owner: aimed at the internet going down
+  (blackouts, cyberattacks, infrastructure failures). New name "Nomad Pocket: Kit Offline" / "Offline Kit",
+  subtitle "Supervivencia sin internet" / "Survival with no internet"; promotional text, description,
+  keywords per locale, what's new and App Review notes that start with the monetization (free, no
+  purchases, ads, accounts or server of its own). No real events named, no third-party trademarks in
+  keywords. "Pocket" stays in the name (a bare "NOMAD" would read as the official Project N.O.M.A.D. app).
+- **Screenshots** regenerated (backlog A): iPhone 6.9" es/en (8 each) and iPad 13" es/en (7 each), the
+  Spanish ones in Madrid, the English ones in New York; captions in the same crisis tone
+  (`scripts/store-screenshots.py`), OSM credit under the map shots. Recipe in `docs/RELEASE.md`.
+- **E2E on build 21**: full suite 39/40 then 40/40 (map-15 lost a tap on "Ir a estas coordenadas", passed
+  alone), iPad tour 1/1 (a first run caught the reader before its page painted; passed on a rerun).
+- What the screenshots turned up went to the backlog; the neighbourhood, first-aid, greeting, Spanish
+  retrieval and empty-box items were fixed by another session in c03c0cc / c7cf754 (build 22).
 
 ### 2026-10-27 — Release: 1.1.0 build 22 to TestFlight
 
