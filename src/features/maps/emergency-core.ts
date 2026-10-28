@@ -3,6 +3,8 @@
 // fetches them for a region while online, and parsing its TSV answer.
 // Pure TypeScript (no `@/` aliases) so node's test runner loads it.
 
+import { lonRanges } from './geo.ts';
+
 export const EMERGENCY_CATEGORIES = ['health', 'security', 'water', 'supplies', 'official'] as const;
 export type EmergencyCategory = (typeof EMERGENCY_CATEGORIES)[number];
 
@@ -163,14 +165,17 @@ export function parseOverpassTsv(text: string): EmergencyPoi[] {
  * queries time out on public Overpass servers; a few medium ones do not.
  */
 export function splitBBox(bbox: [number, number, number, number], maxDegrees = 3): [number, number, number, number][] {
-  const [w, s, e, n] = bbox;
-  const cols = Math.max(1, Math.ceil((e - w) / maxDegrees));
+  const [, s, , n] = bbox;
   const rows = Math.max(1, Math.ceil((n - s) / maxDegrees));
   const cells: [number, number, number, number][] = [];
-  for (let i = 0; i < cols; i++)
-    for (let j = 0; j < rows; j++) {
-      cells.push([w + ((e - w) * i) / cols, s + ((n - s) * j) / rows, w + ((e - w) * (i + 1)) / cols, s + ((n - s) * (j + 1)) / rows]);
-    }
+  // A box across the antimeridian (west > east) is cut at 180° first: Overpass wants west <= east.
+  for (const [w, e] of lonRanges(bbox[0], bbox[2])) {
+    const cols = Math.max(1, Math.ceil((e - w) / maxDegrees));
+    for (let i = 0; i < cols; i++)
+      for (let j = 0; j < rows; j++) {
+        cells.push([w + ((e - w) * i) / cols, s + ((n - s) * j) / rows, w + ((e - w) * (i + 1)) / cols, s + ((n - s) * (j + 1)) / rows]);
+      }
+  }
   return cells;
 }
 

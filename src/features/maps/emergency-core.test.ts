@@ -128,3 +128,15 @@ test('thinForZoom keeps hospitals and one point per kind per cell', () => {
   assert.equal(thinForZoom(pts, 17).length, pts.length);
   assert.equal(thinForZoom([ph(0), { kind: 'pharmacy' as const, lat: 41.4, lon: -3.7 }], 14).length, 2);
 });
+
+test('splitBBox cuts a box across the antimeridian into cells Overpass accepts (Fiji)', () => {
+  const fiji: [number, number, number, number] = [176.8, -20.7, -178.2, -12.4];
+  const cells = splitBBox(fiji, 3);
+  assert.ok(cells.length > 1);
+  for (const [w, s, e, n] of cells) {
+    assert.ok(w < e && w >= -180 && e <= 180, 'west < east inside range');
+    assert.ok(e - w <= 3 && n - s <= 3);
+  }
+  assert.equal(Math.min(...cells.map((c) => c[0])), -180);
+  assert.equal(Math.max(...cells.map((c) => c[2])), 180);
+});

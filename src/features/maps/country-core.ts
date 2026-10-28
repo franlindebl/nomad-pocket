@@ -2,7 +2,7 @@
 // scripts/maps/maps-manifest.py) and which routing pack belongs to which country. A country
 // download is its map plus, where one exists, its routing pack (docs/UX_SURVIVAL_PLAN.md).
 import { cellOf, covers, engineReads, LEGACY_PACK_VALHALLA, type ManifestFile, type ManifestPack } from './routing-core.ts';
-import type { LatLon } from './geo.ts';
+import { bboxHas, type LatLon } from './geo.ts';
 
 export type CountryMap = {
   id: string;
@@ -154,7 +154,7 @@ export function countryWidePacks<P extends Pick<ManifestPack, 'id' | 'regionId'>
   return routePacksFor(packs, regionId).filter((p) => !ids.has(p.id));
 }
 
-const inBox = (b: readonly number[], p: LatLon) => p.lon >= b[0] && p.lon <= b[2] && p.lat >= b[1] && p.lat <= b[3];
+const inBox = bboxHas;
 
 /**
  * The part a point is in: the one whose pack has roads there, else whose map's outline

@@ -2,6 +2,13 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import {
+  bboxAround,
+  bboxesOverlap,
+  bboxHas,
+  lonDelta,
+  lonRanges,
+  lonSql,
+  nearOrderSql,
   bearingDegrees,
   compassSector,
   distanceMeters,
@@ -110,4 +117,95 @@ test('knownOrientation: an unknown one is portrait only on a portrait-shaped scr
 test('isFreshFix', () => {
   assert.equal(isFreshFix(1_000, 5_000, 4_000), true);
   assert.equal(isFreshFix(1_000, 5_000, 7_000), false);
+});
+
+// --- Boxes across the antimeridian ---------------------------------------------
+
+const FIJI: [number, number, number, number] = [176.8, -20.7, -178.2, -12.4];
+const CHUKOTKA: [number, number, number, number] = [160.0, 62.0, -169.0, 71.6];
+const ALEUTIANS: [number, number, number, number] = [172.4, 51.2, -129.9, 55.0];
+const SPAIN: [number, number, number, number] = [-9.4, 35.9, 4.4, 43.8];
+
+test('lonRanges: a normal box stays one range, a crossing one is cut at 180', () => {
+  assert.deepEqual(lonRanges(-9.4, 4.4), [[-9.4, 4.4]]);
+  assert.deepEqual(lonRanges(176.8, -178.2), [
+    [176.8, 180],
+    [-180, -178.2],
+  ]);
+  assert.deepEqual(lonRanges(-180, 180), [[-180, 180]]);
+  assert.deepEqual(lonRanges(-200, 200), [[-180, 180]]);
+});
+
+test('lonRanges: unwrapped boxes (a camera panned past 180) are folded back', () => {
+  assert.deepEqual(lonRanges(179, 181), [
+    [179, 180],
+    [-180, -179],
+  ]);
+  assert.deepEqual(lonRanges(-181, -179), [
+    [179, 180],
+    [-180, -179],
+  ]);
+  assert.deepEqual(lonRanges(181, 183), [[-179, -177]]);
+});
+
+test('bboxHas: Spain, Fiji, Chukotka and the Aleutians', () => {
+  assert.ok(bboxHas(SPAIN, { lat: 40.4, lon: -3.7 }));
+  assert.ok(!bboxHas(SPAIN, { lat: 40.4, lon: 178 }));
+  // Suva (178.4 E) and Taveuni (179.9 W) are in; Samoa and Greenwich are not.
+  assert.ok(bboxHas(FIJI, { lat: -18.14, lon: 178.44 }));
+  assert.ok(bboxHas(FIJI, { lat: -16.8, lon: -179.9 }));
+  assert.ok(!bboxHas(FIJI, { lat: -13.8, lon: -172.1 }));
+  assert.ok(!bboxHas(FIJI, { lat: -18.14, lon: 0 }));
+  assert.ok(!bboxHas(FIJI, { lat: 10, lon: 178.44 }));
+  assert.ok(bboxHas(CHUKOTKA, { lat: 64.7, lon: 177.5 })); // Anadyr
+  assert.ok(bboxHas(CHUKOTKA, { lat: 66.1, lon: -171 }));
+  assert.ok(!bboxHas(CHUKOTKA, { lat: 64.7, lon: 100 }));
+  assert.ok(bboxHas(ALEUTIANS, { lat: 52, lon: 175 })); // Attu
+  assert.ok(bboxHas(ALEUTIANS, { lat: 53.9, lon: -166.5 })); // Unalaska
+  assert.ok(!bboxHas(ALEUTIANS, { lat: 53.9, lon: -100 }));
+  // 180 itself, and a longitude written unwrapped.
+  assert.ok(bboxHas(FIJI, { lat: -17, lon: 180 }));
+  assert.ok(bboxHas(FIJI, { lat: -17, lon: 181.5 }));
+});
+
+test('bboxesOverlap works across 180 degrees', () => {
+  assert.ok(bboxesOverlap(FIJI, [177, -19, 178, -18])); // Viti Levu
+  assert.ok(bboxesOverlap(FIJI, [-180, -19, -179, -18]));
+  assert.ok(bboxesOverlap(FIJI, [179, -19, -179, -18])); // both crossing
+  assert.ok(!bboxesOverlap(FIJI, [-10, -19, 10, -18]));
+  assert.ok(!bboxesOverlap(FIJI, [177, 10, 178, 20]));
+  assert.ok(bboxesOverlap(SPAIN, [-3, 40, -2, 41]));
+  assert.ok(!bboxesOverlap(SPAIN, [177, 40, 178, 41]));
+});
+
+test('lonSql: one BETWEEN for a normal box, two joined by OR across 180', () => {
+  assert.deepEqual(lonSql('lon', -9.4, 4.4), { sql: 'lon BETWEEN ? AND ?', params: [-9.4, 4.4] });
+  assert.deepEqual(lonSql('lon', 176.8, -178.2), { sql: '(lon BETWEEN ? AND ? OR lon BETWEEN ? AND ?)', params: [176.8, 180, -180, -178.2] });
+  // Scaled integer columns round outwards, per range.
+  assert.deepEqual(lonSql('a.lon', 0.123456, 0.2, 1e5).params, [12345, 20000]);
+});
+
+test('bboxAround near Fiji gives a box lonSql can split', () => {
+  const [w, , e] = bboxAround({ lat: -16.8, lon: 179.99 }, 30_000);
+  assert.ok(e > 180);
+  const ranges = lonRanges(w, e);
+  assert.equal(ranges.length, 2);
+  assert.equal(ranges[0][1], 180);
+  assert.equal(ranges[1][0], -180);
+  assert.ok(ranges[1][1] < -179.5);
+});
+
+test('nearOrderSql shifts longitudes only for a crossing box', () => {
+  const plain = nearOrderSql({ lat: 1, lon: 2 }, 0.5, false);
+  assert.ok(!plain.sql.includes('CASE'));
+  assert.deepEqual(plain.params, [1, 1, 2, 2, 0.5]);
+  const cross = nearOrderSql({ lat: -17, lon: -179.9 }, 0.9, true);
+  assert.ok(cross.sql.includes('CASE'));
+  assert.deepEqual(cross.params, [-17, -17, 180.1, 180.1, 0.9]);
+});
+
+test('lonDelta takes the short way round', () => {
+  assert.ok(Math.abs(lonDelta(179, -179) - 2) < 1e-9);
+  assert.ok(Math.abs(lonDelta(-179, 179) + 2) < 1e-9);
+  assert.equal(lonDelta(10, 20), 10);
 });

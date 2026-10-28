@@ -15,7 +15,7 @@ import { decodeTile } from '@/lib/mvt/decode';
 import { countBBoxTiles, listZoomTiles, readTile, type Header, type RangeSource, type TileEntry } from '@/lib/pmtiles';
 
 import { kindCategory, tileEmergencyKind } from './emergency-core';
-import { bboxAround, distanceMeters, type LatLon } from './geo';
+import { bboxAround, bboxesOverlap, distanceMeters, lonRanges, lonSql, nearOrderSql, type LatLon } from './geo';
 import { addressImport, importPlacesBlock, importStreetsBlock, insertRows as insertRowsInto, type AsyncSql } from './import-core';
 import {
   categoryKinds,
@@ -253,14 +253,14 @@ async function importAddresses(itemId: string, file: File, onProgress?: (done: n
 /** The doors of streets named like `streetName` within `meters` of `near`. */
 async function doorsNear(streetName: string, near: LatLon, meters: number): Promise<AddressRow[]> {
   const [w, s, e, n] = bboxAround(near, meters);
+  const lon = lonSql('a.lon', w, e, E5);
   const rows = await indexDbAsync().getAllAsync<{ number: string; lat: number; lon: number }>(
     `SELECT a.number, a.lat, a.lon FROM map_address_streets st JOIN map_addresses a ON a.street = st.id
-     WHERE st.key = ? AND a.lat BETWEEN ? AND ? AND a.lon BETWEEN ? AND ? LIMIT 5000`,
+     WHERE st.key = ? AND a.lat BETWEEN ? AND ? AND ${lon.sql} LIMIT 5000`,
     nameKey(streetName),
     Math.floor(s * E5),
     Math.ceil(n * E5),
-    Math.floor(w * E5),
-    Math.ceil(e * E5),
+    ...lon.params,
   );
   return rows.map((r) => ({ street: streetName, number: r.number, lat: r.lat / E5, lon: r.lon / E5 }));
 }
@@ -601,10 +601,9 @@ async function refreshDetail(p: LatLon) {
   const fresh = state?.version === INDEX_VERSION && distanceMeters(state, p) < DETAIL_MOVE;
   const centre = fresh ? state : p;
   const box = bboxAround(centre, DETAIL_RADIUS);
-  const [w, s, e, n] = box;
   const around = (listItems('map') as MapItem[]).filter((i) => {
     const [iw, is, ie, inn] = i.meta.bbox;
-    return i.meta.role === 'region' && iw < e && ie > w && is < n && inn > s && !searchFilesCover(i);
+    return i.meta.role === 'region' && bboxesOverlap([iw, is, ie, inn], box) && !searchFilesCover(i);
   });
   const zooms: Record<string, number> = {};
   for (const id of Object.keys(state?.zooms ?? {})) {
@@ -621,7 +620,11 @@ async function refreshDetail(p: LatLon) {
     if (!file.exists) continue;
     const source = new LocalFileSource(file);
     try {
-      const { header, tiles } = await listZoomTiles(source, z, { bbox: box });
+      // A box over the antimeridian is listed as two (the tile list wants west <= east).
+      const lists = [];
+      for (const [lw, le] of lonRanges(box[0], box[2])) lists.push(await listZoomTiles(source, z, { bbox: [lw, box[1], le, box[3]] }));
+      const header = lists[0].header;
+      const tiles = lists.flatMap((l) => l.tiles);
       if (await indexTiles(item, source, header, tiles, detailSource(item.id))) zooms[item.id] = z;
     } finally {
       source.close();
@@ -680,19 +683,16 @@ async function nearestOfKinds(kinds: string[], near: LatLon, limit: number): Pro
   let rows: { rowid: number; kind: string; name: string | null; lat: number; lon: number }[] = [];
   for (const radius of KIND_RADII) {
     const [w, s, e, n] = bboxAround(near, radius);
+    const lon = lonSql('lon', w, e);
+    const order = nearOrderSql(near, lonScale, lonRanges(w, e).length > 1);
     rows = await indexDbAsync().getAllAsync(
-      `SELECT rowid, kind, name, lat, lon FROM map_pois WHERE kind IN (${marks}) AND lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?
-       ORDER BY (lat - ?) * (lat - ?) + (lon - ?) * (lon - ?) * ? LIMIT ${limit * 3}`,
+      `SELECT rowid, kind, name, lat, lon FROM map_pois WHERE kind IN (${marks}) AND lat BETWEEN ? AND ? AND ${lon.sql}
+       ORDER BY ${order.sql} LIMIT ${limit * 3}`,
       ...kinds,
       s,
       n,
-      w,
-      e,
-      near.lat,
-      near.lat,
-      near.lon,
-      near.lon,
-      lonScale,
+      ...lon.params,
+      ...order.params,
     );
     rows = rows.filter((r) => distanceMeters(near, r) <= radius);
     if (rows.length >= Math.min(limit, 10)) break;
@@ -782,15 +782,15 @@ async function matchPlaces(text: string, near: LatLon | null, limit: number, lay
     if (near) {
       const [w, s, e, n] = bboxAround(near, 30_000);
       const seen = new Set(rows.map((r) => r.id));
+      const lon = lonSql('lon', w, e);
       const around = await d.getAllAsync<HitRow>(
         `SELECT * FROM (SELECT ${columns} FROM map_places WHERE map_places MATCH ? ${onLayer} LIMIT ${cap * 4})
-         WHERE lat BETWEEN ? AND ? AND lon BETWEEN ? AND ? LIMIT 600`,
+         WHERE lat BETWEEN ? AND ? AND ${lon.sql} LIMIT 600`,
         match,
         ...layerArg,
         s,
         n,
-        w,
-        e,
+        ...lon.params,
       );
       for (const r of around) if (!seen.has(r.id)) rows.push(r);
     }
@@ -815,18 +815,15 @@ async function localityNear(p: LatLon): Promise<string | null> {
   const lonScale = Math.cos((p.lat * Math.PI) / 180) ** 2;
   for (const radius of LOCALITY_RADII) {
     const [w, s, e, n] = bboxAround(p, radius);
+    const lon = lonSql('lon', w, e);
+    const order = nearOrderSql(p, lonScale, lonRanges(w, e).length > 1);
     const nearest = await indexDbAsync().getAllAsync<{ name: string; lat: number; lon: number }>(
-      `SELECT name, lat, lon FROM map_localities WHERE lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?
-       ORDER BY (lat - ?) * (lat - ?) + (lon - ?) * (lon - ?) * ? LIMIT 1`,
+      `SELECT name, lat, lon FROM map_localities WHERE lat BETWEEN ? AND ? AND ${lon.sql}
+       ORDER BY ${order.sql} LIMIT 1`,
       s,
       n,
-      w,
-      e,
-      p.lat,
-      p.lat,
-      p.lon,
-      p.lon,
-      lonScale,
+      ...lon.params,
+      ...order.params,
     );
     // A box's corners lie beyond its radius: only a hit within it is surely the nearest.
     const hit = nearestLocality(p, nearest, radius);

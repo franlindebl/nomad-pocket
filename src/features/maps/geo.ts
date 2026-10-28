@@ -74,6 +74,83 @@ export function bboxAround(p: LatLon, radiusMeters: number): [number, number, nu
   return [p.lon - dLon, p.lat - dLat, p.lon + dLon, p.lat + dLat];
 }
 
+// --- Longitude ranges across the antimeridian --------------------------------
+// A box is [west, south, east, north]. One that crosses 180° (Fiji, Chukotka, the Aleutians) has
+// west > east, or a longitude beyond ±180 (a box around a point near it, a map camera that
+// unwrapped the world): SQL `lon BETWEEN w AND e` and `lon >= w && lon <= e` match nothing there.
+
+export type LonRange = [number, number];
+
+/** Wraps a longitude into [-180, 180). */
+export const wrapLon = (lon: number) => (lon >= -180 && lon < 180 ? lon : ((((lon + 180) % 360) + 360) % 360) - 180);
+
+/** Signed longitude difference b - a, the short way round (-180..180). */
+export const lonDelta = (a: number, b: number) => wrapLon(b - a);
+
+/** The west..east span as one range, or two when it crosses 180° (each inside [-180, 180]). */
+export function lonRanges(west: number, east: number): LonRange[] {
+  if (west <= east) {
+    if (east - west >= 360) return [[-180, 180]];
+    if (west >= -180 && east <= 180) return [[west, east]];
+    // Unwrapped (a camera panned past 180°): move the west end into range, keep the width.
+    const w = wrapLon(west);
+    const e = w + (east - west);
+    return e <= 180
+      ? [[w, e]]
+      : [
+          [w, 180],
+          [-180, e - 360],
+        ];
+  }
+  // west > east: crosses the antimeridian.
+  return [
+    [wrapLon(west), 180],
+    [-180, wrapLon(east)],
+  ];
+}
+
+/** Whether `lon` lies in the span west..east (crossing 180° allowed). */
+export function lonInSpan(west: number, east: number, lon: number): boolean {
+  const l = lon < -180 || lon > 180 ? wrapLon(lon) : lon;
+  return lonRanges(west, east).some(([a, b]) => l >= a && l <= b);
+}
+
+/** Whether a [w, s, e, n] box holds the point; the box may cross the antimeridian. */
+export function bboxHas(b: readonly number[], p: LatLon): boolean {
+  return p.lat >= b[1] && p.lat <= b[3] && lonInSpan(b[0], b[2], p.lon);
+}
+
+/** Whether two longitude spans share any longitude (either may cross 180°). */
+export function lonSpansOverlap(w1: number, e1: number, w2: number, e2: number): boolean {
+  return lonRanges(w1, e1).some(([a, b]) => lonRanges(w2, e2).some(([c, d]) => a < d && b > c));
+}
+
+/** Whether two [w, s, e, n] boxes overlap (strictly, touching edges don't count); either may cross 180°. */
+export function bboxesOverlap(a: readonly number[], b: readonly number[]): boolean {
+  return a[1] < b[3] && a[3] > b[1] && lonSpansOverlap(a[0], a[2], b[0], b[2]);
+}
+
+/** A box's longitude condition for SQL: `col BETWEEN ? AND ?`, or two of them joined by OR when it crosses 180°. */
+export function lonSql(column: string, west: number, east: number, scale = 1): { sql: string; params: number[] } {
+  const ranges = lonRanges(west, east);
+  const one = `${column} BETWEEN ? AND ?`;
+  const params = ranges.flatMap(([a, b]) => scale === 1 ? [a, b] : [Math.floor(a * scale), Math.ceil(b * scale)]);
+  return { sql: ranges.length > 1 ? `(${one} OR ${one})` : one, params };
+}
+
+/**
+ * ORDER BY expression (squared distance in degrees, longitude shrunk by `lonScale`) from `near`
+ * that stays right across 180°: where the box crosses it, longitudes are shifted to 0..360 first.
+ */
+export function nearOrderSql(near: LatLon, lonScale: number, crossing: boolean, lat = 'lat', lon = 'lon'): { sql: string; params: number[] } {
+  if (!crossing) {
+    return { sql: `(${lat} - ?) * (${lat} - ?) + (${lon} - ?) * (${lon} - ?) * ?`, params: [near.lat, near.lat, near.lon, near.lon, lonScale] };
+  }
+  const x = `(CASE WHEN ${lon} < 0 THEN ${lon} + 360 ELSE ${lon} END)`;
+  const nl = near.lon < 0 ? near.lon + 360 : near.lon;
+  return { sql: `(${lat} - ?) * (${lat} - ?) + (${x} - ?) * (${x} - ?) * ?`, params: [near.lat, near.lat, nl, nl, lonScale] };
+}
+
 // ---------------------------------------------------------------------------
 // UTM (WGS84), with the latitude band letter (e.g. "30T 440291 4474254").
 
