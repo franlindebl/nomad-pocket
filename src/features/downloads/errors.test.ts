@@ -4,6 +4,7 @@ import { test } from 'node:test';
 import { downloadErrorKind } from './errors.ts';
 
 test('downloadErrorKind reads the usual failures', () => {
+  assert.equal(downloadErrorKind('PARTIAL_LOST').kind, 'restored');
   assert.equal(downloadErrorKind('NOT_ENOUGH_STORAGE').kind, 'storage');
   assert.equal(
     downloadErrorKind("Call to function 'FileSystemDownloadTask.start' has been rejected. → Caused by: javax.net.ssl.SSLHandshakeException: java.security.cert.CertPathValidatorException: Trust anchor for certification path not found.").kind,

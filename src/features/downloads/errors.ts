@@ -4,11 +4,13 @@
 // URLSession's text is localised (a Spanish iPhone says "Se ha perdido la conexión de red").
 // No `@/` imports: unit tests load this file directly.
 
-export type DownloadErrorKind = 'storage' | 'secure' | 'offline' | 'server' | 'integrity' | 'other';
+export type DownloadErrorKind = 'storage' | 'secure' | 'offline' | 'server' | 'integrity' | 'restored' | 'other';
 
 export function downloadErrorKind(error: string | null | undefined): { kind: DownloadErrorKind; status?: number } {
   const e = error ?? '';
   if (e === 'NOT_ENOUGH_STORAGE' || /no space|ENOSPC|not enough (storage|space)/i.test(e)) return { kind: 'storage' };
+  // Restored from a backup: the partial file did not come along (restore-core.ts).
+  if (e === 'PARTIAL_LOST') return { kind: 'restored' };
   // The manager's own check against the size and hash the source promised.
   if (/^(SIZE|CHECKSUM)_MISMATCH\b/.test(e)) return { kind: 'integrity' };
   // A network that intercepts TLS (corporate proxies, captive portals) or a bad clock.

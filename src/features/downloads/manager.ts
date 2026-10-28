@@ -72,6 +72,7 @@ import {
 } from './manager-core';
 import { isKiwixUrl, planSources, type ProbeFetch, type SourcePlan } from './mirrors';
 import { SEGMENTS_IN_BACKGROUND, SegmentedTransfer } from './segmented';
+import { PARTIAL_LOST_ERROR, startupRowAction } from './restore-core';
 import { chunkBytesFor, MiB, MIN_SEGMENTED_BYTES } from './segments-core';
 import { timed, trace } from './trace';
 import { askAboutMobileData } from './wifi-prompt';
@@ -470,6 +471,25 @@ export function initDownloads() {
     // interrupted running/processing ones go back to the queue.
     // A crash while processing leaves the finished file in place: finish it instead of re-downloading.
     if (rec.status === 'processing' && new File(rec.destUri).exists) {
+      records[rec.id] = rec;
+      continue;
+    }
+    // After a backup restore the partial bytes are gone: fail it (Retry is the person's call)
+    // instead of silently re-downloading gigabytes (restore-core.ts).
+    if (
+      startupRowAction({
+        status: rec.status,
+        segmented: !!rec.meta.segments,
+        destExists: new File(rec.destUri).exists,
+        partExists: partialFile(rec.id).exists,
+        chunksExist: chunksDir(rec.id).exists,
+      }) === 'lost'
+    ) {
+      rec.status = 'failed';
+      rec.error = PARTIAL_LOST_ERROR;
+      rec.bytesWritten = 0;
+      delete rec.meta.segments;
+      persist(rec.id, { status: 'failed', error: PARTIAL_LOST_ERROR, bytes_written: 0, pause_state: null, meta: JSON.stringify(rec.meta) });
       records[rec.id] = rec;
       continue;
     }
