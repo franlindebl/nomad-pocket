@@ -238,6 +238,28 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-27 — Fixes from the store screenshots: first aid in Spanish, assistant, empty image boxes
+
+The other three items seen while making the 1.1.0 screenshots (backlog), checked on an iOS 27
+simulator with the Spain kit and Apple Intelligence (Release):
+- **First aid** (Home): the quick action tried a fixed list that began with the medical library
+  (English PDFs). Archives in the app's language come first now, and Wikipedia Médica opens at its
+  "Primeros auxilios" article; English keeps the medical library first.
+- **Assistant greeting**: the tone line said "saluda, responde a las gracias…", and Apple
+  Intelligence opened every answer with "Hola, ¿qué tal? Muchas gracias por la pregunta". It now
+  greets only when greeted and goes straight to the answer otherwise (both languages, tools tone too).
+- **"¿Cómo potabilizo agua sin hervirla?"** got municipal residual-chlorine levels: full-text ranking
+  puts titles that repeat a word ("Planta Potabilizadora de …") above the article about the process.
+  Retrieval now also asks each archive's title index (`buildTitleQueries`: the first two queries with
+  "-izar/-ificar" verbs as their "-ción" noun) and ranks those articles first; the light stemmer joins
+  "potabilizo" with "potabilización". The answer now covers chlorine, ozone and UV disinfection; a
+  burn question cites the "Quemadura" article.
+- **Wikipedia Médica's empty image boxes**: mwoffliner's nopic editions keep each image as a transparent
+  SVG (`alt-text-clip`) of its size in its bordered frame. The reader (iOS user script, Android
+  injected style) always hides those placeholders, the figures/thumbs holding only them and template
+  table cells whose only child is such a figure. Selectors match only that placeholder, so archives
+  with pictures are untouched. Android not run yet.
+
 ### 2026-10-27 — Maps: a search result's neighbourhood is the nearest one again
 
 The owner saw Calle de Alcalá as "· Nudo Sur" and Hospital Gregorio Marañón as "· Entrevías /

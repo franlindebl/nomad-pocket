@@ -45,6 +45,8 @@ export function stem(word: string): string {
   const steps: [RegExp, string][][] = [
     // Derivational suffixes.
     [
+      // The process and the verb meet ("potabilización" ~ "potabilizar" ~ "potabilizo").
+      [/(iz|ific)(?:aciones|acion|ar|arl[aeo]s?|ando)$/, '$1'],
       [/(?:aciones|acion)$/, 'ac'],
       [/(?:iciones|icion)$/, 'ic'],
       [/(?:ciones|cion)$/, 'c'],
@@ -142,6 +144,25 @@ export function buildSearchQueries(question: string, max = 4): string[] {
   }
   if (kw.length > 1) queries.push(byLength[0]);
   return [...new Set(queries)].slice(0, max);
+}
+
+/**
+ * A Spanish "-izar" / "-ificar" verb as its "-ción" noun ("potabilizo" → "potabilización"):
+ * questions name the action, article titles the process, and the title index wants whole words.
+ */
+export function nominalize(word: string): string {
+  const m = /^(.{3,}?)(iz|ific)(?:o|a|as|an|amos|ar|arl[aeo]s?|ando)$/.exec(word);
+  return m ? `${m[1]}${m[2]}ación` : word;
+}
+
+/**
+ * Queries for the archives' title index: the first search queries with their verbs as nouns.
+ * An article named after the question ("Potabilización del agua" for "¿Cómo potabilizo agua?")
+ * is the best source, but full-text ranking buries it under titles that repeat a word
+ * ("Planta Potabilizadora de …").
+ */
+export function buildTitleQueries(queries: string[], max = 2): string[] {
+  return [...new Set(queries.slice(0, max).map((q) => q.split(' ').map(nominalize).join(' ')))];
 }
 
 const FOLLOW_UP_START = new Set(['y', 'e', 'and', 'pero', 'but', 'entonces', 'so', 'tambien', 'also', 'ademas', 'besides']);
@@ -491,13 +512,14 @@ export function tokensToChars(tokens: number): number {
 const SYSTEM: Record<Lang, [intro: string, tone: string, smallTalk: string, style: string]> = {
   es: [
     'Eres Nomad, un asistente que funciona sin conexión dentro de la app Nomad Pocket.',
-    'Conversa de forma natural y cercana: saluda, responde a las gracias, charla, cuenta chistes y habla de ti con naturalidad.',
+    // "Saluda" alone made Apple Intelligence open every answer with "Hola, ¿qué tal? Muchas gracias por la pregunta".
+    'Conversa de forma natural y cercana: si te saludan, te dan las gracias o quieren charlar, responde con naturalidad, cuenta chistes y habla de ti. Cuando te pregunten algo, ve directo a la respuesta, sin saludar ni agradecer la pregunta.',
     'En la charla contesta con una o dos frases, sin listas, y no inventes datos sobre ti ni sobre la app.',
     'Responde siempre en español, de forma clara, práctica y breve. Usa Markdown sencillo (negritas, listas) cuando ayude.',
   ],
   en: [
     'You are Nomad, an assistant that runs offline inside the Nomad Pocket app.',
-    'Talk naturally and warmly: greet back, answer thanks, chat, tell jokes and talk about yourself freely.',
+    'Talk naturally and warmly: when greeted, thanked or chatted with, reply naturally, tell jokes and talk about yourself. When asked something, go straight to the answer, without greeting or thanking for the question.',
     "In small talk reply in one or two sentences, without lists, and don't make up facts about yourself or the app.",
     'Always answer in English, clearly, practically and concisely. Use simple Markdown (bold, lists) when it helps.',
   ],
@@ -507,8 +529,8 @@ const SYSTEM: Record<Lang, [intro: string, tone: string, smallTalk: string, styl
 // tool (Gemma 4 searched 4 of 10 questions with it, 9 of 10 without): tools mode
 // keeps the tone short.
 const TOOLS_TONE: Record<Lang, string> = {
-  es: 'Conversa de forma natural y cercana.',
-  en: 'Talk naturally and warmly.',
+  es: 'Conversa de forma natural y cercana; cuando te pregunten algo, ve directo a la respuesta, sin saludar ni agradecer la pregunta.',
+  en: 'Talk naturally and warmly; when asked something, go straight to the answer, without greeting or thanking for the question.',
 };
 
 /** What the assistant can lean on, so "what can you do?" gets a true answer. */

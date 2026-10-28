@@ -38,8 +38,18 @@ import { freeBytes } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
 import { radius, space, useTheme, type Hue } from '@/theme';
 
-/** First-aid archives, best first: the quick action opens the first one installed. */
-const FIRST_AID = ['zimgit-medicine_en', 'wikipedia_es_medicine_nopic', 'wwwnc.cdc.gov_en_all', 'irp.fas.org_en_military-medicine', 'nhs.uk_en_medicines'];
+/**
+ * First-aid archives, best first: the quick action opens the first one installed in the app's
+ * language, else in any, at its first-aid article when it has one (the medical library is English PDFs).
+ */
+const FIRST_AID: { id: string; lang: string; path?: string }[] = [
+  { id: 'wikipedia_es_medicine_nopic', lang: 'es', path: 'Primeros_auxilios' },
+  { id: 'medlineplus.gov_es_all', lang: 'es' },
+  { id: 'zimgit-medicine_en', lang: 'en' },
+  { id: 'wwwnc.cdc.gov_en_all', lang: 'en' },
+  { id: 'irp.fas.org_en_military-medicine', lang: 'en' },
+  { id: 'nhs.uk_en_medicines', lang: 'en' },
+];
 
 const READY_ICONS: Record<ReadinessKey, { icon: LucideIcon; hue: Hue }> = {
   map: { icon: Map, hue: 'maps' },
@@ -71,7 +81,7 @@ function QuickAction({ icon, hue, title, onPress, testID }: { icon: LucideIcon; 
 }
 
 export default function HomeScreen() {
-  const { t } = useTranslation('home');
+  const { t, i18n } = useTranslation('home');
   const { t: tc } = useTranslation();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
@@ -88,10 +98,12 @@ export default function HomeScreen() {
   useSettings((s) => s.country);
   const number = emergencyNumber();
 
-  const firstAid = FIRST_AID.map((id) => zims.find((z) => z.catalogId === id)).find(Boolean);
+  const firstAid = [...FIRST_AID.filter((a) => a.lang === i18n.language), ...FIRST_AID.filter((a) => a.lang !== i18n.language)]
+    .map((a) => ({ ...a, item: zims.find((z) => z.catalogId === a.id) }))
+    .find((a) => a.item);
   const openFirstAid = () =>
-    firstAid
-      ? router.push({ pathname: '/reader/[itemId]', params: { itemId: firstAid.id } })
+    firstAid?.item
+      ? router.push({ pathname: '/reader/[itemId]', params: { itemId: firstAid.item.id, path: firstAid.path } })
       : router.navigate({ pathname: '/library/category/[slug]', params: { slug: 'medicine' } });
 
   const used = all.reduce((sum, i) => sum + i.sizeBytes, 0);
