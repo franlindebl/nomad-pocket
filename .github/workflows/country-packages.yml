@@ -29,11 +29,6 @@ on:
         type: choice
         options: [all, maps, routing]
         default: all
-      admins:
-        description: 'Admin boundaries of the routing packs: from the routing-admins release (Overpass only for the missing), or all from Overpass again'
-        type: choice
-        options: [cached, refresh]
-        default: cached
   schedule:
     - cron: '0 3 5 * *' # monthly, after Geofabrik's daily extracts settle
 
@@ -60,7 +55,6 @@ jobs:
       valhalla-image: ${{ env.VALHALLA_IMAGE }}
       stamp: ${{ steps.plan.outputs.stamp }}
       build: ${{ steps.plan.outputs.build }}
-      admins: ${{ steps.plan.outputs.admins }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -79,13 +73,6 @@ jobs:
           # In two halves, one per build call (≤ 256 jobs each); the second may be empty.
           echo "jobs1=$(python3 -I -c 'import json, sys; j = json.loads(sys.argv[1]); print(json.dumps(j[:(len(j) + 1) // 2]))' "$jobs")" >> "$GITHUB_OUTPUT"
           echo "jobs2=$(python3 -I -c 'import json, sys; j = json.loads(sys.argv[1]); print(json.dumps(j[(len(j) + 1) // 2:]))' "$jobs")" >> "$GITHUB_OUTPUT"
-          # Boundaries come from the routing-admins release; the monthly run asks Overpass for
-          # all of them again in January and July (Valhalla's authors advise every 3–6 months).
-          admins="${{ github.event.inputs.admins }}"
-          if [[ -z "$admins" ]]; then
-            case "$(date -u +%m)" in 01|07) admins=refresh ;; *) admins=cached ;; esac
-          fi
-          echo "admins=$admins" >> "$GITHUB_OUTPUT"
           # One stamp per run: a re-run never replaces files a live catalog points at.
           echo "stamp=$(date -u +%Y%m%d)-${{ github.run_id }}" >> "$GITHUB_OUTPUT"
           # Every map of a run comes from the same planet build.
@@ -104,8 +91,9 @@ jobs:
           }
           if want routing; then
             source scripts/gh-releases.sh
+            # Admin boundaries are read from here (admin-boundaries.yml keeps them fresh).
             has_release routing-admins || gh release create routing-admins --prerelease --title "Admin boundaries cache" \
-              --notes "Admin boundaries per routing pack (Overpass answers, OSM data © OpenStreetMap contributors, ODbL), reused by the monthly build: not read by the app."
+              --notes "Admin boundaries per routing pack (Overpass answers, OSM data © OpenStreetMap contributors, ODbL), read by the monthly build: not by the app."
             for c in $(continents "$COUNTRIES" 1); do
               gh release create "routing-$STAMP-$c" --prerelease --title "Routing packs routing-$STAMP-$c" \
                 --notes "Offline routing packs (Valhalla 3.9.1 tiles), emergency points, street names, places and house numbers. Data © OpenStreetMap contributors, ODbL."
@@ -127,7 +115,6 @@ jobs:
       jobs: ${{ needs.plan.outputs.jobs1 }}
       stamp: ${{ needs.plan.outputs.stamp }}
       build: ${{ needs.plan.outputs.build }}
-      admins: ${{ needs.plan.outputs.admins }}
       parts: ${{ github.event.inputs.parts || 'all' }}
       valhalla-image: ${{ needs.plan.outputs.valhalla-image }}
       max-parallel: 4
@@ -139,7 +126,6 @@ jobs:
       jobs: ${{ needs.plan.outputs.jobs2 }}
       stamp: ${{ needs.plan.outputs.stamp }}
       build: ${{ needs.plan.outputs.build }}
-      admins: ${{ needs.plan.outputs.admins }}
       parts: ${{ github.event.inputs.parts || 'all' }}
       valhalla-image: ${{ needs.plan.outputs.valhalla-image }}
       max-parallel: 4

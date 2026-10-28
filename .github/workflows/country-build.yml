@@ -21,10 +21,6 @@ on:
       parts:
         type: string
         required: true
-      admins:
-        description: 'cached or refresh (build-country.sh ADMINS_REFRESH)'
-        type: string
-        required: true
       valhalla-image:
         type: string
         required: true
@@ -98,14 +94,14 @@ jobs:
       - name: Build the routing pack
         if: steps.what.outputs.routing == 'true'
         run: |
-          # Admin boundaries from the routing-admins release (created by the plan job).
+          # Admin boundaries from the routing-admins release (admin-boundaries.yml keeps it fresh).
           docker run --rm -e CONC=4 -e ADMINS_CACHE="https://github.com/$GITHUB_REPOSITORY/releases/download/routing-admins" \
-            -e ADMINS_REFRESH=${{ inputs.admins == 'refresh' && '1' || '0' }} -v "$PWD:/repo:ro" -v "$WORK:/work" "$VALHALLA_IMAGE" bash -c \
+            -v "$PWD:/repo:ro" -v "$WORK:/work" "$VALHALLA_IMAGE" bash -c \
             "apt-get update -qq && apt-get install -y -qq osmium-tool python3-pyosmium python3-shapely >/dev/null && bash /repo/scripts/routing/build-country.sh $COUNTRY /work/routing && chown -R $(id -u):$(id -g) /work"
           ls -la "$WORK/routing/out"
       - name: Keep the admin boundaries
-        # What Overpass answered goes to the cache for the next runs (one file per country code:
-        # the six US regions write the same one, so a clash is fine).
+        # A country the cache lacked asked Overpass: its answer goes there for the next runs
+        # (one file per country code: the six US regions write the same one, a clash is fine).
         if: steps.what.outputs.routing == 'true'
         env:
           GH_TOKEN: ${{ github.token }}

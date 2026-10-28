@@ -146,8 +146,8 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
      reviews medical content first), emergency numbers per country.
    - **CI notes**: a failed country is relaunched alone with `gh workflow run
      country-packages.yml -f countries="<ids>" -f parts=routing|maps` (region ids work too:
-     `us-alaska`); `-f admins=refresh` asks Overpass for every boundary again (else they come from the
-     `routing-admins` release, refreshed in January and July); the `country-packages` concurrency group queues runs; this Mac's corporate VPN
+     `us-alaska`); admin boundaries come from the `routing-admins` release, refreshed on the 1st by
+     `admin-boundaries.yml` (by hand: `gh workflow run admin-boundaries.yml [-f isos="PT ES"]`); the `country-packages` concurrency group queues runs; this Mac's corporate VPN
      breaks TLS to Protomaps/Kiwix/Overpass from simulators (E2E `map-04`, `map-13`), and `map-04`
      needs another server-tagged flow in the same run for its local catalogs.
 
@@ -302,8 +302,10 @@ graph) but needs a ~17 h, 64–128 GB build a month: shelved. Built instead (`do
   never started a job: since the Canada and Russia map regions a full run has 261 jobs, over GitHub's 256
   per matrix (the monthly run of 2026-11-05 would have failed the same way). The build jobs moved to
   `country-build.yml`, called twice with half the list each, 4 at a time each (8 in all, as before). The full
-  run 40691060942 started with them (131 + 130 jobs). Next, in its own commit: admin boundaries cached in a
-  `routing-admins` release, so a run asks Overpass only for what's missing (Portugal waited 23 min for it).
+  run 40691060942 started with them (131 + 130 jobs). Then admin boundaries moved out of the pack builds (Portugal waited 23 min
+  for Overpass): `admin-boundaries.yml` refreshes them monthly into a `routing-admins` release (owner's idea:
+  a separate workflow, the builds always read the freshest there); a build asks Overpass only for a country
+  missing in it (`scripts/routing/admins.sh`, checked locally: cache hit, cached none, miss → Overpass).
 
 ### 2026-10-28 — Functional review on the simulator and its fixes (R1–R14)
 

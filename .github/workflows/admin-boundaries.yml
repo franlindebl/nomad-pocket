@@ -1,0 +1,115 @@
+name: Admin boundaries
+
+# The admin boundaries every routing pack is built with (scripts/routing/admins.sh: levels 2 and
+# 4 from Overpass), refreshed monthly into the routing-admins release a few days before
+# country-packages.yml reads them from there: its builds then don't wait on Overpass, the
+# slowest and flakiest part of a pack (Portugal once waited 23 min). One file per ISO code of
+# scripts/routing/packs.json (admins-PT.osm.pbf; admins-DO_HT for an extract spanning two;
+# .none where OSM has none). A country Overpass doesn't answer for keeps last month's file, and
+# a build finding none asks Overpass itself.
+
+on:
+  workflow_dispatch:
+    inputs:
+      isos:
+        description: 'ISO codes as packs.json writes them (PT, "DO,HT"), space separated (empty: every pack)'
+        required: false
+        default: ''
+  schedule:
+    - cron: '0 3 1 * *' # monthly, four days before country-packages.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: admin-boundaries
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      chunks: ${{ steps.plan.outputs.chunks }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - id: plan
+        env:
+          INPUT: ${{ github.event.inputs.isos }}
+        run: |
+          # The ISO codes of every pack, by continent, in chunks of 15: a chunk is one job, and
+          # a slow Overpass day (half an hour of retries for one country) must not reach
+          # GitHub's 6 h per job.
+          echo "chunks=$(python3 -I - "$INPUT" <<'PY'
+          import json, sys
+          packs = json.load(open("scripts/routing/packs.json"))["countries"]
+          continent = {r["id"]: r["continent"] for r in json.load(open("src/features/maps/regions.json"))["regions"]}
+          want = sys.argv[1].split()
+          by = {}
+          for pid, c in packs.items():
+              if want and c["iso"] not in want:
+                  continue
+              isos = by.setdefault(continent.get(c.get("region", pid), "other"), [])
+              if c["iso"] not in isos:
+                  isos.append(c["iso"])
+          chunks = [{"name": f"{k}-{i // 15 + 1}", "isos": " ".join(v[i:i + 15])} for k, v in sorted(by.items()) for i in range(0, len(v), 15)]
+          print(json.dumps(chunks))
+          PY
+          )" >> "$GITHUB_OUTPUT"
+      - name: The release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          source scripts/gh-releases.sh
+          has_release routing-admins || gh release create routing-admins --prerelease --title "Admin boundaries cache" \
+            --notes "Admin boundaries per routing pack (Overpass answers, OSM data © OpenStreetMap contributors, ODbL), read by the monthly build: not by the app."
+
+  fetch:
+    needs: plan
+    if: ${{ needs.plan.outputs.chunks != '[]' }}
+    name: fetch (${{ matrix.chunk.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      # Polite to the public Overpass servers.
+      max-parallel: 3
+      matrix:
+        chunk: ${{ fromJson(needs.plan.outputs.chunks) }}
+    env:
+      ISOS: ${{ matrix.chunk.isos }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Tools
+        timeout-minutes: 20
+        run: |
+          apt="-o Acquire::Retries=3 -o Acquire::http::Timeout=60 -o Acquire::https::Timeout=60"
+          sudo apt-get $apt update -qq && sudo apt-get $apt install -y -qq osmium-tool >/dev/null
+      # No token here: it runs osmium on what Overpass sends.
+      - name: Ask Overpass
+        run: |
+          mkdir -p out
+          for iso in $ISOS; do
+            bash scripts/routing/admins.sh "$iso" out || echo "$iso" >> failed.txt
+          done
+          ls -la out
+      - name: Keep them
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for f in out/*; do
+            [[ -e "$f" ]] || continue
+            gh release upload routing-admins "$f" --clobber --repo "$GITHUB_REPOSITORY"
+            # A country that went from none to some boundaries (or back) drops the other file.
+            name="$(basename "$f")"
+            other="${name%.*}"; [[ "$name" == *.none ]] && other="$other.osm.pbf" || other="${name%.osm.pbf}.none"
+            gh release delete-asset routing-admins "$other" --yes --repo "$GITHUB_REPOSITORY" 2>/dev/null || true
+          done
+          if [[ -s failed.txt ]]; then
+            echo "::warning::no answer from Overpass for: $(tr '\n' ' ' < failed.txt)(last month's files stay)"
+            exit 1
+          fi
