@@ -147,7 +147,7 @@ the lead, re-tested on both simulators with a Release build.
 |---|---|---|
 | R1 | fixed: `planRetrieval` / `languageEvidence` (rag-core) | the three Spanish phrasings cite "Plan familiar · Puntos de encuentro" |
 | R2 | fixed: SOS leads with the 3 nearest hospitals (police/fire in Security); category words search the nearest of that kind | SOS Madrid: 3 hospitals then the 30 m AED; "hospital"/"farmacia"/"policía" in Madrid and Honolulu give the nearest |
-| R3 | partial: stricter `relevantChunks` (half of 3–8 terms) + health caution rule (no tourniquet, 20 min cool water, only the condition asked) | burn answer: 20 min cool water, no urushiol. A router query sharing two words can still pass; the old manuals stay in the library |
+| R3 | fixed: stricter `relevantChunks` (half of 3–8 terms; one more when an article's title shares no root with 4+ terms) + health caution rule (no tourniquet, 20 min cool water, only the condition asked) | burn answer: 20 min cool water, sources only "Quemadura térmica"; the router query "quemadura aceite hirviendo tratamiento" no longer lets the urushiol article in (unit test). Old manuals stay in the library; the caution rule overrides them |
 | R4 | fixed: Swift `describe()` and `errors.ts` map guardrail text to `declined`; banner "Reintentar" (`retryLast`) | Swift compiles; the guardrail itself couldn't be triggered on demand |
 | R5 | fixed: `sourcesToShow` (none for "not found", else top 3 when nothing cited), `readableDocTitle` | "teléfono de mi dentista": one cited source instead of ten |
 | R6 | partial: apostrophes, cities by English/Spanish name, localized name + native subtitle for tile rows (`INDEX_VERSION` 2) | "mcdonalds", "queens medical center", "Tel Aviv" (city, native subtitle), "Honolulu" OK. Pack POIs/streets stay native (no es/en columns in `places.tsv`): "Puerta de Jaffa", "Jaffa Road 100" still fail |
@@ -157,7 +157,7 @@ the lead, re-tested on both simulators with a Release build.
 | R10 | fixed: no `automaticallyAdjustKeyboardInsets` in the plan form sheets (the agent's delayed-focus attempt made it worse and was dropped) | contact and meeting sheets open with the first label visible |
 | R11 | fixed: Home adds the search index like Settings; `formatBytes` takes the language read in render | 20.2 GB in both, new locale at once |
 | R12 | fixed: a timed-out fix is followed by one `watchPositionAsync` while the screen is open | not exercised (needs a timeout) |
-| R13 | open: the agent's luminance sampling didn't change freeCodeCamp's header; reverted | |
+| R13 | fixed: dark mode no longer re-inverts SVG images (iOS + Android CSS): freeCodeCamp's white header logo was re-inverted while its navy bar turned light | freeCodeCamp header readable in dark mode |
 | R14 | fixed: `dedupeHits` by `rankKey` + distance | "2005 Kalakaua Ave": one row |
 
 Side effect to know: the `INDEX_VERSION` bump re-indexes every installed map's tiles once after the update

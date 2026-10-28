@@ -385,7 +385,7 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
     // Pages that are dark by design get data-nomad-native-dark (see NATIVE_DARK_JS) and are left alone.
     private const val DARK_CSS =
       "html:not([data-nomad-native-dark]){filter:invert(1) hue-rotate(180deg)!important;background:#fff!important}" +
-        "html:not([data-nomad-native-dark]) :is(img:not(.mwe-math-fallback-image-inline):not(.mwe-math-fallback-image-display),picture,video,canvas,iframe,embed,object,svg image,[style*=\"background-image\"]){filter:invert(1) hue-rotate(180deg)!important}"
+        "html:not([data-nomad-native-dark]) :is(img:not(.mwe-math-fallback-image-inline):not(.mwe-math-fallback-image-display):not([src$=\".svg\" i]):not([src*=\".svg?\" i]),picture,video,canvas,iframe,embed,object,svg image,[style*=\"background-image\"]){filter:invert(1) hue-rotate(180deg)!important}"
 
     // Always on. Image-less archives ("nopic" Wikipedia) keep each image as a transparent SVG of its
     // size inside its bordered frame: empty boxes all over the article. Hide those placeholders and

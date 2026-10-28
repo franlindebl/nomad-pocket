@@ -387,11 +387,12 @@ enum ZimContentRules {
 
 enum ZimWebScripts {
   /// CSS for dark mode: invert the page, then re-invert media so photos look right.
-  /// Math formulas (black glyph images) stay inverted so they remain readable.
+  /// Math formulas (black glyph images) and SVG images (logos, icons, drawings: freeCodeCamp's white
+  /// header logo stayed white on its inverted, now light, bar) stay inverted so they remain readable.
   /// Pages that are dark by design get `data-nomad-native-dark` and are left alone.
   static let darkCSS = """
   html:not([data-nomad-native-dark]){filter:invert(1) hue-rotate(180deg)!important;background:#fff!important}
-  html:not([data-nomad-native-dark]) :is(img:not(.mwe-math-fallback-image-inline):not(.mwe-math-fallback-image-display),picture,video,canvas,iframe,embed,object,svg image,[style*="background-image"]){filter:invert(1) hue-rotate(180deg)!important}
+  html:not([data-nomad-native-dark]) :is(img:not(.mwe-math-fallback-image-inline):not(.mwe-math-fallback-image-display):not([src$=".svg" i]):not([src*=".svg?" i]),picture,video,canvas,iframe,embed,object,svg image,[style*="background-image"]){filter:invert(1) hue-rotate(180deg)!important}
   """
 
   /// Always on. Image-less archives ("nopic" Wikipedia) keep each image as a transparent SVG of its
