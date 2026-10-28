@@ -1,0 +1,21 @@
+src/features/assistant/rag-core.test.ts
+  s_bcb6b7f557a4fc::t_7754e0d7653d01 416-420
+src/features/assistant/rag-core.ts
+  s_bcb6b7f557a4fc::t_ad67e67c03542e 226-231,244,253-254,256
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a5e38d214ddc984b3eb938620dc027ddee390b49",
+  "prompts": {},
+  "sessions": {
+    "s_bcb6b7f557a4fc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "edc88951-8810-4355-907f-62d14b615c33",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
