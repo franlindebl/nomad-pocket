@@ -233,6 +233,13 @@ export function startMapDownload(input: StartMapDownload) {
 
   (async () => {
     let handle: ReturnType<File['open']> | null = null;
+    // Trailing save for requests that finish inside a SAVE_EVERY_MS window (else a kill right
+    // after a burst of completions loses them all).
+    let saveTimer: ReturnType<typeof setTimeout> | null = null;
+    const stopSaving = () => {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = null;
+    };
     activateKeepAwakeAsync(jobId).catch(() => {});
     try {
       let saved = loadSaved().find((j) => sameJob(j, input)) ?? null;
@@ -289,14 +296,23 @@ export function startMapDownload(input: StartMapDownload) {
           done: done.size ? new Set(done) : undefined,
           onRequestDone: (i) => {
             done.add(i);
-            if (Date.now() - savedAt >= SAVE_EVERY_MS) {
+            const wait = SAVE_EVERY_MS - (Date.now() - savedAt);
+            if (wait <= 0) {
+              stopSaving();
               savedAt = Date.now();
               persist();
+            } else if (!saveTimer) {
+              saveTimer = setTimeout(() => {
+                saveTimer = null;
+                savedAt = Date.now();
+                persist();
+              }, wait);
             }
           },
           onProgress: (p) => job.update({ bytesWritten: p.bytes, totalBytes: p.totalBytes }),
         },
       );
+      stopSaving();
       handle.close();
       handle = null;
       persist();
@@ -351,6 +367,7 @@ export function startMapDownload(input: StartMapDownload) {
       if (ctrl.signal.aborted) useDownloads.getState().remove(jobId);
       else job.fail(e instanceof NotEnoughStorageError ? 'NOT_ENOUGH_STORAGE' : String((e as Error)?.message ?? e));
     } finally {
+      stopSaving();
       running.delete(input.key);
       deactivateKeepAwake(jobId);
     }
