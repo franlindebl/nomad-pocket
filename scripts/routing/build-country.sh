@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Builds the offline routing pack of one country (docs/MAPS_NAVIGATION_PLAN.md, phase 2):
-# Geofabrik extract(s) + admin boundaries from Overpass → Valhalla tiles → the pack, its
+# Geofabrik extract(s) + admin boundaries (admins.sh, or CI's cache of them) → Valhalla tiles → the pack, its
 # emergency points, and its street names, named places and house numbers (search) → parts
 # of at most 1900 MiB (GitHub Release assets stop at 2 GiB) and a JSON fragment for the
 # manifest (manifest.py).
@@ -22,10 +22,6 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 IMAGE="${VALHALLA_IMAGE:-ghcr.io/valhalla/valhalla:3.9.1}"
 CONC="${CONC:-4}"
 PART_BYTES=$((1900 * 1024 * 1024))
-# maps.mail.ru last, as a CI-only fallback: these queries ask for public admin boundaries
-# and carry no user data. The app lists European servers only (emergency.ts).
-OVERPASS=(https://overpass-api.de/api/interpreter https://overpass.private.coffee/api/interpreter https://overpass.kumi.systems/api/interpreter
-  https://maps.mail.ru/osm/tools/overpass/api/interpreter)
 UA="NomadPocket-routing/1.0 (+https://github.com/franlindebl/nomad-pocket)"
 
 # geofabrik: one extract path, or a list merged into one build (Spain + Canary Islands).
@@ -98,62 +94,30 @@ fi
 BUILD_DATE="$(echo "${STAMP:-$(date -u +%Y-%m-%d)}" | cut -c1-10 | tr -d -)"
 log "data of $BUILD_DATE"
 
-# 2. Admin boundaries: country (level 2) and regions (level 4) as complete relations.
-#    Geofabrik's are clipped at the extract edge, so Valhalla can't build areas from them,
-#    and without them it gets driving side and country access rules wrong. ISO may list
-#    several countries ("DO,HT") for an extract that spans them.
-#    Territories are often not level 2 in OSM (Puerto Rico, Aruba, Åland): then the
-#    relation with that ISO 3166-1 code at any level, then by ISO 3166-2 ("US-PR"). With
-#    none at all the pack is built without them (right-hand traffic, default access).
-#    With 8 builds at once the public servers answer 502/504 for a while: rounds over
-#    all of them, waiting longer after each (half an hour of pauses in all).
-#    Boundaries barely change in a month and Overpass is the slowest, flakiest part of a
-#    build (Portugal once waited 23 min for it): with ADMINS_CACHE (a base URL, CI's
-#    `routing-admins` release) they come from there, and an answer from Overpass is left in
-#    <work dir>/cache for CI to keep there. ADMINS_REFRESH=1 asks Overpass anyway.
-RE="${ISO//,/|}"
-admins_query() { # <tag filter of the country relation>
-  echo "[out:xml][timeout:900];
-relation[\"boundary\"=\"administrative\"]$1->.c;
-.c map_to_area->.a;
-(.c; relation(area.a)[\"boundary\"=\"administrative\"][\"admin_level\"=\"4\"];);
-(._;>;);
-out body;"
-}
-ADMINS="-"
+# 2. Admin boundaries (levels 2 and 4, complete relations; why, and what with none:
+#    admins.sh). With ADMINS_CACHE (a base URL: CI's routing-admins release, refreshed monthly
+#    by admin-boundaries.yml) they come from there; a country missing in it (new, or never
+#    answered) asks Overpass through admins.sh and leaves the answer in <work dir>/cache for CI
+#    to keep. Without ADMINS_CACHE, Overpass every time.
 KEY="admins-${ISO//,/_}"
-cached=0
-if [[ -n "${ADMINS_CACHE:-}" && "${ADMINS_REFRESH:-0}" != 1 ]]; then
-  if curl -fsSL --retry 3 -A "$UA" -o "$WORK/src/admins.osm.pbf" "$ADMINS_CACHE/$KEY.osm.pbf" \
-    && (( $(osmium fileinfo -e -g data.count.relations "$WORK/src/admins.osm.pbf" 2>/dev/null || echo 0) > 0 )); then
-    ADMINS=/w/admins.sqlite; cached=1; log "admin boundaries from the cache ($KEY)"
-  elif curl -fsSL --retry 3 -A "$UA" -o /dev/null "$ADMINS_CACHE/$KEY.none"; then
-    cached=1; log "no admin boundaries for $ISO (cached)"
-  fi
+mkdir -p "$WORK/cache"
+from_cache() { # <file name>
+  [[ -n "${ADMINS_CACHE:-}" ]] && curl -fsSL --retry 3 -A "$UA" -o "$WORK/src/$1" "$ADMINS_CACHE/$1"
+}
+if from_cache "$KEY.osm.pbf" && (( $(osmium fileinfo -e -g data.count.relations "$WORK/src/$KEY.osm.pbf" 2>/dev/null || echo 0) > 0 )); then
+  log "admin boundaries from the cache"
+elif from_cache "$KEY.none"; then
+  log "no admin boundaries for $ISO (cached)"
+else
+  bash "$HERE/admins.sh" "$ISO" "$WORK/cache"
+  cp "$WORK/cache/$KEY".* "$WORK/src/"
 fi
-(( cached )) || for filter in "[\"admin_level\"=\"2\"][\"ISO3166-1\"~\"^($RE)\$\"]" "[\"ISO3166-1\"~\"^($RE)\$\"]" "[\"ISO3166-2\"~\"-($RE)\$\"]"; do
-  answered=0
-  for attempt in 1 2 3 4 5 6; do
-    for server in "${OVERPASS[@]}"; do
-      log "admin boundaries $filter from $server (attempt $attempt)"
-      if curl -fsS --max-time 1200 -A "$UA" --data-urlencode "data=$(admins_query "$filter")" -o "$WORK/src/admins.osm" "$server" \
-        && grep -q '</osm>' "$WORK/src/admins.osm"; then answered=1; break 2; fi
-      sleep 30
-    done
-    [[ $attempt == 6 ]] || sleep $((attempt * 120))
-  done
-  [[ $answered == 1 ]] || { log "no answer from Overpass"; exit 1; }
-  if grep -q '<relation' "$WORK/src/admins.osm"; then ADMINS=/w/admins.sqlite; break; fi
-done
-if (( ! cached )); then
-  mkdir -p "$WORK/cache"
-  if [[ "$ADMINS" == "-" ]]; then
-    log "no admin boundaries in OSM for $ISO: building without them"
-    echo none > "$WORK/cache/$KEY.none" # GitHub refuses empty assets
-  else
-    osmium cat --overwrite "$WORK/src/admins.osm" -o "$WORK/src/admins.osm.pbf"
-    cp "$WORK/src/admins.osm.pbf" "$WORK/cache/$KEY.osm.pbf"
-  fi
+ADMINS="-"
+if [[ -f "$WORK/src/$KEY.osm.pbf" ]] && (( $(osmium fileinfo -e -g data.count.relations "$WORK/src/$KEY.osm.pbf" 2>/dev/null || echo 0) > 0 )); then
+  mv "$WORK/src/$KEY.osm.pbf" "$WORK/src/admins.osm.pbf"
+  ADMINS=/w/admins.sqlite
+else
+  log "no admin boundaries in OSM for $ISO: building without them"
 fi
 
 # 3. Valhalla tiles. build_tiles segfaults now and then in "Enhancing local graph"

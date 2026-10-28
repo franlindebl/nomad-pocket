@@ -857,10 +857,11 @@ and drops its POIs. **Packs are built** by `.github/workflows/country-packages.y
 `osmium merge`d: Spain + Canary Islands; `clip` cuts a bigger extract to the country's
 `regions.json` bbox: Saudi Arabia from gcc-states, Caribbean islands from central-america)
 + admin boundaries (levels 2/4) from Overpass, by ISO 3166-1 at level 2, else at any level,
-else ISO 3166-2 (territories: Puerto Rico, Aruba), else none (right-hand traffic); kept per
-country code in the `routing-admins` release (`admins-<ISO>.osm.pbf`, or `.none`) and read from
-there by later runs, Overpass only for the missing ones (all again in January and July, or with
-the workflow's `admins: refresh`) →
+else ISO 3166-2 (territories: Puerto Rico, Aruba), else none (right-hand traffic)
+(`scripts/routing/admins.sh`); refreshed monthly on the 1st by `.github/workflows/admin-boundaries.yml`
+into the `routing-admins` release (`admins-<ISO>.osm.pbf`, or `.none`; 18 jobs, 3 at a time; a country
+Overpass doesn't answer for keeps last month's file), read from there by the pack builds (a
+country missing in it asks Overpass and is kept) →
 `valhalla_build_admins` → `valhalla_build_tiles` (retried: 3.9.1 segfaults now and then)
 → one tar per country (the owner wants whole-country packs only) → emergency points
 (`osmium tags-filter` + `emergency-points.py`, same columns as the Overpass TSV) → street
