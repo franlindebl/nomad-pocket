@@ -184,20 +184,25 @@ rm -f "$WORK/src/places.osm.pbf"
 
 # 6c. Where main roads cross the pack's border: the app joins routes across packs there
 #     (docs/ROUTING_ACROSS_PACKS.md). A part of a split country ("us-west") is bounded by its
-#     states inside its Geofabrik polygons. No boundaries, no crossings.
-if [[ "$ADMINS" != "-" ]]; then
-  osmium tags-filter --overwrite "$PBF" w/highway=motorway,trunk,primary,secondary,tertiary -o "$WORK/src/roads.osm.pbf"
-  osmium export --overwrite "$WORK/src/admins.osm.pbf" -f geojsonseq -o "$WORK/src/admins.geojsonseq"
-  POLYS=()
+#     states inside its Geofabrik polygons. No boundaries, no crossings. Never fatal: a pack
+#     without them still routes inside itself.
+crossings() {
+  osmium tags-filter --overwrite "$PBF" w/highway=motorway,trunk,primary,secondary,tertiary -o "$WORK/src/roads.osm.pbf" || return 1
+  osmium export --overwrite "$WORK/src/admins.osm.pbf" -f geojsonseq -o "$WORK/src/admins.geojsonseq" || return 1
+  local polys=()
   if [[ "$REGION" != "$COUNTRY" ]]; then
     for G in $GEOFABRIK; do
-      curl -fsSL --retry 3 -A "$UA" -o "$WORK/src/$(basename "$G").poly" "https://download.geofabrik.de/$G.poly"
-      POLYS+=("$WORK/src/$(basename "$G").poly")
+      curl -fsSL --retry 3 -A "$UA" -o "$WORK/src/$(basename "$G").poly" "https://download.geofabrik.de/$G.poly" || return 1
+      polys+=("$WORK/src/$(basename "$G").poly")
     done
   fi
-  python3 -I "$HERE/crossings.py" "$WORK/src/roads.osm.pbf" "$WORK/src/admins.geojsonseq" "$ISO" "$OUT/$COUNTRY.crossings.tsv" ${POLYS[@]+"${POLYS[@]}"}
-  rm -f "$WORK/src/roads.osm.pbf"
+  python3 -I "$HERE/crossings.py" "$WORK/src/roads.osm.pbf" "$WORK/src/admins.geojsonseq" "$ISO" "$OUT/$COUNTRY.crossings.tsv" ${polys[@]+"${polys[@]}"}
+}
+if [[ "$ADMINS" != "-" ]] && ! crossings; then
+  log "border crossings failed: published without them"
+  rm -f "$OUT/$COUNTRY.crossings.tsv"
 fi
+rm -f "$WORK/src/roads.osm.pbf"
 
 # 7. Parts for GitHub's 2 GiB asset limit (the app appends them back together).
 for tar in "$OUT"/*.tar; do

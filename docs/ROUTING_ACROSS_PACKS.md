@@ -1,7 +1,8 @@
 # Routes across routing packs
 
-Status: **stitching built 2026-10-28** (worktree `../nomad-app-routing`, branch `routing-across-packs`):
-crossings in CI, stitching in the app, E2E `map-19-stitch`, measured on the simulator (below). Owner's
+Status: **stitching on main since bdc1fae (2026-10-28)**: crossings in CI, stitching in the app, E2E
+`map-19-stitch`, measured on the simulator (below). It reaches people with the first `country-packages.yml`
+run that publishes the crossings files and an app build from bdc1fae on. Owner's
 decisions (2026-10-28): no paid build machine (open source, no income), so the one-graph design below is
 shelved; instead
 
@@ -73,7 +74,8 @@ The simulator runs on the Mac's CPU: a phone will be slower. One fix it needed: 
 `max_matrix_distance` is also where the matrix search stops, and at 500 km a 472 km bike leg came back
 empty; it is now 2000 km by bike and 1000 km on foot.
 
-Left: a `country-packages.yml` run (until the published packs carry `crossings`, nothing changes for
+Left: a `country-packages.yml` run (its crossings step never fails a pack: a failure publishes it without
+crossings; until the published packs carry them, nothing changes for
 users), Android, ferries as crossings (Spain–Morocco, UK–France: no road crosses there).
 
 ### Data (CI)
