@@ -31,6 +31,12 @@ export type RouteRequestInput = {
   avoid?: [number, number][][];
   /** A new route from where the user is now, mid-trip (they may really be in a tunnel). */
   rerouting?: boolean;
+  /**
+   * An end that is a border crossing joining two packs' legs (stitch-core): on that road,
+   * going that way (`heading`), with no search filter (a crossing may be a tunnel).
+   */
+  fromSeam?: { heading: number };
+  toSeam?: { heading: number };
 };
 
 /**
@@ -60,11 +66,13 @@ const MAX_HIKING_DIFFICULTY = 2;
 export function routeRequest(input: RouteRequestInput): string {
   const origin: Json = { lat: input.from.lat, lon: input.from.lon, type: 'break' };
   const target: Json = { lat: input.to.lat, lon: input.to.lon, type: 'break' };
-  const fromFilter = searchFilter(input.costing, !!input.rerouting);
-  const toFilter = searchFilter(input.costing, false);
+  const fromFilter = input.fromSeam ? undefined : searchFilter(input.costing, !!input.rerouting);
+  const toFilter = input.toSeam ? undefined : searchFilter(input.costing, false);
   if (fromFilter) origin.search_filter = fromFilter;
   if (toFilter) target.search_filter = toFilter;
-  if (input.heading != null && Number.isFinite(input.heading)) {
+  if (input.toSeam) Object.assign(target, { heading: input.toSeam.heading, heading_tolerance: 45 });
+  if (input.fromSeam) Object.assign(origin, { heading: input.fromSeam.heading, heading_tolerance: 45 });
+  else if (input.heading != null && Number.isFinite(input.heading)) {
     origin.heading = Math.round(((input.heading % 360) + 360) % 360);
     origin.heading_tolerance = 60;
   }
@@ -278,6 +286,8 @@ export type ManifestPack = {
   places?: ManifestFile | null;
   /** House numbers (parseAddressesTsv); packs before 2026-10-26 have none. */
   addresses?: ManifestFile | null;
+  /** Where roads cross the pack's border (stitch-core parseCrossings), kept next to the tar; packs before 2026-10-28 have none. */
+  crossings?: ManifestFile | null;
 };
 
 export type RoutingManifest = {
@@ -347,7 +357,8 @@ export function parseManifest(json: string): RoutingManifest | null {
       (p.pois == null || isFile(p.pois)) &&
       (p.streets == null || isFile(p.streets)) &&
       (p.places == null || isFile(p.places)) &&
-      (p.addresses == null || isFile(p.addresses)),
+      (p.addresses == null || isFile(p.addresses)) &&
+      (p.crossings == null || isFile(p.crossings)),
   );
   return {
     version: 1,

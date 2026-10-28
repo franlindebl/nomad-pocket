@@ -159,7 +159,7 @@ jobs:
         if: steps.what.outputs.routing == 'true'
         run: |
           docker run --rm -e CONC=4 -v "$PWD:/repo:ro" -v "$WORK:/work" "$VALHALLA_IMAGE" bash -c \
-            "apt-get update -qq && apt-get install -y -qq osmium-tool python3-pyosmium >/dev/null && bash /repo/scripts/routing/build-country.sh $COUNTRY /work/routing && chown -R $(id -u):$(id -g) /work"
+            "apt-get update -qq && apt-get install -y -qq osmium-tool python3-pyosmium python3-shapely >/dev/null && bash /repo/scripts/routing/build-country.sh $COUNTRY /work/routing && chown -R $(id -u):$(id -g) /work"
           ls -la "$WORK/routing/out"
       - name: Upload the routing pack
         if: steps.what.outputs.routing == 'true'
@@ -171,7 +171,7 @@ jobs:
           # The fragment names its release (the catalog keeps one per pack).
           python3 -I -c 'import json, sys; p = sys.argv[1]; m = json.load(open(p)); json.dump([dict(x, release=sys.argv[2]) for x in m], open(p, "w"), indent=1)' "$COUNTRY.packs.json" "$TAG"
           # Exactly the files the fragment lists (it drops empty packs and side files).
-          python3 -I -c 'import json, sys; [print(f["name"]) for p in json.load(open(sys.argv[1])) for f in p["parts"] + [x for x in (p["pois"], p.get("streets"), p.get("places"), p.get("addresses")) if x]]' \
+          python3 -I -c 'import json, sys; [print(f["name"]) for p in json.load(open(sys.argv[1])) for f in p["parts"] + [x for x in (p["pois"], p.get("streets"), p.get("places"), p.get("addresses"), p.get("crossings")) if x]]' \
             "$COUNTRY.packs.json" | xargs gh release upload "$TAG" --clobber --repo "$GITHUB_REPOSITORY"
           mkdir -p "$WORK/fragments" && cp "$COUNTRY.packs.json" "$WORK/fragments/"
           # Uploaded: the map needs the disk.

@@ -84,7 +84,7 @@ def tile_bbox(names):
 
 
 def described(path):
-    """A side file of a pack (points, streets, places, addresses), or None when missing or empty (GitHub
+    """A side file of a pack (points, streets, places, addresses, crossings), or None when missing or empty (GitHub
     refuses empty assets, and there is nothing to import)."""
     if not os.path.exists(path):
         return None
@@ -119,6 +119,8 @@ def fragment(out_dir, country, build_date, region=None):
             "streets": described(os.path.join(out_dir, f"{pid}.streets.tsv")),
             "places": described(os.path.join(out_dir, f"{pid}.places.tsv")),
             "addresses": described(os.path.join(out_dir, f"{pid}.addresses.tsv")),
+            # Where roads cross its border: routes across packs (crossings.py).
+            "crossings": described(os.path.join(out_dir, f"{pid}.crossings.tsv")),
         })
     json.dump(packs, sys.stdout, indent=1)
 

@@ -15,7 +15,7 @@ import i18n from '@/i18n';
 import { hasArrived, hasMoved, isWrongWay, movingBearing, pushFix, travelBearing, type TrackFix } from './follow-core';
 import { distanceMeters, isFreshFix, type LatLon } from './geo';
 import { watchScreenHeading } from './heading';
-import { computeRoute, packFor, RoutingError } from './routing';
+import { canRoute, computeRoute, RoutingError } from './routing';
 import { cumulativeDistances, isOffRoute, routeProgress, type Costing, type Route, type RouteProgress } from './routing-core';
 
 export type GuidanceTarget = LatLon & { name: string };
@@ -110,8 +110,8 @@ export const useGuidance = create<GuidanceState>((set, get) => {
     const { target, position, costing, heading, route } = get();
     if (!target || !position) return;
     lastRouteAt = Date.now();
-    if (!packFor(position, target)) {
-      // Left the pack's area mid-trip: the route we have is still the best guide.
+    if (!canRoute(position, target, costing)) {
+      // Left the packs' area mid-trip: the route we have is still the best guide.
       if (!route) set({ routing: 'none', progress: null, routeError: null });
       return;
     }

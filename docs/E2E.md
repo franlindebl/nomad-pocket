@@ -152,6 +152,7 @@ scripts/e2e.sh
      ├─ if tagged `seeded`: clone e2e/fixtures/*.zim into the app's Documents/content/zim/
      ├─ if tagged `seeded-map`: clone e2e/fixtures/*.pmtiles into Documents/content/maps/
      ├─ if tagged `seeded-route`: clone e2e/fixtures/routing/*.tar into Documents/content/routing/
+     ├─ if tagged `seeded-stitch`: clone e2e/fixtures/routing-stitch/* (two packs + crossings) there too
      ├─ if tagged `seeded-model`: clone e2e/fixtures/models/*.gguf into Documents/content/models/
      │   (the app registers loose files there at startup:
      │    src/features/{library,maps,assistant}/register.ts)
@@ -209,6 +210,7 @@ By hand:
   | `es-ml.pmtiles` | 0.6 MB | maps: Melilla up to zoom 12 (© OpenStreetMap, Protomaps build), a region map as older versions downloaded ("Otros mapas"), in git |
   | `maps/ad.pmtiles` | 2.5 MB | country download: Andorra up to zoom 10, served by the local catalog (`maps-server`; Protomaps build 2026-10-25, © OpenStreetMap), in git |
   | `routing/ad.tar`, `routing/ad.pois.tsv`, `routing/ad.streets.tsv` | 3 MB | routing: Andorra pack + emergency points + street names built by `scripts/routing/build-country.sh ad` (Valhalla 3.9.1, Geofabrik 2026-10-24, © OpenStreetMap), in git |
+  | `routing-stitch/xadw.tar`, `xade.tar`, `*.crossings.tsv` | 3.5 MB | routes across packs: Andorra cut at 1.555°E, each half built apart with its crossings, by `scripts/routing/stitch-fixture.sh` (Valhalla 3.9.1, Geofabrik 2026-10-28, © OpenStreetMap), in git |
   | `routing/ad.places.tsv`, `routing/ad.addresses.tsv` | 140 KB | named places and house numbers of Andorra from `scripts/routing/places.py` (Geofabrik 2026-10-25), served with the pack by the local pack server |
   | `models/Qwen3.5-0.8B-Q4_K_M.gguf` | 533 MB | assistant with a llama.cpp model (`seeded-model`), from Hugging Face |
 
@@ -263,6 +265,7 @@ By hand:
 | maps | `map-16-routing-github` | MAP-16 | nightly | routing-live, maps-server (published routing catalog, Andorra pack from GitHub, 3 MB) |
 | maps | `map-17-follow` | MAP-17 | full | seeded-route (navigation view; drives the CG-1 with Maestro `travel`) |
 | maps | `map-18-credit` | MAP-18 | full | — (OSM credit shown when the map first appears, then fades) |
+| maps | `map-19-stitch` | MAP-19 | full | seeded-stitch (a route across two packs built apart: Andorra cut in two, by car and on foot) |
 | courses | `crs-01-empty` | CRS-01 | smoke | — |
 | courses | `crs-02-course` | CRS-02, CRS-03, CRS-04 | full | seeded |
 | assistant | `ai-01-no-model` | AI-01, AI-02 | smoke | — |
@@ -312,6 +315,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
 
 - Put it in `e2e/flows/<area>/`, named after its main case. Tag `seeded` if it needs the
   ZIM fixtures, `seeded-map` for the map one, `seeded-route` for the routing pack,
+  `seeded-stitch` for the two packs to route across,
   `routing-server` if it downloads a routing pack from the local server, `maps-server` if
   it needs the local country maps catalog (Andorra), `routing-live`
   if it downloads a published one (needs internet and the live catalog), `seeded-model`
