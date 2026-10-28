@@ -95,6 +95,7 @@ Kiwix) and Qwen3.5 2B (1.3 GB, Hugging Face): 20.7 GB.
 | 5 | big Kiwix archives wait for the CDN files | **1:48** | **6:40** | **55.1 MB/s** |
 | 6 | start at a 300 MB CDN tail; skip sha-256 when every piece was checked; 80 s in the background | 1:44 | 9:00 | 32.9 MB/s (with the background) |
 | 7 | reserve queued at `inactive`; never-started background ranges dropped without blame; 2 min in the background | 1:45 | 8:25 | 35.9 MB/s (with the background) |
+| 8 | 2026-10-28, store prebuild of ea7718e (`NOMAD_STORE_BUILD=1`): segmented from 4 MiB, SQL side-file imports | 1:56 (pack 2:31, search 3:23) | **6:47** | 47.1 MB/s |
 
 What the traces showed, in order:
 
@@ -117,6 +118,12 @@ What the traces showed, in order:
    fastest mirrors for the "stall" and benched them (2.5 min to recover). Queued on `inactive`,
    run 7's reserve fetched ~1 GB in 2 min and the return was at full speed in ~10 s. While
    suspended nothing new can start, so a download at full speed needs the app open (keep-awake).
+
+Run 8 (2026-10-28) checked the 4 MiB threshold on the phone: the 12 guides (15–645 MB, the small ones now
+segmented) were done 49 s after the start, Qwen at 1:01, the map files at 1:56 and the routing pack at 2:31;
+the search imports took 51 s in all (pois 4.6 s, streets 16 s, places 10 s, addresses 20 s, SQL since builds
+18–19) and ended at 3:23, under Wikipedia's download, which ended the kit at 6:47 (47 MB/s over 4:42). Same
+as the best runs: the lower threshold costs nothing.
 
 Processing is not the bottleneck: joining a country's map parts takes 4–7 s, hashing a 2 GB part
 1.5 s, 13 GB 10 s (now skipped when every piece was checked), the search imports ~2 min (pois 7 s,

@@ -21,7 +21,7 @@ can pick up without re-deriving anything.
   is in the catalog of `docs/E2E.md`. On f4b32d4 (2026-10-28): smoke 21/21, full 20/20 after a stale `map-15`
   assertion was fixed (`map-19` flaked once on a tap), iPad tour 1/1. The flows added later (map-20/21/22, ai-09)
   passed on their own branches; on main afb07af smoke + full passed 43/43 (2026-10-28, after making the region
-  flows' `hideKeyboard` optional).
+  flows' `hideKeyboard` optional), then ai-09, map-22 and the Android tour (4/4) too.
 - Routes across routing packs (Madrid to Paris, US regions) are on main and pushed since bdc1fae/6f68b43
   (2026-10-28), but need packs that carry `<pack>.crossings.tsv`. The CI run that rebuilds them (run
   40681896621, launched by hand on 2026-10-28: `ad` and `pt` as the small check, under a Europe
@@ -177,7 +177,7 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
    budget built. Next: measure on a real iPhone and Android phone (background session
    scheduling, Wi-Fi speeds, the budget on the owner's 300 Mb/s line). Since 2026-10-28 files
    from 4 MiB go segmented and resume after an iOS kill; only one-chunk files (< 4 MiB) restart (BUG-CORE-16).
-   Time a whole kit on the phone again: 4–16 MB files now take the segmented path.
+   The whole kit on the phone with it: 6:47 (run 8, 2026-10-28), no slower.
 4. Map extraction: resumes after a kill since 2026-10-28. Still to do: move it off the JS thread (a native
    range fetcher writing at offsets, background URLSession / foreground service; ~3–5 days with both
    platforms), and a Retry for a failed extraction (today it continues on the next launch).
@@ -282,6 +282,23 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-28 — The batch's leftovers: Android, map-22/ai-09, store plist, kit on the iPhone
+
+- **Android** (release APK of ea7718e, Pixel_API_36): the tour passed 4/4 (its 12 MB archive now takes the
+  segmented path). The first try failed 4/4 on a "Pixel Launcher isn't responding" dialog over the app (the Mac
+  at load 80+ with three builds): an emulator problem, not the app. Copy/regenerate and the restore and
+  antimeridian changes were not tried on Android (no model on the emulator, no restore to replay).
+- **iOS**: `ai-09` passed on main's build. `map-22` passed after accepting the row while it prepares search
+  (it timed out at 3 min under load). The planet server's log shows the resume: the first finished range isn't
+  fetched again, the 7 around the kill are (they finished within the 1.5 s between saves, which is the design;
+  487ad4b adds a trailing save so a burst of completions is never left unsaved longer than that).
+- **Store prebuild** (`NOMAD_STORE_BUILD=1`, a signed Release build for the device): the app's `Info.plist`
+  keeps only the `nomadpocket` and bundle-id schemes and ATS `NSAllowsArbitraryLoads: false`; no `exp+`,
+  `RCTMetroPort`, `NSAllowsLocalNetworking` or Bonjour keys.
+- **The kit on the owner's iPhone 14 Pro** (that store build, fresh install, next to the router): 20.7 GB in
+  6:47, the guides in 0:49, the map at 1:56, search ready at 3:23 (imports 51 s), Wikipedia 47 MB/s: as fast
+  as the best runs, so segmenting from 4 MiB costs nothing (`docs/DOWNLOADS_SPEED_PLAN.md`, run 8).
 
 ### 2026-10-28 — Pending work batch: region E2E, full/iPad runs, three bugs, small extras
 
