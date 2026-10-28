@@ -8,7 +8,7 @@ import {
   buildRagUserMessage,
   buildRouterPrompt,
   buildSearchQueries,
-  buildTitleQueries,
+  buildTitleCandidates,
   buildToolResult,
   chunkText,
   citedNumbers,
@@ -25,6 +25,7 @@ import {
   ragMessageFrame,
   rankChunks,
   relevantChunks,
+  ROUTER_INSTRUCTIONS,
   SEARCH_TOOL_NAME,
   searchToolSpec,
   splitSentences,
@@ -78,10 +79,24 @@ describe('tokenizer', () => {
     assert.equal(nominalize('hervirla'), 'hervirla');
   });
 
-  test('buildTitleQueries: the first queries with verbs as nouns', () => {
-    const queries = buildSearchQueries('¿Cómo potabilizo agua sin hervirla?');
-    assert.deepEqual(buildTitleQueries(queries), ['potabilización agua hervirla', 'potabilización agua']);
-    assert.deepEqual(buildTitleQueries(['hipotermia']), ['hipotermia']);
+  test('buildTitleCandidates: survival topics and runs first, single words as a second tier', () => {
+    assert.deepEqual(buildTitleCandidates('How do I make water safe to drink without boiling it?')[0].slice(0, 2), [
+      'Water purification',
+      'Portable water purification',
+    ]);
+    assert.ok(buildTitleCandidates('¿Cómo potabilizo agua sin hervirla?')[0].includes('Potabilización del agua'));
+    assert.ok(buildTitleCandidates('How do I start a fire when everything is wet?')[0].includes('Fire making'));
+    assert.deepEqual(buildTitleCandidates('How do I start a fire when everything is wet?')[1], []);
+    // Facets never become titles ("signs" → a film).
+    assert.deepEqual(buildTitleCandidates('What are the signs of hypothermia and what should I do?'), [[], [['Hypothermia']]]);
+    assert.deepEqual(buildTitleCandidates('First aid for a minor burn'), [['First aid burn'], [['First aid'], ['Burn']]]);
+    // Singular before plural ("Burns" is a surname page); the head of a two-word topic only.
+    assert.deepEqual(buildTitleCandidates('How do I treat burns?')[1], [['Burn', 'Burns']]);
+    assert.deepEqual(buildTitleCandidates('How do I stop heavy bleeding?'), [['Heavy bleeding'], [['Bleeding', 'Heavy']]]);
+    assert.deepEqual(buildTitleCandidates('¿Cómo detengo una hemorragia?')[1], [['Detengo', 'Hemorragia']]);
+    assert.deepEqual(buildTitleCandidates('Primeros auxilios para una quemadura leve')[1], [['Primeros auxilios'], ['Quemadura']]);
+    assert.deepEqual(buildTitleCandidates('How does photosynthesis work?')[1], [['Photosynthesis']]);
+    assert.deepEqual(buildTitleCandidates('heat stroke symptoms')[0], ['Heat stroke']);
   });
 
   test('detectLanguage', () => {
@@ -307,6 +322,16 @@ describe('system prompt', () => {
     assert.match(systemPrompt('es', 'chat', { health: true }), /no consejo médico/);
     assert.doesNotMatch(systemPrompt('es', 'chat'), /consejo médico/);
     assert.match(systemPrompt('en', 'sources'), /\[1\]/);
+  });
+
+  test('answers from sources carry no small-talk lines; the router keeps the question language', () => {
+    assert.match(systemPrompt('es', 'chat'), /chistes/);
+    assert.doesNotMatch(systemPrompt('es', 'sources'), /chistes/);
+    assert.doesNotMatch(systemPrompt('en', 'sources'), /jokes/);
+    assert.match(ROUTER_INSTRUCTIONS, /same language as the latest message/);
+    // retrieve() drops a model query whose language isn't the question's.
+    assert.equal(detectLanguage('purificación de agua sin hervir', 'en'), 'es');
+    assert.equal(detectLanguage('water purification', 'en'), 'en');
   });
 
   test('modes: chat talks naturally, tools explains when to search', () => {

@@ -180,14 +180,10 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 - **Seen while making the 1.1.0 store screenshots** (2026-10-27, iOS 27 simulators with the Spain kit in
   Madrid and the US Northeast kit in New York; build 21). Fixed in c03c0cc / c7cf754: wrong neighbourhood
   on search rows, Home's first aid opening English PDFs for Spanish users, the assistant's greeting,
-  Spanish retrieval ("potabilizo"), empty image boxes in nopic archives. Still open:
-  - **Assistant retrieval in English** (en-US, English Wikipedia complete (compact) 14.4 GB + 10 guides,
-    Apple Intelligence, before c7cf754): "What are the signs of hypothermia and what should I do?" cited
-    "Una cepa de Salmonella…" and said the library had nothing; "How do I start a fire when everything is
-    wet?" cited a Billboard Year-End chart; "How do I make water safe to drink without boiling it?" found
-    nothing. **Still on build 22** (c7cf754's title lookup, same simulator): the water question gets "I
-    couldn't find this in your library" and a cloth-strainer tip. Fix before 1.1.0 reaches English users.
-  - Once (iPad, Spanish) a burn first-aid answer added a joke about burning yourself with coffee.
+  Spanish retrieval ("potabilizo"), empty image boxes in nopic archives. Then fixed for build 23
+  (log 2026-10-28): assistant retrieval in English (Apple's router translated queries into Spanish;
+  English noise words; exact-title lookup) and small talk inside answers with sources (the coffee joke
+  in a burn answer). Still open:
   - Distances are metric only (`lib/format.ts`, guidance): an en-US user in New York sees "3.1 km" and
     "10 m"; the US (and the UK for road distances) expect miles and feet/yards. English copy also uses
     British words ("torch", "health centre") for US users.
@@ -272,6 +268,36 @@ monetization; the owner replied in the Resolution Center). Plan agreed with the 
   alone), iPad tour 1/1 (a first run caught the reader before its page painted; passed on a rerun).
 - What the screenshots turned up went to the backlog; the neighbourhood, first-aid, greeting, Spanish
   retrieval and empty-box items were fixed by another session in c03c0cc / c7cf754 (build 22).
+
+### 2026-10-28 — Assistant: retrieval in English (router language, noise words, exact titles)
+
+Reported by the screenshots session (en-US, US Northeast kit: English Wikipedia complete (compact) +
+10 guides, Apple Intelligence): water without boiling → "I couldn't find this in your library",
+hypothermia → "Una cepa de Salmonella…", wet fire → a Billboard chart, minor burn → Mecca Ointment.
+Reproduced offline with a harness (libzim over that simulator's ZIMs, the same pipeline as `rag.ts`)
+and in the app with a temporary log of the router's decision. Causes and fixes:
+- **Apple's router wrote the query in Spanish** ("purificación de agua sin hervir" for an English
+  question): `ROUTER_INSTRUCTIONS` only had Spanish examples. Now it says to keep the message's language,
+  with English examples, and `retrieve` ignores a model query in another language than the question.
+- **English noise words** were not stopwords ("without", "everything", "start", "minor", "safe", "stop",
+  "long"…), so libzim's all-words query hit song lists and the broad single-word query was "without" or
+  "everything". Facets ("signs", "treat") are never searched alone; "first aid" / "primeros auxilios" stay
+  one keyword.
+- **Exact-title lookup** replaces c7cf754's title-index lookup (which turned "signs" into the film
+  *Signs*): `buildTitleCandidates` gives survival topics (water treatment → Water purification, Portable
+  water purification, Solar water disinfection, Potabilización del agua; fire → Fire making, Hacer fuego;
+  signalling → Distress signal, SOS), then runs of 2–3 topic words, then compounds and the head word
+  (alternatives: "Burn" before "Burns", "Bleeding" for "heavy bleeding"). Found by path (redirects
+  resolved), ranked first and weighted ×2.5 when ranking chunks. Full-text search over a whole Wikipedia
+  doesn't even return "Burn" for "burn".
+- **Small talk in answers with sources**: the tone lines about jokes and talking about itself are only
+  in chat mode now (a burn answer said "I like how my little corner of Nomad Pocket…").
+
+In the app (iOS 27 simulator, Apple Intelligence): water → chemical disinfection, filtration, SODIS and
+portable purifiers citing Water purification, Portable water purification, Solar water disinfection and
+CDC; hypothermia → signs and what to do from Hypothermia and CDC; minor burn → First aid, Burn, First aid
+kit (twice, no filler); wet fire → Fire making. Spanish checked in the harness with Wikipedia Médica
+(Quemadura + Primeros auxilios, Hipotermia, Hemorragia, Agua potable). Smoke E2E 21/21.
 
 ### 2026-10-27 — Release: 1.1.0 build 22 to TestFlight
 

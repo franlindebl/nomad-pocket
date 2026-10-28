@@ -942,7 +942,8 @@ without them are fetched on their own when the sheet opens online) and `route-st
   temperature?, maxTokens? }, onDelta)` (events `onDelta {requestId, delta, reset?}` /
   `onDone` / `onError`), `cancel(id)`, `route(prompt,
   instructions)` → `{ search, query }` (iOS: guided generation with a `@Generable`
-  struct, greedy). iOS weak-links FoundationModels (iOS 26+). The module is Apple-only (no android/ folder):
+  struct, greedy; it once wrote Spanish queries for English questions, so `retrieve` drops a model query
+  in another language than the question). iOS weak-links FoundationModels (iOS 26+). The module is Apple-only (no android/ folder):
   on Android the bridge isn't linked, the status is `unsupported`, `HAS_SYSTEM_MODEL`
   (`system.ts`) hides the system model in the models screen and onboarding, and a stale
   `aiModelId === 'system'` is reset at startup. The Android assistant uses GGUF models only.
@@ -986,8 +987,9 @@ without them are fetched on their own when the sheet opens online) and `route-st
   "¿y cómo se trata?" inherits the previous question's keywords, `followUpTopic`, only when the
   question has at most one word of its own; the question's own queries are always searched; questions
   over 600 chars are searched once, after the sources, not twice) → libzim
-  full-text search across archives, plus the title index for articles named after the question
-  (`buildTitleQueries`: "potabilizo" → "potabilización", ranked first; reciprocal-rank fusion) → up to 6 distinct articles
+  full-text search across archives, plus articles named after the question found by exact path
+  (`buildTitleCandidates`: survival topics, word runs, the head word; ranked first and weighted when ranking
+  chunks; reciprocal-rank fusion) → up to 6 distinct articles
   (redirects counted once) → chunks of 650 chars → BM25 (with title and search-rank
   boosts) → drop chunks sharing too few question terms (`relevantChunks`) → pack the
   best chunks into the model's budget as numbered sources → `[n]` citations, in the user

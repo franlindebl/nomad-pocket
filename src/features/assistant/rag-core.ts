@@ -9,13 +9,13 @@ export type Lang = 'es' | 'en';
 
 const STOPWORDS_ES = new Set(
   (
-    'a al algo algun alguna algunas alguno algunos ante antes aqui asi aun bajo bien cada casi como con contra cual cuales cuando cuanto cuanta de del desde donde dos el ella ellas ello ellos en entre era eran es esa esas ese eso esos esta estaba estan estar este esto estos fue fueron ha habia han hasta hay la las le les lo los mas me mi mis mucho muy nada ni no nos o otra otras otro otros para pero poco por porque puede pueden que quien quienes se ser si sin sobre son su sus tambien tan tanto te tiene tienen todo todos tu tus un una unas uno unos usted y ya yo hacer hago hace cosa cosas debo debe deberia puedo quiero saber explica explicame dime cual cuales sirve sirven mejor forma manera'
+    'a al algo algun alguna algunas alguno algunos ante antes aqui asi aun bajo bien cada casi como con contra cual cuales cuando cuanto cuanta de del desde donde dos el ella ellas ello ellos en entre era eran es esa esas ese eso esos esta estaba estan estar este esto estos fue fueron ha habia han hasta hay la las le les lo los mas me mi mis mucho muy nada ni no nos o otra otras otro otros para pero poco por porque puede pueden que quien quienes se ser si sin sobre son su sus tambien tan tanto te tiene tienen todo todos tu tus un una unas uno unos usted y ya yo hacer hago hace cosa cosas debo debe deberia puedo quiero saber explica explicame dime cual cuales sirve sirven mejor forma manera mientras leve'
   ).split(' '),
 );
 
 const STOPWORDS_EN = new Set(
   (
-    'a about above after again all also am an and any are as at be because been before being below between both but by can could did do does doing down during each few for from further had has have having he her here hers him his how i if in into is it its itself just me more most my no nor not now of off on once only or other our out over own same she should so some such than that the their them then there these they this those through to too under until up very was we were what when where which while who whom why will with would you your yours tell explain please best way ways thing things know get make need want much many'
+    'a about above after again all also am an and any are as at be because been before being below between both but by can could did do does doing down during each few for from further had has have having he her here hers him his how i if in into is it its itself just me more most my no nor not now of off on once only or other our out over own same she should so some such than that the their them then there these they this those through to too under until up very was we were what when where which while who whom why will with would you your yours tell explain please best way ways thing things know get make need want much many without everything anything something nothing start starting started keep use using minor safe safely really someone somebody happen happens stop long last lasts'
   ).split(' '),
 );
 
@@ -109,18 +109,36 @@ export function detectLanguage(text: string, fallback: Lang = 'en'): Lang {
 // Courtesy words that would only add noise to a search ("hola, ¿cómo se cura…?").
 const COURTESY = new Set(['hola', 'buenas', 'buenos', 'hey', 'hello', 'gracias', 'thanks', 'thank', 'please', 'porfa', 'favor']);
 
-/** Keywords of a question in their original spelling (lowercase, accents kept). */
+// Two-word terms that mean nothing apart ("first" alone was the broad fallback of "first aid for a burn").
+const COMPOUNDS = new Set(['first aid', 'primeros auxilios']);
+
+/** Keywords of a question in their original spelling (lowercase, accents kept); compounds stay whole. */
 export function extractKeywords(question: string): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
-  for (const raw of question.toLowerCase().match(WORD_RE) ?? []) {
+  const raws = question.toLowerCase().match(WORD_RE) ?? [];
+  for (let i = 0; i < raws.length; i++) {
+    const raw = raws[i];
     const n = normalize(raw);
+    const pair = i + 1 < raws.length ? `${n} ${normalize(raws[i + 1])}` : '';
+    if (COMPOUNDS.has(pair)) {
+      if (!seen.has(pair)) out.push(`${raw} ${raws[i + 1]}`);
+      seen.add(pair);
+      i++;
+      continue;
+    }
     if (n.length < 3 && !/^\d+$/.test(n)) continue;
     if (isStopword(n) || COURTESY.has(n) || seen.has(n)) continue;
     seen.add(n);
     out.push(raw);
   }
   return out;
+}
+
+/** A facet of a topic ("signs", "tratamiento"): no query or title on its own. */
+function isFacet(keyword: string): boolean {
+  const n = normalize(keyword);
+  return FACET_PREFIXES.some((p) => n.startsWith(p));
 }
 
 /**
@@ -142,27 +160,60 @@ export function buildSearchQueries(question: string, max = 4): string[] {
   else if (kw.length > 1) {
     for (const drop of [kw.length - 1, kw.length - 2]) queries.push(kw.filter((_, i) => i !== drop).join(' '));
   }
-  if (kw.length > 1) queries.push(byLength[0]);
-  return [...new Set(queries)].slice(0, max);
+  const broad = byLength.find((k) => !isFacet(k));
+  if (kw.length > 1 && broad) queries.push(broad);
+  // A query of facets alone ("signs") finds anything; the first one stays (the question may be only that).
+  const [first, ...rest] = queries;
+  return [...new Set([first, ...rest.filter((q) => q.split(' ').some((w) => !isFacet(w)))])].slice(0, max);
 }
 
 /**
  * A Spanish "-izar" / "-ificar" verb as its "-ción" noun ("potabilizo" → "potabilización"):
- * questions name the action, article titles the process, and the title index wants whole words.
+ * questions name the action, article titles the process.
  */
 export function nominalize(word: string): string {
   const m = /^(.{3,}?)(iz|ific)(?:o|a|as|an|amos|ar|arl[aeo]s?|ando)$/.exec(word);
   return m ? `${m[1]}${m[2]}ación` : word;
 }
 
+// Survival topics whose best articles a question rarely names: [topic, action, titles to try].
+const TOPIC_TITLES: [RegExp, RegExp, string[]][] = [
+  [
+    /\b(agua|water)\b/,
+    /potabiliz|purific|desinfect|depur|potable|beber|bebible|filtr|hervir|drink|purif|disinfect|clean|treat|filter|boil/,
+    ['Water purification', 'Portable water purification', 'Solar water disinfection', 'Potabilización del agua', 'Desinfección solar del agua'],
+  ],
+  [/\b(fire|fuego|hoguera|fogata|campfire)\b/, /start|make|light|build|wet|encend|hacer|prend|mojad|humed/, ['Fire making', 'Hacer fuego']],
+  [/\b(signal|signals|señal|senal|señales|senales)\b/, /help|rescue|distress|ayuda|socorro|rescate/, ['Distress signal', 'SOS', 'Señal de socorro']],
+];
+
 /**
- * Queries for the archives' title index: the first search queries with their verbs as nouns.
- * An article named after the question ("Potabilización del agua" for "¿Cómo potabilizo agua?")
- * is the best source, but full-text ranking buries it under titles that repeat a word
- * ("Planta Potabilizadora de …").
+ * Article titles to look up by exact path, in two tiers: survival topics and runs of 2–3 topic
+ * words first; compounds ("First aid") and, for a topic of one or two words, a single word only
+ * when nothing better matched (the caller checks). Each second-tier entry lists alternatives, the
+ * first found wins: the likely head first ("heavy bleeding" → "Bleeding", "quemadura leve" →
+ * "Quemadura"; "detengo hemorragia" falls through to "Hemorragia"), singular before plural. Full-text ranking over a
+ * whole Wikipedia buries the article named after the question ("burn" → surnames, "signs" → a
+ * film, "start fire everything wet" → song lists); its exact title doesn't miss.
  */
-export function buildTitleQueries(queries: string[], max = 2): string[] {
-  return [...new Set(queries.slice(0, max).map((q) => q.split(' ').map(nominalize).join(' ')))];
+export function buildTitleCandidates(question: string, max = 6): [string[], string[][]] {
+  const norm = normalize(question);
+  const topics = TOPIC_TITLES.filter(([topic, action]) => topic.test(norm) && action.test(norm)).flatMap(([, , titles]) => titles);
+  const words = extractKeywords(question)
+    .filter((k) => !isFacet(k))
+    .map((k) => (k.includes(' ') ? k : nominalize(k)));
+  const runs: string[] = [];
+  for (const n of [3, 2]) for (let i = 0; i + n <= words.length; i++) runs.push(words.slice(i, i + n).join(' '));
+  const compounds = words.filter((w) => w.includes(' '));
+  const plain = words.filter((w) => !w.includes(' '));
+  // The head of a two-word topic: last in English ("heavy bleeding"), first in Spanish ("quemadura leve").
+  const heads = plain.length === 1 || (plain.length === 2 && !compounds.length) ? (detectLanguage(question) === 'es' ? plain : [...plain].reverse()) : [];
+  // Singular first: "Burns" is a surname page, "Burn" the injury ("photosynthesis" stays whole).
+  const single = topics.length ? [] : heads.flatMap((w) => (/[^siu]s$/.test(w) && w.length > 4 ? [w.slice(0, -1), w] : [w]));
+  const title = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+  const first = [...new Set([...topics, ...runs.map(title)])].slice(0, max);
+  const second = [...compounds.map((c) => [c]), ...(single.length ? [single] : [])].map((alts) => alts.map(title));
+  return [first, second.filter((alts) => !alts.some((t) => first.includes(t)))];
 }
 
 const FOLLOW_UP_START = new Set(['y', 'e', 'and', 'pero', 'but', 'entonces', 'so', 'tambien', 'also', 'ademas', 'besides']);
@@ -171,7 +222,7 @@ const ANAPHORA = new Set(['eso', 'esto', 'ello', 'it', 'that', 'this', 'them', '
 const FACET_PREFIXES = [
   'trat', 'cura', 'curar', 'sintom', 'caus', 'preven', 'evit', 'funcion', 'dura', 'tipo', 'riesg', 'peligr', 'grav', 'signific', 'diagnost',
   'origen', 'efect', 'dosis', 'mortal', 'contagi', 'ejempl', 'historia', 'ventaj', 'desventaj',
-  'symptom', 'treat', 'cure', 'cause', 'prevent', 'avoid', 'work', 'risk', 'danger', 'type', 'effect', 'sign', 'diagnos', 'origin',
+  'symptom', 'treat', 'cure', 'cause', 'prevent', 'avoid', 'work', 'risk', 'danger', 'type', 'effect', 'signs', 'diagnos', 'origin',
   'example', 'history', 'advantage', 'disadvantage',
 ];
 
@@ -297,6 +348,8 @@ export type Chunk = {
   index: number;
   /** Rank of the article in the search engine's results (0 = best), if known. */
   hitRank?: number;
+  /** The article is named after the question (found by its exact title). */
+  named?: boolean;
 };
 
 /**
@@ -437,7 +490,9 @@ export function rankChunks(question: string, chunks: Chunk[], limit = 12): Score
       const lead = 1 + 0.15 / (1 + c.index);
       const title = 1 + 0.8 * titleBoost(c.title);
       const engine = c.hitRank === undefined ? 1 : 1 + 0.3 / (1 + c.hitRank);
-      return { item: c, score: s.score * lead * title * engine };
+      // An article named after the question beats one that only repeats its words ("Wet blanket").
+      const named = c.named ? 2.5 : 1;
+      return { item: c, score: s.score * lead * title * engine * named };
     })
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
@@ -640,16 +695,20 @@ export const ROUTER_INSTRUCTIONS = [
   "You route messages for an offline assistant. The assistant can search the user's offline library (Wikipedia, medicine, survival, DIY) before answering.",
   'Set search to true only when the latest message asks for information the assistant should look up: facts, people, places, history, science, health, techniques or how to do something. Follow-up questions about a topic ("¿y cómo se trata?", "¿y en niños?") also need a search.',
   'Set search to false for everything else: greetings, how are you, thanks, okay/great, goodbye, jokes, small talk, questions about the assistant itself, and requests to rephrase, simplify, shorten, summarize, translate or continue the previous answer.',
+  // With Spanish examples only, Apple's model wrote "purificación de agua" for an English question,
+  // and an English library had nothing for it.
+  'Write the query in the same language as the latest message, never translated.',
   '',
   'Examples:',
   '"hola" → false',
-  '"¿qué tal estás?" → false',
-  '"gracias!" → false',
+  '"thanks!" → false',
   '"¿quién eres?" → false',
-  '"cuéntame un chiste" → false',
+  '"tell me a joke" → false',
   '"explícamelo más fácil" → false',
   '"¿Quién fue Cervantes?" → true, "Miguel de Cervantes"',
+  '"How do I tie a bowline?" → true, "bowline knot"',
   '"¿cómo hago un nudo as de guía?" → true, "nudo as de guía"',
+  '"and what are the symptoms?" (after talking about scurvy) → true, "scurvy symptoms"',
   '"¿y cuáles son los síntomas?" (after talking about scurvy) → true, "síntomas escorbuto"',
 ].join('\n');
 
@@ -694,7 +753,9 @@ export type PromptMode = 'chat' | 'sources' | 'tools';
 
 export function systemPrompt(lang: Lang, mode: PromptMode, opts: { health?: boolean; library?: boolean } = {}): string {
   const [intro, tone, smallTalk, style] = SYSTEM[lang];
-  const parts = mode === 'tools' ? [intro, TOOLS_TONE[lang], style] : [intro, tone, smallTalk, style];
+  // Answers from sources or tools get no small-talk lines: with them Apple Intelligence put a remark
+  // about itself in the middle of a first-aid answer ("I like how my little corner of Nomad Pocket…").
+  const parts = mode === 'chat' ? [intro, tone, smallTalk, style] : [intro, TOOLS_TONE[lang], style];
   if (opts.health) parts.push(HEALTH_NOTE[lang]);
   const base = parts.join(' ');
   if (mode === 'tools') return `${base}\n\n${TOOL_RULES[lang]}`;
