@@ -1,0 +1,44 @@
+# MAP-20 — an on-device map extraction (Switzerland, a country the maps catalog lacks) survives
+# the app being killed: it continues from the saved progress instead of starting over, and ends
+# as one installed map. Needs the app built with PLANET_PORT (scripts/e2e.sh: the extraction
+# reads scripts/dev-planet-server.ts, slowed down so there is time to kill the app mid-way).
+appId: com.fjlinde.nomadpocket
+tags: [full, maps, maps-server, planet-server]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: "Elegir un país"
+    timeout: 20000
+- tapOn: "Elegir un país"
+- tapOn: "Buscar un país"
+- inputText: "Suiza"
+- tapOn: { id: "country-ch" }
+- extendedWaitUntil:
+    visible: "Descargar · .*"
+    timeout: 60000
+- tapOn: "Descargar · .*"
+- extendedWaitUntil:
+    visible: { id: "country-row" }
+    timeout: 10000
+# Let a few requests land, then kill the app mid-extraction.
+- waitForAnimationToEnd:
+    timeout: 8000
+- takeScreenshot: 01-before-kill
+- killApp
+- launchApp:
+    stopApp: false
+# Home shows the resumed job (progress picks up where it was, not from 0).
+- extendedWaitUntil:
+    visible: ".*descarga activa.*"
+    timeout: 60000
+- takeScreenshot: 02-resumed
+- extendedWaitUntil:
+    notVisible: ".*descarga activa.*"
+    timeout: 300000
+- tapOn: { id: "map" }
+- tapOn: "Tus mapas"
+- extendedWaitUntil:
+    visible: "(?s).*Mapa · .*"
+    timeout: 180000
+- takeScreenshot: 03-installed

@@ -564,7 +564,18 @@ regionId, estimate })` runs as an external download job on the JS thread with th
 kept awake, writes `partial/map-<key>.pmtiles.part`, moves it to `content/maps/<key>.pmtiles`
 and upserts `{ kind: 'map', id: 'map-<key>', meta: { role: 'world'|'region', bbox,
 minZoom, maxZoom, buildDate, regionId, bundledPoints } }`. Only the fallback for a country
-the maps catalog doesn't have: `bestZoom(bbox)` = 15, lower only above 2.5 M tiles. Jobs live in memory (not resumed after a kill). Loose `.pmtiles` files
+the maps catalog doesn't have: `bestZoom(bbox)` = 15, lower only above 2.5 M tiles. **Resume after a kill** (pure
+bookkeeping in `extraction-core.ts`): the plan is deterministic for a pinned build + bbox + zooms, so
+the kv key `maps.extractions` keeps each running job's inputs, the planet build it started with, a
+fingerprint of its plan and the indices of the tile requests already written to the `.part`
+(run-length text, saved at most every 1.5 s; `executeExtract` takes `done` / `onRequestDone`). At
+startup `resumeMapDownloads()` (from `register.ts`, in a `setTimeout`) re-plans against the saved build
+(a few seconds), skips the finished requests and continues in the same `.part`; the saved progress is
+void (start over) if the server no longer has that build, the plan's shape differs or the `.part` is
+shorter than what the finished requests wrote. Cancel and failure delete the `.part` and the saved job;
+`.part` files without a saved job are deleted at startup. `EXPO_PUBLIC_PLANET_BUILD_URL` (dev/E2E) replaces
+the Protomaps build with `scripts/dev-planet-server.ts` (synthetic planet with Range and a delay;
+`PLANET_PORT` in `scripts/e2e.sh`, flow `map-20-extract-resume`). Loose `.pmtiles` files
 are registered at startup from their header (`register.ts`; a region id as file name
 gives the region's name).
 

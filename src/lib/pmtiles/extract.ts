@@ -372,12 +372,16 @@ export async function planExtract(source: RangeSource, opts: PlanOptions): Promi
 }
 
 export type ExecuteOptions = {
+  /** Indices of `plan.requests` already written to the sink (a resumed job): skipped. */
+  done?: ReadonlySet<number>;
+  /** Called once a request's tiles are fully written. */
+  onRequestDone?: (index: number) => void;
   concurrency?: number;
   signal?: AbortSignal;
   onProgress?: (p: ExtractProgress) => void;
 };
 
-/** Downloads the planned tiles into `sink`. The sink must start empty. */
+/** Downloads the planned tiles into `sink`. The sink starts empty unless `opts.done` lists requests it already holds. */
 export async function executeExtract(source: RangeSource, plan: ExtractPlan, sink: Sink, opts: ExecuteOptions = {}): Promise<void> {
   const { signal, onProgress } = opts;
   // Our own controller so in-flight requests stop when one of them fails.
@@ -389,8 +393,13 @@ export async function executeExtract(source: RangeSource, plan: ExtractPlan, sin
     await sink.write(0, plan.prefix);
     const base = plan.header.tileDataOffset;
     let done = 0;
-    onProgress?.({ phase: 'tiles', bytes: 0, totalBytes: plan.downloadBytes });
-    await pool(plan.requests, opts.concurrency ?? DEFAULTS.concurrency, ctrl.signal, async (req) => {
+    const pending: { req: TileRequest; index: number }[] = [];
+    plan.requests.forEach((req, index) => {
+      if (opts.done?.has(index)) done += req.length;
+      else pending.push({ req, index });
+    });
+    onProgress?.({ phase: 'tiles', bytes: done, totalBytes: plan.downloadBytes });
+    await pool(pending, opts.concurrency ?? DEFAULTS.concurrency, ctrl.signal, async ({ req, index }) => {
       try {
         const data = await source.getBytes(req.offset, req.length, ctrl.signal);
         const c = req.copies;
@@ -400,6 +409,7 @@ export async function executeExtract(source: RangeSource, plan: ExtractPlan, sin
         throw e;
       }
       done += req.length;
+      opts.onRequestDone?.(index);
       onProgress?.({ phase: 'tiles', bytes: done, totalBytes: plan.downloadBytes });
     }).catch((e) => {
       if (signal?.aborted) throw new AbortError();

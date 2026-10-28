@@ -65,6 +65,12 @@ ROUTING_PORT="${ROUTING_PORT:-8765}"
 export EXPO_PUBLIC_ROUTING_MANIFEST_URL="http://localhost:$ROUTING_PORT/routing-manifest.json"
 export EXPO_PUBLIC_MAPS_MANIFEST_URL="http://localhost:$ROUTING_PORT/maps-manifest.json"
 
+# Set PLANET_PORT to build an app whose on-device map extraction reads the stand-in planet build
+# (scripts/dev-planet-server.ts, started below for `planet-server` flows) instead of Protomaps.
+if [[ -n "${PLANET_PORT:-}" ]]; then
+  export EXPO_PUBLIC_PLANET_BUILD_URL="http://localhost:$PLANET_PORT/20260101.pmtiles"
+fi
+
 if [[ $BUILD -eq 1 || ! -d "$APP" ]]; then
   echo "Building ${APP}…"
   xcodebuild -workspace "$ROOT/ios/NomadPocket.xcworkspace" -scheme NomadPocket \
@@ -116,6 +122,14 @@ PY
   python3 -m http.server "$ROUTING_PORT" --bind 127.0.0.1 --directory "$SERVE" >/dev/null 2>&1 &
   SERVER_PID=$!
   trap '[[ -n "$SERVER_PID" ]] && kill "$SERVER_PID" 2>/dev/null' EXIT
+fi
+
+# `planet-server` flows: the stand-in planet build, slow enough to kill the app mid-extraction.
+if [[ -n "${PLANET_PORT:-}" ]] && printf '%s\n' "${FLOWS[@]}" | xargs grep -lE '^tags:.*[[ ,]planet-server[],]' >/dev/null 2>&1; then
+  node --experimental-strip-types "$ROOT/scripts/dev-planet-server.ts" --port "$PLANET_PORT" --delay "${PLANET_DELAY:-1500}" >"${TMPDIR:-/tmp}/planet-server.log" 2>&1 &
+  PLANET_PID=$!
+  trap '[[ -n "$SERVER_PID" ]] && kill "$SERVER_PID" 2>/dev/null; kill "$PLANET_PID" 2>/dev/null' EXIT
+  until curl -s -o /dev/null -H 'Range: bytes=0-0' "http://localhost:$PLANET_PORT/"; do sleep 1; done
 fi
 
 OUT="$ROOT/e2e/artifacts/$(date +%Y%m%d-%H%M%S)"

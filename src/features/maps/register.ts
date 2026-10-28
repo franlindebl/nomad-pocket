@@ -8,12 +8,12 @@ import { registerInit } from '@/features/bootstrap';
 import { registerCompletionHandler } from '@/features/downloads/manager';
 import { getItem, listItems, onItemRemoved, upsertItem } from '@/features/content/items';
 import { HEADER_SIZE, parseHeader } from '@/lib/pmtiles/format';
-import { contentDir, deleteFile, partialDir } from '@/lib/storage';
+import { contentDir, deleteFile } from '@/lib/storage';
 
 import { routePacksFor } from './country-core';
 import { onMapFileDownloaded, refreshMapsCatalog, resumeMapImports, sweepCountryMapFiles, useMapsCatalog } from './country-maps';
 import { cancelEmergencySync, syncEmergencyPoints } from './emergency';
-import { forgetEstimates, mapItemId, onMapInstalled, WORLD_ID, type MapItemMeta } from './extraction';
+import { forgetEstimates, mapItemId, onMapInstalled, resumeMapDownloads, WORLD_ID, type MapItemMeta } from './extraction';
 import { useMarkers } from './markers';
 import { forgetMapSource, indexDetailAround, indexDetailAroundView, indexStaleMaps, invalidateIndex } from './places';
 import { getRegion, regionName } from './regions';
@@ -73,16 +73,8 @@ function registerLooseMap(file: File) {
 
 registerInit(() => {
   useMarkers.getState().refresh();
-  // Extraction jobs live in memory; a relaunch leaves their partial files behind.
-  for (const entry of partialDir().list()) {
-    if (entry.name.startsWith('map-') && entry.name.endsWith('.pmtiles.part')) {
-      try {
-        entry.delete();
-      } catch {
-        // in use or gone
-      }
-    }
-  }
+  // Extractions interrupted by a kill continue from their saved progress (leftover .part files are dropped).
+  setTimeout(resumeMapDownloads, 0);
   // Items store absolute URIs that go stale when iOS moves the container: compare names.
   const known = new Set(listItems('map').map((i) => decodeURIComponent(i.fileUri.split('/').pop() ?? '')));
   for (const entry of contentDir('map').list()) {
