@@ -23,7 +23,7 @@ import { Stepper } from '@/features/prepare/components';
 import { DAY_OPTIONS, formatMonth, HOUSEHOLD_MAX, supplies } from '@/features/prepare/kit';
 import { useKitGroups, type KitRow } from '@/features/prepare/rows';
 import { usePrepare } from '@/features/prepare/store';
-import { formatNumber } from '@/lib/format';
+import { formatNumber, formatWater } from '@/lib/format';
 import { space, useTheme } from '@/theme';
 
 function Stat({ label, value }: { label: string; value: string }) {
@@ -96,7 +96,7 @@ export default function KitScreen() {
 
       <Card style={{ marginTop: space.md, gap: space.md }}>
         <Row gap={space.md} align="flex-start">
-          <Stat label={t('kit.water')} value={t('kit.quantity.water', { liters: formatNumber(s.waterLiters) })} />
+          <Stat label={t('kit.water')} value={formatWater(s.waterLiters)} />
           <Stat label={t('kit.food')} value={`${formatNumber(s.foodKcal)} kcal`} />
           <Stat label={t('kit.medication')} value={t('kit.quantity.medication', { days: s.medicationDays })} />
         </Row>

@@ -95,7 +95,7 @@
     "kitAttention_other": "{{count}} items expire soon",
     "kitExpired_one": "{{count}} item has expired: replace it",
     "kitExpired_other": "{{count}} items have expired: replace them",
-    "kitTodo": "Water, food, torch, radio, first-aid kit…",
+    "kitTodo": "Water, food, flashlight, radio, first-aid kit…",
     "mapUpdate": "A newer version is out: update it while you're online",
     "planMeeting": "Meeting point set · add contacts",
     "planContacts_one": "{{count}} contact · no meeting point yet",

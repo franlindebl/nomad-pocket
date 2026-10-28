@@ -35,13 +35,12 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Button, Card, Chip, IconButton, Row, Text } from '@/components/ui';
-import { formatDuration } from '@/lib/format';
+import { formatDistance, formatDuration } from '@/lib/format';
 import { space, useTheme } from '@/theme';
 
 import { hasArrived } from './follow-core';
 import { bearingDegrees, compassSector, distanceMeters } from './geo';
 import { useGuidance } from './guidance';
-import { formatDistance } from './labels';
 import { useRoutingCatalog } from './routing-packs';
 import { COSTINGS, maneuverIcon, packsCovering, remainingSeconds, STRAIGHT_LINE_SPEED, type Costing, type ManeuverIcon } from './routing-core';
 
@@ -127,7 +126,7 @@ export function GuidancePanel({ bottom, top, mapBearing, onHeight, onBannerHeigh
   const remaining =
     following && progress
       ? t('route.remaining', {
-          distance: formatDistance(progress.remainingM, i18n.language),
+          distance: formatDistance(progress.remainingM),
           time: formatDuration(remainingSeconds(route, progress.remainingM)),
           eta: clock(remainingSeconds(route, progress.remainingM), i18n.language),
         })
@@ -169,7 +168,7 @@ export function GuidancePanel({ bottom, top, mapBearing, onHeight, onBannerHeigh
         </View>
         <View style={{ flex: 1, gap: 2 }}>
           <Text variant="title1" tabular testID="guidance-next-distance">
-            {formatDistance(progress.toNextM, i18n.language)}
+            {formatDistance(progress.toNextM)}
           </Text>
           <Text variant="callout" numberOfLines={2} testID="guidance-next">
             {next.instruction}
@@ -188,7 +187,7 @@ export function GuidancePanel({ bottom, top, mapBearing, onHeight, onBannerHeigh
         </View>
         <View style={{ flex: 1, gap: 2 }}>
           <Text variant="title1" tabular testID="guidance-distance">
-            {formatDistance(distance, i18n.language)} {t(`dir.${compassSector(bearing ?? 0)}`)}
+            {formatDistance(distance)} {t(`dir.${compassSector(bearing ?? 0)}`)}
           </Text>
           <Text variant="callout" color="textSecondary">
             {routing === 'loading'
@@ -208,7 +207,7 @@ export function GuidancePanel({ bottom, top, mapBearing, onHeight, onBannerHeigh
         {routeDone ? `${t('route.lastStretch')}\n` : ''}
         {t('guidance.straightLine')}
         {routing === 'none' && !navigating ? `\n${t('route.noPack')}` : ''}
-        {position?.accuracy ? ` · ${t('guidance.accuracy', { meters: Math.round(position.accuracy) })}` : ''}
+        {position?.accuracy ? ` · ${t('guidance.accuracy', { distance: formatDistance(position.accuracy, 1) })}` : ''}
         {heading === null && distance !== null ? `\n${t('guidance.noCompass')}` : ''}
       </Text>
     ) : null;
@@ -230,7 +229,7 @@ export function GuidancePanel({ bottom, top, mapBearing, onHeight, onBannerHeigh
                   {formatDuration(left)}
                 </Text>
                 <Text variant="footnote" color="textSecondary" tabular numberOfLines={1}>
-                  {t('route.left', { distance: formatDistance(progress.remainingM, i18n.language), eta: clock(left, i18n.language) })}
+                  {t('route.left', { distance: formatDistance(progress.remainingM), eta: clock(left, i18n.language) })}
                 </Text>
               </View>
             ) : (

@@ -120,7 +120,6 @@
     "soon": "Caduca pronto · {{month}}",
     "expired": "Caducado · {{month}}",
     "quantity": {
-      "water": "{{liters}} L",
       "food": "{{days}} días · {{kcal}} kcal",
       "medication": "Para {{days}} días"
     },

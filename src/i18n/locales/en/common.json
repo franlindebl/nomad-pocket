@@ -32,7 +32,7 @@
     "processing": "Preparing",
     "failed": "Failed",
     "done": "Done",
-    "cancelled": "Cancelled",
+    "cancelled": "Canceled",
     "notInstalled": "Not installed"
   },
   "storage": {
@@ -61,15 +61,15 @@
     },
     "wifi": {
       "title": "Wi‑Fi only downloads",
-      "bodyOne": "You're on mobile data. “{{title}}” will download once you're on a Wi‑Fi network.",
-      "bodyMany_one": "You're on mobile data. {{count}} download will start once you're on a Wi‑Fi network.",
-      "bodyMany_other": "You're on mobile data. {{count}} downloads will start once you're on a Wi‑Fi network.",
+      "bodyOne": "You're on cellular data. “{{title}}” will download once you're on a Wi‑Fi network.",
+      "bodyMany_one": "You're on cellular data. {{count}} download will start once you're on a Wi‑Fi network.",
+      "bodyMany_other": "You're on cellular data. {{count}} downloads will start once you're on a Wi‑Fi network.",
       "wait": "Wait for Wi‑Fi",
-      "useMobileData": "Use mobile data",
-      "useMobileDataAll": "Use mobile data for all"
+      "useMobileData": "Use cellular data",
+      "useMobileDataAll": "Use cellular data for all"
     },
     "error": {
-      "secure": "Couldn't connect securely. This network may be blocking it: try another Wi‑Fi or mobile data.",
+      "secure": "Couldn't connect securely. This network may be blocking it: try another Wi‑Fi or cellular data.",
       "offline": "No connection. Retry once you're online.",
       "server": "The server didn't answer (error {{status}}). Retry later.",
       "integrity": "The file arrived damaged and was discarded. Retry.",

@@ -166,6 +166,11 @@ in their feature (`features/catalog/DownloadButton`, `features/courses/CourseCar
   components. `npm run check:i18n` catches missing keys.
 - Short, direct, friendly: "Descargar · 1,2 GB", not "Pulse aquí para iniciar la descarga".
 - Sizes in decimal units (MB/GB) with locale formatting.
+- Distances and water follow the device region, not the app language: `formatDistance` / `formatWater`
+  (`lib/format.ts`) show m/km and litres, ft/mi and gallons in the US, yd/mi in the UK. Never write a
+  unit into a string ("{{meters}} m"): pass the formatted value.
+- The single English locale is US English (color, center, flashlight, cellular data): the US is the
+  biggest English-speaking store, and British readers understand it.
 - Health content always carries the "información, no consejo médico" disclaimer.
 
 ## 10. Accessibility

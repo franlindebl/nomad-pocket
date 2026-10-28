@@ -28,7 +28,7 @@ import { useMapUi, type SelectedPlace } from './store';
 const FRESH_FIX_MS = 5 * 60_000;
 
 export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: number }) {
-  const { t, i18n } = useTranslation('maps');
+  const { t } = useTranslation('maps');
   const [here, setHere] = useState<LatLon | null>(null);
   const [saved, setSaved] = useState(false);
   const poi = useMemo(
@@ -67,7 +67,7 @@ export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: num
     force ? t(`police.${force}`) : kindLabel(t, kind),
     force ? null : poi?.operator && poi.operator !== place.name ? poi.operator : null,
     place.context,
-    here ? distanceWithDirection(t, i18n.language, here, place, distanceMeters(here, place)) : null,
+    here ? distanceWithDirection(t, here, place, distanceMeters(here, place)) : null,
   ]
     .filter(Boolean)
     .join(' · ');

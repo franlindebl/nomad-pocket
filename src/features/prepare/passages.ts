@@ -34,7 +34,7 @@ const L = {
     meeting: ['Meeting points', 'Meeting points (where we meet or gather if phones are down)'],
     primary: 'Main',
     secondary: 'Backup',
-    contacts: ['Contacts', 'Emergency contacts (phone numbers of family, friends and neighbours)'],
+    contacts: ['Contacts', 'Emergency contacts (phone numbers of family, friends and neighbors)'],
     people: 'Health',
     person: (name: string) => `Health of ${name}`,
     medications: 'Medication (medicines, pills)',
