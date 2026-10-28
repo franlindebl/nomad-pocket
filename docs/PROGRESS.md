@@ -296,6 +296,11 @@ graph) but needs a ~17 h, 64–128 GB build a month: shelved. Built instead (`do
 - Merged to main (fast-forward, bdc1fae) after a rebase on the functional review fixes; map-14/17/19 passed
   again on the merged code. Then: the crossings step in `build-country.sh` made never fatal (it has not run
   in CI yet: a failure publishes the pack without crossings instead of losing it).
+- CI: a test run (`ad pt`, routing; 40681896621) published both packs with crossings (Portugal 77, as built
+  locally; Andorra 7: CG-1 and CG-6 to Spain, CG-2 to France). The full run that followed (40684248282)
+  never started a job: since the Canada and Russia map regions a full run has 261 jobs, over GitHub's 256
+  per matrix (the monthly run of 2026-11-05 would have failed the same way). The build jobs moved to
+  `country-build.yml`, called twice with half the list each, 4 at a time each (8 in all, as before).
 
 ### 2026-10-28 — Functional review on the simulator and its fixes (R1–R14)
 
