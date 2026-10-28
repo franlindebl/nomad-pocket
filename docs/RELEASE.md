@@ -34,7 +34,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | Version | Build | State (2026-10-27) |
 |---|---|---|
 | 1.0.0 | — | prepared, superseded by 1.0.1 |
-| 1.0.1 | 3 | submitted to App Review (auto-release after approval) |
+| 1.0.1 | 3 | submitted to App Review 2026-10-24; reviewed 2026-10-27 as Guideline 2.1(b) Information Needed (business model); never released: its version record became 1.1.0 |
 | 1.0.2 | 4 | uploaded to TestFlight 2026-10-24 (`51fbe2a`) |
 | 1.1.0 | 5 | TestFlight 2026-10-25: map search, Emergencias, offline road routing, Preparedness, conversational assistant |
 | 1.1.0 | 6 | TestFlight 2026-10-25: whole-country routing packs, street search from the packs, compass beam |
@@ -54,7 +54,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.1.0 | 20 | TestFlight 2026-10-27: dictation in the assistant (on-device speech recognition, never sent), a more capable installed model becomes the default, an answer keeps going while you open another chat; navigation view: the route is consumed behind the arrow, the map turns with your last metres, smooth camera, "Norte arriba" button; Canada and Russia as regional maps |
 | 1.1.0 | 21 | TestFlight 2026-10-27: build 20 plus `NSPhotoLibraryUsageDescription` (App Store Connect flagged build 20 with ITMS-90683: expo-image and expo-file-system's legacy module link the Photos framework; the app never asks for the photo library) |
 | 1.1.0 | 22 | TestFlight 2026-10-27: search results name the right neighbourhood (Calle de Alcalá no longer "· Nudo Sur"), first aid opens in the app's language (Wikipedia Médica at "Primeros auxilios"), the assistant goes straight to the answer and finds articles named after the question, no empty image boxes in image-less archives
-| 1.1.0 | 23 | TestFlight 2026-10-28: the assistant finds its sources in English libraries (Apple's router no longer translates queries into Spanish, English noise words dropped, articles looked up by exact title) and keeps small talk out of answers with sources
+| 1.1.0 | 23 | TestFlight 2026-10-28: the assistant finds its sources in English libraries (Apple's router no longer translates queries into Spanish, English noise words dropped, articles looked up by exact title) and keeps small talk out of answers with sources; **submitted to App Review 2026-10-28** (same submission as 1.0.1, after the owner's 2.1(b) reply; new listing `docs/store/listing-1.1.0.md`, auto-release after approval)
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.

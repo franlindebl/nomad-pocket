@@ -9,8 +9,9 @@ can pick up without re-deriving anything.
 - **Version 1.1.0 (iOS build 23)** on TestFlight 2026-10-28 (build 22 plus assistant retrieval in English; build 22 = build 21 plus the right neighbourhood on search results, first aid in the app's language, an assistant that no longer greets every answer and empty image boxes gone; build 21 added a photo library purpose string): dictation in the assistant, a more
   capable model becomes the default, answers survive switching chats, the navigation view reworked,
   Canada and Russia by regions, on top of build 19 (document collections, map legend, SOS button);
-  **1.0.1 (build 3)** waiting for App Review. Release process and version table: `docs/RELEASE.md`;
-  store builds are tagged from build 13 on (`v1.1.0-21`). Build 17 shipped another session's
+  **1.1.0 (build 23) waiting for App Review** since 2026-10-28 (it replaced 1.0.1 in the same submission after
+  a 2.1(b) business-model question; listing `docs/store/listing-1.1.0.md`, auto-release after approval). Release process and version table: `docs/RELEASE.md`;
+  store builds are tagged from build 13 on (`v1.1.0-23`). Build 17 shipped another session's
   unfinished edits: don't use it.
 - All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
@@ -249,6 +250,18 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-28 — Store: 1.1.0 (build 23) submitted to App Review
+
+1.0.1 sat in "Unresolved Issues" after App Review's 2.1(b) questions (business model) and the owner's reply on
+2026-10-27; forum reports say a Resolution Center reply alone leaves such a submission out of the queue for days
+or weeks. The owner chose to resubmit as 1.1.0 once build 23 (English retrieval) was ready. On the same version
+record, through the App Store Connect API: version 1.1.0, the approved texts in es-ES/es-MX/en-US/en-GB (no
+"What's new": the app's first release), name "Nomad Pocket: Kit Offline" / "Offline Kit" with its subtitles,
+review notes plus the four 2.1(b) answers, the 60 new screenshots, build 23. Then "Actualizar revisión" and
+"Volver a enviar a revisión de apps" in the web UI (the API refuses an unresolved submission): state
+WAITING_FOR_REVIEW, auto-release after approval. Still open from the screenshots: metric-only distances for
+US users.
 
 ### 2026-10-27 — Store: 1.1.0 listing approved, new screenshots
 
