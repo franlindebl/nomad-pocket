@@ -266,6 +266,7 @@ By hand:
 | maps | `map-17-follow` | MAP-17 | full | seeded-route (navigation view; drives the CG-1 with Maestro `travel`) |
 | maps | `map-18-credit` | MAP-18 | full | — (OSM credit shown when the map first appears, then fades) |
 | maps | `map-19-stitch` | MAP-19 | full | seeded-stitch (a route across two packs built apart: Andorra cut in two, by car and on foot) |
+| maps | `map-20-extract-resume` | MAP-20 | full | maps-server, planet-server (an on-device extraction killed mid-way continues from its saved progress; app built with `PLANET_PORT=<port> scripts/e2e.sh --build`, which bakes `EXPO_PUBLIC_PLANET_BUILD_URL` and serves `scripts/dev-planet-server.ts` for the flow) |
 | courses | `crs-01-empty` | CRS-01 | smoke | — |
 | courses | `crs-02-course` | CRS-02, CRS-03, CRS-04 | full | seeded |
 | assistant | `ai-01-no-model` | AI-01, AI-02 | smoke | — |

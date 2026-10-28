@@ -137,7 +137,10 @@ test('abort and empty areas', async () => {
     if (++calls === 2) ctrl2.abort();
     return original(o, l, s);
   };
-  await assert.rejects(executeExtract(slow, plan, new MemorySink(), { signal: ctrl2.signal, concurrency: 1, onProgress: () => {} }), AbortError);
+  await assert.rejects(
+    executeExtract(slow, plan, new MemorySink(), { signal: ctrl2.signal, concurrency: 1, onProgress: () => {} }),
+    AbortError,
+  );
 
   await assert.rejects(planExtract(new BytesSource(src), { bbox: [10, 10, 5, 5] }), EmptyExtractError);
 });
@@ -212,4 +215,38 @@ test('extracts from the live Protomaps planet', { skip: !process.env.PMTILES_NET
   assert.equal((await reader.getHeader()).maxZoom, 15);
   assert.ok(plan.numAddressedTiles >= 3);
   assert.ok(await reader.getZxy(15, lonToTileX(-3.7025, 15), latToTileY(40.416, 15)));
+});
+
+test('resumes: skips finished requests and completes the archive', async () => {
+  const src = fixture(40);
+  const bbox: BBox = [-170, -80, 170, 80];
+  const plan = await planExtract(new BytesSource(src), { bbox, maxRequestBytes: 400 });
+  assert.ok(plan.requests.length > 6);
+
+  // First run is "killed" after a few requests: the sink keeps what was written.
+  const sink = new MemorySink();
+  const finished = new Set<number>();
+  const ctrl = new AbortController();
+  await assert.rejects(
+    executeExtract(new BytesSource(src), plan, sink, {
+      signal: ctrl.signal,
+      concurrency: 1,
+      onRequestDone: (i) => {
+        finished.add(i);
+        if (finished.size === 4) ctrl.abort();
+      },
+    }),
+    AbortError,
+  );
+  assert.equal(finished.size, 4);
+
+  // Second run: only the rest is requested, progress starts where it was.
+  const again = new BytesSource(src);
+  const progress: number[] = [];
+  await executeExtract(again, plan, sink, { done: finished, onProgress: (p) => progress.push(p.bytes) });
+  const skipped = plan.requests.filter((_, i) => finished.has(i)).reduce((n, r) => n + r.length, 0);
+  assert.equal(again.requests.length, plan.requests.length - 4);
+  assert.equal(progress[0], skipped);
+  assert.equal(progress.at(-1), plan.downloadBytes);
+  await assertValidExtract(src, sink.bytes(), bbox, 0, 7);
 });
