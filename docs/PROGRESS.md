@@ -6,7 +6,7 @@ can pick up without re-deriving anything.
 
 ## Current state (2026-10-27)
 
-- **Version 1.1.0 (iOS build 22)** on TestFlight 2026-10-27 (build 21 plus the right neighbourhood on search results, first aid in the app's language, an assistant that no longer greets every answer and empty image boxes gone; build 21 added a photo library purpose string): dictation in the assistant, a more
+- **Version 1.1.0 (iOS build 23)** on TestFlight 2026-10-28 (build 22 plus assistant retrieval in English; build 22 = build 21 plus the right neighbourhood on search results, first aid in the app's language, an assistant that no longer greets every answer and empty image boxes gone; build 21 added a photo library purpose string): dictation in the assistant, a more
   capable model becomes the default, answers survive switching chats, the navigation view reworked,
   Canada and Russia by regions, on top of build 19 (document collections, map legend, SOS button);
   **1.0.1 (build 3)** waiting for App Review. Release process and version table: `docs/RELEASE.md`;
@@ -268,6 +268,13 @@ monetization; the owner replied in the Resolution Center). Plan agreed with the 
   alone), iPad tour 1/1 (a first run caught the reader before its page painted; passed on a rerun).
 - What the screenshots turned up went to the backlog; the neighbourhood, first-aid, greeting, Spanish
   retrieval and empty-box items were fixed by another session in c03c0cc / c7cf754 (build 22).
+
+### 2026-10-28 — Release: 1.1.0 build 23 to TestFlight
+
+Build 23 = build 22 plus the assistant's retrieval in English and no small talk in answers with sources
+(6db8a3a), for the 1.1.0 App Store submission (the screenshots session prepares it). Smoke E2E 21/21 on an
+iOS 27 simulator with that code; archived from the clean worktree `e2e-21` at the release commit, tagged
+`v1.1.0-23`.
 
 ### 2026-10-28 — Assistant: retrieval in English (router language, noise words, exact titles)
 
