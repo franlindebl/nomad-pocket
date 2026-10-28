@@ -1,0 +1,71 @@
+.github/workflows/country-packages.yml
+  s_b0f712d4b0ba52::t_f9c9dac721a6bb 162,174
+CLAUDE.md
+  s_b0f712d4b0ba52::t_1819f9dd19ca7b 130
+docs/ARCHITECTURE.md
+  s_b0f712d4b0ba52::t_e7ec4d17099883 589,792-809
+docs/E2E.md
+  s_b0f712d4b0ba52::t_e7c85c2241b5f3 155,213,268,318
+docs/PROGRESS.md
+  s_b0f712d4b0ba52::t_bf2b3c582f4b8d 142-144,256-282
+docs/ROUTING_ACROSS_PACKS.md
+  s_b0f712d4b0ba52::t_58ff3f51c608bc 1-105,114-116,121,127-133,137-232,236-246
+e2e/fixtures/README.md
+  s_b0f712d4b0ba52::t_b3864a0d7a6a2f 12
+e2e/fixtures/routing-stitch/xade.crossings.tsv
+  s_b0f712d4b0ba52::t_f098f166688ea9 1-11
+e2e/fixtures/routing-stitch/xadw.crossings.tsv
+  s_b0f712d4b0ba52::t_cfc11ee491f8dd 1-11
+e2e/flows/maps/map-19-stitch.yaml
+  s_b0f712d4b0ba52::t_cb7fbe26f52769 1-70
+scripts/e2e.sh
+  s_b0f712d4b0ba52::t_05527bc5d2e7a2 134,145-148
+scripts/routing/build-country.sh
+  s_b0f712d4b0ba52::t_9c92ea6404c0b1 11-12,15,185-201
+scripts/routing/crossings.py
+  s_9773b9edf946e0::t_273ffbe4137f9e 1-119
+scripts/routing/manifest.py
+  s_b0f712d4b0ba52::t_bbcfcf5afaf4a7 87,122-123
+scripts/routing/stitch-fixture.sh
+  s_b0f712d4b0ba52::t_824198570c1682 1-40
+src/features/maps/guidance.ts
+  s_9773b9edf946e0::t_6d5ad2bdce82bf 18,113-114
+src/features/maps/register.ts
+  s_b0f712d4b0ba52::t_efdd6d98569d1d 20,200-203
+src/features/maps/routing-core.ts
+  s_b0f712d4b0ba52::t_a3afbac24b2812 34-39,69-70,73-75,289-290,360-361
+src/features/maps/routing-packs.ts
+  s_b0f712d4b0ba52::t_31bf5c82e24ac1 5-6,83,91-92,119-130,160-172,194,232-239,403,409-410,436,464
+src/features/maps/routing.ts
+  s_b0f712d4b0ba52::t_d42e1f1b2f64cf 10,13-14,18,26,29-44,144-179,191-308,312-314,316-327,333,335,337,341-350,356
+src/features/maps/stitch-core.test.ts
+  s_b0f712d4b0ba52::t_6f0fa0d5ce5c4a 1-188
+src/features/maps/stitch-core.ts
+  s_b0f712d4b0ba52::t_da4bd08c9f8dfd 1-244
+src/features/maps/valhalla-defaults.json
+  s_b0f712d4b0ba52::t_04b768147d737e 205,223,243
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8c87f1ccc40cd08f60deb5e0f28be8cd35dfcde8",
+  "prompts": {},
+  "sessions": {
+    "s_9773b9edf946e0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "709260e2-3b35-4456-9004-95d6c83d9fa4",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_b0f712d4b0ba52": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d8ad743a-8d7d-42bc-80fc-249dfe881782",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
