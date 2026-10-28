@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { formatNumber } from '@/lib/format';
+import { formatNumber, formatWater } from '@/lib/format';
 
 import { expiryStatus, KIT_CATEGORIES, kitFor, supplies, type ExpiryStatus, type KitCategory, type KitItemDef } from './kit';
 import { EMPTY_KIT_ENTRY, usePrepare } from './store';
@@ -25,7 +25,7 @@ function quantity(def: KitItemDef, data: PrepareData, t: (k: string, options?: R
   const s = supplies(data.household);
   switch (def.quantity) {
     case 'water':
-      return t('prepare:kit.quantity.water', { liters: formatNumber(s.waterLiters) });
+      return formatWater(s.waterLiters);
     case 'food':
       return t('prepare:kit.quantity.food', { days: data.household.days, kcal: formatNumber(s.foodKcal) });
     case 'medication':

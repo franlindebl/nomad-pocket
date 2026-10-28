@@ -21,7 +21,7 @@ const SEARCH_DELAY = 200;
 // A plain scroll view (Screen) like the region picker: a virtualized list gets
 // no height inside a formSheet. Results are capped at 40.
 export default function SearchSheet() {
-  const { t, i18n } = useTranslation('maps');
+  const { t } = useTranslation('maps');
   const { colors } = useTheme();
   const [query, setQuery] = useState('');
   const deferred = useDeferredValue(query.trim());
@@ -72,7 +72,7 @@ export default function SearchSheet() {
     showPlace(p);
     router.back();
   };
-  const away = (p: LatLon) => (near ? distanceWithDirection(t, i18n.language, near, p, distanceMeters(near, p)) : null);
+  const away = (p: LatLon) => (near ? distanceWithDirection(t, near, p, distanceMeters(near, p)) : null);
   // A country still being prepared after its download (all of its search), else a map's tiles being indexed.
   const preparing = usePreparingCountries().at(0);
   const indexing = preparing

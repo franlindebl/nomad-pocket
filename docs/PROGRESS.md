@@ -187,10 +187,8 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
   Spanish retrieval ("potabilizo"), empty image boxes in nopic archives. Then fixed for build 23
   (log 2026-10-28): assistant retrieval in English (Apple's router translated queries into Spanish;
   English noise words; exact-title lookup) and small talk inside answers with sources (the coffee joke
-  in a burn answer). Still open:
-  - Distances are metric only (`lib/format.ts`, guidance): an en-US user in New York sees "3.1 km" and
-    "10 m"; the US (and the UK for road distances) expect miles and feet/yards. English copy also uses
-    British words ("torch", "health centre") for US users.
+  in a burn answer). Then (log 2026-10-28, units): distances in miles and feet for US users, yards in
+  the UK, water in gallons in the US, and US English copy. All fixed.
 
 ## Known issues / limitations
 
@@ -253,6 +251,27 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-28 — Units: miles/feet and gallons for the US, US English copy
+
+Asked by the owner after the store screenshots in New York showed "3.1 km" and "10 m". Distances and water
+now follow the device region (`expo-localization` `measurementSystem`, read once; iOS restarts apps when the
+region changes), not the app language, so a Spanish speaker in Texas reads miles:
+
+- `lib/units.ts` `scaleDistance` / `scaleWater` (pure, tested): m/km; ft below 0.1 mi then mi in the US;
+  yd then mi in the UK (Apple Maps does the same); short distances round to 10 of their unit (1 for a
+  GPS accuracy). US water in gallons with one decimal ("3.2 gal"); litres elsewhere, including the UK.
+- `lib/format.ts` `formatDistance(meters, step?)` / `formatWater(liters)` add the app language's number
+  format. They replace `maps/labels.ts` `formatDistance(meters, language)`: emergency list, search rows,
+  place card, route steps, guidance panel. The GPS accuracy ("± 10 m" on Emergencias, in the guidance note
+  and in the shared position message) goes through it too, so `maps:guidance.accuracy` and
+  `maps:emergency.shareMessage` take a formatted `{{distance}}`/`{{accuracy}}`; `prepare:kit.quantity.water`
+  is gone (the kit screen and the checklist rows call `formatWater`).
+- Valhalla still answers in kilometres (`routing-core` reads metres); its verbal texts with distances are not
+  shown, so nothing else changes. E2E runs in es_ES (metric): no flow changed.
+- English copy switched to US English: color, center, theater, neighborhood, flashlight, canned food, trash
+  bags, diapers, pediatrician, canceled, cellular data. OSM keys (`theatre`, `sports_centre`…) stay.
+- Checked on the iOS 27 simulator in en_US with the US Northeast kit in New York (Release build).
 
 ### 2026-10-28 — Assistant: the PDFs inside archives (document index) and the family plan as sources
 

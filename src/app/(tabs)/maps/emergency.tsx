@@ -25,7 +25,7 @@ import { usePlaceIndex } from '@/features/maps/places';
 import { CATEGORY_COLORS, CATEGORY_ICONS, distanceWithDirection, kindIcon, kindLabel } from '@/features/maps/labels';
 import { showPlace, useMapUi } from '@/features/maps/store';
 import { useMapItems } from '@/features/maps/useMapSources';
-import { formatRelativeDate } from '@/lib/format';
+import { formatDistance, formatRelativeDate } from '@/lib/format';
 import { space, useTheme } from '@/theme';
 
 type Here = LatLon & { accuracy: number | null; fromMap: boolean };
@@ -111,7 +111,7 @@ export default function EmergencySheet() {
       message: t('emergency.shareMessage', {
         coords: formatLatLon(here.lat, here.lon),
         utm: utm ? formatUtm(utm) : '—',
-        accuracy: Math.round(here.accuracy ?? 0),
+        accuracy: formatDistance(here.accuracy ?? 0, 1),
         time,
         url: `https://www.openstreetmap.org/?mlat=${here.lat.toFixed(5)}&mlon=${here.lon.toFixed(5)}#map=17/${here.lat.toFixed(5)}/${here.lon.toFixed(5)}`,
       }),
@@ -138,7 +138,7 @@ export default function EmergencySheet() {
       p.emergency === 1 ? t('place.emergencyYes') : null,
       !force && p.operator && p.operator !== p.name ? p.operator : null,
     ].filter(Boolean);
-    const distance = here && p.distance !== null ? distanceWithDirection(t, i18n.language, here, p, p.distance) : null;
+    const distance = here && p.distance !== null ? distanceWithDirection(t, here, p, p.distance) : null;
     return distance ? `${parts.join(' · ')}\n${distance}` : parts.join(' · ');
   };
 
@@ -194,7 +194,7 @@ export default function EmergencySheet() {
             </Text>
             <Text variant="footnote" color="textSecondary" tabular selectable>
               {utm ? `UTM ${formatUtm(utm)}` : ''}
-              {here.accuracy ? `${utm ? '  ·  ' : ''}± ${Math.round(here.accuracy)} m` : ''}
+              {here.accuracy ? `${utm ? '  ·  ' : ''}± ${formatDistance(here.accuracy, 1)}` : ''}
             </Text>
           </>
         ) : (

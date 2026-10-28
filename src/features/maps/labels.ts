@@ -26,6 +26,7 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 
+import { formatDistance } from '@/lib/format';
 import { hues } from '@/theme';
 
 import { EMERGENCY_KINDS, type EmergencyCategory, type EmergencyKind } from './emergency-core';
@@ -89,14 +90,7 @@ export function kindLabel(t: TFunction, kind: string | null | undefined): string
   return (kind && t(`maps:kind.${kind}`, { defaultValue: '' })) || t('maps:kind.place');
 }
 
-/** "850 m" / "1,2 km" / "35 km". */
-export function formatDistance(meters: number, language: string): string {
-  if (meters < 1000) return `${Math.max(10, Math.round(meters / 10) * 10)} m`;
-  const km = meters / 1000;
-  return `${new Intl.NumberFormat(language, { maximumFractionDigits: km < 10 ? 1 : 0 }).format(km)} km`;
-}
-
 /** "1,2 km NE": distance plus the compass direction from `from`. */
-export function distanceWithDirection(t: TFunction, language: string, from: LatLon, to: LatLon, meters: number): string {
-  return `${formatDistance(meters, language)} ${t(`maps:dir.${compassSector(bearingDegrees(from, to))}`)}`;
+export function distanceWithDirection(t: TFunction, from: LatLon, to: LatLon, meters: number): string {
+  return `${formatDistance(meters)} ${t(`maps:dir.${compassSector(bearingDegrees(from, to))}`)}`;
 }

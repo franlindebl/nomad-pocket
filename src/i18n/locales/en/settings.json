@@ -10,7 +10,7 @@
   "themeDark": "Dark",
   "downloads": "Downloads",
   "wifiOnly": "Wi‑Fi only",
-  "wifiOnlyBody": "Avoid using mobile data for large downloads",
+  "wifiOnlyBody": "Avoid using cellular data for large downloads",
   "storage": "Storage",
   "storageUsed": "Used by Nomad",
   "storageFree": "Free on device",
