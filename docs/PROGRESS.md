@@ -326,8 +326,9 @@ one emergency number per country, emergency only.
   Tijuana/San Diego, off Barcelona, open sea), tsc, lint, i18n; Android release APK built from a clean
   prebuild; dependency tree and dex scanned; credits regenerated (191 Android artifacts, 5 fewer); iOS smoke 21/21
   (clean prebuild; home and Emergencias offer 112 at Madrid). Android
-  tour 3/4: android-03 (the number names Andorra), -04, -05 pass; android-01 failed at its last download (a
-  TLS-intercepting proxy, "Trust anchor not found"); to rerun on a direct connection.
+  tour 4/4 over two runs: on a TLS-intercepting network, android-01's last download failed on its TLS proxy ("Trust
+  anchor not found"); with it off android-01 passed and android-03 (the number names Andorra) flaked once on a
+  slow emulator (a dozen iOS simulators booted) and passed alone.
 
 ### 2026-10-29 — Maps: routes across countries tried with the published packs; the missing download offered right
 
