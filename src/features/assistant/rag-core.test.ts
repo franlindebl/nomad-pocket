@@ -16,10 +16,12 @@ import {
   extractKeywords,
   followUpTopic,
   formatSources,
+  guardNotFound,
   guessIntent,
   isHealthQuestion,
   nominalize,
   normalize,
+  NOT_FOUND_ANSWER,
   packContext,
   parseToolQuery,
   planRetrieval,
@@ -582,5 +584,28 @@ describe('readableDocTitle (R5)', () => {
     assert.equal(readableDocTitle('Water purification', 'X'), 'Water purification');
     // A year is part of the title, not an id.
     assert.equal(readableDocTitle('FEMA REP Program Manual Dec 2019', 'X'), 'FEMA REP Program Manual Dec 2019');
+  });
+});
+
+describe('guardNotFound: no answers from memory after a search', () => {
+  test('a "not found" opening without citations becomes the fixed answer', () => {
+    const invented = 'No lo he encontrado en tu biblioteca. La lejía (solución de sal marina) no sirve para agua potable.';
+    assert.equal(guardNotFound(invented, 'es'), NOT_FOUND_ANSWER.es);
+    assert.equal(guardNotFound("I couldn't find this in your library, but bleach is mostly salt water.", 'en'), NOT_FOUND_ANSWER.en);
+    // While it streams: from the moment the opening says so.
+    assert.equal(guardNotFound('No lo he encontrado', 'es'), NOT_FOUND_ANSWER.es);
+  });
+
+  test('answers with sources, or that only mention it later, stay', () => {
+    const cited = 'No he encontrado una guía específica, pero se usan 2 gotas de lejía por litro [1].';
+    assert.equal(guardNotFound(cited, 'es'), cited);
+    const normal = 'Usa 2 gotas de lejía por litro y espera 30 minutos [1]. No lo he encontrado para otros volúmenes.';
+    assert.equal(guardNotFound(normal, 'es'), normal);
+    assert.equal(guardNotFound('Boil it for one minute.', 'en'), 'Boil it for one minute.');
+  });
+
+  test('the fixed answer reads as "not found" itself (no sources attached)', () => {
+    assert.deepEqual(sourcesToShow(NOT_FOUND_ANSWER.es, [{ n: 1 }]), []);
+    assert.deepEqual(sourcesToShow(NOT_FOUND_ANSWER.en, [{ n: 1 }]), []);
   });
 });

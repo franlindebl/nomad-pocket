@@ -270,13 +270,14 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 - Map extraction runs on the JS thread in the foreground (screen kept awake); after a kill or a network
   failure it continues on the next launch, or at once with Retry in Downloads (cancel or a 4xx starts over).
 - Qwen3.5 0.8B rarely emits `[n]` (all retrieved sources are shown then) and is
-  unreliable for health answers — the app recommends 2B+ where RAM allows. With nothing found in the library it
-  still answers from memory after saying so, and can be dangerously wrong (2026-10-28, Android emulator: bleach
-  described as "a sea salt solution" unfit for drinking water). In small talk
+  unreliable for health answers — the app recommends 2B+ where RAM allows. (It answered from memory after
+  saying it found nothing, dangerously wrong: bleach as "a sea salt solution"; since 2026-10-28 no model answers
+  from memory when the library has nothing.) In small talk
   it sometimes rambles or echoes its instructions, and it searches some chit-chat
   ("¿te gusta la música?") on its own.
 - The models still answer some famous facts from memory instead of searching ("What is
-  photosynthesis?"); the "Buscar en mi biblioteca" button covers it. Apple FM tends to
+  photosynthesis?") when the router or the model takes them for small talk: the not-found guard only acts
+  when an answer says it found nothing. The "Buscar en mi biblioteca" button covers it. Apple FM tends to
   open every answer with "¡Hola!" once the chat started with a greeting.
 - Apple Intelligence fails on the iOS 26.5 simulator (works on iOS 27).
 - Map labels in Bengali, Tamil and other Indic scripts, Myanmar and Khmer are not drawn
@@ -290,6 +291,26 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-28 — Assistant: no answers from memory when the library has nothing
+
+Asked by the owner after the Android check, where Qwen 0.8B said it found nothing and then called bleach "a
+sea salt solution" unfit for drinking water. The prompts told the models to "answer from what you know"
+when the library had nothing; now:
+- A search with no passages answers a fixed text (`NOT_FOUND_ANSWER`: not found, no answer from memory so as
+  not to give wrong information, try other words or download guides) without calling the model; in tools
+  mode the search tool hands the engine that text as the final answer (no second pass).
+- With "Usar mi biblioteca" on and nothing to search (no archives, an empty family plan), a question gets
+  `NO_LIBRARY_ANSWER` (download guides, or turn the library off to talk to the model alone) without loading
+  the model. Small talk still goes to the model, and so does everything with the library off.
+- `guardNotFound` cuts any answer that opens with "No lo he encontrado…" and cites no source to the fixed
+  text, while streaming too; one that goes on to cite a source stays whole. The prompts say "say only that".
+- The family plan is searched even with no archive installed (it used to need one).
+- Checked: Android emulator (Qwen 0.8B, tools mode) and iOS 27 simulator (Apple Intelligence): the bleach
+  question gives the fixed text with an empty library and with the E2E archives, "hola" still chats, and
+  questions the library answers keep their sources. `ai-03` and `ai-06` waited for a "Usar modelo integrado"
+  button that the most capable model's preselection (build 20) hides: optional now, like `ai-09`; all three
+  pass.
 
 ### 2026-10-28 — Small leftovers: extraction Retry, antimeridian framing, Android notices, follow-ups
 

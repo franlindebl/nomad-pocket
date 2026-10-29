@@ -404,6 +404,35 @@ export function readableDocTitle(title: string, archiveTitle: string): string {
 const NOT_FOUND_RE = /no lo he encontrado|no he encontrado|couldn['’]?t find|could not find|did not find|didn['’]?t find/i;
 
 /**
+ * The answer when the library has nothing on a question: never one from the model's memory. Small
+ * models invent with confidence (Qwen 0.8B called bleach "a sea salt solution" unfit for water),
+ * and in an emergency a wrong answer is worse than none.
+ */
+export const NOT_FOUND_ANSWER: Record<Lang, string> = {
+  es: 'No lo he encontrado en tu biblioteca. Para no darte información que podría ser incorrecta, no respondo de memoria. Prueba con otras palabras o descarga guías sobre el tema en Biblioteca.',
+  en: "I couldn't find this in your library. So as not to give you information that could be wrong, I don't answer from memory. Try other words, or download guides on the topic from the Library.",
+};
+
+/** The same when there is no library at all to look in (with "Use my library" on): a question gets no answer from memory. */
+export const NO_LIBRARY_ANSWER: Record<Lang, string> = {
+  es: 'Aún no tienes guías ni artículos en tu biblioteca, así que no puedo comprobarlo. Para no darte información que podría ser incorrecta, no respondo de memoria. Descarga guías en Biblioteca, o desactiva «Usar mi biblioteca» para hablar solo con el modelo.',
+  en: "Your library has no guides or articles yet, so I can't check this. So as not to give you information that could be wrong, I don't answer from memory. Download guides from the Library, or turn off \"Use my library\" to talk to the model alone.",
+};
+
+/**
+ * An answer that opens by saying the library had nothing and cites no source becomes
+ * the fixed not-found answer: whatever follows would come from memory (a model without a library to
+search says so too, then invents). Applied while it streams too,
+ * so the invented part never shows; an answer that goes on to cite a source is kept whole.
+ */
+export function guardNotFound(answer: string, lang: Lang): string {
+  if (citedNumbers(answer).length) return answer;
+  const lead = answer.trimStart().slice(0, 200);
+  const end = lead.search(/[.!?\n]/);
+  return NOT_FOUND_RE.test(end >= 0 ? lead.slice(0, end + 1) : lead) ? NOT_FOUND_ANSWER[lang] : answer;
+}
+
+/**
  * The sources to attach to an answer: the ones it cites; if it cites none, nothing when it says it
  * found nothing (the retrieved sources are unrelated), else the top 3 (the first are the best ranked).
  */
@@ -677,12 +706,12 @@ const RAG_RULES: Record<Lang, string> = {
   es: [
     'Cuando el mensaje del usuario traiga fragmentos numerados de su biblioteca, básate en ellos y cita la fuente de cada dato con su número entre corchetes, por ejemplo [1] o [2].',
     'No inventes citas ni números de fuente que no existan.',
-    'Si los fragmentos no contienen la respuesta, dilo con honestidad ("No lo he encontrado en tu biblioteca") y, si puedes, añade lo que sepas por tu cuenta indicando que no procede de la biblioteca.',
+    'Si los fragmentos no contienen la respuesta, di solo «No lo he encontrado en tu biblioteca» y no respondas de memoria: podrías dar información incorrecta.',
   ].join(' '),
   en: [
     "When the user's message comes with numbered excerpts from their library, base your answer on them and cite the source of each fact with its number in square brackets, e.g. [1] or [2].",
     'Never invent citations or source numbers that do not exist.',
-    'If the excerpts do not contain the answer, say so honestly ("I couldn\'t find this in your library") and, if you can, add what you know yourself, making clear it does not come from the library.',
+    'If the excerpts do not contain the answer, say only "I couldn\'t find this in your library" and do not answer from memory: you could give wrong information.',
   ].join(' '),
 };
 
@@ -697,7 +726,7 @@ const TOOL_RULES: Record<Lang, string> = {
     'Busca aunque creas saber la respuesta: la biblioteca es la fuente fiable.',
     'No busques para saludos, agradecimientos, chistes, charla o peticiones sobre tu respuesta anterior (resumir, aclarar, simplificar, traducir): responde directamente.',
     'Cuando busques, básate en los resultados y cita cada dato con su número entre corchetes, por ejemplo [1]. No inventes citas.',
-    'Si los resultados no responden, dilo y añade lo que sepas indicando que no viene de la biblioteca.',
+    'Si los resultados no responden, di solo «No lo he encontrado en tu biblioteca»: no respondas de memoria.',
   ].join(' '),
   en: [
     "The user has an offline library (Wikipedia, medicine, survival, DIY and more, plus their family plan: meeting points, contacts, each person's health and home notes) that you can search with the search_library tool.",
@@ -705,7 +734,7 @@ const TOOL_RULES: Record<Lang, string> = {
     'Search even if you think you know the answer: the library is the trusted source.',
     "Don't search for greetings, thanks, jokes, small talk or requests about your previous answer (summarize, clarify, simplify, translate): reply directly.",
     'When you search, base your answer on the results and cite each fact with its number in square brackets, e.g. [1]. Never invent citations.',
-    "If the results don't answer the question, say so and add what you know, making clear it doesn't come from the library.",
+    "If the results don't answer the question, say only \"I couldn't find this in your library\": don't answer from memory.",
   ].join(' '),
 };
 
@@ -761,8 +790,8 @@ export function buildToolResult(sources: PackedSource[], lang: Lang): string {
 }
 
 const NO_RESULTS: Record<Lang, string> = {
-  es: 'Sin resultados: la biblioteca no tiene artículos sobre esto. Empieza diciendo brevemente «No lo he encontrado en tu biblioteca» y responde con lo que sepas, avisando de que puede no ser exacto.',
-  en: "No results: the library has no articles about this. Start by briefly saying \"I couldn't find this in your library\" and answer from what you know, warning that it may not be accurate.",
+  es: 'Sin resultados: la biblioteca no tiene artículos sobre esto. Di solo «No lo he encontrado en tu biblioteca»: no respondas de memoria.',
+  en: "No results: the library has no articles about this. Say only \"I couldn't find this in your library\": don't answer from memory.",
 };
 
 // Apple's on-device model rarely calls tools on its own (7–11 of 14 on the bench,
@@ -803,8 +832,8 @@ export function buildRouterPrompt(question: string, history: Turn[]): string {
 // Phrased as a note inside the user's turn: wording about "the user's library" got
 // echoed back verbatim ("no lo he encontrado en la biblioteca del usuario").
 const NO_HITS: Record<Lang, string> = {
-  es: '(Nota: mi biblioteca sin conexión no tiene artículos sobre esto. Empieza diciendo brevemente «No lo he encontrado en tu biblioteca» y después responde con lo que sepas, avisando de que puede no ser exacto.)',
-  en: "(Note: my offline library has no articles about this. Start by briefly saying \"I couldn't find this in your library\", then answer from what you know, warning that it may not be accurate.)",
+  es: '(Nota: mi biblioteca sin conexión no tiene artículos sobre esto. Di solo «No lo he encontrado en tu biblioteca»: no respondas de memoria.)',
+  en: "(Note: my offline library has no articles about this. Say only \"I couldn't find this in your library\": don't answer from memory.)",
 };
 
 const HEALTH_NOTE: Record<Lang, string> = {
