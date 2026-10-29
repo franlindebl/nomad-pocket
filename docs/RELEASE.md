@@ -172,8 +172,12 @@ whenever the policy changes, in both languages, and re-check the host list again
 
 ## Android (Google Play)
 
-Not on Play yet. Play Console: personal developer account 5502748653724108225 (it also holds
-Theri.App and Semáforo del Sueño); the Nomad Pocket app isn't created there yet. A new app in this
+Play Console: personal developer account 5502748653724108225 (it also holds Theri.App and Semáforo
+del Sueño); Nomad Pocket is app 4972946077817579435, created 2026-10-29. **1.1.0 (versionCode 23) on
+internal testing since 2026-10-29** (tag `v1.1.0-android-23` on fc268d6, the commit it was built from;
+testers: email list "Nomad Pocket interno", the owner's two accounts; join link
+https://play.google.com/apps/internaltest/4700702884318545923). Closed testing will use the account's
+"Friends and family" list (19 addresses, also Theri.App's). A new app in this
 account needs a **closed test with at least 12 opted-in testers for 14 days in a row** before it can
 apply for production. Listing texts, graphics and every form's answers: `docs/store/play-listing.md`.
 
