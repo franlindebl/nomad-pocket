@@ -31,6 +31,11 @@
     "android": {
       "package": "com.fjlinde.nomadpocket",
       "versionCode": 23,
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#18171B",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -136,7 +141,11 @@
             "deploymentTarget": "16.4"
           },
           "android": {
-            "minSdkVersion": 26
+            "minSdkVersion": 26,
+            "buildArchs": [
+              "arm64-v8a",
+              "x86_64"
+            ]
           }
         }
       ],

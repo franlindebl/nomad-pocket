@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
-import { BookOpen, Copy, Library, RefreshCw, Sparkles } from 'lucide-react-native';
+import { BookOpen, Copy, Flag, Library, RefreshCw, Sparkles } from 'lucide-react-native';
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import Constants from 'expo-constants';
+import { ActivityIndicator, Linking, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 import { showToast } from '@/components/Toast';
 import { Button, IconButton, PressableScale, Text } from '@/components/ui';
@@ -13,6 +14,7 @@ import { radius, space, useTheme } from '@/theme';
 
 import type { ChatMessage, MessageSource, Phase } from '../chats';
 import { toPlainText } from '../markdown';
+import { clipAnswer, REPORT_EMAIL, reportMailto } from '../report-core';
 import { Markdown } from './Markdown';
 
 export function openSource(s: MessageSource) {
@@ -127,6 +129,16 @@ export const AssistantMessage = memo(function AssistantMessage({
     }
   };
 
+  // Opens the user's mail app with the answer; without one, say where to write.
+  const report = () => {
+    const body = t('report.body', {
+      answer: clipAnswer(toPlainText(text)),
+      version: Constants.expoConfig?.version ?? '0.0.0',
+      platform: `${Platform.OS} ${Platform.Version}`,
+    });
+    Linking.openURL(reportMailto(t('report.subject'), body)).catch(() => showToast(t('report.noMail', { email: REPORT_EMAIL }), false));
+  };
+
   const waiting = streaming && !text;
   let status = '';
   if (waiting && phase) {
@@ -157,6 +169,7 @@ export const AssistantMessage = memo(function AssistantMessage({
             {onRegenerate ? (
               <IconButton icon={RefreshCw} variant="plain" size={36} accessibilityLabel={t('regenerate')} onPress={onRegenerate} testID="assistant-regenerate" />
             ) : null}
+            <IconButton icon={Flag} variant="plain" size={36} accessibilityLabel={t('report.label')} onPress={report} testID="assistant-report" />
           </View>
         ) : null}
         {onSearchLibrary ? (

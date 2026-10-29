@@ -42,7 +42,7 @@ can pick up without re-deriving anything.
 | Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 237 packs live (every inhabited country; the USA in six regions) since 2026-10-27; E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
 | Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search; the most capable installed model is the default; on-device dictation; reads the PDFs inside archives (document index) and the family plan; copy and regenerate an answer) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
-| Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android not published |
+| Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android: signed AAB, Play texts, forms and graphics drafted (`docs/store/play-listing.md`), Android screenshots and the Play Console app still to do |
 | Preparedness (family plan, emergency kit with expiry reminders, printable PDF, offline guides) | done — iOS sim + Android emulator (E2E) |
 | E2E suite (Maestro) + pre-commit hook | done |
 | Pre-release audit (2026-10-26): ~60 verified findings fixed in code and docs | merged to main; device checks and the deferred items below pending |
@@ -77,9 +77,8 @@ A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check
    - Android before any Play release: ML Kit GenAI is removed and Firebase kept out of the APK
      (done 2026-10-26); ~~list the full transitive Android notices~~ done 2026-10-28 (Credits › Android
      libraries, `scripts/licenses/android-deps.mjs`); ~~Play services and the Install Referrer next to GPL
-     libkiwix~~ done 2026-10-29, owner's option A: no proprietary library left in the APK (log). Still for the
-     owner: Play Console account, upload key / Play App Signing, store listing, Data safety form (I can draft
-     it from `site/privacy.html`).
+     libkiwix~~ done 2026-10-29, owner's option A: no proprietary library left in the APK (log). ~~Upload key,
+     listing and Data safety draft~~ done 2026-10-29 (backlog item 5).
    - ~~Store prebuild gated by an env var (LEGAL-9)~~ done 2026-10-28: `NOMAD_STORE_BUILD=1 npx expo prebuild`
      (`plugins/with-store-build.js`, `docs/RELEASE.md`); check the archived `Info.plist` on the next store build.
    - A planned index rebuild to reclaim the space of existing users' old index file.
@@ -188,8 +187,12 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 4. Map extraction: resumes after a kill since 2026-10-28. Still to do: move it off the JS thread (a native
    range fetcher writing at offsets, background URLSession / foreground service; ~3–5 days with both
    platforms). ~~A Retry for a failed extraction~~ done 2026-10-28 (Downloads row; flow `map-23`).
-5. Android release: upload keystore, Play listing + data safety; the Android notices and the Play
-   services question of item A come first.
+5. Android release (`docs/RELEASE.md`, Android; `docs/store/play-listing.md`). Done 2026-10-29: upload key and
+   signed store AAB, permissions trimmed, 64-bit ABIs only, "Report answer" for Play's AI policy, Play texts,
+   form answers, icon and feature graphic. To do: Android phone screenshots (emulator, 1080 × 1920 via
+   `scripts/store-screenshots.py`), the owner's review of the listing, create the app in Play Console (it
+   accepts Play's policies: the owner confirms), internal test, then the **closed test: 12 testers × 14
+   days** (required for every new app of this personal account), then production.
 6. Reader: auto-hiding toolbar on scroll (style guide), syllabus for SPA course ZIMs read
    from the rendered DOM.
 7. Assistant: ~~copy / regenerate an answer~~ done 2026-10-28; better small-model citations; check the
@@ -292,6 +295,32 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-29 — Android: ready for Play (upload key, AAB, AI reports, listing draft)
+
+Owner asked what Android still needed for Play, then to do it. Play Console (owner's account, checked
+in Chrome): personal account with two other apps; Nomad Pocket isn't created yet; new apps there need a
+closed test with 12 testers for 14 days (another app's dashboard says so).
+
+- **Signing**: upload key `~/.android-upload/nomadpocket-upload.jks` + properties in
+  `~/.gradle/gradle.properties`, used by `plugins/with-store-build.js` when `NOMAD_STORE_BUILD=1` (a store
+  release build without them fails). `bundleRelease` → 204 MB AAB signed with it (`docs/RELEASE.md`, Android).
+- **Manifest**: `SYSTEM_ALERT_WINDOW` (Expo's template) and the storage permissions that a clean prebuild
+  brings back are blocked (`android.blockedPermissions`). Left: location, network, notifications + boot
+  (kit reminders), microphone, vibrate.
+- **ABIs**: arm64-v8a + x86_64 only (llama.rn has no 32-bit libraries). Download size per bundletool:
+  arm64 ~90 MB, x86_64 ~66 MB (limit 200 MB). 16 KB pages: every `.so` aligned, zipalign -P 16 passes.
+- **Report answer** (Play's AI-generated content policy): a flag under each finished answer opens the mail
+  app with the answer, app version and system (`features/assistant/report-core.ts`, tested); privacy
+  policy says so in es + en (last updated 29 Oct).
+- **Listing**: `docs/store/play-listing.md` (texts from the App Store listing minus Apple Intelligence,
+  every Play Console form answered: content rating, target audience 18+, health apps "medical reference",
+  Data safety "no data collected"); `scripts/store-screenshots.py` also writes Play's 512 px icon and
+  the 1024 × 500 feature graphics (`docs/store/play/`) and composes `android` captures at 1080 × 1920.
+- Checked: tsc, lint, 388 unit tests, i18n; AAB manifest and signature; Android tour with the store APK: android-04 passes;
+  01/03/05 stop at the "Wi-Fi only" question because the Mac's corporate VPN (GlobalProtect) leaves the emulator's
+  network in partial connectivity (the app then treats it as offline and doesn't ask); a non-store APK of the same
+  tree fails the same way. To rerun with the VPN off before the first upload.
 
 ### 2026-10-29 — Android without Play services; an emergency number per country
 

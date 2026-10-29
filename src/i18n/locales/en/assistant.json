@@ -48,6 +48,12 @@
   "copied": "Copied",
   "copy": "Copy answer",
   "regenerate": "Regenerate answer",
+  "report": {
+    "label": "Report answer",
+    "subject": "Nomad Pocket: assistant answer reported",
+    "body": "Tell us what is wrong with this answer (offensive, dangerous, false…):\n\n\n— Answer —\n{{answer}}\n\n— Nomad Pocket {{version}} · {{platform}} —",
+    "noMail": "No mail app found. Write to us at {{email}}"
+  },
   "searchLibrary": "Search my library",
   "searchLibraryHint": "Answer again searching your offline library",
   "errors": {

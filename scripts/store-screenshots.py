@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Compose App Store marketing screenshots: headline + raw simulator capture.
+"""Compose store marketing screenshots: headline + raw simulator/emulator capture.
 
 Reads docs/store/screenshots/<lang>/<device>/NN-name.png and writes
-docs/store/marketing/<lang>/<device>/NN-name.png at the exact App Store size.
+docs/store/marketing/<lang>/<device>/NN-name.png at the exact App Store size (iphone, ipad) or Google Play's phone size (android: 9:16, as Play
+refuses a long side over twice the short one), plus Play's 1024 x 500 feature graphic in
+docs/store/play/.
 Run from the repo root: python3 scripts/store-screenshots.py
 """
 from pathlib import Path
@@ -14,7 +16,10 @@ SRC = ROOT / 'docs/store/screenshots'
 OUT = ROOT / 'docs/store/marketing'
 FONTS = ROOT / 'assets/fonts'
 
-SIZES = {'iphone': (1320, 2868), 'ipad': (2064, 2752)}
+SIZES = {'iphone': (1320, 2868), 'ipad': (2064, 2752), 'android': (1080, 1920)}
+PLAY = ROOT / 'docs/store/play'
+ICON = ROOT / 'assets/images/icon.png'
+DARK = (24, 23, 27)
 BG = (246, 245, 242)
 INK = (24, 23, 27)
 SECONDARY = (106, 103, 96)
@@ -99,10 +104,10 @@ def compose(src: Path, dst: Path, lang: str, device: str):
 
     shot = Image.open(src).convert('RGB')
     avail_h = H - y - int(H * 0.035)
-    avail_w = W - 2 * int(W * (0.10 if device == 'iphone' else 0.09))
+    avail_w = W - 2 * int(W * (0.09 if device == 'ipad' else 0.10))
     scale = min(avail_w / shot.width, avail_h / shot.height)
     shot = shot.resize((round(shot.width * scale), round(shot.height * scale)), Image.LANCZOS)
-    radius = int(shot.width * (0.09 if device == 'iphone' else 0.035))
+    radius = int(shot.width * {'iphone': 0.09, 'android': 0.06}.get(device, 0.035))
     shot = rounded(shot, radius)
     x = (W - shot.width) // 2
 
@@ -121,6 +126,39 @@ def compose(src: Path, dst: Path, lang: str, device: str):
     canvas.convert('RGB').save(dst, 'PNG', optimize=True)
 
 
+FEATURE = {
+    'es': ('Si cae internet, tú sigues', 'Mapas, emergencias, Wikipedia e IA sin conexión'),
+    'en': ("When the internet fails, you don't", 'Maps, emergency help, Wikipedia and AI, offline'),
+}
+
+
+def play_graphics():
+    """Play's 512 px icon and a 1024 x 500 feature graphic per language (no alpha, as Play asks)."""
+    PLAY.mkdir(parents=True, exist_ok=True)
+    icon = Image.open(ICON).convert('RGB')
+    icon.resize((512, 512), Image.LANCZOS).save(PLAY / 'icon-512.png', 'PNG', optimize=True)
+    W, H = 1024, 500
+    for lang, (title, sub) in FEATURE.items():
+        canvas = Image.new('RGB', (W, H), DARK)
+        draw = ImageDraw.Draw(canvas)
+        side = 220
+        mark = rounded(icon.resize((side, side), Image.LANCZOS), 48)
+        canvas.paste(mark, (72, (H - side) // 2), mark)
+        left = 72 + side + 56
+        width = W - left - 64
+        title_font = fit_text(draw, title, FONTS / 'Inter_800ExtraBold.ttf', 60, width)
+        sub_font = fit_text(draw, sub, FONTS / 'Inter_500Medium.ttf', 30, width)
+        bar_h = 8
+        block = bar_h + 24 + title_font.size + 18 + sub_font.size
+        y = (H - block) // 2
+        draw.rounded_rectangle((left, y, left + 72, y + bar_h), bar_h // 2, fill=ACCENT)
+        y += bar_h + 24
+        draw.text((left, y), title, font=title_font, fill=BG)
+        y += title_font.size + 18
+        draw.text((left, y), sub, font=sub_font, fill=(186, 182, 173))
+        canvas.save(PLAY / f'feature-{lang}.png', 'PNG', optimize=True)
+
+
 def main():
     count = 0
     for src in sorted(SRC.glob('*/*/*.png')):
@@ -130,6 +168,8 @@ def main():
         compose(src, OUT / lang / device / src.name, lang, device)
         count += 1
     print(f'{count} screenshots written to {OUT.relative_to(ROOT)}')
+    play_graphics()
+    print(f'Play icon and feature graphics written to {PLAY.relative_to(ROOT)}')
 
 
 if __name__ == '__main__':
