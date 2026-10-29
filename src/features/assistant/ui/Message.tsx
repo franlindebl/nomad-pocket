@@ -129,7 +129,8 @@ export const AssistantMessage = memo(function AssistantMessage({
     }
   };
 
-  // Opens the user's mail app with the answer; without one, say where to write.
+  // Opens the user's mail app with the answer; without one, say where to write. Android only: Google Play's
+  // AI-generated content policy asks for it, the App Store doesn't (owner's decision, 2026-10-29).
   const report = () => {
     const body = t('report.body', {
       answer: clipAnswer(toPlainText(text)),
@@ -169,7 +170,9 @@ export const AssistantMessage = memo(function AssistantMessage({
             {onRegenerate ? (
               <IconButton icon={RefreshCw} variant="plain" size={36} accessibilityLabel={t('regenerate')} onPress={onRegenerate} testID="assistant-regenerate" />
             ) : null}
-            <IconButton icon={Flag} variant="plain" size={36} accessibilityLabel={t('report.label')} onPress={report} testID="assistant-report" />
+            {Platform.OS === 'android' ? (
+              <IconButton icon={Flag} variant="plain" size={36} accessibilityLabel={t('report.label')} onPress={report} testID="assistant-report" />
+            ) : null}
           </View>
         ) : null}
         {onSearchLibrary ? (
