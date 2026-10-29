@@ -134,7 +134,10 @@ cid = sys.argv[3]
 iso = cid.upper()
 slug = lambda s: re.sub(r"[^a-z0-9]+", "-", unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower()).strip("-")
 names = {slug(n) for r in json.load(open(sys.argv[2]))["regions"] if r["id"] == cid for n in r["name"].values()}
-found = [f["properties"] for f in json.load(open(sys.argv[1]))["features"] if iso in f["properties"].get("iso3166-1:alpha2", [])]
+props = [f["properties"] for f in json.load(open(sys.argv[1]))["features"]]
+found = [p for p in props if iso in p.get("iso3166-1:alpha2", [])]
+# None under its code: one named after it, whatever its code says (the Pitcairn Islands come tagged MH).
+found = found or [p for p in props if {slug(p.get("name", "")), p["id"].rsplit("/", 1)[-1]} & names]
 rank = lambda p: (len(p["iso3166-1:alpha2"]), not {slug(p["name"]), p["id"].rsplit("/", 1)[-1]} & names)
 found.sort(key=rank)
 if len(found) > 1 and rank(found[0]) == rank(found[1]):
