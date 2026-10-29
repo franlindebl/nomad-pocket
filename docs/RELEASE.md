@@ -219,7 +219,7 @@ re-check after updating libkiwix, valhalla-mobile, llama.rn or MapLibre:
 `llvm-objdump -p <lib>.so | grep LOAD` (alignment `2**14` or more).
 
 **AI-generated content.** Play's policy asks for a way to report offensive AI output inside the app:
-each finished answer has "Report answer" (flag icon), which opens the user's mail app with the answer
+each finished answer has "Report answer" (flag icon, Android only: the App Store doesn't ask for it), which opens the user's mail app with the answer
 (`features/assistant/report-core.ts`).
 
 **TODO before any Play release** (owner decision 2026-10-26, details in `docs/PROGRESS.md`):
