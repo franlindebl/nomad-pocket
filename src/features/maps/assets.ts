@@ -11,7 +11,7 @@ import { excludeFromBackup } from '@/features/library/zim';
 import { emptyGlyphRange, FONTSTACKS, glyphRanges } from './glyphs';
 
 // Bump when the zip contents change so devices unpack the new set.
-const VERSION = 'v4';
+const VERSION = 'v5';
 
 export type MapAssets = {
   /** Glyph URL template for the style. */
