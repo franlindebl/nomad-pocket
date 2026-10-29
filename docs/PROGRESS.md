@@ -231,6 +231,16 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 
 ## Known issues / limitations
 
+- **Android: big GitHub / Hugging Face downloads stall** (seen 2026-10-29 making the Play screenshots, store APK of
+  fc268d6 on an API 36 emulator, VPN off). Map and routing parts (~2 GB `*.part00`) and the GGUF model hit "stalled …
+  0 bytes in 15 s" on every range after 15–60 s, then `DOWNLOAD_STALLED` ("La descarga se interrumpió. Reintenta");
+  Retry in the same process often sat at 0 connections. Each new process got 150–350 MB more (the Spain map took ~25
+  kill-and-retry cycles). Kiwix mirrors were fine and the Mac's curl got 3–12 MB/s on the same ranges, so it points at
+  the Android side of the segmented engine with many parallel ranges per host (12) to GitHub/HF. **Check on a real
+  phone before the closed test**; a normal user would see the kit fail again and again.
+- Android, also seen then: the emergency sheet's "Agua y refugio" chip clipped on its first render (English "Water &");
+  after a location change the app kept the old country's emergency number until restarted (emulator mock location,
+  may be emulator-only); the 0.8B model's Spanish first-aid answers are poor on the emulator (meta text, odd advice).
 - Map search: house numbers and far-away POIs come from the country package's side files
   (published). Without them (a map from the extraction fallback), big regions are indexed at a
   lower zoom (≤ 40k tiles: Spain z14 → z12) with full detail only within ~25 km of the user or the
