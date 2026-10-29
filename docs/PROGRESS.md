@@ -42,7 +42,7 @@ can pick up without re-deriving anything.
 | Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 237 packs live (every inhabited country; the USA in six regions) since 2026-10-27; E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
 | Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search; the most capable installed model is the default; on-device dictation; reads the PDFs inside archives (document index) and the family plan; copy and regenerate an answer) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
-| Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android: signed AAB, Play texts, forms and graphics drafted (`docs/store/play-listing.md`), Android screenshots and the Play Console app still to do |
+| Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android: app created in Play Console, App content forms done (PEGI 18, see `docs/store/play-listing.md`), 1.1.0 (23) on internal testing 2026-10-29; Android screenshots, en-US listing and the closed test still to do |
 | Preparedness (family plan, emergency kit with expiry reminders, printable PDF, offline guides) | done — iOS sim + Android emulator (E2E) |
 | E2E suite (Maestro) + pre-commit hook | done |
 | Pre-release audit (2026-10-26): ~60 verified findings fixed in code and docs | merged to main; device checks and the deferred items below pending |
@@ -189,10 +189,11 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
    platforms). ~~A Retry for a failed extraction~~ done 2026-10-28 (Downloads row; flow `map-23`).
 5. Android release (`docs/RELEASE.md`, Android; `docs/store/play-listing.md`). Done 2026-10-29: upload key and
    signed store AAB, permissions trimmed, 64-bit ABIs only, "Report answer" for Play's AI policy, Play texts,
-   form answers, icon and feature graphic. To do: Android phone screenshots (emulator, 1080 × 1920 via
-   `scripts/store-screenshots.py`), the owner's review of the listing, create the app in Play Console (it
-   accepts Play's policies: the owner confirms), internal test, then the **closed test: 12 testers × 14
-   days** (required for every new app of this personal account), then production.
+   form answers, icon and feature graphic; the app created in Play Console with every App content form,
+   store settings and the es-ES listing; 1.1.0 (23) on internal testing. To do: Android phone screenshots
+   (emulator, 1080 × 1920 via `scripts/store-screenshots.py`) and the en-US listing, then the **closed test
+   with "Friends and family": 12 testers × 14 days** (required for every new app of this personal account),
+   then production. Content rating is PEGI 18 (audience 18+) until IARC answers the owner's question.
 6. Reader: auto-hiding toolbar on scroll (style guide), syllabus for SPA course ZIMs read
    from the rendered DOM.
 7. Assistant: ~~copy / regenerate an answer~~ done 2026-10-28; better small-model citations; check the
