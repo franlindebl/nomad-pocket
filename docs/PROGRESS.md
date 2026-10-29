@@ -314,7 +314,7 @@ one emergency number per country, emergency only.
   `scripts/maps/make-emergency-numbers.py` (Wikipedia's list + 26 corrections: 112 for every service in
   the EU/EEA, Switzerland, Liechtenstein, Monaco, San Marino; Colombia 123; Pakistan 1122; police where
   the ambulance number is a landline or missing; Australian territories 000; and 8 rows the owner checked:
-  Andorra 116, Ethiopia 911, Uganda 911, Tanzania 115, Peru 106, Bolivia 118, Sri Lanka 1990, UAE 998). One number: the one for
+  Andorra 116, Ethiopia 911, Uganda 911, Tanzania 112 (every service), Peru 106, Bolivia 118, Sri Lanka 1990, UAE 998). One number: the one for
   every service, else the ambulance's ("Llamar al 119 (ambulancia)"), else the police's. The country is
   where the last position seen is (`country-at-core.ts` over `country-shapes.json`, Natural Earth 1:50m
   simplified to ~2 km, 218 KB, plus Ceuta and Melilla from 1:10m; kv `maps.hereCountry`), else the
