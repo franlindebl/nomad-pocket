@@ -179,7 +179,13 @@ never committed), a Play listing and its data-safety form.
 **TODO before any Play release** (owner decision 2026-10-26, details in `docs/PROGRESS.md`):
 ML Kit GenAI (Gemini Nano) is removed and Firebase is kept out of the APK
 (`plugins/with-android-no-firebase.js`; re-check it after an expo-notifications update), so the app
-has no third-party analytics-capable SDK. Still to do: list the full transitive
-Android notice set (a Gradle licence plugin) in Credits; decide how the proprietary Play Services
-pieces sit next to GPL libkiwix (ideally ask Kiwix); re-read `site/privacy.html` for Android and
-fill the Data safety form to match it.
+has no third-party analytics-capable SDK. The full transitive Android notice set is in Credits
+(Android libraries, Android builds only) since 2026-10-28: `node scripts/licenses/android-deps.mjs`
+(after `npx expo prebuild --platform android`) lists every Maven artifact of the release runtime classpath
+with its POM licence into `scripts/licenses/android.json`, then `node scripts/licenses.mjs`; re-run both
+after a dependency or SDK change. Of its 196 artifacts, five aren't open source (Android SDK terms):
+play-services-location/base/basement/tasks (expo-location, MapLibre) and
+`com.android.installreferrer:installreferrer` (expo-application, pulled in by expo-notifications; the app
+never calls its install-referrer API). Still to do: decide how those proprietary pieces sit next to GPL
+libkiwix (ideally ask Kiwix; dropping installreferrer is a Gradle exclude); re-read `site/privacy.html`
+for Android and fill the Data safety form to match it.

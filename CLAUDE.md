@@ -57,6 +57,7 @@ npm run check:i18n          # every t('…') key exists in es and en
 npm run check:catalog       # validates src/data/catalog.json + every URL (--offline: schema only)
 node scripts/licenses.mjs   # regenerates src/data/licenses.json (Credits screen); --check fails if stale.
                             # Run after any dependency change; native libraries live in scripts/licenses/native.json
+                            # Android Maven artifacts: node scripts/licenses/android-deps.mjs first (scripts/licenses/android.json)
 npm run e2e                 # Maestro smoke suite on the iOS simulator (docs/E2E.md)
 ```
 

@@ -389,7 +389,9 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
 - `pauseDownload`, `resumeDownload`, `cancelDownload` (deletes the partial file),
   `dismissDownload`, hooks `useActiveDownloads()`, `useDownload(id)`.
 - `startExternalJob({ id, kind, title, totalBytes, cancel })` → `{ update, finish, fail }`
-  for non-URL work (map extraction) so it shows in the same downloads UI.
+  for non-URL work (map extraction) so it shows in the same downloads UI. `fail(error, { retry, discard })`:
+  with `retry` the failed row offers Retry (`resumeDownload` calls it; the record's in-memory `retryable`),
+  `discard` runs when the row is dismissed instead.
 
 ### Catalog (`src/features/catalog`, `src/data/catalog.json`)
 - Shape (`types.ts`): `resources` (101: id = Kiwix book name without date, bilingual
@@ -572,10 +574,13 @@ fingerprint of its plan and the indices of the tile requests already written to 
 startup `resumeMapDownloads()` (from `register.ts`, in a `setTimeout`) re-plans against the saved build
 (a few seconds), skips the finished requests and continues in the same `.part`; the saved progress is
 void (start over) if the server no longer has that build, the plan's shape differs or the `.part` is
-shorter than what the finished requests wrote. Cancel and failure delete the `.part` and the saved job;
-`.part` files without a saved job are deleted at startup. `EXPO_PUBLIC_PLANET_BUILD_URL` (dev/E2E) replaces
+shorter than what the finished requests wrote. Cancel, no room and a 4xx delete the `.part` and the saved
+job; a network failure keeps them, so both the next launch and the row's Retry in Downloads continue it
+(`startExternalJob`'s `fail(error, { retry, discard })`: Retry restarts the job on its saved build, dismissing
+the row discards the progress). `.part` files without a saved job are deleted at startup. `EXPO_PUBLIC_PLANET_BUILD_URL` (dev/E2E) replaces
 the Protomaps build with `scripts/dev-planet-server.ts` (synthetic planet with Range and a delay;
-`PLANET_PORT` in `scripts/e2e.sh`, flow `map-22-extract-resume`). Loose `.pmtiles` files
+`PLANET_PORT` in `scripts/e2e.sh`, flows `map-22-extract-resume` and `map-23-extract-retry`; its
+`/__outage?ms=` endpoint answers 503 for a while). Loose `.pmtiles` files
 are registered at startup from their header (`register.ts`; a region id as file name
 gives the region's name).
 
@@ -629,8 +634,8 @@ maps only: the union of the Geofabrik polygons it lists ∩ the country, one job
 (the country's own job builds its one pack, which brings them); their entries carry the outline's 1°
 `cells`. For countries without a routing pack also `<id>.{pois,streets,places,addresses}.tsv`
 from the Geofabrik extract named after the country, which wins a tie (an unresolved tie takes none,
-and the app falls back to Overpass; Geofabrik mis-tags `pf`, `wf`, `tk`, Clipperton and `pn`, and `as`,
-`gu`, `mp` have no extract of their own) (scripts/routing/emergency-points.py, streets.py, places.py: the
+and the app falls back to Overpass; with no extract under its code, one named after the country: Geofabrik
+tags the Pitcairn Islands MH; `pf`, `wf`, `as`, `gu`, `mp` have routing packs, which bring their side files) (scripts/routing/emergency-points.py, streets.py, places.py: the
 same side files as a routing pack). `scripts/maps/maps-manifest.py` writes `maps-manifest.json` (release
 `maps-index`, files in one release per continent, `maps-YYYYMMDD-<run id>-<continent>`: GitHub stops at
 1000 assets per release). The job builds the side files first and deletes the extract before

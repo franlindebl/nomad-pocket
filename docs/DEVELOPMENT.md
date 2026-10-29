@@ -46,7 +46,10 @@ npm install
 - After any dependency change run `node scripts/licenses.mjs` (regenerates
   `src/data/licenses.json`, the Credits screen; `--check` fails if it is stale). When you bump a
   fetch script, podspec or Gradle version of a native library, update
-  `scripts/licenses/native.json` too.
+  `scripts/licenses/native.json` too. When the Android dependencies change (an npm package with native
+  Android code, an Expo SDK bump), first run `node scripts/licenses/android-deps.mjs` (needs a
+  prebuilt `android/`): it lists every Maven artifact of the release APK with its POM licence into
+  `scripts/licenses/android.json` (Credits › Android libraries).
 
 ## Native projects
 
