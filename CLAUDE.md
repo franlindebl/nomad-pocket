@@ -172,6 +172,10 @@ docs/               the docs above + screenshots/ + store/
 - No Google Play services in the APK (GPL next to libkiwix): Android location is `modules/nomad-location`
   (expo-location is out of Android autolinking), the Play Install Referrer and Firebase are excluded by
   config plugins. A new dependency that pulls `com.google.android.gms` in needs the same treatment.
+- Android downloads: expo-file-system's `DownloadTask` shares one OkHttpClient whose dispatcher runs 5 calls per
+  host and queues the rest (0 bytes, then our stall watchdog fails them). `modules/nomad-files`
+  `raiseDownloadConcurrency()` lifts it at startup and the manager stays under what it returns; re-check after an
+  expo-file-system update (a warning "can't raise the download client's connections per host" in logcat).
 - kv-store: a zustand `persist` store uses `kvStorage()` (`src/lib/kv.ts`), never
   `createJSONStorage(() => Storage)`. Mixing its async and sync APIs on the first open
   breaks the migration transaction: on a fresh install the settings never hydrated and
