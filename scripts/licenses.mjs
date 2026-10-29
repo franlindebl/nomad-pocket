@@ -103,15 +103,26 @@ for (const [key, entry] of Object.entries(lock.packages)) {
 }
 js.sort((a, b) => a.name.localeCompare(b.name) || a.version.localeCompare(b.version));
 
+// Android: every Maven artifact of the release APK (scripts/licenses/android-deps.mjs), with the
+// standard text of the first licence we have one for; none for terms that aren't open source
+// (Google Play services: `url`).
+const androidFile = path.join(here, 'android.json');
+const android = (fs.existsSync(androidFile) ? JSON.parse(fs.readFileSync(androidFile, 'utf8')) : []).map((a) => {
+  const ids = a.license.split(/\s+OR\s+/);
+  const id = ids.find((x) => hand.spdxFallback?.[x]);
+  return { ...a, text: addText(id ? readHand(hand.spdxFallback[id]) : null), ...(id ? { standard: true } : {}) };
+});
+
 const handEntry = ({ text, ...rest }) => ({ ...rest, text: addText(readHand(text)) });
 const data = {
   app: handEntry(hand.app),
   native: hand.native.map(handEntry),
   data: hand.data.map(handEntry),
   js,
+  android,
   texts,
 };
-const missing = [...data.native, ...data.data, ...js].filter(
+const missing = [...data.native, ...data.data, ...js, ...android].filter(
   (e) => e.text === null && !hand.native.concat(hand.data).some((h) => h.id === e.id),
 );
 for (const e of missing) console.warn(`[licenses] no licence text for ${e.id} (${e.license})`);
@@ -127,6 +138,6 @@ if (process.argv.includes('--check')) {
 } else {
   fs.writeFileSync(outFile, json);
   console.log(
-    `[licenses] ${js.length} JS packages, ${data.native.length} native, ${data.data.length} data; ${texts.length} texts, ${(json.length / 1024).toFixed(0)} KB`,
+    `[licenses] ${js.length} JS packages, ${data.native.length} native, ${android.length} Android, ${data.data.length} data; ${texts.length} texts, ${(json.length / 1024).toFixed(0)} KB`,
   );
 }

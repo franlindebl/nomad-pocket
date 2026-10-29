@@ -9,6 +9,7 @@ const data: CreditsData = {
   native: [c('libzim', 'libzim', 'GPL-2.0-or-later')],
   data: [c('openstreetmap', 'OpenStreetMap', 'ODbL-1.0')],
   js: [c('react@19.3.0', 'react'), c('@scope/pkg@1.0.0', '@scope/pkg', 'ISC')],
+  android: [c('androidx.core:core', 'androidx.core:core', 'Apache-2.0')],
   texts: ['text'],
 };
 
@@ -18,6 +19,8 @@ test('creditKey and findCredit round-trip every kind', () => {
   assert.equal(findCredit(data, creditKey('data', 'openstreetmap')), data.data[0]);
   // Scoped names hold a second "@" and ids a ":"-free version: split on the first ":" only.
   assert.equal(findCredit(data, creditKey('js', '@scope/pkg@1.0.0')), data.js[1]);
+  // Maven ids hold ":" themselves.
+  assert.equal(findCredit(data, creditKey('android', 'androidx.core:core')), data.android[0]);
 });
 
 test('findCredit rejects unknown kinds and ids', () => {

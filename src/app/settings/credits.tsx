@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { Code, Package, Scale } from 'lucide-react-native';
-import { View } from 'react-native';
+import { Code, Package, Scale, Smartphone } from 'lucide-react-native';
+import { Platform, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { IconBadge, ListGroup, ListRow, Screen, SectionHeader, Text } from '@/components/ui';
@@ -76,6 +76,17 @@ export default function CreditsScreen() {
           chevron
           onPress={() => router.push('/settings/packages')}
         />
+        {/* Only the APK carries them (Google Play services included, with their own terms). */}
+        {Platform.OS === 'android' ? (
+          <ListRow
+            testID="credits-android"
+            title={t('creditsAndroid')}
+            subtitle={t('creditsAndroidCount', { count: credits.android.length })}
+            leading={<IconBadge icon={Smartphone} hue="neutral" size={36} />}
+            chevron
+            onPress={() => router.push({ pathname: '/settings/packages', params: { kind: 'android' } })}
+          />
+        ) : null}
       </ListGroup>
     </Screen>
   );

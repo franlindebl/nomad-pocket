@@ -1,7 +1,7 @@
 // Credits & licenses: the shape of src/data/licenses.json (written by scripts/licenses.mjs)
 // and the pure helpers the screens use. No `@/` imports so node --test can load it.
 
-export type CreditKind = 'app' | 'native' | 'data' | 'js';
+export type CreditKind = 'app' | 'native' | 'data' | 'js' | 'android';
 
 export type Credit = {
   id: string;
@@ -23,6 +23,8 @@ export type CreditsData = {
   native: Credit[];
   data: Credit[];
   js: Credit[];
+  /** Maven artifacts of the Android APK (scripts/licenses/android-deps.mjs). */
+  android: Credit[];
   texts: string[];
 };
 
@@ -37,7 +39,8 @@ export function findCredit(data: CreditsData, key: string): Credit | undefined {
   if (sep < 0) return undefined;
   const kind = key.slice(0, sep);
   const id = key.slice(sep + 1);
-  const list = kind === 'native' ? data.native : kind === 'data' ? data.data : kind === 'js' ? data.js : undefined;
+  const lists: Partial<Record<string, Credit[]>> = { native: data.native, data: data.data, js: data.js, android: data.android };
+  const list = lists[kind];
   return list?.find((c) => c.id === id);
 }
 
