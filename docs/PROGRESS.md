@@ -317,10 +317,12 @@ closed test with 12 testers for 14 days (another app's dashboard says so).
   every Play Console form answered: content rating, target audience 18+, health apps "medical reference",
   Data safety "no data collected"); `scripts/store-screenshots.py` also writes Play's 512 px icon and
   the 1024 × 500 feature graphics (`docs/store/play/`) and composes `android` captures at 1080 × 1920.
-- Checked: tsc, lint, 388 unit tests, i18n; AAB manifest and signature; Android tour with the store APK: android-04 passes;
-  01/03/05 stop at the "Wi-Fi only" question because the Mac's corporate VPN (GlobalProtect) leaves the emulator's
-  network in partial connectivity (the app then treats it as offline and doesn't ask); a non-store APK of the same
-  tree fails the same way. To rerun with the VPN off before the first upload.
+- Checked: tsc, lint, 388 unit tests, i18n; AAB manifest and signature; Android tour with the store-signed APK: **4/4 with the
+  VPN off** (a first run with GlobalProtect on passed only android-04: the VPN leaves the emulator's network in
+  partial connectivity, the app treats it as offline and never asks the Wi-Fi question).
+- **Play Console** (owner's OK): the app form filled (name, `com.fjlinde.nomadpocket` available, es-ES, app, free);
+  the owner ticks the two declarations and creates it. Testers: the account-wide email list "Friends and family"
+  (19 addresses, used by Theri.App's closed test) goes to Nomad Pocket's closed test.
 
 ### 2026-10-29 — Android without Play services; an emergency number per country
 
