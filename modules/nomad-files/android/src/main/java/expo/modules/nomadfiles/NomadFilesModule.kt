@@ -1,18 +1,53 @@
 // Streaming file work for downloads that are gigabytes long: a sha-256 of a whole file, and
 // copying one file into another at an offset (checking sha-1 pieces on the way). Same API as
 // the iOS module (where expo-file-system's File.digest held the whole file in memory); here it
-// keeps the bytes out of JS and reuses one buffer.
+// keeps the bytes out of JS and reuses one buffer. Android only: raising the connections per
+// host of expo-file-system's download client (raiseDownloadConcurrency).
 package expo.modules.nomadfiles
 
 import android.net.Uri
+import android.util.Log
+import expo.modules.filesystem.FileSystemDownloadTask
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import java.io.File
 import java.io.FileInputStream
 import java.io.RandomAccessFile
+import java.lang.reflect.Modifier
 import java.security.MessageDigest
+import okhttp3.OkHttpClient
 
 private const val BLOCK = 4 * 1024 * 1024
+
+/** Calls per host (and in all) expo-file-system's download client may run at once. */
+private const val MAX_PER_HOST = 32
+private const val MAX_CALLS = 128
+/** OkHttp's default, what the client keeps when it can't be raised. */
+private const val OKHTTP_PER_HOST = 5
+
+/**
+ * expo-file-system's DownloadTask runs every download through one OkHttpClient (a private static
+ * field) whose dispatcher starts at most 5 calls per host: the rest wait in its queue and get no
+ * byte. The segmented downloader opens up to 12 ranges to one URL (GitHub, Hugging Face, Kiwix's
+ * load balancer when no mirror could be measured): the queued ones looked stalled after 15 s,
+ * were cancelled as errors, and the download gave up with DOWNLOAD_STALLED (Mi 9, 2026-10-29).
+ * Found by type, not by name: R8 renames the field in release builds. Returns the calls per host
+ * the client now allows; the downloader keeps under it.
+ */
+private fun raiseDownloadConcurrency(): Int =
+  try {
+    val field = FileSystemDownloadTask::class.java.declaredFields.firstOrNull {
+      Modifier.isStatic(it.modifiers) && OkHttpClient::class.java.isAssignableFrom(it.type)
+    } ?: throw IllegalStateException("no OkHttpClient field")
+    field.isAccessible = true
+    val dispatcher = (field.get(null) as OkHttpClient).dispatcher
+    dispatcher.maxRequests = maxOf(dispatcher.maxRequests, MAX_CALLS)
+    dispatcher.maxRequestsPerHost = maxOf(dispatcher.maxRequestsPerHost, MAX_PER_HOST)
+    dispatcher.maxRequestsPerHost
+  } catch (e: Throwable) {
+    Log.w("NomadFiles", "can't raise the download client's connections per host", e)
+    OKHTTP_PER_HOST
+  }
 
 private fun fileOf(path: String): File = if (path.startsWith("file:")) File(Uri.parse(path).path!!) else File(path)
 
@@ -32,6 +67,8 @@ private fun readFully(input: FileInputStream, buf: ByteArray, size: Int): Int {
 class NomadFilesModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("NomadFiles")
+
+    Function("raiseDownloadConcurrency") { raiseDownloadConcurrency() }
 
     AsyncFunction("sha256") { path: String ->
       val digest = MessageDigest.getInstance("SHA-256")

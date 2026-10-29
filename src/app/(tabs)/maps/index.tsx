@@ -682,7 +682,7 @@ function EmptyCard({ home }: { home: Region | undefined }) {
             onPress={() => router.push({ pathname: '/maps/download', params: { regionId: home.id } })}
           />
         ) : null}
-        <Button title={t('empty.pickCountry')} variant={home ? 'secondary' : 'primary'} onPress={() => router.push('/maps/pick')} />
+        <Button title={t('empty.pickCountry')} variant={home ? 'secondary' : 'primary'} onPress={() => router.navigate('/maps/pick')} />
       </View>
     </Card>
   );

@@ -44,7 +44,7 @@ import {
   type ContentKind,
 } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
-import { sha256 } from '../../../modules/nomad-files';
+import { raiseDownloadConcurrency, sha256 } from '../../../modules/nomad-files';
 
 import {
   canStartFile,
@@ -147,8 +147,14 @@ export class NotEnoughStorageError extends Error {
  * the budget's fair shares give them most of the line. How many connections and files run in
  * all is the adaptive budget (budget-core.ts).
  */
-const PER_MIRROR = 3;
-const PER_URL = 12;
+/**
+ * Android: expo-file-system starts at most this many of our ranges per host and queues the rest,
+ * which then look stalled (raised to 32 natively; OkHttp's 5 if that failed). One stays free for
+ * the single-file downloads to the same host, which the per-host counts don't include.
+ */
+const HOST_LIMIT = raiseDownloadConcurrency();
+const PER_MIRROR = Math.min(3, HOST_LIMIT - 1);
+const PER_URL = Math.min(12, HOST_LIMIT - 1);
 /** How long a mirror's measured speed stands in for a new probe (in memory). */
 const MIRROR_SCORES_MS = 10 * 60 * 1000;
 const mirrorScores = new Map<string, { bps: number; at: number }>();

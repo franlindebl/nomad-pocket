@@ -141,7 +141,7 @@ export default function MapsSheet() {
           title={countries.length ? t('regions.addCountry') : t('regions.addFirstCountry')}
           subtitle={t('regions.addCountryBody')}
           chevron
-          onPress={() => router.push('/maps/pick')}
+          onPress={() => router.navigate('/maps/pick')}
         />
       </ListGroup>
 
