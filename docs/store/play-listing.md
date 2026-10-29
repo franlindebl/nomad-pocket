@@ -93,7 +93,9 @@ literal questionnaire (sexuality yes, drug images yes) gave the same. Gory image
 are what PEGI rates 18. Kiwix and Wikipedia (same content) are PEGI 3 on Play, but Google's help has no
 exception for reference content ("specific to the content within your app"; misrepresentation can lead to
 removal). Owner's decision: keep PEGI 18 with an 18+ audience and ask IARC (globalratings.com/contact-us) how
-to rate a reader of downloadable encyclopedias and medical guides; redo the questionnaire if they allow it.
+to rate a reader of downloadable encyclopedias and medical guides; redo the questionnaire if they allow it. **Asked on 2026-10-29** through the
+IARC general contact form (600-character limit; the answer goes to the owner's email). If there's no answer in
+~2 weeks, ask PEGI (pegi.info), which the IARC page lists for questions about a specific rating.
 
 ## Data safety
 
