@@ -39,6 +39,8 @@ export type ZimSearchHit = {
   snippet?: string;
   /** Word count of the article, when known. */
   wordCount?: number;
+  /** A passage of a PDF inside the archive (global search): the document's readable name. */
+  docTitle?: string;
 };
 
 export type ZimLink = { path: string; title: string };

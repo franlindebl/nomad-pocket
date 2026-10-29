@@ -44,6 +44,8 @@
   "dismiss": "Cerrar",
   "globalSearch": "Buscar",
   "globalPlaceholder": "Busca en todos tus libros",
+  "inPdfs": "en sus PDF",
+  "pdfPage": "{{title}} · pág. {{page}}",
   "noArchives": "Aún no hay nada que buscar",
   "noArchivesBody": "Descarga un libro desde la biblioteca y búscalo aquí, sin conexión.",
   "toc": "Índice",

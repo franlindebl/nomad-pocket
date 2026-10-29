@@ -44,6 +44,8 @@
   "dismiss": "Dismiss",
   "globalSearch": "Search",
   "globalPlaceholder": "Search all your books",
+  "inPdfs": "in its PDFs",
+  "pdfPage": "{{title}} · p. {{page}}",
   "noArchives": "Nothing to search yet",
   "noArchivesBody": "Download a book from the library and search it here, offline.",
   "toc": "Contents",
