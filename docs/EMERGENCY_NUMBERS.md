@@ -224,7 +224,7 @@ GSM phones treat as an emergency call everywhere).
 | Surinam | sr | 115 | todo | 115 | 115 | 115 |  |
 | Tailandia | th | 1669 | ambulancia | 191 | 1669 | 199 |  |
 | Taiwán | tw | 119 | ambulancia | 110 | 119 | 119 |  |
-| Tanzania | tz | 115 | ambulancia | 112 | 114 | 115 | checked: 112 police, 115 ambulance, 114 fire |
+| Tanzania | tz | 112 | todo | 112 | 114 | 115 | checked: 112 reaches ambulance, fire and police (GOV.UK trav |
 | Tayikistán | tj | 112 | todo | 112 | 112 | 112 |  |
 | Territorio Británico del Océano Índico | io | 112 | todo | 112 or 999 | 112 or 999 | 112 or 999 |  |
 | Territorios Australianos del Océano Índico | ioa | 000 | todo |  |  |  | Australian territory (Christmas and Cocos Islands) |

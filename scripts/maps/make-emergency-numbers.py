@@ -45,7 +45,7 @@ OVERRIDES = {
     'ad': ('116', 'ambulance', 'checked: 110 police, 116 ambulance, 118 fire'),
     'et': ('911', 'all', 'checked: 911 general, 991 police, 907 ambulance, 939 fire'),
     'ug': ('911', 'ambulance', 'checked: 999 police, 911 ambulance, 112 fire'),
-    'tz': ('115', 'ambulance', 'checked: 112 police, 115 ambulance, 114 fire'),
+    'tz': ('112', 'all', 'checked: 112 reaches ambulance, fire and police (GOV.UK travel advice); 115 ambulance, 114 fire'),
     'pe': ('106', 'ambulance', 'checked: 105 police, 106 ambulance (SAMU), 116 fire'),
     'bo': ('118', 'ambulance', 'checked: 110 police, 118 ambulance, 119 fire'),
     'lk': ('1990', 'ambulance', 'checked: 118/119 police, 1990 ambulance (Suwa Seriya), 110/111 fire'),
