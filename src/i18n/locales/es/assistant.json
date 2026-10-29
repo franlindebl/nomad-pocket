@@ -48,6 +48,12 @@
   "copied": "Copiado",
   "copy": "Copiar respuesta",
   "regenerate": "Volver a generar la respuesta",
+  "report": {
+    "label": "Reportar respuesta",
+    "subject": "Nomad Pocket: respuesta del asistente reportada",
+    "body": "Cuéntanos qué está mal en esta respuesta (ofensiva, peligrosa, falsa…):\n\n\n— Respuesta —\n{{answer}}\n\n— Nomad Pocket {{version}} · {{platform}} —",
+    "noMail": "No hay ninguna app de correo. Escríbenos a {{email}}"
+  },
   "searchLibrary": "Buscar en mi biblioteca",
   "searchLibraryHint": "Volver a responder buscando en tu biblioteca sin conexión",
   "errors": {
