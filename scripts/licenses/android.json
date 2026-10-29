@@ -1,0 +1,1374 @@
+[
+ {
+  "id": "androidx.activity:activity",
+  "name": "androidx.activity:activity",
+  "version": "1.8.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.activity:activity-ktx",
+  "name": "androidx.activity:activity-ktx",
+  "version": "1.8.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.annotation:annotation",
+  "name": "androidx.annotation:annotation",
+  "version": "1.9.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.annotation:annotation-experimental",
+  "name": "androidx.annotation:annotation-experimental",
+  "version": "1.4.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.annotation:annotation-jvm",
+  "name": "androidx.annotation:annotation-jvm",
+  "version": "1.9.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.appcompat:appcompat",
+  "name": "androidx.appcompat:appcompat",
+  "version": "1.7.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.appcompat:appcompat-resources",
+  "name": "androidx.appcompat:appcompat-resources",
+  "version": "1.7.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.arch.core:core-common",
+  "name": "androidx.arch.core:core-common",
+  "version": "2.2.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.arch.core:core-runtime",
+  "name": "androidx.arch.core:core-runtime",
+  "version": "2.2.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.autofill:autofill",
+  "name": "androidx.autofill:autofill",
+  "version": "1.3.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.browser:browser",
+  "name": "androidx.browser:browser",
+  "version": "1.6.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.cardview:cardview",
+  "name": "androidx.cardview:cardview",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "url": "http://source.android.com"
+ },
+ {
+  "id": "androidx.collection:collection",
+  "name": "androidx.collection:collection",
+  "version": "1.4.4",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.collection:collection-jvm",
+  "name": "androidx.collection:collection-jvm",
+  "version": "1.4.4",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.collection:collection-ktx",
+  "name": "androidx.collection:collection-ktx",
+  "version": "1.4.4",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.concurrent:concurrent-futures",
+  "name": "androidx.concurrent:concurrent-futures",
+  "version": "1.1.0",
+  "license": "Apache-2.0",
+  "url": "http://source.android.com"
+ },
+ {
+  "id": "androidx.constraintlayout:constraintlayout",
+  "name": "androidx.constraintlayout:constraintlayout",
+  "version": "2.1.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/androidx/constraintlayout"
+ },
+ {
+  "id": "androidx.constraintlayout:constraintlayout-core",
+  "name": "androidx.constraintlayout:constraintlayout-core",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/androidx/constraintlayout"
+ },
+ {
+  "id": "androidx.coordinatorlayout:coordinatorlayout",
+  "name": "androidx.coordinatorlayout:coordinatorlayout",
+  "version": "1.2.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.core:core",
+  "name": "androidx.core:core",
+  "version": "1.18.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.core:core-ktx",
+  "name": "androidx.core:core-ktx",
+  "version": "1.18.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.core:core-splashscreen",
+  "name": "androidx.core:core-splashscreen",
+  "version": "1.2.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.core:core-viewtree",
+  "name": "androidx.core:core-viewtree",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.cursoradapter:cursoradapter",
+  "name": "androidx.cursoradapter:cursoradapter",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "url": "http://source.android.com"
+ },
+ {
+  "id": "androidx.customview:customview",
+  "name": "androidx.customview:customview",
+  "version": "1.1.0",
+  "license": "Apache-2.0",
+  "url": "http://source.android.com"
+ },
+ {
+  "id": "androidx.databinding:viewbinding",
+  "name": "androidx.databinding:viewbinding",
+  "version": "9.2.1",
+  "license": "Apache-2.0",
+  "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+ },
+ {
+  "id": "androidx.documentfile:documentfile",
+  "name": "androidx.documentfile:documentfile",
+  "version": "1.1.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.drawerlayout:drawerlayout",
+  "name": "androidx.drawerlayout:drawerlayout",
+  "version": "1.1.1",
+  "license": "Apache-2.0",
+  "url": "http://source.android.com"
+ },
+ {
+  "id": "androidx.dynamicanimation:dynamicanimation",
+  "name": "androidx.dynamicanimation:dynamicanimation",
+  "version": "1.1.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.emoji2:emoji2",
+  "name": "androidx.emoji2:emoji2",
+  "version": "1.3.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.emoji2:emoji2-views-helper",
+  "name": "androidx.emoji2:emoji2-views-helper",
+  "version": "1.3.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.exifinterface:exifinterface",
+  "name": "androidx.exifinterface:exifinterface",
+  "version": "1.3.6",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.fragment:fragment",
+  "name": "androidx.fragment:fragment",
+  "version": "1.8.9",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.fragment:fragment-ktx",
+  "name": "androidx.fragment:fragment-ktx",
+  "version": "1.8.9",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.graphics:graphics-shapes",
+  "name": "androidx.graphics:graphics-shapes",
+  "version": "1.0.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.graphics:graphics-shapes-android",
+  "name": "androidx.graphics:graphics-shapes-android",
+  "version": "1.0.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.interpolator:interpolator",
+  "name": "androidx.interpolator:interpolator",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "url": "http://source.android.com"
+ },
+ {
+  "id": "androidx.lifecycle:lifecycle-common",
+  "name": "androidx.lifecycle:lifecycle-common",
+  "version": "2.9.3",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.lifecycle:lifecycle-common-java8",
+  "name": "androidx.lifecycle:lifecycle-common-java8",
+  "version": "2.9.3",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.lifecycle:lifecycle-common-jvm",
+  "name": "androidx.lifecycle:lifecycle-common-jvm",
+  "version": "2.9.3",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.lifecycle:lifecycle-livedata",
+  "name": "androidx.lifecycle:lifecycle-livedata",
+  "version": "2.9.3",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.lifecycle:lifecycle-livedata-core",
+  "name": "androidx.lifecycle:lifecycle-livedata-core",
+  "version": "2.9.3",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.lifecycle:lifecycle-livedata-core-ktx",
+  "name": "androidx.lifecycle:lifecycle-livedata-core-ktx",
+  "version": "2.9.3",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.lifecycle:lifecycle-process",
+  "name": "androidx.lifecycle:lifecycle-process",
+  "version": "2.9.3",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.lifecycle:lifecycle-runtime",
+  "name": "androidx.lifecycle:lifecycle-runtime",
+  "version": "2.9.3",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.lifecycle:lifecycle-runtime-android",
+  "name": "androidx.lifecycle:lifecycle-runtime-android",
+  "version": "2.9.3",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.lifecycle:lifecycle-runtime-ktx",
+  "name": "androidx.lifecycle:lifecycle-runtime-ktx",
+  "version": "2.9.3",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.lifecycle:lifecycle-runtime-ktx-android",
+  "name": "androidx.lifecycle:lifecycle-runtime-ktx-android",
+  "version": "2.9.3",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.lifecycle:lifecycle-viewmodel",
+  "name": "androidx.lifecycle:lifecycle-viewmodel",
+  "version": "2.9.3",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.lifecycle:lifecycle-viewmodel-android",
+  "name": "androidx.lifecycle:lifecycle-viewmodel-android",
+  "version": "2.9.3",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.lifecycle:lifecycle-viewmodel-ktx",
+  "name": "androidx.lifecycle:lifecycle-viewmodel-ktx",
+  "version": "2.9.3",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.lifecycle:lifecycle-viewmodel-savedstate",
+  "name": "androidx.lifecycle:lifecycle-viewmodel-savedstate",
+  "version": "2.9.3",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.lifecycle:lifecycle-viewmodel-savedstate-android",
+  "name": "androidx.lifecycle:lifecycle-viewmodel-savedstate-android",
+  "version": "2.9.3",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.loader:loader",
+  "name": "androidx.loader:loader",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "url": "http://source.android.com"
+ },
+ {
+  "id": "androidx.profileinstaller:profileinstaller",
+  "name": "androidx.profileinstaller:profileinstaller",
+  "version": "1.4.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.recyclerview:recyclerview",
+  "name": "androidx.recyclerview:recyclerview",
+  "version": "1.2.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.resourceinspection:resourceinspection-annotation",
+  "name": "androidx.resourceinspection:resourceinspection-annotation",
+  "version": "1.0.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.savedstate:savedstate",
+  "name": "androidx.savedstate:savedstate",
+  "version": "1.3.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.savedstate:savedstate-android",
+  "name": "androidx.savedstate:savedstate-android",
+  "version": "1.3.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.savedstate:savedstate-ktx",
+  "name": "androidx.savedstate:savedstate-ktx",
+  "version": "1.3.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.startup:startup-runtime",
+  "name": "androidx.startup:startup-runtime",
+  "version": "1.1.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.swiperefreshlayout:swiperefreshlayout",
+  "name": "androidx.swiperefreshlayout:swiperefreshlayout",
+  "version": "1.1.0",
+  "license": "Apache-2.0",
+  "url": "http://source.android.com"
+ },
+ {
+  "id": "androidx.tracing:tracing",
+  "name": "androidx.tracing:tracing",
+  "version": "1.2.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.tracing:tracing-ktx",
+  "name": "androidx.tracing:tracing-ktx",
+  "version": "1.2.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.transition:transition",
+  "name": "androidx.transition:transition",
+  "version": "1.7.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.transition:transition-ktx",
+  "name": "androidx.transition:transition-ktx",
+  "version": "1.7.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.vectordrawable:vectordrawable",
+  "name": "androidx.vectordrawable:vectordrawable",
+  "version": "1.2.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.vectordrawable:vectordrawable-animated",
+  "name": "androidx.vectordrawable:vectordrawable-animated",
+  "version": "1.1.0",
+  "license": "Apache-2.0",
+  "url": "http://source.android.com"
+ },
+ {
+  "id": "androidx.versionedparcelable:versionedparcelable",
+  "name": "androidx.versionedparcelable:versionedparcelable",
+  "version": "1.1.1",
+  "license": "Apache-2.0",
+  "url": "http://source.android.com"
+ },
+ {
+  "id": "androidx.viewpager:viewpager",
+  "name": "androidx.viewpager:viewpager",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "url": "http://source.android.com"
+ },
+ {
+  "id": "androidx.viewpager2:viewpager2",
+  "name": "androidx.viewpager2:viewpager2",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "url": "http://source.android.com"
+ },
+ {
+  "id": "androidx.window:window",
+  "name": "androidx.window:window",
+  "version": "1.5.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.window:window-core",
+  "name": "androidx.window:window-core",
+  "version": "1.5.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "androidx.window:window-core-android",
+  "name": "androidx.window:window-core-android",
+  "version": "1.5.1",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
+  "id": "com.android.installreferrer:installreferrer",
+  "name": "com.android.installreferrer:installreferrer",
+  "version": "2.2",
+  "license": "Android-SDK",
+  "url": "https://developer.android.com/studio/terms.html"
+ },
+ {
+  "id": "com.caverock:androidsvg-aar",
+  "name": "com.caverock:androidsvg-aar",
+  "version": "1.4",
+  "license": "Apache-2.0",
+  "url": "https://github.com/BigBadaboom/androidsvg"
+ },
+ {
+  "id": "com.facebook.device.yearclass:yearclass",
+  "name": "com.facebook.device.yearclass:yearclass",
+  "version": "2.1.0",
+  "license": "BSD License",
+  "url": "https://github.com/facebook/device-year-class.git"
+ },
+ {
+  "id": "com.facebook.fbjni:fbjni",
+  "name": "com.facebook.fbjni:fbjni",
+  "version": "0.7.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/facebookincubator/fbjni.git"
+ },
+ {
+  "id": "com.facebook.fresco:animated-base",
+  "name": "com.facebook.fresco:animated-base",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:animated-drawable",
+  "name": "com.facebook.fresco:animated-drawable",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:animated-gif",
+  "name": "com.facebook.fresco:animated-gif",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:animated-gif-lite",
+  "name": "com.facebook.fresco:animated-gif-lite",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:drawee",
+  "name": "com.facebook.fresco:drawee",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:fbcore",
+  "name": "com.facebook.fresco:fbcore",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:fresco",
+  "name": "com.facebook.fresco:fresco",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:imagepipeline",
+  "name": "com.facebook.fresco:imagepipeline",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:imagepipeline-base",
+  "name": "com.facebook.fresco:imagepipeline-base",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:imagepipeline-native",
+  "name": "com.facebook.fresco:imagepipeline-native",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:imagepipeline-okhttp3",
+  "name": "com.facebook.fresco:imagepipeline-okhttp3",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:memory-type-ashmem",
+  "name": "com.facebook.fresco:memory-type-ashmem",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:memory-type-java",
+  "name": "com.facebook.fresco:memory-type-java",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:memory-type-native",
+  "name": "com.facebook.fresco:memory-type-native",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:middleware",
+  "name": "com.facebook.fresco:middleware",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:nativeimagefilters",
+  "name": "com.facebook.fresco:nativeimagefilters",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:nativeimagetranscoder",
+  "name": "com.facebook.fresco:nativeimagetranscoder",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:soloader",
+  "name": "com.facebook.fresco:soloader",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:ui-common",
+  "name": "com.facebook.fresco:ui-common",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:ui-core",
+  "name": "com.facebook.fresco:ui-core",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:urimod",
+  "name": "com.facebook.fresco:urimod",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:vito-core",
+  "name": "com.facebook.fresco:vito-core",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:vito-core-common-impl",
+  "name": "com.facebook.fresco:vito-core-common-impl",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:vito-core-impl",
+  "name": "com.facebook.fresco:vito-core-impl",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:vito-core-java-impl",
+  "name": "com.facebook.fresco:vito-core-java-impl",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:vito-drawee-support",
+  "name": "com.facebook.fresco:vito-drawee-support",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:vito-options",
+  "name": "com.facebook.fresco:vito-options",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:vito-provider",
+  "name": "com.facebook.fresco:vito-provider",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:vito-renderer",
+  "name": "com.facebook.fresco:vito-renderer",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:vito-source",
+  "name": "com.facebook.fresco:vito-source",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.fresco:webpsupport",
+  "name": "com.facebook.fresco:webpsupport",
+  "version": "3.7.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/fresco.git"
+ },
+ {
+  "id": "com.facebook.hermes:hermes-android",
+  "name": "com.facebook.hermes:hermes-android",
+  "version": "260318099.0.4",
+  "license": "MIT",
+  "url": "https://github.com/facebook/hermes.git"
+ },
+ {
+  "id": "com.facebook.infer.annotation:infer-annotation",
+  "name": "com.facebook.infer.annotation:infer-annotation",
+  "version": "0.18.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/infer"
+ },
+ {
+  "id": "com.facebook.react:react-android",
+  "name": "com.facebook.react:react-android",
+  "version": "0.88.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/react-native.git"
+ },
+ {
+  "id": "com.facebook.soloader:annotation",
+  "name": "com.facebook.soloader:annotation",
+  "version": "0.12.1",
+  "license": "Apache-2.0",
+  "url": "https://github.com/facebook/soloader.git"
+ },
+ {
+  "id": "com.facebook.soloader:nativeloader",
+  "name": "com.facebook.soloader:nativeloader",
+  "version": "0.12.1",
+  "license": "Apache-2.0",
+  "url": "https://github.com/facebook/soloader.git"
+ },
+ {
+  "id": "com.facebook.soloader:soloader",
+  "name": "com.facebook.soloader:soloader",
+  "version": "0.12.1",
+  "license": "Apache-2.0",
+  "url": "https://github.com/facebook/soloader.git"
+ },
+ {
+  "id": "com.facebook.yoga:proguard-annotations",
+  "name": "com.facebook.yoga:proguard-annotations",
+  "version": "1.19.0",
+  "license": "MIT",
+  "url": "https://github.com/facebook/yoga.git"
+ },
+ {
+  "id": "com.getkeepsafe.relinker:relinker",
+  "name": "com.getkeepsafe.relinker:relinker",
+  "version": "1.4.5",
+  "license": "Apache-2.0",
+  "url": "https://github.com/KeepSafe/ReLinker"
+ },
+ {
+  "id": "com.github.bumptech.glide:annotations",
+  "name": "com.github.bumptech.glide:annotations",
+  "version": "5.0.5",
+  "license": "BSD-2-Clause OR Apache-2.0",
+  "url": "https://github.com/bumptech/glide"
+ },
+ {
+  "id": "com.github.bumptech.glide:avif-integration",
+  "name": "com.github.bumptech.glide:avif-integration",
+  "version": "5.0.5",
+  "license": "BSD-2-Clause OR Apache-2.0",
+  "url": "https://github.com/bumptech/glide"
+ },
+ {
+  "id": "com.github.bumptech.glide:disklrucache",
+  "name": "com.github.bumptech.glide:disklrucache",
+  "version": "5.0.5",
+  "license": "BSD-2-Clause OR Apache-2.0",
+  "url": "https://github.com/bumptech/glide"
+ },
+ {
+  "id": "com.github.bumptech.glide:gifdecoder",
+  "name": "com.github.bumptech.glide:gifdecoder",
+  "version": "5.0.5",
+  "license": "BSD-2-Clause OR Apache-2.0",
+  "url": "https://github.com/bumptech/glide"
+ },
+ {
+  "id": "com.github.bumptech.glide:glide",
+  "name": "com.github.bumptech.glide:glide",
+  "version": "5.0.5",
+  "license": "BSD-2-Clause OR Apache-2.0",
+  "url": "https://github.com/bumptech/glide"
+ },
+ {
+  "id": "com.github.bumptech.glide:okhttp3-integration",
+  "name": "com.github.bumptech.glide:okhttp3-integration",
+  "version": "5.0.5",
+  "license": "BSD-2-Clause OR Apache-2.0",
+  "url": "https://github.com/bumptech/glide"
+ },
+ {
+  "id": "com.github.penfeizhou.android.animation:apng",
+  "name": "com.github.penfeizhou.android.animation:apng",
+  "version": "3.0.5",
+  "license": "Apache-2.0",
+  "url": "https://github.com/penfeizhou/APNG4Android"
+ },
+ {
+  "id": "com.github.penfeizhou.android.animation:avif",
+  "name": "com.github.penfeizhou.android.animation:avif",
+  "version": "3.0.5",
+  "license": "Apache-2.0",
+  "url": "https://github.com/penfeizhou/APNG4Android"
+ },
+ {
+  "id": "com.github.penfeizhou.android.animation:awebp",
+  "name": "com.github.penfeizhou.android.animation:awebp",
+  "version": "3.0.5",
+  "license": "Apache-2.0",
+  "url": "https://github.com/penfeizhou/APNG4Android"
+ },
+ {
+  "id": "com.github.penfeizhou.android.animation:frameanimation",
+  "name": "com.github.penfeizhou.android.animation:frameanimation",
+  "version": "3.0.5",
+  "license": "Apache-2.0",
+  "url": "https://github.com/penfeizhou/APNG4Android"
+ },
+ {
+  "id": "com.github.penfeizhou.android.animation:gif",
+  "name": "com.github.penfeizhou.android.animation:gif",
+  "version": "3.0.5",
+  "license": "Apache-2.0",
+  "url": "https://github.com/penfeizhou/APNG4Android"
+ },
+ {
+  "id": "com.github.penfeizhou.android.animation:glide-plugin",
+  "name": "com.github.penfeizhou.android.animation:glide-plugin",
+  "version": "3.0.5",
+  "license": "Apache-2.0",
+  "url": "https://github.com/penfeizhou/APNG4Android"
+ },
+ {
+  "id": "com.google.android.gms:play-services-base",
+  "name": "com.google.android.gms:play-services-base",
+  "version": "18.1.0",
+  "license": "Android-SDK",
+  "url": "https://developer.android.com/studio/terms.html"
+ },
+ {
+  "id": "com.google.android.gms:play-services-basement",
+  "name": "com.google.android.gms:play-services-basement",
+  "version": "18.1.0",
+  "license": "Android-SDK",
+  "url": "https://developer.android.com/studio/terms.html"
+ },
+ {
+  "id": "com.google.android.gms:play-services-location",
+  "name": "com.google.android.gms:play-services-location",
+  "version": "21.0.1",
+  "license": "Android-SDK",
+  "url": "https://developer.android.com/studio/terms.html"
+ },
+ {
+  "id": "com.google.android.gms:play-services-tasks",
+  "name": "com.google.android.gms:play-services-tasks",
+  "version": "18.0.2",
+  "license": "Android-SDK",
+  "url": "https://developer.android.com/studio/terms.html"
+ },
+ {
+  "id": "com.google.android.material:material",
+  "name": "com.google.android.material:material",
+  "version": "1.13.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/material-components/material-components-android"
+ },
+ {
+  "id": "com.google.code.findbugs:jsr305",
+  "name": "com.google.code.findbugs:jsr305",
+  "version": "3.0.2",
+  "license": "Apache-2.0",
+  "url": "https://code.google.com/p/jsr-305/"
+ },
+ {
+  "id": "com.google.code.gson:gson",
+  "name": "com.google.code.gson:gson",
+  "version": "2.10.1",
+  "license": "Apache-2.0",
+  "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+ },
+ {
+  "id": "com.google.errorprone:error_prone_annotations",
+  "name": "com.google.errorprone:error_prone_annotations",
+  "version": "2.15.0",
+  "license": "Apache-2.0",
+  "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+ },
+ {
+  "id": "com.google.guava:failureaccess",
+  "name": "com.google.guava:failureaccess",
+  "version": "1.0.1",
+  "license": "Apache-2.0",
+  "url": "https://github.com/google/guava"
+ },
+ {
+  "id": "com.google.guava:guava",
+  "name": "com.google.guava:guava",
+  "version": "28.1-android",
+  "license": "Apache-2.0",
+  "url": "https://github.com/google/guava"
+ },
+ {
+  "id": "com.google.guava:listenablefuture",
+  "name": "com.google.guava:listenablefuture",
+  "version": "9999.0-empty-to-avoid-conflict-with-guava",
+  "license": "Apache-2.0",
+  "url": "https://github.com/google/guava"
+ },
+ {
+  "id": "com.google.j2objc:j2objc-annotations",
+  "name": "com.google.j2objc:j2objc-annotations",
+  "version": "1.3",
+  "license": "Apache-2.0",
+  "url": "https://github.com/google/j2objc/"
+ },
+ {
+  "id": "com.jakewharton.timber:timber",
+  "name": "com.jakewharton.timber:timber",
+  "version": "5.0.1",
+  "license": "Apache-2.0",
+  "url": "https://github.com/JakeWharton/timber"
+ },
+ {
+  "id": "com.parse.bolts:bolts-tasks",
+  "name": "com.parse.bolts:bolts-tasks",
+  "version": "1.4.0",
+  "license": "BSD License",
+  "url": "https://github.com/BoltsFramework/Bolts-Android"
+ },
+ {
+  "id": "com.squareup.moshi:moshi",
+  "name": "com.squareup.moshi:moshi",
+  "version": "1.15.1",
+  "license": "Apache-2.0",
+  "url": "https://github.com/square/moshi/"
+ },
+ {
+  "id": "com.squareup.moshi:moshi-adapters",
+  "name": "com.squareup.moshi:moshi-adapters",
+  "version": "1.15.1",
+  "license": "Apache-2.0",
+  "url": "https://github.com/square/moshi/"
+ },
+ {
+  "id": "com.squareup.moshi:moshi-kotlin",
+  "name": "com.squareup.moshi:moshi-kotlin",
+  "version": "1.15.1",
+  "license": "Apache-2.0",
+  "url": "https://github.com/square/moshi/"
+ },
+ {
+  "id": "com.squareup.okhttp3:okhttp",
+  "name": "com.squareup.okhttp3:okhttp",
+  "version": "4.12.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/square/okhttp"
+ },
+ {
+  "id": "com.squareup.okhttp3:okhttp-urlconnection",
+  "name": "com.squareup.okhttp3:okhttp-urlconnection",
+  "version": "4.12.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/square/okhttp"
+ },
+ {
+  "id": "com.squareup.okio:okio",
+  "name": "com.squareup.okio:okio",
+  "version": "3.16.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/square/okio/"
+ },
+ {
+  "id": "com.squareup.okio:okio-jvm",
+  "name": "com.squareup.okio:okio-jvm",
+  "version": "3.16.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/square/okio/"
+ },
+ {
+  "id": "com.squareup.zstd:zstd-kmp",
+  "name": "com.squareup.zstd:zstd-kmp",
+  "version": "0.4.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/square/okio-zstd/"
+ },
+ {
+  "id": "com.squareup.zstd:zstd-kmp-android",
+  "name": "com.squareup.zstd:zstd-kmp-android",
+  "version": "0.4.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/square/okio-zstd/"
+ },
+ {
+  "id": "com.squareup.zstd:zstd-kmp-okio",
+  "name": "com.squareup.zstd:zstd-kmp-okio",
+  "version": "0.4.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/square/okio-zstd/"
+ },
+ {
+  "id": "com.squareup.zstd:zstd-kmp-okio-android",
+  "name": "com.squareup.zstd:zstd-kmp-okio-android",
+  "version": "0.4.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/square/okio-zstd/"
+ },
+ {
+  "id": "com.stadiamaps:osrm-openapi",
+  "name": "com.stadiamaps:osrm-openapi",
+  "version": "0.0.10",
+  "license": "BSD-3-Clause",
+  "url": "http://github.com/stadiamaps/osrm-openapi"
+ },
+ {
+  "id": "com.tom-roush:pdfbox-android",
+  "name": "com.tom-roush:pdfbox-android",
+  "version": "2.0.27.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/TomRoush/PdfBox-Android"
+ },
+ {
+  "id": "commons-codec:commons-codec",
+  "name": "commons-codec:commons-codec",
+  "version": "1.10",
+  "license": "Apache-2.0",
+  "url": "http://svn.apache.org/viewvc/commons/proper/codec/trunk"
+ },
+ {
+  "id": "commons-io:commons-io",
+  "name": "commons-io:commons-io",
+  "version": "2.6",
+  "license": "Apache-2.0",
+  "url": "https://git-wip-us.apache.org/repos/asf?p=commons-io.git"
+ },
+ {
+  "id": "io.github.expo:expo-modules-v2-react",
+  "name": "io.github.expo:expo-modules-v2-react",
+  "version": "0.2.5",
+  "license": "MIT",
+  "url": "https://github.com/expo/expo-modules-v2-android"
+ },
+ {
+  "id": "io.github.expo.kolibri:kolibri-android",
+  "name": "io.github.expo.kolibri:kolibri-android",
+  "version": "0.2.3",
+  "license": "MIT",
+  "url": "https://github.com/expo/kolibri"
+ },
+ {
+  "id": "io.github.expo.kolibri:runtime",
+  "name": "io.github.expo.kolibri:runtime",
+  "version": "0.2.3",
+  "license": "MIT",
+  "url": "https://github.com/expo/kolibri"
+ },
+ {
+  "id": "io.github.expo.pika:pika-api",
+  "name": "io.github.expo.pika:pika-api",
+  "version": "1.1.0",
+  "license": "MIT",
+  "url": "https://github.com/expo/pika"
+ },
+ {
+  "id": "io.github.rallista:valhalla-mobile",
+  "name": "io.github.rallista:valhalla-mobile",
+  "version": "0.6.4",
+  "license": "MIT",
+  "url": "https://github.com/Rallista/valhalla-mobile"
+ },
+ {
+  "id": "io.github.rallista:valhalla-models",
+  "name": "io.github.rallista:valhalla-models",
+  "version": "0.6.0",
+  "license": "MIT",
+  "url": "https://github.com/Rallista/valhalla-openapi-models-kotlin"
+ },
+ {
+  "id": "io.github.rallista:valhalla-models-config",
+  "name": "io.github.rallista:valhalla-models-config",
+  "version": "0.6.0",
+  "license": "MIT",
+  "url": "https://github.com/Rallista/valhalla-openapi-models-kotlin"
+ },
+ {
+  "id": "javax.inject:javax.inject",
+  "name": "javax.inject:javax.inject",
+  "version": "1",
+  "license": "Apache-2.0",
+  "url": "http://code.google.com/p/atinject/source/checkout"
+ },
+ {
+  "id": "jp.wasabeef:glide-transformations",
+  "name": "jp.wasabeef:glide-transformations",
+  "version": "4.3.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/wasabeef/glide-transformations"
+ },
+ {
+  "id": "me.leolin:ShortcutBadger",
+  "name": "me.leolin:ShortcutBadger",
+  "version": "1.1.22",
+  "license": "Apache-2.0",
+  "url": "https://github.com/leolin310148/ShortcutBadger.git"
+ },
+ {
+  "id": "org.aomedia.avif.android:avif",
+  "name": "org.aomedia.avif.android:avif",
+  "version": "1.1.1.14d8e3c4",
+  "license": "BSD-2-Clause",
+  "url": "https://github.com/AOMediaCodec/libavif"
+ },
+ {
+  "id": "org.brotli:dec",
+  "name": "org.brotli:dec",
+  "version": "0.1.2",
+  "license": "MIT",
+  "url": "https://github.com/google/brotli"
+ },
+ {
+  "id": "org.checkerframework:checker-compat-qual",
+  "name": "org.checkerframework:checker-compat-qual",
+  "version": "2.5.5",
+  "license": "GPL-2.0-only WITH Classpath-exception-2.0 OR MIT",
+  "url": "https://github.com/typetools/checker-framework.git"
+ },
+ {
+  "id": "org.codehaus.mojo:animal-sniffer-annotations",
+  "name": "org.codehaus.mojo:animal-sniffer-annotations",
+  "version": "1.18",
+  "license": "MIT",
+  "url": "https://github.com/mojohaus/animal-sniffer"
+ },
+ {
+  "id": "org.jetbrains:annotations",
+  "name": "org.jetbrains:annotations",
+  "version": "23.0.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/JetBrains/java-annotations"
+ },
+ {
+  "id": "org.jetbrains.kotlin:kotlin-android-extensions-runtime",
+  "name": "org.jetbrains.kotlin:kotlin-android-extensions-runtime",
+  "version": "2.2.10",
+  "license": "Apache-2.0",
+  "url": "https://github.com/JetBrains/kotlin"
+ },
+ {
+  "id": "org.jetbrains.kotlin:kotlin-annotations-jvm",
+  "name": "org.jetbrains.kotlin:kotlin-annotations-jvm",
+  "version": "1.3.72",
+  "license": "Apache-2.0",
+  "url": "https://github.com/JetBrains/kotlin"
+ },
+ {
+  "id": "org.jetbrains.kotlin:kotlin-bom",
+  "name": "org.jetbrains.kotlin:kotlin-bom",
+  "version": "1.8.22",
+  "license": "Apache-2.0",
+  "url": "https://github.com/JetBrains/kotlin"
+ },
+ {
+  "id": "org.jetbrains.kotlin:kotlin-parcelize-runtime",
+  "name": "org.jetbrains.kotlin:kotlin-parcelize-runtime",
+  "version": "2.2.10",
+  "license": "Apache-2.0",
+  "url": "https://github.com/JetBrains/kotlin"
+ },
+ {
+  "id": "org.jetbrains.kotlin:kotlin-reflect",
+  "name": "org.jetbrains.kotlin:kotlin-reflect",
+  "version": "2.2.10",
+  "license": "Apache-2.0",
+  "url": "https://github.com/JetBrains/kotlin"
+ },
+ {
+  "id": "org.jetbrains.kotlin:kotlin-stdlib",
+  "name": "org.jetbrains.kotlin:kotlin-stdlib",
+  "version": "2.3.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/JetBrains/kotlin"
+ },
+ {
+  "id": "org.jetbrains.kotlin:kotlin-stdlib-jdk7",
+  "name": "org.jetbrains.kotlin:kotlin-stdlib-jdk7",
+  "version": "2.2.10",
+  "license": "Apache-2.0",
+  "url": "https://github.com/JetBrains/kotlin"
+ },
+ {
+  "id": "org.jetbrains.kotlin:kotlin-stdlib-jdk8",
+  "name": "org.jetbrains.kotlin:kotlin-stdlib-jdk8",
+  "version": "1.8.22",
+  "license": "Apache-2.0",
+  "url": "https://github.com/JetBrains/kotlin"
+ },
+ {
+  "id": "org.jetbrains.kotlinx:kotlinx-coroutines-android",
+  "name": "org.jetbrains.kotlinx:kotlinx-coroutines-android",
+  "version": "1.10.2",
+  "license": "Apache-2.0",
+  "url": "https://github.com/Kotlin/kotlinx.coroutines"
+ },
+ {
+  "id": "org.jetbrains.kotlinx:kotlinx-coroutines-bom",
+  "name": "org.jetbrains.kotlinx:kotlinx-coroutines-bom",
+  "version": "1.10.2",
+  "license": "Apache-2.0",
+  "url": "https://github.com/Kotlin/kotlinx.coroutines"
+ },
+ {
+  "id": "org.jetbrains.kotlinx:kotlinx-coroutines-core",
+  "name": "org.jetbrains.kotlinx:kotlinx-coroutines-core",
+  "version": "1.10.2",
+  "license": "Apache-2.0",
+  "url": "https://github.com/Kotlin/kotlinx.coroutines"
+ },
+ {
+  "id": "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm",
+  "name": "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm",
+  "version": "1.10.2",
+  "license": "Apache-2.0",
+  "url": "https://github.com/Kotlin/kotlinx.coroutines"
+ },
+ {
+  "id": "org.jetbrains.kotlinx:kotlinx-serialization-bom",
+  "name": "org.jetbrains.kotlinx:kotlinx-serialization-bom",
+  "version": "1.7.3",
+  "license": "Apache-2.0",
+  "url": "https://github.com/Kotlin/kotlinx.serialization"
+ },
+ {
+  "id": "org.jetbrains.kotlinx:kotlinx-serialization-core",
+  "name": "org.jetbrains.kotlinx:kotlinx-serialization-core",
+  "version": "1.7.3",
+  "license": "Apache-2.0",
+  "url": "https://github.com/Kotlin/kotlinx.serialization"
+ },
+ {
+  "id": "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm",
+  "name": "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm",
+  "version": "1.7.3",
+  "license": "Apache-2.0",
+  "url": "https://github.com/Kotlin/kotlinx.serialization"
+ },
+ {
+  "id": "org.jspecify:jspecify",
+  "name": "org.jspecify:jspecify",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/jspecify/jspecify/"
+ },
+ {
+  "id": "org.kiwix:libkiwix",
+  "name": "org.kiwix:libkiwix",
+  "version": "2.7.0",
+  "license": "GPL-3.0-or-later",
+  "url": "https://www.kiwix.org/en/"
+ },
+ {
+  "id": "org.maplibre.gl:android-plugin-annotation-v9",
+  "name": "org.maplibre.gl:android-plugin-annotation-v9",
+  "version": "3.0.2",
+  "license": "BSD-2-Clause",
+  "url": "https://github.com/maplibre/maplibre-plugins-android"
+ },
+ {
+  "id": "org.maplibre.gl:android-plugin-scalebar-v9",
+  "name": "org.maplibre.gl:android-plugin-scalebar-v9",
+  "version": "3.0.2",
+  "license": "BSD-2-Clause",
+  "url": "https://github.com/maplibre/maplibre-plugins-android"
+ },
+ {
+  "id": "org.maplibre.gl:android-sdk-geojson",
+  "name": "org.maplibre.gl:android-sdk-geojson",
+  "version": "6.0.1",
+  "license": "Apache-2.0",
+  "url": "https://github.com/maplibre/maplibre-java"
+ },
+ {
+  "id": "org.maplibre.gl:android-sdk-opengl",
+  "name": "org.maplibre.gl:android-sdk-opengl",
+  "version": "13.6.1",
+  "license": "BSD-2-Clause",
+  "url": "https://github.com/maplibre/maplibre-native"
+ },
+ {
+  "id": "org.maplibre.gl:android-sdk-turf",
+  "name": "org.maplibre.gl:android-sdk-turf",
+  "version": "6.0.1",
+  "license": "Apache-2.0",
+  "url": "https://github.com/maplibre/maplibre-java"
+ },
+ {
+  "id": "org.maplibre.gl:maplibre-android-gestures",
+  "name": "org.maplibre.gl:maplibre-android-gestures",
+  "version": "0.0.4",
+  "license": "BSD-2-Clause",
+  "url": "https://github.com/maplibre/maplibre-gestures-android"
+ }
+]

@@ -453,6 +453,8 @@
   "spdxFallback": {
     "MIT": "texts/spdx/MIT.txt",
     "ISC": "texts/spdx/ISC.txt",
+    "BSD-2-Clause": "texts/spdx/BSD-2-Clause.txt",
+    "GPL-3.0-or-later": "../../LICENSE",
     "BSD-3-Clause": "texts/spdx/BSD-3-Clause.txt",
     "Unlicense": "texts/spdx/Unlicense.txt",
     "Apache-2.0": "texts/Apache-2.0.txt"

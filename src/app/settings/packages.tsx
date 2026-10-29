@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -7,12 +7,16 @@ import { ListRow, SearchField, Text } from '@/components/ui';
 import { creditKey, creditSubtitle, filterCredits, getCredits } from '@/features/credits/licenses';
 import { layout, radius, space, useTheme } from '@/theme';
 
-/** Credits › JavaScript packages: ~550 rows, so a searchable FlatList rather than a ListGroup. */
+/**
+ * Credits › JavaScript packages (~550 rows) or, with `kind=android`, the APK's Android libraries
+ * (~200): a searchable FlatList rather than a ListGroup.
+ */
 export default function PackagesScreen() {
   const { t } = useTranslation('settings');
   const { colors, scheme } = useTheme();
   const [query, setQuery] = useState('');
-  const all = getCredits().js;
+  const kind = useLocalSearchParams<{ kind?: string }>().kind === 'android' ? 'android' : 'js';
+  const all = getCredits()[kind];
   const list = useMemo(() => filterCredits(all, query), [all, query]);
   const border = scheme === 'light' ? colors.border : 'transparent';
 
@@ -54,7 +58,7 @@ export default function PackagesScreen() {
             title={item.name}
             subtitle={creditSubtitle(item)}
             chevron
-            onPress={() => router.push({ pathname: '/settings/license', params: { id: creditKey('js', item.id) } })}
+            onPress={() => router.push({ pathname: '/settings/license', params: { id: creditKey(kind, item.id) } })}
           />
         </View>
       )}
