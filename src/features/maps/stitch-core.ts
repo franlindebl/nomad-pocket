@@ -4,7 +4,7 @@
 // The crossings come with each pack (<pack>.crossings.tsv, scripts/routing/crossings.py);
 // the best one is chosen by adding up the times of every combination (matrices), never
 // the first found. Pure TypeScript (no `@/` aliases) so node's test runner loads it.
-import { distanceMeters, type LatLon } from './geo.ts';
+import { distanceMeters, fitBox, type LatLon } from './geo.ts';
 import { covers, type Costing, type Coverage, type Route } from './routing-core.ts';
 
 export const ROAD_CLASSES = ['motorway', 'trunk', 'primary', 'secondary', 'tertiary'] as const;
@@ -183,10 +183,8 @@ export function joinRoutes(legs: Route[]): Route {
       }
     }
   }
-  const bbox = legs.reduce<Route['bbox']>(
-    (b, l) => [Math.min(b[0], l.bbox[0]), Math.min(b[1], l.bbox[1]), Math.max(b[2], l.bbox[2]), Math.max(b[3], l.bbox[3])],
-    [Infinity, Infinity, -Infinity, -Infinity],
-  );
+  // From the legs' corners: a leg's box may run past 180° (fitBox).
+  const bbox = fitBox(legs.flatMap((l) => [[l.bbox[0], l.bbox[1]] as const, [l.bbox[2], l.bbox[3]] as const])) ?? legs[0].bbox;
   return {
     costing: legs[0].costing,
     distanceM: legs.reduce((s, l) => s + l.distanceM, 0),
