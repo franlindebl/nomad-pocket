@@ -76,10 +76,10 @@ A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check
    Owner decisions still open or to carry out:
    - Android before any Play release: ML Kit GenAI is removed and Firebase kept out of the APK
      (done 2026-10-26); ~~list the full transitive Android notices~~ done 2026-10-28 (Credits › Android
-     libraries, `scripts/licenses/android-deps.mjs`: 196 artifacts). Still to decide: how the proprietary
-     Play services libraries that expo-location and MapLibre need (play-services-location/base/basement/tasks)
-     and the Play Install Referrer that expo-notifications pulls in (through expo-application; never called)
-     sit next to GPL libkiwix; see `docs/RELEASE.md`.
+     libraries, `scripts/licenses/android-deps.mjs`); ~~Play services and the Install Referrer next to GPL
+     libkiwix~~ done 2026-10-29, owner's option A: no proprietary library left in the APK (log). Still for the
+     owner: Play Console account, upload key / Play App Signing, store listing, Data safety form (I can draft
+     it from `site/privacy.html`).
    - ~~Store prebuild gated by an env var (LEGAL-9)~~ done 2026-10-28: `NOMAD_STORE_BUILD=1 npx expo prebuild`
      (`plugins/with-store-build.js`, `docs/RELEASE.md`); check the archived `Info.plist` on the next store build.
    - A planned index rebuild to reclaim the space of existing users' old index file.
@@ -155,11 +155,12 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
    - **Routes across packs** (between countries and US regions): stitched at border crossings, on main
      and pushed since bdc1fae (2026-10-28). Works once the published packs carry `<pack>.crossings.tsv`: the first
      `country-packages.yml` run after it: run 40681896621 (`ad pt`, 2026-10-28) succeeded and both carry
-     crossings; a full run of every country (40691060942, launched by hand from c9a5176 on 2026-10-28, before
-     the `routing-admins` change) was in progress that evening (77 of 262 jobs done); the monthly one is on
-     2026-11-05. Needs app builds from bdc1fae on (store builds up to 23 predate it). Then Android, ferries. The US stays split. `docs/ROUTING_ACROSS_PACKS.md`.
+     crossings; the full run of every country (40691060942, 2026-10-28) succeeded (263/263 jobs): 165 of 237 packs
+     carry crossings (the rest are islands, plus `ie`, whose pack holds Northern Ireland, `ps`, covered by `il`'s,
+     and `va`); the monthly one is on 2026-11-05. Needs app builds from bdc1fae on (store builds up to 23 predate it). Then Android, ferries. The US stays split. `docs/ROUTING_ACROSS_PACKS.md`.
    - **Deferred by decision**: bundled quick cards (first aid, water, radio; owner
-     reviews medical content first), emergency numbers per country.
+     reviews medical content first). ~~Emergency numbers per country~~ done 2026-10-29 (log); **owner:
+     review `docs/EMERGENCY_NUMBERS.md`** (8 rows marked Revisar) before the next store build.
    - **CI notes**: a failed country is relaunched alone with `gh workflow run
      country-packages.yml -f countries="<ids>" -f parts=routing|maps` (region ids work too:
      `us-alaska`); admin boundaries come from the `routing-admins` release, refreshed on the 1st by
@@ -291,6 +292,48 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-29 — Android without Play services; an emergency number per country
+
+Owner's decisions of 2026-10-28: option A for Play (no proprietary library next to GPL libkiwix) and
+one emergency number per country, emergency only.
+
+- **Android location without Play services**: `modules/nomad-location` (Kotlin, Android only): the
+  system's `LocationManager` (fused provider on Android 12+, GPS + network before, a network fix dropped
+  while GPS gave one in the last 10 s), the compass from magnetometer + accelerometer with expo-location's
+  thresholds and true north from `GeomagneticField`, watches and compass paused in the background like
+  expo-location. `src/lib/location.ts` is the one import for the app (ESLint bans `expo-location`
+  elsewhere): expo-location on iOS, `location.android.ts` on Android with expo-location's types and watch
+  defaults; several compass watchers share one native listener (expo-location kept only the last one).
+  `package.json` leaves expo-location out of Android autolinking. `plugins/with-android-no-install-referrer.js`
+  excludes `com.android.installreferrer`; R8 is told not to fail on the Play services tasks that
+  expo-notifications' unused push-token code names (they used to come along with play-services-location).
+  The release runtime classpath has no `gms` or `installreferrer` artifact; the dex only names them from
+  code that never runs. Lost: Android's "turn on location accuracy" dialog (a Play services feature).
+- **Emergency number per country**: `emergency-numbers.json` (235 of 242 countries) from
+  `scripts/maps/make-emergency-numbers.py` (Wikipedia's list + 18 corrections: 112 for every service in
+  the EU/EEA, Switzerland, Liechtenstein, Monaco, San Marino; Colombia 123; Pakistan 1122; police where
+  the ambulance number is a landline or missing; Australian territories 000). One number: the one for
+  every service, else the ambulance's ("Llamar al 119 (ambulancia)"), else the police's. The country is
+  where the last position seen is (`country-at-core.ts` over `country-shapes.json`, Natural Earth 1:50m
+  simplified to ~2 km, 218 KB, plus Ceuta and Melilla from 1:10m; kv `maps.hereCountry`), else the
+  onboarding country, else the device region, else 112. The Emergencias sheet names the country under
+  the button. Review table for the owner: `docs/EMERGENCY_NUMBERS.md`. Credits: Wikipedia (CC BY-SA)
+  for the numbers.
+- Also: dictation verified on the owner's iPhone (2026-10-28).
+- Checked: unit tests (country lookup: Madrid, Ceuta, Melilla, Tangier, Maseru inside South Africa,
+  Tijuana/San Diego, off Barcelona, open sea), tsc, lint, i18n; Android release APK built from a clean
+  prebuild; dependency tree and dex scanned; Android tour: RESULT_ANDROID.
+
+### 2026-10-29 — CI: admin boundaries cached for every pack, sturdier prune
+
+Full routing run 40691060942 (from before the cache existed) succeeded, 263/263 jobs, 165 of 237 packs with
+crossings. `admin-boundaries.yml` (run 40774092206, ~4 h) then filled `routing-admins` with all 230 ISO codes
+of `packs.json`, none unanswered. Test run 40801730164 (`ad pt`, routing) read them from the cache (`admin
+boundaries from the cache`; same 7 and 77 crossings; `pt` 9 min instead of ~30) and published, but its prune
+failed twice: GitHub answers 502 to deleting a release of 280 files (9.5 GB, `routing-20261026-…-africa`) in one
+call. The prune now deletes such a release's files one by one first and only warns when one still won't go
+(the catalogs are already out; the next run retries). Old unreferenced releases remain until then.
 
 ### 2026-10-28 — Assistant: no answers from memory when the library has nothing
 
@@ -702,8 +745,7 @@ default, answers that keep going while another chat is open, the reworked naviga
 showed those regions by their raw ids and without routes. One build for everyone after asking the
 other sessions working on the repo. Smoke E2E 21/21 on an iOS 27 simulator (lib-02 and x-01 first failed because a fresh worktree lacks the gitignored ZIM fixtures: copy them from the main checkout; ai-08 passes too; Maestro needs Bash outside the sandbox); archived from the clean
 worktree `.claude/worktrees/dictation` at the release commit, tagged `v1.1.0-20`. To check on the
-owner's iPhone: dictation (transcription never ran on this Mac's simulator or emulator) and the
-navigation view.
+owner's iPhone: ~~dictation~~ (works, owner 2026-10-28) and the navigation view.
 
 ### 2026-10-27 — Assistant: dictate questions with the phone's own speech recognition
 
@@ -724,8 +766,9 @@ a "Micrófono y dictado" section; InfoPlist strings in `locales/`. Built in the 
   RECORD_AUDIO prompt.
 - Not checked: the transcription itself. On this Mac both the iOS simulator (CoreAudio "RPC timeout.
   Apparently deadlocked", a known simulator AVAudioEngine input bug) and the Android emulator (host
-  audio, QEMU hung) die as soon as they open the microphone. Pending on a real iPhone and Android
-  phone; `ai-08-dictation` only checks the button is there.
+  audio, QEMU hung) die as soon as they open the microphone. `ai-08-dictation` only checks the button
+  is there. **Checked on the owner's iPhone (2026-10-28): transcription works.** Still pending on a
+  real Android phone.
 
 ### 2026-10-27 — Maps: a navigation view that reads like Google Maps'
 
