@@ -1,8 +1,11 @@
-# Google Play listing and forms — 1.1.0 (draft, 2026-10-29)
+# Google Play listing and forms — 1.1.0 (2026-10-29)
 
-Draft of everything Play Console asks before the first release, adapted from the App Store listing
-approved by the owner (`listing-1.1.0.md`). Nothing here is in Play Console yet; the owner reviews it
-first (CLAUDE.md, Releases). Play limits: app name 30, short description 80, full description 4000.
+Everything Play Console asks before the first release, adapted from the App Store listing approved by
+the owner (`listing-1.1.0.md`; the owner approved this file on 2026-10-29). **In Play Console since
+2026-10-29** (app id 4972946077817579435): app created, App content forms saved, store settings, the es-ES
+listing texts, icon and feature graphic (listing saved as a draft: phone screenshots and the en-US
+translation still missing). Automatic protection (Play's installer check) is **off**: it injects Google's
+closed code into the app (owner's decision, no proprietary code next to libkiwix). Play limits: app name 30, short description 80, full description 4000.
 Play has no subtitle, promotional text or keywords: the short description does that job and Play
 indexes the full description.
 
@@ -65,15 +68,32 @@ expiry reminders were checked on the emulator (Android tour, `docs/E2E.md`).
 | Privacy policy | URL above |
 | App access | All functionality is available without special access (no sign-in) |
 | Ads | No ads |
-| Content rating (IARC) | Category "Reference, News, or Educational". Violence, sex, language, controlled substances, gambling: no. Users interact or exchange content: no. Shares the user's location with other users: **yes** (the "Share my position" button sends it by message, only when the user taps it). Unrestricted internet access: no (archive pages are offline; external links ask first). Digital purchases: no. Generative AI: yes, on-device (answer the AI questions if the form shows them) |
-| Target audience | 18 and over (not designed for children; keeps it out of the Families policy) |
+| Content rating (IARC) | See "Content rating" below. Original draft: category "Reference, News, or Educational". Violence, sex, language, controlled substances, gambling: no. Users interact or exchange content: no. Shares the user's location with other users: **yes** (the "Share my position" button sends it by message, only when the user taps it). Unrestricted internet access: no (archive pages are offline; external links ask first). Digital purchases: no. Generative AI: yes, on-device (answer the AI questions if the form shows them) |
+| Target audience | 18 and over (13+ first, then 18+ to match the PEGI 18 below; back to 13+ if the rating comes down) |
 | News app | No |
 | COVID-19 contact tracing / status | No |
 | Data safety | see below |
 | Government app | No |
 | Financial features | None |
-| Health apps | Yes: "Medical reference and education" only (first aid and medical archives to read). No medical device features, no health data collected |
+| Health apps | "Emergencias y primeros auxilios" and "Educación y referencias médicas". No medical device features, no health data collected |
 | Actions / foreground services | None declared (the manifest has no foreground service, no exact alarms, no background location) |
+
+## Content rating (as submitted, 2026-10-29)
+
+Category "Todos los demás tipos de aplicaciones" (the questionnaire has no reference category). Package
+content: no. Users exchange content: no. Online content (downloaded archives, AI answers): yes. Violence:
+yes, not the main purpose, visual and gory (injury photos in the medical guides), in text. Sexuality: no
+(encyclopedic nudity is "natural or scientific context", which the question excludes). Language: yes (mild,
+moderate, discriminatory and sexual words quoted in encyclopedia articles), not the main purpose. Drugs: yes,
+text only. Age-restricted products: no. Shares location with other users: yes. Digital purchases, rewards,
+browser: no. Primarily informational/educational: yes.
+
+Result: ClassInd L, ESRB 10+, **PEGI 18**, USK 12, IARC generic 18+, Russia 18+, Korea 19. The first,
+literal questionnaire (sexuality yes, drug images yes) gave the same. Gory images and discriminatory language
+are what PEGI rates 18. Kiwix and Wikipedia (same content) are PEGI 3 on Play, but Google's help has no
+exception for reference content ("specific to the content within your app"; misrepresentation can lead to
+removal). Owner's decision: keep PEGI 18 with an 18+ audience and ask IARC (globalratings.com/contact-us) how
+to rate a reader of downloadable encyclopedias and medical guides; redo the questionnaire if they allow it.
 
 ## Data safety
 
