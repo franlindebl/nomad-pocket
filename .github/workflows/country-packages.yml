@@ -227,9 +227,19 @@ jobs:
                   keep |= {x["release"] for x in d.get("packs", []) + d.get("maps", [])}
           print("\n".join(sorted(keep)))' current/routing-manifest.json current/maps-manifest.json previous/routing-manifest.json previous/maps-manifest.json)
           echo "keeping: $keep"
+          # GitHub answers 502 to deleting a release of a few hundred files (a continent's packs,
+          # 9.5 GB) in one call: then its files go one by one first. The catalogs are already
+          # out, so a release that still won't go is only a warning: the next run tries again.
+          prune() {
+            gh release delete "$1" --yes --cleanup-tag && return
+            gh release view "$1" --json assets --jq '.assets[].name' | while read -r asset; do
+              gh release delete-asset "$1" "$asset" --yes || true
+            done
+            gh release delete "$1" --yes --cleanup-tag
+          }
           families="$( [[ -f current/no-routing ]] || echo routing ) $( [[ -f current/no-maps ]] || echo maps )"
           for fam in $families; do
             gh release list --limit 1000 --json tagName --jq '.[].tagName' | grep -E "^$fam-[0-9]{8}-[0-9]+(-[a-z-]+)?\$" | while read -r tag; do
-              grep -qxF "$tag" <<<"$keep" || { echo "deleting $tag"; gh release delete "$tag" --yes --cleanup-tag; }
+              grep -qxF "$tag" <<<"$keep" || { echo "deleting $tag"; prune "$tag" || echo "::warning::could not delete $tag (the next run tries again)"; }
             done
           done
