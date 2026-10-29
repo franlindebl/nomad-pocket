@@ -380,7 +380,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `map-credit` | the "© OpenStreetMap contributors" pill shown when the map first appears (gone after ~5 s or the first gesture) |
   | `guidance-panel`, `guidance-distance`, `guidance-stop` | guidance panel: remaining distance (route) or distance + direction (straight line), stop |
   | `guidance-costing-<auto\|pedestrian\|bicycle>`, `guidance-next`, `guidance-next-distance`, `guidance-steps` | mode chips, next maneuver and its distance, directions button |
-  | `guidance-note`, `guidance-get-routing` | straight-line note and its "Descargar la navegación de este país" button (opens the country sheet) |
+  | `guidance-note`, `guidance-get-routing` | straight-line note and its "Descargar la navegación de este país" button (opens the sheet of the first country the trip lacks: destination, origin, then on the way) |
   | `guidance-start`, `guidance-banner`, `guidance-remaining` | "Iniciar" (trip preview); navigation view: maneuver banner, remaining distance/time in the bottom bar |
   | `maps-empty`, `maps-incoming` | Maps tab with no country yet: the card that offers one, or the one that shows the country on its way (progress, "Ver descargas") |
   | `map-recenter`, `map-overview` | navigation view: "Recentrar" pill (not following) and whole-route button (following) |

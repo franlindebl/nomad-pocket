@@ -35,14 +35,15 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Button, Card, Chip, IconButton, Row, Text } from '@/components/ui';
+import { useItems } from '@/features/content/items';
 import { formatDistance, formatDuration } from '@/lib/format';
 import { space, useTheme } from '@/theme';
 
 import { hasArrived } from './follow-core';
 import { bearingDegrees, compassSector, distanceMeters } from './geo';
 import { useGuidance } from './guidance';
-import { useRoutingCatalog } from './routing-packs';
-import { COSTINGS, maneuverIcon, packsCovering, remainingSeconds, STRAIGHT_LINE_SPEED, type Costing, type ManeuverIcon } from './routing-core';
+import { isPackInstalled, useRoutingCatalog } from './routing-packs';
+import { COSTINGS, maneuverIcon, packToFetch, remainingSeconds, STRAIGHT_LINE_SPEED, type Costing, type ManeuverIcon } from './routing-core';
 
 const COSTING_ICONS: Record<Costing, LucideIcon> = { auto: Car, pedestrian: Footprints, bicycle: Bike };
 
@@ -87,10 +88,14 @@ export function GuidancePanel({ bottom, top, mapBearing, onHeight, onBannerHeigh
   const costing = useGuidance((s) => s.costing);
   const routing = useGuidance((s) => s.routing);
   const packs = useRoutingCatalog((s) => s.manifest?.packs);
-  // No routing here: offer the country download that brings it, if one exists.
+  const installedPacks = useItems('route');
+  // No routing here: offer the download of a country the trip still lacks (the destination's,
+  // the origin's or one on the way), if one exists.
   const packCountry = useMemo(
-    () => (routing === 'none' && target && packs ? (packsCovering(packs, target)[0]?.regionId ?? null) : null),
-    [routing, target, packs],
+    () => (routing === 'none' && target && packs ? (packToFetch(packs, isPackInstalled, position ?? target, target)?.regionId ?? null) : null),
+    // isPackInstalled reads the items: `installedPacks` stands for them.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [routing, target, position, packs, installedPacks],
   );
   const route = useGuidance((s) => s.route);
   const routeError = useGuidance((s) => s.routeError);

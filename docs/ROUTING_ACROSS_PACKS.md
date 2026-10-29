@@ -74,9 +74,22 @@ The simulator runs on the Mac's CPU: a phone will be slower. One fix it needed: 
 `max_matrix_distance` is also where the matrix search stops, and at 500 km a 472 km bike leg came back
 empty; it is now 2000 km by bike and 1000 km on foot.
 
-Left: a `country-packages.yml` run (its crossings step never fails a pack: a failure publishes it without
-crossings; until the published packs carry them, nothing changes for
-users), Android, ferries as crossings (Spain–Morocco, UK–France: no road crosses there).
+With the published packs (2026-10-29: catalog of run 40691060942, 165 of 237 packs with crossings),
+downloaded in the app from GitHub on the same simulator: Luxembourg city → Brussels, `route-lu → route-be`:
+
+| Mode | Result | Time to compute |
+|---|---|---|
+| car | 213 km, 1 h 58 min, one list of directions with one arrival | 0.5–1.4 s |
+| foot | 213 km, 41 h 52 min | — |
+| bike | stitched, 50 161 s | 3.0 s |
+| car, navigating, moved off the route north of the city | rerouted, 221 km | 28 ms |
+
+That test found the offer of the missing download wrong: with the destination's country installed, the
+guidance panel's "Descargar la navegación de este país" offered that country again (0 MB) instead of the
+origin's. It now offers the first country the trip lacks: the destination's, the origin's, then one on the
+straight line between them (`packToFetch`, routing-core.ts).
+
+Left: Android, ferries as crossings (Spain–Morocco, UK–France: no road crosses there).
 
 ### Data (CI)
 
