@@ -157,7 +157,7 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
      `country-packages.yml` run after it: run 40681896621 (`ad pt`, 2026-10-28) succeeded and both carry
      crossings; the full run of every country (40691060942, 2026-10-28) succeeded (263/263 jobs): 165 of 237 packs
      carry crossings (the rest are islands, plus `ie`, whose pack holds Northern Ireland, `ps`, covered by `il`'s,
-     and `va`); the monthly one is on 2026-11-05. Needs app builds from bdc1fae on (store builds up to 23 predate it). Then Android, ferries. The US stays split. `docs/ROUTING_ACROSS_PACKS.md`.
+     and `va`); the monthly one is on 2026-11-05 and adds ferry crossings (2026-10-29). Needs app builds from bdc1fae on (store builds up to 23 predate it). Tried with the live packs on iOS and Android (Luxembourg → Brussels). The US stays split. `docs/ROUTING_ACROSS_PACKS.md`.
    - **Deferred by decision**: bundled quick cards (first aid, water, radio; owner
      reviews medical content first). ~~Emergency numbers per country~~ done 2026-10-29 (log); the 8 doubtful
      rows checked by the owner the same day (`docs/EMERGENCY_NUMBERS.md`).
@@ -329,6 +329,25 @@ one emergency number per country, emergency only.
   tour 4/4 over two runs: with the corporate VPN on, android-01's last download failed on its TLS proxy ("Trust
   anchor not found"); with it off android-01 passed and android-03 (the number names Andorra) flaked once on a
   slow emulator (a dozen iOS simulators booted) and passed alone.
+
+### 2026-10-29 — Maps: ferries join packs; Android tried; routes must reach their ends
+
+- **Android**: the Release APK on a second emulator (the other agent's untouched), packs from the
+  live catalog: Luxembourg city → Brussels by car, 213 km, 1 h 58 min, as on iOS. Belgium's pack
+  stalled once on the emulator's network (`DOWNLOAD_STALLED`); the guidance button fetched it again.
+- **Ferries as crossings** (Spain–Morocco, Great Britain–France, the Baltic): Estonia and Finland
+  built locally with `build-country.sh` showed both packs hold the whole Tallinn–Helsinki ferries
+  up to the other side's port. `crossings.py` now lists each ferry (and car shuttle) with one end
+  abroad at that port, class `ferry`; the app takes ferry seams for every costing, without a
+  heading, only from the departure pack's file (from the other's, the next leg started on the
+  boat: "Conduzca … por Helsinki (FIN) – Tallinn (EST)") and only needing the arrival pack's
+  coverage (the catalog clips Estonia's cells short of Helsinki); at a port the next leg's first
+  instruction stays. Simulator: Tallinn → Lahti 192 km with "Tome la … Ferri", 0.3 s.
+- **Routes must reach their ends** (`endGap`, `pickRoute`): Finland's pack covers Tallinn's cell,
+  where it has only the boat, and the on-foot answer starting there began 1.5 km away on the ferry.
+  Answers to one trip are now compared by end distance first (250 m slack), then time.
+- Published packs get ferry crossings with the next CI run; older app versions ignore those rows.
+  Figures: `docs/ROUTING_ACROSS_PACKS.md`.
 
 ### 2026-10-29 — Maps: routes across countries tried with the published packs; the missing download offered right
 

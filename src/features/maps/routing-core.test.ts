@@ -106,6 +106,12 @@ test('routeRequest', () => {
   assert.deepEqual(en.locations[0].search_filter, { min_road_class: 'residential', exclude_tunnel: true });
   assert.deepEqual(en.locations[1].search_filter, { min_road_class: 'residential', exclude_tunnel: true });
   assert.equal(en.exclude_polygons.length, 1);
+  // Legs across packs: a road seam keeps its heading and drops the filter; a port has no heading.
+  const seams = JSON.parse(
+    routeRequest({ from: { lat: 0, lon: 0 }, to: { lat: 1, lon: 1 }, costing: 'auto', language: 'es', fromSeam: { heading: null }, toSeam: { heading: 90 } }),
+  );
+  assert.deepEqual(seams.locations[0], { lat: 0, lon: 0, type: 'break' });
+  assert.deepEqual(seams.locations[1], { lat: 1, lon: 1, type: 'break', heading: 90, heading_tolerance: 45 });
 });
 
 test('valhallaConfig fills the tile extract without touching the defaults', () => {

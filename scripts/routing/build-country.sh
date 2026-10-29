@@ -165,12 +165,13 @@ osmium tags-filter --overwrite "$PBF" nwr/name nwr/addr:housenumber nwr/addr:blo
 python3 -I "$HERE/places.py" "$WORK/src/places.osm.pbf" "$OUT/$COUNTRY.places.tsv" "$OUT/$COUNTRY.addresses.tsv"
 rm -f "$WORK/src/places.osm.pbf"
 
-# 6c. Where main roads cross the pack's border: the app joins routes across packs there
-#     (docs/ROUTING_ACROSS_PACKS.md). A part of a split country ("us-west") is bounded by its
-#     states inside its Geofabrik polygons. No boundaries, no crossings. Never fatal: a pack
+# 6c. Where main roads and ferries cross the pack's border: the app joins routes across packs
+#     there (docs/ROUTING_ACROSS_PACKS.md). A part of a split country ("us-west") is bounded by
+#     its states inside its Geofabrik polygons. No boundaries, no crossings. Never fatal: a pack
 #     without them still routes inside itself.
 crossings() {
-  osmium tags-filter --overwrite "$PBF" w/highway=motorway,trunk,primary,secondary,tertiary -o "$WORK/src/roads.osm.pbf" || return 1
+  osmium tags-filter --overwrite "$PBF" w/highway=motorway,trunk,primary,secondary,tertiary w/route=ferry,shuttle_train \
+    -o "$WORK/src/roads.osm.pbf" || return 1
   osmium export --overwrite "$WORK/src/admins.osm.pbf" -f geojsonseq -o "$WORK/src/admins.geojsonseq" || return 1
   local polys=()
   if [[ "$REGION" != "$COUNTRY" ]]; then

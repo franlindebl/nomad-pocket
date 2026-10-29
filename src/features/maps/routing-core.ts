@@ -33,10 +33,11 @@ export type RouteRequestInput = {
   rerouting?: boolean;
   /**
    * An end that is a border crossing joining two packs' legs (stitch-core): on that road,
-   * going that way (`heading`), with no search filter (a crossing may be a tunnel).
+   * going that way (`heading`; none at a ferry's port), with no search filter (a crossing
+   * may be a tunnel).
    */
-  fromSeam?: { heading: number };
-  toSeam?: { heading: number };
+  fromSeam?: { heading: number | null };
+  toSeam?: { heading: number | null };
 };
 
 /**
@@ -70,9 +71,10 @@ export function routeRequest(input: RouteRequestInput): string {
   const toFilter = input.toSeam ? undefined : searchFilter(input.costing, false);
   if (fromFilter) origin.search_filter = fromFilter;
   if (toFilter) target.search_filter = toFilter;
-  if (input.toSeam) Object.assign(target, { heading: input.toSeam.heading, heading_tolerance: 45 });
-  if (input.fromSeam) Object.assign(origin, { heading: input.fromSeam.heading, heading_tolerance: 45 });
-  else if (input.heading != null && Number.isFinite(input.heading)) {
+  if (input.toSeam?.heading != null) Object.assign(target, { heading: input.toSeam.heading, heading_tolerance: 45 });
+  if (input.fromSeam) {
+    if (input.fromSeam.heading != null) Object.assign(origin, { heading: input.fromSeam.heading, heading_tolerance: 45 });
+  } else if (input.heading != null && Number.isFinite(input.heading)) {
     origin.heading = Math.round(((input.heading % 360) + 360) % 360);
     origin.heading_tolerance = 60;
   }
