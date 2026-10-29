@@ -99,6 +99,8 @@ export type DownloadRecord = {
   speed?: number;
   /** True for jobs that are not URL downloads (map extraction...). */
   external?: boolean;
+  /** A failed external job that can start again (its Retry). In-memory only. */
+  retryable?: boolean;
 };
 
 export type EnqueueInput = {
@@ -1145,6 +1147,10 @@ export async function pauseDownload(id: string) {
 export function resumeDownload(id: string) {
   const rec = useDownloads.getState().records[id];
   if (!rec || !['paused', 'failed'].includes(rec.status)) return;
+  if (rec.external) {
+    if (rec.status === 'failed') externalRetries.get(id)?.();
+    return;
+  }
   // The person's retry starts the automatic retries over.
   failures.delete(id);
   retryAt.delete(id);
@@ -1190,11 +1196,15 @@ export async function cancelDownload(id: string) {
 // External jobs (map extraction, model setup...). Kept in memory only.
 
 const externalCancels = new Map<string, () => void>();
+/** A failed job's Retry and what dismissing its row throws away (kept until it starts again). */
+const externalRetries = new Map<string, () => void>();
+const externalDiscards = new Map<string, () => void>();
 
 export type ExternalJob = {
   update: (patch: { bytesWritten?: number; totalBytes?: number; status?: DownloadStatus; error?: string | null }) => void;
   finish: () => void;
-  fail: (error: string) => void;
+  /** `retry` starts the job again (the row shows Retry); `discard` runs if the person dismisses the row instead. */
+  fail: (error: string, opts?: { retry?: () => void; discard?: () => void }) => void;
 };
 
 export function startExternalJob(input: {
@@ -1206,6 +1216,8 @@ export function startExternalJob(input: {
 }): ExternalJob {
   const now = Date.now();
   externalCancels.set(input.id, input.cancel);
+  externalRetries.delete(input.id);
+  externalDiscards.delete(input.id);
   useDownloads.setState((s) => ({
     records: {
       ...s.records,
@@ -1240,16 +1252,21 @@ export function startExternalJob(input: {
       if (done) listeners.forEach((l) => l(done));
       setTimeout(() => useDownloads.getState().remove(input.id), 4000);
     },
-    fail: (error) => {
+    fail: (error, opts) => {
       externalCancels.delete(input.id);
       cellularJobs.delete(input.id);
-      useDownloads.getState().patch(input.id, { status: 'failed', error });
+      if (opts?.retry) externalRetries.set(input.id, opts.retry);
+      if (opts?.discard) externalDiscards.set(input.id, opts.discard);
+      useDownloads.getState().patch(input.id, { status: 'failed', error, retryable: !!opts?.retry });
     },
   };
 }
 
 export function dismissDownload(id: string) {
   const rec = useDownloads.getState().records[id];
+  externalRetries.delete(id);
+  externalDiscards.get(id)?.();
+  externalDiscards.delete(id);
   forget(id);
   deletePartial(id);
   db().runSync('DELETE FROM downloads WHERE id = ?', id);

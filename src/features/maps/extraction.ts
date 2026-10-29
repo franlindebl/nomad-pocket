@@ -360,12 +360,27 @@ export function startMapDownload(input: StartMapDownload) {
       // to resume. (A kill never gets here and keeps both.)
       const transient =
         !ctrl.signal.aborted && !(e instanceof NotEnoughStorageError) && !(e instanceof HttpError && e.status >= 400 && e.status < 500);
-      if (!transient || !loadSaved().some((j) => j.key === input.key && j.done)) {
+      const discard = () => {
         deleteFile(part.uri);
         forgetJob(input.key);
-      }
+      };
+      const kept = transient && loadSaved().some((j) => j.key === input.key && j.done);
+      if (!kept) discard();
       if (ctrl.signal.aborted) useDownloads.getState().remove(jobId);
-      else job.fail(e instanceof NotEnoughStorageError ? 'NOT_ENOUGH_STORAGE' : String((e as Error)?.message ?? e));
+      else
+        job.fail(e instanceof NotEnoughStorageError ? 'NOT_ENOUGH_STORAGE' : String((e as Error)?.message ?? e), {
+          // Retry continues from the kept progress, on the build it started with.
+          retry: () => {
+            try {
+              startMapDownload({ ...input, build: loadSaved().find((j) => j.key === input.key)?.build ?? input.build });
+            } catch (err) {
+              // Still no room: the row keeps its error and its Retry.
+              console.warn('[maps] cannot retry extraction', input.key, err);
+            }
+          },
+          // Dismissed instead: nothing should continue it on the next launch.
+          discard: kept ? discard : undefined,
+        });
     } finally {
       stopSaving();
       running.delete(input.key);

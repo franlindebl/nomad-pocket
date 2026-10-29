@@ -7,6 +7,7 @@
 //
 //   node --experimental-strip-types scripts/dev-planet-server.ts [--port 8786] [--delay 800]
 //        [--bbox 5.95,45.81,10.475,47.796] [--max-zoom 12] [--pad 60000] [--file /tmp/planet.pmtiles]
+//   curl 'http://localhost:<port>/__outage?ms=60000'   # a network failure for a minute (?ms=0 ends it)
 import { createServer } from 'node:http';
 import { existsSync, readFileSync, statSync, createReadStream, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -89,7 +90,21 @@ const size = statSync(file).size;
 const etag = `"dev-${size}"`;
 let served = 0;
 
+// GET /__outage?ms=N: answer 503 to every range request for N ms (0 ends it), a network failure
+// for E2E (map-23 calls it from Maestro: the app's retries give up and the job fails).
+let outageUntil = 0;
 createServer((req, res) => {
+  const outage = /^\/__outage\?ms=(\d+)$/.exec(req.url ?? '');
+  if (outage) {
+    outageUntil = Date.now() + Number(outage[1]);
+    console.log(`outage for ${outage[1]} ms`);
+    res.writeHead(204);
+    return void res.end();
+  }
+  if (Date.now() < outageUntil) {
+    res.writeHead(503);
+    return void res.end();
+  }
   const m = /^bytes=(\d+)-(\d+)$/.exec(String(req.headers.range ?? ''));
   if (!m) {
     res.writeHead(200, { 'Content-Length': size, 'Accept-Ranges': 'bytes' });
