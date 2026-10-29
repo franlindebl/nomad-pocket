@@ -1,0 +1,19 @@
+docs/store/play-listing.md
+  s_9d09a0d4224efc::t_c2f9308d6e6be2 96-98
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "765dcd44ac6483487fa2672b65f0aec4883900cd",
+  "prompts": {},
+  "sessions": {
+    "s_9d09a0d4224efc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e877f81a-749f-4064-b41b-3a224eeab081",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
