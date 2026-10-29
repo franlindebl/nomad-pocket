@@ -9,8 +9,12 @@ import { getLocales } from 'expo-localization';
 import { create } from 'zustand';
 
 import { indexDb, indexDbAsync } from '@/db';
+import Storage from '@/db/kv';
 import { getItem } from '@/features/content/items';
 import { useSettings } from '@/stores/settings';
+
+import { countryAt, prepareShapes, type CountryShapes } from './country-at-core';
+import shapesData from './country-shapes.json';
 
 import {
   EMERGENCY_KINDS,
@@ -26,6 +30,7 @@ import {
   type EmergencyKind,
   type EmergencyPoi,
 } from './emergency-core';
+import numbersData from './emergency-numbers.json';
 import type { LatLon } from './geo';
 import { distanceMeters, lonSql } from './geo';
 import { exclusive, forgetMapSource, indexEmergencyPoints } from './places';
@@ -41,13 +46,51 @@ const SERVERS = [
   'https://overpass.private.coffee/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
 ];
-// 112 works on any GSM phone and is the number across Europe; most of the Americas use 911.
-const NINE_ONE_ONE = new Set(['US', 'CA', 'MX', 'AR', 'CR', 'PA', 'PY', 'UY', 'SV', 'GT', 'HN', 'DO', 'EC', 'VE', 'PR', 'PH']);
+export type EmergencyNumber = {
+  number: string;
+  /** What it reaches: every service, or (a country with no single number) the ambulance or the police. */
+  for: 'all' | 'ambulance' | 'police';
+  /** The regions.json country it is for; null for the fallback. */
+  country: string | null;
+};
 
-/** Emergency number for the user's country (onboarding), else the device's region. */
-export function emergencyNumber(): string {
-  const region = useSettings.getState().country ?? getLocales()[0]?.regionCode ?? '';
-  return NINE_ONE_ONE.has(region.toUpperCase()) ? '911' : '112';
+// One number per country (scripts/maps/make-emergency-numbers.py, reviewed in docs/EMERGENCY_NUMBERS.md).
+const NUMBERS = numbersData.numbers as Record<string, { n: string; for?: 'ambulance' | 'police' }>;
+const HERE_KEY = 'maps.hereCountry';
+
+/** The country of the last position seen (country-shapes.json), kept for the next launch offline. */
+export const useHereCountry = create<{ id: string | null }>(() => ({ id: Storage.getItemSync(HERE_KEY) }));
+
+let shapes: ReturnType<typeof prepareShapes> | null = null;
+
+/** Notes where the person is, for the emergency number. At sea or off the outlines: kept as it was. */
+export function noteHere(lat: number, lon: number) {
+  shapes ??= prepareShapes(shapesData as unknown as CountryShapes);
+  const id = countryAt(shapes, lat, lon);
+  if (!id || id === useHereCountry.getState().id) return;
+  Storage.setItemSync(HERE_KEY, id);
+  useHereCountry.setState({ id });
+}
+
+/**
+ * The emergency number of the country the person is in (the last position seen), else of their
+ * country (onboarding), else of the device's region. 112 when none is known: GSM phones treat it as
+ * an emergency call everywhere.
+ */
+export function emergencyNumber(): EmergencyNumber {
+  const ids = [useHereCountry.getState().id, useSettings.getState().country, getLocales()[0]?.regionCode?.toLowerCase()];
+  for (const id of ids) {
+    const e = id ? NUMBERS[id] : undefined;
+    if (id && e) return { number: e.n, for: e.for ?? 'all', country: id };
+  }
+  return { number: '112', for: 'all', country: null };
+}
+
+/** emergencyNumber(), re-rendering when the position's country or the person's country changes. */
+export function useEmergencyNumber(): EmergencyNumber {
+  useHereCountry((s) => s.id);
+  useSettings((s) => s.country);
+  return emergencyNumber();
 }
 
 const USER_AGENT = 'NomadPocket/1.0 (+https://github.com/franlindebl/nomad-pocket)';

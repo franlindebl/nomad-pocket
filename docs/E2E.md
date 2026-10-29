@@ -401,7 +401,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `open-courses` | Courses card in the Library |
   | `settings-country`, `settings-credits` | Settings: your country, Credits & licenses |
   | `credits-source`, `credits-gpl`, `credits-js`, `credits-search` | Credits screen: source link, GPL text, JavaScript packages, package search |
-  | `emergency-call`, `emergency-share`, `emergency-position` | Emergencias sheet: call, share position, position text |
+  | `emergency-call`, `emergency-share`, `emergency-position`, `emergency-number-country` | Emergencias sheet: call, share position, position text, the country whose number it is |
   | `emergency-cat-<category>`, `emergency-place`, `emergency-guide` | category chips (health, security, water, supplies, official), rows and their Llévame button |
   | `emergency-region`, `emergency-fetch` | per-map rows and their retry/refresh button (points come with the country; Overpass runs by itself for maps without them) |
   | `marker-guide` | Llévame in a saved place's sheet |

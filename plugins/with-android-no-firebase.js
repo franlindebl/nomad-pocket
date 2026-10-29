@@ -7,7 +7,9 @@
 // local path never loads a Firebase class: only the push-token and topic functions, which the
 // app doesn't call, and its FirebaseMessagingService, which nothing can start without Firebase
 // and which is removed from the manifest here. R8 is told not to fail on the classes those
-// references point to. Re-check this after an expo-notifications update.
+// references point to (and the Play services tasks its push-token code uses: they came along with
+// play-services-location until location moved to modules/nomad-location). Re-check this after an
+// expo-notifications update.
 const fs = require('fs');
 const path = require('path');
 const { AndroidConfig, withAndroidManifest, withAppBuildGradle, withDangerousMod } = require('expo/config-plugins');
@@ -20,8 +22,10 @@ configurations.configureEach {
 }
 `;
 const PROGUARD = `
-# plugins/with-android-no-firebase.js: expo-notifications' push code references Firebase, left out of the APK.
+# plugins/with-android-no-firebase.js: expo-notifications' push code references Firebase and Play services
+# tasks, left out of the APK.
 -dontwarn com.google.firebase.**
+-dontwarn com.google.android.gms.**
 `;
 const SERVICE = 'expo.modules.notifications.service.ExpoFirebaseMessagingService';
 

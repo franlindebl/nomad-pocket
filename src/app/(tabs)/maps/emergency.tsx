@@ -1,4 +1,4 @@
-import * as Location from 'expo-location';
+import * as Location from '@/lib/location';
 import * as Network from 'expo-network';
 import { router } from 'expo-router';
 import { Navigation, Phone, RefreshCw, Share2 } from 'lucide-react-native';
@@ -9,12 +9,13 @@ import { Alert, ScrollView, Share, View } from 'react-native';
 import { Button, Card, Chip, IconBadge, IconButton, ListGroup, ListRow, Row, Screen, SectionHeader, Text } from '@/components/ui';
 import { callPhones } from '@/features/maps/call';
 import {
-  emergencyNumber,
   emergencySyncInfo,
   hasEmergencyPoints,
   nearestEmergencyPlaces,
+  noteHere,
   syncEmergencyPoints,
   tilePointCounts,
+  useEmergencyNumber,
   usePoiSync,
   type EmergencyPlace,
 } from '@/features/maps/emergency';
@@ -22,6 +23,7 @@ import { EMERGENCY_CATEGORIES, policeForce, type EmergencyCategory } from '@/fea
 import { formatLatLon, formatUtm, toUtm, type LatLon } from '@/features/maps/geo';
 import { startGuidance } from '@/features/maps/guidance';
 import { usePlaceIndex } from '@/features/maps/places';
+import { getRegion, regionName } from '@/features/maps/regions';
 import { CATEGORY_COLORS, CATEGORY_ICONS, distanceWithDirection, kindIcon, kindLabel } from '@/features/maps/labels';
 import { showPlace, useMapUi } from '@/features/maps/store';
 import { useMapItems } from '@/features/maps/useMapSources';
@@ -40,7 +42,9 @@ export default function EmergencySheet() {
   const [category, setCategory] = useState<EmergencyCategory>('health');
   const [here, setHere] = useState<Here | null>(null);
   const [locating, setLocating] = useState(true);
-  const number = emergencyNumber();
+  const emergency = useEmergencyNumber();
+  const { number } = emergency;
+  const numberCountry = emergency.country ? getRegion(emergency.country) : undefined;
 
   useEffect(() => {
     let alive = true;
@@ -54,9 +58,12 @@ export default function EmergencySheet() {
         if (!perm.granted && perm.canAskAgain) perm = await Location.requestForegroundPermissionsAsync();
         if (!perm.granted) throw new Error('denied');
         const last = await Location.getLastKnownPositionAsync({ maxAge: 5 * 60_000 });
-        if (last && alive)
+        if (last && alive) {
           setHere({ lat: last.coords.latitude, lon: last.coords.longitude, accuracy: last.coords.accuracy, fromMap: false });
+          noteHere(last.coords.latitude, last.coords.longitude);
+        }
         const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+        noteHere(pos.coords.latitude, pos.coords.longitude);
         if (alive) setHere({ lat: pos.coords.latitude, lon: pos.coords.longitude, accuracy: pos.coords.accuracy, fromMap: false });
       } catch {
         if (alive) setHere((h) => h ?? fromMap());
@@ -166,7 +173,13 @@ export default function EmergencySheet() {
       <Row gap={space.sm}>
         <Button
           testID="emergency-call"
-          title={t('emergency.call', { number })}
+          title={
+            emergency.for === 'ambulance'
+              ? t('emergency.callAmbulance', { number })
+              : emergency.for === 'police'
+                ? t('emergency.callPolice', { number })
+                : t('emergency.call', { number })
+          }
           icon={Phone}
           variant="danger"
           size="lg"
@@ -182,6 +195,15 @@ export default function EmergencySheet() {
           onPress={share}
         />
       </Row>
+      {numberCountry ? (
+        <Text testID="emergency-number-country" variant="footnote" color="textSecondary">
+          {emergency.for === 'ambulance'
+            ? t('emergency.numberInAmbulance', { country: regionName(numberCountry, i18n.language) })
+            : emergency.for === 'police'
+              ? t('emergency.numberInPolice', { country: regionName(numberCountry, i18n.language) })
+              : t('emergency.numberIn', { country: regionName(numberCountry, i18n.language) })}
+        </Text>
+      ) : null}
 
       <Card style={{ gap: space.xs }}>
         <Text variant="overline" color="textSecondary">

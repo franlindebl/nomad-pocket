@@ -159,8 +159,8 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
      carry crossings (the rest are islands, plus `ie`, whose pack holds Northern Ireland, `ps`, covered by `il`'s,
      and `va`); the monthly one is on 2026-11-05. Needs app builds from bdc1fae on (store builds up to 23 predate it). Then Android, ferries. The US stays split. `docs/ROUTING_ACROSS_PACKS.md`.
    - **Deferred by decision**: bundled quick cards (first aid, water, radio; owner
-     reviews medical content first). ~~Emergency numbers per country~~ done 2026-10-29 (log); **owner:
-     review `docs/EMERGENCY_NUMBERS.md`** (8 rows marked Revisar) before the next store build.
+     reviews medical content first). ~~Emergency numbers per country~~ done 2026-10-29 (log); the 8 doubtful
+     rows checked by the owner the same day (`docs/EMERGENCY_NUMBERS.md`).
    - **CI notes**: a failed country is relaunched alone with `gh workflow run
      country-packages.yml -f countries="<ids>" -f parts=routing|maps` (region ids work too:
      `us-alaska`); admin boundaries come from the `routing-admins` release, refreshed on the 1st by
@@ -311,19 +311,23 @@ one emergency number per country, emergency only.
   The release runtime classpath has no `gms` or `installreferrer` artifact; the dex only names them from
   code that never runs. Lost: Android's "turn on location accuracy" dialog (a Play services feature).
 - **Emergency number per country**: `emergency-numbers.json` (235 of 242 countries) from
-  `scripts/maps/make-emergency-numbers.py` (Wikipedia's list + 18 corrections: 112 for every service in
+  `scripts/maps/make-emergency-numbers.py` (Wikipedia's list + 26 corrections: 112 for every service in
   the EU/EEA, Switzerland, Liechtenstein, Monaco, San Marino; Colombia 123; Pakistan 1122; police where
-  the ambulance number is a landline or missing; Australian territories 000). One number: the one for
+  the ambulance number is a landline or missing; Australian territories 000; and 8 rows the owner checked:
+  Andorra 116, Ethiopia 911, Uganda 911, Tanzania 115, Peru 106, Bolivia 118, Sri Lanka 1990, UAE 998). One number: the one for
   every service, else the ambulance's ("Llamar al 119 (ambulancia)"), else the police's. The country is
   where the last position seen is (`country-at-core.ts` over `country-shapes.json`, Natural Earth 1:50m
   simplified to ~2 km, 218 KB, plus Ceuta and Melilla from 1:10m; kv `maps.hereCountry`), else the
   onboarding country, else the device region, else 112. The Emergencias sheet names the country under
-  the button. Review table for the owner: `docs/EMERGENCY_NUMBERS.md`. Credits: Wikipedia (CC BY-SA)
+  the button. Review table: `docs/EMERGENCY_NUMBERS.md`. Credits: Wikipedia (CC BY-SA)
   for the numbers.
 - Also: dictation verified on the owner's iPhone (2026-10-28).
 - Checked: unit tests (country lookup: Madrid, Ceuta, Melilla, Tangier, Maseru inside South Africa,
   Tijuana/San Diego, off Barcelona, open sea), tsc, lint, i18n; Android release APK built from a clean
-  prebuild; dependency tree and dex scanned; Android tour: RESULT_ANDROID.
+  prebuild; dependency tree and dex scanned; credits regenerated (191 Android artifacts, 5 fewer); iOS smoke 21/21
+  (clean prebuild; home and Emergencias offer 112 at Madrid). Android
+  tour 3/4: android-03 (the number names Andorra), -04, -05 pass; android-01 failed at its last download (the
+  corporate VPN's TLS proxy, "Trust anchor not found"); to rerun with the VPN off.
 
 ### 2026-10-29 — CI: admin boundaries cached for every pack, sturdier prune
 

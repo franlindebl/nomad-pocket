@@ -156,6 +156,11 @@
   "emergency": {
     "title": "Emergency",
     "call": "Call {{number}}",
+    "callAmbulance": "Call {{number}} (ambulance)",
+    "callPolice": "Call {{number}} (police)",
+    "numberIn": "Emergency number in {{country}}.",
+    "numberInAmbulance": "{{country}} has no single emergency number: this is the ambulance's.",
+    "numberInPolice": "{{country}} has no single emergency number: this is the police's.",
     "share": "Share my position",
     "shareMessage": "My position: {{coords}} (UTM {{utm}}), accuracy ± {{accuracy}}, at {{time}}. {{url}}",
     "myPosition": "Your position",

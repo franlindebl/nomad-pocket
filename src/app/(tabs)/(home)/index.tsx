@@ -33,10 +33,9 @@ import { ContinueCarousel } from '@/features/home/ContinueCarousel';
 import { useReadiness, type ReadinessKey } from '@/features/home/readiness';
 import { callPhones } from '@/features/maps/call';
 import { usePreparingCountries } from '@/features/maps/countries';
-import { emergencyNumber } from '@/features/maps/emergency';
+import { useEmergencyNumber } from '@/features/maps/emergency';
 import { formatBytes } from '@/lib/format';
 import { freeBytes } from '@/lib/storage';
-import { useSettings } from '@/stores/settings';
 import { radius, space, useTheme, type Hue } from '@/theme';
 
 /**
@@ -95,9 +94,8 @@ export default function HomeScreen() {
   const net = Network.useNetworkState();
   const online = net.isInternetReachable ?? net.isConnected ?? true;
   const { items, done } = useReadiness();
-  // Re-render when the country (and so the emergency number) changes.
-  useSettings((s) => s.country);
-  const number = emergencyNumber();
+  const emergency = useEmergencyNumber();
+  const { number } = emergency;
 
   const firstAid = [...FIRST_AID.filter((a) => a.lang === i18n.language), ...FIRST_AID.filter((a) => a.lang !== i18n.language)]
     .map((a) => ({ ...a, item: zims.find((z) => z.catalogId === a.id) }))
@@ -135,7 +133,13 @@ export default function HomeScreen() {
         <QuickAction testID="home-emergency" icon={Siren} hue="medicine" title={t('crisis.nearby')} onPress={() => router.navigate('/maps/emergency')} />
         <QuickAction testID="home-first-aid" icon={HeartPulse} hue="medicine" title={t('crisis.firstAid')} onPress={openFirstAid} />
         <QuickAction testID="home-plan" icon={Users} hue="survival" title={t('crisis.plan')} onPress={() => router.push('/prepare/plan')} />
-        <QuickAction testID="home-call" icon={Phone} hue="medicine" title={t('crisis.call', { number })} onPress={() => callPhones(number)} />
+        <QuickAction testID="home-call" icon={Phone} hue="medicine" title={
+            emergency.for === 'ambulance'
+              ? t('crisis.callAmbulance', { number })
+              : emergency.for === 'police'
+                ? t('crisis.callPolice', { number })
+                : t('crisis.call', { number })
+          } onPress={() => callPhones(number)} />
       </View>
 
       {downloads.length > 0 || preparing.length > 0 ? (

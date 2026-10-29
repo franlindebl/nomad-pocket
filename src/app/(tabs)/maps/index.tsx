@@ -1,5 +1,5 @@
 import { Camera, GeoJSONSource, Layer, Map, NativeUserLocation, type CameraRef, type InitialViewState } from '@maplibre/maplibre-react-native';
-import * as Location from 'expo-location';
+import * as Location from '@/lib/location';
 import { router, useNavigation } from 'expo-router';
 import { Layers, LocateFixed, MapPin, Navigation, Navigation2, Route, Search } from 'lucide-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';

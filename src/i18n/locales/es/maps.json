@@ -156,6 +156,11 @@
   "emergency": {
     "title": "Emergencias",
     "call": "Llamar al {{number}}",
+    "callAmbulance": "Llamar al {{number}} (ambulancia)",
+    "callPolice": "Llamar al {{number}} (policía)",
+    "numberIn": "Número de emergencias en {{country}}.",
+    "numberInAmbulance": "{{country}} no tiene un número único de emergencias: este es el de ambulancias.",
+    "numberInPolice": "{{country}} no tiene un número único de emergencias: este es el de la policía.",
     "share": "Compartir mi posición",
     "shareMessage": "Mi posición: {{coords}} (UTM {{utm}}), precisión ± {{accuracy}}, a las {{time}}. {{url}}",
     "myPosition": "Tu posición",

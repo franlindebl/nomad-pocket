@@ -1,7 +1,7 @@
 // Maps feature wiring: startup init, item-removal hooks (maps, routing packs), and the search index /
 // emergency points that follow every installed map.
 import { File, FileMode } from 'expo-file-system';
-import * as Location from 'expo-location';
+import * as Location from '@/lib/location';
 
 import i18n from '@/i18n';
 import { registerInit } from '@/features/bootstrap';
@@ -12,7 +12,7 @@ import { contentDir, deleteFile } from '@/lib/storage';
 
 import { routePacksFor } from './country-core';
 import { onMapFileDownloaded, refreshMapsCatalog, resumeMapImports, sweepCountryMapFiles, useMapsCatalog } from './country-maps';
-import { cancelEmergencySync, syncEmergencyPoints } from './emergency';
+import { cancelEmergencySync, noteHere, syncEmergencyPoints } from './emergency';
 import { forgetEstimates, mapItemId, onMapInstalled, resumeMapDownloads, WORLD_ID, type MapItemMeta } from './extraction';
 import { useMarkers } from './markers';
 import { forgetMapSource, indexDetailAround, indexDetailAroundView, indexStaleMaps, invalidateIndex } from './places';
@@ -126,7 +126,7 @@ registerInit(() => {
  * The map detail around the user (where they are, else where the map was left), so search
  * finds nearby schools and shops on a big map. Never asks for permission, nor (Android) to
  * turn on Google's location accuracy. A fresh install has no last known position yet: then
- * one coarse fix.
+ * one coarse fix. The position also gives the country for the emergency number (noteHere).
  */
 function indexDetailAroundUser() {
   Location.getForegroundPermissionsAsync()
@@ -139,8 +139,10 @@ function indexDetailAroundUser() {
     })
     .catch(() => null)
     .then((pos) => {
-      if (pos) indexDetailAround({ lat: pos.coords.latitude, lon: pos.coords.longitude });
-      else indexDetailAroundView();
+      if (pos) {
+        noteHere(pos.coords.latitude, pos.coords.longitude);
+        indexDetailAround({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+      } else indexDetailAroundView();
     })
     .catch((e) => console.warn('[maps] cannot index the detail around the user', e));
 }
