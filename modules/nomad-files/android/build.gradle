@@ -13,3 +13,10 @@ android {
     versionName "0.1.0"
   }
 }
+
+dependencies {
+  // raiseDownloadConcurrency reaches into expo-file-system's download client (and its OkHttp). The
+  // app ships expo-file-system itself, as a prebuilt artifact of the version in node_modules.
+  def fsVersion = new groovy.json.JsonSlurper().parse(new File(rootDir, '../node_modules/expo-file-system/package.json')).version
+  compileOnly "host.exp.exponent:expo.modules.filesystem:${fsVersion}"
+}

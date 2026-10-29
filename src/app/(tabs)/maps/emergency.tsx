@@ -286,7 +286,7 @@ export default function EmergencySheet() {
           <Text variant="callout" color="textSecondary">
             {regions.length ? (syncing ? t('emergency.preparingBody') : t('emergency.noDataBody')) : t('emergency.noRegions')}
           </Text>
-          {!regions.length ? <Button title={t('emergency.pickRegion')} variant="secondary" onPress={() => router.push('/maps/pick')} /> : null}
+          {!regions.length ? <Button title={t('emergency.pickRegion')} variant="secondary" onPress={() => router.navigate('/maps/pick')} /> : null}
         </Card>
       )}
 

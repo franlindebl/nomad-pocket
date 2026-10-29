@@ -231,14 +231,11 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 
 ## Known issues / limitations
 
-- **Android: big GitHub / Hugging Face downloads stall** (seen 2026-10-29 making the Play screenshots, store APK of
-  fc268d6 on an API 36 emulator, VPN off). Map and routing parts (~2 GB `*.part00`) and the GGUF model hit "stalled …
-  0 bytes in 15 s" on every range after 15–60 s, then `DOWNLOAD_STALLED` ("La descarga se interrumpió. Reintenta");
-  Retry in the same process often sat at 0 connections. Each new process got 150–350 MB more (the Spain map took ~25
-  kill-and-retry cycles). Kiwix mirrors were fine and the Mac's curl got 3–12 MB/s on the same ranges, so it points at
-  the Android side of the segmented engine with many parallel ranges per host (12) to GitHub/HF. **Check on a real
-  phone before the closed test**; a normal user would see the kit fail again and again.
-- Android, also seen then: the emergency sheet's "Agua y refugio" chip clipped on its first render (English "Water &");
+- ~~Android: big GitHub / Hugging Face downloads stall~~ fixed 2026-10-29 (log): expo-file-system's download client
+  queued every call past OkHttp's 5 per host, and the segmented engine's queued ranges looked stalled.
+- Android, also seen then: the country picker scrolls stiffly on a Mi 9 (~240 heavy rows in a plain scroll view; a
+  virtualized list needs testing inside the form sheet on both platforms); the emergency sheet's "Agua y refugio" chip
+  clipped on its first render (English "Water &");
   after a location change the app kept the old country's emergency number until restarted (emulator mock location,
   may be emulator-only); the 0.8B model's Spanish first-aid answers are poor on the emulator (meta text, odd advice).
 - Map search: house numbers and far-away POIs come from the country package's side files
@@ -306,6 +303,21 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-29 — Android: downloads no longer stall; country picker opens fast and once
+
+Owner's Mi 9 (Android 11) by USB, store APK, logcat of the app while the owner downloaded the Spain kit.
+- **Stalls**: expo-file-system's `DownloadTask` sends every download through one OkHttpClient whose dispatcher runs 5
+  calls per host and queues the rest. The segmented engine opens 12 ranges to one URL (GitHub, Hugging Face, Kiwix's
+  load balancer when no mirror could be measured): the 7 queued ranges got 0 bytes, the 15 s watchdog cancelled them as
+  errors, and the download gave up with DOWNLOAD_STALLED (the log showed exactly 7 stalls of 12 on Wikipedia).
+  `modules/nomad-files` now raises that dispatcher to 32 per host at startup (`raiseDownloadConcurrency`, finding the
+  client field by type: R8 renames it; compiles against the prebuilt expo-file-system artifact), and the manager keeps
+  its per-host connections under what the client allows (4 if raising ever fails). After: Spanish Wikipedia 13.3 GB in
+  950 s (14 MB/s), Portugal and Belgium with 12 connections to github.com and no stall (the Belgian map 838 MB in 45 s).
+- **Country picker**: tapping "Añadir un país" several times stacked as many sheets (`router.push` before the first sheet
+  was up): `router.navigate` now. It also took a second or more to appear: the first 30 rows render at once, the rest
+  350 ms later. Scrolling it is still stiff on the Mi 9 (known issues).
 
 ### 2026-10-29 — Android: ready for Play (upload key, AAB, AI reports, listing draft)
 
