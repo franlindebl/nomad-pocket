@@ -1,0 +1,57 @@
+# MAP-23 — an on-device map extraction that fails on the network (the stand-in planet answers 503
+# until the app's own retries give up) shows Retry in Downloads, and Retry continues it to an
+# installed map. Same build as map-22 (PLANET_PORT, scripts/e2e.sh).
+appId: com.fjlinde.nomadpocket
+tags: [planet, maps, maps-server, planet-server]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: "Elegir un país"
+    timeout: 20000
+- tapOn: "Elegir un país"
+- tapOn: "Buscar un país"
+- inputText: "Suiza"
+- tapOn: { id: "country-ch" }
+- extendedWaitUntil:
+    visible: "Descargar · .*"
+    timeout: 60000
+- tapOn: "Descargar · .*"
+- extendedWaitUntil:
+    visible: { id: "country-row" }
+    timeout: 10000
+- waitForAnimationToEnd:
+    timeout: 5000
+- runScript:
+    file: ../../scripts/planet-outage.js
+    env:
+      MS: "600000"
+# The country sheets stay stacked over the map: straight to Downloads.
+- openLink: nomadpocket:///downloads
+- tapOn:
+    text: "Abrir"
+    optional: true
+- extendedWaitUntil:
+    visible: "Reintentar"
+    timeout: 120000
+- takeScreenshot: 01-failed
+- runScript:
+    file: ../../scripts/planet-outage.js
+    env:
+      MS: "0"
+- tapOn: "Reintentar"
+- extendedWaitUntil:
+    notVisible: "Reintentar"
+    timeout: 10000
+- takeScreenshot: 02-retrying
+- extendedWaitUntil:
+    visible: "No hay descargas activas"
+    timeout: 300000
+- launchApp:
+    stopApp: true
+- tapOn: { id: "map" }
+- tapOn: "Tus mapas"
+- extendedWaitUntil:
+    visible: "(?s).*(Mapa · |Preparando búsqueda).*"
+    timeout: 180000
+- takeScreenshot: 03-installed

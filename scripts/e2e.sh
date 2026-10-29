@@ -208,7 +208,8 @@ for flow in "${FLOWS[@]}"; do
   echo "▶ $name"
   reset_app "$flow"
   mkdir -p "$OUT/$name"
-  if "$MAESTRO" --device "$UDID" test "$abs" --test-output-dir "$OUT/$name" \
+  # PLANET_PORT reaches the flows too (map-23 turns the stand-in planet off and on).
+  if "$MAESTRO" --device "$UDID" test "$abs" --test-output-dir "$OUT/$name" ${PLANET_PORT:+-e "PLANET_PORT=$PLANET_PORT"} \
       --format junit --output "$OUT/$name/report.xml" \
       > "$OUT/$name/maestro.log" 2>&1; then
     passed=$((passed + 1)); echo "  ✓"

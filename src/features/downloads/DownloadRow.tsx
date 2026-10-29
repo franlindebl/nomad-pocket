@@ -21,6 +21,8 @@ export function DownloadRow({ entry, waiting }: { entry: DownloadEntry<DownloadR
   const progress = totalBytes > 0 ? bytesWritten / totalBytes : 0;
   const eta = speed && speed > 0 && totalBytes > 0 ? (totalBytes - bytesWritten) / speed : 0;
   const held = status === 'queued' && waiting ? waiting : null;
+  // An external job (map extraction) can be retried only when it says so.
+  const retryable = !entry.external || records.some((r) => r.status === 'failed' && r.retryable);
 
   let detail = `${formatBytes(bytesWritten)} / ${formatBytes(totalBytes)}`;
   // While running, the time left gets a line of its own, kept even before there is an estimate:
@@ -74,11 +76,11 @@ export function DownloadRow({ entry, waiting }: { entry: DownloadEntry<DownloadR
         {status === 'paused' ? (
           <IconButton icon={Play} size={36} accessibilityLabel={t('actions.resume')} onPress={() => resumeDownloads(records)} />
         ) : null}
-        {status === 'failed' && !entry.external ? (
+        {status === 'failed' && retryable ? (
           <IconButton icon={RotateCw} size={36} accessibilityLabel={t('actions.retry')} onPress={() => resumeDownloads(records)} />
         ) : null}
         {status === 'done' ? <IconButton icon={Check} size={36} variant="plain" color={colors.success} accessibilityLabel={t('status.done')} /> : null}
-        {status === 'failed' && entry.external ? (
+        {status === 'failed' && !retryable ? (
           <IconButton icon={AlertCircle} size={36} accessibilityLabel={t('actions.close')} onPress={() => cancelDownloads(records)} />
         ) : null}
         {status !== 'done' && status !== 'processing' ? (
