@@ -183,9 +183,13 @@ has no third-party analytics-capable SDK. The full transitive Android notice set
 (Android libraries, Android builds only) since 2026-10-28: `node scripts/licenses/android-deps.mjs`
 (after `npx expo prebuild --platform android`) lists every Maven artifact of the release runtime classpath
 with its POM licence into `scripts/licenses/android.json`, then `node scripts/licenses.mjs`; re-run both
-after a dependency or SDK change. Of its 196 artifacts, five aren't open source (Android SDK terms):
-play-services-location/base/basement/tasks (expo-location, MapLibre) and
-`com.android.installreferrer:installreferrer` (expo-application, pulled in by expo-notifications; the app
-never calls its install-referrer API). Still to do: decide how those proprietary pieces sit next to GPL
-libkiwix (ideally ask Kiwix; dropping installreferrer is a Gradle exclude); re-read `site/privacy.html`
-for Android and fill the Data safety form to match it.
+after a dependency or SDK change. Since 2026-10-29 (owner's decision, option A) none of them is
+proprietary: the five that were (Android SDK terms) are gone. play-services-location/base/basement/tasks
+came only from expo-location (MapLibre adds them only with `locationEngine=google`, not set): Android
+location is `modules/nomad-location` and expo-location is out of Android autolinking (`package.json`).
+`com.android.installreferrer` (expo-application, via expo-notifications; never called) is excluded by
+`plugins/with-android-no-install-referrer.js`. The dex still names `com.google.android.gms.tasks` and the
+referrer classes from code that never runs (expo-notifications' push token, expo-application's referrer):
+R8 `-dontwarn`s them; check `./gradlew :app:dependencies --configuration releaseRuntimeClasspath | grep -i
+'gms\|installreferrer'` is empty after an Expo update. Still to do: re-read `site/privacy.html` for
+Android and fill the Data safety form to match it.

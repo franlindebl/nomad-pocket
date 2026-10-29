@@ -60,7 +60,9 @@
     "nearby": "Emergency services nearby",
     "firstAid": "First aid",
     "plan": "My family plan",
-    "call": "Call {{number}}"
+    "call": "Call {{number}}",
+    "callAmbulance": "Call {{number}} (ambulance)",
+    "callPolice": "Call {{number}} (police)"
   },
   "downloadsHint": "Leave it on Wi‑Fi and charging. You can keep using the app.",
   "ready": {

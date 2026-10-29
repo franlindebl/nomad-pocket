@@ -3,7 +3,7 @@
 // them. The UI only deals with countries; this module maps them onto map items, routing
 // packs and downloads. A country the maps catalog doesn't have yet is extracted on the
 // phone instead (extraction.ts), at the highest zoom a phone can handle.
-import * as Location from 'expo-location';
+import * as Location from '@/lib/location';
 import { useEffect, useMemo, useState } from 'react';
 import { create } from 'zustand';
 

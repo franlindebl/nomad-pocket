@@ -9,7 +9,7 @@
 // (knownOrientation then gives no heading in landscape rather than a guessed one).
 // Android tablets whose natural orientation is landscape report rotation 0 as
 // LANDSCAPE_RIGHT and stay 90° off: rare, and expo-screen-orientation hides the raw value.
-import * as Location from 'expo-location';
+import * as Location from '@/lib/location';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { Dimensions, Platform } from 'react-native';
 

@@ -60,7 +60,9 @@
     "nearby": "Emergencias cerca",
     "firstAid": "Primeros auxilios",
     "plan": "Mi plan familiar",
-    "call": "Llamar al {{number}}"
+    "call": "Llamar al {{number}}",
+    "callAmbulance": "Llamar al {{number}} (ambulancia)",
+    "callPolice": "Llamar al {{number}} (policía)"
   },
   "downloadsHint": "Déjalo con Wi‑Fi y cargando. Puedes seguir usando la app.",
   "ready": {

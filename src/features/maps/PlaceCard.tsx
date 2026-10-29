@@ -2,7 +2,7 @@
 // dot on the map): what it is, how far, and the actions — take me there, save, and
 // one call button per number OpenStreetMap lists. The buttons show the number, so it
 // can be dialled from another phone when this device can't call.
-import * as Location from 'expo-location';
+import * as Location from '@/lib/location';
 import { Check, MapPin, Navigation, Phone, X } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';

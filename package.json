@@ -77,5 +77,14 @@
     "check:catalog": "node scripts/validate-catalog.mjs"
   },
   "private": true,
-  "license": "GPL-3.0-or-later"
+  "license": "GPL-3.0-or-later",
+  "expo": {
+    "autolinking": {
+      "android": {
+        "exclude": [
+          "expo-location"
+        ]
+      }
+    }
+  }
 }

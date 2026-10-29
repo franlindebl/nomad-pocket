@@ -5,7 +5,7 @@
 // Keep-awake holds for the whole app, so a trip nobody ended kept the screen, GPS and
 // compass on for hours: guidance ends by itself a minute after arriving, and keeps the
 // screen awake only while the Maps tab is in front and the user is on the move.
-import * as Location from 'expo-location';
+import * as Location from '@/lib/location';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { Alert, Linking } from 'react-native';
 import { create } from 'zustand';

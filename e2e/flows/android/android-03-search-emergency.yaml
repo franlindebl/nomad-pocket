@@ -52,9 +52,11 @@ tags: [android, network]
 - takeScreenshot: 03-guidance
 - tapOn: { id: "guidance-stop" }
 - tapOn: { id: "map-emergency" }
+# The number of the country the position is in (Andorra's: docs/EMERGENCY_NUMBERS.md), whatever it is.
 - extendedWaitUntil:
-    visible: "Llamar al 112"
+    visible: { id: "emergency-number-country", text: ".*Andorra.*" }
     timeout: 15000
+- assertVisible: "Llamar al .*"
 # The points come with the routing pack, or from Overpass when there is none.
 - extendedWaitUntil:
     visible: { id: "emergency-place" }
