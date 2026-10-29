@@ -5,7 +5,9 @@ tags: [nightly, assistant, seeded]
 ---
 - runFlow: ../../subflows/launch.yaml
 - tapOn: { id: "sparkles" }
-- tapOn: "Usar modelo integrado"
+- tapOn:   # the most capable model is already chosen since build 20: the button may not show
+    text: "Usar modelo integrado"
+    optional: true
 - assertVisible: "¿En qué te ayudo\\?"
 - tapOn: "Pregunta .*"
 - inputText: "¿Quién fue Michael Jackson?"

@@ -20,8 +20,11 @@ import { parseToolQuery, SEARCH_TOOL_NAME, stripThinking, type Turn } from './ra
 export type SearchTool = {
   /** OpenAI-style function definition (`searchToolSpec`). */
   spec: object;
-  /** Runs the search and returns the text handed back to the model. */
-  run: (query: string) => Promise<string>;
+  /**
+   * Runs the search and returns the text handed back to the model, or `{ final }`: the answer
+   * itself, without a second pass (nothing found: the model would answer from memory).
+   */
+  run: (query: string) => Promise<string | { final: string }>;
 };
 
 export type GenerateRequest = {
@@ -233,6 +236,10 @@ class LlamaEngine implements Engine {
     const query = parseToolQuery(call.function?.arguments);
     const result = await tool.run(query);
     if (this.stopRequested) return { text: '', stopped: true, toolQuery: query };
+    if (typeof result !== 'string') {
+      req.onText(result.final);
+      return { text: result.final, stopped: false, toolQuery: query };
+    }
     const id = call.id || 'call_0';
     const fn = call.function?.name === SEARCH_TOOL_NAME ? call.function : { name: SEARCH_TOOL_NAME, arguments: JSON.stringify({ query }) };
     const second = await this.complete(

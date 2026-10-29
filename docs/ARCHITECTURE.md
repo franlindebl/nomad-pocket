@@ -1094,7 +1094,15 @@ without them are fetched on their own when the sheet opens online) and `route-st
   boosts) → drop chunks sharing too few question terms (`relevantChunks`) → pack the
   best chunks into the model's budget as numbered sources → `[n]` citations, in the user
   turn (`sources` prompt) or as the tool result. Health questions get an extra caution
-  rule.
+  rule. **No answers from memory when the library has nothing** (owner, 2026-10-28): a search with no
+  passages (`retrieve` without sources and without `overflow`) answers `NOT_FOUND_ANSWER` without calling
+  the model (in tools mode the search tool returns `{ final }` and the engine skips the second pass); a
+  search-type question (`guessIntent`) with "Usar mi biblioteca" on and nothing to search (no archives, empty
+  family plan: `hasLibrary`) gets `NO_LIBRARY_ANSWER` without loading the model; and `guardNotFound` turns
+  any answer that opens with "No lo he encontrado…" and cites nothing into `NOT_FOUND_ANSWER`, while it
+  streams too (the invented part never shows). The prompts no longer invite answers from memory. With
+  "Usar mi biblioteca" off the model is talked to alone, by the user's choice. The family plan alone is
+  searched when no archive is installed.
 - `chats.ts`: sessions/messages in SQLite, `useChat` store, `sendMessage` (token budget:
   answer 768 tokens for GGUF / 600 for system, ~25 % of the rest for history, the rest for
   sources, counting the whole RAG frame (`ragMessageFrame`); phases loading → thinking (router / tool decision) → searching → generating;

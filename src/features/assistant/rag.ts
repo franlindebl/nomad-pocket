@@ -33,6 +33,8 @@ export type RetrievalResult = {
   sources: PackedSource[];
   /** The final user turn to send to the model. */
   userMessage: string;
+  /** Passages were found but none fits the context budget (a very long question): not "nothing found". */
+  overflow?: boolean;
 };
 
 const HITS_PER_QUERY = 8;
@@ -51,6 +53,11 @@ const keyOf = (itemId: string, path: string) => `${itemId}\u0000${path}`;
 
 export function libraryItemIds(): string[] {
   return listItems('zim').map((i) => i.id);
+}
+
+/** Whether there is anything to search: archives, or a family plan with something written in it. */
+export function hasLibrary(): boolean {
+  return libraryItemIds().length > 0 || planPassages(usePrepare.getState(), 'en').length > 0;
 }
 
 /** Reciprocal-rank fusion of the hit lists of several queries, each with a bonus for its hits. */
@@ -102,7 +109,9 @@ export type RetrieveOptions = {
 
 export async function retrieve(question: string, lang: Lang, budgetChars: number, opts: RetrieveOptions = {}): Promise<RetrievalResult> {
   const itemIds = opts.itemIds ?? libraryItemIds();
-  if (!itemIds.length) return { noLibrary: true, sources: [], userMessage: buildRagUserMessage(question, [], lang) };
+  const plan = planPassages(usePrepare.getState(), lang);
+  // No archives: the family plan alone is still searched.
+  if (!itemIds.length && !plan.length) return { noLibrary: true, sources: [], userMessage: buildRagUserMessage(question, [], lang) };
 
   const history = opts.history ?? [];
   // A model's query in another language than the question ("purificación de agua" for an English
@@ -110,11 +119,13 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
   // keeps the question's own words whenever the query isn't positively in its language.
   const { queries, rankText, relevanceTexts } = planRetrieval(question, history, lang, opts.query);
   const [first, second] = buildTitleCandidates(relevanceTexts[0]);
-  const [lists, titled, passages] = await Promise.all([
-    Promise.all(queries.map((q) => search(itemIds, q, HITS_PER_QUERY).catch(() => [] as ZimSearchHit[]))),
-    titleHits(itemIds, first).then(async (hits) => (hits.length ? hits : firstTitleHits(itemIds, second))),
-    searchDocuments(itemIds, queries, DOC_PASSAGES).catch(() => [] as DocHit[]),
-  ]);
+  const [lists, titled, passages] = itemIds.length
+    ? await Promise.all([
+        Promise.all(queries.map((q) => search(itemIds, q, HITS_PER_QUERY).catch(() => [] as ZimSearchHit[]))),
+        titleHits(itemIds, first).then(async (hits) => (hits.length ? hits : firstTitleHits(itemIds, second))),
+        searchDocuments(itemIds, queries, DOC_PASSAGES).catch(() => [] as DocHit[]),
+      ])
+    : [[] as ZimSearchHit[][], [] as ZimSearchHit[], [] as DocHit[]];
   const hits = fuseHits([
     { hits: titled, bonus: TITLE_BONUS },
     // Earlier (more specific) queries weigh a bit more.
@@ -150,7 +161,7 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
   });
 
   // The family plan (meeting points, contacts, health, home notes) competes like any source.
-  for (const p of planPassages(usePrepare.getState(), lang)) {
+  for (const p of plan) {
     const key = `${PLAN_SOURCE}\u0000${p.section}`;
     refs.set(key, { itemId: PLAN_SOURCE, path: p.section, title: p.title });
     chunks.push({ sourceKey: key, title: p.title, text: p.text, index: 0 });
@@ -167,6 +178,6 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
   }
   const { sources } = packContext(ranked, (k) => refs.get(k), budgetChars, 3);
   // Found, but nothing fits the budget (a very long question): don't claim the library has nothing.
-  if (!sources.length && ranked.length) return { noLibrary: false, sources, userMessage: question };
+  if (!sources.length && ranked.length) return { noLibrary: false, sources, userMessage: question, overflow: true };
   return { noLibrary: false, sources, userMessage: buildRagUserMessage(question, sources, lang) };
 }

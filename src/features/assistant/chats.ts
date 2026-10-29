@@ -11,14 +11,17 @@ import { useSettings } from '@/stores/settings';
 
 import { EngineUnavailableError, stopGeneration, withEngine, type SearchTool } from './engine';
 import { errorFor } from './errors';
-import { libraryItemIds, retrieve } from './rag';
+import { hasLibrary, retrieve } from './rag';
 import {
   buildRouterPrompt,
   buildToolResult,
   detectLanguage,
   estimateTokens,
+  guardNotFound,
   guessIntent,
   isHealthQuestion,
+  NO_LIBRARY_ANSWER,
+  NOT_FOUND_ANSWER,
   ragMessageFrame,
   ROUTER_INSTRUCTIONS,
   searchToolSpec,
@@ -281,7 +284,7 @@ function toTurns(messages: ChatMessage[]): Turn[] {
 async function answer(sessionId: string, text: string, history: Turn[], forceSearch: boolean, replaces?: ChatMessage) {
   const st = useChat.getState();
   const modelId = useSettings.getState().aiModelId;
-  const library = st.useLibrary && libraryItemIds().length > 0;
+  const library = st.useLibrary && hasLibrary();
   const streaming: Streaming = { sessionId, messageId: uid(), text: '', phase: 'loading', loadProgress: 0, sources: [] };
   useChat.setState({ streaming });
 
@@ -294,8 +297,15 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
   let failed: string | null = null;
   const cancelled = () => cancelledAnswers.has(streaming.messageId);
 
+  // A question with "Use my library" on but nothing installed to look in: no answer from memory.
+  const noLibrary = st.useLibrary && !library && guessIntent(text, history) === 'search';
+  if (noLibrary) {
+    answerText = NO_LIBRARY_ANSWER[lang];
+    patchStreaming({ phase: 'generating', text: answerText });
+  }
+
   try {
-    await withEngine(modelId, async (engine) => {
+    if (!noLibrary) await withEngine(modelId, async (engine) => {
       await engine.load((p) => patchStreaming({ loadProgress: p }));
       if (cancelled()) return;
 
@@ -342,6 +352,13 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
         patchStreaming({ phase: 'searching' });
         const r = await retrieve(text, lang, contextBudget, { history, query });
         keep(r);
+        if (cancelled()) return;
+        // Nothing in the library: say so, never an answer from the model's memory (NOT_FOUND_ANSWER).
+        if (!sources.length && !r.overflow) {
+          answerText = NOT_FOUND_ANSWER[lang];
+          patchStreaming({ phase: 'generating', text: answerText });
+          return;
+        }
         userTurn = r.noLibrary ? text : r.userMessage;
         // Without sources the citation rules would only confuse the model.
         if (!sources.length) sys = systemPrompt(lang, 'chat', { health, library });
@@ -357,6 +374,7 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
                 const r = await retrieve(text, lang, contextBudget, { history, query: q || undefined });
                 keep(r);
                 patchStreaming({ phase: 'generating' });
+                if (!r.sources.length && !r.overflow) return { final: NOT_FOUND_ANSWER[lang] };
                 return buildToolResult(r.sources, lang);
               },
             }
@@ -370,7 +388,9 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
         maxTokens: answerTokens,
         temperature: 0.5,
         tool,
-        onText: (t) => {
+        onText: (raw) => {
+          // An answer that only says "not found" and goes on from memory is cut there.
+          const t = guardNotFound(raw, lang);
           answerText = t;
           const now = Date.now();
           // An empty text resets the bubble (a tool call replaced a preamble): never throttle it.
@@ -380,7 +400,7 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
           }
         },
       });
-      answerText = res.text || answerText;
+      answerText = guardNotFound(res.text, lang) || answerText;
       stopped = res.stopped;
     });
   } catch (e) {
