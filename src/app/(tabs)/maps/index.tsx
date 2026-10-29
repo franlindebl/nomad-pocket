@@ -19,6 +19,7 @@ import { countryDownloadGroup } from '@/features/maps/country-maps';
 import { FollowArrow, FollowBeam, useFollowCamera } from '@/features/maps/FollowCamera';
 import { GuidancePanel } from '@/features/maps/GuidancePanel';
 import { HeadingBeam } from '@/features/maps/HeadingBeam';
+import { fitBox } from '@/features/maps/geo';
 import { useGuidance } from '@/features/maps/guidance';
 import { CATEGORY_COLORS } from '@/features/maps/labels';
 import { CREDIT_MS, MapCredit } from '@/features/maps/MapCredit';
@@ -140,6 +141,20 @@ export default function MapScreen() {
     // Only on first render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  // Opened on the world because the first region registered after the first render (a seeded or
+  // loose map): frame it once, unless something else already moved the camera. Only once the native
+  // map has loaded: a fitBounds before that is dropped.
+  const framedFirst = useRef(!('center' in initialView) || !!useMapUi.getState().viewport);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  useEffect(() => {
+    const bbox = regions[0]?.meta.bbox;
+    if (framedFirst.current || !bbox || !mapLoaded || !cameraRef.current) return;
+    framedFirst.current = true;
+    if (moved || request || target || openFix) return;
+    cameraRef.current.fitBounds(bbox, { duration: 0 });
+    // Only when the first region appears (or the map loads, if the region came first).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [regions, mapLoaded]);
 
   useEffect(() => {
     if (!request || !cameraRef.current) return;
@@ -259,15 +274,11 @@ export default function MapScreen() {
     if (!position || framedFor.current === target) return;
     framedFor.current = target;
     setShowUser(true);
-    cameraRef.current?.fitBounds(
-      [
-        Math.min(position.lon, target.lon),
-        Math.min(position.lat, target.lat),
-        Math.max(position.lon, target.lon),
-        Math.max(position.lat, target.lat),
-      ],
-      { padding: tripPadding, duration: 900 },
-    );
+    const box = fitBox([
+      [position.lon, position.lat],
+      [target.lon, target.lat],
+    ]);
+    if (box) cameraRef.current?.fitBounds(box, { padding: tripPadding, duration: 900 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target, position]);
 
@@ -283,7 +294,10 @@ export default function MapScreen() {
     const box =
       route?.bbox ??
       (target && position
-        ? ([Math.min(position.lon, target.lon), Math.min(position.lat, target.lat), Math.max(position.lon, target.lon), Math.max(position.lat, target.lat)] as const)
+        ? fitBox([
+            [position.lon, position.lat],
+            [target.lon, target.lat],
+          ])
         : null);
     if (!box) return;
     // fitBounds fits at the current pitch and bearing and only then applies new ones
@@ -359,6 +373,7 @@ export default function MapScreen() {
           compass={false}
           attributionPosition={{ bottom: space.sm, left: space.sm }}
           tintColor={colors.location}
+          onDidFinishLoadingMap={() => setMapLoaded(true)}
           onRegionWillChange={safe((e) => {
             if (!e.nativeEvent.userInteraction) return;
             setMoved(true);

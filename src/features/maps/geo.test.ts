@@ -5,6 +5,7 @@ import {
   bboxAround,
   bboxesOverlap,
   bboxHas,
+  fitBox,
   lonDelta,
   lonRanges,
   lonSql,
@@ -208,4 +209,20 @@ test('lonDelta takes the short way round', () => {
   assert.ok(Math.abs(lonDelta(179, -179) - 2) < 1e-9);
   assert.ok(Math.abs(lonDelta(-179, 179) + 2) < 1e-9);
   assert.equal(lonDelta(10, 20), 10);
+});
+
+test('fitBox: the smallest box, running past 180 across the antimeridian', () => {
+  assert.deepEqual(fitBox([[-3.7, 40.4], [2.35, 48.85]]), [-3.7, 40.4, 2.35, 48.85]);
+  // Taveuni (Fiji): 179.9 to -179.9 is 0.2° wide, not the whole world.
+  const t = fitBox([[179.9, -16.8], [-179.9, -16.7]])!;
+  near(t[0], 179.9, 1e-9);
+  near(t[2], 180.1, 1e-9);
+  assert.deepEqual([t[1], t[3]], [-16.8, -16.7]);
+  // Already unwrapped corners (a leg's box) give the same box.
+  const u = fitBox([[179.9, -16.8], [180.1, -16.7]])!;
+  near(u[0], 179.9, 1e-9);
+  near(u[2], 180.1, 1e-9);
+  // Points only west of 0 never get shifted.
+  assert.deepEqual(fitBox([[-179.5, 51], [-170, 52]]), [-179.5, 51, -170, 52]);
+  assert.equal(fitBox([]), null);
 });

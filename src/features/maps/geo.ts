@@ -130,6 +130,26 @@ export function bboxesOverlap(a: readonly number[], b: readonly number[]): boole
   return a[1] < b[3] && a[3] > b[1] && lonSpansOverlap(a[0], a[2], b[0], b[2]);
 }
 
+/**
+ * The smallest [w, s, e, n] box around [lon, lat] points, for a map camera. One that crosses 180° (a
+ * route on Taveuni, Fiji) keeps west < east by running east past 180: MapLibre fits such unwrapped
+ * bounds on iOS and Android, while a plain min/max would frame the whole world.
+ */
+export function fitBox(points: Iterable<readonly [number, number]>): [number, number, number, number] | null {
+  let [s, n] = [Infinity, -Infinity];
+  let [w1, e1, w2, e2] = [Infinity, -Infinity, Infinity, -Infinity];
+  for (const [rawLon, lat] of points) {
+    const lon = wrapLon(rawLon);
+    // The same longitudes on 0..360, where a span across 180° is contiguous.
+    const shifted = lon < 0 ? lon + 360 : lon;
+    [w1, e1, w2, e2] = [Math.min(w1, lon), Math.max(e1, lon), Math.min(w2, shifted), Math.max(e2, shifted)];
+    [s, n] = [Math.min(s, lat), Math.max(n, lat)];
+  }
+  if (s > n) return null;
+  if (e1 - w1 <= e2 - w2) return [w1, s, e1, n];
+  return w2 >= 180 ? [w2 - 360, s, e2 - 360, n] : [w2, s, e2, n];
+}
+
 /** A box's longitude condition for SQL: `col BETWEEN ? AND ?`, or two of them joined by OR when it crosses 180°. */
 export function lonSql(column: string, west: number, east: number, scale = 1): { sql: string; params: number[] } {
   const ranges = lonRanges(west, east);

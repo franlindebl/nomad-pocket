@@ -2,7 +2,7 @@
 // (modules/nomad-route) takes, reading its answers, choosing a routing pack, and
 // following a route from GPS fixes. Pure TypeScript (no `@/` aliases) so node's test
 // runner loads it.
-import { bboxHas, bearingDegrees, distanceMeters, wrapLon, type LatLon } from './geo.ts';
+import { bboxHas, bearingDegrees, distanceMeters, fitBox, wrapLon, type LatLon } from './geo.ts';
 
 export const COSTINGS = ['auto', 'pedestrian', 'bicycle'] as const;
 export type Costing = (typeof COSTINGS)[number];
@@ -186,13 +186,8 @@ export function parseRoute(json: string, costing: Costing): Route {
       });
     }
   }
-  let [w, s, e, n] = [Infinity, Infinity, -Infinity, -Infinity];
-  for (const [lon, lat] of shape) {
-    w = Math.min(w, lon);
-    e = Math.max(e, lon);
-    s = Math.min(s, lat);
-    n = Math.max(n, lat);
-  }
+  // Across 180° east runs past 180 (fitBox).
+  const [w, s, e, n] = fitBox(shape) ?? [0, 0, 0, 0];
   return {
     costing,
     distanceM: trip.summary.length * perUnit,
