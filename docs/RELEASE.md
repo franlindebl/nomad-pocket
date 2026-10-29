@@ -180,8 +180,10 @@ whenever the policy changes, in both languages, and re-check the host list again
 Play Console: personal developer account; Nomad Pocket is app <app-id>, created 2026-10-29. **1.1.0 (versionCode 23) on
 internal testing since 2026-10-29** (tag `v1.1.0-android-23` on fc268d6, the commit it was built from;
 testers: email list "Nomad Pocket interno", the owner's two accounts; join link
-the internal-test link in Play Console). Closed testing will use the account's
-"Friends and family" list (19 addresses, also another app's). A new app in this
+the internal-test link in Play Console). **1.1.0 (24) on closed testing**
+(track "Prueba cerrada - Alpha", the account's "Friends and family" list;
+all countries), sent to Google's review on 2026-10-29 with the listings and App content forms (tag
+`v1.1.0-android-24` on 10a265b). A new app in this
 account needs a **closed test with at least 12 opted-in testers for 14 days in a row** before it can
 apply for production. Listing texts, graphics and every form's answers: `docs/store/play-listing.md`.
 
