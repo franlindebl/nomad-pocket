@@ -3,8 +3,8 @@
 Everything Play Console asks before the first release, adapted from the App Store listing approved by
 the owner (`listing-1.1.0.md`; the owner approved this file on 2026-10-29). **In Play Console since
 2026-10-29** (app id 4972946077817579435): app created, App content forms saved, store settings, the es-ES
-listing texts, icon and feature graphic (listing saved as a draft: phone screenshots and the en-US
-translation still missing). Automatic protection (Play's installer check) is **off**: it injects Google's
+listing texts, icon and feature graphic, and since the afternoon the es-ES and en-US listings complete with
+the Android phone screenshots (`docs/store/marketing/<lang>/android/`). Automatic protection (Play's installer check) is **off**: it injects Google's
 closed code into the app (owner's decision, no proprietary code next to libkiwix). Play limits: app name 30, short description 80, full description 4000.
 Play has no subtitle, promotional text or keywords: the short description does that job and Play
 indexes the full description.
@@ -53,7 +53,7 @@ expiry reminders were checked on the emulator (Android tour, `docs/E2E.md`).
 |---|---|---|
 | App icon | 512 × 512 PNG, 32-bit | `docs/store/play/icon-512.png` (from `assets/images/icon.png`) |
 | Feature graphic | 1024 × 500 PNG/JPEG, no alpha | `docs/store/play/feature-<lang>.png` |
-| Phone screenshots | 2–8, 9:16, each side 320–3840 px, long side ≤ 2× short side | to capture on the Android emulator: the iPhone shots (1320 × 2868) are over the 2:1 limit and show iOS UI |
+| Phone screenshots | 2–8, 9:16, each side 320–3840 px, long side ≤ 2× short side | `docs/store/marketing/<lang>/android/`, 8 per language (the iPhone shots are over the 2:1 limit and show iOS UI) |
 | 7" / 10" tablet screenshots | optional (needed to be featured for tablets) | not planned for 1.1.0 |
 
 ## Store settings

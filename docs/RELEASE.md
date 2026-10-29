@@ -151,6 +151,11 @@ Raw simulator captures go to `docs/store/screenshots/<lang>/<iphone|ipad>/NN-nam
 script, es + en) and writes `docs/store/marketing/<lang>/<device>/` at App Store sizes:
 iPhone 1320×2868 (iPhone 17 Pro Max simulator), iPad 2064×2752 (iPad Pro 13-inch).
 
+Google Play (Android): `android` captures from an emulator (pixel_6 AVD `Nomad_Shots`, 1080×2400, SystemUI demo
+mode for the status bar) composed at 1080 × 1920 (Play refuses a long side over twice the short one); same
+eight screens and kits as iOS (2026-10-29), assistant with the downloaded Qwen3.5 2B. The script also writes
+Play's 512 px icon and the 1024 × 500 feature graphics (`docs/store/play/`).
+
 Current set (2026-10-27, for 1.1.0; texts in `docs/store/listing-1.1.0.md`): home, emergency, route,
 first aid, assistant, family plan, library, kit (iPhone only). Spanish shots use the Spain kit in Madrid,
 English ones the US Northeast kit in New York, each on a simulator in that language and region, with
