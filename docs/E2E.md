@@ -43,7 +43,7 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 | `npm run e2e` | 21 | ~14 min | P0: every screen's main path (incl. map search, Emergencias, road routing and Preparedness) | nothing (offline) |
 | `npm run e2e:full` | 43 | ~27 min | + P1: secondary features (themes, markers, find in page, courses, reminders, PDF…) | nothing (offline) |
 | `npm run e2e:all` | 56 | ~38 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
-| `PLANET_PORT=8766 scripts/e2e.sh --build e2e/flows/maps/map-22-extract-resume.yaml` | 1 | ~6 min | extraction resumed after a kill (tag `planet`, its own build: rebuild without `PLANET_PORT` before other suites) | nothing (local stand-in planet) |
+| `PLANET_PORT=8766 scripts/e2e.sh --build --tags planet` | 2 | ~12 min | extraction resumed after a kill (`map-22`) and retried after a network failure (`map-23`) (tag `planet`, their own build: rebuild without `PLANET_PORT` before other suites) | nothing (local stand-in planet) |
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape, light and dark | nothing (offline) |
 | `npm run e2e:android` | 4 | ~15 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack | internet, Android emulator |
 
@@ -240,7 +240,7 @@ By hand:
 | settings | `set-03-storage` | SET-03, SET-04 | full | seeded |
 | settings | `set-05-credits` | SET-05 | full | — (GPL notice, source/licence links, libkiwix, a JS package's licence via search) |
 | library | `lib-01-open` | LIB-01, RDR-01 | smoke | seeded |
-| library | `lib-02-delete` | LIB-02, LIB-05 | smoke | seeded |
+| library | `lib-02-delete` | LIB-02, LIB-05 | smoke | seeded (long press offers Share and Delete) |
 | library | `lib-03-category` | LIB-03 | full | — |
 | library | `lib-04-wikipedia` | LIB-04 | full | — |
 | library | `lib-06-explore` | LIB-06 | nightly | network |
@@ -272,6 +272,7 @@ By hand:
 | maps | `map-20-regions-packs` | MAP-20 | full | routing-server, maps-server (country in regions with a pack per region, as the USA: tick, download, "Tus mapas", add the other region, delete each) |
 | maps | `map-21-regions-national-pack` | MAP-21 | full | routing-server, maps-server (regions for the map only + a national pack, as Canada/Russia: region ticked from the location, pack with the first region only, deleting the last region removes the pack) |
 | maps | `map-22-extract-resume` | MAP-22 | planet (by hand) | maps-server, planet-server (an on-device extraction killed mid-way continues from its saved progress). Its own build: `PLANET_PORT=8766 scripts/e2e.sh --build e2e/flows/maps/map-22-extract-resume.yaml` bakes `EXPO_PUBLIC_PLANET_BUILD_URL` and serves `scripts/dev-planet-server.ts`; that app no longer reaches Protomaps, so rebuild without `PLANET_PORT` before other suites |
+| maps | `map-23-extract-retry` | MAP-23 | planet (by hand) | maps-server, planet-server (an extraction failing on the network shows Retry in Downloads; Retry continues it to an installed map). The same build as `map-22`; the flow turns the stand-in planet off and on through its `/__outage?ms=` endpoint (`e2e/scripts/planet-outage.js`, `PLANET_PORT` passed to Maestro by `scripts/e2e.sh`) |
 | courses | `crs-01-empty` | CRS-01 | smoke | — |
 | courses | `crs-02-course` | CRS-02, CRS-03, CRS-04 | full | seeded |
 | assistant | `ai-01-no-model` | AI-01, AI-02 | smoke | — |

@@ -17,8 +17,8 @@ can pick up without re-deriving anything.
   Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
   tour). Downloads measured and tuned by the agent on the owner's iPhone 14 Pro (2026-10-27), re-timed
   2026-10-28 with segments from 4 MiB: the 20.7 GB kit in 6:47 (`docs/DOWNLOADS_SPEED_PLAN.md`, run 8).
-- Checks: `npm test` (the count drifts: run it), `tsc` clean, lint clean, i18n keys complete. E2E: 62 Maestro flows
-  (21 smoke, 22 full, 13 nightly, 1 iPad tour, 4 Android, 1 by hand: `map-22`, its own build); which cases they cover
+- Checks: `npm test` (the count drifts: run it), `tsc` clean, lint clean, i18n keys complete. E2E: 63 Maestro flows
+  (21 smoke, 22 full, 13 nightly, 1 iPad tour, 4 Android, 2 by hand: `map-22` and `map-23`, their own build); which cases they cover
   is in the catalog of `docs/E2E.md`. On f4b32d4 (2026-10-28): smoke 21/21, full 20/20 after a stale `map-15`
   assertion was fixed (`map-19` flaked once on a tap), iPad tour 1/1. The flows added later (map-20/21/22, ai-09)
   passed on their own branches; on main afb07af smoke + full passed 43/43 (2026-10-28, after making the region
@@ -75,21 +75,22 @@ A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check
      pushed, `v1.1.0-12` to `v1.1.0-23` (no `-17`: that build is not to be used; GPL section 6).
    Owner decisions still open or to carry out:
    - Android before any Play release: ML Kit GenAI is removed and Firebase kept out of the APK
-     (done 2026-10-26). Still to do: list the full transitive Android notices (Gradle licence
-     plugin), and decide how the proprietary Play services libraries that expo-location and
-     MapLibre need (play-services-location/base/basement/tasks) sit next to GPL libkiwix; see
-     `docs/RELEASE.md`.
+     (done 2026-10-26); ~~list the full transitive Android notices~~ done 2026-10-28 (Credits › Android
+     libraries, `scripts/licenses/android-deps.mjs`: 196 artifacts). Still to decide: how the proprietary
+     Play services libraries that expo-location and MapLibre need (play-services-location/base/basement/tasks)
+     and the Play Install Referrer that expo-notifications pulls in (through expo-application; never called)
+     sit next to GPL libkiwix; see `docs/RELEASE.md`.
    - ~~Store prebuild gated by an env var (LEGAL-9)~~ done 2026-10-28: `NOMAD_STORE_BUILD=1 npx expo prebuild`
      (`plugins/with-store-build.js`, `docs/RELEASE.md`); check the archived `Info.plist` on the next store build.
    - A planned index rebuild to reclaim the space of existing users' old index file.
-   - Optionally ship `OFL.txt` and the sprites' MIT licence inside `basemap-assets.zip` (bump
-     `features/maps/assets.ts` `VERSION`).
-   - Geofabrik mis-tags `pf`, `wf`, `tk`, Clipperton (VU) and `pn` (MH), and `as`, `gu`, `mp` have no
-     extract of their own: no side files for them (Overpass fallback); matching by name could give them
-     points.
-   - The pronoun threshold of the assistant (a follow-up inherits the previous topic only with at
-     most one word of its own) loses some two-word English follow-ups ("Can I put ice on it?") on the
-     heuristic search paths; long questions (> 600 chars) are searched once.
+   - ~~Ship `OFL.txt` and the sprites' MIT licence inside `basemap-assets.zip`~~ done 2026-10-28 (`VERSION` v5).
+   - ~~Geofabrik mis-tags: matching by name~~ done 2026-10-28 for the one country it affected: of the list,
+     `pf`, `wf`, `as`, `gu`, `mp` have routing packs (which bring their side files), `tk` and Clipperton
+     aren't offered; the Pitcairn Islands (`pn`, tagged MH) get side files from the next monthly run, matched by
+     name. Saint Pierre and Miquelon (`pm`) has no Geofabrik extract at all (Overpass).
+   - ~~The pronoun threshold of the assistant~~ done 2026-10-28: a pronoun that is an object ("on it", last
+     word) carries the topic with two words of its own ("Can I put ice on it?"). Long questions (> 600
+     chars) are still searched once.
    - ~~Code cleanup: `places.ts`'s private `forEachLineBlock`~~ already gone (it imports `side-files.ts`'s).
    Decisions already taken (2026-10-26): the OSM credit fades after 5 s (approved); guidance
    auto-stops 60 s after arrival and keeps the screen awake only with movement in the last 10 min
@@ -185,7 +186,7 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
    The whole kit on the phone with it: 6:47 (run 8, 2026-10-28), no slower.
 4. Map extraction: resumes after a kill since 2026-10-28. Still to do: move it off the JS thread (a native
    range fetcher writing at offsets, background URLSession / foreground service; ~3–5 days with both
-   platforms), and a Retry for a failed extraction (today it continues on the next launch).
+   platforms). ~~A Retry for a failed extraction~~ done 2026-10-28 (Downloads row; flow `map-23`).
 5. Android release: upload keystore, Play listing + data safety; the Android notices and the Play
    services question of item A come first.
 6. Reader: auto-hiding toolbar on scroll (style guide), syllabus for SPA course ZIMs read
@@ -194,10 +195,9 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
    conversational flow on Android (llama.cpp tools) and on a
    real iPhone (tool-call latency with Metal). Document index follow-ups (log 2026-10-28): OCR for scanned
    PDFs, open a PDF at the cited page (native PDFKit view), English guides for Spanish questions, measure
-   the indexing time and memory on a real iPhone and Android phone, and search the passages from the
-   library's global search too.
-8. Preparedness follow-ups: share ZIMs/maps phone to phone (share sheet export, import
-   exists); "Ready.gov"-style quick cards bundled in the app (radio frequencies, first aid)
+   the indexing time and memory on a real iPhone and Android phone; ~~search the passages from the
+   library's global search~~ done 2026-10-28.
+8. Preparedness follow-ups: ~~share ZIMs phone to phone~~ done 2026-10-28 (maps still need an import); "Ready.gov"-style quick cards bundled in the app (radio frequencies, first aid)
    that need no download; optional Face ID lock for the plan; link the plan's meeting points to maps' Llévame
    guidance and the hub to the Emergencias sheet (both landed on main in parallel).
 
@@ -249,10 +249,11 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
   isochrones (valhalla-mobile exposes none), routes across packs only where the packs carry
   crossings (see item U), no voice / background navigation yet. Pack and map files are verified against the
   manifest's size and sha-256. Maps downloaded as a country (map with the pack or its own points) no longer ask Overpass.
-- Across the antimeridian, route bounds (fitBounds) and map extraction clipping are not handled; search, map
-  points, locality context, routing coverage and Overpass cells are (2026-10-28).
-- Map screen first opens on the world when a region is registered after the first render
-  (seeded/loose maps): pre-existing, cosmetic.
+- Across the antimeridian: search, map points, locality context, routing coverage, Overpass cells and the
+  camera framing of routes and trips (`fitBox`, east past 180) are handled (2026-10-28). Map boxes still
+  stop at 180°: `regions.json` and the published country maps (`fj` ends at 180, `ru-far-east` too), so
+  Fiji's Lau group and Chukotka's eastern tip are not in their maps, and extraction never gets a box that
+  crosses (a fix spans `regions.json`, the CI outlines, the PMTiles header bounds and the camera).
 - After a backup restore the database comes back without the content (items are dropped at
   startup, see ARCHITECTURE). A segmented download whose partial bytes didn't come back is marked
   failed ("didn't come back with your backup", Retry); a queued row that never started and one-chunk
@@ -267,9 +268,11 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
   launch, so the heading is withheld in landscape until then; Android tablets whose natural
   orientation is landscape stay 90° off.
 - Map extraction runs on the JS thread in the foreground (screen kept awake); after a kill or a network
-  failure it continues on the next launch (cancel or a 4xx starts over).
+  failure it continues on the next launch, or at once with Retry in Downloads (cancel or a 4xx starts over).
 - Qwen3.5 0.8B rarely emits `[n]` (all retrieved sources are shown then) and is
-  unreliable for health answers — the app recommends 2B+ where RAM allows. In small talk
+  unreliable for health answers — the app recommends 2B+ where RAM allows. With nothing found in the library it
+  still answers from memory after saying so, and can be dangerously wrong (2026-10-28, Android emulator: bleach
+  described as "a sea salt solution" unfit for drinking water). In small talk
   it sometimes rambles or echoes its instructions, and it searches some chit-chat
   ("¿te gusta la música?") on its own.
 - The models still answer some famous facts from memory instead of searching ("What is
@@ -287,6 +290,62 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-28 — Small leftovers: extraction Retry, antimeridian framing, Android notices, follow-ups
+
+The owner asked for the pending work that needs no device or decision. Done:
+
+- **Retry for a failed map extraction**: `startExternalJob`'s `fail(error, { retry, discard })`; the Downloads
+  row shows Retry for an external job that offers it (`retryable`). A network failure keeps the saved progress
+  and Retry continues it on the build it started with; dismissing the row discards that progress (it used to
+  resume silently on the next launch). Flow `map-23-extract-retry` (tag `planet`): the stand-in planet answers
+  503 through its new `/__outage?ms=` endpoint (called from Maestro, `e2e/scripts/planet-outage.js`).
+  Passed on the iOS 27 simulator (Release build with `PLANET_PORT`): of the 6 ranges done before the outage,
+  none was fetched again after Retry.
+- **Antimeridian**: `fitBox` (geo.ts) gives a camera box that runs east past 180 when the points cross it
+  (MapLibre takes unwrapped bounds on iOS; Android's `LatLngBounds.from` only refuses east < west, checked in
+  the 13.6.1 bytecode). Used for a route's bbox, a stitched route's and the trip framing. Extraction clipping
+  left as is: no box that reaches it crosses 180 (`regions.json` and the published maps stop at 180; Fiji's
+  Lau group and Chukotka's tip are outside their maps: known issue).
+- **Map opens on the world** when the first region registers after the first render: framed once the native
+  map has loaded (`onDidFinishLoadingMap`: a `fitBounds` before that is dropped, seen with a temporary log),
+  unless the user's location, a place or a trip moved the camera first. Checked on the iOS simulator with a
+  loose Melilla map and location denied: it opens on Melilla.
+- **Map assets**: `OFL.txt` and `LICENSE-sprites.txt` inside `basemap-assets.zip` (+2.8 KB; `make-zip.py` adds
+  them from `scripts/licenses/texts`), `VERSION` v5.
+- **Assistant follow-ups**: a pronoun that is an object (last word, or after on/in/with/en/con…) carries the
+  topic with two words of its own ("Can I put ice on it?", "¿Puedo poner hielo en eso?").
+- **Geofabrik by name**: with no extract under the country's code, one named after it (the Pitcairn Islands,
+  tagged MH). The rest of the old list already had routing packs; `pm` has no extract at all.
+- **Android notices** (Play prerequisite): `scripts/licenses/android-deps.mjs` reads `./gradlew :app:dependencies`
+  (release runtime classpath) and each POM's licence from the Gradle cache into `scripts/licenses/android.json`
+  (196 artifacts; Expo modules are left to the JS list); Credits › Android libraries on Android builds. Not open
+  source: four play-services artifacts and the Play Install Referrer (expo-application, via expo-notifications).
+  BSD-2-Clause and GPL-3.0 standard texts added to `spdxFallback`.
+- **PDFs in the library's global search**: full text also searches the passages of the PDFs inside the
+  archives (the assistant's document index, `useDocSearch` → `searchDocuments`), a section per archive
+  ("… · en sus PDF") whose rows read "<document> · pág. N" with the passage, opening the document like a
+  source does (at page 1, like sources: the viewer ignores `#page=`), each archive's PDFs right after its
+  articles. Checked on a clone of the docs simulator (67,858 passages): "tourniquet" lists *First Aid for
+  Soldier · p. 68* and *Hospital Corpsman · p. 34* under Military Medicine, and opens the field manual.
+- **Share an archive with another phone** (Preparedness follow-up): Library's long press offers Share or Delete
+  (Delete still asks), and the resource sheet has Share; the share sheet gets the archive file itself (no copy,
+  AirDrop/Nearby Share/Files), which the other phone adds with Import ZIM file. Maps aren't shareable yet (no
+  import for them). `lib-02` follows the new long press and passes; the share sheet comes up with the
+  ZIM file on the simulator (Copy, Save to Files; no AirDrop there).
+- **Android** (release APK with all of the above, Pixel_API_36). Behind this Mac's corporate VPN (GlobalProtect)
+  Kiwix and Hugging Face downloads fail on the emulator (`CertPathValidatorException: Trust anchor for
+  certification path not found`: TLS intercepted); with the VPN off (the owner switched it off) they work. Tour:
+  `android-03/04/05` pass (05 downloads Andorra's published pack with its `ad.crossings.tsv` and routes);
+  `android-01` reaches the course and fails twice on its 30 s wait for the syllabus. Measured with temporary
+  logs: the PDF scan of the new archive takes 0.19 s and the syllabus 0.18 s; the time goes to Maestro waiting
+  for an overloaded emulator (4–7 s per hierarchy dump, skipped frames, a dozen simulators booted on the Mac);
+  with a 120 s wait the course part passes. Assistant with llama.cpp (Qwen3.5 0.8B downloaded in the app, 533 MB
+  at ~2 MB/s on the emulator's link): an answer, Copy (the keyboard offers the copied text) and Regenerate
+  work. The 0.8B answer to "¿Cómo potabilizo agua con lejía?" with an empty library said it found nothing and
+  then called bleach "a sea salt solution" unfit for drinking water (see Known issues). Credits › Android
+  libraries checked by hand. Not tried on Android: a route across two packs (needs packs rebuilt with crossings
+  by the full run), restore recovery, download speed on a real phone.
 
 ### 2026-10-28 — Docs: backlog checked against the day's work
 
