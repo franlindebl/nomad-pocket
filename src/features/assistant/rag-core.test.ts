@@ -413,6 +413,11 @@ describe('chat or search', () => {
     assert.deepEqual(followUpTopic('Is it safe to drink rain water?', burn), []);
     assert.deepEqual(followUpTopic('Is it possible to start a fire with a battery?', burn), []);
     assert.deepEqual(followUpTopic('Can they hear ultrasound?', burn), []);
+    // Two words of its own still follow up when the pronoun is the object.
+    assert.deepEqual(followUpTopic('Can I put ice on it?', burn), ['treat', 'burn']);
+    assert.deepEqual(followUpTopic('Should I cover it?', burn), ['treat', 'burn']);
+    assert.deepEqual(followUpTopic('¿Puedo poner hielo en eso?', H), ['hipotermia']);
+    assert.deepEqual(followUpTopic('Is it a good idea to drink rain water?', burn), []);
     assert.deepEqual(followUpTopic('Is it contagious?', burn), ['treat', 'burn']);
     assert.deepEqual(followUpTopic('Does it scar?', burn), ['treat', 'burn']);
     assert.deepEqual(followUpTopic('And in children?', burn), ['treat', 'burn']);

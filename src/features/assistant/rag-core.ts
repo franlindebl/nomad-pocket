@@ -223,6 +223,12 @@ export function buildTitleCandidates(question: string, max = 6): [string[], stri
 
 const FOLLOW_UP_START = new Set(['y', 'e', 'and', 'pero', 'but', 'entonces', 'so', 'tambien', 'also', 'ademas', 'besides']);
 const ANAPHORA = new Set(['eso', 'esto', 'ello', 'it', 'that', 'this', 'them', 'they', 'those', 'these']);
+// A pronoun after one of these, or ending the question, is an object pointing back ("Can I put ice
+// on it?"), unlike the empty subject of "Is it safe to drink rain water?".
+const OBJECT_PREPOSITIONS = new Set([
+  'on', 'in', 'into', 'onto', 'with', 'for', 'about', 'from', 'under', 'over', 'near', 'without',
+  'en', 'con', 'para', 'sobre', 'sin', 'por', 'de',
+]);
 // Facets of a topic that make no sense on their own: "¿cómo se trata?", "what are the symptoms?".
 const FACET_PREFIXES = [
   'trat', 'cura', 'curar', 'sintom', 'caus', 'preven', 'evit', 'funcion', 'dura', 'tipo', 'riesg', 'peligr', 'grav', 'signific', 'diagnost',
@@ -235,7 +241,7 @@ const FACET_PREFIXES = [
  * The topic a follow-up question leaves implicit ("¿y cómo se trata?" after asking
  * about hypothermia): keywords of the previous user turn when the new question opens
  * with a conjunction, only names facets of a topic, or points back ("eso", "it") with
- * at most one word of its own. Empty when the question stands alone: English puts
+ * at most one word of its own (two when the pronoun is an object: "Can I put ice on it?"). Empty when the question stands alone: English puts
  * "it" in most questions ("Is it safe to drink rain water?").
  */
 export function followUpTopic(question: string, history: Turn[]): string[] {
@@ -244,8 +250,10 @@ export function followUpTopic(question: string, history: Turn[]): string[] {
   const own = extractKeywords(question);
   const ws = words(question);
   const ownTopic = own.filter((k) => !FACET_PREFIXES.some((p) => normalize(k).startsWith(p)));
+  const pointsBack = ws.some((w) => ANAPHORA.has(w));
+  const pointsBackAsObject = ws.some((w, i) => ANAPHORA.has(w) && (i === ws.length - 1 || OBJECT_PREPOSITIONS.has(ws[i - 1] ?? '')));
   const followUp =
-    FOLLOW_UP_START.has(ws[0] ?? '') || ownTopic.length === 0 || (ownTopic.length <= 1 && ws.some((w) => ANAPHORA.has(w)));
+    FOLLOW_UP_START.has(ws[0] ?? '') || ownTopic.length === 0 || (ownTopic.length <= (pointsBackAsObject ? 2 : 1) && pointsBack);
   if (!followUp) return [];
   const ownSet = new Set(own.map(normalize));
   return extractKeywords(prev.content)
