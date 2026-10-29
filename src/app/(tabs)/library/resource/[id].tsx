@@ -7,6 +7,7 @@ import { getResource, loc } from '@/features/catalog';
 import { startResourceDownload, useResourceState } from '@/features/catalog/DownloadButton';
 import { categoryHue, categoryIcon } from '@/features/catalog/icons';
 import { removeItem } from '@/features/content/items';
+import { shareArchive } from '@/features/library/share';
 import { cancelDownload, pauseDownload, resumeDownload } from '@/features/downloads/manager';
 import { formatBytes, formatMB } from '@/lib/format';
 import { layout, space } from '@/theme';
@@ -73,6 +74,11 @@ export default function ResourceSheet() {
               router.push({ pathname: '/reader/[itemId]', params: { itemId: installed.id } });
             }}
             style={{ flex: 1 }}
+          />
+          <Button
+            title={t('share')}
+            variant="secondary"
+            onPress={() => shareArchive(installed).catch((e) => Alert.alert(t('shareFailed'), String((e as Error)?.message ?? e)))}
           />
           <Button
             title={tc('actions.delete')}

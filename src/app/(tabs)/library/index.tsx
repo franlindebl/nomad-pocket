@@ -15,6 +15,7 @@ import { removeItem, useItems, type InstalledItem } from '@/features/content/ite
 import { NotEnoughStorageError } from '@/features/downloads/manager';
 import { indexDocuments } from '@/features/library/documents';
 import { AlreadyInstalledError, registerZimFile } from '@/features/library/register';
+import { shareArchive } from '@/features/library/share';
 import { formatBytes, formatMB } from '@/lib/format';
 import { contentDir, deleteFile, freeBytes, hasRoomFor, partialDir } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
@@ -92,6 +93,13 @@ export default function LibraryScreen() {
       { text: tc('actions.cancel'), style: 'cancel' },
       { text: tc('actions.delete'), style: 'destructive', onPress: () => removeItem(item.id) },
     ]);
+  // Long press: send it to another phone, or delete it.
+  const itemActions = (item: InstalledItem) =>
+    Alert.alert(item.title, formatBytes(item.sizeBytes), [
+      { text: t('share'), onPress: () => shareArchive(item).catch((e) => Alert.alert(t('shareFailed'), String((e as Error)?.message ?? e))) },
+      { text: tc('actions.delete'), style: 'destructive', onPress: () => confirmDelete(item) },
+      { text: tc('actions.cancel'), style: 'cancel' },
+    ]);
 
   return (
     <Screen title={tc('tabs.library')}>
@@ -105,7 +113,7 @@ export default function LibraryScreen() {
       {archives.length ? (
         <ListGroup>
           {archives.map((item) => (
-            <ArchiveRow key={item.id} item={item} onLongPress={() => confirmDelete(item)} />
+            <ArchiveRow key={item.id} item={item} onLongPress={() => itemActions(item)} />
           ))}
         </ListGroup>
       ) : (
