@@ -329,6 +329,20 @@ one emergency number per country, emergency only.
   tour 3/4: android-03 (the number names Andorra), -04, -05 pass; android-01 failed at its last download (the
   corporate VPN's TLS proxy, "Trust anchor not found"); to rerun with the VPN off.
 
+### 2026-10-29 — Maps: routes across countries tried with the published packs; the missing download offered right
+
+The stitched routes, until now tried with packs built on the Mac, tried end to end with the live catalogs on
+the simulator (iPhone 17 Pro, iOS 27; the Release app with a JS bundle pointing at the GitHub catalogs):
+Luxembourg city → Brussels with nothing installed, then Belgium, then Luxembourg downloaded from the sheet
+(1.5 GB and 139 MB, each with its `<pack>.crossings.tsv`). Car 213 km / 1 h 58 min, foot 41 h 52 min, bike too,
+each one route with one arrival (`[maps] stitched route-lu → route-be`, 0.5–3 s); a car reroute off the
+route north of the city took 28 ms. Figures in `docs/ROUTING_ACROSS_PACKS.md`.
+
+Bug found and fixed: with the destination's country installed but not the origin's, the guidance panel's
+"Descargar la navegación de este país" opened the destination's sheet again (0 MB). `packToFetch`
+(routing-core.ts, tested) now picks the first country the trip lacks: the destination's, the origin's, then
+one on the straight line between them (Lisbon → Paris also needs Spain); none when every point is covered.
+
 ### 2026-10-29 — CI: admin boundaries cached for every pack, sturdier prune
 
 Full routing run 40691060942 (from before the cache existed) succeeded, 263/263 jobs, 165 of 237 packs with

@@ -9,6 +9,7 @@ import {
   isOffRoute,
   maneuverIcon,
   packsCovering,
+  packToFetch,
   parseManifest,
   parseTarHeader,
   parseRoute,
@@ -27,6 +28,7 @@ import {
   ENGINE_VALHALLA,
   fileIntegrity,
   valhallaConfig,
+  type ManifestPack,
 } from './routing-core.ts';
 import { bearingDegrees } from './geo.ts';
 
@@ -313,6 +315,24 @@ test('assetUrl and packsCovering', () => {
     packsCovering(m.packs, { lat: 40.4, lon: -3.7 }).map((p) => p.id),
     ['es'],
   );
+});
+
+test('packToFetch: the destination, then the origin, then a country on the way', () => {
+  const pack = (id: string, bbox: [number, number, number, number], size = 1) =>
+    ({ id, regionId: id, bbox, size, parts: [], pois: null }) as unknown as ManifestPack;
+  const packs = [pack('pt', [-9.6, 36.9, -6.1, 42.2]), pack('es', [-9.4, 35.9, 3.4, 43.8], 2), pack('fr', [-5.2, 42.3, 8.3, 51.1], 3)];
+  const lisbon = { lat: 38.72, lon: -9.14 };
+  const paris = { lat: 48.86, lon: 2.35 };
+  const has = (...ids: string[]) => (id: string) => ids.includes(id);
+  assert.equal(packToFetch(packs, has(), lisbon, paris)?.id, 'fr');
+  assert.equal(packToFetch(packs, has('fr'), lisbon, paris)?.id, 'pt');
+  // Lisbon is covered by Spain's bbox too, but Portugal is the smaller pack there.
+  assert.equal(packToFetch(packs, has('fr', 'pt'), lisbon, paris)?.id, 'es');
+  assert.equal(packToFetch(packs, has('fr', 'pt', 'es'), lisbon, paris), null);
+  // The origin's country installed: the destination's, not the origin's again.
+  assert.equal(packToFetch(packs, has('pt'), lisbon, { lat: 40.42, lon: -3.7 })?.id, 'es');
+  // Open sea (no pack covers it) is no reason to offer anything.
+  assert.equal(packToFetch(packs, has('fr'), { lat: 46, lon: -7 }, paris), null);
 });
 
 test('coverage cells: a pack covers where it has roads, not its whole bbox', () => {

@@ -375,6 +375,23 @@ export function packsCovering(packs: ManifestPack[], p: LatLon): ManifestPack[] 
   return packs.filter((pack) => covers(pack, p)).sort((a, b) => a.size - b.size);
 }
 
+/**
+ * The pack a trip still lacks, to offer its country's download: the destination's, then
+ * the origin's, then one on the way (Lisbon → Paris also needs Spain). The straight line
+ * stands in for the road, so a winding road may want one more. A point with any of its
+ * packs installed is covered; null when every point is (or no pack covers a missing one).
+ */
+export function packToFetch(packs: ManifestPack[], installed: (packId: string) => boolean, from: LatLon, to: LatLon): ManifestPack | null {
+  const STEPS = 20;
+  const points = [to, from];
+  for (let i = 1; i < STEPS; i++) points.push({ lat: from.lat + ((to.lat - from.lat) * i) / STEPS, lon: from.lon + ((to.lon - from.lon) * i) / STEPS });
+  for (const p of points) {
+    const here = packsCovering(packs, p);
+    if (here.length && !here.some((pack) => installed(pack.id))) return here[0];
+  }
+  return null;
+}
+
 // --- Routing pack files -------------------------------------------------------
 
 /** One entry of a tar header block (512 bytes, ustar). Null at the end-of-archive block. */
