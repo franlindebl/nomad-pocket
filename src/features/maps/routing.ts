@@ -29,12 +29,14 @@ import {
 import {
   bestPath,
   chainEstimate,
+  endGap,
   joinRoutes,
   matrixRequest,
   nearestSeams,
   packChains,
   parseCrossings,
   parseMatrix,
+  pickRoute,
   robustMatrix,
   seamLocation,
   seamsBetween,
@@ -219,7 +221,7 @@ type Stitch = { to: LatLon; costing: Costing; packs: RoutePackItem[]; seams: Sea
 let lastStitch: Stitch | null = null;
 
 function remember(to: LatLon, costing: Costing, packs: RoutePackItem[], seams: Seam[], legs: Route[]): Route {
-  const route = joinRoutes(legs);
+  const route = joinRoutes(legs, seams);
   lastStitch = { to, costing, packs, seams, legs, route, cumulative: cumulativeDistances(route.shape) };
   return route;
 }
@@ -270,16 +272,20 @@ async function stitchedRoute(from: LatLon, to: LatLon, costing: Costing, heading
     .filter((c) => Number.isFinite(c.estimate))
     .sort((a, b) => a.chain.length - b.chain.length || a.estimate - b.estimate)
     .slice(0, CHAINS_TRIED);
-  let best: { total: number; seams: Seam[]; legs: Route[]; packs: RoutePackItem[] } | null = null;
+  const answers: { total: number; seams: Seam[]; legs: Route[]; packs: RoutePackItem[]; gap: number }[] = [];
   for (const { chain } of chains) {
     const started = Date.now();
     const r = await stitchChain(chain, from, to, costing, heading, rerouting);
+    const gap = r ? endGap(joinRoutes(r.legs, r.seams), from, to) : Infinity;
     // In Release too: how long a trip across packs takes to choose is worth seeing on a phone.
-    console.log('[maps] stitched', chain.map((p) => p.id).join(' → '), costing, r ? `${Math.round(r.total)} s` : 'no way', `${Date.now() - started} ms`);
-    if (r && (!best || r.total < best.total)) best = { ...r, packs: chain.map((c) => c.item) };
+    console.log('[maps] stitched', chain.map((p) => p.id).join(' → '), costing, r ? `${Math.round(r.total)} s, ends ${Math.round(gap)} m off` : 'no way', `${Date.now() - started} ms`);
+    if (r) answers.push({ ...r, packs: chain.map((c) => c.item), gap });
   }
-  return best;
+  return pickRoute(answers, (a) => a.gap, (a) => a.total);
 }
+
+/** A route in one pack this far from an end may be on another country's ferry: the stitched ones are weighed too. */
+const SINGLE_GAP_OK_M = 250;
 
 /**
  * A reroute on a stitched trip: from where the person is to the next crossing ahead, in the
@@ -339,10 +345,12 @@ export function computeRoute(from: LatLon, to: LatLon, costing: Costing, heading
       }
     }
     // A reroute keeps the kind of trip it had: crossings are only weighed again when it was stitched.
-    if (single && (!nearBorder || rerouting)) return single;
+    const singleGap = single ? endGap(single, from, to) : Infinity;
+    if (single && (rerouting || (!nearBorder && singleGap <= SINGLE_GAP_OK_M))) return single;
     try {
       const stitched = await stitchedRoute(from, to, costing, heading, rerouting);
-      if (stitched && (!single || stitched.total < single.durationS)) return remember(to, costing, stitched.packs, stitched.seams, stitched.legs);
+      const pick = stitched && single ? pickRoute([stitched, single], (a) => (a === single ? singleGap : stitched.gap), (a) => (a === single ? single.durationS : stitched.total)) : stitched;
+      if (stitched && pick === stitched) return remember(to, costing, stitched.packs, stitched.seams, stitched.legs);
     } catch (e) {
       failure ??= failureOf(e);
     }

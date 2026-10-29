@@ -9,10 +9,16 @@ import { covers, type Costing, type Coverage, type Route } from './routing-core.
 
 export const ROAD_CLASSES = ['motorway', 'trunk', 'primary', 'secondary', 'tertiary'] as const;
 export type RoadClass = (typeof ROAD_CLASSES)[number];
+/**
+ * A road's class, or `ferry`: a boat (or the Channel Tunnel's car shuttle) to another country,
+ * listed at its port there (crossings.py). Older app versions skip those rows.
+ */
+export type CrossingClass = RoadClass | 'ferry';
+const CROSSING_CLASSES: readonly CrossingClass[] = [...ROAD_CLASSES, 'ferry'];
 
-/** Where a road crosses a pack's border. */
+/** Where a road or a ferry crosses a pack's border. */
 export type Crossing = LatLon & {
-  cls: RoadClass;
+  cls: CrossingClass;
   /** Bearing of travel leaving the pack (degrees). */
   out: number;
   /** Which way traffic may go: a one-way road crosses one way only. */
@@ -24,9 +30,9 @@ export function parseCrossings(tsv: string): Crossing[] {
   const out: Crossing[] = [];
   for (const line of tsv.split('\n')) {
     const [lat, lon, cls, bearing, dirs] = line.split('\t');
-    const c = { lat: Number(lat), lon: Number(lon), cls: cls as RoadClass, out: Number(bearing), dirs: dirs as Crossing['dirs'] };
+    const c = { lat: Number(lat), lon: Number(lon), cls: cls as CrossingClass, out: Number(bearing), dirs: dirs as Crossing['dirs'] };
     if (!Number.isFinite(c.lat) || !Number.isFinite(c.lon) || !Number.isFinite(c.out)) continue;
-    if (!ROAD_CLASSES.includes(c.cls) || !['both', 'in', 'out'].includes(c.dirs)) continue;
+    if (!CROSSING_CLASSES.includes(c.cls) || !['both', 'in', 'out'].includes(c.dirs)) continue;
     out.push(c);
   }
   return out;
@@ -34,16 +40,20 @@ export function parseCrossings(tsv: string): Crossing[] {
 
 /**
  * Roads a seam may be on (owner, 2026-10-28: main roads, never a track). Bikes and people
- * on foot can't take motorways or most trunk roads, and do fine on smaller ones.
+ * on foot can't take motorways or most trunk roads, and do fine on smaller ones. Ferries for
+ * everyone: whether a boat takes cars, bikes or foot passengers is the graph's to say.
  */
-const SEAM_CLASSES: Record<Costing, readonly RoadClass[]> = {
-  auto: ['motorway', 'trunk', 'primary', 'secondary'],
-  bicycle: ['primary', 'secondary', 'tertiary'],
-  pedestrian: ['primary', 'secondary', 'tertiary'],
+const SEAM_CLASSES: Record<Costing, readonly CrossingClass[]> = {
+  auto: ['motorway', 'trunk', 'primary', 'secondary', 'ferry'],
+  bicycle: ['primary', 'secondary', 'tertiary', 'ferry'],
+  pedestrian: ['primary', 'secondary', 'tertiary', 'ferry'],
 };
 
-/** A point where one leg ends and the next starts, with the heading of travel there. */
-export type Seam = LatLon & { heading: number; cls: RoadClass };
+/**
+ * A point where one leg ends and the next starts, with the heading of travel there. A port
+ * has none: off the boat, the road may leave in any direction.
+ */
+export type Seam = LatLon & { heading: number | null; cls: CrossingClass };
 
 export type StitchPack = Coverage & { id: string; crossings: Crossing[] | null };
 
@@ -53,18 +63,24 @@ const SAME_SEAM_M = 60;
 /**
  * Where a trip can go from pack `a` into pack `b` for a costing: crossings of `a`'s border
  * leaving it (or of `b`'s border entering it, when `a` has no file), inside both coverages.
+ * A ferry only from `a`'s file (its port in `b`): from `b`'s, the seam would be the port at
+ * home and the next leg would start on the boat ("head northeast on Helsinki – Tallinn")
+ * instead of `a`'s leg taking it ("take the ferry"). That port only has to be in `b`'s
+ * coverage: `a`'s graph holds the boat to it, but the catalog clips `a`'s cells to its
+ * country (manifest.py), so they may stop short of it (Estonia's don't reach Helsinki).
  */
 export function seamsBetween(a: StitchPack, b: StitchPack, costing: Costing): Seam[] {
   const allowed = SEAM_CLASSES[costing];
   const found: Seam[] = [];
   const add = (c: Crossing, heading: number) => {
-    if (!allowed.includes(c.cls) || !covers(a, c) || !covers(b, c)) return;
-    const h = ((Math.round(heading) % 360) + 360) % 360;
-    if (found.some((s) => Math.abs(((s.heading - h + 540) % 360) - 180) < 45 && distanceMeters(s, c) < SAME_SEAM_M)) return;
+    if (!allowed.includes(c.cls) || !covers(b, c) || (c.cls !== 'ferry' && !covers(a, c))) return;
+    const h = c.cls === 'ferry' ? null : ((Math.round(heading) % 360) + 360) % 360;
+    const same = (s: Seam) => s.heading === null || h === null || Math.abs(((s.heading - h + 540) % 360) - 180) < 45;
+    if (found.some((s) => same(s) && distanceMeters(s, c) < SAME_SEAM_M)) return;
     found.push({ lat: c.lat, lon: c.lon, heading: h, cls: c.cls });
   };
   for (const c of a.crossings ?? []) if (c.dirs !== 'in') add(c, c.out);
-  for (const c of b.crossings ?? []) if (c.dirs !== 'out') add(c, c.out + 180);
+  for (const c of b.crossings ?? []) if (c.dirs !== 'out' && c.cls !== 'ferry') add(c, c.out + 180);
   return found;
 }
 
@@ -161,11 +177,12 @@ const isDeparture = (type: number) => type >= 1 && type <= 3;
 const isArrival = (type: number) => type >= 4 && type <= 6;
 
 /**
- * One route from legs that meet end to start. At each seam the first leg's "you have
- * arrived" goes and the next leg's "head south on…" folds into the manoeuvre before it:
- * the road goes on across the border, and so does the instruction.
+ * One route from legs that meet end to start (`seams[i]` between legs i and i + 1). At each
+ * seam the first leg's "you have arrived" goes and the next leg's "head south on…" folds
+ * into the manoeuvre before it: the road goes on across the border, and so does the
+ * instruction. Except at a port: off the boat, "head south on…" is the next thing to do.
  */
-export function joinRoutes(legs: Route[]): Route {
+export function joinRoutes(legs: Route[], seams: Pick<Seam, 'cls'>[] = []): Route {
   if (legs.length === 1) return legs[0];
   const shape: [number, number][] = [];
   const maneuvers: Route['maneuvers'] = [];
@@ -176,7 +193,7 @@ export function joinRoutes(legs: Route[]): Route {
     for (const [i, m] of own.entries()) {
       const moved = { ...m, begin: m.begin + offset, end: m.end + offset };
       const prev = maneuvers[maneuvers.length - 1];
-      if (n > 0 && i === 0 && isDeparture(m.type) && prev) {
+      if (n > 0 && i === 0 && isDeparture(m.type) && prev && seams[n - 1]?.cls !== 'ferry') {
         maneuvers[maneuvers.length - 1] = { ...prev, end: moved.end, distanceM: prev.distanceM + m.distanceM, durationS: prev.durationS + m.durationS };
       } else {
         maneuvers.push(moved);
@@ -198,12 +215,39 @@ export function joinRoutes(legs: Route[]): Route {
   };
 }
 
+/**
+ * How far a route's ends are from where it was asked to start and end (m), the larger. A pack
+ * holds its ferries whole, so it "covers" the port abroad, where it has nothing but the boat:
+ * a trip from there in that pack starts on the ferry, a stretch away from the person.
+ */
+export function endGap(route: Pick<Route, 'shape'>, from: LatLon, to: LatLon): number {
+  const at = (p: [number, number] | undefined) => (p ? { lat: p[1], lon: p[0] } : null);
+  const start = at(route.shape[0]);
+  const end = at(route.shape[route.shape.length - 1]);
+  if (!start || !end) return Infinity;
+  return Math.max(distanceMeters(from, start), distanceMeters(to, end));
+}
+
+/** Ends this much further off than the best answer's are a different trip, however fast. */
+export const END_GAP_SLACK_M = 250;
+
+/**
+ * The fastest of several answers to one trip (one pack, or chains of them) among those that
+ * reach its ends about as closely as the best one does.
+ */
+export function pickRoute<T>(answers: T[], gap: (a: T) => number, seconds: (a: T) => number): T | null {
+  const closest = Math.min(...answers.map(gap));
+  if (!Number.isFinite(closest)) return null;
+  return answers.filter((a) => gap(a) <= closest + END_GAP_SLACK_M).reduce((best, a) => (seconds(a) < seconds(best) ? a : best));
+}
+
 // --- Talking to Valhalla ---------------------------------------------------------
 
 type Json = Record<string, unknown>;
 
-/** A seam as a Valhalla location: on that road, going that way (any road class, tunnels too). */
+/** A seam as a Valhalla location: on that road, going that way (any road class, tunnels too); a port, any way. */
 export function seamLocation(seam: Seam): Json {
+  if (seam.heading === null) return { lat: seam.lat, lon: seam.lon, type: 'break' };
   return { lat: seam.lat, lon: seam.lon, type: 'break', heading: seam.heading, heading_tolerance: 45 };
 }
 

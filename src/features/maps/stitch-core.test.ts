@@ -5,12 +5,14 @@ import type { Route } from './routing-core.ts';
 import {
   bestPath,
   chainEstimate,
+  endGap,
   joinRoutes,
   matrixRequest,
   nearestSeams,
   packChains,
   parseCrossings,
   parseMatrix,
+  pickRoute,
   robustMatrix,
   seamLocation,
   seamsBetween,
@@ -163,6 +165,82 @@ test('joinRoutes: one route, the seam folded into the manoeuvre before it', () =
   assert.deepEqual(r.bbox, [0, 0, 3, 1]);
   assert.equal(r.hasHighway, true);
   assert.equal(joinRoutes([a]), a);
+});
+
+test('ferries: a port abroad is a seam for every costing, with no heading', () => {
+  // A ferry from the west pack lands at a port inside the east pack (both hold the whole crossing).
+  const port = '42.5\t0.5\tferry\t95\tboth\tHelsinki (FIN) – Tallinn (EST)';
+  const rows = parseCrossings([port, crossing(-2)].join('\n'));
+  assert.deepEqual(rows[0], { lat: 42.5, lon: 0.5, cls: 'ferry', out: 95, dirs: 'both' });
+  // The catalog clips the departure pack's cells to its country: they stop short of the port.
+  const wide: StitchPack = { id: 'w', bbox: [-4.1, 41, 0.2, 43], crossings: rows };
+  for (const costing of ['auto', 'bicycle', 'pedestrian'] as const) {
+    assert.deepEqual(
+      seamsBetween(wide, east, costing).filter((s) => s.cls === 'ferry'),
+      [{ lat: 42.5, lon: 0.5, heading: null, cls: 'ferry' }],
+    );
+  }
+  // Two lines into the same port: one seam.
+  const twice: StitchPack = { ...wide, crossings: parseCrossings([port, port.replace('\t95\t', '\t250\t')].join('\n')) };
+  assert.equal(seamsBetween(twice, east, 'auto').filter((s) => s.cls === 'ferry').length, 1);
+  assert.deepEqual(seamLocation({ lat: 42.5, lon: 0.5, heading: null, cls: 'ferry' }), { lat: 42.5, lon: 0.5, type: 'break' });
+  // The way back uses the other pack's own ferries: this file's port abroad would start that leg on the boat.
+  assert.deepEqual(
+    seamsBetween(east, wide, 'auto').filter((s) => s.cls === 'ferry'),
+    [],
+  );
+});
+
+test('joinRoutes: off the boat, the next leg’s first instruction stays', () => {
+  const a = leg(
+    [
+      [0, 0],
+      [1, 0],
+    ],
+    [
+      [28, 'Take the ferry to Helsinki', 80000],
+      [4, 'You have arrived', 0],
+    ],
+  );
+  const b = leg(
+    [
+      [1, 0],
+      [1, 1],
+    ],
+    [
+      [1, 'Head north on Mechelininkatu', 4000],
+      [4, 'You have arrived', 0],
+    ],
+  );
+  assert.deepEqual(
+    joinRoutes([a, b], [{ cls: 'ferry' }]).maneuvers.map((m) => [m.instruction, m.begin, m.end]),
+    [
+      ['Take the ferry to Helsinki', 0, 1],
+      ['Head north on Mechelininkatu', 1, 2],
+      ['You have arrived', 2, 2],
+    ],
+  );
+  // At a road seam it folds, as before.
+  assert.equal(joinRoutes([a, b], [{ cls: 'primary' }]).maneuvers.length, 2);
+});
+
+test('pickRoute: the fastest of the answers that reach the trip’s ends', () => {
+  const tallinn = { lat: 59.437, lon: 24.7536 };
+  const helsinki = { lat: 60.1699, lon: 24.9384 };
+  // Finland's pack has only the ferry in Tallinn: its answer starts on the boat, 1.3 km out.
+  const onTheBoat = { shape: [[24.77, 59.4485], [24.9384, 60.1699]] as [number, number][] };
+  const fromTheStreet = { shape: [[24.7537, 59.437], [24.9383, 60.1699]] as [number, number][] };
+  assert.ok(endGap(onTheBoat, tallinn, helsinki) > 1000);
+  assert.ok(endGap(fromTheStreet, tallinn, helsinki) < 10);
+  assert.equal(endGap({ shape: [] }, tallinn, helsinki), Infinity);
+  const answers = [
+    { name: 'boat', gap: endGap(onTheBoat, tallinn, helsinki), s: 9008 },
+    { name: 'street', gap: endGap(fromTheStreet, tallinn, helsinki), s: 12033 },
+  ];
+  assert.equal(pickRoute(answers, (a) => a.gap, (a) => a.s)?.name, 'street');
+  // Ends about as close: the faster one.
+  assert.equal(pickRoute([{ ...answers[1], s: 9000, name: 'b' }, answers[1]], (a) => a.gap, (a) => a.s)?.name, 'b');
+  assert.equal(pickRoute([], (a: { gap: number }) => a.gap, () => 0), null);
 });
 
 test('robustMatrix isolates the location that breaks a request', async () => {

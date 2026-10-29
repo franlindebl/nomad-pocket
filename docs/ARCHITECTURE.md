@@ -865,13 +865,17 @@ pack is its own Valhalla build, so with no pack covering both ends (or with an e
 another installed pack's margin, near a border) `computeRoute` stitches: chains of installed
 packs joined by **crossings** (`<pack>.crossings.tsv` next to the tar: where a road from
 motorway to tertiary crosses the pack's border, `scripts/routing/crossings.py`; by car only
-motorway…secondary, by bike or on foot primary…tertiary), a matrix per pack border by
+motorway…secondary, by bike or on foot primary…tertiary; and **ferries**, listed at their port
+abroad: both packs hold the whole boat, the departure pack's leg takes it, the seam has no
+heading and only needs the arrival pack's coverage), a matrix per pack border by
 border (origin → seams, seams → seams for a pack crossed on the way, seams → destination;
 a request that fails on one bad location is halved until it's alone), the cheapest sum
 wins (`bestPath`), then one route per leg with the seam's heading, joined by `joinRoutes`
 (the first leg's "arrive" dropped, the next leg's "depart" folded into the manoeuvre before
-it), so guidance sees one route. Near a border both the single-pack route and the stitched
-one are computed and the faster wins. A reroute on a stitched trip only recomputes the leg
+it; kept at a ferry's port), so guidance sees one route. Near a border both the single-pack route
+and the stitched one are computed; answers are compared by how close their ends come to the asked
+ones first (`endGap`/`pickRoute`, 250 m slack: a pack "covers" a port abroad where it has only
+the boat), then by time, and a one-pack route ending over 250 m off weighs the stitched ones too. A reroute on a stitched trip only recomputes the leg
 to the next crossing ahead (`lastStitch`), unless more than 10 km off. `canRoute` (guidance's
 gate) is true for a stitchable trip too. Valhalla's `max_matrix_distance` (`valhalla-defaults.json`)
 is also where its matrix search gives up, not only a straight-line check: at 500 km a 472 km bike

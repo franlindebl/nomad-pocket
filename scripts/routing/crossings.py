@@ -4,14 +4,20 @@ The app routes a trip between two packs in legs joined at one of these crossings
 adding up the times of every combination (src/features/maps/stitch-core.ts). Only roads from
 motorway to tertiary: a seam is never a track.
 
+Ferries too (and the Channel Tunnel's car shuttle): Geofabrik keeps a way that leaves the
+extract whole, so both countries' packs hold the whole crossing, each up to the port on the
+other side (checked on Tallinn–Helsinki). The seam is that port, outside the pack: one leg
+ends there off the boat, the next starts there on land. Its bearing is the boat's, arriving.
+
 Usage: crossings.py <roads.osm.pbf> <admins.geojsonseq> <ISO[,ISO…]> <out.tsv> [<extract .poly>…]
-- roads: the pack's extract filtered to w/highway=motorway,…,tertiary (build-country.sh).
+- roads: the pack's extract filtered to w/highway=motorway,…,tertiary and w/route=ferry,shuttle_train
+  (build-country.sh).
 - admins: the admin boundaries of build-country.sh step 2 as areas (osmium export).
 - The border is the country's (ISO 3166-1, any admin level, else ISO 3166-2 as for
   territories), or, given the pack's Geofabrik polygons (a part of a split country, "us-west"),
   the outline of the country's level-4 areas inside them.
-Output, one crossing per line: lat, lon, class, bearing leaving the pack, both|in|out (which
-way a one-way road goes), ref. Nothing at all without a boundary (islands, territories
+Output, one crossing per line: lat, lon, class (a road's, or ferry), bearing leaving the pack,
+both|in|out (which way a one-way road goes), ref. Nothing at all without a boundary (islands, territories
 with none in OSM): the app then can't stitch through that pack.
 """
 import json
@@ -23,7 +29,8 @@ from shapely.geometry import LineString, Point, Polygon, shape
 from shapely.ops import unary_union
 from shapely.prepared import prep
 
-CLASSES = ("motorway", "trunk", "primary", "secondary", "tertiary")
+CLASSES = ("motorway", "trunk", "primary", "secondary", "tertiary", "ferry")
+FERRIES = ("ferry", "shuttle_train")
 
 
 def read_poly(path):
@@ -85,6 +92,8 @@ def main(roads, admins, isos, out, polys):
 
         class Roads(osmium.SimpleHandler):
             def way(self, w):
+                if w.tags.get("route") in FERRIES:
+                    return self.ferry(w)
                 cls = w.tags.get("highway")
                 if cls not in CLASSES:
                     return
@@ -105,6 +114,22 @@ def main(roads, admins, isos, out, polys):
                     leaving = ia != reverse  # drawn from inside to outside (or the other way, oneway=-1)
                     dirs = "both" if not (oneway or reverse) else ("out" if leaving else "in")
                     rows.append((round(p.y, 6), round(p.x, 6), cls, round(bearing(a, b) if ia else bearing(b, a)), dirs, w.tags.get("ref", "")))
+
+            def ferry(self, w):
+                # One end at home and the other abroad: the port abroad. A ferry drawn in pieces
+                # joins them out at sea: that point is the seam then, and each pack has its piece.
+                try:
+                    pts = [(n.lon, n.lat) for n in w.nodes]
+                except osmium.InvalidLocationError:
+                    return
+                if len(pts) < 2:
+                    return
+                home = [inside.contains(Point(p)) for p in (pts[0], pts[-1])]
+                if home[0] == home[1]:
+                    return
+                (a, b) = (pts[-2], pts[-1]) if home[0] else (pts[1], pts[0])
+                name = w.tags.get("ref") or w.tags.get("name") or ""
+                rows.append((round(b[1], 6), round(b[0], 6), "ferry", round(bearing(a, b)), "both", name.replace("\t", " ")[:80]))
 
         Roads().apply_file(roads, locations=True)
     with open(out, "w") as f:

@@ -89,7 +89,49 @@ guidance panel's "Descargar la navegación de este país" offered that country a
 origin's. It now offers the first country the trip lacks: the destination's, the origin's, then one on the
 straight line between them (`packToFetch`, routing-core.ts).
 
-Left: Android, ferries as crossings (Spain–Morocco, UK–France: no road crosses there).
+Android (2026-10-29, the Release APK on an emulator, packs from the live catalog): the same trip,
+Luxembourg city → Brussels by car, 213 km, 1 h 58 min, as on iOS.
+
+### Ferries (2026-10-29)
+
+Spain–Morocco or Great Britain–France have no road across the border: a trip there needs the boat
+(or the Channel Tunnel's car shuttle). Checked with Estonia and Finland built locally by
+`build-country.sh` (Tallinn–Helsinki, no land border):
+
+- Geofabrik keeps a way that leaves an extract whole, so **both packs hold every ferry between
+  them, each up to the port on the other side** (Estonia's graph has tiles in Helsinki; Tallinn →
+  Helsinki's West Harbour in Estonia's pack alone: 84.7 km, 2 h 13 min, with the boat).
+- So `crossings.py` lists, for each ferry with one end at home and the other abroad, **the port
+  abroad**, class `ferry` (`route=ferry` and `route=shuttle_train`; Estonia 8, Finland 15, among
+  them Travemünde and the Swedish ports). The departure pack's leg takes the boat there with
+  Valhalla's own "Tome el ferry…", the next leg starts on land. Older app versions skip the rows
+  (unknown class).
+- In the app (`stitch-core.ts`): ferry seams for every costing (the graph says whether a boat
+  takes cars, bikes or foot passengers), with **no heading** (off the boat the road may leave any
+  way), the next leg's first instruction **kept** at a port (not folded), and only from the
+  departure pack's file: from the other pack's, the seam is the home port and the next leg starts
+  on the boat ("Conduzca hacia el noreste por Helsinki (FIN) – Tallinn (EST)", seen in the first
+  try). The port only has to be in the arrival pack's coverage: the catalog clips cells to each
+  extract's polygon, and Estonia's stop short of Helsinki.
+- **Routes must reach their ends** (`endGap`, `pickRoute`): a pack "covers" a port abroad where
+  it has nothing but the boat (Finland's clipped cells still reach Tallinn's), and a trip starting
+  there in that pack began on the ferry, 1.5 km from the person. Answers to one trip (one pack,
+  or chains) are now compared by how far their ends are from the asked ones first (within 250 m
+  of the best), then by time; a one-pack route ending more than 250 m off also weighs the
+  stitched ones.
+
+Simulator, `xee` + `xfi` seeded (renamed so the catalog's files don't replace their crossings):
+
+| Trip | Mode | Result | Time to compute |
+|---|---|---|---|
+| Tallinn → Lahti | car | 192 km, 3 h 24 min, "Tome la Helsinki (FIN) – Tallinn (EST)… Ferri", then on land in Helsinki | 0.2–0.3 s |
+| Tallinn → central Helsinki | foot | starts in the street (24 m), the 1.5 km-off chain dropped | 0.9 s |
+| Tallinn → central Helsinki | bike | the same | 1.4 s |
+
+On foot the route walks 11.9 km in Tallinn to that line's pier (2.7 km to the other one): Estonia's
+pack alone does the same, so it is how the port's footpaths are mapped, not the stitching.
+
+Left: the catalog's packs get ferry crossings with the next run (the monthly one, 2026-11-05).
 
 ### Data (CI)
 
