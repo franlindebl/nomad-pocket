@@ -1,0 +1,47 @@
+.githooks/commit-msg
+  s_9b6df8c49d7b9e::t_e80a30987c9884 1-4
+.githooks/post-commit
+  s_9b6df8c49d7b9e::t_e97e391b35fe82 1-4
+.githooks/pre-push
+  s_9b6df8c49d7b9e::t_a55f7e8eecaebb 1-5
+CLAUDE.md
+  s_a344509541409a::t_b3d59c7c0f4d89 143-152
+docs/DEVELOPMENT.md
+  s_a344509541409a::t_66bf3d5c8d2c1d 45-49
+docs/PROGRESS.md
+  s_9b6df8c49d7b9e::t_1070c8e03b00cb 307-317
+package.json
+  s_9b6df8c49d7b9e::t_a0b4824b9d0a02 69
+scripts/commit-hours.mjs
+  s_9b6df8c49d7b9e::t_85832ff8c7dd73 1-170
+scripts/commit-hours.test.mjs
+  s_9b6df8c49d7b9e::t_daa9508a75c95d 1-61
+scripts/git-hooks.mjs
+  s_9b6df8c49d7b9e::t_8b1882b54dc16e 1-3
+.claude/settings.json
+  s_9b6df8c49d7b9e::t_bac9adf08ae375 4-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b60eba8e3e45de9cb573dc5c1cd12c577a68bd92",
+  "prompts": {},
+  "sessions": {
+    "s_9b6df8c49d7b9e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "43be6c18-36fe-4f35-844e-2581f73bf132",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_a344509541409a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "21536407-0568-4a70-8d46-93e7324c0443",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
