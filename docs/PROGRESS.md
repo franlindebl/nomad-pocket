@@ -313,7 +313,7 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   messages were translated; every commit hash in older notes is stale.
 - Enforced from now on: `scripts/commit-hours.mjs` (+ tests) behind three new hooks in `.githooks/` (commit-msg
   strips the link, post-commit amends a daytime commit into that night and carries git-ai's note over, pre-push
-  refuses what slipped through), `attribution.sessionUrl: false` in `.claude/settings.json`, the rule in CLAUDE.md.
+  refuses what slipped through; notes refs are skipped), `attribution.sessionUrl: false` in `.claude/settings.json`, the rule in CLAUDE.md.
 
 ### 2026-10-30 — Android: closed test 1.1.0 (26) sent to review; Android/Play doc
 

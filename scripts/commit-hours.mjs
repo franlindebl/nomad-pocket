@@ -135,8 +135,9 @@ function check(remote) {
   const known = (oid) => gitOk('cat-file', '-e', `${oid}^{commit}`);
   const bad = new Set();
   for (const line of readFileSync(0, 'utf8').split('\n')) {
-    const [, local, , remoteOid] = line.split(' ');
+    const [localRef, local, , remoteOid] = line.split(' ');
     if (!local || zero.test(local)) continue; // a deletion
+    if (localRef.startsWith('refs/notes/')) continue; // git notes' own commits (git-ai), dated when written, not shown
     const range = [local, '--not', `--remotes=${remote}`];
     if (remoteOid && !zero.test(remoteOid) && known(remoteOid)) range.push(remoteOid);
     for (const sha of git('rev-list', ...range)
