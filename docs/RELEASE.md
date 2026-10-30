@@ -26,7 +26,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
   `version` equal (not used by the build, but it's what people read).
 - iOS build number: `expo.ios.buildNumber` (currently **"23"**) → `CFBundleVersion`. Bump it
   for every upload: App Store Connect rejects a build number it has already seen.
-- Android: `expo.android.versionCode` (currently **24**; 23 and 24 went to Play internal testing). Must grow
+- Android: `expo.android.versionCode` (currently **25**: 23 and 24 went to Play internal testing, 24 to the rejected closed test; 25 is the build without health features). Must grow
   with every Play upload.
 - After changing any of them, run `npx expo prebuild` (it can regenerate `ios/` and
   `android/` from scratch: then `cd ios && pod install`).
