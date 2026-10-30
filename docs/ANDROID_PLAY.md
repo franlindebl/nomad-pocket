@@ -44,7 +44,7 @@ Details that already live elsewhere are linked, not repeated:
 | Play account | Personal, id 5502748653724108225 (also holds Theri.App and Semáforo del Sueño) |
 | App | Nomad Pocket, id 4972946077817579435, package `com.fjlinde.nomadpocket`, created 2026-10-29 |
 | Internal testing | 1.1.0 (23), list "Nomad Pocket interno" (the owner's two accounts). Still has health features: internal only |
-| Closed testing ("Prueba cerrada - Alpha") | 1.1.0 (24) **rejected** 2026-10-29 (health apps need an organization). **1.1.0 (26) sent to review 2026-10-30** with the redone listing and forms (15 changes). Testers: account list "Friends and family" (19 addresses), all countries |
+| Closed testing ("Prueba cerrada - Alpha") | 1.1.0 (24) **rejected** 2026-10-29 (health apps need an organization). **1.1.0 (26) approved and live for testers 2026-10-30 9:40** (sent the same morning with the redone listing and forms, 15 changes). Join: https://play.google.com/apps/testing/com.fjlinde.nomadpocket. Testers: account list "Friends and family" (19 addresses), all countries |
 | Production | Not yet. A new app in a personal account needs a closed test with **≥ 12 opted-in testers for 14 days in a row** before it can apply |
 | Content rating | PEGI 3 / ESRB Everyone (redone 2026-10-29; the first one was PEGI 18 because of injury photos in medical guides) |
 | Target audience | 13 and over |
@@ -53,9 +53,10 @@ Details that already live elsewhere are linked, not repeated:
 
 Next steps, in order:
 
-1. Wait for Google's review of 26. If rejected, read the reason in Play Console › Policy status (and the email),
-   fix it, bump `versionCode`, rebuild, upload, resubmit.
-2. When approved: testers opt in through the closed-test link; keep **12+ testers active for 14 days**.
+1. ~~Google's review of 26~~ approved 2026-10-30. (If a later build is rejected: read the reason in Play Console ›
+   Policy status and the email, fix it, bump `versionCode`, rebuild, upload, resubmit.)
+2. Testers opt in through the closed-test link and install from Play; keep **12+ testers opted in for 14 days in a
+   row** (from 2026-10-30, the earliest production application is ~2026-11-13 if 12 join today).
 3. Then apply for production from the dashboard (Play asks questions about the test) and publish to production.
 4. Open items: the owner's dedicated Gmail to replace the public contact email (`REPORT_EMAIL`, `site/`, Play
    contact, `play-listing.md`); the IARC question sent on 2026-10-29 is moot unless they answer.
