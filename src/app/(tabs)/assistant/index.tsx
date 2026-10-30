@@ -14,12 +14,14 @@ import { AssistantMessage, UserMessage } from '@/features/assistant/ui/Message';
 import { Composer } from '@/features/assistant/ui/Composer';
 import { useActiveModel } from '@/features/assistant/useActiveModel';
 import { useItems } from '@/features/content/items';
+import { HEALTH_FEATURES } from '@/lib/health';
 import { useSettings } from '@/stores/settings';
 import { layout, radius, space, useTheme } from '@/theme';
 
 type Row_ = { key: string; message?: ChatMessage; streaming?: Streaming };
 
-const STARTERS = ['water', 'burn', 'fire', 'photosynthesis'] as const;
+// Without health features (src/lib/health.ts) the assistant answers no first-aid question.
+const STARTERS = HEALTH_FEATURES ? (['water', 'burn', 'fire', 'photosynthesis'] as const) : (['water', 'knot', 'fire', 'photosynthesis'] as const);
 
 export default function AssistantScreen() {
   const { t } = useTranslation('assistant');

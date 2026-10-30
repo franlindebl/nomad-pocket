@@ -128,7 +128,7 @@ docs/               the docs above + screenshots/ + store/
   holds the whole file in memory: a 2 GB map part got the app killed): use `modules/nomad-files`
   `sha256`, and its `copyInto` for multi-GB copies instead of `FileHandle.readBytes` loops in JS.
 - **Pure, tested modules** (`src/lib/{pmtiles,mvt}`, `features/assistant/{rag-core,models,markdown,dictation-core,report-core}`,
-  `features/library/html`, `features/catalog/opds`, `features/downloads/{mirrors,errors,groups,segments-core,budget-core,restore-core}`,
+  `features/library/html`, `features/catalog/{opds,health-core}`, `features/downloads/{mirrors,errors,groups,segments-core,budget-core,restore-core}`,
   `features/maps/{glyphs,geo,extraction-core,places-core,import-core,prepare-core,emergency-core,routing-core,stitch-core,follow-core,country-core,country-at-core,phone,region-terms}`, `features/prepare/{kit,document,passages}`, `features/downloads/manager-core`, `lib/units`, `features/library/{register-core,medical,collection,documents-core}`, `features/content/reconcile-core`, `features/assistant/errors`, `features/credits/credits-core`, `db/{migrate-core,schema}`) use no `@/` aliases and import siblings with `.ts` extensions,
   so `node --test --experimental-strip-types` can load them. Keep it that way and add
   `*.test.ts` next to them.
@@ -176,6 +176,11 @@ docs/               the docs above + screenshots/ + store/
   host and queues the rest (0 bytes, then our stall watchdog fails them). `modules/nomad-files`
   `raiseDownloadConcurrency()` lifts it at startup and the manager stays under what it returns; re-check after an
   expo-file-system update (a warning "can't raise the download client's connections per host" in logcat).
+- Google Play only lets organization accounts publish health apps, and ours is personal: Android has **no health
+  features** (`HEALTH_FEATURES` in `src/lib/health.ts`, false on Android, fixed at build time): no medical or
+  first-aid archives (catalog and Explore), no first-aid shortcut, no health answers from the assistant, no health
+  card in the plan. Gate anything new about health, medicine or first aid on it; never make it a remote switch
+  (`docs/store/play-listing.md`, "Health features on Android").
 - kv-store: a zustand `persist` store uses `kvStorage()` (`src/lib/kv.ts`), never
   `createJSONStorage(() => Storage)`. Mixing its async and sync APIs on the first open
   breaks the migration transaction: on a fresh install the settings never hydrated and

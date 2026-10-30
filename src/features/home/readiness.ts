@@ -13,6 +13,7 @@ import { useCountries } from '@/features/maps/countries';
 import { getRegion, regionName } from '@/features/maps/regions';
 import { guideResources } from '@/features/onboarding/kit';
 import { useKitGroups } from '@/features/prepare/rows';
+import { HEALTH_FEATURES } from '@/lib/health';
 import { useSettings } from '@/stores/settings';
 
 export type ReadinessKey = 'map' | 'guides' | 'wikipedia' | 'assistant' | 'plan' | 'kit';
@@ -106,12 +107,14 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
             ? downloading(guidesProgress)
             : guidesHave
               ? t('ready.guidesDone', { count: guidesHave, total: guides.length })
-              : t('ready.guidesTodo'),
+              : HEALTH_FEATURES
+                ? t('ready.guidesTodo')
+                : t('ready.guidesTodoNoHealth'),
         // Not while any guide is still coming down: the first of 12 is not "ready".
         done: guidesHave > 0 && guidesProgress === null,
         progress: guidesProgress,
         warning: false,
-        href: { pathname: '/library/category/[slug]', params: { slug: 'medicine' } },
+        href: { pathname: '/library/category/[slug]', params: { slug: HEALTH_FEATURES ? 'medicine' : 'survival' } },
       },
       {
         key: 'wikipedia',
@@ -141,7 +144,9 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
               ? t('ready.planMeeting')
               : summary.contacts
                 ? t('ready.planContacts', { count: summary.contacts })
-                : t('ready.planTodo'),
+                : HEALTH_FEATURES
+                  ? t('ready.planTodo')
+                  : t('ready.planTodoNoHealth'),
         done: summary.meeting || summary.contacts > 0,
         progress: null,
         warning: false,

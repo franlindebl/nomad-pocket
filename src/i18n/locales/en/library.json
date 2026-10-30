@@ -2,7 +2,7 @@
   "searchPlaceholder": "Search your library",
   "onDevice": "On this device",
   "onDeviceEmpty": "Your library is empty",
-  "onDeviceEmptyBody": "Download Wikipedia, medical or survival guides and read them offline.",
+  "onDeviceEmptyBody": "Download Wikipedia, guides and courses and read them offline.",
   "wikipedia": "Wikipedia",
   "wikipediaBody": "Pick the size that fits your storage",
   "categories": "Collections",
@@ -34,5 +34,5 @@
   "exploreEmpty": "No results",
   "wikipediaPick": "Choose your Wikipedia",
   "wikipediaPickBody": "All of them work offline. Versions without images are much smaller.",
-  "coursesBody": "Learn at your own pace, offline: health, science, maths, programming…"
+  "coursesBody": "Learn at your own pace, offline: science, maths, programming…"
 }

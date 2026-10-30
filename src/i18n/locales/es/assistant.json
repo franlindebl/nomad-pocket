@@ -19,6 +19,7 @@
     "starters": {
       "water": "¿Cómo potabilizo agua sin hervirla?",
       "burn": "Primeros auxilios para una quemadura leve",
+      "knot": "¿Qué nudo aguanta más peso?",
       "fire": "¿Cómo enciendo fuego si todo está mojado?",
       "photosynthesis": "Explícame la fotosíntesis de forma sencilla"
     },
@@ -33,7 +34,7 @@
   },
   "noLibrary": {
     "title": "Tu biblioteca está vacía",
-    "body": "Para responder con fuentes, el asistente busca en el contenido que has descargado. Consigue Wikipedia, medicina o guías de supervivencia en Biblioteca.",
+    "body": "Para responder con fuentes, el asistente busca en el contenido que has descargado. Consigue Wikipedia o guías de supervivencia en Biblioteca.",
     "action": "Ir a Biblioteca"
   },
   "phase": {

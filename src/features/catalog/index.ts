@@ -3,13 +3,25 @@ import * as Network from 'expo-network';
 import rawCatalog from '@/data/catalog.json';
 import i18n from '@/i18n';
 import { enqueueDownload, type DownloadRecord } from '@/features/downloads/manager';
+import { HEALTH_FEATURES } from '@/lib/health';
 
+import { healthResourceIds, withoutHealth } from './health-core';
 import { resolveLatest } from './opds';
 import type { Catalog, CatalogCategory, CatalogResource, CatalogTier, Localized } from './types';
 
 export * from './types';
 
-export const catalog = rawCatalog as unknown as Catalog;
+const fullCatalog = rawCatalog as unknown as Catalog;
+
+/** The bundled catalog, without its health content in builds without health features (src/lib/health.ts). */
+export const catalog = HEALTH_FEATURES ? fullCatalog : withoutHealth(fullCatalog);
+
+const hiddenIds = HEALTH_FEATURES ? new Set<string>() : healthResourceIds(fullCatalog);
+
+/** Whether a Kiwix book is one the bundled catalog leaves out for lacking health features (Explore hides it too). */
+export function isHiddenHealthBook(name: string): boolean {
+  return hiddenIds.has(name);
+}
 
 export function loc(value: Localized | string | undefined): string {
   if (!value) return '';

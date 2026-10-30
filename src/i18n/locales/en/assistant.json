@@ -19,6 +19,7 @@
     "starters": {
       "water": "How do I make water safe to drink without boiling it?",
       "burn": "First aid for a minor burn",
+      "knot": "Which knot holds the most weight?",
       "fire": "How do I start a fire when everything is wet?",
       "photosynthesis": "Explain photosynthesis simply"
     },
@@ -33,7 +34,7 @@
   },
   "noLibrary": {
     "title": "Your library is empty",
-    "body": "To answer with sources, the assistant searches the content you've downloaded. Get Wikipedia, medicine or survival guides from the Library.",
+    "body": "To answer with sources, the assistant searches the content you've downloaded. Get Wikipedia or survival guides from the Library.",
     "action": "Go to Library"
   },
   "phase": {
