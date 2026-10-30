@@ -1,0 +1,21 @@
+scripts/commit-hours.mjs
+  s_9b6df8c49d7b9e::t_e70efd43665649 138,140
+docs/PROGRESS.md
+  s_9b6df8c49d7b9e::t_38fad0a3cad575 316
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d3dbac08559e1630eab53cb15723ad1f029a145c",
+  "prompts": {},
+  "sessions": {
+    "s_9b6df8c49d7b9e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "43be6c18-36fe-4f35-844e-2581f73bf132",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
