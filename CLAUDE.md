@@ -20,6 +20,7 @@ English. User-facing strings are Spanish + English (i18n).
 | `docs/STYLE_GUIDE.md` | Design tokens, components, copy and accessibility rules |
 | `docs/E2E.md` | Maestro functional suite: how to run, read and write flows |
 | `docs/RELEASE.md` | Versioning, TestFlight/App Store upload, store listing, privacy site |
+| `docs/ANDROID_PLAY.md` | **Android + Google Play**: hard rules (no health features, no Play services), state of the tracks, health gate map, release steps, Play Console gotchas. Read before any Android or Play work |
 | `docs/MAPS_NAVIGATION_PLAN.md` | Approved plan for map search, Emergencias and routing/navigation (phases, decisions, measurements) |
 | `docs/NAVIGATION_VIEW_PLAN.md` | Navigation view like Google Maps' (route consumed, bearing from the last metres, gliding camera, north up): diagnosis and what was built |
 | `docs/DOWNLOADS_SPEED_PLAN.md` | Analysis + plan for faster downloads (mirror throughput, parallel chunks, resume, keep awake); ready to pick up |
@@ -180,7 +181,7 @@ docs/               the docs above + screenshots/ + store/
   features** (`HEALTH_FEATURES` in `src/lib/health.ts`, false on Android, fixed at build time): no medical or
   first-aid archives (catalog and Explore), no first-aid shortcut, no health answers from the assistant, no health
   card in the plan. Gate anything new about health, medicine or first aid on it; never make it a remote switch
-  (`docs/store/play-listing.md`, "Health features on Android").
+  (`docs/ANDROID_PLAY.md`, section 4: what's gated where, and the checklist for new health code).
 - kv-store: a zustand `persist` store uses `kvStorage()` (`src/lib/kv.ts`), never
   `createJSONStorage(() => Storage)`. Mixing its async and sync APIs on the first open
   breaks the migration transaction: on a fresh install the settings never hydrated and

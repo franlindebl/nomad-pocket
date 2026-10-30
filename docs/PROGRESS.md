@@ -42,7 +42,7 @@ can pick up without re-deriving anything.
 | Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 237 packs live (every inhabited country; the USA in six regions) since 2026-10-27; E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
 | Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search; the most capable installed model is the default; on-device dictation; reads the PDFs inside archives (document index) and the family plan; copy and regenerate an answer) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
-| Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android: app created in Play Console, App content forms done (PEGI 3 since 2026-10-29, see `docs/store/play-listing.md`), 1.1.0 (23) on internal testing, Android screenshots and en-US listing done, 1.1.0 (24) for the closed test **rejected** 2026-10-29 (health apps need an organization account): Android now ships without health features; listing, screenshots, Health apps and content rating redone, resubmit as 1.1.0 (26); then 12 testers × 14 days and production |
+| Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android: app created in Play Console, App content forms done (PEGI 3 since 2026-10-29, see `docs/store/play-listing.md`), 1.1.0 (23) on internal testing, Android screenshots and en-US listing done, 1.1.0 (24) for the closed test **rejected** 2026-10-29 (health apps need an organization account): Android now ships without health features; listing, screenshots, Health apps and content rating redone; **1.1.0 (26) sent to review 2026-10-30**; then 12 testers × 14 days and production (`docs/ANDROID_PLAY.md`) |
 | Preparedness (family plan, emergency kit with expiry reminders, printable PDF, offline guides) | done — iOS sim + Android emulator (E2E) |
 | E2E suite (Maestro) + pre-commit hook | done |
 | Pre-release audit (2026-10-26): ~60 verified findings fixed in code and docs | merged to main; device checks and the deferred items below pending |
@@ -303,6 +303,19 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-30 — Android: closed test 1.1.0 (26) sent to review; Android/Play doc
+
+- Play Console: the rejected 1.1.0 (24) couldn't be edited, so a new release on "Prueba cerrada - Alpha" with the
+  versionCode 26 AAB (the owner uploaded it; 24 "not included"), release notes es/en from `play-listing.md`, saved
+  through review (no errors, no devices lost). The owner sent the 15 changes to review (release, listings, content
+  rating PEGI 3, audience 13+, Health apps "none", Data safety and the other forms).
+- New `docs/ANDROID_PLAY.md`: one place for Android + Google Play, written for the next session: hard rules (no
+  health features, never a remote switch, no Play services, who clicks what in Play Console), track state, timeline
+  of the rejection and Play support's answer, map of every `HEALTH_FEATURES` gate in the code, checklist for new
+  health-related code, the assistant model check, other Play requirements and how we meet them, release steps and
+  Play Console gotchas. Linked from `CLAUDE.md`, `docs/RELEASE.md` and `docs/store/play-listing.md`.
+- Next: Google's answer; then 12+ testers for 14 days and the production application.
 
 ### 2026-10-29 — Android: Play listing redone without health; build 26 tightens the assistant
 

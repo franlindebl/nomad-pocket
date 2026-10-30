@@ -1,5 +1,7 @@
 # Google Play listing and forms — 1.1.0 (2026-10-29)
 
+Policies, track state and release steps: `docs/ANDROID_PLAY.md`. This file holds the texts and form answers.
+
 Everything Play Console asks before the first release, adapted from the App Store listing approved by
 the owner (`listing-1.1.0.md`; the owner approved this file on 2026-10-29). **In Play Console since
 2026-10-29** (app id 4972946077817579435): app created, App content forms saved, store settings, the es-ES
@@ -157,3 +159,5 @@ With the medical guides gone the content rating was redone: PEGI 3 ("Content rat
 Android screenshots redone on 2026-10-29 (home, a survival guide instead of first aid, the assistant answering the
 water starter, library and kit without medicine; Android captions in `scripts/store-screenshots.py`) and uploaded to
 both listings.
+
+Sent to review with the closed test 1.1.0 (26) on 2026-10-30.

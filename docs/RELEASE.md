@@ -177,6 +177,9 @@ whenever the policy changes, in both languages, and re-check the host list again
 
 ## Android (Google Play)
 
+Policies, current state of the tracks, the health gate and the step-by-step release with Play Console's
+gotchas: **`docs/ANDROID_PLAY.md`** (start there). This section keeps the build and signing details.
+
 Play Console: personal developer account 5502748653724108225 (it also holds Theri.App and Semáforo
 del Sueño); Nomad Pocket is app 4972946077817579435, created 2026-10-29. **1.1.0 (versionCode 23) on
 internal testing since 2026-10-29** (tag `v1.1.0-android-23` on fc268d6, the commit it was built from;
@@ -185,6 +188,8 @@ https://play.google.com/apps/internaltest/4700702884318545923). **1.1.0 (24) on 
 (track "Prueba cerrada - Alpha", the account's "Friends and family" list of 19 addresses, also Theri.App's;
 all countries), sent to Google's review on 2026-10-29 with the listings and App content forms (tag
 `v1.1.0-android-24` on 10a265b) and **rejected** the same day: health apps need an organization account.
+**1.1.0 (26)** (no health features; tag `v1.1.0-android-26` on e25bef1) replaced it and was sent to review on
+2026-10-30.
 Android builds have no health features since then (`src/lib/health.ts`; what changed and why in
 `docs/store/play-listing.md`, "Health features on Android"). A new app in this
 account needs a **closed test with at least 12 opted-in testers for 14 days in a row** before it can
