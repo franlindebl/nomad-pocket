@@ -1,0 +1,27 @@
+app.json
+  s_dae816423ce6de::t_16840f55ee6f8d 17,32
+docs/ARCHITECTURE.md
+  s_dae816423ce6de::t_42d9324ed19cbf 947
+docs/RELEASE.md
+  s_dae816423ce6de::t_fd1b580f3eaf66 27,29,34,48
+site/privacy.html
+  s_dae816423ce6de::t_e747c84dada84b 24,89-91,117,181-183
+docs/PROGRESS.md
+  s_dae816423ce6de::t_6e754c7e2bd65e 7,9-12,18,24,227-233
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "38f383c2e4fc4a062f3c7019dbc1e87818bc0800",
+  "prompts": {},
+  "sessions": {
+    "s_dae816423ce6de": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b582f6fc-2f40-4b1f-b67a-6a2993dec875",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

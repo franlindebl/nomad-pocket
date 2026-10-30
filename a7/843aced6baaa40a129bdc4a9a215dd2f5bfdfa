@@ -1,0 +1,25 @@
+modules/nomad-llm/ios/NomadLlmModule.swift
+  s_cbd2a9b15986bf::t_dbacb6d86401d9 158-159
+src/app/reader/[itemId].tsx
+  s_cbd2a9b15986bf::t_c562d034090bf9 27
+src/features/home/ContinueCarousel.tsx
+  s_cbd2a9b15986bf::t_079b79d3c86604 10,29-32
+src/features/library/titles.ts
+  s_cbd2a9b15986bf::t_451d4a2c9e7cac 1-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "464d93e528b43fd3f4adc29937f1b19486dfdad7",
+  "prompts": {},
+  "sessions": {
+    "s_cbd2a9b15986bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8fb325cf-e8f4-4b02-a113-0dab7f1f1a40",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

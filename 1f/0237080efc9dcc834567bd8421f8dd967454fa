@@ -1,0 +1,29 @@
+src/app/(tabs)/(home)/index.tsx
+  s_cbd2a9b15986bf::t_476b1e6604ebe2 41
+src/components/navigation.ts
+  s_cbd2a9b15986bf::t_d88910d67ef1f9 25
+src/features/catalog/icons.ts
+  s_cbd2a9b15986bf::t_da301aed0ee9a6 7,19,34,46
+src/features/courses/CourseCard.tsx
+  s_cbd2a9b15986bf::t_6810dc607dcd01 53,65
+src/features/downloads/manager.ts
+  s_cbd2a9b15986bf::t_84d60cfa2d1643 136-141,278-286,332,401-407
+src/lib/storage.ts
+  s_cbd2a9b15986bf::t_aad5d245f012b9 33,37,43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9cd02b8e5b3045a875828bc04dc2ff3163c6d62f",
+  "prompts": {},
+  "sessions": {
+    "s_cbd2a9b15986bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8fb325cf-e8f4-4b02-a113-0dab7f1f1a40",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

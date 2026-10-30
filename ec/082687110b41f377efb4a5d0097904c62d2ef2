@@ -1,0 +1,25 @@
+docs/ARCHITECTURE.md
+  s_4b0560f0970a92::t_da7f79de5a9e33 374
+src/features/downloads/manager.ts
+  s_4b0560f0970a92::t_627ed07f8f54c8 1116-1117
+src/features/downloads/restore-core.ts
+  s_4b0560f0970a92::t_199dd74030ddb7 28
+src/features/maps/extraction.ts
+  s_4b0560f0970a92::t_44a122cdf04612 342-350
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9cf24b8e66d5d103da61d15d763f23e7fcbb24a0",
+  "prompts": {},
+  "sessions": {
+    "s_4b0560f0970a92": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b2c53080-88f8-4fbb-b393-9462237c3d5c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

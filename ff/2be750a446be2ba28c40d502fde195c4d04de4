@@ -1,0 +1,43 @@
+docs/ARCHITECTURE.md
+  s_838c9370c44bfa::t_8689d048005ea9 366-368,372-374,379-387,389-390,393-399,401-402
+docs/MAPS_NAVIGATION_PLAN.md
+  s_838c9370c44bfa::t_920bf460b833c0 64-65,67,95-102,118,122-126,133,139
+docs/PROGRESS.md
+  s_838c9370c44bfa::t_c71f325bd12300 127-132,134-142
+e2e/fixtures/routing/ad.streets.tsv
+  s_838c9370c44bfa::t_92ccb28c309541 1-1375
+e2e/flows/maps/map-15-routing-download.yaml
+  s_838c9370c44bfa::t_a9508e8132189c 4-5,58-72
+scripts/e2e.sh
+  s_838c9370c44bfa::t_3c76bc41fbfe7e 79-80,90,99
+src/features/maps/places-core.test.ts
+  s_838c9370c44bfa::t_18b7ef20164fdc 15,111-113,115-119,121-125,127
+src/features/maps/places-core.ts
+  s_838c9370c44bfa::t_2720446e9e51f6 2-4,113-141
+src/features/maps/places.ts
+  s_838c9370c44bfa::t_a4c224838375fe 119-148,293,296,299-315
+src/features/maps/register.ts
+  s_838c9370c44bfa::t_0fa8a218c009e4 18,115-116
+src/features/maps/routing-core.ts
+  s_838c9370c44bfa::t_0ee609e8dc3f32 238-239,275-276
+src/features/maps/routing-packs.ts
+  s_838c9370c44bfa::t_39ba049e9918d0 3-4,22-23,61,75,78,90,93-96,121,126-155,161-164,180-189,260,273-274,280-281,297
+docs/E2E.md
+  s_838c9370c44bfa::t_665270da8c9012 192,239
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "aa4dd2b562bdea9457255b00e687bf69fa5a24e5",
+  "prompts": {},
+  "sessions": {
+    "s_838c9370c44bfa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65e8c9ca-b49f-4076-9462-02635ce8b6df",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

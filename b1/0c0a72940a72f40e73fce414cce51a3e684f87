@@ -1,0 +1,19 @@
+docs/PROGRESS.md
+  s_80cce01f256705::t_f298ad9d359e6a 278-283
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4eaac0bbd23dbe74a74ae43f4cbd595587d3d9c5",
+  "prompts": {},
+  "sessions": {
+    "s_80cce01f256705": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "96957f72-4a63-4f13-8b4a-5557e9a3e095",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

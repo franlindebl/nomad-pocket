@@ -1,0 +1,31 @@
+docs/ARCHITECTURE.md
+  s_9773b9edf946e0::t_b6cdc6ee2ca802 447
+docs/FUNCTIONAL_REVIEW_2026-10-28.md
+  s_9773b9edf946e0::t_e7bd3acfbb3308 150,160
+docs/PROGRESS.md
+  s_9773b9edf946e0::t_c7c48cf626e40f 200-202,292-295
+modules/nomad-zim/android/src/main/java/expo/modules/nomadzim/ZimWebView.kt
+  s_9773b9edf946e0::t_d8629b688f3133 388
+modules/nomad-zim/ios/ZimWebView.swift
+  s_9773b9edf946e0::t_2b75e2955e8f56 390-391,395
+src/features/assistant/rag-core.test.ts
+  s_9773b9edf946e0::t_8355c9f0cbb85e 553-561
+src/features/assistant/rag-core.ts
+  s_9773b9edf946e0::t_b26eae6bc2b4e0 334-335,337-339,344-345,347-350
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "25d8198082eab4149a564c07ecd4326ff1fef4a4",
+  "prompts": {},
+  "sessions": {
+    "s_9773b9edf946e0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "709260e2-3b35-4456-9004-95d6c83d9fa4",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

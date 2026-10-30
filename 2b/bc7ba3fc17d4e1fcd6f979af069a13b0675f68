@@ -1,0 +1,83 @@
+docs/E2E.md
+  s_7f4d89e27550a2::t_2624f23d0e6e9e 35-36,223-243,245-248
+docs/PROGRESS.md
+  s_7f4d89e27550a2::t_965f9414ab20c3 156-170,173-174,194
+e2e/flows/assistant/ai-05-conversations.yaml
+  s_7f4d89e27550a2::t_890cb009a40203 15
+e2e/flows/courses/crs-02-course.yaml
+  s_7f4d89e27550a2::t_4c1d03d6faa6ea 10,13-19,23
+e2e/flows/home/home-02-header.yaml
+  s_7f4d89e27550a2::t_33d73676788ad6 10
+e2e/flows/home/x-01-persistence.yaml
+  s_7f4d89e27550a2::t_810f3a94e6bb6f 6,15,17,35
+e2e/flows/library/lib-03-category.yaml
+  s_7f4d89e27550a2::t_0ff10d18a534ec 9,13
+e2e/flows/maps/map-04-region.yaml
+  s_7f4d89e27550a2::t_a1a958dfbbc175 36-39
+e2e/flows/maps/map-06-markers.yaml
+  s_7f4d89e27550a2::t_4589b8e43f001b 18,21-28
+e2e/flows/onboarding/onb-02-language.yaml
+  s_7f4d89e27550a2::t_3d6fafc1926bc1 19
+e2e/flows/reader/rdr-04-history-nav.yaml
+  s_7f4d89e27550a2::t_5833c2b51266c5 11
+e2e/flows/reader/rdr-05-text-find.yaml
+  s_7f4d89e27550a2::t_67edf2a4ea708e 14,21
+e2e/flows/reader/rdr-10-dark.yaml
+  s_7f4d89e27550a2::t_e877d472a978ec 6
+e2e/flows/settings/set-01-language.yaml
+  s_7f4d89e27550a2::t_49b0c5620f905b 6
+e2e/flows/settings/set-02-theme.yaml
+  s_7f4d89e27550a2::t_d7e2537b10b2a9 6
+e2e/flows/settings/set-03-storage.yaml
+  s_7f4d89e27550a2::t_a9e4dad77320e9 10
+scripts/e2e.sh
+  s_7f4d89e27550a2::t_dae8fbc5155276 60
+src/app/(tabs)/(home)/index.tsx
+  s_7f4d89e27550a2::t_f643b4db1b7f20 55-56
+src/app/(tabs)/assistant/conversations.tsx
+  s_7f4d89e27550a2::t_c300aa5e8f0c95 48
+src/app/(tabs)/assistant/index.tsx
+  s_7f4d89e27550a2::t_a855513fe4f0ad 213
+src/app/(tabs)/courses/[id].tsx
+  s_7f4d89e27550a2::t_b9b49f909f5440 172-173,175,179,189-204,223-224
+src/app/(tabs)/maps/marker.tsx
+  s_7f4d89e27550a2::t_8708867f28c53c 52,69
+src/app/(tabs)/maps/markers.tsx
+  s_7f4d89e27550a2::t_c7a1008fd7f525 46
+src/app/(tabs)/maps/regions.tsx
+  s_7f4d89e27550a2::t_9c66b7750cc085 100
+src/components/ui/Button.tsx
+  s_7f4d89e27550a2::t_b7780120486c1f 24,45,61,98,101,107
+src/components/ui/Card.tsx
+  s_7f4d89e27550a2::t_e0482eb0ef3ba0 17,20,31-37,40
+src/components/ui/ListRow.tsx
+  s_7f4d89e27550a2::t_bc59977603ccc9 15-17,25,33,41,61-77,81-87,123-124
+src/components/ui/Misc.tsx
+  s_7f4d89e27550a2::t_fd3caa126b428d 4,70,85
+src/features/catalog/DownloadButton.tsx
+  s_7f4d89e27550a2::t_ee999310605b25 65,84,99
+src/features/catalog/ResourceRow.tsx
+  s_7f4d89e27550a2::t_d51ae3f886c441 14,16-32,34-35,37,42-43
+src/features/library/components/ReaderChrome.tsx
+  s_7f4d89e27550a2::t_0c68c94e2d8bf7 6,21-43,47-48,50,56,74,78,183-185
+src/features/library/components/ReaderLibrarySheet.tsx
+  s_7f4d89e27550a2::t_b2290882afb7b7 15-16,18-34,40-46,51,89
+src/app/(tabs)/library/category/[slug].tsx
+  s_7f4d89e27550a2::t_92bd5e717a5026 138-147,149,158-173,175-176,178-183,189-192
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2e1cf405f35f26a3cb3f4a1c817e69b690b67df1",
+  "prompts": {},
+  "sessions": {
+    "s_7f4d89e27550a2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "99f9ab25-1210-41a5-af44-46d9a81f8ba6",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+modules/nomad-zim/android/build.gradle
+  s_cbd2a9b15986bf::t_6f4c03dc18c02c 12
+modules/nomad-zim/android/consumer-rules.pro
+  s_cbd2a9b15986bf::t_b4c9f1bde88282 1-3
+modules/nomad-zim/android/src/main/java/expo/modules/nomadzim/ZimWebView.kt
+  s_cbd2a9b15986bf::t_4628609ee322e2 56-58
+src/app/(tabs)/_layout.tsx
+  s_cbd2a9b15986bf::t_a0b8288135c8c5 2,11-17
+src/features/downloads/manager.ts
+  s_cbd2a9b15986bf::t_c610d4c96c6c15 161-165,173-178,280-292,355
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8764459fc4f5a6578465abf91294f7ad1974efc5",
+  "prompts": {},
+  "sessions": {
+    "s_cbd2a9b15986bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8fb325cf-e8f4-4b02-a113-0dab7f1f1a40",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+docs/ARCHITECTURE.md
+  s_f1a99e165ab9e6::t_3cad5fa5d8a3c4 725-728
+docs/E2E.md
+  s_f1a99e165ab9e6::t_ef96ece67b4134 340-341
+docs/PROGRESS.md
+  s_f1a99e165ab9e6::t_2f58d6f6ecb086 224-234
+src/app/(tabs)/maps/_layout.tsx
+  s_f1a99e165ab9e6::t_8a70844196eda0 19
+src/app/(tabs)/maps/index.tsx
+  s_f1a99e165ab9e6::t_fa2510e2e40aed 4,15,28,62-63,152,154,168,531-539,544-546,677
+src/app/(tabs)/maps/points.tsx
+  s_f1a99e165ab9e6::t_bde463a1842f9b 1-61
+src/features/maps/PointDot.tsx
+  s_f1a99e165ab9e6::t_7119d99945445a 1-37
+src/features/maps/emergency.ts
+  s_f1a99e165ab9e6::t_a0d2412fc99ed0 185-186,257-259,318-319,323,331
+src/features/maps/labels.ts
+  s_f1a99e165ab9e6::t_22fb6639306b78 36-37
+src/i18n/locales/en/maps.json
+  s_f1a99e165ab9e6::t_211d7a7aac2aee 11-12,82-95
+src/i18n/locales/es/maps.json
+  s_f1a99e165ab9e6::t_48f5641159fe6f 11-12,83-96
+src/stores/settings.ts
+  s_f1a99e165ab9e6::t_b27db54bd8848b 23-25,34-35,53-54,69-75,80,89-101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "613f6874c6f8a3e8681d6d7134636fa5e1794546",
+  "prompts": {},
+  "sessions": {
+    "s_f1a99e165ab9e6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2ba5e1b5-ae92-45d0-b7b8-928c8413943c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
