@@ -1,0 +1,45 @@
+AGENTS.md
+  s_cbd2a9b15986bf::t_38fdb8d0c8d5a3 43,45-49
+CLAUDE.md
+  s_cbd2a9b15986bf::t_de48d296b646b7 1-153
+README.md
+  s_cbd2a9b15986bf::t_cfeb8eec18396d 21-27,33,35-37,43-44,47-50
+app.json
+  s_cbd2a9b15986bf::t_688a6ca2c2c2da 13,28
+docs/ARCHITECTURE.md
+  s_cbd2a9b15986bf::t_8e645fdbc13b14 6-8,13,17,22-30,32-39,45-69,71-88,91,93-107,109-144,148-156,158-177,179-218,220-250,272-284,288-312,315-321,323-328,330-353,355-361,363,365-370
+docs/DEVELOPMENT.md
+  s_cbd2a9b15986bf::t_daf83db12cac76 1-123
+docs/E2E.md
+  s_cbd2a9b15986bf::t_b98996fafd2997 56,271
+docs/PROGRESS.md
+  s_cbd2a9b15986bf::t_bcf06d460ba2a4 1,3-5,7-30,35,39-40,42,44-78,251-261
+docs/RELEASE.md
+  s_cbd2a9b15986bf::t_5950e474a581e0 1-121
+docs/STYLE_GUIDE.md
+  s_cbd2a9b15986bf::t_75277ea0419dd8 48-52,57,85,89-91,105-106,109-112,114,116-117,119-120,122,124-130,143-144,149-150,158-160,171-172
+package-lock.json
+  s_cbd2a9b15986bf::t_4f1eface70a35f 3,9
+package.json
+  s_cbd2a9b15986bf::t_76554c820907b9 3
+src/app/(tabs)/(home)/index.tsx
+  s_cbd2a9b15986bf::t_9a8b87beca814e 30
+src/i18n/index.ts
+  s_cbd2a9b15986bf::t_080e8b06132ea4 4,19,30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "be80c4f728823b88bc825eb9194ec5d22bd77dd2",
+  "prompts": {},
+  "sessions": {
+    "s_cbd2a9b15986bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8fb325cf-e8f4-4b02-a113-0dab7f1f1a40",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

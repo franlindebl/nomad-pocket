@@ -1,0 +1,43 @@
+modules/nomad-llm/.gitignore
+  s_cbd2a9b15986bf::t_ebfdef907681df 1-3
+modules/nomad-llm/android/build.gradle
+  s_cbd2a9b15986bf::t_42cf90e5ed63ae 1-25
+  s_cbd2a9b15986bf::t_f6aa6615b17160 1-25
+modules/nomad-llm/android/src/main/java/expo/modules/nomadllm/NomadLlmModule.kt
+  s_cbd2a9b15986bf::t_710cc1bbe86ede 1-138
+  s_cbd2a9b15986bf::t_dbcc3d755fdb9e 1-138
+modules/nomad-llm/expo-module.config.json
+  s_cbd2a9b15986bf::t_26f94856f3892e 1-9
+  s_cbd2a9b15986bf::t_1bd4110cbeb9a8 1-9
+modules/nomad-llm/index.ts
+  s_cbd2a9b15986bf::t_e16e9f3e73cf66 1-63
+  s_cbd2a9b15986bf::t_ace1d45c3cda61 1-63
+modules/nomad-llm/ios/NomadLlm.podspec
+  s_cbd2a9b15986bf::t_86be6f6063b629 1-24
+  s_cbd2a9b15986bf::t_25c7e2147d7b9a 1-24
+modules/nomad-llm/ios/NomadLlmModule.swift
+  s_cbd2a9b15986bf::t_d9247ee44dd618 1-168
+  s_cbd2a9b15986bf::t_ab2eac747bc046 1-168
+modules/nomad-llm/src/NomadLlm.types.ts
+  s_cbd2a9b15986bf::t_cff8fa9ea3fed6 1-46
+  s_cbd2a9b15986bf::t_7f259a472bba20 1-46
+modules/nomad-llm/src/NomadLlmModule.ts
+  s_cbd2a9b15986bf::t_8cd3885e1ab11f 1-15
+  s_cbd2a9b15986bf::t_0e2bf27c5d7570 1-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "59d5009d1b3b9f8ef2a42505c5f8a5bc826ea2e1",
+  "prompts": {},
+  "sessions": {
+    "s_cbd2a9b15986bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8fb325cf-e8f4-4b02-a113-0dab7f1f1a40",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

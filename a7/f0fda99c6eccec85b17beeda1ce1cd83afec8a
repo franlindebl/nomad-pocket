@@ -1,0 +1,23 @@
+README.es.md
+  s_78b408ad093c39::t_18658652e351ea 103
+README.md
+  s_78b408ad093c39::t_eaade755192d49 101
+docs/PROGRESS.md
+  s_78b408ad093c39::t_c3b6a421c2384a 288-292
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "db0dc7af8af5790448a5503c26c4284447a9036a",
+  "prompts": {},
+  "sessions": {
+    "s_78b408ad093c39": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e82e2e6d-65bd-4709-9859-f05fbe0b2151",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

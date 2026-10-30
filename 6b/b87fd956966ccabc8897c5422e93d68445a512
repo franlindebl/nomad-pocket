@@ -1,0 +1,35 @@
+src/app/(tabs)/courses/[id].tsx
+  s_cbd2a9b15986bf::t_1be91df19ccf6b 9-10,128
+src/app/(tabs)/library/resource/[id].tsx
+  s_cbd2a9b15986bf::t_37cf3d39121dde 6-7,91
+src/app/_layout.tsx
+  s_cbd2a9b15986bf::t_0650fed8fbf99a 5,56
+src/app/onboarding.tsx
+  s_cbd2a9b15986bf::t_4ebd8cd4874b50 55-56
+src/features/catalog/DownloadButton.tsx
+  s_cbd2a9b15986bf::t_fdc03c69e7e5d9 11,17-18,22-31,39-46,100
+src/features/onboarding/packs.ts
+  s_cbd2a9b15986bf::t_a58af385c9c03a 7-19,28,36-39
+src/i18n/locales/en/library.json
+  s_cbd2a9b15986bf::t_6540e4aa63123e 31,35-37
+src/i18n/locales/es/library.json
+  s_cbd2a9b15986bf::t_9dd4df61678ffe 31,35-37
+src/app/(tabs)/library/category/[slug].tsx
+  s_cbd2a9b15986bf::t_5b8d60a41b164e 9-18,55-62,120-128,130-131,147-151
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ea120db184bb5fdef85f2f2b93d2007db6da3269",
+  "prompts": {},
+  "sessions": {
+    "s_cbd2a9b15986bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8fb325cf-e8f4-4b02-a113-0dab7f1f1a40",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

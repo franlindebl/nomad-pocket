@@ -1,0 +1,117 @@
+CLAUDE.md
+  s_838c9370c44bfa::t_df89d97e793377 23
+app.json
+  s_838c9370c44bfa::t_57f60fa061577d 113
+docs/ARCHITECTURE.md
+  s_5d93938f8d10c9::t_13d87fc4fc8c8e 118-121,124,310-356,433
+docs/E2E.md
+  s_5d93938f8d10c9::t_2aff7a5b4a9b10 5,43-45,47,227-229,241,282-290,318
+docs/MAPS_NAVIGATION_PLAN.md
+  s_838c9370c44bfa::t_ea6e90585dbc4a 1-142
+docs/PROGRESS.md
+  s_838c9370c44bfa::t_1796767192589f 7,14-15,26-27,48-50,69-80,106-133
+e2e/flows/android/android-03-search-emergency.yaml
+  s_838c9370c44bfa::t_b52c46de378967 1-65
+e2e/flows/maps/map-10-search.yaml
+  s_838c9370c44bfa::t_9fc0d4845c25b2 1-50
+e2e/flows/maps/map-12-emergency-empty.yaml
+  s_838c9370c44bfa::t_72e4124ebb2cf9 1-19
+e2e/flows/maps/map-13-emergency-points.yaml
+  s_838c9370c44bfa::t_6ef68bc2fa07ae 1-41
+site/privacy.html
+  s_838c9370c44bfa::t_93349d2c3b6d0a 51-53,65-66,112-114,126-127
+src/app/(tabs)/(home)/index.tsx
+  s_838c9370c44bfa::t_38172af774b74c 2,117-129
+src/app/(tabs)/maps/_layout.tsx
+  s_838c9370c44bfa::t_187fcd8f151b05 6-8,21-22
+src/app/(tabs)/maps/emergency.tsx
+  s_838c9370c44bfa::t_547d8052e40d91 1-333
+src/app/(tabs)/maps/index.tsx
+  s_838c9370c44bfa::t_a3e0dd5ff228f8 4,10,12,14-16,19-20,23-27,47-48,50-52,95-173,200,255-334,345-360,362-364,381-388,411-429
+src/app/(tabs)/maps/marker.tsx
+  s_838c9370c44bfa::t_a1d15bbcaf0f73 2,8,82-93
+src/app/(tabs)/maps/search.tsx
+  s_838c9370c44bfa::t_bd196b3fade0ff 1-135
+src/components/ui/Misc.tsx
+  s_838c9370c44bfa::t_a69fc5b5fd645c 31-43,47
+src/features/maps/GuidancePanel.tsx
+  s_838c9370c44bfa::t_2761433a867904 1-100
+src/features/maps/MapFab.tsx
+  s_838c9370c44bfa::t_cfdcbd361f391d 18,26,31
+src/features/maps/PlaceCard.tsx
+  s_838c9370c44bfa::t_e72495a3afcace 1-128
+src/features/maps/emergency.ts
+  s_838c9370c44bfa::t_4c497a201c388f 1-310
+src/features/maps/extraction.ts
+  s_838c9370c44bfa::t_7a9b7f7e62fd11 101-108,187-193
+src/features/maps/geo.ts
+  s_838c9370c44bfa::t_422c907190ccc5 1-188
+src/features/maps/guidance.ts
+  s_838c9370c44bfa::t_d4643cd6e69aad 1-85
+src/features/maps/labels.ts
+  s_838c9370c44bfa::t_bbfc85023ac735 1-99
+src/features/maps/places-core.test.ts
+  s_838c9370c44bfa::t_37a81c935add2b 1-109
+src/features/maps/places-core.ts
+  s_838c9370c44bfa::t_3085681faa49fa 1-185
+src/features/maps/places.ts
+  s_838c9370c44bfa::t_b60d8bf13debb7 1-297
+src/features/maps/register.ts
+  s_838c9370c44bfa::t_3a67ac4033adcc 1-2,7,11-12,14,16,88-104,112-113
+src/features/maps/store.ts
+  s_838c9370c44bfa::t_3562d1af77e8e9 2-3,13-23,27,30,49,56,58-64
+src/i18n/locales/en/home.json
+  s_838c9370c44bfa::t_d501ba701a7661 67-70
+src/i18n/locales/en/maps.json
+  s_cbd2a9b15986bf::t_23c4cc0d75785f 7-9,93-272
+src/i18n/locales/es/home.json
+  s_838c9370c44bfa::t_8db611b11710cd 67-70
+src/i18n/locales/es/maps.json
+  s_cbd2a9b15986bf::t_a5cbf8c715f5c7 7-9,93-272
+src/lib/mvt/decode.ts
+  s_838c9370c44bfa::t_c8c5923a7baa5f 1-246
+src/lib/pmtiles/index.ts
+  s_838c9370c44bfa::t_90930bbb01484c 7
+src/db/index.ts
+  s_838c9370c44bfa::t_fab0d9c072d044 105-158
+src/features/maps/emergency-core.test.ts
+  s_838c9370c44bfa::t_07daab68a52161 1-96
+src/features/maps/emergency-core.ts
+  s_838c9370c44bfa::t_3d4e7a7dac8845 1-189
+src/features/maps/geo.test.ts
+  s_838c9370c44bfa::t_9400041c92a982 1-78
+src/lib/pmtiles/reader.ts
+  s_838c9370c44bfa::t_3b2c65b84528a5 1-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "16ea22cee2a3eb76b7776c0d74e72ed3a07a4f61",
+  "prompts": {},
+  "sessions": {
+    "s_5d93938f8d10c9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c3435998-9f47-4bba-aadf-01f09832ccec",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_838c9370c44bfa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65e8c9ca-b49f-4076-9462-02635ce8b6df",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_cbd2a9b15986bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8fb325cf-e8f4-4b02-a113-0dab7f1f1a40",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+docs/PROGRESS.md
+  s_cbd2a9b15986bf::t_59ab798bee1c91 44-50,74
+src/app/(tabs)/(home)/index.tsx
+  s_cbd2a9b15986bf::t_0774fa02295897 4,41-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "283bbd9b3e526f7f3f507cc3772829630fc587c8",
+  "prompts": {},
+  "sessions": {
+    "s_cbd2a9b15986bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8fb325cf-e8f4-4b02-a113-0dab7f1f1a40",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

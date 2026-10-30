@@ -1,0 +1,21 @@
+docs/PROGRESS.md
+  s_838c9370c44bfa::t_8be49191b02e99 358-360
+scripts/routing/build-country.sh
+  s_838c9370c44bfa::t_3f632aa1ee793d 60-63,70-78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6bca65265922e01205850199cd79e4e938bfe0e7",
+  "prompts": {},
+  "sessions": {
+    "s_838c9370c44bfa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65e8c9ca-b49f-4076-9462-02635ce8b6df",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

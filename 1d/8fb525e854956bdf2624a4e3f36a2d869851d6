@@ -1,0 +1,31 @@
+.github/workflows/country-packages.yml
+  s_838c9370c44bfa::t_6bf85b15458011 72-80,83,136-137,140-141,144,227-240
+docs/ARCHITECTURE.md
+  s_838c9370c44bfa::t_b7db87a8f4e9ed 646-649,655-656,663-665
+docs/MAPS_NAVIGATION_PLAN.md
+  s_838c9370c44bfa::t_50c042e07dc763 123-128
+docs/PROGRESS.md
+  s_838c9370c44bfa::t_02adf3bc93b9fa 130-131,226-241
+scripts/routing/build-country.sh
+  s_838c9370c44bfa::t_2a96d3f5d58902 27-29,31,33-37,75-79,87-93,98-108,110-111,113-117,122,125
+scripts/routing/manifest.py
+  s_838c9370c44bfa::t_b75176af6cd8da 7-8,124-126,239-257,266-267
+scripts/routing/packs.json
+  s_838c9370c44bfa::t_36763ccfd2e83e 2,63-235
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6695d78366ef7ef72eeebdff300254643ccc5189",
+  "prompts": {},
+  "sessions": {
+    "s_838c9370c44bfa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65e8c9ca-b49f-4076-9462-02635ce8b6df",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

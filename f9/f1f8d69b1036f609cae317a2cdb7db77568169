@@ -1,0 +1,69 @@
+CLAUDE.md
+  s_ce10cae30995fc::t_c13a3960c6223a 129
+docs/ARCHITECTURE.md
+  s_f1a99e165ab9e6::t_30e1a32e951abf 483-496
+docs/PROGRESS.md
+  s_f1a99e165ab9e6::t_ebd4a53282464b 224-242
+modules/nomad-zim/android/build.gradle
+  s_ce10cae30995fc::t_a2f1b93bc148e7 22-23
+modules/nomad-zim/android/src/main/AndroidManifest.xml
+  s_ce10cae30995fc::t_28447329efd7cd 1-17
+modules/nomad-zim/android/src/main/java/expo/modules/nomadzim/NomadZimModule.kt
+  s_ce10cae30995fc::t_7f0a7fee3137fb 97-102
+modules/nomad-zim/android/src/main/java/expo/modules/nomadzim/ZimExternalOpen.kt
+  s_ce10cae30995fc::t_518cf5ca336a51 1-41
+modules/nomad-zim/android/src/main/java/expo/modules/nomadzim/ZimFileProvider.kt
+  s_ce10cae30995fc::t_d1cede732de050 1-6
+modules/nomad-zim/android/src/main/java/expo/modules/nomadzim/ZimRegistry.kt
+  s_ce10cae30995fc::t_19359bec070490 79-105
+modules/nomad-zim/android/src/main/java/expo/modules/nomadzim/ZimWebView.kt
+  s_ce10cae30995fc::t_7eaf7cbb0c9f3d 119-121,125-133,218-222,244-247
+modules/nomad-zim/android/src/main/res/xml/nomadzim_file_paths.xml
+  s_ce10cae30995fc::t_c100a75f5e6c2f 1-5
+modules/nomad-zim/ios/NomadZimModule.swift
+  s_ce10cae30995fc::t_fab1058e2b8d91 86-90
+modules/nomad-zim/ios/ZimWebView.swift
+  s_ce10cae30995fc::t_9e803847ff7e9e 202-206,209
+modules/nomad-zim/src/NomadZim.types.ts
+  s_ce10cae30995fc::t_39132ee53423b0 47-49,56
+src/app/reader/[itemId].tsx
+  s_ce10cae30995fc::t_883ffcf74a2bbf 1,19,23,25,27,33,51-52,58-60,63,83-85,91-108,145,184-195,207,225-229,240,258-268,305
+src/features/library/collection.ts
+  s_ce10cae30995fc::t_1729503df15186 1-200
+src/features/library/components/CollectionView.tsx
+  s_ce10cae30995fc::t_3bff403ea5b1a6 1-128
+src/features/library/titles.ts
+  s_ce10cae30995fc::t_2c6f0a571e99c8 3-4,11
+src/features/library/zim.ts
+  s_ce10cae30995fc::t_b1d04a703719d6 9,50-51,99,266-290
+src/i18n/locales/en/reader.json
+  s_ce10cae30995fc::t_60b12c0489565d 51-56
+src/i18n/locales/es/reader.json
+  s_ce10cae30995fc::t_aedfde6ec3b716 51-56
+src/features/library/collection.test.ts
+  s_ce10cae30995fc::t_15c819aa4dbb0c 1-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "45b7f40fcaed1be5ac489ca81706e487d353758a",
+  "prompts": {},
+  "sessions": {
+    "s_ce10cae30995fc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "219fc472-1df4-402e-bf2b-b59e337b9845",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    },
+    "s_f1a99e165ab9e6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2ba5e1b5-ae92-45d0-b7b8-928c8413943c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

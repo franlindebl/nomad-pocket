@@ -1,0 +1,29 @@
+README.es.md
+  s_e47c090fd13d57::t_1a9336ac886ce5 101
+README.md
+  s_e47c090fd13d57::t_9b5b40dce26c54 99
+e2e/flows/maps/map-01-empty.yaml
+  s_e47c090fd13d57::t_5167ef7a5755a2 15
+src/i18n/locales/en/maps.json
+  s_e47c090fd13d57::t_930b80d5bae1dd 15,36-37,73
+src/i18n/locales/es/maps.json
+  s_e47c090fd13d57::t_b3cb211e70f231 15,36-37,73
+docs/PROGRESS.md
+  s_e47c090fd13d57::t_52ea82fcef24e6 224-232
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bc6c5e7c45f6be1645c570dca6d12e2d172e9244",
+  "prompts": {},
+  "sessions": {
+    "s_e47c090fd13d57": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3362bbda-8880-4ab1-bea3-3f14294c5ff9",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

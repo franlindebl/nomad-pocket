@@ -1,0 +1,33 @@
+docs/ARCHITECTURE.md
+  s_6bd7e2aeaba808::t_39a24c247dd9ef 446-447,989-990
+docs/PROGRESS.md
+  s_6bd7e2aeaba808::t_a8aaa757640b5f 241-262
+modules/nomad-zim/android/src/main/java/expo/modules/nomadzim/ZimWebView.kt
+  s_6bd7e2aeaba808::t_a6a26dbc460d88 296,390-397,422-423
+modules/nomad-zim/ios/ZimWebView.swift
+  s_6bd7e2aeaba808::t_4be95b222b67bc 397-405,408,413,434-438,444
+src/app/(tabs)/(home)/index.tsx
+  s_6bd7e2aeaba808::t_d2de7eeaad17bd 41-52,84,101-103,105-106
+src/features/assistant/rag-core.test.ts
+  s_6bd7e2aeaba808::t_a31d43e42f6401 11,21,65-86
+src/features/assistant/rag-core.ts
+  s_6bd7e2aeaba808::t_174bb07e17d3a7 48-49,149-167,515-516,522,532-533
+src/features/assistant/rag.ts
+  s_6bd7e2aeaba808::t_60fb092d0d8a24 3,7,13,41-43,51-52,54,57,84-92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c7cf754d80dd7b22802d709c91c167acbcc9562b",
+  "prompts": {},
+  "sessions": {
+    "s_6bd7e2aeaba808": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c660d59b-bb90-4446-ba47-2ecbf4e628de",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

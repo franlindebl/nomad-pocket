@@ -1,0 +1,27 @@
+docs/ARCHITECTURE.md
+  s_838c9370c44bfa::t_267a425b14a86e 466-468
+docs/PROGRESS.md
+  s_838c9370c44bfa::t_9bb9598b83e51d 163-175
+src/features/maps/country-maps.ts
+  s_838c9370c44bfa::t_e867532e206b7f 167-168
+src/features/maps/places.ts
+  s_838c9370c44bfa::t_8922d7e1bba67e 27,140-141,315-316,320-338
+src/features/maps/routing-packs.ts
+  s_838c9370c44bfa::t_f79e42e17e9b75 203-204
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4757f73b933362ea24094c215b0573f29d2100c6",
+  "prompts": {},
+  "sessions": {
+    "s_838c9370c44bfa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65e8c9ca-b49f-4076-9462-02635ce8b6df",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

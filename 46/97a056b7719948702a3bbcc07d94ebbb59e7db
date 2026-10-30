@@ -1,0 +1,99 @@
+CLAUDE.md
+  s_bcb6b7f557a4fc::t_d9fc663c0c3002 40-41,82,132,172-174
+app.json
+  s_bcb6b7f557a4fc::t_9c2214530403f8 154
+docs/ARCHITECTURE.md
+  s_bcb6b7f557a4fc::t_cfe2fc0a3e07da 34-41,48-50,53,113-115,819-830,956,1215-1216
+docs/E2E.md
+  s_bcb6b7f557a4fc::t_390f0767fcdeb0 404
+docs/EMERGENCY_NUMBERS.md
+  s_bcb6b7f557a4fc::t_e8a873ca1bc3cc 1-252
+docs/PROGRESS.md
+  s_bcb6b7f557a4fc::t_6d0a77edaae3a3 162-163,314,316-317,322,327-330
+docs/RELEASE.md
+  s_bcb6b7f557a4fc::t_0cbd6525b87aba 186-195
+e2e/flows/android/android-03-search-emergency.yaml
+  s_bcb6b7f557a4fc::t_e4fb152edea405 55,57,59
+eslint.config.js
+  s_bcb6b7f557a4fc::t_b4341d6a72be4a 13,15,23
+modules/nomad-location/.gitignore
+  s_bcb6b7f557a4fc::t_1ce82542abf3d3 1-3
+modules/nomad-location/android/build.gradle
+  s_bcb6b7f557a4fc::t_7b7231f18d3077 1-15
+modules/nomad-location/android/src/main/AndroidManifest.xml
+  s_bcb6b7f557a4fc::t_5abf516ae1f79f 1-4
+modules/nomad-location/android/src/main/java/expo/modules/nomadlocation/NomadLocationModule.kt
+  s_bcb6b7f557a4fc::t_aec8183a0f6475 1-331
+modules/nomad-location/expo-module.config.json
+  s_bcb6b7f557a4fc::t_f5021948efbd2e 1-6
+package.json
+  s_bcb6b7f557a4fc::t_c56b51fd9e0c6d 80-89
+plugins/with-android-no-firebase.js
+  s_bcb6b7f557a4fc::t_2c7782174402f7 10-12,25-26,28
+scripts/licenses/native.json
+  s_bcb6b7f557a4fc::t_af912079e0a608 413-422
+scripts/maps/make-country-shapes.mjs
+  s_bcb6b7f557a4fc::t_b76f4357628e98 1-137
+scripts/maps/make-emergency-numbers.py
+  s_bcb6b7f557a4fc::t_ff576b0a356f16 1-182
+src/app/(tabs)/(home)/index.tsx
+  s_bcb6b7f557a4fc::t_34abeda4ab296f 36,97-98,136-142
+src/app/(tabs)/maps/emergency.tsx
+  s_bcb6b7f557a4fc::t_e6922bd225e6c6 1,15,18,26,45-47,61,63-64,66,176-182,198-206
+src/app/(tabs)/maps/index.tsx
+  s_bcb6b7f557a4fc::t_89d0572b9d48b5 2
+src/data/licenses.json
+  s_bcb6b7f557a4fc::t_c37887fbc76206 1
+src/features/maps/PlaceCard.tsx
+  s_bcb6b7f557a4fc::t_2b7212c28f040a 5
+src/features/maps/countries.ts
+  s_bcb6b7f557a4fc::t_57223f5e8dabf4 6
+src/features/maps/country-at-core.ts
+  s_bcb6b7f557a4fc::t_3a1989adcf8059 1-130
+src/features/maps/country-shapes.json
+  s_bcb6b7f557a4fc::t_0eb74b865aa46f 1
+src/features/maps/emergency-numbers.json
+  s_bcb6b7f557a4fc::t_4c5d71929a7048 1-804
+src/features/maps/emergency.ts
+  s_bcb6b7f557a4fc::t_1bfdd209b794a6 12,16-18,33,49-87,89-93
+src/features/maps/guidance.ts
+  s_bcb6b7f557a4fc::t_e469099a2d5c16 8
+src/features/maps/heading.ts
+  s_bcb6b7f557a4fc::t_8604115cdb7250 12
+src/features/maps/register.ts
+  s_bcb6b7f557a4fc::t_b39bd3156e9035 4,15,129,142-145
+src/i18n/locales/en/home.json
+  s_bcb6b7f557a4fc::t_d4252196a25521 63-65
+src/i18n/locales/en/maps.json
+  s_bcb6b7f557a4fc::t_eae6a9f9cc6d74 159-163
+src/i18n/locales/es/home.json
+  s_bcb6b7f557a4fc::t_751ee90bb42a6c 63-65
+src/i18n/locales/es/maps.json
+  s_bcb6b7f557a4fc::t_7e7d10e16d2e74 159-163
+src/lib/location.android.ts
+  s_bcb6b7f557a4fc::t_9a290e44bed126 1-83
+modules/nomad-location/index.ts
+  s_bcb6b7f557a4fc::t_2be142c0d8dbc7 1-27
+plugins/with-android-no-install-referrer.js
+  s_bcb6b7f557a4fc::t_4920193e58f7e3 1-46
+src/features/maps/country-at-core.test.ts
+  s_bcb6b7f557a4fc::t_3d4352835053e2 1-33
+src/lib/location.ts
+  s_bcb6b7f557a4fc::t_42f18c24c92440 1-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b5c8da494de353dac46df3e796e07623e41b4c83",
+  "prompts": {},
+  "sessions": {
+    "s_bcb6b7f557a4fc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "edc88951-8810-4355-907f-62d14b615c33",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

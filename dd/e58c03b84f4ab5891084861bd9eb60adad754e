@@ -1,0 +1,21 @@
+docs/ARCHITECTURE.md
+  s_cbd2a9b15986bf::t_ccdb7ff2aa0828 90-102
+docs/PROGRESS.md
+  s_cbd2a9b15986bf::t_c9e26b4acb63ff 22,36-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "42a47ef5adc4b8970b1cf76749b44a997463a686",
+  "prompts": {},
+  "sessions": {
+    "s_cbd2a9b15986bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8fb325cf-e8f4-4b02-a113-0dab7f1f1a40",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}

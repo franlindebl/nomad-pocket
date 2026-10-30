@@ -1,0 +1,21 @@
+docs/MAPS_NAVIGATION_PLAN.md
+  s_838c9370c44bfa::t_9aec86e1610b5e 148-199
+docs/PROGRESS.md
+  s_838c9370c44bfa::t_265b3f1ac8e26a 139-141
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0bec742222a99289e794a15abf09cd7a347d2385",
+  "prompts": {},
+  "sessions": {
+    "s_838c9370c44bfa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65e8c9ca-b49f-4076-9462-02635ce8b6df",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
