@@ -23,7 +23,8 @@
       "fire": "How do I start a fire when everything is wet?",
       "photosynthesis": "Explain photosynthesis simply"
     },
-    "disclaimer": "AI can make mistakes. Double-check what matters and, for health questions, consult a professional."
+    "disclaimer": "AI can make mistakes. Double-check what matters and, for health questions, consult a professional.",
+    "disclaimerNoHealth": "AI can make mistakes. Double-check what matters."
   },
   "noModel": {
     "title": "Choose a model to get started",

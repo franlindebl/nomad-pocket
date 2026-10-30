@@ -326,6 +326,13 @@ describe('system prompt', () => {
     assert.equal(isHealthQuestion('What should I do after a snake bite?'), true);
     assert.equal(isHealthQuestion('Explícame la fotosíntesis'), false);
     assert.equal(isHealthQuestion('An interesting fact about Spain'), false);
+    assert.equal(isHealthQuestion('Me he cortado un dedo con un cuchillo, ¿qué hago?'), true);
+    assert.equal(isHealthQuestion('My kid swallowed some bleach, what should I do?'), true);
+    assert.equal(isHealthQuestion('Se ha desmayado mi padre'), true);
+    assert.equal(isHealthQuestion('¿Cómo potabilizo agua sin hervirla?'), false);
+    assert.equal(isHealthQuestion('How do I make water safe to drink without boiling it?'), false);
+    assert.equal(isHealthQuestion('¿Cómo me preparo para un vendaval?'), false);
+    assert.equal(isHealthQuestion('¿Cómo corto leña sin hacha?'), false);
     assert.match(systemPrompt('es', 'chat', { health: true }), /no consejo médico/);
     assert.doesNotMatch(systemPrompt('es', 'chat'), /consejo médico/);
     assert.match(systemPrompt('en', 'sources'), /\[1\]/);

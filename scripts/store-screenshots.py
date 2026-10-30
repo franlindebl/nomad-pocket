@@ -58,8 +58,25 @@ MAP_SHOTS = ('route', 'emergency')
 OSM_CREDIT = {'es': 'Mapa © colaboradores de OpenStreetMap', 'en': 'Map © OpenStreetMap contributors'}
 
 
-def caption_for(lang: str, name: str):
-    for key, text in CAPTIONS[lang].items():
+# Google Play: the Android build has no health features (src/lib/health.ts), so no first aid, medicine
+# or medical details; its 04 screen is a survival guide instead of first aid.
+ANDROID_CAPTIONS = {
+    'es': {
+        'guides': ('Guías de supervivencia, sin red', 'Agua, refugio, nudos y mucho más'),
+        'plan': ('Tu plan familiar, a mano', 'Puntos de encuentro, contactos y números clave'),
+        'library': ('Todo el conocimiento, sin red', 'Wikipedia, supervivencia, bricolaje y más'),
+    },
+    'en': {
+        'guides': ('Survival guides, offline', 'Water, shelter, knots and much more'),
+        'plan': ('Your family plan, at hand', 'Meeting points, contacts and key numbers'),
+        'library': ('All the knowledge, no network', 'Wikipedia, survival, DIY and more'),
+    },
+}
+
+
+def caption_for(lang: str, name: str, device: str):
+    captions = {**CAPTIONS[lang], **ANDROID_CAPTIONS[lang]} if device == 'android' else CAPTIONS[lang]
+    for key, text in captions.items():
         if key in name:
             return text
     raise SystemExit(f'No caption for {lang}/{name}')
@@ -87,7 +104,7 @@ def compose(src: Path, dst: Path, lang: str, device: str):
     W, H = SIZES[device]
     canvas = Image.new('RGB', (W, H), BG)
     draw = ImageDraw.Draw(canvas)
-    title, sub = caption_for(lang, src.stem)
+    title, sub = caption_for(lang, src.stem, device)
 
     margin = int(W * 0.08)
     top = int(H * 0.055)

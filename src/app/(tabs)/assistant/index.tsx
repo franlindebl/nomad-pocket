@@ -124,7 +124,7 @@ export default function AssistantScreen() {
             ))}
           </View>
           <Text variant="caption" color="textTertiary" align="center" style={{ maxWidth: 320, alignSelf: 'center' }}>
-            {t('empty.disclaimer')}
+            {t(HEALTH_FEATURES ? 'empty.disclaimer' : 'empty.disclaimerNoHealth')}
           </Text>
         </ScrollView>
       ) : (

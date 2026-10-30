@@ -853,8 +853,8 @@ export function noHealthAnswer(lang: Lang, emergencyNumber: string): string {
 
 /** The same rule for whatever the question check misses (a follow-up like "and if it's serious?"). */
 const NO_HEALTH_NOTE: Record<Lang, string> = {
-  es: 'No des consejos de salud, medicina ni primeros auxilios: si te los piden, di solo que en esta versión no respondes preguntas de salud.',
-  en: "Don't give health, medical or first-aid advice: if asked, only say that in this version you don't answer health questions.",
+  es: 'No des tratamientos médicos ni pasos de primeros auxilios (heridas, enfermedades, medicamentos): si te los piden, di solo que en esta versión no respondes preguntas de salud. El agua, la comida, el refugio, el fuego y la higiene no son temas de salud: respóndelos con normalidad, sin avisos de salud ni consejos de ir al médico.',
+  en: "Don't give medical treatment or first-aid steps (injuries, illness, medicines): if asked, only say that in this version you don't answer health questions. Water, food, shelter, fire and hygiene are not health topics: answer them normally, with no health warnings and no advice to see a doctor.",
 };
 
 const HEALTH_TERMS = [
@@ -862,6 +862,14 @@ const HEALTH_TERMS = [
   'fractur', 'envenen', 'intoxic', 'auxilio', 'sintom', 'infecc', 'dosis', 'pastill', 'embaraz', 'alergi',
   'health', 'medical', 'medicine', 'injur', 'wound', 'burn', 'bleed', 'pain', 'fever', 'hypotherm', 'bite',
   'sting', 'fractur', 'poison', 'first aid', 'symptom', 'infect', 'dose', 'pill', 'pregnan', 'allerg', 'cpr', 'rcp',
+  // Emergencies that name no condition ("me he cortado", "swallowed bleach"): without health features these must
+  // get the fixed answer, not the model's improvised first aid.
+  'tragad', 'ingeri', 'desmay', 'inconscien', 'atragant', 'asfixi', 'vomit', 'diarrea', 'nausea', 'infarto', 'ictus',
+  'convulsi', 'esguince', 'torniquete', 'vendaj', 'antibiot', 'paracetamol', 'ibuprofen', 'insulin', 'diabet',
+  'conmocion', 'me he cortado', 'me corte', 'se ha cortado', 'se corto', 'golpe de calor',
+  'swallow', 'unconscious', 'fainted', 'fainting', 'choking', 'diarrh', 'nause', 'heart attack', 'seizure', 'sprain',
+  'concussion', 'tourniquet', 'bandag', 'aspirin', 'cut myself', 'cut my finger', 'cut my hand', 'heatstroke',
+  'heat stroke',
 ];
 
 /** Words a health term starts but that aren't about health ("paint", "medición", "carne picadilla"). */
