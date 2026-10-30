@@ -304,6 +304,7 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+
 ### 2026-10-30 — Android: closed test 1.1.0 (26) sent to review; Android/Play doc
 
 - Play Console: the rejected 1.1.0 (24) couldn't be edited, so a new release on "Prueba cerrada - Alpha" with the

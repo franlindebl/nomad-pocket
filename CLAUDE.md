@@ -140,6 +140,8 @@ docs/               the docs above + screenshots/ + store/
   and Arabic glyphs`), body with the why. Work goes straight to `main` (the early merges of agent worktree
   branches are history; keep it linear from now on). Commit/push only
   when the user asks. Keep `docs/PROGRESS.md` in the same commit as the work it logs.
+- **Commit messages.** Never put a claude.ai session link (`Claude-Session: …`) or any other session URL in a
+  commit message or PR; `.claude/settings.json` sets `attribution.sessionUrl: false`. Never commit with `--no-verify`.
 
 ## Platform pitfalls already paid for
 
