@@ -140,6 +140,16 @@ docs/               the docs above + screenshots/ + store/
   and Arabic glyphs`), body with the why. Work goes straight to `main` (the early merges of agent worktree
   branches are history; keep it linear from now on). Commit/push only
   when the user asks. Keep `docs/PROGRESS.md` in the same commit as the work it logs.
+- **Commit rules (owner's, hard).** (1) Never put a claude.ai session link (`Claude-Session: …`) or any
+  other session URL in a commit message or PR. (2) Mon–Fri commits are dated between 22:00 and 02:00
+  (Europe/Madrid); Saturday and Sunday are free. Annotated tags follow the same rule. The hooks in
+  `.githooks/` enforce both (`scripts/commit-hours.mjs`): commit-msg strips the link, post-commit amends a
+  daytime commit into that night (02:00–22:00 squeezed 6:1 into 22:00–01:20, so it may be dated later
+  today), pre-push refuses anything that slipped through. `.claude/settings.json` sets
+  `attribution.sessionUrl: false`. Never commit with `--no-verify` or with hooks off; in a fresh clone
+  check `git config core.hooksPath` is `.githooks` (`npm install` sets it). A rebase replays commits with
+  new committer dates: `git rebase --committer-date-is-author-date`. For a tag made on a weekday
+  daytime, date it with `GIT_COMMITTER_DATE` in the window.
 
 ## Platform pitfalls already paid for
 

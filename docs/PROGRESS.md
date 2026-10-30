@@ -304,6 +304,17 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-30 — Repo: commit rules (no session links, weekday commits at night)
+
+- The owner's rules for this repo: no claude.ai session links in commits, and Mon–Fri commits dated 22:00–02:00
+  (weekends free). History rewritten twice and force-pushed (main, the 40 remote tags with their Releases, the
+  git-ai notes in `refs/notes/ai`): first the dates (each weekday 02:00→02:00 squeezed into 22:00→02:00, today's two
+  commits at 01:55), then the `Claude-Session:` trailers dropped from all 291 commits that had them. Hashes quoted in
+  messages were translated; every commit hash in older notes is stale.
+- Enforced from now on: `scripts/commit-hours.mjs` (+ tests) behind three new hooks in `.githooks/` (commit-msg
+  strips the link, post-commit amends a daytime commit into that night and carries git-ai's note over, pre-push
+  refuses what slipped through), `attribution.sessionUrl: false` in `.claude/settings.json`, the rule in CLAUDE.md.
+
 ### 2026-10-30 — Android: closed test 1.1.0 (26) sent to review; Android/Play doc
 
 - Play Console: the rejected 1.1.0 (24) couldn't be edited, so a new release on "Prueba cerrada - Alpha" with the

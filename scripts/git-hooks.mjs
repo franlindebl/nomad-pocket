@@ -1,6 +1,6 @@
-// npm prepare: points git at the repo's hooks (.githooks/pre-commit: typecheck, lint, unit tests,
-// i18n keys). Leaves alone a hooks path the contributor already has (a global secret-scanning
-// hook, say): overriding it in this clone would silently turn that off.
+// npm prepare: points git at the repo's hooks (.githooks/: pre-commit runs typecheck, lint, unit tests and i18n keys;
+// commit-msg, post-commit and pre-push enforce the commit rules in scripts/commit-hours.mjs). Leaves alone a hooks path the
+// contributor already has (a global secret-scanning hook, say): overriding it in this clone would silently turn that off.
 import { spawnSync } from 'node:child_process';
 
 const HOOKS = '.githooks';

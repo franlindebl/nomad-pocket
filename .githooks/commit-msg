@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Drops claude.ai session links from the message (repo rule: scripts/commit-hours.mjs).
+set -euo pipefail
+node "$(git rev-parse --show-toplevel)/scripts/commit-hours.mjs" strip "$1"

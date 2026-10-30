@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Mon–Fri commits are dated 22:00–02:00: amends a commit made outside that window into it (scripts/commit-hours.mjs).
+set -euo pipefail
+node "$(git rev-parse --show-toplevel)/scripts/commit-hours.mjs" fix

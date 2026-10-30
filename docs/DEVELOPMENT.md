@@ -42,7 +42,11 @@ npm install
   (simulator) and it registers at startup.
 - `prepare` (`scripts/git-hooks.mjs`) sets `git config core.hooksPath .githooks` only when no
   hooks path is set (an existing one is left alone) (pre-commit: tsc, lint, unit tests, i18n).
-  Skip once with `git commit --no-verify`.
+  Skip once with `git commit --no-verify`. The other hooks enforce the owner's commit rules
+  (`scripts/commit-hours.mjs`, CLAUDE.md "Commit rules"): commit-msg drops claude.ai session links,
+  post-commit amends a Mon–Fri commit made outside 22:00–02:00 into that night (it prints
+  `commit-hours: dated …`; git-ai's note follows the amended commit), pre-push refuses commits that
+  break either rule and prints the `git rebase -x` that fixes them.
 - After any dependency change run `node scripts/licenses.mjs` (regenerates
   `src/data/licenses.json`, the Credits screen; `--check` fails if it is stale). When you bump a
   fetch script, podspec or Gradle version of a native library, update

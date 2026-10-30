@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Refuses to push commits dated outside Mon–Fri 22:00–02:00 or carrying a claude.ai session link
+# (scripts/commit-hours.mjs). Skip once: git push --no-verify
+set -euo pipefail
+node "$(git rev-parse --show-toplevel)/scripts/commit-hours.mjs" check "$1"
