@@ -23,7 +23,8 @@
       "fire": "¿Cómo enciendo fuego si todo está mojado?",
       "photosynthesis": "Explícame la fotosíntesis de forma sencilla"
     },
-    "disclaimer": "La IA puede equivocarse. Contrasta lo importante y, en temas de salud, consulta a un profesional."
+    "disclaimer": "La IA puede equivocarse. Contrasta lo importante y, en temas de salud, consulta a un profesional.",
+    "disclaimerNoHealth": "La IA puede equivocarse. Contrasta lo importante."
   },
   "noModel": {
     "title": "Elige un modelo para empezar",

@@ -80,33 +80,33 @@ emulator (Android tour, `docs/E2E.md`).
 | App access | All functionality is available without special access (no sign-in) |
 | Ads | No ads |
 | Content rating (IARC) | See "Content rating" below. Original draft: category "Reference, News, or Educational". Violence, sex, language, controlled substances, gambling: no. Users interact or exchange content: no. Shares the user's location with other users: **yes** (the "Share my position" button sends it by message, only when the user taps it). Unrestricted internet access: no (archive pages are offline; external links ask first). Digital purchases: no. Generative AI: yes, on-device (answer the AI questions if the form shows them) |
-| Target audience | 18 and over (13+ first, then 18+ to match the PEGI 18 below; back to 13+ if the rating comes down) |
+| Target audience | 13 and over (13–15, 16–17, 18+). It was 18+ while the rating was PEGI 18; back to 13+ with the PEGI 3 rating of 2026-10-29 |
 | News app | No |
 | COVID-19 contact tracing / status | No |
 | Data safety | see below |
 | Government app | No |
 | Financial features | None |
-| Health apps | **"My app doesn't provide any health features"** (from 1.1.0 (25), the build without them). The first submission declared "Emergency and First Aid" and "Medical Reference and Education" and was rejected on 2026-10-29: those categories need an organization account. Play support (ticket of 2026-10-29) said what to remove; `src/lib/health.ts` turns it off on Android |
+| Health apps | **"My app doesn't provide any health features"** (from 1.1.0 (26), the build without them). The first submission declared "Emergency and First Aid" and "Medical Reference and Education" and was rejected on 2026-10-29: those categories need an organization account. Play support (ticket of 2026-10-29) said what to remove; `src/lib/health.ts` turns it off on Android |
 | Actions / foreground services | None declared (the manifest has no foreground service, no exact alarms, no background location) |
 
-## Content rating (as submitted, 2026-10-29)
+## Content rating (2026-10-29, build without health features)
 
 Category "Todos los demás tipos de aplicaciones" (the questionnaire has no reference category). Package
-content: no. Users exchange content: no. Online content (downloaded archives, AI answers): yes. Violence:
-yes, not the main purpose, visual and gory (injury photos in the medical guides), in text. Sexuality: no
-(encyclopedic nudity is "natural or scientific context", which the question excludes). Language: yes (mild,
-moderate, discriminatory and sexual words quoted in encyclopedia articles), not the main purpose. Drugs: yes,
-text only. Age-restricted products: no. Shares location with other users: yes. Digital purchases, rewards,
-browser: no. Primarily informational/educational: yes.
+content: no. Users exchange content: no. Online content (downloaded archives, AI answers): yes. Violence,
+sexuality, language, controlled substances, age-restricted products: no. Shares location with other users:
+yes. Digital purchases, rewards, browser: no. Primarily informational/educational: yes.
 
-Result: ClassInd L, ESRB 10+, **PEGI 18**, USK 12, IARC generic 18+, Russia 18+, Korea 19. The first,
-literal questionnaire (sexuality yes, drug images yes) gave the same. Gory images and discriminatory language
-are what PEGI rates 18. Kiwix and Wikipedia (same content) are PEGI 3 on Play, but Google's help has no
-exception for reference content ("specific to the content within your app"; misrepresentation can lead to
-removal). Owner's decision: keep PEGI 18 with an 18+ audience and ask IARC (globalratings.com/contact-us) how
-to rate a reader of downloadable encyclopedias and medical guides; redo the questionnaire if they allow it. **Asked on 2026-10-29** through the
-IARC general contact form (600-character limit; the answer goes to the owner's email). If there's no answer in
-~2 weeks, ask PEGI (pegi.info), which the IARC page lists for questions about a specific rating.
+Result: **PEGI 3**, ESRB Everyone, with "shared location" as the interactive element.
+
+Why "no" to violence, language and drugs: the only content the app ships is its own UI; what users download is
+third-party reference content (Wikipedia and other Kiwix archives), described in text the way an encyclopedia
+describes it. Kiwix and Wikipedia, which offer the same content, are PEGI 3 on Play; the owner chose to rate it
+the same way. The injury photos of the medical guides, which gave the first submission PEGI 18 (gory images),
+are out of the Android build.
+
+First submission (2026-10-29, with health features): violence yes (gory, injury photos), language yes
+(discriminatory words quoted in articles), drugs in text: ClassInd L, ESRB 10+, PEGI 18, USK 12, IARC 18+.
+The question to IARC sent that day (globalratings.com/contact-us) is moot now unless they answer otherwise.
 
 ## Data safety
 
@@ -152,8 +152,8 @@ To bring them back on Android: an organization account (D-U-N-S), the Health app
 `HEALTH_FEATURES` true on Android in a new release. Never through a remote switch: Play forbids features
 turned on after review that the declarations don't list.
 
-With the medical guides gone the content rating may come down (PEGI 18 came from their injury photos):
-redo the questionnaire with the build without health features.
+With the medical guides gone the content rating was redone: PEGI 3 ("Content rating" above).
 
-Screenshots to redo for Android: home (first-aid shortcut), first aid (replace), assistant (a burn
-question), library (medicine category); the plan's caption says "datos médicos".
+Android screenshots redone on 2026-10-29 (home, a survival guide instead of first aid, the assistant answering the
+water starter, library and kit without medicine; Android captions in `scripts/store-screenshots.py`) and uploaded to
+both listings.

@@ -42,7 +42,7 @@ can pick up without re-deriving anything.
 | Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 237 packs live (every inhabited country; the USA in six regions) since 2026-10-27; E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
 | Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search; the most capable installed model is the default; on-device dictation; reads the PDFs inside archives (document index) and the family plan; copy and regenerate an answer) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
-| Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android: app created in Play Console, App content forms done (PEGI 18, see `docs/store/play-listing.md`), 1.1.0 (23) on internal testing, Android screenshots and en-US listing done, 1.1.0 (24) for the closed test **rejected** 2026-10-29 (health apps need an organization account): Android now ships without health features, resubmit as 1.1.0 (25); then 12 testers × 14 days and production |
+| Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android: app created in Play Console, App content forms done (PEGI 3 since 2026-10-29, see `docs/store/play-listing.md`), 1.1.0 (23) on internal testing, Android screenshots and en-US listing done, 1.1.0 (24) for the closed test **rejected** 2026-10-29 (health apps need an organization account): Android now ships without health features; listing, screenshots, Health apps and content rating redone, resubmit as 1.1.0 (26); then 12 testers × 14 days and production |
 | Preparedness (family plan, emergency kit with expiry reminders, printable PDF, offline guides) | done — iOS sim + Android emulator (E2E) |
 | E2E suite (Maestro) + pre-commit hook | done |
 | Pre-release audit (2026-10-26): ~60 verified findings fixed in code and docs | merged to main; device checks and the deferred items below pending |
@@ -303,6 +303,23 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-29 — Android: Play listing redone without health; build 26 tightens the assistant
+
+- Play Console: Health apps declaration "no health features"; es-ES and en-US descriptions without first aid or
+  medical details; the 8 Android phone screenshots of each language redone on the versionCode 25 APK (home with
+  survival guides, a survival guide instead of first aid, the water starter answered by Qwen3.5 4B, library and
+  kit without medicine). Content rating redone: violence, language and drugs "no", as Kiwix and Wikipedia rate the
+  same content (owner's decision) → **PEGI 3**, ESRB Everyone; target audience back to 13+. All saved, not sent.
+- Seen while shooting: the no-health prompt made the model refuse water questions or add "consult a doctor", and
+  the assistant's empty screen still said "for health questions, consult a professional". Fixed for versionCode
+  26: the prompt now forbids only medical treatment and first-aid steps and says water, food, shelter, fire and
+  hygiene aren't health topics (Qwen3.5 4B on the Mac, 3 runs per question: clean water answers in es and en, where
+  the old prompt appended a refusal); `empty.disclaimerNoHealth`; `isHealthQuestion` also catches emergencies that
+  name no condition ("me he cortado", "swallowed bleach", fainting, choking, seizures…), which the model answered
+  with improvised first aid once in 3 runs with the old prompt.
+- Known: an update from 23/24 (internal testers only) keeps medical archives already installed; they stay readable
+  under the "not medical advice" banner. Fresh installs (Play's reviewers, closed testers) never see them.
 
 ### 2026-10-29 — Android without health features (Play rejected the closed test)
 
