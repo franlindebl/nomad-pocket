@@ -7,6 +7,7 @@ import { callPhones } from '@/features/maps/call';
 import { Field } from '@/features/prepare/components';
 import { usePrepare } from '@/features/prepare/store';
 import type { EntryKind, MeetingSlot } from '@/features/prepare/types';
+import { HEALTH_FEATURES } from '@/lib/health';
 import { space, useTheme } from '@/theme';
 
 function AddRow({ title, onPress, testID }: { title: string; onPress: () => void; testID: string }) {
@@ -97,21 +98,26 @@ export default function PlanScreen() {
       </ListGroup>
       <Footer>{t('plan.numbersFooter')}</Footer>
 
-      <SectionHeader title={t('plan.people')} />
-      <ListGroup>
-        {people.map((p) => (
-          <ListRow
-            key={p.id}
-            title={p.name}
-            subtitle={[p.medications, p.allergies, p.bloodType].filter(Boolean).join(' · ') || undefined}
-            leading={<IconBadge icon={HeartPulse} hue="medicine" size={36} />}
-            chevron
-            onPress={() => openEntry('person', p.id)}
-          />
-        ))}
-        <AddRow testID="add-person" title={t('plan.addPerson')} onPress={() => openEntry('person')} />
-      </ListGroup>
-      <Footer>{t('plan.peopleFooter')}</Footer>
+      {/* Each person's medication, allergies and blood type: health data, not in builds without health features. */}
+      {HEALTH_FEATURES ? (
+        <>
+          <SectionHeader title={t('plan.people')} />
+          <ListGroup>
+            {people.map((p) => (
+              <ListRow
+                key={p.id}
+                title={p.name}
+                subtitle={[p.medications, p.allergies, p.bloodType].filter(Boolean).join(' · ') || undefined}
+                leading={<IconBadge icon={HeartPulse} hue="medicine" size={36} />}
+                chevron
+                onPress={() => openEntry('person', p.id)}
+              />
+            ))}
+            <AddRow testID="add-person" title={t('plan.addPerson')} onPress={() => openEntry('person')} />
+          </ListGroup>
+          <Footer>{t('plan.peopleFooter')}</Footer>
+        </>
+      ) : null}
 
       <SectionHeader title={t('plan.homeNotes')} />
       <Field

@@ -184,7 +184,9 @@ testers: email list "Nomad Pocket interno", the owner's two accounts; join link
 https://play.google.com/apps/internaltest/4700702884318545923). **1.1.0 (24) on closed testing**
 (track "Prueba cerrada - Alpha", the account's "Friends and family" list of 19 addresses, also Theri.App's;
 all countries), sent to Google's review on 2026-10-29 with the listings and App content forms (tag
-`v1.1.0-android-24` on 10a265b). A new app in this
+`v1.1.0-android-24` on 10a265b) and **rejected** the same day: health apps need an organization account.
+Android builds have no health features since then (`src/lib/health.ts`; what changed and why in
+`docs/store/play-listing.md`, "Health features on Android"). A new app in this
 account needs a **closed test with at least 12 opted-in testers for 14 days in a row** before it can
 apply for production. Listing texts, graphics and every form's answers: `docs/store/play-listing.md`.
 

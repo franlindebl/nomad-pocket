@@ -391,7 +391,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `country-<id>` | a country in the picker (onboarding, maps, settings), e.g. `country-ad` |
   | `country-download`, `country-size` | country sheet: download button, total size |
   | `region-all`, `region-<id>`, `region-delete-<id>` | country sheet and onboarding kit of a country in regions (the USA: `region-us-west`…; Canada, Russia: `region-ca-ontario`…): whole-country shortcut, tick a region, delete a region on the phone |
-  | `home-emergency`, `home-first-aid`, `home-plan`, `home-call` | Home: "En una emergencia" actions |
+  | `home-emergency`, `home-first-aid` (`home-guides` on Android: no health features), `home-plan`, `home-call` | Home: "En una emergencia" actions |
   | `home-readiness`, `ready-<map\|guides\|wikipedia\|assistant\|plan\|kit>`, `home-downloads`, `home-network` | Home: "Tu preparación" card and rows, downloads card (also while a country is being prepared), connection line |
   | `onboarding-start`, `onboarding-next`, `onboarding-download`, `onboarding-finish`, `onboarding-plan`, `onboarding-close` | setup wizard buttons (`onboarding-close` only on a second run) |
   | `download-allow-cellular`, `downloads-waiting-wifi`, `downloads-allow-cellular-all` | download row: "use mobile data" for this download; Downloads sheet: the "waiting for Wi-Fi" card and its "use mobile data for all" button |

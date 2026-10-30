@@ -841,6 +841,22 @@ const HEALTH_NOTE: Record<Lang, string> = {
   en: 'Answer only the condition the user asks about: do not mix in other conditions from the sources. Use current first aid: for snake bites no tourniquet, cutting or suction (keep still and get urgent help); for burns, cool running water for about 20 minutes. If a source contradicts this, do not follow it. End with one short line: "Reference information, not medical advice."',
 };
 
+/**
+ * Builds without health features (src/lib/health.ts): Google Play lets only organization accounts ship an
+ * assistant that gives medical answers. Health questions get this fixed answer instead of the model's.
+ */
+export function noHealthAnswer(lang: Lang, emergencyNumber: string): string {
+  return lang === 'es'
+    ? `En esta versión no respondo preguntas de salud ni de primeros auxilios. Si es una emergencia, llama al ${emergencyNumber}.`
+    : `In this version I don't answer health or first-aid questions. In an emergency, call ${emergencyNumber}.`;
+}
+
+/** The same rule for whatever the question check misses (a follow-up like "and if it's serious?"). */
+const NO_HEALTH_NOTE: Record<Lang, string> = {
+  es: 'No des consejos de salud, medicina ni primeros auxilios: si te los piden, di solo que en esta versión no respondes preguntas de salud.',
+  en: "Don't give health, medical or first-aid advice: if asked, only say that in this version you don't answer health questions.",
+};
+
 const HEALTH_TERMS = [
   'salud', 'medic', 'enferm', 'herid', 'quemad', 'sangr', 'dolor', 'fiebre', 'hipoterm', 'picad', 'mordedur',
   'fractur', 'envenen', 'intoxic', 'auxilio', 'sintom', 'infecc', 'dosis', 'pastill', 'embaraz', 'alergi',
@@ -848,10 +864,13 @@ const HEALTH_TERMS = [
   'sting', 'fractur', 'poison', 'first aid', 'symptom', 'infect', 'dose', 'pill', 'pregnan', 'allerg', 'cpr', 'rcp',
 ];
 
-/** Whether a question is about health/first aid (adds the "not medical advice" note). */
+/** Words a health term starts but that aren't about health ("paint", "medición", "carne picadilla"). */
+const NOT_HEALTH = ['paint', 'medicion', 'sangria', 'picadill', 'burner', 'quemador'];
+
+/** Whether a question is about health/first aid (adds the "not medical advice" note, or gets noHealthAnswer). */
 export function isHealthQuestion(question: string): boolean {
   const q = normalize(question);
-  const ws = words(question);
+  const ws = words(question).filter((w) => !NOT_HEALTH.some((x) => w.startsWith(x)));
   // Word-prefix match so "interesting" doesn't hit "sting".
   return HEALTH_TERMS.some((t) => (t.includes(' ') ? q.includes(t) : ws.some((w) => w.startsWith(t))));
 }
@@ -862,12 +881,13 @@ export function isHealthQuestion(question: string): boolean {
  */
 export type PromptMode = 'chat' | 'sources' | 'tools';
 
-export function systemPrompt(lang: Lang, mode: PromptMode, opts: { health?: boolean; library?: boolean } = {}): string {
+export function systemPrompt(lang: Lang, mode: PromptMode, opts: { health?: boolean; library?: boolean; noHealth?: boolean } = {}): string {
   const [intro, tone, smallTalk, style] = SYSTEM[lang];
   // Answers from sources or tools get no small-talk lines: with them Apple Intelligence put a remark
   // about itself in the middle of a first-aid answer ("I like how my little corner of Nomad Pocket…").
   const parts = mode === 'chat' ? [intro, tone, smallTalk, style] : [intro, TOOLS_TONE[lang], style];
-  if (opts.health) parts.push(HEALTH_NOTE[lang]);
+  if (opts.noHealth) parts.push(NO_HEALTH_NOTE[lang]);
+  else if (opts.health) parts.push(HEALTH_NOTE[lang]);
   const base = parts.join(' ');
   if (mode === 'tools') return `${base}\n\n${TOOL_RULES[lang]}`;
   if (mode === 'sources') return `${base}\n\n${RAG_RULES[lang]}`;

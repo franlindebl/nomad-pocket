@@ -5,7 +5,9 @@ import { persist } from 'zustand/middleware';
 
 import { db, parseJson } from '@/db';
 import i18n from '@/i18n';
+import { emergencyNumber } from '@/features/maps/emergency';
 import { uid } from '@/lib/format';
+import { HEALTH_FEATURES } from '@/lib/health';
 import { kvStorage } from '@/lib/kv';
 import { useSettings } from '@/stores/settings';
 
@@ -21,6 +23,7 @@ import {
   guessIntent,
   isHealthQuestion,
   NO_LIBRARY_ANSWER,
+  noHealthAnswer,
   NOT_FOUND_ANSWER,
   ragMessageFrame,
   ROUTER_INSTRUCTIONS,
@@ -297,15 +300,20 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
   let failed: string | null = null;
   const cancelled = () => cancelledAnswers.has(streaming.messageId);
 
+  // Without health features (src/lib/health.ts) a health question gets a fixed answer, never the model's.
+  const noHealth = !HEALTH_FEATURES && health;
   // A question with "Use my library" on but nothing installed to look in: no answer from memory.
-  const noLibrary = st.useLibrary && !library && guessIntent(text, history) === 'search';
-  if (noLibrary) {
+  const noLibrary = !noHealth && st.useLibrary && !library && guessIntent(text, history) === 'search';
+  if (noHealth) {
+    answerText = noHealthAnswer(lang, emergencyNumber().number);
+    patchStreaming({ phase: 'generating', text: answerText });
+  } else if (noLibrary) {
     answerText = NO_LIBRARY_ANSWER[lang];
     patchStreaming({ phase: 'generating', text: answerText });
   }
 
   try {
-    if (!noLibrary) await withEngine(modelId, async (engine) => {
+    if (!noLibrary && !noHealth) await withEngine(modelId, async (engine) => {
       await engine.load((p) => patchStreaming({ loadProgress: p }));
       if (cancelled()) return;
 
@@ -332,7 +340,7 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
 
       // Token budget: system + history + sources + answer must fit the window.
       const answerTokens = engine.kind === 'system' ? SYSTEM_ANSWER_TOKENS : MAX_ANSWER_TOKENS;
-      let sys = systemPrompt(lang, mode === 'tools' ? 'tools' : mode === 'search' ? 'sources' : 'chat', { health, library });
+      let sys = systemPrompt(lang, mode === 'tools' ? 'tools' : mode === 'search' ? 'sources' : 'chat', { health, library, noHealth: !HEALTH_FEATURES });
       const toolTokens = mode === 'tools' ? TOOL_PROMPT_TOKENS : 0;
       // With sources in the user turn the question goes in twice (once if long), with labels.
       const questionTokens = estimateTokens(mode === 'search' ? ragMessageFrame(text, lang) : text);
@@ -361,7 +369,7 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
         }
         userTurn = r.noLibrary ? text : r.userMessage;
         // Without sources the citation rules would only confuse the model.
-        if (!sources.length) sys = systemPrompt(lang, 'chat', { health, library });
+        if (!sources.length) sys = systemPrompt(lang, 'chat', { health, library, noHealth: !HEALTH_FEATURES });
       }
       if (cancelled()) return;
 

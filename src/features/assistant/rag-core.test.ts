@@ -19,6 +19,7 @@ import {
   guardNotFound,
   guessIntent,
   isHealthQuestion,
+  noHealthAnswer,
   nominalize,
   normalize,
   NOT_FOUND_ANSWER,
@@ -328,6 +329,22 @@ describe('system prompt', () => {
     assert.match(systemPrompt('es', 'chat', { health: true }), /no consejo médico/);
     assert.doesNotMatch(systemPrompt('es', 'chat'), /consejo médico/);
     assert.match(systemPrompt('en', 'sources'), /\[1\]/);
+  });
+
+  test('without health features: no first-aid note, a rule against health advice and a fixed answer', () => {
+    assert.doesNotMatch(systemPrompt('es', 'sources', { health: true, noHealth: true }), /consejo médico/);
+    assert.match(systemPrompt('es', 'chat', { noHealth: true }), /no respondes preguntas de salud/);
+    assert.match(systemPrompt('en', 'tools', { noHealth: true }), /don't answer health questions/);
+    assert.match(noHealthAnswer('es', '112'), /llama al 112\.$/);
+    assert.match(noHealthAnswer('en', '911'), /call 911\.$/);
+  });
+
+  test('words that only start like a health term are not health questions', () => {
+    for (const q of ['How do I paint a wall?', '¿Cómo hago una medición precisa?', 'Receta de sangría', 'Picadillo de verduras', 'Gas burner repair']) {
+      assert.equal(isHealthQuestion(q), false, q);
+    }
+    assert.equal(isHealthQuestion('I have back pain'), true);
+    assert.equal(isHealthQuestion('Me sangra la nariz'), true);
   });
 
   test('answers from sources carry no small-talk lines; the router keeps the question language', () => {

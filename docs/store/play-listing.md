@@ -35,17 +35,28 @@ apply for production (seen on another app's dashboard, 2026-10-29). Plan for it:
 
 ## Full description
 
-Same as the App Store description in `listing-1.1.0.md`, with these changes (Android has no Apple
-Intelligence):
+Same as the App Store description in `listing-1.1.0.md`, with these changes. Android has no Apple
+Intelligence, and **no health features** (Google Play only lets organization accounts publish medical
+apps; see "Health apps" below), so nothing about first aid, medical guides or medical details:
 
+- es, intro: `… dónde están el hospital o el agua potable más cercanos y qué hacer ante una herida.` → `… dónde están el hospital o el agua potable más cercanos y cómo potabilizarla.`
+- en, intro: `… where the nearest hospital or drinking water is, and what to do about a wound.` → `… where the nearest hospital or drinking water is, and how to make it safe.`
+- "CUANDO LLEGA LA EMERGENCIA" / "WHEN THE EMERGENCY COMES": drop the first-aid line; plan line →
+  `• Plan familiar: puntos de encuentro, contactos y números importantes, también en PDF para imprimir` /
+  `• Family plan: meeting points, contacts and important numbers, also as a printable PDF`
+- Library: `• Más de 80 colecciones: supervivencia, agua y alimentos, agricultura, reparaciones, informática… y miles más del catálogo de Kiwix` /
+  `• 80+ collections: survival, water and food, farming, repairs, computing… plus thousands more from the Kiwix catalog`;
+  `• 12 cursos…` / `• 12 courses…` (88 archives and 12 courses once the health ones are out)
 - es, "UNA IA QUE NO NECESITA INTERNET": `• Funciona en tu teléfono, con un modelo abierto que descargas una vez`
 - en, "AN AI THAT DOESN'T NEED THE INTERNET": `• Runs on your phone, with an open model you download once`
 - es, add to that section: `• ¿Una respuesta inapropiada? Repórtala desde la propia respuesta`
 - en, add to that section: `• An inappropriate answer? Report it from the answer itself`
+- Last line: `La IA puede equivocarse. En una emergencia, llama siempre a los servicios de emergencia si puedes.` /
+  `The AI can make mistakes. In an emergency, always call the emergency services if you can.`
 
-Everything else (kit, emergency, maps, library, privacy, open source credits, the medical and AI
-disclaimer) is true on Android too: emergency numbers, routing, search, the plan's PDF and the
-expiry reminders were checked on the emulator (Android tour, `docs/E2E.md`).
+Everything else (kit, emergency points and number, maps, library, privacy, open source credits) is true on
+Android too: emergency numbers, routing, search, the plan's PDF and the expiry reminders were checked on the
+emulator (Android tour, `docs/E2E.md`).
 
 ## Graphics
 
@@ -75,7 +86,7 @@ expiry reminders were checked on the emulator (Android tour, `docs/E2E.md`).
 | Data safety | see below |
 | Government app | No |
 | Financial features | None |
-| Health apps | "Emergencias y primeros auxilios" and "Educación y referencias médicas". No medical device features, no health data collected |
+| Health apps | **"My app doesn't provide any health features"** (from 1.1.0 (25), the build without them). The first submission declared "Emergency and First Aid" and "Medical Reference and Education" and was rejected on 2026-10-29: those categories need an organization account. Play support (ticket of 2026-10-29) said what to remove; `src/lib/health.ts` turns it off on Android |
 | Actions / foreground services | None declared (the manifest has no foreground service, no exact alarms, no background location) |
 
 ## Content rating (as submitted, 2026-10-29)
@@ -116,5 +127,33 @@ Answers, matching `site/privacy.html` (re-read it before filling this in):
 
 ## Release notes for the first Play release
 
-- es: `Primera versión para Android: tu kit para cuando se caiga internet. Mapas y rutas sin conexión, emergencias cerca de ti, Wikipedia y guías médicas, plan familiar y un asistente de IA que funciona en tu teléfono.`
-- en: `First Android release: your kit for when the internet goes down. Offline maps and routes, emergency help near you, Wikipedia and medical guides, a family plan and an AI assistant that runs on your phone.`
+- es: `Primera versión para Android: tu kit para cuando se caiga internet. Mapas y rutas sin conexión, emergencias cerca de ti, Wikipedia y guías de supervivencia, plan familiar y un asistente de IA que funciona en tu teléfono.`
+- en: `First Android release: your kit for when the internet goes down. Offline maps and routes, emergency help near you, Wikipedia and survival guides, a family plan and an AI assistant that runs on your phone.`
+
+## Health features on Android (2026-10-29)
+
+The closed test 1.1.0 (24) was rejected on 2026-10-29 (Play Console Requirements: "some types of apps can
+only be distributed by organizations"). The owner's account is personal and will stay so. Play support's
+answer (ticket of 2026-10-29): declaring no health features is only accurate once the app, the bundle and the
+listing have none; to ship from a personal account remove the downloadable medical and first-aid archives,
+make sure the assistant gives no medical answers, and remove first-aid instructions and health-specific
+guidance from the preparedness section. Emergency numbers and the map's hospitals and pharmacies are fine
+as general utility.
+
+Off on Android (`HEALTH_FEATURES` in `src/lib/health.ts`, fixed at build time; iOS keeps everything):
+the medicine category and every medical archive, plus "Después del desastre" (mostly first aid), out of the
+bundled catalog (`features/catalog/health-core.ts`) and out of Explore; the 2 health courses; Home's first-aid
+shortcut (a survival guides shortcut instead); the onboarding's medical guides; the assistant's first-aid note
+and any answer to a health question (a fixed reply with the emergency number); the plan's health card
+(medication, allergies, blood type). Kept: the kit's health supplies (a shopping list, like Ready.gov's),
+Ready.gov and CD3WD, Wikipedia, the reader's "not medical advice" banner.
+
+To bring them back on Android: an organization account (D-U-N-S), the Health apps declaration updated, and
+`HEALTH_FEATURES` true on Android in a new release. Never through a remote switch: Play forbids features
+turned on after review that the declarations don't list.
+
+With the medical guides gone the content rating may come down (PEGI 18 came from their injury photos):
+redo the questionnaire with the build without health features.
+
+Screenshots to redo for Android: home (first-aid shortcut), first aid (replace), assistant (a burn
+question), library (medicine category); the plan's caption says "datos médicos".

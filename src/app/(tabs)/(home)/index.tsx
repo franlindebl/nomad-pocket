@@ -14,6 +14,7 @@ import {
   Siren,
   Sparkles,
   Stethoscope,
+  Tent,
   Users,
   Backpack,
   Wifi,
@@ -35,6 +36,7 @@ import { callPhones } from '@/features/maps/call';
 import { usePreparingCountries } from '@/features/maps/countries';
 import { useEmergencyNumber } from '@/features/maps/emergency';
 import { formatBytes } from '@/lib/format';
+import { HEALTH_FEATURES } from '@/lib/health';
 import { freeBytes } from '@/lib/storage';
 import { radius, space, useTheme, type Hue } from '@/theme';
 
@@ -53,7 +55,7 @@ const FIRST_AID: { id: string; lang: string; path?: string }[] = [
 
 const READY_ICONS: Record<ReadinessKey, { icon: LucideIcon; hue: Hue }> = {
   map: { icon: Map, hue: 'maps' },
-  guides: { icon: Stethoscope, hue: 'medicine' },
+  guides: HEALTH_FEATURES ? { icon: Stethoscope, hue: 'medicine' } : { icon: Tent, hue: 'survival' },
   wikipedia: { icon: BookOpen, hue: 'reference' },
   assistant: { icon: Sparkles, hue: 'ai' },
   plan: { icon: Users, hue: 'survival' },
@@ -131,7 +133,17 @@ export default function HomeScreen() {
       <SectionHeader title={t('crisis.title')} style={{ marginTop: space.xl }} />
       <View style={styles.grid}>
         <QuickAction testID="home-emergency" icon={Siren} hue="medicine" title={t('crisis.nearby')} onPress={() => router.navigate('/maps/emergency')} />
-        <QuickAction testID="home-first-aid" icon={HeartPulse} hue="medicine" title={t('crisis.firstAid')} onPress={openFirstAid} />
+        {HEALTH_FEATURES ? (
+          <QuickAction testID="home-first-aid" icon={HeartPulse} hue="medicine" title={t('crisis.firstAid')} onPress={openFirstAid} />
+        ) : (
+          <QuickAction
+            testID="home-guides"
+            icon={Tent}
+            hue="survival"
+            title={t('crisis.guides')}
+            onPress={() => router.navigate({ pathname: '/library/category/[slug]', params: { slug: 'survival' } })}
+          />
+        )}
         <QuickAction testID="home-plan" icon={Users} hue="survival" title={t('crisis.plan')} onPress={() => router.push('/prepare/plan')} />
         <QuickAction testID="home-call" icon={Phone} hue="medicine" title={
             emergency.for === 'ambulance'

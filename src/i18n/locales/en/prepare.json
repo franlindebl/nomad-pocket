@@ -4,6 +4,7 @@
     "intro": "If one day there is no internet or signal, keep what really matters at hand: how to find each other, who to call and what to keep at home.",
     "planTitle": "Family plan",
     "planEmpty": "Meeting points, contacts, important numbers and health",
+    "planEmptyNoHealth": "Meeting points, contacts and important numbers",
     "kitTitle": "Emergency kit",
     "kitEmpty": "Work out water and food for your household and tick what you have",
     "export": "Export PDF to print",

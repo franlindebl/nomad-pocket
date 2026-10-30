@@ -6,13 +6,14 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 
 import { Chip, EmptyState, PressableScale, ProgressRing, Row, SearchField, Text } from '@/components/ui';
-import { getResource } from '@/features/catalog';
+import { getResource, isHiddenHealthBook } from '@/features/catalog';
 import { showDownloadError, LanguageTag } from '@/features/catalog/DownloadButton';
 import { searchKiwix, shortLanguage, type KiwixEntry } from '@/features/catalog/opds';
 import { useContent } from '@/features/content/items';
 import { enqueueDownload, useDownload } from '@/features/downloads/manager';
 import { looksMedical } from '@/features/library/medical';
 import { formatBytes } from '@/lib/format';
+import { HEALTH_FEATURES } from '@/lib/health';
 import { useSettings } from '@/stores/settings';
 import { layout, radius, space, useTheme } from '@/theme';
 
@@ -43,7 +44,14 @@ export default function ExploreScreen() {
       setLoading(true);
       searchKiwix({ q: toKiwixQuery(query), lang: LANG_CODES[lang], count: 40 }, ctrl.signal)
         .then((res) => {
-          setEntries(res.entries);
+          // Without health features (src/lib/health.ts) no medical book can be downloaded from here either.
+          setEntries(
+            HEALTH_FEATURES
+              ? res.entries
+              : res.entries.filter(
+                  (e) => !isHiddenHealthBook(e.name) && !looksMedical({ names: [e.name, e.title], category: e.category, tags: e.tags }),
+                ),
+          );
           setOffline(false);
         })
         .catch((e) => {

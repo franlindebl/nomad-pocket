@@ -10,6 +10,7 @@ import { ResourceRow } from '@/features/catalog/ResourceRow';
 import { resetPrepare } from '@/features/prepare/reminders';
 import { useKitGroups } from '@/features/prepare/rows';
 import { sharePlanPdf } from '@/features/prepare/share';
+import { HEALTH_FEATURES } from '@/lib/health';
 import { useSettings } from '@/stores/settings';
 import { space, useTheme } from '@/theme';
 
@@ -70,7 +71,7 @@ export default function PrepareScreen() {
   const planBody = [
     data.meeting.primary?.place,
     summary.contacts ? t('home.contacts', { count: summary.contacts }) : '',
-    data.people.length ? t('plan.people') : '',
+    HEALTH_FEATURES && data.people.length ? t('plan.people') : '',
   ]
     .filter(Boolean)
     .join(' · ');
@@ -109,7 +110,7 @@ export default function PrepareScreen() {
       <HubCard
         icon={Users}
         title={t('hub.planTitle')}
-        body={planBody || t('hub.planEmpty')}
+        body={planBody || (HEALTH_FEATURES ? t('hub.planEmpty') : t('hub.planEmptyNoHealth'))}
         onPress={() => router.push('/prepare/plan')}
         testID="prepare-plan"
       />

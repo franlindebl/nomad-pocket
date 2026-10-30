@@ -2,7 +2,7 @@
   "searchPlaceholder": "Buscar en tu biblioteca",
   "onDevice": "En tu dispositivo",
   "onDeviceEmpty": "Tu biblioteca está vacía",
-  "onDeviceEmptyBody": "Descarga Wikipedia, guías médicas o de supervivencia y léelas sin conexión.",
+  "onDeviceEmptyBody": "Descarga Wikipedia, guías y cursos y léelos sin conexión.",
   "wikipedia": "Wikipedia",
   "wikipediaBody": "Elige el tamaño que mejor encaje con tu espacio",
   "categories": "Colecciones",
@@ -34,5 +34,5 @@
   "exploreEmpty": "Sin resultados",
   "wikipediaPick": "Elige tu Wikipedia",
   "wikipediaPickBody": "Todas funcionan sin conexión. Las versiones sin imágenes ocupan mucho menos.",
-  "coursesBody": "Aprende a tu ritmo, sin conexión: salud, ciencia, matemáticas, programación…"
+  "coursesBody": "Aprende a tu ritmo, sin conexión: ciencia, matemáticas, programación…"
 }

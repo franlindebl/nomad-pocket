@@ -42,7 +42,7 @@ can pick up without re-deriving anything.
 | Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 237 packs live (every inhabited country; the USA in six regions) since 2026-10-27; E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | planned |
 | Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search; the most capable installed model is the default; on-device dictation; reads the PDFs inside archives (document index) and the family plan; copy and regenerate an answer) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
-| Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android: app created in Play Console, App content forms done (PEGI 18, see `docs/store/play-listing.md`), 1.1.0 (23) on internal testing, Android screenshots and en-US listing done, **1.1.0 (24) sent to Google's review for the closed test** 2026-10-29; then 12 testers × 14 days and production |
+| Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android: app created in Play Console, App content forms done (PEGI 18, see `docs/store/play-listing.md`), 1.1.0 (23) on internal testing, Android screenshots and en-US listing done, 1.1.0 (24) for the closed test **rejected** 2026-10-29 (health apps need an organization account): Android now ships without health features, resubmit as 1.1.0 (25); then 12 testers × 14 days and production |
 | Preparedness (family plan, emergency kit with expiry reminders, printable PDF, offline guides) | done — iOS sim + Android emulator (E2E) |
 | E2E suite (Maestro) + pre-commit hook | done |
 | Pre-release audit (2026-10-26): ~60 verified findings fixed in code and docs | merged to main; device checks and the deferred items below pending |
@@ -303,6 +303,28 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-29 — Android without health features (Play rejected the closed test)
+
+Google rejected the closed test 1.1.0 (24) the same day: our Health apps declaration ("Emergency and First
+Aid", "Medical Reference and Education") needs an organization account, and the owner's is personal and will
+stay so. Declaring "no health features" with the app as it was would have been inaccurate (Play support
+confirmed it in a ticket), so Android now has none; iOS keeps everything.
+
+- `src/lib/health.ts`: `HEALTH_FEATURES`, false on Android, fixed at build time (Play forbids switching
+  undeclared features on after review). `features/catalog/health-core.ts` (+ tests) drops the medicine
+  category, every medical archive, "Después del desastre" and the 2 health courses from the bundled catalog;
+  Explore hides them and anything `looksMedical`.
+- Home: a survival guides shortcut instead of first aid; readiness and onboarding guides without medicine.
+  Assistant: a health question gets a fixed answer with the emergency number (`noHealthAnswer`), the prompt
+  forbids health advice, the burn starter becomes a knot one; `isHealthQuestion` no longer takes "paint",
+  "medición", "sangría", "picadillo" or "burner" for health. Plan: no health card.
+- Kept (owner's choices): the kit's health supplies, Ready.gov and CD3WD, Wikipedia; emergency number and the
+  map's hospitals and pharmacies (Play: general utility).
+- Library texts no longer mention medicine on either platform ("Wikipedia, guides and courses").
+- Next: versionCode 25 AAB, Android screenshots without first aid (home, first aid, assistant, library),
+  Play listing per `docs/store/play-listing.md`, Health apps declaration "no health features", redo the
+  content rating (the injury photos that made it PEGI 18 were in the medical guides), resubmit the closed test.
 
 ### 2026-10-29 — Android: downloads no longer stall; country picker opens fast and once
 

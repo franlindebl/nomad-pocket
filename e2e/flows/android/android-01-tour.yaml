@@ -14,7 +14,8 @@ tags: [android, network]
 
 # Collection tier: the pack button sits beside the tier's button (B1).
 - tapOn: { point: "63%,93%" }   # Biblioteca
-- tapOn: "Medicina.*"
+- assertNotVisible: "Medicina.*"   # no health features on Android (src/lib/health.ts)
+- tapOn: "Supervivencia.*"
 - tapOn: { id: "pack-download" }
 - assertVisible: "¿Descargar .*"
 - takeScreenshot: 03-pack-confirm

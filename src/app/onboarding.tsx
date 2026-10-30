@@ -1,6 +1,6 @@
 import * as Device from 'expo-device';
 import { router } from 'expo-router';
-import { BookOpen, Check, Compass, Map, ShieldCheck, Sparkles, Stethoscope, Users, X, type LucideIcon } from 'lucide-react-native';
+import { BookOpen, Check, Compass, Map, ShieldCheck, Sparkles, Stethoscope, Tent, Users, X, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
@@ -30,6 +30,7 @@ import { guideResources, pickModel, pickWikipedia } from '@/features/onboarding/
 import { useItems } from '@/features/content/items';
 import type { AppLanguage } from '@/i18n';
 import { formatBytes } from '@/lib/format';
+import { HEALTH_FEATURES } from '@/lib/health';
 import { freeBytes, STORAGE_HEADROOM } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
 import { layout, radius, space, useTheme, type Hue } from '@/theme';
@@ -312,12 +313,14 @@ export default function OnboardingScreen() {
             </View>
             <Text variant="display">{t('onboarding.welcomeTitle')}</Text>
             <Text variant="body" color="textSecondary">
-              {t('onboarding.welcomeBody')}
+              {HEALTH_FEATURES ? t('onboarding.welcomeBody') : t('onboarding.welcomeBodyNoHealth')}
             </Text>
             <View style={{ gap: space.md }}>
               {[
                 { icon: Map, hue: 'maps' as Hue, key: 'pointMaps' },
-                { icon: Stethoscope, hue: 'medicine' as Hue, key: 'pointGuides' },
+                HEALTH_FEATURES
+                  ? { icon: Stethoscope, hue: 'medicine' as Hue, key: 'pointGuides' }
+                  : { icon: Tent, hue: 'survival' as Hue, key: 'pointGuidesNoHealth' },
                 { icon: Sparkles, hue: 'ai' as Hue, key: 'pointAi' },
                 { icon: Users, hue: 'survival' as Hue, key: 'pointPlan' },
               ].map((p) => (
@@ -410,10 +413,10 @@ export default function OnboardingScreen() {
               ) : null}
               <KitRow
                 testID="kit-guides"
-                icon={Stethoscope}
-                hue="medicine"
+                icon={HEALTH_FEATURES ? Stethoscope : Tent}
+                hue={HEALTH_FEATURES ? 'medicine' : 'survival'}
                 title={t('onboarding.kit.guides')}
-                body={t('onboarding.kit.guidesBody')}
+                body={HEALTH_FEATURES ? t('onboarding.kit.guidesBody') : t('onboarding.kit.guidesBodyNoHealth')}
                 size={kit.guides.length ? t('onboarding.kit.guidesSize', { count: kit.guides.length, size: sizeLabel(kit.guidesBytes) }) : null}
                 value={on.guides}
                 onChange={kit.guides.length ? (v) => setOn((o) => ({ ...o, guides: v })) : undefined}
@@ -535,7 +538,7 @@ export default function OnboardingScreen() {
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text variant="headline">{t('onboarding.planTitle')}</Text>
                   <Text variant="footnote" color="textSecondary">
-                    {t('onboarding.planBody')}
+                    {HEALTH_FEATURES ? t('onboarding.planBody') : t('onboarding.planBodyNoHealth')}
                   </Text>
                 </View>
               </Row>
