@@ -1016,8 +1016,27 @@ at a nominal speed, and, where the routing catalog has a pack covering the targe
 country's download (`maps/download`); installing a
 pack mid-guidance retries the route (`retryRoute`). Arrival ≤ max(20 m, accuracy ≤ 50 m) from the target, with a haptic; at the route's end
 (it stops at the road nearest the target) the last stretch switches to the arrow. A session counter drops superseded starts, a
-request counter late routes. Turn-by-turn voice, background location and rerouting
-polish are phase 3 (`docs/MAPS_NAVIGATION_PLAN.md`).
+request counter late routes.
+**Background** (2026-10-31): the preview's GPS watch is expo-location's (foreground only, as
+before). "Iniciar" (or "Ir" in the car) swaps it for `watchNavigationAsync` (`src/lib/navigation-watch.ts`,
+`modules/nomad-location`), which keeps going with the screen locked: on iOS a `CLLocationManager`
+with `allowsBackgroundLocationUpdates` (`UIBackgroundModes: location`, the "While Using" permission
+is enough for a watch started in front, the blue pill shows); on Android a foreground service of
+type location (`NavigationService.kt`, notification "Navegación en curso · Hacia …"; no
+`ACCESS_BACKGROUND_LOCATION`). A `gpsRequest` counter keeps only the latest watch when the swap and
+a start race.
+**Voice** (`voice.ts`, pure `voice-core.ts`, `modules/nomad-voice`): while navigating on a route,
+each maneuver gets an early announcement ("En 400 metros, gire a la derecha hacia…": Valhalla's
+`verbal_transition_alert_instruction` after a round distance in the region's units; 400 m / 1 km /
+2 km by car as speed grows, 200 m by bike, 100 m on foot) and the prompt itself about 6 s before
+(`verbal_pre_transition_instruction`, which already chains a close next maneuver: then the next one
+gets no early announcement, `verbal_multi_cue`). The start instruction once per trip (not after a
+reroute), nothing while > 60 m off the route. Prompts queue, never cut each other. Native side: iOS
+`AVSpeechSynthesizer` with the audio session in `.voicePrompt` mode, ducking others and released
+with `.notifyOthersOnDeactivation` (`UIBackgroundModes: audio`); Android `TextToSpeech` with
+navigation-guidance audio attributes and transient may-duck focus (silent without a TTS engine or
+a voice for the language). Speaker button in the navigation bar (`guidance-voice`, setting
+`navVoice`, on by default).
 **Lifecycle**: `startGuidance()` is the single "take me there" entry (place card, saved places,
 Emergencias, search); when location is denied it shows an alert with "Open Settings" instead of
 doing nothing. Guidance ends by itself 60 s after arrival and the screen only stays awake while
@@ -1052,6 +1071,38 @@ Routes: `maps/index` (map, locate-me, compass, long-press to add a pin), sheets
 (`CountryList`), `download` (one country: what it includes and its exact size), `markers`,
 `marker` (edit/delete), `search`, `emergency` (points of the installed maps; maps still
 without them are fetched on their own when the sheet opens online) and `route-steps`.
+
+### CarPlay (`modules/nomad-carplay`, `src/features/carplay`, `plugins/with-carplay.js`)
+
+Navigation only (`docs/CARPLAY_PLAN.md`). **One guidance**: JS (`useGuidance`) owns routes,
+progress, rerouting and voice; the car shows it and sends back what the driver chose, so a trip
+started on the phone shows in the car and the other way round.
+- **Scene**: `with-carplay.js` adds the `CPTemplateApplicationSceneSessionRoleApplication` scene
+  (`NomadCarPlaySceneDelegate`) and the `com.apple.developer.carplay-maps` entitlement only with the
+  plugin option `entitlement: true` or `CARPLAY_ENTITLEMENT=1` at prebuild (off in `app.json` until
+  Apple grants it: a device build with an entitlement its profile lacks doesn't sign).
+- **Started from the car**: Expo starts React Native when the phone's window scene connects. With
+  only the CarPlay scene (phone locked), `CarPlayBoot` starts it into a window no screen shows, and
+  the phone's `SceneDelegate` (rewritten by the plugin) adopts that root view controller later.
+- **Map** (`CarMapViewController.swift`): MapLibre Native (`MLNMapView`, the same SPM package and
+  version maplibre-react-native links, via `spm_dependency` in the podspec) with the style JSON
+  `buildMapStyle` makes for light and dark (the car's appearance picks), the route line, the
+  destination pin. Its own location manager (`CarLocationManager`) runs in the background (MapLibre's
+  default one froze with the phone locked). Following: course up, tilted, user low while
+  navigating; north up otherwise. Map buttons: recentre (only after a pan), zoom ±, pan mode.
+- **Templates** (`CarPlayController.swift`): `CPMapTemplate` with "Destinos" → list (Buscar →
+  `CPSearchTemplate` over `searchPlaces`; Guardados = markers by distance; Emergencias cerca: one row
+  per category → nearest points, health only with `HEALTH_FEATURES`). A pick → `onPick` → JS
+  `startGuidance` by car → trip preview (`CPTrip`, estimates, note with tolls / ferry, "Ir") → `onStart`
+  → `startNavigation` and a `CPNavigationSession`: maneuver panel (SF Symbols per `maneuverIcon`, the
+  next two maneuvers), estimates every fix, paused "Recalculando" while a reroute loads, finished on
+  arrival. "Finalizar" / "Cancelar" (`onEnd`) stops guidance. Straight-line guidance shows as a
+  maneuver "Hacia el NE, en línea recta".
+- **JS** (`carplay.ts`, pure `carplay-core.ts`): on connect it pushes the texts, the styles and the
+  state; then guidance changes (not the compass), map installs and the language. List requests are
+  answered from the app's data (8 s timeout on the native side).
+- Testing: Xcode simulator, I/O → External Displays → CarPlay; `xcrun simctl io booted screenshot
+  --display=external`.
 
 ### Assistant (`modules/nomad-llm`, `src/features/assistant`, `src/app/(tabs)/assistant`)
 - `modules/nomad-llm`: `getSystemModelStatus()` → `{ status: available | notEnabled |

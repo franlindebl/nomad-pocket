@@ -165,6 +165,12 @@
       "./plugins/with-android-backup-rules",
       "./plugins/with-android-no-firebase",
       "./plugins/with-android-no-install-referrer",
+      [
+        "./plugins/with-carplay",
+        {
+          "entitlement": false
+        }
+      ],
       "./plugins/with-store-build",
       [
         "expo-speech-recognition",

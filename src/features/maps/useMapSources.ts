@@ -17,15 +17,18 @@ export function resolveMapFile(item: Pick<InstalledItem, 'fileUri'>): string {
   return name ? contentFile('map', name).uri : item.fileUri;
 }
 
-/** Installed map items: the world basemap first, then regions by detail (more detail on top). */
+/** Map items with today's file URIs: the world basemap first, then regions by detail (more detail on top). */
+export function sortMapItems(items: MapItem[]): { world: MapItem | undefined; regions: MapItem[]; all: MapItem[] } {
+  const resolved = items.map((i) => ({ ...i, fileUri: resolveMapFile(i) }));
+  const world = resolved.find((i) => i.id === mapItemId(WORLD_ID));
+  const regions = resolved
+    .filter((i) => i.id !== mapItemId(WORLD_ID))
+    .sort((a, b) => (a.meta.maxZoom ?? 0) - (b.meta.maxZoom ?? 0) || a.installedAt - b.installedAt);
+  return { world, regions, all: world ? [world, ...regions] : regions };
+}
+
+/** Installed map items, sorted as sortMapItems does. */
 export function useMapItems(): { world: MapItem | undefined; regions: MapItem[]; all: MapItem[] } {
   const items = useItems('map') as MapItem[];
-  return useMemo(() => {
-    const resolved = items.map((i) => ({ ...i, fileUri: resolveMapFile(i) }));
-    const world = resolved.find((i) => i.id === mapItemId(WORLD_ID));
-    const regions = resolved
-      .filter((i) => i.id !== mapItemId(WORLD_ID))
-      .sort((a, b) => (a.meta.maxZoom ?? 0) - (b.meta.maxZoom ?? 0) || a.installedAt - b.installedAt);
-    return { world, regions, all: world ? [world, ...regions] : regions };
-  }, [items]);
+  return useMemo(() => sortMapItems(items), [items]);
 }
