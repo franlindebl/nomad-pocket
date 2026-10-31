@@ -39,10 +39,11 @@ test('modelFit flags models that need more RAM', () => {
   assert.equal(modelFit(gemma, null), 'good');
 });
 
-test('modelRank puts the system model between Qwen3.5 2B and 4B', () => {
-  assert.ok(modelRank('qwen3.5-4b-q4km') > modelRank(SYSTEM_MODEL_ID));
-  assert.ok(modelRank(SYSTEM_MODEL_ID) > modelRank('qwen3.5-2b-q4km'));
-  assert.ok(modelRank('qwen3.5-2b-q4km') > modelRank('qwen3.5-0.8b-q4km'));
+test('modelRank puts the system model between Qwen3.5 0.8B and 2B', () => {
+  assert.ok(modelRank('qwen3.5-4b-q4km') > modelRank('qwen3.5-2b-q4km'));
+  assert.ok(modelRank('qwen3.5-2b-q4km') > modelRank(SYSTEM_MODEL_ID));
+  assert.ok(modelRank('gemma-4-e2b-q4km') > modelRank(SYSTEM_MODEL_ID));
+  assert.ok(modelRank(SYSTEM_MODEL_ID) > modelRank('qwen3.5-0.8b-q4km'));
   assert.equal(modelRank(null), 0);
   assert.equal(modelRank('unknown'), 0);
 });
@@ -50,5 +51,6 @@ test('modelRank puts the system model between Qwen3.5 2B and 4B', () => {
 test('bestModel picks the most capable, the first one on a tie', () => {
   assert.equal(bestModel([]), null);
   assert.equal(bestModel(['qwen3.5-0.8b-q4km', SYSTEM_MODEL_ID, 'qwen3.5-4b-q4km']), 'qwen3.5-4b-q4km');
-  assert.equal(bestModel([SYSTEM_MODEL_ID, 'gemma-4-e2b-q4km']), SYSTEM_MODEL_ID);
+  assert.equal(bestModel([SYSTEM_MODEL_ID, 'gemma-4-e2b-q4km']), 'gemma-4-e2b-q4km');
+  assert.equal(bestModel(['qwen3.5-0.8b-q4km', SYSTEM_MODEL_ID]), SYSTEM_MODEL_ID);
 });

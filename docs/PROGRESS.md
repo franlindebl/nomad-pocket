@@ -67,6 +67,15 @@ Roughly by value. Items A, U and 0 are in progress; 3, 4 and 7 are partly done (
 started. (Preparedness was added
 on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
 
+AI. **Assistant quality** (`docs/ASSISTANT_QUALITY_PLAN.md`, measured 2026-10-31 on the Spain kit with 50 crisis
+   questions, blind-graded): Apple FM scores 0.42/3 and Qwen3.5 4B 1.30/3 as the app is; retrieval v2 + Spanish
+   content 1.94/3. In order: ~~(1) propose Qwen even with Apple Intelligence; (2) retrieval bugs: only the first 8
+   archives give full-text hits, duplicated articles across Wikipedias, a leaked `<tool_call>`~~ done 2026-10-31
+   (no score change alone: 1.28 vs 1.32, blind); (3) bench before
+   assistant changes (`scripts/assistant-bench`); (4) bilingual search (`query_en`); (5) semantic rerank
+   (EmbeddingGemma, measure on a phone first); (6) a vetted bilingual emergency guide: every variant gave 3–8
+   harmful answers out of 50 (CPR, choking, bleach dose, CO); (7) Spanish Ready.gov/MedlinePlus in the kit.
+
 CU. **Content updates, next** (`docs/CONTENT_UPDATES_PLAN.md`): the owner tries build 27 on the iPhone; later an
    optional "update automatically on Wi-Fi" switch. A delete-first update that goes through was checked by hand
    only (it needs a nearly full phone; E2E covers the refusal).
@@ -319,6 +328,33 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-31 — Assistant: measured on real content, plan to fix it
+
+- Owner: Apple Intelligence refuses most questions (fire, wounds), the answers are bad even for the chat's own
+  starters; should we recommend Qwen, add content, preprocess/vectorize? Test with ~50 crisis questions and
+  Qwen 3.5 4B on a real Spain onboarding.
+- Fresh iOS 27 simulator `NP-ai` onboarded for Spain on production data (12 guides + full Spanish Wikipedia;
+  with Apple Intelligence the kit offers no model). Bench in `scripts/assistant-bench` (README): libzim server
+  over the simulator's ZIMs + the app's `search.db`, a Node mirror of `rag.ts` on the real pure modules, Qwen
+  through `llama-server` with the app's two-pass tool flow, Apple FM through FoundationModels on macOS 27, a
+  runner that types the questions into the app, blind grading sheets.
+- Results and findings in `docs/ASSISTANT_QUALITY_PLAN.md`: Apple 0.42/3 (27 of 50 "not found", router refused 3,
+  the app refused "¿Cómo hago fuego sin mechero ni cerillas?" mid-answer); Qwen as is 1.30; 0 of 50 answers used
+  any English guide; 21 of 50 had a duplicated source; `zim.search` keeps 8 hits round-robin, so the oldest
+  installs never give full-text hits; adding Spanish content alone did nothing (1.32), with retrieval v2
+  (bilingual, per-archive hits, dedup, EmbeddingGemma rerank) 1.94. Harmful answers in every variant. Nothing
+  changed in the app; backlog item AI. The simulator's CoreSimulator hung once under load and recovered alone.
+- Then steps 1–2 of the plan (owner OK): the onboarding kit proposes the recommended Qwen next to Apple
+  Intelligence ("…el modelo recomendado para emergencias. Mientras se descarga, responde Apple Intelligence": no
+  comparison with Apple's model, for App Review), Apple answers until the
+  download ends and Qwen takes over (`SYSTEM_MODEL_RANK` 3 → 1.5: below Qwen 2B and Gemma, above 0.8B; seen on a new
+  iOS 27 simulator, NP-ai2). Retrieval: `zim.search(…, perArchive)`, 3 hits per archive and query, up to 8 articles
+  (was 6), one copy per title across archives; `stripToolCalls` on llama.cpp output; `guardNotFound` drops a lone
+  "No lo he encontrado en tu biblioteca." line before a cited answer. Bench: duplicated sources 21 → 0, "not found"
+  12 → 12, blind score 1.32 → 1.28 (noise): these fixes only pay off with bilingual search and content (steps 4–7).
+  tsc, lint, tests (446), i18n clean. Owner decided on the guide (step 6): full, faithful copies of official
+  public-domain sources only, vital protocols shown verbatim.
 
 ### 2026-10-31 — Content updates: E2E on iOS and Android
 

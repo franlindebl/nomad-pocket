@@ -434,7 +434,9 @@ the country download (`useCountrySize`), essential guides (`guideResources`: med
 survival, agriculture essential tiers in the content languages, items ≤ 300/100 MB, plus
 `zimgit-post-disaster_en`), Wikipedia (`pickWikipedia`: all-nopic / all-mini / top-nopic /
 top-mini, the biggest that leaves 60 / 20 / 6 / 0 GB free after the rest), the assistant
-(the system model if available, else `recommendModel(ram)`) → done (family plan shortcut).
+(`recommendModel(ram)`, also next to Apple Intelligence, which answers far worse:
+`docs/ASSISTANT_QUALITY_PLAN.md`; the system model stays active until the download ends) → done (family plan
+shortcut).
 Pieces already on the phone show as installed, pieces in flight as downloading (excluded from
 the total) and pieces that won't fit say so; the total is checked against the space a country
 takes while installing (`countrySize.needed`: the assembly copy plus the queued downloads).
@@ -1202,7 +1204,8 @@ started on the phone shows in the car and the other way round.
 
   `modelFit(model, ramGB)` and `recommendModel(ram)` (largest Qwen that fits). Items are
   `kind: 'model'`, id = model id; `useSettings.aiModelId` is a model id or `'system'`.
-  `rank` orders answer quality (Qwen3.5 0.8B 1, 2B 2, Apple FM and Gemma 4 E2B 3, Qwen3.5 4B 4;
+  `rank` orders answer quality (Qwen3.5 0.8B 1, Apple FM 1.5, 2B 2, Gemma 4 E2B 3, Qwen3.5 4B 4; Apple FM scored 0.42 of 3 against Qwen 4B's 1.30
+  on the crisis bench, `docs/ASSISTANT_QUALITY_PLAN.md`;
   `modelRank`/`bestModel`): an installed model becomes the active one when it beats the current
   choice (or nothing usable is selected); the user's pick in the models screen stays until then.
   Removing the active model (or finding its file gone at startup) falls back to the best one left. `tools`: how the model calls
@@ -1214,7 +1217,7 @@ started on the phone shows in the car and the other way round.
   GPU layers on real iOS devices, CPU elsewhere). `engine.decides` says how the model
   chooses to search: `tools` (GGUF: pass 1 offers search_library — Qwen with thinking
   on, budget 256 tokens — and either answers or calls it; pass 2 answers from the tool
-  result with `tool_choice: 'none'`), `router` (Apple FM: `route()`), or null (an engine that can't decide: heuristics). `withEngine(modelId, fn)`,
+  result with `tool_choice: 'none'`; a tool call it writes as text anyway is stripped, `stripToolCalls`), `router` (Apple FM: `route()`), or null (an engine that can't decide: heuristics). `withEngine(modelId, fn)`,
   `stopGeneration()`, `releaseEngine()`, `releaseIfModel()`. One engine alive at a time;
   released on background and after 4 idle minutes. Release is terminal (a `released` flag:
   `load`/`generate` return stopped afterwards), and the AppState background hook also ends the
@@ -1242,8 +1245,9 @@ started on the phone shows in the car and the other way round.
   quedamos", but no topic words; source id `prepare:plan`, its chip opens the plan; the router and tool
   prompts name the plan, or "where do we meet?" was small talk), plus articles named after the question found by exact path
   (`buildTitleCandidates`: survival topics, word runs, the head word; ranked first and weighted when ranking
-  chunks; reciprocal-rank fusion) → up to 6 distinct articles
-  (redirects counted once) → chunks of 650 chars → BM25 (with title and search-rank
+  chunks; reciprocal-rank fusion) → libzim full-text hits, 3 per archive and query
+  (the round-robin used to stop at 8 in all, leaving the oldest installs out) → up to 8 distinct articles
+  (redirects counted once, one copy of a title found in two archives) → chunks of 650 chars → BM25 (with title and search-rank
   boosts) → drop chunks sharing too few question terms (`relevantChunks`) → pack the
   best chunks into the model's budget as numbered sources → `[n]` citations, in the user
   turn (`sources` prompt) or as the tool result. Health questions get an extra caution

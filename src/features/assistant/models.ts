@@ -109,11 +109,12 @@ export function getModel(id: string | null | undefined): GgufModel | undefined {
 }
 
 /**
- * Apple's on-device model (~3B, 2-bit) sits between Qwen3.5 2B and 4B: on par with
- * Gemma 4 E2B, behind Qwen3.5 4B in reasoning, Spanish and tool use, and its guardrails
- * refuse some medical questions.
+ * Apple's on-device model (~3B, 2-bit) ranks below every downloadable model but Qwen3.5 0.8B: on 50
+ * crisis questions over the Spain kit it scored 0.42 of 3 against Qwen3.5 4B's 1.30, said "not found"
+ * to 27, and its guardrails refuse questions about fire, wounds or charging a phone
+ * (docs/ASSISTANT_QUALITY_PLAN.md).
  */
-const SYSTEM_MODEL_RANK = 3;
+const SYSTEM_MODEL_RANK = 1.5;
 
 /** Answer quality of a model id ('system' included); 0 for nothing or an unknown id. */
 export function modelRank(id: string | null | undefined): number {

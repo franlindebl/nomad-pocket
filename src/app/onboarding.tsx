@@ -170,7 +170,8 @@ export default function OnboardingScreen() {
     const model = pickModel(ramGB(Device.totalMemory));
     const modelInstalled = installedIds.has(model.id);
     const modelDownloading = !modelInstalled && pendingIds.has(model.id);
-    const modelBytes = systemModel || modelInstalled || modelDownloading ? 0 : model.sizeBytes;
+    // Proposed even next to the phone's own model, which answers far worse (docs/ASSISTANT_QUALITY_PLAN.md).
+    const modelBytes = modelInstalled || modelDownloading ? 0 : model.sizeBytes;
     const wikiLang = s.contentLanguages.includes(s.language) ? s.language : (s.contentLanguages[0] ?? 'en');
     const installedWiki = catalog.wikipedia[wikiLang]?.find((o) => installedIds.has(o.resourceId));
     // Any Wikipedia on its way: the free space has shrunk since it was picked, so a new pick
@@ -235,8 +236,9 @@ export default function OnboardingScreen() {
         await downloadResource(r);
         count++;
       }
+      // The phone's own model answers until the download ends; then the better one takes over (register.ts).
       if (kit.systemModel) keepSystemModel();
-      else if (on.assistant && !kit.modelInstalled && !kit.modelDownloading) {
+      if (on.assistant && !kit.modelInstalled && !kit.modelDownloading) {
         await downloadModel(kit.model);
         count++;
       }
@@ -272,7 +274,7 @@ export default function OnboardingScreen() {
     (on.country && kit.countryWanted) ||
     (on.guides && kit.guides.length > 0) ||
     (on.wikipedia && !!kit.wiki) ||
-    (on.assistant && !kit.systemModel && !kit.modelInstalled && !kit.modelDownloading);
+    (on.assistant && !kit.modelInstalled && !kit.modelDownloading);
   const installedBadge = { label: tc('status.installed'), tone: 'success' } as const;
   const downloadingBadge = { label: tc('status.running'), tone: 'accent' } as const;
   const preparingBadge = { label: tc('status.processing'), tone: 'accent' } as const;
@@ -455,24 +457,17 @@ export default function OnboardingScreen() {
                 hue="ai"
                 title={t('onboarding.kit.assistant')}
                 body={
-                  kit.systemModel
-                    ? t('onboarding.kit.assistantSystem', { provider: t(`assistant:models.systemProvider.${kit.systemModel}`) })
+                  kit.systemModel && !kit.modelInstalled
+                    ? t('onboarding.kit.assistantOverSystem', {
+                        name: kit.model.name,
+                        provider: t(`assistant:models.systemProvider.${kit.systemModel}`),
+                      })
                     : t('onboarding.kit.assistantModel', { name: kit.model.name })
                 }
-                size={kit.systemModel || kit.modelInstalled || kit.modelDownloading ? null : sizeLabel(kit.modelBytes)}
+                size={kit.modelInstalled || kit.modelDownloading ? null : sizeLabel(kit.modelBytes)}
                 value={on.assistant}
-                onChange={
-                  kit.systemModel || kit.modelInstalled || kit.modelDownloading ? undefined : (v) => setOn((o) => ({ ...o, assistant: v }))
-                }
-                badge={
-                  kit.systemModel
-                    ? { label: t('onboarding.kit.included'), tone: 'success' }
-                    : kit.modelInstalled
-                      ? installedBadge
-                      : kit.modelDownloading
-                        ? downloadingBadge
-                        : undefined
-                }
+                onChange={kit.modelInstalled || kit.modelDownloading ? undefined : (v) => setOn((o) => ({ ...o, assistant: v }))}
+                badge={kit.modelInstalled ? installedBadge : kit.modelDownloading ? downloadingBadge : undefined}
               />
             </View>
             <Card style={{ gap: space.xs }}>

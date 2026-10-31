@@ -14,7 +14,7 @@ import { contentFile, toNativePath } from '@/lib/storage';
 
 import * as SystemLLM from '../../../modules/nomad-llm';
 import { getModel, SYSTEM_MODEL_ID } from './models';
-import { parseToolQuery, SEARCH_TOOL_NAME, stripThinking, type Turn } from './rag-core';
+import { parseToolQuery, SEARCH_TOOL_NAME, stripThinking, stripToolCalls, type Turn } from './rag-core';
 
 /** The library search offered to a model that calls tools. */
 export type SearchTool = {
@@ -295,7 +295,7 @@ class LlamaEngine implements Engine {
           } else {
             raw += data.token;
           }
-          const next = stripThinking(raw);
+          const next = stripToolCalls(stripThinking(raw));
           if (next !== text) {
             text = next;
             req.onText(text);
@@ -305,7 +305,7 @@ class LlamaEngine implements Engine {
         }
       },
     );
-    const final = stripThinking(result.content ?? result.text ?? raw).trim() || text;
+    const final = stripToolCalls(stripThinking(result.content ?? result.text ?? raw)) || text;
     const toolCalls = (result.tool_calls ?? []) as LlamaToolCall[];
     return { text: final, stopped: this.stopRequested || !!result.interrupted, toolCalls: toolCalls.length ? toolCalls : undefined };
   }

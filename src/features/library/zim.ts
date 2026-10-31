@@ -165,8 +165,12 @@ export async function suggest(itemIds: string[], query: string, limit = 20): Pro
   return interleave(lists, limit);
 }
 
-/** Full-text search (Xapian). Falls back to suggestions when there is no full-text index. */
-export async function search(itemIds: string[], query: string, limit = 20): Promise<ZimSearchHit[]> {
+/**
+ * Full-text search (Xapian). Falls back to suggestions when there is no full-text index. `perArchive`
+ * caps each archive's hits (default `limit`); the lists are merged round-robin up to `limit`, so a
+ * `limit` under the number of archives leaves the last ones out.
+ */
+export async function search(itemIds: string[], query: string, limit = 20, perArchive = limit): Promise<ZimSearchHit[]> {
   const q = query.trim();
   if (!q || !itemIds.length) return [];
   const lists = await Promise.all(
@@ -174,9 +178,9 @@ export async function search(itemIds: string[], query: string, limit = 20): Prom
       const info = await ensureOpen(id);
       if (!info) return [];
       try {
-        const hits = info.hasFulltextIndex ? await NomadZim.search(id, q, limit) : [];
+        const hits = info.hasFulltextIndex ? await NomadZim.search(id, q, perArchive) : [];
         if (hits.length) return hits.map((h) => toHit(id, h));
-        return (await NomadZim.suggest(id, q, limit)).map((h) => toHit(id, h, false));
+        return (await NomadZim.suggest(id, q, perArchive)).map((h) => toHit(id, h, false));
       } catch {
         return [];
       }

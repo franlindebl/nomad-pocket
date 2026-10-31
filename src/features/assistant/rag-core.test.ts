@@ -37,6 +37,7 @@ import {
   splitSentences,
   stem,
   stripThinking,
+  stripToolCalls,
   systemPrompt,
   tokenize,
   trimHistory,
@@ -299,6 +300,14 @@ describe('answers and history', () => {
   test('stripThinking removes reasoning blocks, closed or not', () => {
     assert.equal(stripThinking('<think>hmm</think>\nHola'), 'Hola');
     assert.equal(stripThinking('<think>todavía pensando'), '');
+  });
+
+  test('stripToolCalls removes a tool call written as text, closed or not', () => {
+    const leaked = '<tool_call>\n<function=search_library>\n<parameter=query>\nextintores aceite\n</parameter>\n</function>\n</tool_call>';
+    assert.equal(stripToolCalls(leaked), '');
+    assert.equal(stripToolCalls('Tapa la sartén [1].\n<tool_call>\n<function=search_library>'), 'Tapa la sartén [1].');
+    assert.equal(stripToolCalls('<function=search_library><parameter=query>x</parameter></function>'), '');
+    assert.equal(stripToolCalls('Usa una tapa, nunca agua.'), 'Usa una tapa, nunca agua.');
   });
 
   test('trimHistory keeps recent whole turns and starts with the user', () => {
@@ -626,6 +635,15 @@ describe('guardNotFound: no answers from memory after a search', () => {
     const normal = 'Usa 2 gotas de lejía por litro y espera 30 minutos [1]. No lo he encontrado para otros volúmenes.';
     assert.equal(guardNotFound(normal, 'es'), normal);
     assert.equal(guardNotFound('Boil it for one minute.', 'en'), 'Boil it for one minute.');
+  });
+
+  test('a lone "not found" line before an answer from the sources is dropped', () => {
+    const both = 'No lo he encontrado en tu biblioteca.\n\n[1] menciona usar una lupa para concentrar la luz solar.';
+    assert.equal(guardNotFound(both, 'es'), '[1] menciona usar una lupa para concentrar la luz solar.');
+    assert.equal(guardNotFound("I couldn't find this in your library.\nUse a magnifying glass [2].", 'en'), 'Use a magnifying glass [2].');
+    // Part of a sentence that goes on: kept.
+    const partial = 'No lo he encontrado en tu biblioteca para niños, pero en adultos son 30 compresiones [1].';
+    assert.equal(guardNotFound(partial, 'es'), partial);
   });
 
   test('the fixed answer reads as "not found" itself (no sources attached)', () => {

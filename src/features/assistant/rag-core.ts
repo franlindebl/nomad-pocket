@@ -402,6 +402,8 @@ export function readableDocTitle(title: string, archiveTitle: string): string {
 
 /** Answers that say the library had nothing ("No lo he encontrado en tu biblioteca"). */
 const NOT_FOUND_RE = /no lo he encontrado|no he encontrado|couldn['’]?t find|could not find|did not find|didn['’]?t find/i;
+/** The not-found sentence alone, as the model's first line, before an answer that cites sources. */
+const LONE_NOT_FOUND_RE = /^\s*(?:no lo he encontrado en tu biblioteca|i couldn['’]?t find this in your library)[.!]?\s*\n+/i;
 
 /**
  * The answer when the library has nothing on a question: never one from the model's memory. Small
@@ -426,7 +428,9 @@ search says so too, then invents). Applied while it streams too,
  * so the invented part never shows; an answer that goes on to cite a source is kept whole.
  */
 export function guardNotFound(answer: string, lang: Lang): string {
-  if (citedNumbers(answer).length) return answer;
+  // "No lo he encontrado en tu biblioteca." on its own and then an answer from the sources (Apple FM
+  // did it): the opening contradicts the rest, so it goes.
+  if (citedNumbers(answer).length) return answer.replace(LONE_NOT_FOUND_RE, '');
   const lead = answer.trimStart().slice(0, 200);
   const end = lead.search(/[.!?\n]/);
   return NOT_FOUND_RE.test(end >= 0 ? lead.slice(0, end + 1) : lead) ? NOT_FOUND_ANSWER[lang] : answer;
@@ -974,4 +978,15 @@ export function trimHistory(turns: Turn[], budgetChars: number): Turn[] {
 /** Removes reasoning blocks some models emit (<think>…</think>), also unterminated ones. */
 export function stripThinking(text: string): string {
   return text.replace(/<think>[\s\S]*?(<\/think>|$)/g, '').replace(/^\s+/, '');
+}
+
+/**
+ * Removes a tool call written as text (Qwen3.5 4B once answered the second pass, where tools are off,
+ * with `<tool_call><function=search_library>…`), also unterminated ones: the person would see it raw.
+ */
+export function stripToolCalls(text: string): string {
+  return text
+    .replace(/<tool_call>[\s\S]*?(<\/tool_call>|$)/g, '')
+    .replace(/<function=[\s\S]*?(<\/function>|$)/g, '')
+    .trim();
 }

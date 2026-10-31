@@ -15,6 +15,7 @@ import {
   buildRagUserMessage,
   buildTitleCandidates,
   chunkText,
+  normalize,
   planRetrieval,
   readableDocTitle,
   packContext,
@@ -37,10 +38,14 @@ export type RetrievalResult = {
   overflow?: boolean;
 };
 
-const HITS_PER_QUERY = 8;
+/**
+ * Hits per archive and query. Every archive gets its share: with 8 hits in all, merged round-robin, the
+ * Spain kit's 13 archives left the five oldest installs (water, CDC, medicine guides…) out of every answer.
+ */
+const HITS_PER_ARCHIVE = 3;
 /** Hits read to find MAX_ARTICLES distinct articles (several hits can redirect to one). */
-const MAX_HITS = 12;
-const MAX_ARTICLES = 6;
+const MAX_HITS = 18;
+const MAX_ARTICLES = 8;
 const ARTICLE_CHARS = 9000;
 const CHUNK_SIZE = 650;
 const CHUNK_OVERLAP = 120;
@@ -121,7 +126,9 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
   const [first, second] = buildTitleCandidates(relevanceTexts[0]);
   const [lists, titled, passages] = itemIds.length
     ? await Promise.all([
-        Promise.all(queries.map((q) => search(itemIds, q, HITS_PER_QUERY).catch(() => [] as ZimSearchHit[]))),
+        Promise.all(
+          queries.map((q) => search(itemIds, q, itemIds.length * HITS_PER_ARCHIVE, HITS_PER_ARCHIVE).catch(() => [] as ZimSearchHit[])),
+        ),
         titleHits(itemIds, first).then(async (hits) => (hits.length ? hits : firstTitleHits(itemIds, second))),
         searchDocuments(itemIds, queries, DOC_PASSAGES).catch(() => [] as DocHit[]),
       ])
@@ -138,6 +145,9 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
     hits.map(async (h) => ({ hit: h, article: await getArticleText(h.itemId, h.path, ARTICLE_CHARS).catch(() => null) })),
   );
   const named = new Set(titled.map((h) => keyOf(h.itemId, h.path)));
+  // One copy of an article two archives share (medicine Wikipedia is part of the full one): the second
+  // took an article slot and room in the prompt in 21 of 50 answers.
+  const titles = new Set<string>();
   for (const { hit, article } of articles) {
     if (refs.size >= MAX_ARTICLES) break;
     const text = article?.text || hit.snippet;
@@ -147,6 +157,9 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
     const key = keyOf(hit.itemId, path);
     if (refs.has(key)) continue;
     const title = article?.title || hit.title;
+    const titleKey = normalize(title);
+    if (titles.has(titleKey)) continue;
+    titles.add(titleKey);
     const hitRank = refs.size;
     refs.set(key, { itemId: hit.itemId, path, title });
     chunkText(text, CHUNK_SIZE, CHUNK_OVERLAP).forEach((c, index) => chunks.push({ sourceKey: key, title, text: c, index, hitRank, named: named.has(key) }));

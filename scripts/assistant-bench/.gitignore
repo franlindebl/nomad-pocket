@@ -1,0 +1,6 @@
+venv/
+fm/.build/
+search.db
+*.jsonl
+*.log
+grade/
