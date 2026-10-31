@@ -40,6 +40,8 @@ export type CarStrings = {
   categories: [string, string][];
   go: string;
   cancel: string;
+  /** Leaves the pan arrows. */
+  done: string;
   end: string;
   rerouting: string;
   arrived: string;

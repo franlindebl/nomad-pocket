@@ -45,6 +45,7 @@ function strings(): CarStrings {
     categories: categories.map((c) => [c, t(`maps:emergency.category.${c}`)]),
     go: t('maps:carplay.go'),
     cancel: t('common:actions.cancel'),
+    done: t('common:actions.done'),
     end: t('maps:guidance.stop'),
     rerouting: t('maps:carplay.rerouting'),
     arrived: t('maps:guidance.arrived'),

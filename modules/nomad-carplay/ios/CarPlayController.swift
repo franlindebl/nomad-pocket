@@ -219,8 +219,10 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
   /// What the bar buttons were made for: rebuilt only when it changes, not on every fix.
   private var bars: (navigating: Bool, target: Bool)?
 
+  private var panning = false
+
   private func updateBarButtons() {
-    guard let strings else { return }
+    guard let strings, !panning else { return }
     let state = (navigating: guidance?.navigating == true, target: guidance?.target != nil)
     if let bars, bars == state { return }
     bars = state
@@ -322,13 +324,38 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
     CarPlayHub.shared.emit("onStart")
   }
 
+  // While the pan arrows show, the bar has only "Hecho" to leave them (CarPlay adds no way out).
+  func mapTemplateDidShowPanningInterface(_ mapTemplate: CPMapTemplate) {
+    guard let strings else { return }
+    panning = true
+    mapTemplate.leadingNavigationBarButtons = []
+    mapTemplate.trailingNavigationBarButtons = [CPBarButton(title: strings.done) { [weak self] _ in
+      self?.mapTemplate.dismissPanningInterface(animated: true)
+    }]
+  }
+
+  func mapTemplateDidDismissPanningInterface(_ mapTemplate: CPMapTemplate) {
+    panning = false
+    bars = nil
+    updateBarButtons()
+  }
+
   func mapTemplate(_ mapTemplate: CPMapTemplate, panWith direction: CPMapTemplate.PanDirection) {
     var v = CGVector.zero
     if direction.contains(.left) { v.dx -= 1 }
     if direction.contains(.right) { v.dx += 1 }
     if direction.contains(.up) { v.dy -= 1 }
     if direction.contains(.down) { v.dy += 1 }
-    map.pan(v)
+    if v != .zero { map.pan(v) }
+  }
+
+  // Dragging the map with a finger (touch screens, in the pan mode).
+  func mapTemplateDidBeginPanGesture(_ mapTemplate: CPMapTemplate) {
+    map.beginDrag()
+  }
+
+  func mapTemplate(_ mapTemplate: CPMapTemplate, didUpdatePanGestureWithTranslation translation: CGPoint, velocity: CGPoint) {
+    map.drag(to: translation)
   }
 
   func mapTemplateDidCancelNavigation(_ mapTemplate: CPMapTemplate) {
