@@ -75,6 +75,10 @@ export default function RootLayout() {
             name="downloads"
             options={{ title: t('downloads.title'), presentation: 'formSheet', sheetAllowedDetents: [0.6, 1], sheetGrabberVisible: true }}
           />
+          <Stack.Screen
+            name="updates"
+            options={{ title: t('updates:title'), presentation: 'formSheet', sheetAllowedDetents: [0.6, 1], sheetGrabberVisible: true }}
+          />
           <Stack.Screen name="settings" options={{ headerShown: false, presentation: 'modal' }} />
           <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }} />
           <Stack.Screen name="reader/[itemId]" options={{ title: '' }} />

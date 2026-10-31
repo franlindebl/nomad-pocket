@@ -23,6 +23,7 @@ English. User-facing strings are Spanish + English (i18n).
 | `docs/ANDROID_PLAY.md` | **Android + Google Play**: hard rules (no health features, no Play services), state of the tracks, health gate map, release steps, Play Console gotchas. Read before any Android or Play work |
 | `docs/MAPS_NAVIGATION_PLAN.md` | Approved plan for map search, Emergencias and routing/navigation (phases, decisions, measurements) |
 | `docs/NAVIGATION_VIEW_PLAN.md` | Navigation view like Google Maps' (route consumed, bearing from the last metres, gliding camera, north up): diagnosis and what was built |
+| `docs/CONTENT_UPDATES_PLAN.md` | Telling the person their content is old and updating it safely (download then swap; delete first only on purpose) |
 | `docs/DOWNLOADS_SPEED_PLAN.md` | Analysis + plan for faster downloads (mirror throughput, parallel chunks, resume, keep awake); ready to pick up |
 | `AGENTS.md` | Generic Expo rules (kept for other agents; same rules repeated below) |
 
@@ -130,7 +131,7 @@ docs/               the docs above + screenshots/ + store/
   `sha256`, and its `copyInto` for multi-GB copies instead of `FileHandle.readBytes` loops in JS.
 - **Pure, tested modules** (`src/lib/{pmtiles,mvt}`, `features/assistant/{rag-core,models,markdown,dictation-core,report-core}`,
   `features/library/html`, `features/catalog/{opds,health-core}`, `features/downloads/{mirrors,errors,groups,segments-core,budget-core,restore-core}`,
-  `features/maps/{glyphs,geo,extraction-core,places-core,import-core,prepare-core,emergency-core,routing-core,stitch-core,follow-core,country-core,country-at-core,phone,region-terms,tap-core,speed-core}`, `features/prepare/{kit,document,passages}`, `features/downloads/manager-core`, `lib/units`, `features/library/{register-core,medical,collection,documents-core}`, `features/content/reconcile-core`, `features/assistant/errors`, `features/credits/credits-core`, `db/{migrate-core,schema}`) use no `@/` aliases and import siblings with `.ts` extensions,
+  `features/maps/{glyphs,geo,extraction-core,places-core,import-core,prepare-core,emergency-core,routing-core,stitch-core,follow-core,country-core,country-at-core,phone,region-terms,tap-core,speed-core}`, `features/prepare/{kit,document,passages}`, `features/downloads/manager-core`, `lib/units`, `features/library/{register-core,medical,collection,documents-core}`, `features/content/reconcile-core`, `features/assistant/errors`, `features/credits/credits-core`, `features/updates/updates-core`, `db/{migrate-core,schema}`) use no `@/` aliases and import siblings with `.ts` extensions,
   so `node --test --experimental-strip-types` can load them. Keep it that way and add
   `*.test.ts` next to them.
 - **Style of code.** Match the surrounding code: a short header comment per file saying

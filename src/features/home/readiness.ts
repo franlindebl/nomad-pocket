@@ -12,6 +12,7 @@ import { useDownloads, type DownloadRecord } from '@/features/downloads/manager'
 import { useCountries } from '@/features/maps/countries';
 import { getRegion, regionName } from '@/features/maps/regions';
 import { guideResources } from '@/features/onboarding/kit';
+import { useUpdates } from '@/features/updates/updates';
 import { useKitGroups } from '@/features/prepare/rows';
 import { HEALTH_FEATURES } from '@/lib/health';
 import { useSettings } from '@/stores/settings';
@@ -56,6 +57,8 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
   const zims = useItems('zim');
   const { countries } = useCountries();
   const model = useActiveModel();
+  // Archives whose newer edition is worth a warning (the map's is worked out from its country below).
+  const updates = useUpdates();
   const { summary } = useKitGroups();
   // Pieces still downloading show their progress instead of a to-do (Home doesn't offer them again).
   const records = useDownloads((s) => s.records);
@@ -69,8 +72,13 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
     const guidesHave = guides.filter((r) => installedIds.has(r.id)).length;
     const wikiIds = new Set(Object.values(catalog.wikipedia).flatMap((opts) => opts.map((o) => o.resourceId)));
     const wiki = zims.find((z) => wikiIds.has(z.catalogId ?? ''));
-    const stale = !!mine?.map && (mine.update || monthsSince(mine.buildDate) > STALE_MONTHS);
     const guideIds = new Set(guides.map((r) => r.id));
+    // A newer build every month is no reason for a warning; old data with a newer build (or a pack this app can't read) is.
+    const urgentMap = !!mine && updates.some((u) => u.key === `country:${mine.regionId}` && u.urgent);
+    const stale = !!mine?.map && (urgentMap || monthsSince(mine.buildDate) > STALE_MONTHS);
+    const urgentZims = new Set(updates.filter((u) => u.kind === 'zim' && u.urgent && !u.inFlight).map((u) => u.itemId));
+    const wikiStale = !!wiki && urgentZims.has(wiki.id);
+    const guidesStale = zims.some((z) => guideIds.has(z.catalogId ?? '') && urgentZims.has(z.id));
     const guidesProgress = progressOf(records, (r) => guideIds.has(r.id));
     const wikiProgress = wiki ? null : progressOf(records, (r) => wikiIds.has(r.id));
     const modelProgress = model.ready ? null : progressOf(records, (r) => r.kind === 'model');
@@ -105,25 +113,27 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
         detail:
           guidesProgress !== null
             ? downloading(guidesProgress)
-            : guidesHave
-              ? t('ready.guidesDone', { count: guidesHave, total: guides.length })
+            : guidesStale
+              ? t('ready.zimUpdate')
+              : guidesHave
+                ? t('ready.guidesDone', { count: guidesHave, total: guides.length })
               : HEALTH_FEATURES
                 ? t('ready.guidesTodo')
                 : t('ready.guidesTodoNoHealth'),
         // Not while any guide is still coming down: the first of 12 is not "ready".
         done: guidesHave > 0 && guidesProgress === null,
         progress: guidesProgress,
-        warning: false,
-        href: { pathname: '/library/category/[slug]', params: { slug: HEALTH_FEATURES ? 'medicine' : 'survival' } },
+        warning: guidesStale,
+        href: guidesStale ? '/updates' : { pathname: '/library/category/[slug]', params: { slug: HEALTH_FEATURES ? 'medicine' : 'survival' } },
       },
       {
         key: 'wikipedia',
         title: t('ready.wikipedia'),
-        detail: wiki ? wiki.title : wikiProgress !== null ? downloading(wikiProgress) : t('ready.wikipediaTodo'),
+        detail: wikiStale ? t('ready.zimUpdate') : wiki ? wiki.title : wikiProgress !== null ? downloading(wikiProgress) : t('ready.wikipediaTodo'),
         done: !!wiki,
         progress: wikiProgress,
-        warning: false,
-        href: '/library/wikipedia',
+        warning: wikiStale,
+        href: wikiStale ? '/updates' : '/library/wikipedia',
       },
       {
         key: 'assistant',
@@ -170,5 +180,5 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
       },
     ];
     return { items, done: items.filter((i) => i.done).length };
-  }, [country, countries, zims, langs, model.ready, model.name, summary, records, t, i18n.language]);
+  }, [country, countries, zims, langs, model.ready, model.name, summary, records, updates, t, i18n.language]);
 }

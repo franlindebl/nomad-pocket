@@ -398,6 +398,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `home-readiness`, `ready-<map\|guides\|wikipedia\|assistant\|plan\|kit>`, `home-downloads`, `home-network` | Home: "Tu preparación" card and rows, downloads card (also while a country is being prepared), connection line |
   | `onboarding-start`, `onboarding-next`, `onboarding-download`, `onboarding-finish`, `onboarding-plan`, `onboarding-close` | setup wizard buttons (`onboarding-close` only on a second run) |
   | `download-allow-cellular`, `downloads-waiting-wifi`, `downloads-allow-cellular-all` | download row: "use mobile data" for this download; Downloads sheet: the "waiting for Wi-Fi" card and its "use mobile data for all" button |
+  | `home-updates`, `downloads-updates`, `updates-check`, `updates-checked`, `update-row`, `updates-all`, `updates-blocked` | Content updates: Home's card (urgent ones, online), the Downloads sheet's row to `/updates`; in `/updates`: "Buscar ahora", the last-check line, each update's row, "Actualizar todo", the "doesn't fit" note |
   | `downloads-keep-awake` | Downloads sheet: the "the screen stays on while downloading" note (while something runs or installs; DL-02) |
   | `download-preparing` | Downloads sheet: a downloaded country still being prepared (search, emergency points), with its progress |
   | `kit-country`, `kit-guides`, `kit-wikipedia`, `kit-assistant` | setup wizard kit rows (the whole row toggles) |

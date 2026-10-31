@@ -9,6 +9,7 @@ import {
   HeartPulse,
   Map,
   Phone,
+  RefreshCw,
   Settings,
   ShieldCheck,
   Siren,
@@ -35,6 +36,7 @@ import { useReadiness, type ReadinessKey } from '@/features/home/readiness';
 import { callPhones } from '@/features/maps/call';
 import { usePreparingCountries } from '@/features/maps/countries';
 import { useEmergencyNumber } from '@/features/maps/emergency';
+import { useUpdates } from '@/features/updates/updates';
 import { formatBytes } from '@/lib/format';
 import { HEALTH_FEATURES } from '@/lib/health';
 import { freeBytes } from '@/lib/storage';
@@ -96,6 +98,8 @@ export default function HomeScreen() {
   const net = Network.useNetworkState();
   const online = net.isInternetReachable ?? net.isConnected ?? true;
   const { items, done } = useReadiness();
+  // Old data with a newer version (or a routing pack this app can't read): worth a card while online.
+  const urgent = useUpdates().filter((u) => u.urgent && !u.inFlight);
   const emergency = useEmergencyNumber();
   const { number } = emergency;
 
@@ -173,6 +177,21 @@ export default function HomeScreen() {
                 {t('downloadsHint')}
               </Text>
             </View>
+          </Row>
+        </Card>
+      ) : null}
+
+      {urgent.length && online ? (
+        <Card style={{ marginTop: space.md }} onPress={() => router.push('/updates')} testID="home-updates">
+          <Row gap={space.md} align="flex-start">
+            <IconBadge icon={RefreshCw} hue="survival" />
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text variant="headline">{tc('updates:homeTitle', { count: urgent.length })}</Text>
+              <Text variant="footnote" color="textSecondary">
+                {tc('updates:homeBody')}
+              </Text>
+            </View>
+            <ChevronRight size={18} color={colors.textTertiary} />
           </Row>
         </Card>
       ) : null}

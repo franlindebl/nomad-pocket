@@ -7,7 +7,7 @@ import * as Location from '@/lib/location';
 import { useEffect, useMemo, useState } from 'react';
 import { create } from 'zustand';
 
-import { getItem, removeItem, useItems } from '@/features/content/items';
+import { getItem, removeItem, useContent, useItems, type InstalledItem } from '@/features/content/items';
 import { recordGroup, summarize } from '@/features/downloads/groups';
 import { cancelDownload, dismissDownload, NotEnoughStorageError, resumeDownloads, useDownloads, type DownloadRecord } from '@/features/downloads/manager';
 import i18n from '@/i18n';
@@ -43,7 +43,7 @@ import { getRegion, regionName, type Region } from './regions';
 import { routePackId, type RoutePackItem } from './routing';
 import { usePreparing } from './prepare';
 import { preparedFraction } from './prepare-core';
-import type { ManifestPack } from './routing-core';
+import { engineReads, LEGACY_PACK_VALHALLA, type ManifestPack } from './routing-core';
 import { abortPack, discardPackFiles, downloadPack, packPlan, refreshRoutingCatalog, useRoutingCatalog } from './routing-packs';
 import type { MapItem } from './useMapSources';
 
@@ -408,6 +408,8 @@ export type CountryState = {
   buildDate: string | null;
   /** The catalogs have a newer build of this country's map or routing pack. */
   update: boolean;
+  /** A routing pack this app's engine can't read (built by another Valhalla): routes need the update. */
+  incompatible: boolean;
 };
 
 const regionOfRecord = (r: DownloadRecord): string | null => {
@@ -426,6 +428,23 @@ const regionOfRecord = (r: DownloadRecord): string | null => {
 /** A country's downloads in flight or left over (failed ones, finished files of an unfinished group). */
 const countryRecords = (regionId: string) => Object.values(useDownloads.getState().records).filter((r) => regionOfRecord(r) === regionId);
 
+/** Whether a country's files are downloading or being processed (its update, say). */
+export function countryInFlight(regionId: string): boolean {
+  return countryRecords(regionId).some((r) => ACTIVE.has(r.status));
+}
+
+/** A country's installed maps and packs that the catalogs have a newer (or readable) build of. */
+export function outdatedPieces(c: CountryState): InstalledItem[] {
+  const catalogMaps = useMapsCatalog.getState().manifest?.maps;
+  const catalogPacks = useRoutingCatalog.getState().manifest?.packs;
+  const maps = c.maps.filter((m) => isNewer(catalogMaps?.find((x) => x.id === (m.catalogId ?? c.regionId))?.buildDate, m.meta.buildDate));
+  const packs = c.packs.filter((p) => {
+    const latest = catalogPacks?.find((x) => x.id === p.catalogId);
+    return !!latest && packOutdated(p.meta, latest);
+  });
+  return [...maps, ...packs];
+}
+
 /** Installed and downloading countries, plus the maps that aren't a country (older regions, areas). */
 export function useCountries(): { countries: CountryState[]; otherMaps: MapItem[] } {
   const maps = useItems('map') as MapItem[];
@@ -434,99 +453,125 @@ export function useCountries(): { countries: CountryState[]; otherMaps: MapItem[
   const catalogMaps = useMapsCatalog((s) => s.manifest?.maps);
   const catalogPacks = useRoutingCatalog((s) => s.manifest?.packs);
   const preparing = usePreparing((s) => s.items);
+  return useMemo(
+    () => buildCountries(maps, packs, records, catalogMaps, catalogPacks, preparing),
+    [maps, packs, records, catalogMaps, catalogPacks, preparing],
+  );
+}
 
-  return useMemo(() => {
-    const byCountry = new Map<string, CountryState>();
-    const country = (regionId: string): CountryState | null => {
-      const region = getRegion(regionId);
-      if (!region || region.type !== 'country') return null;
-      let c = byCountry.get(regionId);
-      if (!c) {
-        c = {
-          regionId,
-          title: regionName(region, i18n.language),
-          map: null,
-          maps: [],
-          regions: [],
-          packs: [],
-          sizeBytes: 0,
-          progress: null,
-          preparing: null,
-          failed: false,
-          buildDate: null,
-          update: false,
-        };
-        byCountry.set(regionId, c);
-      }
-      return c;
-    };
-    const otherMaps: MapItem[] = [];
-    for (const m of maps) {
-      if (m.id === mapItemId(WORLD_ID)) continue;
-      const c = m.meta.regionId ? country(m.meta.regionId) : null;
-      if (!c) {
-        otherMaps.push(m);
-        continue;
-      }
-      c.maps.push(m);
-      c.map ??= m;
-      // A region's map is named after it (us-west); the country's after the country.
-      const mapId = m.catalogId ?? c.regionId;
-      if (mapId !== c.regionId) c.regions.push(mapId);
-      if (!c.buildDate || (m.meta.buildDate && m.meta.buildDate < c.buildDate)) c.buildDate = m.meta.buildDate;
-      if (isNewer(catalogMaps?.find((x) => x.id === mapId)?.buildDate, m.meta.buildDate)) c.update = true;
+/** useCountries outside React (the content updates run reads it from the stores). */
+export function currentCountries(): { countries: CountryState[]; otherMaps: MapItem[] } {
+  const items = useContent.getState().items;
+  return buildCountries(
+    items.filter((i) => i.kind === 'map') as MapItem[],
+    items.filter((i) => i.kind === 'route') as RoutePackItem[],
+    useDownloads.getState().records,
+    useMapsCatalog.getState().manifest?.maps,
+    useRoutingCatalog.getState().manifest?.packs,
+    usePreparing.getState().items,
+  );
+}
+
+function buildCountries(
+  maps: MapItem[],
+  packs: RoutePackItem[],
+  records: Record<string, DownloadRecord>,
+  catalogMaps: CountryMap[] | undefined,
+  catalogPacks: ManifestPack[] | undefined,
+  preparing: ReturnType<typeof usePreparing.getState>['items'],
+): { countries: CountryState[]; otherMaps: MapItem[] } {
+  const byCountry = new Map<string, CountryState>();
+  const country = (regionId: string): CountryState | null => {
+    const region = getRegion(regionId);
+    if (!region || region.type !== 'country') return null;
+    let c = byCountry.get(regionId);
+    if (!c) {
+      c = {
+        regionId,
+        title: regionName(region, i18n.language),
+        map: null,
+        maps: [],
+        regions: [],
+        packs: [],
+        sizeBytes: 0,
+        progress: null,
+        preparing: null,
+        failed: false,
+        buildDate: null,
+        update: false,
+        incompatible: false,
+      };
+      byCountry.set(regionId, c);
     }
-    // Downloads in flight, by country (finished files of a group stay until the last one).
-    const active = Object.values(records).filter((r) => ACTIVE.has(r.status) || r.status === 'failed' || r.status === 'done');
-    const recordsBy = new Map<string, DownloadRecord[]>();
-    for (const r of active) {
-      const id = regionOfRecord(r);
-      if (!id || !country(id)) continue;
-      recordsBy.set(id, [...(recordsBy.get(id) ?? []), r]);
+    return c;
+  };
+  const otherMaps: MapItem[] = [];
+  for (const m of maps) {
+    if (m.id === mapItemId(WORLD_ID)) continue;
+    const c = m.meta.regionId ? country(m.meta.regionId) : null;
+    if (!c) {
+      otherMaps.push(m);
+      continue;
     }
-    // A pack goes with the country whose map uses it (Haiti uses the Dominican Republic's).
-    for (const p of packs) {
-      const owner = [...byCountry.values()].find((c) => routePacksFor([{ id: p.catalogId ?? '', regionId: p.meta.regionId ?? '' }], c.regionId).length);
-      const c = owner ?? (p.meta.regionId ? country(p.meta.regionId) : null);
-      if (!c) continue;
-      c.packs.push(p);
-      // A newer build of its roads, points and addresses, or one this app's engine can't read.
-      const latest = catalogPacks?.find((x) => x.id === p.catalogId);
-      if (latest && packOutdated(p.meta, latest)) c.update = true;
+    c.maps.push(m);
+    c.map ??= m;
+    // A region's map is named after it (us-west); the country's after the country.
+    const mapId = m.catalogId ?? c.regionId;
+    if (mapId !== c.regionId) c.regions.push(mapId);
+    if (!c.buildDate || (m.meta.buildDate && m.meta.buildDate < c.buildDate)) c.buildDate = m.meta.buildDate;
+    if (isNewer(catalogMaps?.find((x) => x.id === mapId)?.buildDate, m.meta.buildDate)) c.update = true;
+  }
+  // Downloads in flight, by country (finished files of a group stay until the last one).
+  const active = Object.values(records).filter((r) => ACTIVE.has(r.status) || r.status === 'failed' || r.status === 'done');
+  const recordsBy = new Map<string, DownloadRecord[]>();
+  for (const r of active) {
+    const id = regionOfRecord(r);
+    if (!id || !country(id)) continue;
+    recordsBy.set(id, [...(recordsBy.get(id) ?? []), r]);
+  }
+  // A pack goes with the country whose map uses it (Haiti uses the Dominican Republic's).
+  for (const p of packs) {
+    const owner = [...byCountry.values()].find((c) => routePacksFor([{ id: p.catalogId ?? '', regionId: p.meta.regionId ?? '' }], c.regionId).length);
+    const c = owner ?? (p.meta.regionId ? country(p.meta.regionId) : null);
+    if (!c) continue;
+    c.packs.push(p);
+    // A newer build of its roads, points and addresses, or one this app's engine can't read.
+    const latest = catalogPacks?.find((x) => x.id === p.catalogId);
+    if (latest && packOutdated(p.meta, latest)) c.update = true;
+    if (!engineReads(p.meta.valhalla ?? LEGACY_PACK_VALHALLA)) c.incompatible = true;
+  }
+  for (const c of byCountry.values()) {
+    c.sizeBytes = c.maps.reduce((sum, m) => sum + m.sizeBytes, 0) + c.packs.reduce((sum, p) => sum + p.sizeBytes, 0);
+    c.preparing = preparedFraction(preparing, [...c.maps, ...c.packs].map((i) => i.id));
+    c.regions.sort();
+    const mine = recordsBy.get(c.regionId) ?? [];
+    const running = mine.filter((r) => ACTIVE.has(r.status));
+    c.failed = !running.length && mine.some((r) => r.status === 'failed');
+    if (!running.length) continue;
+    // Queued together as one group: its files' bytes, finished ones included.
+    if (mine.every((r) => recordGroup(r)?.id === countryDownloadGroup(c.regionId).id)) {
+      const { bytesWritten, totalBytes } = summarize(c.regionId, c.title, mine);
+      c.progress = totalBytes ? Math.min(1, bytesWritten / totalBytes) : 0;
+      continue;
     }
-    for (const c of byCountry.values()) {
-      c.sizeBytes = c.maps.reduce((sum, m) => sum + m.sizeBytes, 0) + c.packs.reduce((sum, p) => sum + p.sizeBytes, 0);
-      c.preparing = preparedFraction(preparing, [...c.maps, ...c.packs].map((i) => i.id));
-      c.regions.sort();
-      const mine = recordsBy.get(c.regionId) ?? [];
-      const running = mine.filter((r) => ACTIVE.has(r.status));
-      c.failed = !running.length && mine.some((r) => r.status === 'failed');
-      if (!running.length) continue;
-      // Queued together as one group: its files' bytes, finished ones included.
-      if (mine.every((r) => recordGroup(r)?.id === countryDownloadGroup(c.regionId).id)) {
-        const { bytesWritten, totalBytes } = summarize(c.regionId, c.title, mine);
-        c.progress = totalBytes ? Math.min(1, bytesWritten / totalBytes) : 0;
-        continue;
-      }
-      // Combined progress: prebuilt map parts, an extraction job and pack parts, by bytes.
-      let done = 0;
-      let total = 0;
-      const catalogMap = catalogMaps?.find((m) => m.regionId === c.regionId);
-      if (catalogMap && !c.map && running.some((r) => r.kind === 'map' && r.meta.map)) {
-        done += (countryMapProgress(records, catalogMap).progress ?? 0) * catalogMap.size;
-        total += catalogMap.size;
-      }
-      for (const r of running) {
-        if (r.kind === 'map' && r.meta.map) continue;
-        if (r.meta.role === 'pois') continue;
-        done += r.bytesWritten;
-        total += r.totalBytes || 0;
-      }
-      c.progress = total ? Math.min(1, done / total) : 0;
+    // Combined progress: prebuilt map parts, an extraction job and pack parts, by bytes.
+    let done = 0;
+    let total = 0;
+    const catalogMap = catalogMaps?.find((m) => m.regionId === c.regionId);
+    if (catalogMap && !c.map && running.some((r) => r.kind === 'map' && r.meta.map)) {
+      done += (countryMapProgress(records, catalogMap).progress ?? 0) * catalogMap.size;
+      total += catalogMap.size;
     }
-    const countries = [...byCountry.values()].sort((a, b) => a.title.localeCompare(b.title, i18n.language));
-    return { countries, otherMaps };
-  }, [maps, packs, records, catalogMaps, catalogPacks, preparing]);
+    for (const r of running) {
+      if (r.kind === 'map' && r.meta.map) continue;
+      if (r.meta.role === 'pois') continue;
+      done += r.bytesWritten;
+      total += r.totalBytes || 0;
+    }
+    c.progress = total ? Math.min(1, done / total) : 0;
+  }
+  const countries = [...byCountry.values()].sort((a, b) => a.title.localeCompare(b.title, i18n.language));
+  return { countries, otherMaps };
 }
 
 /** Countries whose files are in and that are still being prepared (search, emergency points). */
