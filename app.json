@@ -168,6 +168,7 @@
       [
         "./plugins/with-carplay",
         {
+          "enabled": false,
           "entitlement": false
         }
       ],

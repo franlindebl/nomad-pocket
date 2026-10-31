@@ -117,14 +117,15 @@ A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check
      Apple FM error codes translated. (Done since: Android release builds with it and the Android tour pass,
      2026-10-28; the Maestro suites run on main, smoke + full 43/43.)
 
-C. **CarPlay + voice + background navigation** (branch `carplay`, `docs/CARPLAY_PLAN.md`), built and tested on the
-   simulator's car screen 2026-10-31. Next, in order:
-   - Owner: request the CarPlay navigation entitlement (draft text at the end of `docs/CARPLAY_PLAN.md`).
+C. **CarPlay + voice + background navigation** (`docs/CARPLAY_PLAN.md`), built and tested on the simulator's car
+   screen 2026-10-31, on main with **CarPlay off** (voice and background navigation ship for the phone). Next:
    - Hear the voice prompts on a real phone (walk or drive a short route with "Iniciar"), screen locked.
-   - Merge `carplay` into main when the owner is happy (it changes the location purpose string and the privacy
-     policy; the Android build adds a foreground service: Play Console declaration first, `docs/ANDROID_PLAY.md`).
-   - With the entitlement: `entitlement: true` for `./plugins/with-carplay` in `app.json`, TestFlight, a real car;
-     then the Dashboard and instrument cluster (`docs/CARPLAY_PLAN.md`, "Later").
+   - Next store build: the App Review note on the background modes (`docs/CARPLAY_PLAN.md`); Android needs the
+     Play Console foreground-service declaration first (`docs/ANDROID_PLAY.md`).
+   - Owner: request the CarPlay navigation entitlement once 1.1.0 is approved (draft text at the end of
+     `docs/CARPLAY_PLAN.md`).
+   - With the entitlement: `enabled: true` and `entitlement: true` for `./plugins/with-carplay` in `app.json`,
+     TestFlight, a real car; then the Dashboard and instrument cluster (`docs/CARPLAY_PLAN.md`, "Later").
 
 U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNTRY_REGIONS_PLAN.md`):
    done and live. State at 2026-10-27 (resume point for the "rediseño" session, which also owns
@@ -314,6 +315,16 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-31 — CarPlay merged into main, switched off
+
+- Owner's call: wait for 1.1.0's approval before requesting the entitlement, and ship voice + background
+  navigation now. `plugins/with-carplay.js` has an `enabled` switch (off in `app.json`; `CARPLAY=1` or
+  `CARPLAY_ENTITLEMENT=1` at prebuild for the simulator): off, the app has no CarPlay scene, Expo's own
+  SceneDelegate and no `nomad-carplay` in autolinking. Review note for the background modes drafted.
+- Checks: tsc, lint, unit tests (414), i18n; iOS Release sim build with CarPlay off (Info.plist has only the phone
+  scene, no CarPlay symbols in the binary; `UIBackgroundModes` location + audio); smoke E2E 21/21. On mode
+  checked at prebuild (scene, SceneDelegate, entitlement, module linked).
+
 ### 2026-10-31 — CarPlay: seen and fixed on the simulator's car screen
 
 - Xcode 27 has no CarPlay screen (Device Hub); Xcode 26.5 installed next to it for its Simulator.app (owner's
@@ -346,7 +357,7 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   `UIBackgroundModes` location + audio, location purpose string and privacy policy (es/en) say so.
 - **CarPlay** (`modules/nomad-carplay`, `features/carplay`, `plugins/with-carplay.js`): see ARCHITECTURE
   ("CarPlay"). The entitlement is only added with `CARPLAY_ENTITLEMENT=1` at prebuild (simulator) until Apple
-  grants it; `app.json` keeps it off so device builds still sign.
+  grants it; `app.json` keeps it off so device builds still sign (since the merge, CarPlay itself is off too).
 - Checks: tsc, lint, unit tests (new: voice-core, carplay-core), i18n; iOS Release sim build; E2E map-14-route and
   map-17-follow pass on iOS (a rerun of map-17 under a parallel Gradle build lost typed text, a Maestro flake).
 - Android emulator (AVD `Pixel_API_36` recreated, it was gone, like the iOS simulators: `NP-carplay` created):

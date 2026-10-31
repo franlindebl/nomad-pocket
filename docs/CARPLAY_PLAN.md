@@ -1,8 +1,9 @@
 # CarPlay navigation — plan
 
 Approved by the owner on 2026-10-31 (night). Builds on "CarPlay — analysis" in
-`docs/MAPS_NAVIGATION_PLAN.md` (2026-10-25). Work happens on the `carplay` branch (commits and
-pushes there, not on `main`, until the owner merges it).
+`docs/MAPS_NAVIGATION_PLAN.md` (2026-10-25). Built on the `carplay` branch, merged into `main` on 2026-10-31
+with **CarPlay switched off** (owner's call): voice and background navigation ship for the phone, the CarPlay
+code waits in the repo for the entitlement.
 
 ## Decisions (owner)
 
@@ -55,6 +56,10 @@ pushes there, not on `main`, until the owner merges it).
 ## Phase 3 — CarPlay (iOS)
 
 - `modules/nomad-carplay` (Swift, iOS only) + `plugins/with-carplay.js`:
+  - **Off by default** (`enabled: false` in `app.json`): no CarPlay scene, Expo's own `SceneDelegate`,
+    `nomad-carplay` left out of autolinking (`use_expo_modules!(exclude: …)` in the Podfile), so the binary
+    carries no CarPlay code and `features/carplay` finds no native module. On with `enabled: true` or
+    `CARPLAY=1` at prebuild; the entitlement option (or `CARPLAY_ENTITLEMENT=1`) turns it on too.
   - Info.plist scene `CPTemplateApplicationSceneSessionRoleApplication` →
     `NomadCarPlaySceneDelegate`; `UIApplicationSupportsMultipleScenes` stays false (CarPlay
     scenes don't count).
@@ -129,9 +134,20 @@ minute later; "Terminar" in the bar ends it on the phone too.
 
 ## Phase 4 — after the entitlement
 
-Entitlement on in `app.json`, provisioning profile regenerated, TestFlight build, test in a real
+`enabled: true` and `entitlement: true` in `app.json`, provisioning profile regenerated, TestFlight build, test in a real
 car (and with Apple's CarPlay Simulator app on the Mac with the phone over USB). Store listing
 note and screenshots of the CarPlay screen (owner reviews).
+
+## App Review notes (first build with voice and background navigation)
+
+Owner's plan: request the entitlement once 1.1.0 is approved (it is a separate form and team, but a live app
+helps the request). The next build carries `UIBackgroundModes` location + audio; add to the review notes:
+
+> Background modes: location is used in the background only while the user is following turn-by-turn
+> directions they started ("Start" on a route), so guidance continues with the screen locked; it is never
+> stored or sent. Audio is used for the spoken turn-by-turn prompts during that guidance, which lower other
+> audio while they play. To try it: download Andorra, open Maps, tap a place, choose "Take me there" and
+> then "Start".
 
 ## Entitlement request (draft for the owner)
 
