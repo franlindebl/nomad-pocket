@@ -8,7 +8,8 @@ import { scaleDistance, type MeasurementSystem } from '../../lib/units.ts';
 
 export type CarDistance = { value: number; unit: 'm' | 'km' | 'ft' | 'yd' | 'mi' };
 export type CarEstimate = { distance: CarDistance; seconds: number };
-export type CarStep = { index: number; icon: string; instruction: string; street: string | null; estimate: CarEstimate };
+/** rotation: for the straight-line arrow, degrees clockwise from the way the car goes (the map's up). */
+export type CarStep = { index: number; icon: string; instruction: string; street: string | null; estimate: CarEstimate; rotation?: number };
 export type CarTarget = { name: string; lat: number; lon: number };
 
 export type CarGuidance = {
@@ -48,7 +49,8 @@ export type CarStrings = {
 
 export type GuidanceInput = {
   target: CarTarget | null;
-  position: (LatLon & { accuracy: number | null }) | null;
+  /** travel: the direction of the user's last metres (guidance.ts), course: the GPS one. */
+  position: (LatLon & { accuracy: number | null; course?: number | null; travel?: number | null }) | null;
   navigating: boolean;
   routing: CarGuidance['routing'];
   costing: Costing;
@@ -130,12 +132,25 @@ export function carGuidance(input: GuidanceInput, system: MeasurementSystem, tex
   }
   // No route (no pack, no way found) or its end before the target: as the crow flies.
   if (distance !== null && position && input.routing !== 'loading') {
-    const speed = STRAIGHT_LINE_SPEED[input.routing === 'none' ? 'pedestrian' : input.costing];
-    const sector = compassSector(bearingDegrees(position, target));
+    // At the trip's own mode's speed: in a car, not on foot as the phone's "no routes here" note says.
+    const speed = STRAIGHT_LINE_SPEED[input.costing];
+    const bearing = bearingDegrees(position, target);
+    const sector = compassSector(bearing);
+    // The arrow points at the target from the way the car goes (the car map turns with it); stopped,
+    // from north, as the map is then.
+    const up = position.travel ?? position.course ?? 0;
+    const turn = compassSector(bearing - up);
     const line = estimate(distance, distance / speed, system);
     base.summary ??= line;
     base.remaining = line;
-    base.step = { index: LINE_INDEX - sector, icon: 'straight-line', instruction: text.lineTo(sector), street: null, estimate: line };
+    base.step = {
+      index: LINE_INDEX - turn,
+      icon: 'straight-line',
+      instruction: text.lineTo(sector),
+      street: null,
+      estimate: line,
+      rotation: turn * 45,
+    };
   }
   return base;
 }
