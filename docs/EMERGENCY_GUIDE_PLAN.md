@@ -76,6 +76,22 @@ inventories, one table row per card with the URLs that were opened, dates, licen
 5. **Lejía.** No official Spanish dose in drops per litre exists. Options: the CDC/EPA table as it is (for 6 % and
    8.25 %, with a note that Spanish lejía is 3.5–6 % and the label rules), or no dose (boiling only).
 
+### Owner's answers (2026-10-31)
+
+1. Translation: **yes**, a faithful sentence-by-sentence translation marked "Traducción fiel de <fuente>", original
+   linked.
+2. Excerpts: **yes**, whole sentences or paragraphs left out, nothing reworded, marked "Fragmento".
+3. US details: **text as it is plus a fixed note outside it** ("En España: 112 · Información Toxicológica 91 562 04
+   20"), metric equivalents in brackets marked as ours.
+4. Gaps: the owner asked to reproduce them anyway from the original sources, credited. Not possible as such: the ERC
+   2025 guidelines are "© European Resuscitation Council 2025. All rights reserved" with no reproduction without the
+   ERC's permission, and so are Red Cross and AHA; credit is not a licence. Asking for permission would take too long,
+   so **for the five gap cards only, our own wording of the current guidance** (ERC 2025, WHO, CDC): procedures are
+   not protected, their wording is. Each such card says "Redactado por Nomad Pocket según <guía, año>" (never passed
+   off as an official text), every sentence is checked against the guideline it follows, and a review by someone with
+   first-aid training is welcome later (not blocking).
+5. Lejía: not answered yet (default: the CDC/EPA table as it is, with the note on Spanish concentrations).
+
 ## Next
 
 After the decisions: write the cards (text copied, never generated), each with source, URL, date and licence line;
