@@ -71,6 +71,11 @@ async function getArticleText(itemId: string, path: string, maxChars: number) {
   return { title: html.decodeEntities(a.title) || title, text, path: a.path };
 }
 
+// Archive languages, as the app's items record them (catalog `language`; extras by name).
+const EXTRA_LANG: Record<string, string> = { 'ready.gov_es_all': 'es', 'medlineplus.gov_es_all': 'es', nomad_guide_es: 'es', nomad_guide_en: 'en' };
+const catalogRes = JSON.parse(readFileSync(`${APP}/data/catalog.json`, 'utf8')).resources;
+const langOf = (id: string) => EXTRA_LANG[id] ?? (id.startsWith('wikipedia_es') ? 'es' : catalogRes[id]?.language ?? 'en');
+
 // ---------------------------------------------------------------- documents (documents.ts)
 const db = existsSync(DB) ? new DatabaseSync(DB, { readOnly: true }) : null;
 const sql = {
@@ -111,14 +116,17 @@ async function firstTitleHits(items: string[], groups: string[][]): Promise<Hit[
   }));
   return found.flat();
 }
-export async function retrieve(question: string, lang: 'es' | 'en', budgetChars: number, query?: string) {
-  const { queries, rankText, relevanceTexts } = rc.planRetrieval(question, [], lang, query);
+// One language's half of the search (rag.ts gather).
+async function gather(items: string[], plan: any, leads: boolean) {
+  const { queries, rankText, relevanceTexts } = plan;
   const [first, second] = rc.buildTitleCandidates(relevanceTexts[0]);
-  const [lists, titled, passages] = await Promise.all([
-    Promise.all(queries.map((q: string) => search(itemIds, q, itemIds.length * HITS_PER_ARCHIVE, HITS_PER_ARCHIVE).catch(() => [] as Hit[]))),
-    titleHits(itemIds, first).then(async (h) => (h.length ? h : firstTitleHits(itemIds, second))),
-    searchDocuments(itemIds, queries, DOC_PASSAGES),
-  ]);
+  const [lists, titled, passages] = items.length
+    ? await Promise.all([
+        Promise.all(queries.map((q: string) => search(items, q, items.length * HITS_PER_ARCHIVE, HITS_PER_ARCHIVE).catch(() => [] as Hit[]))),
+        titleHits(items, first).then(async (h) => (h.length ? h : firstTitleHits(items, second))),
+        searchDocuments(items, queries, DOC_PASSAGES),
+      ])
+    : [[] as Hit[][], [] as Hit[], [] as any[]];
   const hits = fuseHits([{ hits: titled, bonus: TITLE_BONUS }, ...lists.map((hits: Hit[], qi: number) => ({ hits, bonus: qi === 0 ? 0.002 : 0 }))]).slice(0, MAX_HITS);
   const refs = new Map<string, { itemId: string; path: string; title: string; page?: number }>();
   const chunks: any[] = [];
@@ -146,13 +154,25 @@ export async function retrieve(question: string, lang: 'es' | 'en', budgetChars:
   });
   let ranked = rc.rankChunks(rankText, chunks, 16);
   if (ranked.length) ranked = rc.relevantChunks(relevanceTexts, ranked);
-  else if (chunks.length) ranked = chunks.filter((c) => c.index === 0).map((c, i) => ({ item: c, score: 1 / (i + 1) }));
+  else if (leads && chunks.length) ranked = chunks.filter((c) => c.index === 0).map((c, i) => ({ item: c, score: 1 / (i + 1) }));
+  return { ranked, refs, queries };
+}
+
+// rag.ts retrieve: English archives take the English query for a Spanish question, rankings merged.
+export async function retrieve(question: string, lang: 'es' | 'en', budgetChars: number, query?: string, queryEn?: string) {
+  const own = rc.planRetrieval(question, [], lang, query);
+  const en = lang === 'es' ? queryEn?.trim() : undefined;
+  const english = en ? itemIds.filter((id) => rc.archiveLanguage(langOf(id)) === 'en') : [];
+  const rest = english.length ? itemIds.filter((id) => !english.includes(id)) : itemIds;
+  const groups = await Promise.all([gather(rest, own, true), english.length ? gather(english, rc.planRetrieval(en!, [], 'en'), false) : null]);
+  const refs = new Map(groups.flatMap((g) => (g ? [...g.refs] : [])));
+  const ranked = rc.mergeRanked(groups.flatMap((g) => (g ? [g.ranked] : [])));
   const { sources } = rc.packContext(ranked, (k: string) => refs.get(k), budgetChars, 3);
+  const queries = groups.map((g) => g?.queries ?? []);
   const candidates = [...refs.values()].map((r) => `${r.itemId} · ${r.title}${r.page ? ` p.${r.page}` : ''}`);
   if (!sources.length && ranked.length) return { sources, userMessage: question, overflow: true, queries, candidates };
   return { sources, userMessage: rc.buildRagUserMessage(question, sources, lang), queries, candidates };
 }
-
 
 // ---------------------------------------------------------------- v2 retrieval (experiment)
 // Bilingual: the question's words for archives in its language, an English query for English ones;
@@ -160,9 +180,8 @@ export async function retrieve(question: string, lang: 'es' | 'en', budgetChars:
 // reranked by a small multilingual embedding model (no index: only the candidates are embedded).
 const V2 = args.includes('--v2');
 const EMB = flag('emb', 'http://127.0.0.1:8081');
-const EXTRA_LANG: Record<string, string> = { 'ready.gov_es_all': 'es', 'medlineplus.gov_es_all': 'es', nomad_guide_es: 'es', nomad_guide_en: 'en' };
-const catalogRes = JSON.parse(readFileSync(`${APP}/data/catalog.json`, 'utf8')).resources;
-const langOf = (id: string) => EXTRA_LANG[id] ?? (id.startsWith('wikipedia_es') ? 'es' : catalogRes[id]?.language ?? 'en');
+
+
 const normTitle = (t: string) => rc.normalize(t).replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 async function embed(texts: string[]): Promise<number[][]> {
   const r = await fetch(`${EMB}/v1/embeddings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ input: texts }) });
@@ -180,7 +199,7 @@ async function searchAll(items: string[], q: string): Promise<Hit[]> {
   const lists = await Promise.all(items.map((id) => search([id], q, PER_ARCHIVE).catch(() => [] as Hit[])));
   return interleave(lists, PER_ARCHIVE * items.length);
 }
-async function gather(items: string[], lang: 'es' | 'en', question: string, query: string | undefined, seenTitles: Set<string>) {
+async function gatherV2(items: string[], lang: 'es' | 'en', question: string, query: string | undefined, seenTitles: Set<string>) {
   if (!items.length) return { chunks: [] as any[], refs: new Map<string, any>() };
   const { queries, rankText, relevanceTexts } = rc.planRetrieval(question, [], lang, query);
   const [first, second] = rc.buildTitleCandidates(relevanceTexts[0]);
@@ -222,9 +241,9 @@ async function gather(items: string[], lang: 'es' | 'en', question: string, quer
 export async function retrieve2(question: string, lang: 'es' | 'en', budgetChars: number, query?: string, queryEn?: string) {
   const byLang = { es: itemIds.filter((i) => langOf(i) === 'es'), en: itemIds.filter((i) => langOf(i) !== 'es') };
   const seen = new Set<string>();
-  const own = lang === 'es' ? await gather(byLang.es, 'es', question, query, seen) : { chunks: [], refs: new Map(), queries: [] };
+  const own = lang === 'es' ? await gatherV2(byLang.es, 'es', question, query, seen) : { chunks: [], refs: new Map(), queries: [] };
   const enQ = lang === 'en' ? query : queryEn;
-  const en = lang === 'en' || enQ ? await gather(byLang.en, 'en', lang === 'en' ? question : enQ!, lang === 'en' ? query : undefined, seen) : { chunks: [], refs: new Map(), queries: [] };
+  const en = lang === 'en' || enQ ? await gatherV2(byLang.en, 'en', lang === 'en' ? question : enQ!, lang === 'en' ? query : undefined, seen) : { chunks: [], refs: new Map(), queries: [] };
   const refs = new Map([...own.refs, ...en.refs]);
   const pool = [...own.chunks, ...en.chunks];
   if (!pool.length) return { sources: [], userMessage: question, queries: [own.queries, en.queries], candidates: [] };
@@ -256,7 +275,7 @@ async function chat(body: object) {
   return j.choices[0].message as { content?: string; reasoning_content?: string; tool_calls?: { id: string; function: { name: string; arguments: string } }[] };
 }
 
-const MAX_ANSWER_TOKENS = Number(flag('answer-tokens', '768')), TOOL_PROMPT_TOKENS = 380;
+const MAX_ANSWER_TOKENS = Number(flag('answer-tokens', '768')), TOOL_PROMPT_TOKENS = 420;
 const ROUTES: Record<number, any> = {};
 if (flag('routes', '')) for (const l of readFileSync(flag('routes', ''), 'utf8').trim().split('\n')) { const r = JSON.parse(l); ROUTES[r.id] = r; }
 const EMIT = flag('emit', '');
@@ -279,7 +298,10 @@ async function answer(text: string, qid = 0) {
   const messages: any[] = [{ role: 'system', content: sys }, { role: 'user', content: text }];
   if (mode === 'sources') {
     const route = ROUTES[qid];
-    const r: any = V2 ? await retrieve2(text, lang, budget, route?.query?.trim() || undefined, route?.query_en?.trim() || undefined) : await retrieve(text, lang, budget, route?.query?.trim() || undefined);
+    const rq = route?.query?.trim() || undefined;
+    // chats.ts: an English router query for a Spanish question searches the English archives.
+    const rqEn = rq && lang === 'es' && rc.languageEvidence(rq) === 'en' ? rq : undefined;
+    const r: any = V2 ? await retrieve2(text, lang, budget, rq, route?.query_en?.trim() || rqEn) : await retrieve(text, lang, budget, rq, rqEn);
     rec.routerQuery = route?.query ?? route?.error;
     if (EMIT) {
       const prompt = !r.sources.length && !r.overflow ? null : r.userMessage;
@@ -303,9 +325,11 @@ async function answer(text: string, qid = 0) {
   if (!call) return { ...rec, toolCalled: false, answer: rc.guardNotFound(rc.stripThinking(first.content ?? ''), lang), ms: Date.now() - t0 };
   let query = rc.parseToolQuery(call.function.arguments);
   let queryEn: string | undefined;
-  try { const a = JSON.parse(call.function.arguments); if (typeof a.query === 'string') query = a.query.trim(); if (typeof a.query_en === 'string') queryEn = a.query_en.trim(); } catch {}
+  const parsed = rc.parseToolArgs(call.function.arguments);
+  query = parsed.query;
+  queryEn = parsed.queryEn;
   rec.queryEn = queryEn;
-  const r: any = V2 ? await retrieve2(text, lang, budget, query || undefined, queryEn) : await retrieve(text, lang, budget, query || undefined);
+  const r: any = V2 ? await retrieve2(text, lang, budget, query || undefined, queryEn) : await retrieve(text, lang, budget, query || undefined, queryEn);
   Object.assign(rec, { toolCalled: true, toolQuery: query, queries: r.queries, sources: r.sources.map((s: any) => `${s.itemId} · ${s.title}${s.page ? ` p.${s.page}` : ''}`), context: r.userMessage });
   if (!r.sources.length && !r.overflow) return { ...rec, answer: rc.NOT_FOUND_ANSWER[lang], ms: Date.now() - t0 };
   const id = call.id || 'call_0';

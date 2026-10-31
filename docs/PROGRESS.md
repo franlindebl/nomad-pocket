@@ -71,7 +71,8 @@ AI. **Assistant quality** (`docs/ASSISTANT_QUALITY_PLAN.md`, measured 2026-10-31
    questions, blind-graded): Apple FM scores 0.42/3 and Qwen3.5 4B 1.30/3 as the app is; retrieval v2 + Spanish
    content 1.94/3. In order: ~~(1) propose Qwen even with Apple Intelligence; (2) retrieval bugs: only the first 8
    archives give full-text hits, duplicated articles across Wikipedias, a leaked `<tool_call>`~~ done 2026-10-31
-   (no score change alone: 1.28 vs 1.32, blind); (3) bench before
+   (no score change alone: 1.28 vs 1.32, blind); ~~(4) bilingual search (`query_en`)~~ done 2026-10-31 (1.78/3,
+   harmful 5 of 50); (3) bench before
    assistant changes (`scripts/assistant-bench`); (4) bilingual search (`query_en`); (5) semantic rerank
    (EmbeddingGemma, measure on a phone first); (6) a vetted bilingual emergency guide: every variant gave 3–8
    harmful answers out of 50 (CPR, choking, bleach dose, CO); (7) Spanish Ready.gov/MedlinePlus in the kit.
@@ -355,6 +356,12 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   12 → 12, blind score 1.32 → 1.28 (noise): these fixes only pay off with bilingual search and content (steps 4–7).
   tsc, lint, tests (446), i18n clean. Owner decided on the guide (step 6): full, faithful copies of official
   public-domain sources only, vital protocols shown verbatim.
+- Step 4, bilingual search: `search_library` takes `query_en` for Spanish questions (`parseToolArgs`), Apple's
+  router query is used when it is English; English archives (`archiveLanguage` of the item) are searched and
+  ranked with it as a separate half, merged scaled to each half's best (`mergeRanked`, 8 chunks over 0.4).
+  Blind: "not found" 12 → 3, English guides in 49 of 50 answers, mean 1.18–1.28 → 1.78, harmful 5–6 → 5. With 16
+  chunks instead of 8 it scored 1.50–1.66 with 9–10 harmful: more material, more garbling. tsc, lint, tests (449),
+  i18n clean.
 
 ### 2026-10-31 — Content updates: E2E on iOS and Android
 

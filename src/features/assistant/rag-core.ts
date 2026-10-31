@@ -609,6 +609,34 @@ export function rankChunks(question: string, chunks: Chunk[], limit = 12): Score
     .slice(0, limit);
 }
 
+/**
+ * The language an archive's text is in, from its item's language ("es", "spa", "en", "eng", "es-MX"):
+ * null for several or unknown ones ("mul"), which are searched with the question's own words.
+ */
+export function archiveLanguage(language: string | null | undefined): Lang | null {
+  const l = (language ?? '').toLowerCase();
+  if (/^(es|spa)\b/.test(l)) return 'es';
+  if (/^(en|eng)\b/.test(l)) return 'en';
+  return null;
+}
+
+/**
+ * One ranking from several (the question's language, and English archives ranked against the English
+ * query): BM25 scores of different queries don't compare, so each list is scaled to its best chunk, and
+ * what scores under `floor` of it goes. Few and strong: with up to 16 chunks (8.5 sources an answer)
+ * Qwen3.5 4B garbled more of them into harmful advice (9 of 50 answers, blind) than with 8 over 0.4 of the
+ * best (5 of 50, and better answers: 1.78 of 3 against 1.66).
+ */
+export function mergeRanked<T>(lists: Scored<T>[][], limit = 8, floor = 0.4): Scored<T>[] {
+  return lists
+    .flatMap((list) => {
+      const top = list[0]?.score ?? 0;
+      return top > 0 ? list.map((x) => ({ item: x.item, score: x.score / top })).filter((x) => x.score >= floor) : [];
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+}
+
 // ---------------------------------------------------------------------------
 // Context packing
 
@@ -751,6 +779,7 @@ export function searchToolSpec(lang: Lang) {
       ? {
           d: 'Busca en la biblioteca sin conexión del usuario (Wikipedia, medicina, supervivencia…) y devuelve fragmentos numerados de artículos.',
           q: 'Palabras clave del tema, completas aunque la pregunta dependa de la conversación (ej. "tratamiento hipotermia").',
+          en: 'Las mismas palabras clave en inglés: muchas guías están en inglés (ej. "hypothermia treatment").',
         }
       : {
           d: "Searches the user's offline library (Wikipedia, medicine, survival…) and returns numbered article excerpts.",
@@ -761,7 +790,16 @@ export function searchToolSpec(lang: Lang) {
     function: {
       name: SEARCH_TOOL_NAME,
       description: t.d,
-      parameters: { type: 'object', properties: { query: { type: 'string', description: t.q } }, required: ['query'] },
+      // Spanish questions also get an English query: the best survival guides are English, and Spanish
+      // words never matched them (0 of 50 answers used one; Qwen3.5 4B filled query_en in 150 of 150 calls).
+      parameters:
+        'en' in t
+          ? {
+              type: 'object',
+              properties: { query: { type: 'string', description: t.q }, query_en: { type: 'string', description: t.en } },
+              required: ['query', 'query_en'],
+            }
+          : { type: 'object', properties: { query: { type: 'string', description: t.q } }, required: ['query'] },
     },
   };
 }
@@ -784,6 +822,22 @@ export function parseToolQuery(args: string | undefined): string {
     // not JSON: use as is
   }
   return args.trim();
+}
+
+/** A tool call's search: the query in the question's language and, for Spanish questions, an English one. */
+export type ToolQuery = { query: string; queryEn?: string };
+
+/** `parseToolQuery` plus the English query (`query_en`) when the model wrote one. */
+export function parseToolArgs(args: string | undefined): ToolQuery {
+  const query = parseToolQuery(args);
+  try {
+    const v: unknown = args ? JSON.parse(args) : null;
+    const en = v && typeof v === 'object' ? (v as { query_en?: unknown }).query_en : undefined;
+    if (typeof en === 'string' && en.trim()) return { query, queryEn: en.trim() };
+  } catch {
+    // not JSON: the query alone
+  }
+  return { query };
 }
 
 /** The tool result handed back to the model: numbered sources, or what to do without them. */

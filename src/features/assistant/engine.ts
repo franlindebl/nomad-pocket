@@ -14,7 +14,7 @@ import { contentFile, toNativePath } from '@/lib/storage';
 
 import * as SystemLLM from '../../../modules/nomad-llm';
 import { getModel, SYSTEM_MODEL_ID } from './models';
-import { parseToolQuery, SEARCH_TOOL_NAME, stripThinking, stripToolCalls, type Turn } from './rag-core';
+import { parseToolArgs, SEARCH_TOOL_NAME, stripThinking, stripToolCalls, type ToolQuery, type Turn } from './rag-core';
 
 /** The library search offered to a model that calls tools. */
 export type SearchTool = {
@@ -24,7 +24,7 @@ export type SearchTool = {
    * Runs the search and returns the text handed back to the model, or `{ final }`: the answer
    * itself, without a second pass (nothing found: the model would answer from memory).
    */
-  run: (query: string) => Promise<string | { final: string }>;
+  run: (query: ToolQuery) => Promise<string | { final: string }>;
 };
 
 export type GenerateRequest = {
@@ -233,8 +233,9 @@ class LlamaEngine implements Engine {
     // Pass 2: answer from the search results. Tools stay declared so the chat template
     // renders the call the same way; tool_choice "none" keeps the model from searching again.
     req.onText('');
-    const query = parseToolQuery(call.function?.arguments);
-    const result = await tool.run(query);
+    const args = parseToolArgs(call.function?.arguments);
+    const query = args.query;
+    const result = await tool.run(args);
     if (this.stopRequested) return { text: '', stopped: true, toolQuery: query };
     if (typeof result !== 'string') {
       req.onText(result.final);

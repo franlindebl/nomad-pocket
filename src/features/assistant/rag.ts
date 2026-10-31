@@ -1,6 +1,7 @@
 // Retrieval-augmented generation over the installed ZIM library.
 // question (or the model's own query) → keyword queries → libzim full-text search
-// across archives, plus articles named after the question (exact path), plus passages of the
+// across archives (English archives with the model's English query when a Spanish question has one,
+// ranked against it, then merged), plus articles named after the question (exact path), plus passages of the
 // archives' PDF documents (the library's document index) and the user's family plan → fetch
 // top articles → chunk →
 // BM25 over chunks and passages → drop chunks that barely share terms with the question →
@@ -12,9 +13,11 @@ import { PLAN_SOURCE, planPassages } from '@/features/prepare/passages';
 import { usePrepare } from '@/features/prepare/store';
 
 import {
+  archiveLanguage,
   buildRagUserMessage,
   buildTitleCandidates,
   chunkText,
+  mergeRanked,
   normalize,
   planRetrieval,
   readableDocTitle,
@@ -24,6 +27,8 @@ import {
   type Chunk,
   type Lang,
   type PackedSource,
+  type RetrievalPlan,
+  type Scored,
   type SourceRef,
   type Turn,
 } from './rag-core';
@@ -109,20 +114,20 @@ export type RetrieveOptions = {
   history?: Turn[];
   /** Search keywords chosen by the model (tool call / router); replaces the question's. */
   query?: string;
+  /** English keywords for a Spanish question (the tool's `query_en`): searched in the English archives. */
+  queryEn?: string;
   itemIds?: string[];
 };
 
-export async function retrieve(question: string, lang: Lang, budgetChars: number, opts: RetrieveOptions = {}): Promise<RetrievalResult> {
-  const itemIds = opts.itemIds ?? libraryItemIds();
-  const plan = planPassages(usePrepare.getState(), lang);
-  // No archives: the family plan alone is still searched.
-  if (!itemIds.length && !plan.length) return { noLibrary: true, sources: [], userMessage: buildRagUserMessage(question, [], lang) };
+type Gathered = { ranked: Scored<Chunk>[]; refs: Map<string, SourceRef> };
 
-  const history = opts.history ?? [];
-  // A model's query in another language than the question ("purificación de agua" for an English
-  // question, "meeting point" for a Spanish one) finds nothing in that library: planRetrieval
-  // keeps the question's own words whenever the query isn't positively in its language.
-  const { queries, rankText, relevanceTexts } = planRetrieval(question, history, lang, opts.query);
+/**
+ * One language's half of a search: libzim hits and articles named after the question, document passages
+ * and `extra` passages (the family plan), chunked and ranked against `plan`. `leads`: when no chunk shares a
+ * word with the question, fall back to the article leads (the engine matched by stemming or synonyms).
+ */
+async function gather(itemIds: string[], plan: RetrievalPlan, extra: { key: string; ref: SourceRef; title: string; text: string }[], leads: boolean): Promise<Gathered> {
+  const { queries, rankText, relevanceTexts } = plan;
   const [first, second] = buildTitleCandidates(relevanceTexts[0]);
   const [lists, titled, passages] = itemIds.length
     ? await Promise.all([
@@ -173,22 +178,50 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
     chunks.push({ sourceKey: key, title: p.title, text: p.text, index: 1 + rank, hitRank: rank });
   });
 
-  // The family plan (meeting points, contacts, health, home notes) competes like any source.
-  for (const p of plan) {
-    const key = `${PLAN_SOURCE}\u0000${p.section}`;
-    refs.set(key, { itemId: PLAN_SOURCE, path: p.section, title: p.title });
-    chunks.push({ sourceKey: key, title: p.title, text: p.text, index: 0 });
+  for (const p of extra) {
+    refs.set(p.key, p.ref);
+    chunks.push({ sourceKey: p.key, title: p.title, text: p.text, index: 0 });
   }
 
   let ranked = rankChunks(rankText, chunks, 16);
   if (ranked.length) {
     // Chunks that only share a word or two with a longer question are about something else.
     ranked = relevantChunks(relevanceTexts, ranked);
-  } else if (chunks.length) {
-    // The search engine matched (stemming, synonyms, other language) but no chunk
-    // shares a term with the question: fall back to the article leads, in hit order.
+  } else if (leads && chunks.length) {
     ranked = chunks.filter((c) => c.index === 0).map((c, i) => ({ item: c, score: 1 / (i + 1) }));
   }
+  return { ranked, refs };
+}
+
+export async function retrieve(question: string, lang: Lang, budgetChars: number, opts: RetrieveOptions = {}): Promise<RetrievalResult> {
+  const itemIds = opts.itemIds ?? libraryItemIds();
+  const plan = planPassages(usePrepare.getState(), lang);
+  // No archives: the family plan alone is still searched.
+  if (!itemIds.length && !plan.length) return { noLibrary: true, sources: [], userMessage: buildRagUserMessage(question, [], lang) };
+
+  const history = opts.history ?? [];
+  // A model's query in another language than the question ("purificación de agua" for an English
+  // question, "meeting point" for a Spanish one) finds nothing in that library: planRetrieval
+  // keeps the question's own words whenever the query isn't positively in its language.
+  const own = planRetrieval(question, history, lang, opts.query);
+  // With an English query for a Spanish question, English archives are searched and ranked with it
+  // instead of Spanish words they never contain; the rest take the question's words, as before.
+  const queryEn = lang === 'es' ? opts.queryEn?.trim() : undefined;
+  const english = queryEn ? itemIds.filter((id) => archiveLanguage(getItem(id)?.language) === 'en') : [];
+  const rest = english.length ? itemIds.filter((id) => !english.includes(id)) : itemIds;
+  // The family plan (meeting points, contacts, health, home notes) competes like any source.
+  const planChunks = plan.map((p) => ({
+    key: `${PLAN_SOURCE}\u0000${p.section}`,
+    ref: { itemId: PLAN_SOURCE, path: p.section, title: p.title },
+    title: p.title,
+    text: p.text,
+  }));
+  const groups = await Promise.all([
+    gather(rest, own, planChunks, true),
+    english.length ? gather(english, planRetrieval(queryEn!, [], 'en'), [], false) : null,
+  ]);
+  const refs = new Map(groups.flatMap((g) => (g ? [...g.refs] : [])));
+  const ranked = mergeRanked(groups.flatMap((g) => (g ? [g.ranked] : [])));
   const { sources } = packContext(ranked, (k) => refs.get(k), budgetChars, 3);
   // Found, but nothing fits the budget (a very long question): don't claim the library has nothing.
   if (!sources.length && ranked.length) return { noLibrary: false, sources, userMessage: question, overflow: true };

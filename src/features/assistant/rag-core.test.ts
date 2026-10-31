@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
 import {
+  archiveLanguage,
   BM25,
   buildConversationQueries,
   buildRagUserMessage,
@@ -19,11 +20,13 @@ import {
   guardNotFound,
   guessIntent,
   isHealthQuestion,
+  mergeRanked,
   noHealthAnswer,
   nominalize,
   normalize,
   NOT_FOUND_ANSWER,
   packContext,
+  parseToolArgs,
   parseToolQuery,
   planRetrieval,
   ragMessageFrame,
@@ -513,10 +516,19 @@ describe('relevance', () => {
 });
 
 describe('tool calls', () => {
-  test('searchToolSpec describes search_library with a query', () => {
-    const spec = searchToolSpec('es');
-    assert.equal(spec.function.name, SEARCH_TOOL_NAME);
-    assert.deepEqual(spec.function.parameters.required, ['query']);
+  test('searchToolSpec describes search_library with a query, plus an English one for Spanish', () => {
+    const es = searchToolSpec('es');
+    assert.equal(es.function.name, SEARCH_TOOL_NAME);
+    assert.deepEqual(es.function.parameters.required, ['query', 'query_en']);
+    assert.deepEqual(searchToolSpec('en').function.parameters.required, ['query']);
+  });
+
+  test('parseToolArgs adds the English query when there is one', () => {
+    assert.deepEqual(parseToolArgs('{"query":"lejía agua","query_en":" bleach water "}'), { query: 'lejía agua', queryEn: 'bleach water' });
+    assert.deepEqual(parseToolArgs('{"query":"lejía agua"}'), { query: 'lejía agua' });
+    assert.deepEqual(parseToolArgs('{"query":"lejía agua","query_en":""}'), { query: 'lejía agua' });
+    assert.deepEqual(parseToolArgs('lejía'), { query: 'lejía' });
+    assert.deepEqual(parseToolArgs(undefined), { query: '' });
   });
 
   test('parseToolQuery reads JSON arguments, bare strings and junk', () => {
@@ -527,6 +539,27 @@ describe('tool calls', () => {
     assert.equal(parseToolQuery('{"keywords":" hipotermia niños "}'), 'hipotermia niños');
     assert.equal(parseToolQuery('{"a":"x","b":"y"}'), '{"a":"x","b":"y"}');
     assert.equal(parseToolQuery(undefined), '');
+  });
+
+  test('archiveLanguage reads ISO codes, none for several languages', () => {
+    assert.equal(archiveLanguage('es'), 'es');
+    assert.equal(archiveLanguage('spa'), 'es');
+    assert.equal(archiveLanguage('es-MX'), 'es');
+    assert.equal(archiveLanguage('eng'), 'en');
+    assert.equal(archiveLanguage('mul'), null);
+    assert.equal(archiveLanguage('english'), null);
+    assert.equal(archiveLanguage(null), null);
+  });
+
+  test('mergeRanked scales each ranking to its best, drops the weak tail and caps the total', () => {
+    const es = [{ item: 'es1', score: 10 }, { item: 'es2', score: 4 }, { item: 'es3', score: 1 }];
+    const en = [{ item: 'en1', score: 2 }, { item: 'en2', score: 1.5 }];
+    assert.deepEqual(
+      mergeRanked([es, en]).map((x) => x.item),
+      ['es1', 'en1', 'en2', 'es2'],
+    );
+    assert.deepEqual(mergeRanked([[], en]).map((x) => x.item), ['en1', 'en2']);
+    assert.deepEqual(mergeRanked([es, en], 2).map((x) => x.item), ['es1', 'en1']);
   });
 
   test('buildToolResult numbers sources or explains there are none', () => {

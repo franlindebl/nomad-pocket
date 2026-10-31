@@ -1249,7 +1249,13 @@ started on the phone shows in the car and the other way round.
   (the round-robin used to stop at 8 in all, leaving the oldest installs out) → up to 8 distinct articles
   (redirects counted once, one copy of a title found in two archives) → chunks of 650 chars → BM25 (with title and search-rank
   boosts) → drop chunks sharing too few question terms (`relevantChunks`) → pack the
-  best chunks into the model's budget as numbered sources → `[n]` citations, in the user
+  best chunks into the model's budget as numbered sources. **Bilingual**: a Spanish question's tool call
+  carries `query_en` too (`searchToolSpec`, `parseToolArgs`; Apple's router query counts when it is English);
+  then archives whose item language is English (`archiveLanguage`) are searched with it, as a separate half
+  (`gather`) ranked against the English query, without the lead fallback, and the two rankings are merged scaled
+  to each one's best chunk (`mergeRanked`: 8 at most, under 0.4 of the best dropped; with 16 the 4B model
+  garbled more sources into harmful advice). Before, Spanish
+  words never matched the English guides (0 of 50 answers used one; `docs/ASSISTANT_QUALITY_PLAN.md`). Sources → `[n]` citations, in the user
   turn (`sources` prompt) or as the tool result. Health questions get an extra caution
   rule. **No answers from memory when the library has nothing** (owner, 2026-10-28): a search with no
   passages (`retrieve` without sources and without `overflow`) answers `NOT_FOUND_ANSWER` without calling

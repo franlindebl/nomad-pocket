@@ -22,6 +22,7 @@ import {
   guardNotFound,
   guessIntent,
   isHealthQuestion,
+  languageEvidence,
   NO_LIBRARY_ANSWER,
   noHealthAnswer,
   NOT_FOUND_ANSWER,
@@ -198,9 +199,9 @@ export function newChat() {
 const MAX_ANSWER_TOKENS = 768;
 const SYSTEM_ANSWER_TOKENS = 600;
 const UI_THROTTLE_MS = 60;
-// What declaring search_library costs in the prompt: the JSON schema plus the
-// template's own tool instructions (~250 tokens in Qwen's).
-const TOOL_PROMPT_TOKENS = 380;
+// What declaring search_library costs in the prompt: the JSON schema (with query_en for Spanish)
+// plus the template's own tool instructions (~250 tokens in Qwen's).
+const TOOL_PROMPT_TOKENS = 420;
 
 /** Language of the message; short ones ("ok", "gracias") follow the conversation. */
 function languageFor(question: string, history: Turn[]): Lang {
@@ -320,6 +321,7 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
       // Decide whether to search.
       let mode: 'chat' | 'search' | 'tools' = 'chat';
       let query: string | undefined;
+      let queryEn: string | undefined;
       if (library) {
         if (forceSearch) mode = 'search';
         else if (guessIntent(text, history) === 'chat') mode = 'chat';
@@ -330,6 +332,9 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
             const d = await engine.route(ROUTER_INSTRUCTIONS, buildRouterPrompt(text, history));
             mode = d.search ? 'search' : 'chat';
             query = d.query.trim() || undefined;
+            // Apple's router often writes English keywords for a Spanish question (21 of 47): useless for the
+            // Spanish archives, just right for the English guides.
+            if (query && lang === 'es' && languageEvidence(query) === 'en') queryEn = query;
           } catch (e) {
             console.warn('[assistant] router failed, searching', e);
             mode = 'search';
@@ -358,7 +363,7 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
       let userTurn = text;
       if (mode === 'search') {
         patchStreaming({ phase: 'searching' });
-        const r = await retrieve(text, lang, contextBudget, { history, query });
+        const r = await retrieve(text, lang, contextBudget, { history, query, queryEn });
         keep(r);
         if (cancelled()) return;
         // Nothing in the library: say so, never an answer from the model's memory (NOT_FOUND_ANSWER).
@@ -377,9 +382,9 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
         mode === 'tools'
           ? {
               spec: searchToolSpec(lang),
-              run: async (q) => {
+              run: async ({ query: q, queryEn: en }) => {
                 patchStreaming({ phase: 'searching', text: '' });
-                const r = await retrieve(text, lang, contextBudget, { history, query: q || undefined });
+                const r = await retrieve(text, lang, contextBudget, { history, query: q || undefined, queryEn: en });
                 keep(r);
                 patchStreaming({ phase: 'generating' });
                 if (!r.sources.length && !r.overflow) return { final: NOT_FOUND_ANSWER[lang] };

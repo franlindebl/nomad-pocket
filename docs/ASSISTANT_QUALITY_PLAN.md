@@ -119,6 +119,22 @@ vs "start a fire").
   cost on a phone (an extra model in memory, a few seconds per question) has not been measured yet.
 - Precomputed vectors are worth it for a small curated pack (step 6): built on our side, shipped with it.
 
+## After steps 1, 2 and 4 (2026-10-31)
+
+Same bench, blind-graded in rounds (a round compares a few variants; a variant's score moves ±0.15 between
+rounds):
+
+| Variant | Mean | Useful | Zero | Harmful | "Not found" | Sources/answer |
+|---|---|---|---|---|---|---|
+| A2 — steps 1–2 (per-archive hits, dedup) | 1.18–1.28 | 20–22 | 16–17 | 5–6 | 12 | 2.3 |
+| A3 — + bilingual search, 16 chunks | 1.50–1.66 | 24–27 | 6 | 9–10 | 1 | 8.5 |
+| **A4 — + bilingual search, 8 strong chunks (shipped)** | **1.78** | **30** | 4 | **5** | 3 | 5.0 |
+| A3x — A3 + Spanish Ready.gov/MedlinePlus | 1.80 | 31 | 3 | 11 | 1 | 8.3 |
+
+English guides now reach 49 of 50 answers (0 before). More material made the 4B model garble more of it into
+harmful advice (A3), fewer and stronger chunks fixed most of that (A4). Four of A4's five harmful answers are
+vital first aid (CPR, choking, viper bite, recovery position): step 6's verbatim cards.
+
 ## Plan, in order
 
 1. **Recommend Qwen even with Apple Intelligence** (small). Every Apple Intelligence iPhone has 8 GB, so
@@ -131,9 +147,10 @@ vs "start a fire").
    `<tool_call>` in pass 2; cut "not found" openings followed by a cited answer.
 3. **Bench in the release checklist**: run `scripts/assistant-bench` before an assistant change (A as the
    baseline), and grow the questions to 100 with English ones.
-4. **Bilingual retrieval** (medium): `search_library` takes `query_en` too (Qwen filled it in 150 of 150 calls); the
-   Apple router's `@Generable` gets the same field; English archives are searched with it and their chunks
-   ranked against it. Archive language comes from the catalog.
+4. ~~**Bilingual retrieval**~~ done 2026-10-31 (A4 above): `search_library` takes `query_en` for Spanish
+   questions (Qwen filled it in 150 of 150 calls); Apple's router query is used for it when it is English (no
+   native change); English archives (the installed item's language) are searched with it, ranked against it,
+   and merged with the Spanish half.
 5. **Semantic rerank** (medium, needs a device measurement first): EmbeddingGemma 300M through llama.rn
    embeddings, downloaded with the chat model; rerank the candidates, drop those under ~0.40 cosine.
    Measure the time and memory on an iPhone 13 (4 GB) and 15 Pro before choosing; without it, step 4
