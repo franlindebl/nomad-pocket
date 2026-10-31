@@ -105,6 +105,12 @@ Trips are driven from the phone with Maestro (`travel`), seeded with the Andorra
 (`e2e/fixtures/{maps,routing}` copied into the app's `Documents/content`). The simulator only sends
 a location when it changes: `xcrun simctl location <udid> set …` after a reinstall.
 
+The Simulator's hidden `defaults write com.apple.iphonesimulator CarPlayExtraOptions -bool YES` opens a
+setup sheet (size, scale, touch, knob) when choosing CarPlay; the device keeps what it ran last. The
+standard screen is 800×480 @2x, touch lo-fi + knob: set it back that way after trying another. A
+1920×480 screen still showed CarPlay at 800 pt, and no Dashboard appeared in any layout tried, so the
+Dashboard and instrument-cluster scenes are not built (they need a real car or a newer simulator to see).
+
 Checked this way: opening from the car with the phone app closed (React Native starts behind the car's
 map) and then opening the phone (it adopts it); the offline map in the car (day/night), following;
 Destinos → Guardados / Emergencias cerca (empty state) / Buscar with the car keyboard; a trip from the
@@ -112,6 +118,14 @@ phone and one picked in the car: preview (route framed beside the card, time, di
 "Cancelar"; navigation: maneuver panel, estimates, the route behind consumed, course up and tilted,
 reroute after leaving the route, arrival ("Has llegado" with "Terminar"), guidance ending by itself a
 minute later; "Terminar" in the bar ends it on the phone too.
+
+## Later (not built)
+
+- **Dashboard** (`CPTemplateApplicationDashboardScene`, `CPSupportsDashboardNavigationScene`): our map in the
+  car home screen's tile, the system's maneuver card over it, a "Destinos" shortcut. Tried on 2026-10-31
+  and taken out again: the simulator never showed a Dashboard, and code nobody has seen run isn't shipped.
+- **Instrument cluster** (`CPTemplateApplicationInstrumentClusterScene`): the map in the cluster behind the
+  wheel, on cars that offer it.
 
 ## Phase 4 — after the entitlement
 
