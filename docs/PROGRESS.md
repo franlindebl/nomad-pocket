@@ -321,6 +321,11 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-31 — iOS build 27 to TestFlight
+
+- 1.1.0 (27), TestFlight only (build 23 still in App Review): build 26 plus content updates (c711eb9), for the owner
+  to try. Archived from the clean worktree `e2e-21` at the release commit (store prebuild). Tagged `v1.1.0-27`.
+
 ### 2026-10-31 — Content updates: tell the person their data is old, update it without losing it
 
 - Owner: nothing said that maps, guides, Wikipedia or courses had newer versions; show it, let them update, and
