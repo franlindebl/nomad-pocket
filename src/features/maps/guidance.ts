@@ -49,6 +49,8 @@ type GuidanceState = {
   setCosting: (costing: Costing) => void;
   /** A routing pack was installed: try roads again if guidance is on a straight line. */
   retryRoute: () => void;
+  /** CarPlay connected or not: with it, even the trip preview's GPS watch runs in the background. */
+  keepInBackground: (on: boolean) => void;
   /** The Maps tab came to the front or left it (a sheet over the map keeps it in front). */
   setMapFocused: (focused: boolean) => void;
   stop: () => void;
@@ -62,6 +64,14 @@ const ARRIVED_STOP_MS = 60_000;
 /** Not moving on for this long (a rest, a shelter, no GPS signal): the screen may sleep again. */
 const IDLE_MS = 10 * 60_000;
 let gps: Location.LocationSubscription | null = null;
+/** What the session's GPS watch calls with each fix (the watch is swapped when the trip starts). */
+let onFix: ((p: Location.LocationObject) => void) | null = null;
+/** Bumped by every watch (re)start: only the latest one is kept. */
+let gpsRequest = 0;
+/** The current watch keeps going in the background. */
+let gpsBackground = false;
+/** CarPlay is connected: even the preview may run with the phone locked (keepGuidanceInBackground). */
+let carConnected = false;
 /** The compass watcher (it starts asynchronously); only while the Maps tab is in front. */
 let compass: Promise<{ remove: () => void }> | null = null;
 /** Bumped by every start/stop, so a slow start that was superseded cleans up after itself. */
@@ -91,13 +101,19 @@ function stopCompass() {
   pending?.then((s) => s.remove()).catch(() => {});
 }
 
-function unsubscribe() {
+function removeGps() {
   try {
     gps?.remove();
   } catch {
     // already removed
   }
   gps = null;
+}
+
+function unsubscribe() {
+  removeGps();
+  gpsBackground = false;
+  onFix = null;
   stopCompass();
   if (arrivalTimer) clearTimeout(arrivalTimer);
   if (idleTimer) clearTimeout(idleTimer);
@@ -212,6 +228,39 @@ export const useGuidance = create<GuidanceState>((set, get) => {
     }
   }
 
+  /**
+   * (Re)starts the GPS watch feeding `onFix`. In the background only once the trip has started
+   * ("Iniciar"): the preview may sit there forever, and its watch stops with the app like before.
+   */
+  async function watchGps(mine: number, background: boolean) {
+    background ||= carConnected;
+    const ask = ++gpsRequest;
+    gpsBackground = background;
+    const options = { accuracy: Location.Accuracy.BestForNavigation, distanceInterval: 3, timeInterval: 2000 };
+    const target = get().target;
+    try {
+      const sub = background
+        ? await Location.watchNavigationAsync(
+            {
+              ...options,
+              automotive: get().costing === 'auto',
+              notice: { title: i18n.t('maps:guidance.notice'), body: i18n.t('maps:guidance.toward', { name: target?.name ?? '' }) },
+            },
+            (p) => onFix?.(p),
+          )
+        : await Location.watchPositionAsync(options, (p) => onFix?.(p));
+      // stop(), another start() or the switch to the trip's watch ran while this one was starting.
+      if (session !== mine || ask !== gpsRequest) {
+        sub.remove();
+        return;
+      }
+      removeGps();
+      gps = sub;
+    } catch (e) {
+      console.warn('[maps] guidance GPS', e);
+    }
+  }
+
   return {
     target: null,
     position: null,
@@ -254,33 +303,29 @@ export const useGuidance = create<GuidanceState>((set, get) => {
       const last = await Location.getLastKnownPositionAsync({ maxAge: STALE_FIX_MS }).catch(() => null);
       if (last && session === mine && isFreshFix(last.timestamp, STALE_FIX_MS))
         firstFix({ lat: last.coords.latitude, lon: last.coords.longitude, accuracy: last.coords.accuracy, at: last.timestamp });
-      try {
-        const sub = await Location.watchPositionAsync(
-          { accuracy: Location.Accuracy.BestForNavigation, distanceInterval: 3, timeInterval: 2000 },
-          (p) => {
-            if (session !== mine) return;
-            course = (p.coords.speed ?? 0) > 2 && (p.coords.heading ?? -1) >= 0 ? p.coords.heading : null;
-            const speed = p.coords.speed !== null && p.coords.speed >= 0 ? p.coords.speed : null;
-            const here = { lat: p.coords.latitude, lon: p.coords.longitude, accuracy: p.coords.accuracy, at: p.timestamp };
-            track = pushFix(track, here);
-            const fix = { ...here, course, speed, travel: travelBearing(track, get().costing) };
-            if (!routed) firstFix(fix);
-            else {
-              onPosition(fix);
-              watchProgress(fix, mine);
-            }
-          },
-        );
-        // stop() or another start() may have run while the watcher was starting.
-        if (session === mine) gps = sub;
-        else sub.remove();
-      } catch (e) {
-        console.warn('[maps] guidance GPS', e);
-      }
+      // stop() or another start() ran meanwhile: that session owns onFix now.
+      if (session !== mine) return true;
+      onFix = (p) => {
+        if (session !== mine) return;
+        course = (p.coords.speed ?? 0) > 2 && (p.coords.heading ?? -1) >= 0 ? p.coords.heading : null;
+        const speed = p.coords.speed !== null && p.coords.speed >= 0 ? p.coords.speed : null;
+        const here = { lat: p.coords.latitude, lon: p.coords.longitude, accuracy: p.coords.accuracy, at: p.timestamp };
+        track = pushFix(track, here);
+        const fix = { ...here, course, speed, travel: travelBearing(track, get().costing) };
+        if (!routed) firstFix(fix);
+        else {
+          onPosition(fix);
+          watchProgress(fix, mine);
+        }
+      };
+      await watchGps(mine, false);
       return true;
     },
     startNavigation: () => {
-      if (get().target) set({ navigating: true });
+      if (!get().target || get().navigating) return;
+      set({ navigating: true });
+      // From the preview's watch to one that keeps going in the background.
+      if (!gpsBackground) watchGps(session, true);
     },
     setCosting: (costing) => {
       if (costing === get().costing) return;
@@ -297,6 +342,12 @@ export const useGuidance = create<GuidanceState>((set, get) => {
         set({ routing: 'loading' });
         requestRoute();
       }
+    },
+    keepInBackground: (on) => {
+      if (on === carConnected) return;
+      carConnected = on;
+      // A preview running when the car connects: its watch must survive the phone being locked.
+      if (on && gps && !gpsBackground && get().target) watchGps(session, true);
     },
     setMapFocused: (focused) => {
       if (focused === mapFocused) return;

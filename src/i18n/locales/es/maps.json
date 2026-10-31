@@ -151,7 +151,8 @@
       "auto": "{{time}} en coche",
       "pedestrian": "{{time}} a pie",
       "bicycle": "{{time}} en bici"
-    }
+    },
+    "notice": "Navegación en curso"
   },
   "emergency": {
     "title": "Emergencias",
@@ -440,5 +441,22 @@
       "name": "Lejano Oriente",
       "states": "Vladivostok, Jabárovsk, Yakutsk, Kamchatka y Sajalín"
     }
+  },
+  "voice": {
+    "in": "En {{distance}}, {{instruction}}",
+    "unit": {
+      "m_one": "{{value}} metro",
+      "m_other": "{{value}} metros",
+      "km_one": "{{value}} kilómetro",
+      "km_other": "{{value}} kilómetros",
+      "ft_one": "{{value}} pie",
+      "ft_other": "{{value}} pies",
+      "yd_one": "{{value}} yarda",
+      "yd_other": "{{value}} yardas",
+      "mi_one": "{{value}} milla",
+      "mi_other": "{{value}} millas"
+    },
+    "mute": "Silenciar las indicaciones por voz",
+    "unmute": "Activar las indicaciones por voz"
   }
 }

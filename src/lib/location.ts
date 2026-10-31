@@ -15,3 +15,4 @@ export {
   type LocationObject,
   type LocationSubscription,
 } from 'expo-location';
+export { watchNavigationAsync } from './navigation-watch';

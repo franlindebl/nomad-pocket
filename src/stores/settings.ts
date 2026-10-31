@@ -25,6 +25,8 @@ type SettingsState = {
   hiddenPointCategories: string[];
   /** Navigation keeps the map north up (the arrow turns) instead of turning it the way the user goes. */
   navNorthUp: boolean;
+  /** Navigation speaks its prompts (the speaker button in the navigation view). */
+  navVoice: boolean;
   setLanguage: (l: AppLanguage) => void;
   setContentLanguages: (l: AppLanguage[]) => void;
   setTheme: (t: ThemePreference) => void;
@@ -36,6 +38,7 @@ type SettingsState = {
   setMapPoints: (v: boolean) => void;
   setPointCategoryHidden: (category: string, hidden: boolean) => void;
   setNavNorthUp: (v: boolean) => void;
+  setNavVoice: (v: boolean) => void;
 };
 
 function applyTheme(theme: ThemePreference) {
@@ -56,6 +59,7 @@ export const useSettings = create<SettingsState>()(
       mapPoints: true,
       hiddenPointCategories: [],
       navNorthUp: false,
+      navVoice: true,
       setLanguage: (language) => {
         setLanguage(language);
         set({ language });
@@ -78,6 +82,7 @@ export const useSettings = create<SettingsState>()(
             : st.hiddenPointCategories.filter((c) => c !== category),
         })),
       setNavNorthUp: (navNorthUp) => set({ navNorthUp }),
+      setNavVoice: (navVoice) => set({ navVoice }),
     }),
     {
       name: 'settings',
@@ -94,6 +99,7 @@ export const useSettings = create<SettingsState>()(
         mapPoints,
         hiddenPointCategories,
         navNorthUp,
+        navVoice,
       }) => ({
         language,
         contentLanguages,
@@ -106,6 +112,7 @@ export const useSettings = create<SettingsState>()(
         mapPoints,
         hiddenPointCategories,
         navNorthUp,
+        navVoice,
       }),
       onRehydrateStorage: () => (state) => {
         if (!state) return;

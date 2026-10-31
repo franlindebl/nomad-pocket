@@ -1,6 +1,6 @@
 {
   "ios": {
-    "NSLocationWhenInUseUsageDescription": "Nomad Pocket usa tu ubicación para mostrarte en los mapas sin conexión, medir distancias y guiarte hasta lugares y puntos de emergencia.",
+    "NSLocationWhenInUseUsageDescription": "Nomad Pocket usa tu ubicación para mostrarte en los mapas sin conexión, medir distancias y guiarte hasta lugares y puntos de emergencia, también con la pantalla bloqueada mientras navegas.",
     "NSMicrophoneUsageDescription": "Nomad Pocket usa el micrófono solo cuando tocas el botón de dictar en el asistente, para escribir tu pregunta con la voz. El audio se procesa en tu dispositivo y no se guarda ni se envía.",
     "NSSpeechRecognitionUsageDescription": "Nomad Pocket convierte tu voz en texto en tu dispositivo, sin conexión, cuando dictas una pregunta al asistente.",
     "NSPhotoLibraryUsageDescription": "Nomad Pocket no accede a tus fotos. Algunas librerías incluidas pueden leer imágenes de la fototeca, pero la app nunca lo solicita."

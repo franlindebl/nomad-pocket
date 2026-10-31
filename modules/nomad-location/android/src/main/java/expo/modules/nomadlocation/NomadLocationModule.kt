@@ -4,7 +4,9 @@
 // needs play-services-location, a proprietary library that can't ship next to GPL libkiwix, so it is
 // left out of Android autolinking (package.json). Results have expo-location's shapes and its
 // behaviour where the app relies on it: watches and the compass pause while the app is in the
-// background, true north comes from GeomagneticField at the last known position.
+// background, true north comes from GeomagneticField at the last known position. A navigation
+// watch is the exception: it keeps going in the background, inside a foreground service
+// (NavigationService) started while the app is in front, so no background permission is needed.
 //
 // Everything runs on the main thread (listeners, sensors and the functions), so the state below
 // needs no locking.
@@ -37,6 +39,7 @@ import kotlin.math.abs
 // expo-location's Accuracy values (Lowest 1 … BestForNavigation 6).
 private const val ACCURACY_LOWEST = 1
 private const val ACCURACY_HIGH = 4
+private const val ACCURACY_NAVIGATION = 6
 private const val FIX_TIMEOUT_MS = 30_000L
 // With two providers (below Android 12), a network fix is dropped while GPS gave one this recently.
 private const val GPS_PREFERRED_MS = 10_000L
@@ -56,7 +59,7 @@ class NomadLocationModule : Module(), SensorEventListener {
     get() = appContext.reactContext?.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
   private val main = Handler(Looper.getMainLooper())
 
-  private class Watch(val accuracy: Int, val distance: Float, val intervalMs: Long) {
+  private class Watch(val accuracy: Int, val distance: Float, val intervalMs: Long, val navigation: Boolean = false) {
     val listeners = mutableListOf<LocationListener>()
     var lastGpsAt = 0L
   }
@@ -73,7 +76,7 @@ class NomadLocationModule : Module(), SensorEventListener {
 
   override fun definition() = ModuleDefinition {
     Name("NomadLocation")
-    Events("onLocation", "onHeading")
+    Events("onLocation", "onHeading", "onNavigation")
 
     // Granted means at least approximate location, as expo-location reports it.
     AsyncFunction("getPermissions") { promise: Promise ->
@@ -136,6 +139,22 @@ class NomadLocationModule : Module(), SensorEventListener {
       Unit
     }.runOnQueue(Queues.MAIN)
 
+    // Fixes arrive as onNavigation events, also with the app in the background; the notice is the
+    // service's notification ("Navigating to …"). `automotive` is for iOS (its activity type).
+    AsyncFunction("startNavigation") { id: Int, distance: Double, intervalMs: Double, title: String, body: String, _: Boolean ->
+      val watch = Watch(ACCURACY_NAVIGATION, distance.toFloat(), intervalMs.toLong(), navigation = true)
+      watches.remove(id)?.let(::pause)
+      watches[id] = watch
+      NavigationService.start(context, title, body)
+      resume(id, watch)
+    }.runOnQueue(Queues.MAIN)
+
+    AsyncFunction("stopNavigation") { id: Int ->
+      watches.remove(id)?.let(::pause)
+      if (watches.values.none { it.navigation }) NavigationService.stop(context)
+      Unit
+    }.runOnQueue(Queues.MAIN)
+
     AsyncFunction("startHeading") { ->
       val sm = sensors
       if (sm?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) == null) throw CodedException("E_NO_COMPASS", "This device has no compass", null)
@@ -153,7 +172,7 @@ class NomadLocationModule : Module(), SensorEventListener {
     OnActivityEntersBackground {
       main.post {
         foreground = false
-        watches.values.forEach(::pause)
+        watches.values.filterNot { it.navigation }.forEach(::pause)
         sensors?.unregisterListener(this@NomadLocationModule)
       }
     }
@@ -170,6 +189,7 @@ class NomadLocationModule : Module(), SensorEventListener {
     OnDestroy {
       main.post {
         watches.values.forEach(::pause)
+        if (watches.values.any { it.navigation }) appContext.reactContext?.let(NavigationService::stop)
         watches.clear()
         sensors?.unregisterListener(this@NomadLocationModule)
       }
@@ -225,7 +245,7 @@ class NomadLocationModule : Module(), SensorEventListener {
         if (fix.provider == LocationManager.GPS_PROVIDER) watch.lastGpsAt = now
         else if (watch.lastGpsAt > 0 && now - watch.lastGpsAt < GPS_PREFERRED_MS) return@Listener
         noteDeclination(fix)
-        sendEvent("onLocation", Bundle().apply {
+        sendEvent(if (watch.navigation) "onNavigation" else "onLocation", Bundle().apply {
           putInt("watchId", id)
           putBundle("location", toBundle(fix))
         })
