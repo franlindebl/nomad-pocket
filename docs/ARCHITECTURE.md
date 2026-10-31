@@ -1077,6 +1077,9 @@ without them are fetched on their own when the sheet opens online) and `route-st
 Navigation only (`docs/CARPLAY_PLAN.md`). **One guidance**: JS (`useGuidance`) owns routes,
 progress, rerouting and voice; the car shows it and sends back what the driver chose, so a trip
 started on the phone shows in the car and the other way round.
+- **Switch**: off in `app.json` (`enabled: false`) until Apple grants the entitlement: the plugin then adds
+  nothing and leaves `nomad-carplay` out of autolinking (Podfile `use_expo_modules!(exclude: …)`), the JS side
+  sees no native module and does nothing. `CARPLAY=1` (or `CARPLAY_ENTITLEMENT=1`) at prebuild turns it on.
 - **Scene**: `with-carplay.js` adds the `CPTemplateApplicationSceneSessionRoleApplication` scene
   (`NomadCarPlaySceneDelegate`) and the `com.apple.developer.carplay-maps` entitlement only with the
   plugin option `entitlement: true` or `CARPLAY_ENTITLEMENT=1` at prebuild (off in `app.json` until

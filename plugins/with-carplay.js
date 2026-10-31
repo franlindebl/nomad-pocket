@@ -1,23 +1,35 @@
-// CarPlay navigation (modules/nomad-carplay, docs/CARPLAY_PLAN.md) in the generated iOS project:
+// CarPlay navigation (modules/nomad-carplay, docs/CARPLAY_PLAN.md) in the generated iOS project.
+// Off unless the `enabled` option is true or CARPLAY=1 at prebuild: then the app is built without
+// CarPlay at all (no scene, the Expo template's SceneDelegate, nomad-carplay left out of autolinking,
+// so the binary has no CarPlay code; src/features/carplay finds no native module and does nothing).
+// On:
 // - the CarPlay scene in Info.plist, next to the phone's (UIApplicationSupportsMultipleScenes stays
 //   false: a CarPlay scene doesn't count);
 // - the phone's SceneDelegate adopts the React Native view the car already started, when the app
 //   was opened from CarPlay first (CarPlayBoot.swift says why);
 // - the CarPlay navigation entitlement, only when the `entitlement` option is true or
-//   CARPLAY_ENTITLEMENT=1 at prebuild. A device build whose provisioning profile lacks it doesn't
-//   sign, and Apple grants it on request: off until then, on for the simulator's CarPlay screen
-//   (`CARPLAY_ENTITLEMENT=1 npx expo prebuild --platform ios`).
+//   CARPLAY_ENTITLEMENT=1 at prebuild (either turns CarPlay on). A device build whose provisioning
+//   profile lacks it doesn't sign, and Apple grants it on request: off until then, on for the
+//   simulator's CarPlay screen (`CARPLAY_ENTITLEMENT=1 npx expo prebuild --platform ios`).
 const fs = require('fs');
 const path = require('path');
-const { withDangerousMod, withEntitlementsPlist, withInfoPlist } = require('expo/config-plugins');
+const { withDangerousMod, withEntitlementsPlist, withInfoPlist, withPodfile } = require('expo/config-plugins');
 
 const CARPLAY_ROLE = 'CPTemplateApplicationSceneSessionRoleApplication';
 
-function withCarPlayScene(config) {
+const MODULE = 'nomad-carplay';
+const AUTOLINKING = 'use_expo_modules!';
+const AUTOLINKING_WITHOUT = `use_expo_modules!(exclude: ['${MODULE}'])`;
+
+function withCarPlayScene(config, enabled) {
   return withInfoPlist(config, (config) => {
     const plist = config.modResults;
     plist.UIApplicationSceneManifest ??= { UIApplicationSupportsMultipleScenes: false, UISceneConfigurations: {} };
     plist.UIApplicationSceneManifest.UISceneConfigurations ??= {};
+    if (!enabled) {
+      delete plist.UIApplicationSceneManifest.UISceneConfigurations[CARPLAY_ROLE];
+      return config;
+    }
     plist.UIApplicationSceneManifest.UISceneConfigurations[CARPLAY_ROLE] = [
       {
         UISceneClassName: 'CPTemplateApplicationScene',
@@ -25,6 +37,17 @@ function withCarPlayScene(config) {
         UISceneDelegateClassName: 'NomadCarPlaySceneDelegate',
       },
     ];
+    return config;
+  });
+}
+
+// Both ways, in case prebuild merges into an ios/ made with CarPlay on (it clears it when the config changed).
+function withCarPlayModule(config, enabled) {
+  return withPodfile(config, (config) => {
+    const podfile = config.modResults.contents;
+    const current = podfile.includes(AUTOLINKING_WITHOUT) ? AUTOLINKING_WITHOUT : AUTOLINKING;
+    if (!podfile.includes(current)) throw new Error(`with-carplay: no ${AUTOLINKING} in the Podfile (did Expo's iOS template change?)`);
+    config.modResults.contents = podfile.replace(current, enabled ? AUTOLINKING : AUTOLINKING_WITHOUT);
     return config;
   });
 }
@@ -55,13 +78,18 @@ class SceneDelegate: ExpoAppSceneDelegate {
 }
 `;
 
-function withSceneDelegate(config) {
+function withSceneDelegate(config, enabled) {
   return withDangerousMod(config, [
     'ios',
     async (config) => {
       const file = path.join(config.modRequest.platformProjectRoot, config.modRequest.projectName, 'SceneDelegate.swift');
       if (!fs.existsSync(file)) throw new Error(`with-carplay: ${file} not found (did Expo's iOS template change?)`);
       const current = fs.readFileSync(file, 'utf8');
+      if (!enabled) {
+        // Ours imports NomadCarPlay, which isn't linked now; the template's comes back with --clean.
+        if (current.includes('NomadCarPlay')) throw new Error('with-carplay: CarPlay is off but ios/ was built with it: npx expo prebuild --clean');
+        return config;
+      }
       if (!current.includes('class SceneDelegate: ExpoAppSceneDelegate')) {
         throw new Error('with-carplay: SceneDelegate.swift is not the Expo template one; merge the CarPlay hand-off by hand');
       }
@@ -81,7 +109,9 @@ function withCarPlayEntitlement(config, enabled) {
 
 module.exports = function withCarPlay(config, options = {}) {
   const entitlement = options.entitlement === true || process.env.CARPLAY_ENTITLEMENT === '1';
-  config = withCarPlayScene(config);
-  config = withSceneDelegate(config);
+  const enabled = entitlement || options.enabled === true || process.env.CARPLAY === '1';
+  config = withCarPlayScene(config, enabled);
+  config = withSceneDelegate(config, enabled);
+  config = withCarPlayModule(config, enabled);
   return withCarPlayEntitlement(config, entitlement);
 };
