@@ -3,14 +3,14 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
 import { cumulativeDistances, parseRoute, routeProgress } from '../maps/routing-core.ts';
-import { carDistance, carGuidance, type GuidanceInput } from './carplay-core.ts';
+import { carDistance, carGuidance, mainRoad, type GuidanceInput } from './carplay-core.ts';
 
 const route = parseRoute(readFileSync(new URL('../maps/fixtures/route-madrid-auto.json', import.meta.url), 'utf8'), 'auto');
 const cumulative = cumulativeDistances(route.shape);
 const start = { lat: route.shape[0][1], lon: route.shape[0][0], accuracy: 5 };
 const end = route.shape[route.shape.length - 1];
 const target = { name: 'Plaza de Castilla', lat: end[1], lon: end[0] };
-const text = { lineTo: (s: number) => `line ${s}`, toll: 'Peajes', ferry: 'Ferri' };
+const text = { lineTo: (s: number) => `line ${s}`, toll: 'Peajes', ferry: 'Ferri', via: (r: string) => `Por ${r}` };
 
 const input = (over: Partial<GuidanceInput> = {}): GuidanceInput => ({
   target,
@@ -45,7 +45,7 @@ test('on the route: the next maneuver, the one after, and what is left', () => {
   assert.equal(g.summary?.distance.unit, 'km');
   assert.equal(g.summary?.seconds, Math.round(route.durationS));
   assert.ok(g.remaining && g.remaining.seconds > 0);
-  assert.equal(g.note, route.hasToll ? 'Peajes' : null);
+  assert.equal(g.note, [`Por ${mainRoad(route)}`, route.hasToll ? 'Peajes' : null].filter(Boolean).join(' · '));
 });
 
 test('the maneuver after the next only when it comes close behind', () => {
@@ -78,6 +78,12 @@ test('no route: a straight-line step that changes with the compass sector', () =
   assert.equal(((north.step!.rotation! - east.step!.rotation!) + 360) % 360, 90);
   // Computing: no step yet.
   assert.equal(carGuidance(input({ routing: 'loading', route: null, progress: null }), 'metric', text).step, null);
+});
+
+test('the main road is the street the route spends the longest on', () => {
+  const m = (streets: string[], distanceM: number) => ({ streets, distanceM });
+  assert.equal(mainRoad({ maneuvers: [m(['Calle A'], 100), m([], 5000), m(['CG-1', 'Av. Meritxell'], 3000), m(['Calle B'], 200)] as never }), 'CG-1');
+  assert.equal(mainRoad({ maneuvers: [m([], 100)] as never }), null);
 });
 
 test('distances in the region units', () => {
