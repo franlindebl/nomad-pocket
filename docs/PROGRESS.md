@@ -315,6 +315,11 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-31 — iOS build 25 to TestFlight
+
+- 1.1.0 (25), TestFlight only (build 23 still in App Review): build 24 plus map taps on anything, the smoother follow
+  camera and the low navigation bar (8d8be50). Tagged `v1.1.0-25`.
+
 ### 2026-10-31 — Navigation: smoother follow camera, bar low; no route through private roads
 
 - Owner: the map sometimes advanced in jerks while navigating. Causes: the trip's GPS watch asked for a fix
