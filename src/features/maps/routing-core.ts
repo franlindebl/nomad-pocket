@@ -121,6 +121,10 @@ export type Maneuver = {
   instruction: string;
   /** Spoken before the maneuver ("Gire a la derecha hacia Gran Vía."). */
   verbal: string | null;
+  /** Spoken well before it, after "In 500 metres" (Valhalla's transition alert; none at the start). */
+  alert: string | null;
+  /** `verbal` also announces the maneuver after this one (it comes close behind). */
+  multiCue: boolean;
   streets: string[];
   distanceM: number;
   durationS: number;
@@ -149,6 +153,8 @@ type ValhallaManeuver = {
   type: number;
   instruction: string;
   verbal_pre_transition_instruction?: string;
+  verbal_transition_alert_instruction?: string;
+  verbal_multi_cue?: boolean;
   street_names?: string[];
   length: number;
   time: number;
@@ -179,6 +185,8 @@ export function parseRoute(json: string, costing: Costing): Route {
         type: m.type,
         instruction: m.instruction,
         verbal: m.verbal_pre_transition_instruction ?? null,
+        alert: m.verbal_transition_alert_instruction ?? null,
+        multiCue: !!m.verbal_multi_cue,
         streets: m.street_names ?? [],
         distanceM: m.length * perUnit,
         durationS: m.time,

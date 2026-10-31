@@ -151,7 +151,8 @@
       "auto": "{{time}} by car",
       "pedestrian": "{{time}} on foot",
       "bicycle": "{{time}} by bike"
-    }
+    },
+    "notice": "Navigation in progress"
   },
   "emergency": {
     "title": "Emergency",
@@ -440,5 +441,22 @@
       "name": "Far East",
       "states": "Vladivostok, Khabarovsk, Yakutsk, Kamchatka and Sakhalin"
     }
+  },
+  "voice": {
+    "in": "In {{distance}}, {{instruction}}",
+    "unit": {
+      "m_one": "{{value}} metre",
+      "m_other": "{{value}} metres",
+      "km_one": "{{value}} kilometre",
+      "km_other": "{{value}} kilometres",
+      "ft_one": "{{value}} foot",
+      "ft_other": "{{value}} feet",
+      "yd_one": "{{value}} yard",
+      "yd_other": "{{value}} yards",
+      "mi_one": "{{value}} mile",
+      "mi_other": "{{value}} miles"
+    },
+    "mute": "Mute voice guidance",
+    "unmute": "Turn on voice guidance"
   }
 }

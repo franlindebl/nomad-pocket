@@ -7,6 +7,7 @@ import type * as Expo from 'expo-location';
 import NomadLocation from '../../modules/nomad-location';
 
 export type { LocationHeadingObject, LocationObject, LocationSubscription } from 'expo-location';
+export { watchNavigationAsync } from './navigation-watch';
 
 export const Accuracy = {
   Lowest: 1,

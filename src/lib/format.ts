@@ -22,7 +22,7 @@ export function formatMB(mb: number): string {
 // Follows the device region (Settings > General > Language & Region), not the app language: a
 // Spanish speaker in Texas reads miles. iOS restarts apps when the region changes.
 let system: MeasurementSystem | undefined;
-function measurementSystem(): MeasurementSystem {
+export function measurementSystem(): MeasurementSystem {
   return (system ??= getLocales()[0]?.measurementSystem ?? 'metric');
 }
 

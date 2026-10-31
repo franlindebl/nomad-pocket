@@ -12,7 +12,7 @@ module.exports = defineConfig([
     // opening one by name elsewhere would create a second, empty copy in Documents/SQLite.
     // expo-location's native module isn't linked on Android: src/lib/location.ts wraps it.
     files: ['src/**/*.{ts,tsx}'],
-    ignores: ['src/db/**', 'src/lib/location.ts', 'src/lib/location.android.ts'],
+    ignores: ['src/db/**', 'src/lib/location.ts', 'src/lib/location.android.ts', 'src/lib/navigation-watch.ts'],
     rules: {
       'no-restricted-imports': [
         'error',

@@ -113,7 +113,7 @@ const leg = (shape: [number, number][], maneuvers: [number, string, number][]): 
     shape,
     maneuvers: maneuvers.map(([type, instruction, distanceM], i) => {
       const end = i === maneuvers.length - 1 ? shape.length - 1 : at + 1;
-      const m = { type, instruction, verbal: null, streets: [], distanceM, durationS: distanceM / 10, begin: at, end, exit: null };
+      const m = { type, instruction, verbal: null, alert: null, multiCue: false, streets: [], distanceM, durationS: distanceM / 10, begin: at, end, exit: null };
       at = end;
       return m;
     }),

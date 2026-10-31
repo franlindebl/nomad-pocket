@@ -21,6 +21,7 @@ import { closeRouter, crossingsFile, listRoutePacks, registerLoosePack, resolveP
 import { onRouteFileDownloaded, refreshRoutingCatalog, resumePackImports, sweepRoutingFiles, useRoutingCatalog } from './routing-packs';
 import { forgetSideFilesOf } from './side-files';
 import { resolveMapFile, type MapItem } from './useMapSources';
+import { watchVoice } from './voice';
 import { ensureWorldMap } from './world';
 
 /** YYYYMMDD of a timestamp, the format map items keep their build date in. */
@@ -73,6 +74,7 @@ function registerLooseMap(file: File) {
 
 registerInit(() => {
   useMarkers.getState().refresh();
+  watchVoice();
   // Extractions interrupted by a kill continue from their saved progress (leftover .part files are dropped).
   setTimeout(resumeMapDownloads, 0);
   // Items store absolute URIs that go stale when iOS moves the container: compare names.

@@ -27,6 +27,8 @@ import {
   RotateCw,
   Ship,
   Undo2,
+  Volume2,
+  VolumeX,
   X,
   type LucideIcon,
 } from 'lucide-react-native';
@@ -37,6 +39,7 @@ import { StyleSheet, View } from 'react-native';
 import { Button, Card, Chip, IconButton, Row, Text } from '@/components/ui';
 import { useItems } from '@/features/content/items';
 import { formatDistance, formatDuration } from '@/lib/format';
+import { useSettings } from '@/stores/settings';
 import { space, useTheme } from '@/theme';
 
 import { hasArrived } from './follow-core';
@@ -101,6 +104,7 @@ export function GuidancePanel({ bottom, top, mapBearing, onHeight, onBannerHeigh
   const routeError = useGuidance((s) => s.routeError);
   const progress = useGuidance((s) => s.progress);
   const navigating = useGuidance((s) => s.navigating);
+  const voice = useSettings((s) => s.navVoice);
   const arrivedRef = useRef(false);
 
   const distance = target && position ? distanceMeters(position, target) : null;
@@ -243,6 +247,15 @@ export function GuidancePanel({ bottom, top, mapBearing, onHeight, onBannerHeigh
               </Text>
             )}
             {following ? stepsButton : null}
+            {following ? (
+              <IconButton
+                testID="guidance-voice"
+                icon={voice ? Volume2 : VolumeX}
+                size={32}
+                accessibilityLabel={t(voice ? 'voice.mute' : 'voice.unmute')}
+                onPress={() => useSettings.getState().setNavVoice(!voice)}
+              />
+            ) : null}
             {stopButton}
           </Card>
         </View>

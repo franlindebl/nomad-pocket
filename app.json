@@ -25,7 +25,11 @@
         "UIFileSharingEnabled": true,
         "LSSupportsOpeningDocumentsInPlace": true,
         "ITSAppUsesNonExemptEncryption": false,
-        "NSPhotoLibraryUsageDescription": "Nomad Pocket no accede a tus fotos. Algunas librerías incluidas pueden leer imágenes de la fototeca, pero la app nunca lo solicita."
+        "NSPhotoLibraryUsageDescription": "Nomad Pocket no accede a tus fotos. Algunas librerías incluidas pueden leer imágenes de la fototeca, pero la app nunca lo solicita.",
+        "UIBackgroundModes": [
+          "location",
+          "audio"
+        ]
       }
     },
     "android": {
@@ -120,7 +124,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Nomad Pocket usa tu ubicación para mostrarte en los mapas sin conexión, medir distancias y guiarte hasta lugares y puntos de emergencia.",
+          "locationWhenInUsePermission": "Nomad Pocket usa tu ubicación para mostrarte en los mapas sin conexión, medir distancias y guiarte hasta lugares y puntos de emergencia, también con la pantalla bloqueada mientras navegas.",
           "locationAlwaysAndWhenInUsePermission": false,
           "locationAlwaysPermission": false,
           "locationFullAccuracyPermission": false,

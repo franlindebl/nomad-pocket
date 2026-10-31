@@ -1,4 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+  <!-- Guidance in the background (NavigationService). Not ACCESS_BACKGROUND_LOCATION: the service
+       starts while the app is in front, so the while-in-use permission covers it. -->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
+  <application>
+    <service
+      android:name="expo.modules.nomadlocation.NavigationService"
+      android:exported="false"
+      android:foregroundServiceType="location" />
+  </application>
 </manifest>
