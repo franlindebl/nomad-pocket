@@ -169,6 +169,7 @@ vital first aid (CPR, choking, viper bite, recovery position): step 6's verbatim
    official Spanish version where the agency publishes one (Ready.gov ES, CDC en español), otherwise a
    faithful translation marked as such. Vital protocols (CPR, choking, bleeding…) are answered with the card
    itself, unchanged, plus at most one line from the assistant.
+   Source inventory done 2026-10-31: `docs/EMERGENCY_GUIDE_PLAN.md` (licences, per-card sources, gaps, decisions).
    Open point: some public-domain sources are dated (FM 4-25.11 teaches pre-2010 CPR, before ERC/AHA's
    compressions first). Each vital card needs a current official source, or the card says it is out of date.
 7. **Spanish content in the kit**: Ready.gov ES and MedlinePlus ES (2.1 + 1.8 GB) when there is room,

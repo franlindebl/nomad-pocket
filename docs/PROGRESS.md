@@ -362,6 +362,12 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   Blind: "not found" 12 → 3, English guides in 49 of 50 answers, mean 1.18–1.28 → 1.78, harmful 5–6 → 5. With 16
   chunks instead of 8 it scored 1.50–1.66 with 9–10 harmful: more material, more garbling. tsc, lint, tests (449),
   i18n clean.
+- Step 6, emergency guide: source inventory for 94 cards (`docs/EMERGENCY_GUIDE_PLAN.md`, `docs/emergency-guide/`),
+  four research agents opening every URL. English: 71 current, 18 thin, 5 none. Spanish: 53 same-agency, 13 Spanish
+  government, 23 need translation, 5 none. Licences checked on each legal page (US federal PD; Spain Ley 37/2007 with
+  attribution; EU CC BY; not Guardia Civil, Justicia, WHO). Five decisions are the owner's (translation, excerpts, US
+  details, gaps, lejía dose). Found official texts that must not be copied (Protección Civil's doorway earthquake
+  advice, old INSST NTPs, "16 drops per gallon").
 
 ### 2026-10-31 — Content updates: E2E on iOS and Android
 

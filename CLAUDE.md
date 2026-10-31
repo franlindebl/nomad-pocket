@@ -25,6 +25,7 @@ English. User-facing strings are Spanish + English (i18n).
 | `docs/NAVIGATION_VIEW_PLAN.md` | Navigation view like Google Maps' (route consumed, bearing from the last metres, gliding camera, north up): diagnosis and what was built |
 | `docs/CONTENT_UPDATES_PLAN.md` | Telling the person their content is old and updating it safely (download then swap; delete first only on purpose) |
 | `docs/ASSISTANT_QUALITY_PLAN.md` | Assistant measured on the Spain kit (50 crisis questions, blind-graded): findings and the fix plan; bench in `scripts/assistant-bench` |
+| `docs/EMERGENCY_GUIDE_PLAN.md` | Own bilingual emergency guide (assistant step 6): licences, per-card official sources (`docs/emergency-guide/`), gaps, owner's decisions |
 | `docs/DOWNLOADS_SPEED_PLAN.md` | Analysis + plan for faster downloads (mirror throughput, parallel chunks, resume, keep awake); ready to pick up |
 | `AGENTS.md` | Generic Expo rules (kept for other agents; same rules repeated below) |
 
