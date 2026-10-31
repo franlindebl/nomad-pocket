@@ -24,6 +24,10 @@ export const palette = {
     dangerSoft: '#FBE1E1',
     /** The user's position on the map (puck + compass beam: scripts/maps/make-beam.py). */
     location: '#1A73E8',
+    /** A speed limit sign: white, red ring, black figures, in both schemes like the real one. */
+    signFace: '#FFFFFF',
+    signRing: '#D93D42',
+    signText: '#18171B',
     overlay: 'rgba(24,23,27,0.45)',
     shadow: 'rgba(24,23,27,0.12)',
   },
@@ -48,6 +52,9 @@ export const palette = {
     danger: '#FF6369',
     dangerSoft: '#3A1517',
     location: '#4C8DF6',
+    signFace: '#FFFFFF',
+    signRing: '#D93D42',
+    signText: '#18171B',
     overlay: 'rgba(0,0,0,0.6)',
     shadow: 'rgba(0,0,0,0.5)',
   },

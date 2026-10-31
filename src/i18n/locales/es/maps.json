@@ -473,5 +473,9 @@
     "lineTo": "Hacia el {{dir}}, en línea recta",
     "noPermission": "Permite el acceso a la ubicación en el móvil para navegar.",
     "via": "Por {{street}}"
+  },
+  "speed": {
+    "now": "Velocidad {{value}} {{unit}}",
+    "limit": "límite {{value}} {{unit}}"
   }
 }

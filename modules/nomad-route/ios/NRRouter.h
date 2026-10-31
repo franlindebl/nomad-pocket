@@ -13,6 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 /// and set `error` (domain "valhalla", code = Valhalla error code, e.g. 442 no path).
 - (nullable NSString *)route:(NSString *)request error:(NSError **)error;
 - (nullable NSString *)matrix:(NSString *)request error:(NSError **)error;
+/// The edges along a shape and their attributes (a route's speed limits).
+- (nullable NSString *)traceAttributes:(NSString *)request error:(NSError **)error;
 
 @end
 

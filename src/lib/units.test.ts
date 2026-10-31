@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { formatDuration, type MeasurementSystem, scaleBytes, scaleDistance, scaleWater } from './units.ts';
+import { formatDuration, type MeasurementSystem, scaleBytes, scaleDistance, scaleSpeed, scaleSpeedLimit, scaleWater } from './units.ts';
 
 const shown = (bytes: number, digits?: number) => {
   const { value, unit, fractionDigits } = scaleBytes(bytes, digits);
@@ -75,4 +75,18 @@ test('scaleWater: gallons only in the US', () => {
   assert.equal(water(12, 'uk'), '12 L');
   assert.equal(water(12, 'us'), '3.2 gal');
   assert.equal(water(84, 'us'), '22 gal');
+});
+
+test('scaleSpeed: km/h, or mph in the US and the UK', () => {
+  assert.deepEqual(scaleSpeed(13.9, 'metric'), { value: 50, unit: 'km/h' });
+  assert.deepEqual(scaleSpeed(13.9, 'us'), { value: 31, unit: 'mph' });
+  assert.deepEqual(scaleSpeed(31.3, 'uk'), { value: 70, unit: 'mph' });
+  assert.deepEqual(scaleSpeed(-1, 'metric'), { value: 0, unit: 'km/h' });
+});
+
+test('scaleSpeedLimit: mph signs come back to their step of 5', () => {
+  assert.equal(scaleSpeedLimit(50, 'metric'), 50);
+  assert.equal(scaleSpeedLimit(40, 'us'), 25); // 25 mph stored as 40 km/h
+  assert.equal(scaleSpeedLimit(105, 'us'), 65);
+  assert.equal(scaleSpeedLimit(113, 'uk'), 70);
 });

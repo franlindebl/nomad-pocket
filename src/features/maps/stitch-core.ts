@@ -186,8 +186,10 @@ export function joinRoutes(legs: Route[], seams: Pick<Seam, 'cls'>[] = []): Rout
   if (legs.length === 1) return legs[0];
   const shape: [number, number][] = [];
   const maneuvers: Route['maneuvers'] = [];
+  const limits: NonNullable<Route['limits']> = [];
   for (const [n, leg] of legs.entries()) {
     const offset = Math.max(0, shape.length - 1);
+    for (const l of leg.limits ?? []) limits.push({ from: l.from + offset, to: l.to + offset, kmh: l.kmh });
     shape.push(...(shape.length ? leg.shape.slice(1) : leg.shape));
     const own = leg.maneuvers.filter((m, i) => !(n < legs.length - 1 && i === leg.maneuvers.length - 1 && isArrival(m.type)));
     for (const [i, m] of own.entries()) {
@@ -212,6 +214,7 @@ export function joinRoutes(legs: Route[], seams: Pick<Seam, 'cls'>[] = []): Rout
     hasToll: legs.some((l) => l.hasToll),
     hasHighway: legs.some((l) => l.hasHighway),
     hasFerry: legs.some((l) => l.hasFerry),
+    ...(legs.some((l) => l.limits) ? { limits } : {}),
   };
 }
 

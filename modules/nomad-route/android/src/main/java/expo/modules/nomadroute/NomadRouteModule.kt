@@ -109,5 +109,9 @@ class NomadRouteModule : Module() {
     AsyncFunction("matrix") Coroutine { request: String ->
       withContext(Dispatchers.IO) { withRouter { it.matrixRaw(request) } }
     }
+
+    AsyncFunction("traceAttributes") Coroutine { request: String ->
+      withContext(Dispatchers.IO) { withRouter { it.traceAttributesRaw(request) } }
+    }
   }
 }

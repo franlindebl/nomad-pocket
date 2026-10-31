@@ -997,8 +997,16 @@ card, trip preview, navigation bar, no-maps card) sits low, like the banner sits
 credit button hides while one is up (it would show cut in half beside it). Starting to follow ("Iniciar",
 "Recentrar") is one 1 s ease straight to the user; fixes during it wait for its end, and until it lands
 the map's own location dot shows where the user is, not the arrow (`useFollowCamera` returns `arrived`).
-A reroute whose first 400 m leave the old route (`isNewWay`) chimes (`NomadVoice.chime()`, two notes
-made in code, the prompts' audio session; muted with the voice). Zoom by mode and speed
+A reroute whose first 400 m leave the old route (`isNewWay`) chimes (`NomadVoice.chime('reroute')`, notes
+made in code, the prompts' audio session; muted with the voice). **Speed** (`SpeedBadge`, car and bike):
+the GPS speed bottom left (km/h, mph in the US/UK), and by car the posted limit as a round sign above it.
+The limits come with each car route: `routeIn` asks the open pack's Valhalla for `trace_attributes` along
+the route's own shape (edge_walk: edges carry the route's vertex indices and `speed_limit` from OSM's
+maxspeed; ~76 % of a Madrid trip known), short unknown stretches between known ones keep the limit
+before (`bridgeLimitGaps`: roundabouts), `joinRoutes` shifts them per leg; no limit known, no sign. Over
+the limit the speed turns red; 2 s over it beeps (`chime('speed')`) and the badge blinks, again only
+after 5 s back under or when a lower limit starts (`speed-core`, run from voice.ts so it also works
+with the screen locked). Zoom by mode and speed
 and closer before a maneuver (`followZoom`); pitch 45° car, 40° bike, 30° foot. While navigating
 the route line starts at the snapped point (the travelled part is sliced off, like Google Maps';
 not `line-gradient`, whose progress is projected and sampled into a texture). `fitBounds` on

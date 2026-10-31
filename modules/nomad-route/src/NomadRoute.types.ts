@@ -9,4 +9,6 @@ export type NomadRouteNativeModule = {
   /** Valhalla actions: request JSON in, response JSON out. Errors read "valhalla <code>: <message>". */
   route(request: string): Promise<string>;
   matrix(request: string): Promise<string>;
+  /** The edges a shape runs along and their attributes (the route's speed limits). */
+  traceAttributes(request: string): Promise<string>;
 };

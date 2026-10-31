@@ -315,6 +315,22 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-31 — Navigation: speed, the road's speed limit and an over-the-limit warning
+
+- Owner: show the speed while driving or cycling (not on foot), the posted limit, and a soft beep with the badge
+  blinking when going over it. Researched first: the route answer has no limits, but the wrapper exposes
+  `trace_attributes` on both platforms (iOS `trace_attributes()` free function, Android `traceAttributesRaw`), and on
+  Madrid's graph OSM's maxspeed covers ~76 % of a Sol → airport trip. Now each car route asks for them (`routeIn`,
+  same pack; a failure leaves the trip without a sign), `SpeedBadge` shows speed + sign, red over the limit, and
+  `speed-core` decides the warning (2 s over; again after 5 s under or a lower limit). A short unknown stretch between
+  known limits keeps the previous one (`bridgeLimitGaps`): seen on the simulator, the sign blinked away at Andorra's
+  roundabouts. Speed cameras: researched (DGT's open fixed-camera feed, OSM's speed_camera/enforcement data, the
+  countries where warnings are illegal), not built; the owner chose speed first.
+- Checked on the simulator, driving Andorra la Vella at 58 km/h with `simctl location start` (Maestro's `travel`
+  gives fixes without a speed): the 50 sign, 58 in red, the blink (a burst of screenshots), the sign steady across
+  42 screenshots after the gap fix. The beep can't be heard on the simulator. tsc, lint, unit tests (new:
+  speed-core, limits, units), i18n.
+
 ### 2026-10-31 — Navigation: a chime when a reroute changes the way; "Recentrar" goes straight to the user
 
 - Owner: a short sound on reroutes, like Google Maps and Waze, but not every second. Reroutes already need two fixes

@@ -10,14 +10,17 @@ import { isNomadRouteAvailable, NomadRoute } from '../../../modules/nomad-route'
 import { distanceMeters, type LatLon } from './geo';
 import { getRegion, regionName } from './regions';
 import {
+  bridgeLimitGaps,
   covers,
   cumulativeDistances,
   parseRoute,
+  parseSpeedLimits,
   parseTarHeader,
   packsFor as packsForCoverage,
   routeProgress,
   routeRequest,
   routingErrorKind,
+  speedLimitRequest,
   tarEntrySpan,
   tileCoverage,
   valhallaConfig,
@@ -201,7 +204,17 @@ async function openPack(pack: RoutePackItem) {
 
 async function routeIn(pack: RoutePackItem, input: Omit<RouteRequestInput, 'language'>): Promise<Route> {
   await openPack(pack);
-  return parseRoute(await NomadRoute.route(routeRequest({ ...input, language: i18n.language })), input.costing);
+  const route = parseRoute(await NomadRoute.route(routeRequest({ ...input, language: i18n.language })), input.costing);
+  // By car, the posted limits along it, from the same pack while it's open (the speed sign while
+  // driving). Without them the trip goes on; no sign is shown.
+  if (input.costing !== 'auto' || route.shape.length < 2) return route;
+  try {
+    const limits = parseSpeedLimits(await NomadRoute.traceAttributes(speedLimitRequest(route.shape, input.costing)));
+    return { ...route, limits: bridgeLimitGaps(limits, cumulativeDistances(route.shape)) };
+  } catch (e) {
+    console.warn('[maps] speed limits', e);
+    return route;
+  }
 }
 
 /** Seams kept per border for a matrix: the ends' borders, and the (n×m) ones of a pack crossed on the way. */

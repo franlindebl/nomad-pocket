@@ -8,8 +8,11 @@ declare class NomadVoiceNative extends NativeModule {
    * Without a voice for the language (or any speech engine on Android): silent, no error.
    */
   speak(text: string, language: string): Promise<void>;
-  /** The reroute chime: two short notes, ducking other audio like a prompt. Silent while one plays. */
-  chime(): Promise<void>;
+  /**
+   * A chime, ducking other audio like a prompt: 'reroute' (two soft rising notes) or 'speed' (a short
+   * double beep, over the speed limit). Skipped while another one plays.
+   */
+  chime(kind: 'reroute' | 'speed'): Promise<void>;
   /** Silences the prompt playing and drops the queued ones. */
   stop(): Promise<void>;
 }

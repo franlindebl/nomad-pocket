@@ -264,3 +264,23 @@ test('parseMatrix reads times, null where there is no way', () => {
     costing: 'auto',
   });
 });
+
+test('joinRoutes: speed limits move with their leg', () => {
+  const shapeA: [number, number][] = [
+    [0, 0],
+    [1, 0],
+    [2, 0],
+  ];
+  const shapeB: [number, number][] = [
+    [2, 0],
+    [3, 0],
+    [3, 1],
+  ];
+  const a = { ...leg(shapeA, [[1, 'Head east', 200]]), limits: [{ from: 0, to: 2, kmh: 90 }] };
+  const b = { ...leg(shapeB, [[1, 'Head east', 200]]), limits: [{ from: 0, to: 2, kmh: 50 }] };
+  assert.deepEqual(joinRoutes([a, b]).limits, [
+    { from: 0, to: 2, kmh: 90 },
+    { from: 2, to: 4, kmh: 50 },
+  ]);
+  assert.equal(joinRoutes([leg(shapeA, [[1, 'x', 1]]), leg(shapeB, [[1, 'x', 1]])]).limits, undefined);
+});

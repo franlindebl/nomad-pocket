@@ -473,5 +473,9 @@
     "lineTo": "Head {{dir}}, as the crow flies",
     "noPermission": "Allow location access on the phone to navigate.",
     "via": "Via {{street}}"
+  },
+  "speed": {
+    "now": "Speed {{value}} {{unit}}",
+    "limit": "limit {{value}} {{unit}}"
   }
 }
