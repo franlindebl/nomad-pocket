@@ -172,6 +172,9 @@ vital first aid (CPR, choking, viper bite, recovery position): step 6's verbatim
    Source inventory done 2026-10-31: `docs/EMERGENCY_GUIDE_PLAN.md` (licences, per-card sources, gaps, decisions).
    Open point: some public-domain sources are dated (FM 4-25.11 teaches pre-2010 CPR, before ERC/AHA's
    compressions first). Each vital card needs a current official source, or the card says it is out of date.
+   **Done 2026-10-31**: 94 cards in the app (ATP 4-02.11 of 2026 instead of FM 4-25.11); vital questions answered
+   with the card itself; pilot bench 1.64/1.56 → 1.82/1.68, harmful answers on its topics 4–5 → 0; whole guide
+   1.66/1.64 → 2.00/2.04, useful 35 of 50, harmful 4 (`docs/EMERGENCY_GUIDE_PLAN.md`).
 7. **Spanish content in the kit**: Ready.gov ES and MedlinePlus ES (2.1 + 1.8 GB) when there is room,
    after steps 2 and 4 (without them they don't help). Step 6 makes this less urgent.
 

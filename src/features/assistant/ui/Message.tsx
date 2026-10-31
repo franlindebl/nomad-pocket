@@ -8,6 +8,7 @@ import { ActivityIndicator, Linking, Platform, ScrollView, StyleSheet, View } fr
 
 import { showToast } from '@/components/Toast';
 import { Button, IconButton, PressableScale, Text } from '@/components/ui';
+import { GUIDE_SOURCE } from '@/features/guide/guide-core';
 import { PLAN_SOURCE } from '@/features/prepare/passages';
 import { formatPercent } from '../format';
 import { radius, space, useTheme } from '@/theme';
@@ -20,6 +21,10 @@ import { Markdown } from './Markdown';
 export function openSource(s: MessageSource) {
   if (s.itemId === PLAN_SOURCE) {
     router.push('/prepare/plan');
+    return;
+  }
+  if (s.itemId === GUIDE_SOURCE) {
+    router.push({ pathname: '/guide/[id]', params: { id: s.path } });
     return;
   }
   // A PDF's own title is often a file name: the reader shows the document's name instead.

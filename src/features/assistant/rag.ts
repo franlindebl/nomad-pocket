@@ -5,8 +5,11 @@
 // archives' PDF documents (the library's document index) and the user's family plan → fetch
 // top articles → chunk →
 // BM25 over chunks and passages → drop chunks that barely share terms with the question →
-// pack the best within the model's context budget → numbered sources, cited as [n].
+// pack the best within the model's context budget → numbered sources, cited as [n]. The emergency guide's
+// cards on the question (short official texts, src/features/guide) are ranked on their own and go first.
 import { getItem, listItems } from '@/features/content/items';
+import { guideCards, guideIndex } from '@/features/guide/guide';
+import { GUIDE_SOURCE, sourceCards } from '@/features/guide/guide-core';
 import { searchDocuments, type DocHit } from '@/features/library/documents';
 import { getArticleHtml, getArticleText, search, type ZimSearchHit } from '@/features/library/zim';
 import { PLAN_SOURCE, planPassages } from '@/features/prepare/passages';
@@ -65,9 +68,9 @@ export function libraryItemIds(): string[] {
   return listItems('zim').map((i) => i.id);
 }
 
-/** Whether there is anything to search: archives, or a family plan with something written in it. */
+/** Whether there is anything to search: archives, the guide, or a family plan with something written in it. */
 export function hasLibrary(): boolean {
-  return libraryItemIds().length > 0 || planPassages(usePrepare.getState(), 'en').length > 0;
+  return libraryItemIds().length > 0 || guideCards().length > 0 || planPassages(usePrepare.getState(), 'en').length > 0;
 }
 
 /** Reciprocal-rank fusion of the hit lists of several queries, each with a bonus for its hits. */
@@ -193,17 +196,31 @@ async function gather(itemIds: string[], plan: RetrievalPlan, extra: { key: stri
   return { ranked, refs };
 }
 
+/** The guide's cards on the question, chunked and ranked like articles: their own list, so they lead the merge. */
+function guideRanked(plan: RetrievalPlan, lang: Lang): Gathered {
+  const refs = new Map<string, SourceRef>();
+  const chunks: Chunk[] = [];
+  sourceCards(guideIndex(lang), plan.rankText).forEach((card, hitRank) => {
+    const key = keyOf(GUIDE_SOURCE, card.id);
+    const { title, body } = card[lang];
+    refs.set(key, { itemId: GUIDE_SOURCE, path: card.id, title });
+    chunkText(body, CHUNK_SIZE, CHUNK_OVERLAP).forEach((text, index) => chunks.push({ sourceKey: key, title, text, index, hitRank, named: true }));
+  });
+  return { ranked: chunks.length ? rankChunks(plan.rankText, chunks, 4) : [], refs };
+}
+
 export async function retrieve(question: string, lang: Lang, budgetChars: number, opts: RetrieveOptions = {}): Promise<RetrievalResult> {
   const itemIds = opts.itemIds ?? libraryItemIds();
   const plan = planPassages(usePrepare.getState(), lang);
-  // No archives: the family plan alone is still searched.
-  if (!itemIds.length && !plan.length) return { noLibrary: true, sources: [], userMessage: buildRagUserMessage(question, [], lang) };
+  // No archives: the guide and the family plan are still searched.
+  if (!itemIds.length && !plan.length && !guideCards().length) return { noLibrary: true, sources: [], userMessage: buildRagUserMessage(question, [], lang) };
 
   const history = opts.history ?? [];
   // A model's query in another language than the question ("purificación de agua" for an English
   // question, "meeting point" for a Spanish one) finds nothing in that library: planRetrieval
   // keeps the question's own words whenever the query isn't positively in its language.
   const own = planRetrieval(question, history, lang, opts.query);
+  const guide = guideRanked(own, lang);
   // With an English query for a Spanish question, English archives are searched and ranked with it
   // instead of Spanish words they never contain; the rest take the question's words, as before.
   const queryEn = lang === 'es' ? opts.queryEn?.trim() : undefined;
@@ -217,6 +234,7 @@ export async function retrieve(question: string, lang: Lang, budgetChars: number
     text: p.text,
   }));
   const groups = await Promise.all([
+    guide,
     gather(rest, own, planChunks, true),
     english.length ? gather(english, planRetrieval(queryEn!, [], 'en'), [], false) : null,
   ]);

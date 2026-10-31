@@ -11,6 +11,7 @@ const APP = new URL('../../src', import.meta.url).pathname;
 const rc = await import(`${APP}/features/assistant/rag-core.ts`);
 const html = await import(`${APP}/features/library/html.ts`);
 const dc = await import(`${APP}/features/library/documents-core.ts`);
+const gc = await import(`${APP}/features/guide/guide-core.ts`);
 
 const args = process.argv.slice(2);
 const flag = (n: string, d: string) => args.find((a) => a.startsWith(`--${n}=`))?.slice(n.length + 3) ?? d;
@@ -158,13 +159,29 @@ async function gather(items: string[], plan: any, leads: boolean) {
   return { ranked, refs, queries };
 }
 
+// The emergency guide (--guide): rag.ts guideRanked, and chats.ts' vital answers (the card, no model).
+const GUIDE = args.includes('--guide');
+const guideCards = GUIDE ? JSON.parse(readFileSync(flag('guide-file', `${APP}/data/guide.json`), 'utf8')).cards : [];
+const guideIdx = { es: new gc.GuideIndex(guideCards, 'es'), en: new gc.GuideIndex(guideCards, 'en') };
+function guideRanked(plan: any, lang: 'es' | 'en') {
+  const refs = new Map<string, any>();
+  const chunks: any[] = [];
+  gc.sourceCards(guideIdx[lang], plan.rankText).forEach((card: any, hitRank: number) => {
+    const key = keyOf(gc.GUIDE_SOURCE, card.id);
+    const { title, body } = card[lang];
+    refs.set(key, { itemId: gc.GUIDE_SOURCE, path: card.id, title });
+    rc.chunkText(body, CHUNK_SIZE, CHUNK_OVERLAP).forEach((text: string, index: number) => chunks.push({ sourceKey: key, title, text, index, hitRank, named: true }));
+  });
+  return { ranked: chunks.length ? rc.rankChunks(plan.rankText, chunks, 4) : [], refs, queries: [] as string[] };
+}
+
 // rag.ts retrieve: English archives take the English query for a Spanish question, rankings merged.
 export async function retrieve(question: string, lang: 'es' | 'en', budgetChars: number, query?: string, queryEn?: string) {
   const own = rc.planRetrieval(question, [], lang, query);
   const en = lang === 'es' ? queryEn?.trim() : undefined;
   const english = en ? itemIds.filter((id) => rc.archiveLanguage(langOf(id)) === 'en') : [];
   const rest = english.length ? itemIds.filter((id) => !english.includes(id)) : itemIds;
-  const groups = await Promise.all([gather(rest, own, true), english.length ? gather(english, rc.planRetrieval(en!, [], 'en'), false) : null]);
+  const groups = await Promise.all([GUIDE ? guideRanked(own, lang) : null, gather(rest, own, true), english.length ? gather(english, rc.planRetrieval(en!, [], 'en'), false) : null]);
   const refs = new Map(groups.flatMap((g) => (g ? [...g.refs] : [])));
   const ranked = rc.mergeRanked(groups.flatMap((g) => (g ? [g.ranked] : [])));
   const { sources } = rc.packContext(ranked, (k: string) => refs.get(k), budgetChars, 3);
@@ -290,6 +307,8 @@ async function answer(text: string, qid = 0) {
   const budget = rc.tokensToChars(free);
   const rec: any = { lang, health, intent, mode, budget };
   const t0 = Date.now();
+  const vital = GUIDE && intent === 'search' ? gc.vitalCard(guideIdx[lang], text, []) : null;
+  if (vital) return { ...rec, mode: 'vital', sources: [`guide · ${vital[lang].title}`], answer: gc.vitalAnswer(vital, lang, '112'), ms: Date.now() - t0 };
   if (RETRIEVAL_ONLY) {
     const r: any = V2 ? await retrieve2(text, lang, budget, undefined, flag('qen', '') || undefined) : await retrieve(text, lang, budget);
     Object.assign(rec, { queries: r.queries, candidates: r.candidates, sources: r.sources.map((s: any) => `${s.itemId} · ${s.title}${s.page ? ` p.${s.page}` : ''}`), context: r.userMessage });

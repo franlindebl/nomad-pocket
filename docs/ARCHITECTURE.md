@@ -1300,6 +1300,32 @@ started on the phone shows in the car and the other way round.
   pause; the text goes after what was typed (`joinDictation`), live, and is never sent by itself.
   Typing, sending or leaving the app cancels it; results after a cancel are dropped.
 
+### Emergency guide (`src/features/guide`, `src/app/guide`, `src/data/guide/`; `docs/EMERGENCY_GUIDE_PLAN.md`)
+
+- **Content.** One Markdown file per card and language, `src/data/guide/<id>.<lang>.md`, with front
+  matter (number, vital, health, kind, sources, licence, keywords, see, note; format and fidelity rules in
+  `docs/emergency-guide/FORMAT.md`). The text is the official source's, word for word (`copy`/`excerpt`), a
+  marked faithful translation of the other language's card, or, for the five cards with no reusable source,
+  our own wording of current guidance (`own`, labelled as such). `node scripts/guide/build.mjs` bundles them into
+  `src/data/guide.json` (`--check` fails when stale; the pre-commit hook runs it);
+  `node scripts/guide/check-sources.mjs [id…]` fetches each source and lists every sentence of a copied card it
+  can't find there.
+- **Search** (`guide-core.ts`, pure): BM25 per language over title ×3, keywords ×2, text; a match also
+  reports `coverage` (share of the question's terms in title + keywords) and `reach` (share anywhere in the
+  card, people words such as "mi padre" left out). `guide.ts` drops the health cards when `HEALTH_FEATURES`
+  is false and keeps one index per language.
+- **Vital answers** (`chats.ts`). A question (intent `search`) whose best card is vital with coverage ≥ 0.5
+  and reach ≥ 0.75 is answered with `vitalAnswer`: header, the card's text unchanged, the notes outside it
+  (911 → the local number from `emergencyNumber()`, the card's own `note`) and its provenance, cited as
+  source [1] (`guide` / card id). No model call: it's instant, the same on every model, and nothing is
+  paraphrased. A follow-up ("¿y si es un bebé?") is matched with the earlier question's topic
+  (`followUpTopic`), but the card must still cover the new question.
+- **As sources** (`rag.ts`). Otherwise up to two cards with coverage ≥ 0.34 are chunked and ranked as their own
+  list, which leads `mergeRanked`, so the model sees them first among the library's passages. A guide chip
+  (or [n]) opens `/guide/[id]`. `hasLibrary()` counts the guide, so a question is searched even with no archive.
+- **UI.** `/guide` (Home's "Primeros auxilios" on iOS): sections, search, vital badge. `/guide/[id]`: the text,
+  Nomad's notes in a card, provenance, URLs and licence, related cards.
+
 ### Preparedness (`src/features/prepare`, `src/app/(tabs)/(home)/prepare`)
 
 Emergency plan and kit, inspired by "if the internet goes down" checklists: things a

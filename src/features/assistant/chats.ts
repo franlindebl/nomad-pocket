@@ -5,6 +5,8 @@ import { persist } from 'zustand/middleware';
 
 import { db, parseJson } from '@/db';
 import i18n from '@/i18n';
+import { guideIndex } from '@/features/guide/guide';
+import { GUIDE_SOURCE, vitalAnswer, vitalCard } from '@/features/guide/guide-core';
 import { emergencyNumber } from '@/features/maps/emergency';
 import { uid } from '@/lib/format';
 import { HEALTH_FEATURES } from '@/lib/health';
@@ -312,9 +314,18 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
     answerText = NO_LIBRARY_ANSWER[lang];
     patchStreaming({ phase: 'generating', text: answerText });
   }
+  // A vital protocol (CPR, choking, bleeding, bleach doses…) is answered with the guide's card, word for word,
+  // with or without a model: the 4B model's paraphrases put CPR on the side and halved the bleach.
+  const vital = !noHealth && !noLibrary && guessIntent(text, history) === 'search' ? vitalCard(guideIndex(lang), text, history) : null;
+  if (vital) {
+    answerText = vitalAnswer(vital, lang, emergencyNumber().number);
+    sources = [{ n: 1, itemId: GUIDE_SOURCE, path: vital.id, title: vital[lang].title }];
+    searched = true;
+    patchStreaming({ phase: 'generating', text: answerText, sources });
+  }
 
   try {
-    if (!noLibrary && !noHealth) await withEngine(modelId, async (engine) => {
+    if (!noLibrary && !noHealth && !vital) await withEngine(modelId, async (engine) => {
       await engine.load((p) => patchStreaming({ loadProgress: p }));
       if (cancelled()) return;
 

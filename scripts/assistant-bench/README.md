@@ -30,6 +30,8 @@ node --experimental-strip-types bench.ts out.jsonl --v2            # experimenta
 ```
 
 Flags: `--zim=URL --llm=URL --emb=URL --db=search.db --questions=file --ctx=6144 --answer-tokens=768`;
+`--guide` adds the emergency guide as the app has it (vital cards answer alone, others lead the sources), from
+`src/data/guide.json` or `--guide-file=path`;
 `--v2` with `--mincos=0.40 --pool=40 --articles=10 --per-archive=3`.
 
 `APP_ORDER` in `bench.ts` is the order the app searches archives in (`listItems`: newest install first) for

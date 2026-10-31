@@ -1,0 +1,29 @@
+{
+  "title": "Guía de emergencias",
+  "intro": "Textos oficiales breves para emergencias, siempre disponibles sin conexión. No sustituyen a una llamada al número de emergencias.",
+  "search": "Buscar en la guía",
+  "empty": "No hay ninguna ficha sobre eso.",
+  "vital": "Vital",
+  "source": "Fuente",
+  "licence": "Licencia",
+  "related": "Fichas relacionadas",
+  "ownNotice": "Esta ficha no es un texto oficial: la ha redactado Nomad Pocket siguiendo las guías que cita, porque no hay ningún texto oficial que se pueda reproducir.",
+  "translationNotice": "Traducción fiel de Nomad Pocket. El texto original está en inglés.",
+  "translationNoticeEs": "Traducción fiel de Nomad Pocket. El texto original está en español.",
+  "noteBy": "Nota de Nomad Pocket",
+  "sections": {
+    "1": "Primeros auxilios",
+    "2": "Medicamentos y botiquín",
+    "3": "Agua",
+    "4": "Comida",
+    "5": "Apagones y energía",
+    "6": "Frío y calor",
+    "7": "Refugio, kit y evacuación",
+    "8": "Comunicación",
+    "9": "Catástrofes",
+    "10": "Guerra, explosiones y sustancias peligrosas",
+    "11": "Higiene y epidemias",
+    "12": "Supervivencia al aire libre",
+    "13": "Afrontar la situación"
+  }
+}

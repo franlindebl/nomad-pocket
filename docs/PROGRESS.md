@@ -72,8 +72,9 @@ AI. **Assistant quality** (`docs/ASSISTANT_QUALITY_PLAN.md`, measured 2026-10-31
    content 1.94/3. In order: ~~(1) propose Qwen even with Apple Intelligence; (2) retrieval bugs: only the first 8
    archives give full-text hits, duplicated articles across Wikipedias, a leaked `<tool_call>`~~ done 2026-10-31
    (no score change alone: 1.28 vs 1.32, blind); ~~(4) bilingual search (`query_en`)~~ done 2026-10-31 (1.78/3,
-   harmful 5 of 50); **next: (6) the emergency guide, pilot of ~21 vital cards** (`docs/EMERGENCY_GUIDE_PLAN.md`,
-   design and resume notes there); (3) bench before
+   harmful 5 of 50); ~~(6) the emergency guide~~ done 2026-10-31: all 94 cards in the app, vital ones answer word for
+   word (pilot: 0 harmful on its topics; `docs/EMERGENCY_GUIDE_PLAN.md`); **next: the owner's review list there**
+   (thin vital texts, a few kept typos, health flags); (3) bench before
    assistant changes (`scripts/assistant-bench`); (4) bilingual search (`query_en`); (5) semantic rerank
    (EmbeddingGemma, measure on a phone first); (6) a vetted bilingual emergency guide: every variant gave 3–8
    harmful answers out of 50 (CPR, choking, bleach dose, CO); (7) Spanish Ready.gov/MedlinePlus in the kit.
@@ -330,6 +331,32 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-31 — Emergency guide: pilot measured, all 94 cards in the app
+
+- Owner: go ahead with the pilot and, if it works, the whole guide.
+- Card format and rules (`docs/emergency-guide/FORMAT.md`): one Markdown file per card and language in
+  `src/data/guide/`, front matter (number, vital, health, kind, sources, licence, keywords, see, note);
+  `scripts/guide/build.mjs` → `src/data/guide.json` (pre-commit runs `--check`); `scripts/guide/check-sources.mjs`
+  fetches every source and lists copied sentences it can't find there.
+- App (`docs/ARCHITECTURE.md` › Emergency guide): `features/guide/guide-core.ts` (pure, 11 tests) searches the cards;
+  a question whose best card is vital is answered with the card word for word, its notes (911 → the local number) and
+  its source, with no model call (instant, any model, Apple Intelligence too); otherwise up to two cards lead the
+  library's sources. `/guide` and `/guide/[id]` screens; Home's "Primeros auxilios" opens the guide. Health cards are
+  hidden on Android (`docs/ANDROID_PLAY.md`).
+- Pilot (21 vital cards, three agents; five `own` cards from ERC 2025, NHS, NICE): blind, two graders, vs A4 — mean
+  1.64/1.56 → 1.82/1.68; the 11 questions answered by a card 1.45 → 2.55/2.45 with harmful 4–5 → 0
+  (`docs/EMERGENCY_GUIDE_PLAN.md`, Pilot result). The matcher learnt from the bench and from ad hoc questions: rarity-
+  weighted coverage, reach, negations kept ("no respira" was landing on the recovery position), people and asking
+  words ignored, same-root words, general card first.
+- Full guide: the other 73 cards by nine agents, all checked against their sources (8 explained misses in 143
+  copied cards). Errors found in official Spanish pages (a 4× bleach dose, chlorine dioxide, "sin baterías"…) left
+  out; two Spanish cards became translations. Review list for the owner at the end of the plan.
+- Whole guide on the bench (run H), same two graders: mean 1.66/1.64 (A4) → 2.00/2.04, useful 26–27 → 35 of 50,
+  harmful 5–6 → 4; the 15 questions answered by a vital card 1.5 → 2.6/2.5. The four harmful answers left had the
+  right card among the sources and the model garbled it (fire in a tent, stove indoors, bleach dose, bombing).
+- Checked on the iOS 27 simulator (Release): guide list, a card with its note and source, and "Mi padre se ha
+  desmayado y no respira" answered at once with the CPR card under Apple Intelligence. tsc, lint, tests (460), i18n clean.
 
 ### 2026-10-31 — Assistant: measured on real content, plan to fix it
 

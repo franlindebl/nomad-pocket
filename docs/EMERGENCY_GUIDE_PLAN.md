@@ -1,6 +1,8 @@
 # Emergency guide: sources and decisions
 
-Status: source inventory done 2026-10-31, no card written yet. Step 6 of `docs/ASSISTANT_QUALITY_PLAN.md`: a
+Status (2026-10-31): **all 94 cards written in both languages and in the app** (`src/data/guide/`, format in
+`docs/emergency-guide/FORMAT.md`, code in `docs/ARCHITECTURE.md` › Emergency guide); pilot measured (below); a review
+list for the owner at the end. Step 6 of `docs/ASSISTANT_QUALITY_PLAN.md`: a
 bilingual guide of short official texts that the assistant searches first and, for vital protocols, shows as
 they are. Owner's rules (2026-10-31): the whole guide, **no text of our own** (faithful copies of official
 sources that may legally be reproduced, each with its reference), official Spanish versions first, vital cards
@@ -92,7 +94,7 @@ inventories, one table row per card with the URLs that were opened, dates, licen
    first-aid training is welcome later (not blocking).
 5. Lejía: not answered yet (default: the CDC/EPA table as it is, with the note on Spanish concentrations).
 
-## Pilot (next, approved 2026-10-31)
+## Pilot (done 2026-10-31)
 
 Vital first aid first: it is where the harmful answers left after step 4 are (CPR, choking, viper bite,
 recovery position; `docs/ASSISTANT_QUALITY_PLAN.md`). Cards: 1.1 CPR adult, 1.2 CPR child/infant, 1.3 choking,
@@ -137,8 +139,84 @@ Design (proposed; adjust while building):
 - Results so far (JSONL, scratchpad of the 2026-10-31 session, not in the repo): A (as was), A2 (steps 1–2), A3/A4
   (step 4, 16 vs 8 chunks), A3x, B/C/C′/D (experiments), apple*. Numbers are in `docs/ASSISTANT_QUALITY_PLAN.md`.
 
-## After the pilot
+## Pilot result
 
-Write the remaining cards (text copied, never generated), each with source, URL, date and licence line;
-a check that compares each card with its source text; the guide shipped in the app (small, bilingual, searched
-first by the assistant, vital cards shown whole); then the bench again.
+Built as designed above, with these changes: card ids are English slugs (`cpr-adult`), the numbers order the guide;
+`see`, `note` and `transcribed` keys; the vital pick needs coverage ≥ 0.5 (weighted by rarity) **and** reach ≥ 0.75
+(the card says nearly every word of the question: "¿cómo sé si una seta es venenosa?" shared "venenosa" with the
+snake card), a negation stays with its word ("no respira" is CPR, "respira" the recovery position), words about
+people and about asking don't count ("mi padre", "primeros auxilios", "síntomas"), words of the same root match
+("atragantando" ~ "atragantado"), and of two cards that fit about as well the general one wins (adults before babies).
+
+Bench (`scripts/assistant-bench`, run G: A4 + the 21 pilot cards, `--guide --guide-file`), blind, two graders, same
+sheets as A4:
+
+| | A4 | Pilot (G) |
+|---|---|---|
+| Mean (grader 1 / 2) | 1.64 / 1.56 | 1.82 / 1.68 |
+| Harmful answers | 6 / 8 | 5 / 7 |
+| 11 questions answered with a vital card | 1.45, 4–5 harmful | **2.55 / 2.45, 0 harmful** |
+| 5 questions with a guide card among the sources | 2.00 | 3.00 / 2.80 |
+| 34 questions the guide didn't touch | 1.65 / 1.53 | 1.41 / 1.26 (same code: run-to-run noise of the model) |
+
+The pilot met its target (no harmful answer on its topics). The remaining harmful answers were all outside it
+(fire in a tent, a stove indoors, food in an outage, flour on an oil fire): the full guide covers those.
+
+## Full guide (2026-10-31)
+
+All 94 cards written by nine agents from the inventories, both languages, each checked against its source with
+`check-sources.mjs` (143 copy/excerpt cards, 8 sentences not found, all explained: ligatures lost by pdftotext in the
+CDC coping PDF, a page header inside an ATP sentence, a table cell turned into a list item, a figure reference split
+by a line break) and each translation re-read sentence by sentence. Kinds: copy/excerpt from the same agency in both
+languages for most; Spanish-government texts (INSST NTP 524/546, Protección Civil, Sanidad, La Moncloa/Consumo) with
+an English translation; English-only sources (ATP 4-02.11 and 3-50.21, DHS, NIOSH, CISA, NPS) with a Spanish
+translation; five `own` cards. 26 vital cards. `src/data/guide.json` is 600 KB.
+
+Bench with the whole guide (run H, `--guide`), blind, two graders, one sheet with A4, G and H:
+
+| | A4 | Pilot (G) | Whole guide (H) |
+|---|---|---|---|
+| Mean (grader 1 / 2) | 1.66 / 1.64 | 1.70 / 1.78 | **2.00 / 2.04** |
+| Useful (≥ 2) of 50 | 26 / 27 | 27 / 29 | **35 / 35** |
+| Harmful | 5 / 6 | 6 / 6 | **4 / 4** |
+| 15 questions answered with a vital card | 1.53 / 1.47 | 2.07 / 2.13 | **2.60 / 2.53** |
+| 33 questions with guide cards among the sources | 1.79 / 1.79 | 1.61 / 1.70 | 1.82 / 1.91 |
+
+The vital cards carry the gain. As sources the cards help little: the model still garbles them. The four harmful
+answers left all had the right card among their sources: a fire inside a tent (Q1, `making-fire`), a gas or coal
+stove indoors (Q4, the CO warning was there), "2 drops per gallon" (Q7, "potabilizo agua sin hervirla" got the
+boiling and filter cards, not the bleach one) and leaving the building during a bombing (Q45, `explosion`). Next
+idea for the owner: show the best card itself (not only vital ones) under a short answer, or answer more questions
+with the card when it covers them.
+
+Things the agents found in official Spanish pages (left out whole, as the rules say, unless noted):
+CDC "1 cuarto de litro" for "1 quart or liter" (5 % bleach dose, 4× too strong); CDC "tabletas con cloro" for chlorine
+dioxide; FDA "sin baterías" for "with batteries" and "dispositivo mecánico" for medical (the Spanish card is now a
+translation); Ready.gov earthquake "aléjese de la costa" tied to earthquake zones, house fire "quédese donde está"
+for "say where you are", a garbled generator sentence; USFA's Spanish kitchen-fire handout without "don't move the
+pan" (the Spanish card is now a translation of the English one); CDC "linternas" among CO sources (sentence left
+out); EPA Spanish well steps "cierra los grifos" for "turn on"; Ready.gov winter "aviso"/"advertencia" swapped.
+
+### For the owner to review
+
+1. **Thin or dated vital texts** (faithful copies of the best reusable source; the alternative is our own wording of
+   ERC 2025, as for the five gap cards):
+   - `choking` (ATP 2026): back blows are named but not described, no alternation of 5 blows and 5 thrusts, military
+     register; `recovery-position` (ATP + FEMA): no step-by-step roll; `cpr-child` (MedlinePlus): no 5 initial breaths,
+     no infant technique; `shock` (ATP): legs raised without the "no trauma" caveat; `anaphylaxis` (ATP): "0.3 mg for
+     adults over 66 pounds", repeat every 5–10 min; `electric-shock` (INSST 1999): says "cortar la corriente en
+     condiciones seguras" but not "don't touch the person"; `burns` (INSST 1999) says to give water by mouth and
+     evacuate every burn.
+2. **Small fixes the rules forbid** (kept as published): NTP 524 prints "2030 minutos" (20-30) in chemical burns (the
+   sentence is left out, so the card gives no skin flushing time); FDA Spanish "A Fiebre de 102 grados"; CDC "beach
+   solution"; Spanish "4,000 miligramos" (a `note` says it means 4 grams).
+3. **Different texts per language** where each side has its own official source: `potassium-iodide` (CDC vs
+   Protección Civil: Spain gives 130 mg from 12 years, CDC 65 mg for 12–18), `rubbish-waste` (CDC vs Sanidad, 51 words),
+   `dehydration` (Spanish has no ORS steps).
+4. **Health flag**: `extreme-heat` and `disinfecting-surfaces` are `health: no`; `disabilities-older` was switched to
+   `yes` (medicines, dialysis). Confirm for Android.
+5. **Notes of ours** (`note:`): bleach strength in Spain (RD 349/1993) on `water-bleach` and `disinfecting-surfaces`,
+   "4,000 miligramos" on `pain-relievers`, the English acronyms on `suspicious-object`.
+6. **No card yet** for air raids (no reusable official text: the EU's 72-hour guidance isn't published), and none for
+   wild plants (the CDC source only covers mushrooms).
+7. A review by someone with first-aid training is still welcome, `childbirth` first.

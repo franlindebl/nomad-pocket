@@ -1,0 +1,29 @@
+{
+  "title": "Emergency guide",
+  "intro": "Short official texts for emergencies, always available offline. They don't replace a call to the emergency number.",
+  "search": "Search the guide",
+  "empty": "No card about that.",
+  "vital": "Vital",
+  "source": "Source",
+  "licence": "Licence",
+  "related": "Related cards",
+  "ownNotice": "This card is not an official text: Nomad Pocket wrote it following the guidelines it cites, because there is no official text that may be reproduced.",
+  "translationNotice": "Faithful translation by Nomad Pocket. The original text is in English.",
+  "translationNoticeEs": "Faithful translation by Nomad Pocket. The original text is in Spanish.",
+  "noteBy": "Nomad Pocket's note",
+  "sections": {
+    "1": "First aid",
+    "2": "Medicines and first-aid kit",
+    "3": "Water",
+    "4": "Food",
+    "5": "Power outages and energy",
+    "6": "Cold and heat",
+    "7": "Shelter, kit and evacuation",
+    "8": "Communication",
+    "9": "Disasters",
+    "10": "War, explosions and hazardous materials",
+    "11": "Hygiene and epidemics",
+    "12": "Outdoor survival",
+    "13": "Coping"
+  }
+}
