@@ -179,5 +179,7 @@ vital first aid (CPR, choking, viper bite, recovery position): step 6's verbatim
 - One run per variant; three graders (Claude agents, blind to the variant); no human review yet.
 - Wikipedia `all_maxi` 2026-05 stood in for `all_nopic` 2026-10 on the host (same text). The app searches
   archives newest install first; the bench mirrors that order.
-- Apple FM ran on macOS 27, not on the owner's iPhone, so its refusal rate here understates the phone's.
+- Apple FM ran on macOS 27, not on the owner's iPhone, so its refusal rate here understates the phone's. In the
+  app itself (iOS 27 simulator, build before steps 1–4, `insim.py`): 0 refusals in 50 (one by hand earlier, the
+  fire question) and 16 "not found".
 - Phone speed was not measured (Mac GPU only).
