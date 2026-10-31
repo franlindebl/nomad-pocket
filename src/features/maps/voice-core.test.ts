@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
 import { parseRoute } from './routing-core.ts';
-import { earlyDistance, keysOf, lowerFirst, nextCue, nowDistance, spokenDistance, START_KEY, type Cue, type VoiceManeuver } from './voice-core.ts';
+import { earlyDistance, isNewWay, keysOf, lowerFirst, nextCue, nowDistance, spokenDistance, START_KEY, type Cue, type VoiceManeuver } from './voice-core.ts';
 
 const madrid = parseRoute(readFileSync(new URL('./fixtures/route-madrid-auto.json', import.meta.url), 'utf8'), 'auto');
 
@@ -83,4 +83,48 @@ test('spoken distances are round numbers in the region units', () => {
 test('lowerFirst', () => {
   assert.equal(lowerFirst('Gire a la derecha.'), 'gire a la derecha.');
   assert.equal(lowerFirst(''), '');
+});
+
+test('isNewWay: the same road found again is not a new way; a turn onto another one is', () => {
+  // A street running north, ~1.1 km.
+  const street: [number, number][] = [
+    [-3.7, 40.4],
+    [-3.7, 40.41],
+  ];
+  // Rerouted from a GPS jump 15 m off it: back onto the same street.
+  const same: [number, number][] = [
+    [-3.70018, 40.4045],
+    [-3.7, 40.4046],
+    [-3.7, 40.41],
+  ];
+  assert.equal(isNewWay(street, same), false);
+  // Rerouted down a side street going east.
+  const other: [number, number][] = [
+    [-3.7, 40.4045],
+    [-3.698, 40.4045],
+    [-3.698, 40.41],
+  ];
+  assert.equal(isNewWay(street, other), true);
+  // Different only beyond the first 400 m: not said now.
+  const later: [number, number][] = [
+    [-3.7, 40.4],
+    [-3.7, 40.406],
+    [-3.69, 40.406],
+  ];
+  assert.equal(isNewWay(street, later), false);
+});
+
+test('isNewWay: one long straight segment is checked along its length', () => {
+  const street: [number, number][] = [
+    [-3.7, 40.4],
+    [-3.7, 40.41],
+  ];
+  // Starts on the street, then one segment heading away north-east.
+  assert.equal(
+    isNewWay(street, [
+      [-3.7, 40.4],
+      [-3.69, 40.41],
+    ]),
+    true,
+  );
 });

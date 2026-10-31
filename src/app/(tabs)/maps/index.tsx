@@ -314,9 +314,10 @@ export default function MapScreen() {
   }, [route, cut]);
 
   const top = insets.top + space.sm;
-  // Clear of the map's (i) credit button, except while navigating: then the panel sits low like the
-  // banner sits high (owner's call; the credit shows again when the trip ends).
-  const cardBottom = insets.bottom + (navigating ? space.sm : 72);
+  // Every bottom card sits low, like the banner sits high (owner's call); the map's (i) credit button,
+  // which it would cut in half, hides while one is up.
+  const cardBottom = insets.bottom + space.sm;
+  const bottomCard = !!target || !!selected || (!!style && !regions.length);
   // Following: the user three quarters down the map between the search bar and the
   // panel, so most of the screen shows the road ahead. The camera's padding centres
   // the user there; the arrow is drawn at the same point.
@@ -436,7 +437,9 @@ export default function MapScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openFix]);
 
-  useFollowCamera(cameraRef, following && tabFocused && size.height > 0, Math.max(0, shift), Math.max(0, -shift), northUp, setTravel);
+  // Until the camera has reached the user, the map's own dot shows where they are (the arrow sits at
+  // the screen's following point, where they will be once it arrives).
+  const arrived = useFollowCamera(cameraRef, following && tabFocused && size.height > 0, Math.max(0, shift), Math.max(0, -shift), northUp, setTravel);
 
   return (
     <View
@@ -449,6 +452,7 @@ export default function MapScreen() {
           mapStyle={style}
           logo={false}
           compass={false}
+          attribution={!bottomCard}
           attributionPosition={{ bottom: space.sm, left: space.sm }}
           tintColor={colors.location}
           onDidFinishLoadingMap={() => setMapLoaded(true)}
@@ -477,9 +481,9 @@ export default function MapScreen() {
             router.push({ pathname: '/maps/marker', params: { lat: String(lat), lon: String(lon) } });
           })}>
           <Camera ref={cameraRef} initialViewState={initialView} maxZoom={19} />
-          {/* Following: the arrow (FollowArrow) stands for the user. */}
-          {showUser && !following ? <NativeUserLocation /> : null}
-          {showUser && tabFocused && !following ? <HeadingBeam /> : null}
+          {/* Following: the arrow (FollowArrow) stands for the user, once the camera is on them. */}
+          {showUser && !arrived ? <NativeUserLocation /> : null}
+          {showUser && tabFocused && !arrived ? <HeadingBeam /> : null}
           <GeoJSONSource
             id="markers"
             data={markerData}
@@ -629,8 +633,8 @@ export default function MapScreen() {
         </View>
       )}
 
-      {style && following ? <FollowBeam x={size.width / 2} y={userY} mapBearing={bearing} /> : null}
-      {style && following ? <FollowArrow x={size.width / 2} y={userY} rotation={northUp ? (travel ?? 0) : 0} /> : null}
+      {style && arrived ? <FollowBeam x={size.width / 2} y={userY} mapBearing={bearing} /> : null}
+      {style && arrived ? <FollowArrow x={size.width / 2} y={userY} rotation={northUp ? (travel ?? 0) : 0} /> : null}
 
       {style && credit ? <MapCredit top={freeTop} /> : null}
 

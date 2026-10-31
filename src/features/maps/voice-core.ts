@@ -4,6 +4,7 @@
 // one comes close behind). Plus the start instruction when the trip starts. Nothing twice: the
 // caller keeps the keys already spoken for the current route.
 // Pure TypeScript (no `@/` aliases) so node's test runner loads it.
+import { distanceMeters, metersToLine } from './geo.ts';
 import type { Costing, Maneuver } from './routing-core.ts';
 import type { MeasurementSystem } from '../../lib/units.ts';
 
@@ -112,4 +113,33 @@ export function spokenDistance(meters: number, system: MeasurementSystem): { val
 /** "Gire a la derecha…" → "gire a la derecha…", to follow "En 400 metros, ". */
 export function lowerFirst(text: string): string {
   return text ? text[0].toLocaleLowerCase() + text.slice(1) : text;
+}
+
+/** How much of a new route is compared with the old one, and how far off it counts as another way. */
+const NEW_WAY_AHEAD_M = 400;
+const NEW_WAY_OFF_M = 30;
+const NEW_WAY_STEP_M = 20;
+
+/**
+ * Whether a reroute sends the user another way (the chime says so): some point of the new route's
+ * first 400 m lies off the old route. A reroute after a GPS jump that finds the same road again
+ * stays silent. Shapes are [lon, lat].
+ */
+export function isNewWay(previous: readonly (readonly [number, number])[], next: readonly (readonly [number, number])[]): boolean {
+  if (previous.length < 2 || next.length < 2) return previous.length !== next.length;
+  let along = 0;
+  let sinceSample = NEW_WAY_STEP_M;
+  for (let i = 1; i < next.length && along <= NEW_WAY_AHEAD_M; i++) {
+    const a = { lon: next[i - 1][0], lat: next[i - 1][1] };
+    const b = { lon: next[i][0], lat: next[i][1] };
+    const seg = distanceMeters(a, b);
+    // Points every 20 m along the segment, so a long straight one is checked along its length.
+    for (let d = NEW_WAY_STEP_M - sinceSample; d <= seg && along + d <= NEW_WAY_AHEAD_M; d += NEW_WAY_STEP_M) {
+      const t = seg ? d / seg : 0;
+      if (metersToLine({ lon: a.lon + (b.lon - a.lon) * t, lat: a.lat + (b.lat - a.lat) * t }, previous) > NEW_WAY_OFF_M) return true;
+    }
+    sinceSample = (sinceSample + seg) % NEW_WAY_STEP_M;
+    along += seg;
+  }
+  return false;
 }

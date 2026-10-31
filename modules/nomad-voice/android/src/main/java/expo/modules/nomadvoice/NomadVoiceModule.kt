@@ -2,13 +2,16 @@
 // tagged as navigation guidance and takes transient, may-duck audio focus, so music lowers for a
 // prompt and comes back after it, the way Android Auto and car head units expect. Not expo-speech:
 // it sets neither. A phone without any engine (no Google services, nothing installed) stays
-// silent; guidance goes on.
+// silent; guidance goes on. The reroute chime is two soft notes made here (no sound file), played
+// the same way.
 package expo.modules.nomadvoice
 
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
+import android.media.AudioFormat
 import android.media.AudioManager
+import android.media.AudioTrack
 import android.os.Handler
 import android.os.Looper
 import android.speech.tts.TextToSpeech
@@ -19,6 +22,9 @@ import expo.modules.kotlin.modules.ModuleDefinition
 import java.util.Locale
 
 private const val UTTERANCE = "nomad-prompt"
+private const val CHIME_RATE = 22050
+/** G5 then C6, seconds: keep in step with iOS's Chime. */
+private val CHIME_NOTES = listOf(784.0 to 0.11, 1047.0 to 0.2)
 
 class NomadVoiceModule : Module() {
   private var tts: TextToSpeech? = null
@@ -28,6 +34,20 @@ class NomadVoiceModule : Module() {
   private var pending: Pair<String, String>? = null
   private var focus: AudioFocusRequest? = null
   private val main = Handler(Looper.getMainLooper())
+  private var chiming: AudioTrack? = null
+  private val chimeSamples: ShortArray by lazy {
+    val out = ArrayList<Short>()
+    for ((hz, seconds) in CHIME_NOTES) {
+      val n = (CHIME_RATE * seconds).toInt()
+      for (i in 0 until n) {
+        val t = i.toDouble() / CHIME_RATE
+        // A quick attack and an exponential fade: a bell, not a beep.
+        val envelope = minOf(1.0, t / 0.008) * Math.exp(-t * 9)
+        out.add((0.45 * envelope * Math.sin(2 * Math.PI * hz * t) * Short.MAX_VALUE).toInt().toShort())
+      }
+    }
+    out.toShortArray()
+  }
 
   private val attributes = AudioAttributes.Builder()
     .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
@@ -49,6 +69,10 @@ class NomadVoiceModule : Module() {
           start()
         }
       }
+    }.runOnQueue(Queues.MAIN)
+
+    AsyncFunction("chime") { ->
+      chime()
     }.runOnQueue(Queues.MAIN)
 
     AsyncFunction("stop") { ->
@@ -105,6 +129,42 @@ class NomadVoiceModule : Module() {
     engine.speak(text, TextToSpeech.QUEUE_ADD, null, UTTERANCE)
   }
 
+  private fun chime() {
+    if (chiming != null) return
+    val pcm = chimeSamples
+    val track = try {
+      AudioTrack.Builder()
+        .setAudioAttributes(
+          AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build(),
+        )
+        .setAudioFormat(
+          AudioFormat.Builder()
+            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+            .setSampleRate(CHIME_RATE)
+            .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+            .build(),
+        )
+        .setTransferMode(AudioTrack.MODE_STATIC)
+        .setBufferSizeInBytes(pcm.size * 2)
+        .build()
+    } catch (e: Exception) {
+      return
+    }
+    track.write(pcm, 0, pcm.size)
+    acquire()
+    chiming = track
+    track.play()
+    // A static track says nothing when it ends: it lasts as long as its samples.
+    main.postDelayed({
+      track.release()
+      chiming = null
+      release()
+    }, pcm.size * 1000L / CHIME_RATE + 100)
+  }
+
   private fun acquire() {
     if (focus != null) return
     val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
@@ -117,8 +177,8 @@ class NomadVoiceModule : Module() {
   // On the main thread (the engine calls back on its own), like everything else here.
   private fun release() {
     val request = focus ?: return
-    // Another prompt is queued behind this one.
-    if (tts?.isSpeaking == true) return
+    // Another prompt is queued behind this one, or the chime still plays.
+    if (tts?.isSpeaking == true || chiming != null) return
     focus = null
     audio?.abandonAudioFocusRequest(request)
   }

@@ -992,8 +992,13 @@ on), lasting that long, so the map glides without trailing a fix behind and a la
 moving (the next one takes over mid-glide). The trip's watch asks for every fix, once a second (with
 fixes every 3 m they came every 2-3 s on foot, unevenly, and the map stopped and jumped: measured on
 the simulator, 1 Hz walk, 5.6 % of frames still and a 2 s stop before, none after). The camera padding
-is read at each fix: a banner growing a line no longer restarts the glide. While navigating the bottom
-bar sits low (over the map's (i) credit), like the banner sits high. Zoom by mode and speed
+is read at each fix: a banner growing a line no longer restarts the glide. Every bottom card (place
+card, trip preview, navigation bar, no-maps card) sits low, like the banner sits high; the map's (i)
+credit button hides while one is up (it would show cut in half beside it). Starting to follow ("Iniciar",
+"Recentrar") is one 1 s ease straight to the user; fixes during it wait for its end, and until it lands
+the map's own location dot shows where the user is, not the arrow (`useFollowCamera` returns `arrived`).
+A reroute whose first 400 m leave the old route (`isNewWay`) chimes (`NomadVoice.chime()`, two notes
+made in code, the prompts' audio session; muted with the voice). Zoom by mode and speed
 and closer before a maneuver (`followZoom`); pitch 45° car, 40° bike, 30° foot. While navigating
 the route line starts at the snapped point (the travelled part is sliced off, like Google Maps';
 not `line-gradient`, whose progress is projected and sampled into a texture). `fitBounds` on

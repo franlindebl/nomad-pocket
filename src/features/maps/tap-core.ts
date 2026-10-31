@@ -2,7 +2,7 @@
 // (rendered features of the basemap's pois and places layers) and the street it stands on (the
 // nearest named road line drawn around it), for the place card. Pure, no @/ imports, so
 // node --test runs it.
-import { distanceMeters, type LatLon } from './geo.ts';
+import { distanceMeters, metersToSegment, type LatLon } from './geo.ts';
 import { localizedName, packNames } from './places-core.ts';
 
 /** What queryRenderedFeatures returns, as far as this file reads it. */
@@ -59,22 +59,6 @@ export function tappedPlace(found: { poi: TapFeature[]; place: TapFeature[] }, a
   return best;
 }
 
-/** Metres from `p` to the segment a–b, on a local flat projection (fine over a street's length). */
-function toSegment(p: LatLon, a: [number, number], b: [number, number]): number {
-  const k = Math.cos((p.lat * Math.PI) / 180);
-  const ax = (a[0] - p.lon) * k;
-  const ay = a[1] - p.lat;
-  const bx = (b[0] - p.lon) * k;
-  const by = b[1] - p.lat;
-  const dx = bx - ax;
-  const dy = by - ay;
-  const len = dx * dx + dy * dy;
-  const t = len ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / len)) : 0;
-  const x = ax + t * dx;
-  const y = ay + t * dy;
-  return Math.sqrt(x * x + y * y) * 111_320;
-}
-
 function lines(g: TapFeature['geometry']): [number, number][][] {
   if (g.type === 'LineString') return [g.coordinates as [number, number][]];
   if (g.type === 'MultiLineString') return g.coordinates as [number, number][][];
@@ -92,7 +76,7 @@ export function nearestStreet(features: TapFeature[], p: LatLon, lang: string): 
     if (!native || kind === 'rail' || kind === 'ferry' || kind === 'aerialway') continue;
     for (const line of lines(f.geometry)) {
       for (let i = 1; i < line.length; i++) {
-        const d = toSegment(p, line[i - 1], line[i]);
+        const d = metersToSegment(p, line[i - 1], line[i]);
         if (d >= bestD) continue;
         bestD = d;
         best = { name: names(props, lang).name, native };
