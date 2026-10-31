@@ -92,8 +92,53 @@ inventories, one table row per card with the URLs that were opened, dates, licen
    first-aid training is welcome later (not blocking).
 5. Lejía: not answered yet (default: the CDC/EPA table as it is, with the note on Spanish concentrations).
 
-## Next
+## Pilot (next, approved 2026-10-31)
 
-After the decisions: write the cards (text copied, never generated), each with source, URL, date and licence line;
+Vital first aid first: it is where the harmful answers left after step 4 are (CPR, choking, viper bite,
+recovery position; `docs/ASSISTANT_QUALITY_PLAN.md`). Cards: 1.1 CPR adult, 1.2 CPR child/infant, 1.3 choking,
+1.4 infant choking (own wording), 1.5 bleeding, 1.6 tourniquet, 1.7 recovery position, 1.8 shock, 1.9 burns,
+1.16 hypothermia, 1.18 heat stroke, 1.20 snake bite, 1.22 anaphylaxis, 1.23 swallowed poison (own), 1.24 carbon
+monoxide, 1.25 drowning (own), 1.27 stroke, 1.28 heart attack, 1.30 childbirth (own), 11.5 toilets without water
+(own), 3.2 bleach doses (frequent harmful answer). Sources and caveats per card: `docs/emergency-guide/sources-*.md`.
+
+Design (proposed; adjust while building):
+1. **Card files**: `src/data/guide/<id>.<lang>.md` (e.g. `1.1.es.md`) with front matter: `title`, `section`, `health`
+   (true for sections 1–2 and health-ish cards), `vital`, `kind` (`copy` | `excerpt` | `translation` | `own`),
+   `source` (agency, title), `url`, `date` (as the page shows it), `licence` line, `keywords` (search terms people use,
+   both languages' synonyms), and for a translation the original's id. Body: Markdown, the source's text only.
+   Excerpts mark omissions with "[…]"; our metric equivalents go in brackets as "[≈ 2 L, nota de Nomad]".
+2. **Build**: `scripts/guide/build.mjs` → `src/data/guide.json` (bundled, ~100–200 KB); `--check` fails if stale
+   (like `licenses.mjs`). Validates front matter and that every card has both languages.
+3. **Source check**: `scripts/guide/check-sources.mjs` fetches each `copy`/`excerpt` URL (cached under the
+   scratchpad, never in the repo) and verifies every sentence of the card appears in the source text (normalized
+   whitespace, quotes); prints the misses. Translations are checked against their original card by a human/agent
+   pass, sentence by sentence; `own` cards list the guideline lines they follow in a `basis` field.
+4. **Retrieval** (`features/assistant/guide-core.ts`, pure and tested): BM25 over the cards of the question's language
+   (title ×3, keywords ×2, body), `matchGuide(question, lang)` → scored cards. In `rag.ts` the best matches join the
+   ranking as sources ahead of the library (source id `guide:<id>`, its chip opens the card). **Vital**: when the
+   best match is a vital card above a threshold, the answer *is* the card, word for word, with its source line, and
+   the model adds nothing (no generation call); a header line says it's the official text. Health cards are dropped
+   when `HEALTH_FEATURES` is false.
+5. **Fixed note** under every card that mentions 911/°F/gallons: "En tu país: <emergencyNumber()>" (the country's
+   number from `features/maps/emergency`), plus Spain's toxicology number on poison cards.
+6. **UI**: the card as Markdown in the chat bubble; a guide screen (list by section, search, card view with its
+   source and licence); entry from Home's "Primeros auxilios" quick action (today it opens a Wikipedia article).
+7. **Measure**: mirror `guide-core` in `scripts/assistant-bench/bench.ts`, rerun the 50 questions, blind-grade against
+   A4 (`mergeRanked` 8/0.4, the code on main); target: no harmful answers on the pilot's topics.
+
+## Bench state (to resume)
+
+- Data: simulator NP-ai `87957D59-2FE2-4EC0-A9DB-5069E6FB4A50` (iOS 27, Spain kit downloaded, Apple Intelligence),
+  NP-ai2 `F6D8E91E-7FEA-4F61-ACCD-700DF51E319B` (new onboarding check, Qwen 4B downloaded). Host files:
+  `~/Proyectos/nomad/data/models/` (Qwen3.5-4B, embeddinggemma-300M), `~/Proyectos/nomad/data/zim/` (Wikipedia es
+  maxi used as the nopic stand-in), `~/Proyectos/nomad/data/zim-extra/` (Ready.gov ES, MedlinePlus ES).
+- Servers (`scripts/assistant-bench/README.md`): `llama-server` Qwen on :8080, embeddings on :8081, ZIM kit on :8899,
+  kit + Spanish extras on :8898. The bench needs `search.db` copied from NP-ai next to `bench.ts` and a venv with libzim.
+- Results so far (JSONL, scratchpad of the 2026-10-31 session, not in the repo): A (as was), A2 (steps 1–2), A3/A4
+  (step 4, 16 vs 8 chunks), A3x, B/C/C′/D (experiments), apple*. Numbers are in `docs/ASSISTANT_QUALITY_PLAN.md`.
+
+## After the pilot
+
+Write the remaining cards (text copied, never generated), each with source, URL, date and licence line;
 a check that compares each card with its source text; the guide shipped in the app (small, bilingual, searched
 first by the assistant, vital cards shown whole); then the bench again.

@@ -72,7 +72,8 @@ AI. **Assistant quality** (`docs/ASSISTANT_QUALITY_PLAN.md`, measured 2026-10-31
    content 1.94/3. In order: ~~(1) propose Qwen even with Apple Intelligence; (2) retrieval bugs: only the first 8
    archives give full-text hits, duplicated articles across Wikipedias, a leaked `<tool_call>`~~ done 2026-10-31
    (no score change alone: 1.28 vs 1.32, blind); ~~(4) bilingual search (`query_en`)~~ done 2026-10-31 (1.78/3,
-   harmful 5 of 50); (3) bench before
+   harmful 5 of 50); **next: (6) the emergency guide, pilot of ~21 vital cards** (`docs/EMERGENCY_GUIDE_PLAN.md`,
+   design and resume notes there); (3) bench before
    assistant changes (`scripts/assistant-bench`); (4) bilingual search (`query_en`); (5) semantic rerank
    (EmbeddingGemma, measure on a phone first); (6) a vetted bilingual emergency guide: every variant gave 3–8
    harmful answers out of 50 (CPR, choking, bleach dose, CO); (7) Spanish Ready.gov/MedlinePlus in the kit.
@@ -368,6 +369,9 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   attribution; EU CC BY; not Guardia Civil, Justicia, WHO). Five decisions are the owner's (translation, excerpts, US
   details, gaps, lejía dose). Found official texts that must not be copied (Protección Civil's doorway earthquake
   advice, old INSST NTPs, "16 drops per gallon").
+- Owner's decisions on the guide: faithful marked translations and excerpts OK; US text kept with a fixed "En tu
+  país: 112" note; the five cards with no reusable source in our own wording of current guidance, labelled as such
+  (ERC 2025 is all rights reserved, permission too slow). Pilot approved: ~21 vital first-aid cards first.
 
 ### 2026-10-31 — Content updates: E2E on iOS and Android
 
