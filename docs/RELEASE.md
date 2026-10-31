@@ -24,7 +24,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 
 - Marketing version: `expo.version` (currently **1.1.0**). Keep `package.json`'s
   `version` equal (not used by the build, but it's what people read).
-- iOS build number: `expo.ios.buildNumber` (currently **"23"**) → `CFBundleVersion`. Bump it
+- iOS build number: `expo.ios.buildNumber` (currently **"24"**) → `CFBundleVersion`. Bump it
   for every upload: App Store Connect rejects a build number it has already seen.
 - Android: `expo.android.versionCode` (currently **26**: 23 and 24 went to Play internal testing, 24 to the rejected closed test; 25 is the build without health features, superseded before review; 26 adds the assistant's no-health fixes). Must grow
   with every Play upload.
@@ -55,6 +55,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.1.0 | 21 | TestFlight 2026-10-27: build 20 plus `NSPhotoLibraryUsageDescription` (App Store Connect flagged build 20 with ITMS-90683: expo-image and expo-file-system's legacy module link the Photos framework; the app never asks for the photo library) |
 | 1.1.0 | 22 | TestFlight 2026-10-27: search results name the right neighbourhood (Calle de Alcalá no longer "· Nudo Sur"), first aid opens in the app's language (Wikipedia Médica at "Primeros auxilios"), the assistant goes straight to the answer and finds articles named after the question, no empty image boxes in image-less archives
 | 1.1.0 | 23 | TestFlight 2026-10-28: the assistant finds its sources in English libraries (Apple's router no longer translates queries into Spanish, English noise words dropped, articles looked up by exact title) and keeps small talk out of answers with sources; **submitted to App Review 2026-10-28** (same submission as 1.0.1, after the owner's 2.1(b) reply; new listing `docs/store/listing-1.1.0.md`, auto-release after approval)
+| 1.1.0 | 24 | TestFlight 2026-10-31 (TestFlight only: 1.1.0 build 23 stays in review): spoken turn-by-turn prompts (speaker button to mute them) and guidance that keeps going with the screen locked or the app in the background (`UIBackgroundModes` location + audio, new location purpose string); CarPlay built but switched off (`docs/CARPLAY_PLAN.md`). A store release of it needs a new marketing version and the background-modes review note |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.

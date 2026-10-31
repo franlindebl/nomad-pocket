@@ -315,6 +315,13 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-31 — iOS build 24 to TestFlight (voice and background navigation)
+
+- 1.1.0 (24), TestFlight only (build 23 stays in App Review): main at the CarPlay merge, CarPlay off. For the
+  owner to hear the voice prompts and try guidance with the phone locked on a real iPhone. A store release of it
+  needs a new marketing version (1.1.0 will be out by then) and the review note in `docs/CARPLAY_PLAN.md`.
+  Tagged `v1.1.0-24`.
+
 ### 2026-10-31 — CarPlay merged into main, switched off
 
 - Owner's call: wait for 1.1.0's approval before requesting the entitlement, and ship voice + background
