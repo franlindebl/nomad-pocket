@@ -315,6 +315,31 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-31 — Navigation: a chime when a reroute changes the way; "Recentrar" goes straight to the user
+
+- Owner: a short sound on reroutes, like Google Maps and Waze, but not every second. Reroutes already need two fixes
+  in a row off the route (or the wrong way) and at most one per 10 s; now the new route chimes only when its first
+  400 m leave the old one (`isNewWay` in voice-core, tested): a reroute after a GPS jump that finds the same road
+  stays silent. The chime is two soft notes generated in `modules/nomad-voice` (`chime()`, no sound file), in the
+  voice-prompt audio session on iOS (ducks music, CarPlay) and as navigation-guidance audio on Android; muted with
+  the voice; a prompt right after it waits 400 ms. Not heard: the simulator has no sound (owner's check).
+- Owner: "Recentrar" wandered over the map with the arrow drawn where the user wasn't. Every fix during the
+  0.9 s move started another ease from wherever the first had got to; and the arrow showed at the following point
+  at once. Now one 1 s ease straight to the user, fixes meanwhile wait for its end, and until it lands the map's own
+  location dot shows where the user is (`useFollowCamera` returns `arrived`). Checked: a scratch flow (car trip, pan,
+  "Recentrar", leave the route) passes with no crash; the screen recording froze over the move, so its frames weren't
+  seen.
+- Checks: tsc, lint, unit tests, i18n; Android `:nomad-voice` compiles; smoke E2E 21/21, map-14, map-17 (with the
+  low cards).
+
+### 2026-10-31 — Maps: every bottom card sits low; the (i) hides under them
+
+- Owner: the place card and the trip preview should sit low like the navigation bar, and the map's (i) showed
+  cut in half beside them. Every bottom card now sits 8 pt above the tab bar; the (i) credit button hides while
+  a card is up (MapLibre's `attribution` prop) and comes back with the bare map. Checked on the simulator (Las
+  Palmas: bare map with the (i), a restaurant's card, its trip preview, back to the card); tsc, lint, unit tests,
+  smoke E2E, map-14 and map-17.
+
 ### 2026-10-31 — Maps: a result's town is never a field name
 
 - Owner: "Calle Prados Quemados" (Lozoyuela) showed "· Maíllos". The context line is the nearest place of

@@ -2,7 +2,8 @@
 // audio session alone, so a prompt neither ducks the music nor plays with the screen locked, and
 // CarPlay expects a navigation app's prompts in the voice-prompt mode (the car lowers its audio and
 // routes ours to the speakers). Here the session is set for each prompt and released after it,
-// telling the other app to come back (`.notifyOthersOnDeactivation`).
+// telling the other app to come back (`.notifyOthersOnDeactivation`). The reroute chime plays in
+// the same session: two soft notes made here, no sound file.
 import AVFoundation
 import ExpoModulesCore
 
@@ -20,23 +21,30 @@ public final class NomadVoiceModule: Module {
   }
   /// Voices per language, best quality first (the lookup reads every installed voice).
   private var voices: [String: AVSpeechSynthesisVoice?] = [:]
+  private lazy var chimeSound = Chime.wav()
+  private var player: AVAudioPlayer?
+  private lazy var playerListener = PlayerListener { [weak self] in
+    self?.queue.async {
+      self?.player = nil
+      self?.release()
+    }
+  }
 
   public func definition() -> ModuleDefinition {
     Name("NomadVoice")
 
     AsyncFunction("speak") { (text: String, language: String) in
-      guard let voice = self.voice(for: language) else { return }
-      let session = AVAudioSession.sharedInstance()
-      do {
-        try session.setCategory(.playback, mode: .voicePrompt, options: [.duckOthers, .interruptSpokenAudioAndMixWithOthers])
-        try session.setActive(true)
-      } catch {
-        // Another app holds the session (a call): the prompt is skipped, guidance goes on.
-        return
-      }
+      guard let voice = self.voice(for: language), self.activate() else { return }
       let utterance = AVSpeechUtterance(string: text)
       utterance.voice = voice
       self.synth.speak(utterance)
+    }.runOnQueue(queue)
+
+    AsyncFunction("chime") {
+      guard self.player == nil, self.activate(), let player = try? AVAudioPlayer(data: self.chimeSound) else { return }
+      player.delegate = self.playerListener
+      player.play()
+      self.player = player
     }.runOnQueue(queue)
 
     AsyncFunction("stop") {
@@ -47,6 +55,19 @@ public final class NomadVoiceModule: Module {
       self.queue.async {
         if self.synth.isSpeaking { self.synth.stopSpeaking(at: .immediate) }
       }
+    }
+  }
+
+  /// The voice-prompt session, ducking other audio. False when another app holds it (a call): the
+  /// sound is skipped, guidance goes on.
+  private func activate() -> Bool {
+    let session = AVAudioSession.sharedInstance()
+    do {
+      try session.setCategory(.playback, mode: .voicePrompt, options: [.duckOthers, .interruptSpokenAudioAndMixWithOthers])
+      try session.setActive(true)
+      return true
+    } catch {
+      return false
     }
   }
 
@@ -72,8 +93,8 @@ public final class NomadVoiceModule: Module {
   }
 
   private func release() {
-    // Between two queued prompts the session stays.
-    guard !synth.isSpeaking else { return }
+    // Between two queued prompts (or a chime and a prompt) the session stays.
+    guard !synth.isSpeaking, player == nil else { return }
     try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
   }
 }
@@ -88,5 +109,53 @@ private final class Listener: NSObject, AVSpeechSynthesizerDelegate {
 
   func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
     done()
+  }
+}
+
+private final class PlayerListener: NSObject, AVAudioPlayerDelegate {
+  let done: () -> Void
+  init(done: @escaping () -> Void) { self.done = done }
+
+  func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+    done()
+  }
+
+  func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+    done()
+  }
+}
+
+/// The reroute chime: two soft rising notes (G5, C6), a WAV in memory. Keep in step with Android's.
+enum Chime {
+  static let rate = 22050
+  static let notes: [(hz: Double, seconds: Double)] = [(784, 0.11), (1047, 0.2)]
+
+  static func samples() -> [Int16] {
+    var out: [Int16] = []
+    for note in notes {
+      let n = Int(Double(rate) * note.seconds)
+      for i in 0..<n {
+        let t = Double(i) / Double(rate)
+        // A quick attack and an exponential fade: a bell, not a beep.
+        let envelope = min(1, t / 0.008) * exp(-t * 9)
+        out.append(Int16(0.45 * envelope * sin(2 * .pi * note.hz * t) * Double(Int16.max)))
+      }
+    }
+    return out
+  }
+
+  static func wav() -> Data {
+    let pcm = samples()
+    var data = Data()
+    func put<T>(_ value: T) { withUnsafeBytes(of: value) { data.append(contentsOf: $0) } }
+    let bytes = UInt32(pcm.count * 2)
+    data.append(contentsOf: Array("RIFF".utf8)); put(UInt32(36 + bytes).littleEndian)
+    data.append(contentsOf: Array("WAVEfmt ".utf8)); put(UInt32(16).littleEndian)
+    put(UInt16(1).littleEndian); put(UInt16(1).littleEndian) // PCM, mono
+    put(UInt32(rate).littleEndian); put(UInt32(rate * 2).littleEndian)
+    put(UInt16(2).littleEndian); put(UInt16(16).littleEndian)
+    data.append(contentsOf: Array("data".utf8)); put(bytes.littleEndian)
+    for s in pcm { put(s.littleEndian) }
+    return data
   }
 }

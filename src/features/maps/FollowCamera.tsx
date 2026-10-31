@@ -28,6 +28,13 @@ const GLIDE_MAX = 2500;
  * one takes over mid-glide.
  */
 const GLIDE_OVERRUN = 1.3;
+/**
+ * The move that starts following ("Iniciar", "Recentrar"): one ease straight to the user, and fixes
+ * that come meanwhile wait for it. Each used to start another ease from wherever the first had got
+ * to, with another bearing and zoom: the map wandered on the way, the arrow already drawn at the
+ * centre over places the user wasn't.
+ */
+const SETTLE_MS = 1000;
 const ARROW = 44;
 /** The compass beam's image (scripts/maps/make-beam.py), its apex at the bottom centre. */
 const BEAM = { width: 80, height: 88 };
@@ -39,6 +46,8 @@ const BEAMS = {
 /**
  * Moves the camera with the user while `active`; `top`/`bottom` padding put the user at
  * the arrow. onBearing gets the direction of travel the camera uses (for a north-up arrow).
+ * Returns whether the camera has arrived at the user: until then the screen shows the map's own
+ * location dot, not the arrow.
  */
 export function useFollowCamera(
   camera: RefObject<CameraRef | null>,
@@ -55,9 +64,14 @@ export function useFollowCamera(
     report.current = onBearing;
     padding.current = { top, bottom };
   }, [onBearing, top, bottom]);
+  const [settled, setSettled] = useState(false);
   useEffect(() => {
+    // Stopping (the cleanup below) sets settled back to false.
     if (!active) return;
     let bearing: number | null = null;
+    /** Until when the first move runs; fixes before then wait for it. */
+    let settling = 0;
+    let wait: ReturnType<typeof setTimeout> | null = null;
     let fixAt = 0;
     /** Expected time between fixes, smoothed (iOS gives ~1 s driving, a fix every few metres walking). */
     let gap = 1000;
@@ -67,6 +81,8 @@ export function useFollowCamera(
       const p = s.position;
       if (!p) return;
       const now = Date.now();
+      // The end of the first move takes the latest fix.
+      if (now < settling) return;
       const since = now - fixAt;
       if (!first) gap = 0.7 * gap + 0.3 * Math.min(GLIDE_MAX, Math.max(GLIDE_MIN, since));
       const progress = s.route ? s.progress : null;
@@ -74,7 +90,7 @@ export function useFollowCamera(
       // Standing off the route keeps the map; the compass only sets the very first bearing on foot.
       const next = followBearing({ moving, progress, accuracy: p.accuracy }) ?? (bearing === null && s.costing !== 'auto' ? s.heading : null);
       if (next !== null) bearing = bearing === null ? next : smoothTurn(bearing, next, first ? 0 : since, s.costing);
-      const duration = first ? 900 : gap * GLIDE_OVERRUN;
+      const duration = first ? SETTLE_MS : gap * GLIDE_OVERRUN;
       fixAt = now;
       const center = followCenter({ position: p, route: s.route, cumulative: s.routeCumulative, progress, moving, gapMs: duration });
       camera.current?.easeTo({
@@ -87,13 +103,27 @@ export function useFollowCamera(
         easing: first ? 'ease' : 'linear',
       });
       report.current(bearing);
+      if (first) {
+        settling = now + SETTLE_MS;
+        wait = setTimeout(() => {
+          wait = null;
+          setSettled(true);
+          move();
+        }, SETTLE_MS);
+      }
       first = false;
     };
     move();
-    return useGuidance.subscribe((s, prev) => {
+    const unsubscribe = useGuidance.subscribe((s, prev) => {
       if (s.position !== prev.position) move();
     });
+    return () => {
+      unsubscribe();
+      if (wait) clearTimeout(wait);
+      setSettled(false);
+    };
   }, [camera, active, northUp]);
+  return active && settled;
 }
 
 /** A rotation style that eases the short way round (350° → 10° turns 20°, not back 340°). */

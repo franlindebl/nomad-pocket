@@ -17,6 +17,26 @@ export function distanceMeters(a: LatLon, b: LatLon): number {
   return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 
+/** Metres from `p` to the segment a–b ([lon, lat] ends), on a local flat projection (fine over a street's length). */
+export function metersToSegment(p: LatLon, a: readonly [number, number], b: readonly [number, number]): number {
+  const k = Math.cos(rad(p.lat));
+  const ax = (a[0] - p.lon) * k;
+  const ay = a[1] - p.lat;
+  const dx = (b[0] - p.lon) * k - ax;
+  const dy = b[1] - p.lat - ay;
+  const len = dx * dx + dy * dy;
+  const t = len ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / len)) : 0;
+  return Math.hypot(ax + t * dx, ay + t * dy) * ((Math.PI * R) / 180);
+}
+
+/** Metres from `p` to the nearest point of a [lon, lat] line. */
+export function metersToLine(p: LatLon, line: readonly (readonly [number, number])[]): number {
+  if (line.length === 1) return distanceMeters(p, { lon: line[0][0], lat: line[0][1] });
+  let best = Infinity;
+  for (let i = 1; i < line.length; i++) best = Math.min(best, metersToSegment(p, line[i - 1], line[i]));
+  return best;
+}
+
 /** Initial bearing from a to b, degrees clockwise from true north (0..360). */
 export function bearingDegrees(a: LatLon, b: LatLon): number {
   const y = Math.sin(rad(b.lon - a.lon)) * Math.cos(rad(b.lat));
