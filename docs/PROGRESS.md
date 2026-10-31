@@ -40,7 +40,7 @@ can pick up without re-deriving anything.
 | Maps (country downloads: prebuilt z15 map + routing pack + points; the USA by regions; Canada and Russia by regions for the map with one national pack; on-device extraction as fallback, resumed after a kill; bundled world map; markers, GPS, multi-script labels; location asked on opening Maps) | done — iOS sim (Andorra and US regions, local catalogs; E2E map-20/21 for both kinds of regions); build 16. Canada/Russia regions: maps published 2026-10-27 (run 40544693154) and the app code is in builds 20+ (3c75852); a real-phone check of one region is pending (`docs/COUNTRY_REGIONS_PLAN.md`) |
 | Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
 | Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 237 packs live (every inhabited country; the USA in six regions) since 2026-10-27; E2E vs the live catalog on iOS + Android |
-| Maps turn-by-turn (voice, background location; plan phase 3) | built on branch `carplay` (2026-10-31): spoken prompts (iOS + Android, offline system voices), guidance with the screen locked (iOS background location, Android foreground service); iOS sim E2E map-14/17 pass; not yet heard on a real phone, Android not run on the emulator |
+| Maps turn-by-turn (voice, background location; plan phase 3) | built on branch `carplay` (2026-10-31): spoken prompts (iOS + Android, offline system voices), guidance with the screen locked (iOS background location, Android foreground service); iOS sim E2E map-14/17 pass; Android emulator: tour 4/4, foreground service checked by hand (starts with Iniciar, survives Home, ends with Finalizar); not yet heard on a real phone |
 | CarPlay navigation (`docs/CARPLAY_PLAN.md`) | built on branch `carplay` (2026-10-31): map, destinations (search, saved, Emergencias cerca), trip preview, turn-by-turn session; compiles and the app runs, **not yet seen on a CarPlay screen** (Xcode 27's DeviceHub can't be driven headless); the entitlement must be requested by the owner |
 | Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search; the most capable installed model is the default; on-device dictation; reads the PDFs inside archives (document index) and the family plan; copy and regenerate an answer) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android: app created in Play Console, App content forms done (PEGI 3 since 2026-10-29, see `docs/store/play-listing.md`), 1.1.0 (23) on internal testing, Android screenshots and en-US listing done, 1.1.0 (24) for the closed test **rejected** 2026-10-29 (health apps need an organization account): Android now ships without health features; listing, screenshots, Health apps and content rating redone; **1.1.0 (26) approved for the closed test 2026-10-30**; then 12 testers × 14 days and production (`docs/ANDROID_PLAY.md`) |
@@ -323,9 +323,12 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   grants it; `app.json` keeps it off so device builds still sign.
 - Checks: tsc, lint, unit tests (new: voice-core, carplay-core), i18n; iOS Release sim build; E2E map-14-route and
   map-17-follow pass on iOS (a rerun of map-17 under a parallel Gradle build lost typed text, a Maestro flake).
+- Android emulator (AVD `Pixel_API_36` recreated, it was gone, like the iOS simulators: `NP-carplay` created):
+  tour 4/4; by hand with Maestro, "Iniciar" starts `NavigationService` (foreground, type location, notification
+  "Navegación en curso · Hacia …"), the high-accuracy request stays registered after Home, "Finalizar" stops it.
 - Not done: seeing the car screen (Xcode 27 replaced Simulator.app by DeviceHub, which opened no window from the
   command line: the owner opens the simulator UI and its CarPlay external display, see `docs/CARPLAY_PLAN.md` testing); hearing the voice on
-  a phone; Android on the emulator.
+  a phone.
 
 ### 2026-10-30 — Repo: commit rules (no session links, weekday commits at night)
 
