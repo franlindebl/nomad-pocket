@@ -1,4 +1,14 @@
-import { Camera, GeoJSONSource, Layer, Map, NativeUserLocation, type CameraRef, type InitialViewState } from '@maplibre/maplibre-react-native';
+import {
+  Camera,
+  GeoJSONSource,
+  Layer,
+  Map,
+  NativeUserLocation,
+  type CameraRef,
+  type InitialViewState,
+  type MapRef,
+  type PressEvent,
+} from '@maplibre/maplibre-react-native';
 import * as Location from '@/lib/location';
 import { router, useNavigation } from 'expo-router';
 import { Layers, LocateFixed, MapPin, Navigation, Navigation2, Route, Search } from 'lucide-react-native';
@@ -30,6 +40,7 @@ import { PointsGlyph } from '@/features/maps/PointDot';
 import { getRegion, regionName, type Region } from '@/features/maps/regions';
 import { showPlace, useMapUi } from '@/features/maps/store';
 import { buildMapStyle } from '@/features/maps/style';
+import { nearestStreet, tappedPlace, type TapFeature } from '@/features/maps/tap-core';
 import { useMapItems } from '@/features/maps/useMapSources';
 import { useSettings } from '@/stores/settings';
 import { hues, radius, space, useTheme } from '@/theme';
@@ -37,6 +48,22 @@ import { hues, radius, space, useTheme } from '@/theme';
 /** Emergency points are drawn from this zoom on (fewer would be a cloud of dots). */
 const POI_MIN_ZOOM = 11;
 const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
+/** Half the side (pt) of the box a tap looks for a map point in: a POI icon is about this size. */
+const TAP_SLOP = 16;
+/** Half the side (pt) of the box searched for the tapped place's street: tap-core keeps one within 60 m. */
+const STREET_SLOP = 120;
+
+/** The basemap's style layers a tap reads, by kind (style.ts names them "<source>:<protomaps layer>"). */
+function tapLayers(style: { layers: { id: string }[] }) {
+  const ids = (test: (layer: string) => boolean) => style.layers.map((l) => l.id).filter((id) => test(id.slice(id.indexOf(':') + 1)));
+  return {
+    poi: ids((l) => l === 'pois'),
+    place: ids((l) => l === 'places_locality' || l === 'places_subplace'),
+    road: ids(
+      (l) => l.startsWith('roads_') && !l.includes('label') && !l.includes('casing') && l !== 'roads_shields' && l !== 'roads_oneway',
+    ),
+  };
+}
 
 /** Exceptions thrown inside native event callbacks crash Release builds: log instead. */
 function safe<A extends unknown[]>(fn: (...args: A) => void) {
@@ -77,6 +104,7 @@ export default function MapScreen() {
   /** The direction of travel the follow camera uses: the arrow turns by it when the map stays north up. */
   const [travel, setTravel] = useState<number | null>(null);
   const cameraRef = useRef<CameraRef>(null);
+  const mapRef = useRef<MapRef>(null);
   const [assets, setAssets] = useState<MapAssets | null>(null);
   const [bearing, setBearing] = useState(0);
   const [showUser, setShowUser] = useState(false);
@@ -120,9 +148,56 @@ export default function MapScreen() {
   }, []);
 
   const style = useMemo(
-    () => (assets ? buildMapStyle({ scheme, lang: i18n.language, assets, sources: all.map((i) => ({ id: i.id, fileUri: i.fileUri })) }) : null),
+    () =>
+      assets ? buildMapStyle({ scheme, lang: i18n.language, assets, sources: all.map((i) => ({ id: i.id, fileUri: i.fileUri })) }) : null,
     [assets, scheme, i18n.language, all],
   );
+  const tapIds = useMemo(() => (style ? tapLayers(style) : null), [style]);
+
+  /** The street drawn next to a point on screen (for the card's address), null when none is near. */
+  const streetAt = async (point: readonly [number, number], p: { lat: number; lon: number }) => {
+    const map = mapRef.current;
+    if (!map || !tapIds?.road.length) return null;
+    const [x, y] = point;
+    const roads = await map.queryRenderedFeatures(
+      [
+        [x - STREET_SLOP, y - STREET_SLOP],
+        [x + STREET_SLOP, y + STREET_SLOP],
+      ],
+      { layers: tapIds.road },
+    );
+    return nearestStreet(roads as TapFeature[], p, i18n.language);
+  };
+
+  /** A tap on the base map: the restaurant, stop or town under the finger gets the place card; nothing there closes it. */
+  const tapMap = async ({ point, lngLat }: PressEvent) => {
+    const map = mapRef.current;
+    if (!map || !tapIds) return;
+    const [x, y] = point;
+    const box: [[number, number], [number, number]] = [
+      [x - TAP_SLOP, y - TAP_SLOP],
+      [x + TAP_SLOP, y + TAP_SLOP],
+    ];
+    const [poi, place] = await Promise.all([
+      tapIds.poi.length ? map.queryRenderedFeatures(box, { layers: tapIds.poi }) : [],
+      tapIds.place.length ? map.queryRenderedFeatures(box, { layers: tapIds.place }) : [],
+    ]);
+    const hit = tappedPlace({ poi: poi as TapFeature[], place: place as TapFeature[] }, { lat: lngLat[1], lon: lngLat[0] }, i18n.language);
+    if (!hit) {
+      useMapUi.getState().select(null);
+      return;
+    }
+    const street = hit.layer === 'poi' ? await streetAt(point, hit) : undefined;
+    useMapUi.getState().select({
+      name: hit.name || t(`kind.${hit.kind}`, { defaultValue: t('kind.place') }),
+      nativeName: hit.nativeName,
+      lat: hit.lat,
+      lon: hit.lon,
+      kind: hit.kind,
+      layer: hit.layer,
+      street,
+    });
+  };
 
   // Counted while the map is on screen: the tab may be mounted behind Home at launch.
   useEffect(() => {
@@ -239,7 +314,9 @@ export default function MapScreen() {
   }, [route, cut]);
 
   const top = insets.top + space.sm;
-  const cardBottom = insets.bottom + 72;
+  // Clear of the map's (i) credit button, except while navigating: then the panel sits low like the
+  // banner sits high (owner's call; the credit shows again when the trip ends).
+  const cardBottom = insets.bottom + (navigating ? space.sm : 72);
   // Following: the user three quarters down the map between the search bar and the
   // panel, so most of the screen shows the road ahead. The camera's padding centres
   // the user there; the arrow is drawn at the same point.
@@ -367,6 +444,7 @@ export default function MapScreen() {
       onLayout={(e) => setSize({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })}>
       {style ? (
         <Map
+          ref={mapRef}
           style={StyleSheet.absoluteFill}
           mapStyle={style}
           logo={false}
@@ -387,6 +465,13 @@ export default function MapScreen() {
             setBearing(Number(b));
             setViewport({ center, zoom: Number(zoom), bounds });
           })}
+          onPress={(e) => {
+            // A press on the emergency or saved-place dots bubbles up here too: their sources handled it.
+            // (Not through safe(): the compiler can't tell it doesn't run its argument during render. An
+            // async function can't throw at the caller anyway.)
+            if ('features' in e.nativeEvent || target) return;
+            tapMap(e.nativeEvent).catch((err) => console.warn('[maps] tap', err));
+          }}
           onLongPress={safe((e) => {
             const [lon, lat] = e.nativeEvent.lngLat;
             router.push({ pathname: '/maps/marker', params: { lat: String(lat), lon: String(lon) } });
@@ -429,23 +514,37 @@ export default function MapScreen() {
           <GeoJSONSource
             id="emergency"
             data={poiData}
-            onPress={safe((e) => {
-              const f = e.nativeEvent.features[0];
-              const props = f?.properties as { osmId?: string; name?: string; kind?: string } | undefined;
-              if (!f || f.geometry.type !== 'Point' || !props?.osmId) return;
-              const [lon, lat] = f.geometry.coordinates;
-              showPlace(
-                {
-                  name: props.name || t(`kind.${props.kind}`, { defaultValue: t('kind.place') }),
-                  lat,
-                  lon,
-                  kind: props.kind,
-                  layer: 'poi',
-                  osmId: props.osmId,
-                },
-                0,
-              );
-            })}>
+            onPress={(e) => {
+              // safe() inline: the compiler won't let a ref-reading function through it (see the map's onPress).
+              try {
+                const f = e.nativeEvent.features[0];
+                const props = f?.properties as { osmId?: string; name?: string; kind?: string } | undefined;
+                if (!f || f.geometry.type !== 'Point' || !props?.osmId) return;
+                const [lon, lat] = f.geometry.coordinates;
+                const show = (street: { name: string; native: string } | null) =>
+                  showPlace(
+                    {
+                      name: props.name || t(`kind.${props.kind}`, { defaultValue: t('kind.place') }),
+                      lat,
+                      lon,
+                      kind: props.kind,
+                      layer: 'poi',
+                      osmId: props.osmId,
+                      street,
+                    },
+                    0,
+                  );
+                streetAt(e.nativeEvent.point, { lat, lon })
+                  .catch((err) => {
+                    console.warn('[maps] street', err);
+                    return null;
+                  })
+                  .then(show)
+                  .catch((err) => console.warn('[maps] emergency tap', err));
+              } catch (err) {
+                console.warn('[maps] event handler failed', err);
+              }
+            }}>
             <Layer
               type="circle"
               id="emergency-dot"

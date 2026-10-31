@@ -670,6 +670,26 @@ export async function searchPlaces(text: string, near: LatLon | null, limit = 40
   return Promise.all(hits.slice(0, limit).map(async (h) => ({ ...h, context: h.layer === 'place' ? null : await localityNear(h) })));
 }
 
+/** A door this far from a tapped place is its address; beyond, only the street is said. */
+const DOOR_NEAR = 50;
+
+/**
+ * Where a place tapped on the map is: the nearest house number on its street (when the country's
+ * addresses are installed) and the town or neighbourhood around it. `street` is the road's
+ * OpenStreetMap name (the doors are keyed by it); without one, only the locality.
+ */
+export async function addressNear(p: LatLon, street: string | null): Promise<{ number: string | null; locality: string | null }> {
+  let number: string | null = null;
+  if (street) {
+    let best = DOOR_NEAR;
+    for (const d of await doorsNear(street, p, DOOR_NEAR)) {
+      const m = distanceMeters(p, d);
+      if (m < best) [best, number] = [m, d.number];
+    }
+  }
+  return { number, locality: await localityNear(p) };
+}
+
 /** Radii (m) tried in turn for the nearest places of a kind: stop at the first that holds enough. */
 const KIND_RADII = [2_000, 8_000, 30_000, 120_000, 500_000];
 

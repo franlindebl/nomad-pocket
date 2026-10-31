@@ -315,6 +315,38 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-31 — Navigation: smoother follow camera, bar low; no route through private roads
+
+- Owner: the map sometimes advanced in jerks while navigating. Causes: the trip's GPS watch asked for a fix
+  every 3 m (every 2-3 s on foot, unevenly), each glide lasted exactly the expected gap (a late fix found the map
+  stopped), and a banner changing height restarted the follow (a 900 ms ease and the bearing reset). Now every fix
+  once a second, glides planned 1.3× the gap, padding read per fix. Measured on the simulator with a 1 Hz walk
+  (`simctl location start`) and a full-resolution still-frame count: 5.6 % still frames and 3 stops (one of 2 s)
+  before, 0.3 % and none after; driving with Maestro's `travel` (an uneven feed): 40 % → 36 % still, longest stop
+  4 s → 1.5 s. The real check is on a phone.
+- The navigation bar sits low, over the map's (i) credit, like the banner at the top (owner's call).
+- Owner: on foot (and by bike) routes went through private roads and garages (Calle de Abtao / Avenida del
+  Mediterráneo, Madrid: the destination snapped to a garage ramp, the walk went along its underground aisles).
+  `build-country.sh` now builds the routing graph without private roads, driveways, parking aisles and
+  underground service roads (`scripts/routing/no-routing.py`, with `--test`); the map still shows them. Checked
+  with Valhalla 3.9.1 on Madrid's graph: that walk and ride no longer use them (car unchanged), 120 random trips
+  all still route; Andorra built with the CI recipe (osmium 1.16 has `removeid`): 606 ways out. Installed packs get
+  it with the monthly rebuild on 2026-11-05 (the app offers the newer build).
+- Checks: tsc, lint, 420 unit tests, i18n, `no-routing.py --test`; smoke E2E 21/21 (`set-01` rerun after the
+  network dropped), map-14 and map-17 (map-17 rerun: a tap on the search row only hid the keyboard).
+
+### 2026-10-31 — Maps: anything tapped on the map opens the place card
+
+- Owner asked: a restaurant, a bus or metro stop, a café… tapped on the map did nothing; now any point of the
+  basemap (its `pois` layer) or a town/neighbourhood label gets the same card as an emergency point: take me there,
+  save, coordinates, and where it is: "Calle Sagasta · Puerto" (the nearest named road drawn within 60 m, the house
+  number of that street within 50 m when the country's addresses are installed, the nearest locality). Emergency dots
+  get the address line too. A tap on nothing closes the card; taps do nothing while a trip is set. Pure `tap-core.ts`
+  (tests), `addressNear` in `places.ts`, everyday kinds get their icon (cubiertos, taza, autobús, tren…), also in search.
+- Checked on the iOS simulator with the Canarias map (Las Palmas, z15): restaurant, café, "Puerto" label, empty tap,
+  Hospital San José dot ("Paseo Las Canteras · Puerto"). House numbers not seen on screen (no addresses file for
+  that map); tsc, lint, unit tests, i18n, smoke E2E 21/21.
+
 ### 2026-10-31 — iOS build 24 to TestFlight (voice and background navigation)
 
 - 1.1.0 (24), TestFlight only (build 23 stays in App Review): main at the CarPlay merge, CarPlay off. For the

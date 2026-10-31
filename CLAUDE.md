@@ -130,7 +130,7 @@ docs/               the docs above + screenshots/ + store/
   `sha256`, and its `copyInto` for multi-GB copies instead of `FileHandle.readBytes` loops in JS.
 - **Pure, tested modules** (`src/lib/{pmtiles,mvt}`, `features/assistant/{rag-core,models,markdown,dictation-core,report-core}`,
   `features/library/html`, `features/catalog/{opds,health-core}`, `features/downloads/{mirrors,errors,groups,segments-core,budget-core,restore-core}`,
-  `features/maps/{glyphs,geo,extraction-core,places-core,import-core,prepare-core,emergency-core,routing-core,stitch-core,follow-core,country-core,country-at-core,phone,region-terms}`, `features/prepare/{kit,document,passages}`, `features/downloads/manager-core`, `lib/units`, `features/library/{register-core,medical,collection,documents-core}`, `features/content/reconcile-core`, `features/assistant/errors`, `features/credits/credits-core`, `db/{migrate-core,schema}`) use no `@/` aliases and import siblings with `.ts` extensions,
+  `features/maps/{glyphs,geo,extraction-core,places-core,import-core,prepare-core,emergency-core,routing-core,stitch-core,follow-core,country-core,country-at-core,phone,region-terms,tap-core}`, `features/prepare/{kit,document,passages}`, `features/downloads/manager-core`, `lib/units`, `features/library/{register-core,medical,collection,documents-core}`, `features/content/reconcile-core`, `features/assistant/errors`, `features/credits/credits-core`, `db/{migrate-core,schema}`) use no `@/` aliases and import siblings with `.ts` extensions,
   so `node --test --experimental-strip-types` can load them. Keep it that way and add
   `*.test.ts` next to them.
 - **Style of code.** Match the surrounding code: a short header comment per file saying

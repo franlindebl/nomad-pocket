@@ -920,7 +920,13 @@ else ISO 3166-2 (territories: Puerto Rico, Aruba), else none (right-hand traffic
 into the `routing-admins` release (`admins-<ISO>.osm.pbf`, or `.none`; 18 jobs, 3 at a time; a country
 Overpass doesn't answer for keeps last month's file), read from there by the pack builds (a
 country missing in it asks Overpass and is kept) →
-`valhalla_build_admins` → `valhalla_build_tiles` (retried: 3.9.1 segfaults now and then)
+`valhalla_build_admins` → `valhalla_build_tiles` (retried: 3.9.1 segfaults now and then) on the
+extract **without the ways no route may use** (owner, 2026-10-31): private roads (`access=private|no`
+unless foot/bicycle/vehicle is open), driveways, parking aisles and underground service roads
+(`no-routing.py` picks them from an `osmium tags-filter` of candidates, `osmium removeid` drops them;
+the map still draws them). Valhalla let walks and rides through all of them, and a destination snapped
+to the nearest one went in through a garage (Madrid, Avenida del Mediterráneo 28; checked on Madrid's
+graph: no route failed in 120 random trips, a few now go round private compounds)
 → one tar per country (the owner wants whole-country packs only) → emergency points
 (`osmium tags-filter` + `emergency-points.py`, same columns as the Overpass TSV) → street
 names (`streets.py`, one row per name per ~1 km) → split → `manifest.py` (bbox, cells,
@@ -981,8 +987,13 @@ way the user moves; standing off the route the map holds (the compass only gives
 bearing on foot). `smoothTurn` drops < 2° and caps the turn rate (90°/s, 60°/s on foot). Moving
 > 120° against the road (`isWrongWay`) counts as off the route for rerouting. Every GPS fix is an
 `easeTo` (linear) to where the user will be at the next fix: the snapped point moved along the
-route by speed × the smoothed gap between fixes (`followCenter`, ≤ 60 m; off the route straight
-on), lasting that gap, so the map glides without trailing a fix behind. Zoom by mode and speed
+route by speed × the smoothed gap between fixes × 1.3 (`followCenter`, ≤ 60 m; off the route straight
+on), lasting that long, so the map glides without trailing a fix behind and a late fix finds it still
+moving (the next one takes over mid-glide). The trip's watch asks for every fix, once a second (with
+fixes every 3 m they came every 2-3 s on foot, unevenly, and the map stopped and jumped: measured on
+the simulator, 1 Hz walk, 5.6 % of frames still and a 2 s stop before, none after). The camera padding
+is read at each fix: a banner growing a line no longer restarts the glide. While navigating the bottom
+bar sits low (over the map's (i) credit), like the banner sits high. Zoom by mode and speed
 and closer before a maneuver (`followZoom`); pitch 45° car, 40° bike, 30° foot. While navigating
 the route line starts at the snapped point (the travelled part is sliced off, like Google Maps';
 not `line-gradient`, whose progress is projected and sampled into a texture). `fitBounds` on
@@ -1054,7 +1065,14 @@ map's centre, so it starts from the user too.
 layers for emergency points (category colours, labels from z15, tap → place card), the
 selected place (ring), the route line and the straight guidance line; bottom `PlaceCard` (kind, operator/police
 force, ER badge, hours, distance, decimal + UTM, Llévame / Guardar / one Llamar button per phone
-number, `place-call`) or `GuidancePanel`. Every `tel:` call goes through `callNumber` /
+number, `place-call`) or `GuidancePanel`. **A tap on the base map** (no dot of ours under it: their
+sources' presses bubble up to the map's `onPress`, which skips them) reads the rendered features of
+the basemap's `pois` and `places_locality`/`places_subplace` layers in a 32 pt box and the nearest one
+gets the card (pure `tap-core.ts`; an unnamed POI is named by its kind); nothing there closes the card,
+and taps are ignored while a trip is set. For a POI (and an emergency dot) the card also says where it is
+(`place-address`): the nearest named road drawn within 60 m (`nearestStreet`, from the rendered road
+lines), the house number of that street within 50 m from the country's addresses (`addressNear`,
+`map_addresses`, keyed by the road's OSM name) and the nearest locality. Every `tel:` call goes through `callNumber` /
 `callPhones` (`call.ts`, numbers parsed by pure `phone.ts`): an alert with the number when the
 device can't call, a choice when a place lists several. **OSM credit** (`MapCredit`, testID
 `map-credit`): "© OpenStreetMap contributors" shows when the map first appears and folds away after

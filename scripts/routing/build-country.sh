@@ -120,7 +120,18 @@ else
   log "no admin boundaries in OSM for $ISO: building without them"
 fi
 
-# 3. Valhalla tiles. build_tiles segfaults now and then in "Enhancing local graph"
+# 3. The routing graph's input: the extract without the ways no route may use (private roads,
+#    driveways, parking aisles, underground service roads; no-routing.py says why). Only for the
+#    tiles and the border crossings: search, places and emergency points read the whole extract.
+log "leaving private roads, driveways and parking aisles out of the routing graph"
+osmium tags-filter --overwrite -R "$PBF" w/access=private,no w/service=driveway,parking_aisle w/tunnel=yes \
+  -o "$WORK/src/closed.osm.pbf"
+osmium cat --overwrite "$WORK/src/closed.osm.pbf" -f opl -o "$WORK/src/closed.opl"
+python3 -I "$HERE/no-routing.py" "$WORK/src/closed.opl" > "$WORK/src/closed.ids"
+log "$(wc -l < "$WORK/src/closed.ids" | tr -d ' ') ways left out"
+osmium removeid --overwrite -i "$WORK/src/closed.ids" "$PBF" -o "$WORK/src/routing.osm.pbf"
+rm "$WORK/src/closed.osm.pbf" "$WORK/src/closed.opl"
+# 4. Valhalla tiles. build_tiles segfaults now and then in "Enhancing local graph"
 #    (3.9.1): retry from scratch. Paths that don't exist instead of "" for unused inputs.
 valhalla valhalla_build_config \
   --mjolnir-tile-dir /w/tiles --mjolnir-tile-extract /w/tiles.tar --mjolnir-admin "${ADMINS/#-//w/nonexistent/admins.sqlite}" \
@@ -131,7 +142,7 @@ built=0
 for attempt in 1 2 3; do
   rm -rf "$WORK/tiles"
   log "building tiles (attempt $attempt)"
-  if valhalla valhalla_build_tiles -c /w/valhalla.json "/w/src/$COUNTRY.osm.pbf" > "$WORK/tiles.log" 2>&1; then built=1; break; fi
+  if valhalla valhalla_build_tiles -c /w/valhalla.json /w/src/routing.osm.pbf > "$WORK/tiles.log" 2>&1; then built=1; break; fi
   tail -5 "$WORK/tiles.log"
 done
 [[ $built == 1 ]] || { log "valhalla_build_tiles failed"; exit 1; }
@@ -139,7 +150,7 @@ done
 # short of it, gave an empty 20 KB pack): fail rather than publish a pack that routes nowhere.
 [[ -n "$(find "$WORK/tiles" -name '*.gph' -print -quit)" ]] || { log "no roads in the extract"; exit 1; }
 
-# 4. The pack: a tile extract (one tar, mmapped by the app).
+# 5. The pack: a tile extract (one tar, mmapped by the app).
 extract() { # <tile dir under WORK> <pack id>
   valhalla bash -c "valhalla_build_config --mjolnir-tile-dir /w/$1 --mjolnir-tile-extract /w/out/$2.tar \
     --mjolnir-admin /w/nonexistent --mjolnir-timezone /w/nonexistent > /tmp/v.json && valhalla_build_extract -c /tmp/v.json" \
@@ -148,7 +159,7 @@ extract() { # <tile dir under WORK> <pack id>
 }
 extract tiles "$COUNTRY"
 
-# 5. Emergency points per pack (same filters as the app's Overpass query).
+# 6. Emergency points per pack (same filters as the app's Overpass query).
 osmium tags-filter --overwrite "$PBF" \
   nwr/amenity=hospital,clinic,doctors,pharmacy,police,fire_station,drinking_water,water_point,shelter,fuel,townhall,embassy \
   nwr/healthcare=hospital,centre,clinic nwr/emergency=ambulance_station,defibrillator,assembly_point \
@@ -156,7 +167,7 @@ osmium tags-filter --overwrite "$PBF" \
   -o "$WORK/src/pois.osm.pbf"
 python3 -I "$HERE/emergency-points.py" "$WORK/src/pois.osm.pbf" "$OUT/$COUNTRY.pois.tsv"
 
-# 6. Street and locality names for the app's search.
+# 7. Street and locality names for the app's search.
 osmium tags-filter --overwrite "$PBF" w/highway n/place -o "$WORK/src/streets.osm.pbf"
 python3 -I "$HERE/streets.py" "$WORK/src/streets.osm.pbf" "$OUT/$COUNTRY.streets.tsv"
 
@@ -170,7 +181,7 @@ rm -f "$WORK/src/places.osm.pbf"
 #     its states inside its Geofabrik polygons. No boundaries, no crossings. Never fatal: a pack
 #     without them still routes inside itself.
 crossings() {
-  osmium tags-filter --overwrite "$PBF" w/highway=motorway,trunk,primary,secondary,tertiary w/route=ferry,shuttle_train \
+  osmium tags-filter --overwrite "$WORK/src/routing.osm.pbf" w/highway=motorway,trunk,primary,secondary,tertiary w/route=ferry,shuttle_train \
     -o "$WORK/src/roads.osm.pbf" || return 1
   osmium export --overwrite "$WORK/src/admins.osm.pbf" -f geojsonseq -o "$WORK/src/admins.geojsonseq" || return 1
   local polys=()
@@ -186,9 +197,9 @@ if [[ "$ADMINS" != "-" ]] && ! crossings; then
   log "border crossings failed: published without them"
   rm -f "$OUT/$COUNTRY.crossings.tsv"
 fi
-rm -f "$WORK/src/roads.osm.pbf"
+rm -f "$WORK/src/roads.osm.pbf" "$WORK/src/routing.osm.pbf"
 
-# 7. Parts for GitHub's 2 GiB asset limit (the app appends them back together).
+# 8. Parts for GitHub's 2 GiB asset limit (the app appends them back together).
 for tar in "$OUT"/*.tar; do
   if (( $(wc -c < "$tar") > PART_BYTES )); then
     split -b "$PART_BYTES" -d -a 2 "$tar" "$tar.part"
