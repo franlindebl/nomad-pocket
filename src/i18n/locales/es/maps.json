@@ -458,5 +458,19 @@
     },
     "mute": "Silenciar las indicaciones por voz",
     "unmute": "Activar las indicaciones por voz"
+  },
+  "carplay": {
+    "destinations": "Destinos",
+    "search": "Buscar",
+    "saved": "Guardados",
+    "savedEmpty": "Guarda lugares en el mapa del móvil para tenerlos aquí.",
+    "emergency": "Emergencias cerca",
+    "searchEmpty": "Sin resultados en tus mapas descargados.",
+    "go": "Ir",
+    "rerouting": "Recalculando la ruta…",
+    "noLocation": "Esperando al GPS…",
+    "straightLine": "En línea recta: no sigue las carreteras",
+    "lineTo": "Hacia el {{dir}}, en línea recta",
+    "noPermission": "Permite el acceso a la ubicación en el móvil para navegar."
   }
 }

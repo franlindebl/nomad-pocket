@@ -458,5 +458,19 @@
     },
     "mute": "Mute voice guidance",
     "unmute": "Turn on voice guidance"
+  },
+  "carplay": {
+    "destinations": "Destinations",
+    "search": "Search",
+    "saved": "Saved",
+    "savedEmpty": "Save places on the phone's map to have them here.",
+    "emergency": "Emergency nearby",
+    "searchEmpty": "No results in your downloaded maps.",
+    "go": "Go",
+    "rerouting": "Rerouting…",
+    "noLocation": "Waiting for GPS…",
+    "straightLine": "As the crow flies: it doesn't follow roads",
+    "lineTo": "Head {{dir}}, as the crow flies",
+    "noPermission": "Allow location access on the phone to navigate."
   }
 }
