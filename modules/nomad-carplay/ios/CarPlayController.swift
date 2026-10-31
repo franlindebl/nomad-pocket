@@ -117,7 +117,7 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
     let destination = MKMapItem(placemark: MKPlacemark(coordinate: CLLocationCoordinate2D(latitude: target.lat, longitude: target.lon)))
     destination.name = target.name
     let summary = guidance?.note ?? (guidance?.routing == "ready" ? "" : strings?.straightLine ?? "")
-    let choice = CPRouteChoice(summaryVariants: [summary], additionalInformationVariants: [], selectionSummaryVariants: [summary])
+    let choice = CPRouteChoice(summaryVariants: [summary], additionalInformationVariants: [summary], selectionSummaryVariants: [summary])
     let trip = CPTrip(origin: MKMapItem.forCurrentLocation(), destination: destination, routeChoices: [choice])
     tripTarget = target
     return trip

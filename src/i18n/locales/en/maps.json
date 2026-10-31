@@ -471,6 +471,7 @@
     "noLocation": "Waiting for GPS…",
     "straightLine": "As the crow flies: it doesn't follow roads",
     "lineTo": "Head {{dir}}, as the crow flies",
-    "noPermission": "Allow location access on the phone to navigate."
+    "noPermission": "Allow location access on the phone to navigate.",
+    "via": "Via {{street}}"
   }
 }

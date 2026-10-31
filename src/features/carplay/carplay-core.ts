@@ -59,11 +59,23 @@ export type GuidanceInput = {
   routeId: number;
 };
 
+/** The street the route spends the longest on ("CG-1"), for the trip preview's "Por la CG-1". */
+export function mainRoad(route: Pick<Route, 'maneuvers'>): string | null {
+  let best: { street: string; m: number } | null = null;
+  for (const m of route.maneuvers) {
+    const street = m.streets[0];
+    if (street && (!best || m.distanceM > best.m)) best = { street, m: m.distanceM };
+  }
+  return best?.street ?? null;
+}
+
 export type GuidanceText = {
   /** "Hacia el NE, en línea recta" for compass sector 0–7 (geo.ts compassSector). */
   lineTo: (sector: number) => string;
   toll: string;
   ferry: string;
+  /** "Por la CG-1" for the route's main road. */
+  via: (street: string) => string;
 };
 
 /** The maneuver after the next shows too ("then…") when it is at most this far after it. */
@@ -102,7 +114,8 @@ export function carGuidance(input: GuidanceInput, system: MeasurementSystem, tex
   const following = input.routing === 'ready' && route && progress && !(progress.remainingM < 15 && progress.offRouteM < 30);
   if (input.routing === 'ready' && route) {
     base.summary = estimate(route.distanceM, route.durationS, system);
-    base.note = [route.hasToll ? text.toll : null, route.hasFerry ? text.ferry : null].filter(Boolean).join(' · ') || null;
+    const via = mainRoad(route);
+    base.note = [via ? text.via(via) : null, route.hasToll ? text.toll : null, route.hasFerry ? text.ferry : null].filter(Boolean).join(' · ') || null;
   }
   if (following && route && progress) {
     base.remaining = estimate(progress.remainingM, remainingSeconds(route, progress.remainingM), system);

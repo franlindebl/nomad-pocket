@@ -98,6 +98,7 @@ function pushGuidance() {
       lineTo: (sector) => t('maps:carplay.lineTo', { dir: t(`maps:dir.${sector}`) }),
       toll: t('maps:route.toll'),
       ferry: t('maps:route.ferry'),
+      via: (street) => t('maps:carplay.via', { street }),
     },
   );
   NomadCarPlay.update(JSON.stringify(payload)).catch((e) => console.warn('[carplay] update', e));

@@ -471,6 +471,7 @@
     "noLocation": "Esperando al GPS…",
     "straightLine": "En línea recta: no sigue las carreteras",
     "lineTo": "Hacia el {{dir}}, en línea recta",
-    "noPermission": "Permite el acceso a la ubicación en el móvil para navegar."
+    "noPermission": "Permite el acceso a la ubicación en el móvil para navegar.",
+    "via": "Por {{street}}"
   }
 }
