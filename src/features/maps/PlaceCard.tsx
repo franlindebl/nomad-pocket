@@ -1,5 +1,6 @@
-// Bottom card for the selected place (search result, emergency point or a tapped
-// dot on the map): what it is, how far, and the actions — take me there, save, and
+// Bottom card for the selected place (search result, emergency point or anything tapped
+// on the map: a restaurant, a bus stop, a town): what it is, where (street, number and
+// neighbourhood for a tapped one), how far, and the actions — take me there, save, and
 // one call button per number OpenStreetMap lists. The buttons show the number, so it
 // can be dialled from another phone when this device can't call.
 import * as Location from '@/lib/location';
@@ -18,6 +19,7 @@ import { distanceMeters, formatLatLon, formatUtm, isFreshFix, toUtm, type LatLon
 import { startGuidance } from './guidance';
 import { distanceWithDirection, isEmergencyKind, kindColor, kindIcon, kindLabel } from './labels';
 import { addMarker } from './markers';
+import { addressNear } from './places';
 import { parsePhones } from './phone';
 import { useMapUi, type SelectedPlace } from './store';
 
@@ -41,6 +43,23 @@ export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: num
     [place],
   );
   const phones = useMemo(() => parsePhones(poi?.phone), [poi]);
+  const [address, setAddress] = useState<string | null>(null);
+
+  // A place tapped on the map: "Calle Mayor, 12 · Sol" from its street and the offline index.
+  useEffect(() => {
+    if (place.street === undefined) return;
+    let alive = true;
+    const street = place.street;
+    addressNear(place, street?.native ?? null)
+      .then(({ number, locality }) => {
+        const where = street ? (number ? `${street.name}, ${number}` : street.name) : null;
+        if (alive) setAddress([where, locality].filter(Boolean).join(' · ') || null);
+      })
+      .catch((e) => console.warn('[maps] address', e));
+    return () => {
+      alive = false;
+    };
+  }, [place]);
 
   // The parent keys this card by place, so `saved` starts fresh for each one.
   useEffect(() => {
@@ -86,6 +105,11 @@ export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: num
             <Text variant="footnote" color="textSecondary" numberOfLines={2}>
               {subtitle}
             </Text>
+            {address ? (
+              <Text testID="place-address" variant="footnote" color="textSecondary" numberOfLines={2}>
+                {address}
+              </Text>
+            ) : null}
           </View>
           <IconButton
             testID="place-close"

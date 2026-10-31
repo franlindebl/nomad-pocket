@@ -4,7 +4,7 @@
 // shows above the guidance panel. Driven from JS with easeTo, not MapLibre's tracking
 // modes: those ignore the padding on iOS (the user would sit under the panel) and turn
 // the map by the raw GPS course. The user sits on the route (snapped), and each ease
-// goes to where they will be at the next fix and lasts until it comes, so the map glides
+// goes to where they will be at the next fix and lasts a little longer, so the map glides
 // on instead of stopping at every fix one fix behind (follow-core). The arrow is a plain
 // view at the padded centre: it stays put while the map moves under it (the native puck
 // would lag the camera).
@@ -22,6 +22,12 @@ import { useGuidance } from './guidance';
 /** Shortest and longest glide between two fixes, ms. */
 const GLIDE_MIN = 400;
 const GLIDE_MAX = 2500;
+/**
+ * Each glide is planned this much longer than the expected gap (and aims as far ahead): a fix
+ * that comes late finds the map still moving at the user's pace instead of stopped, and the next
+ * one takes over mid-glide.
+ */
+const GLIDE_OVERRUN = 1.3;
 const ARROW = 44;
 /** The compass beam's image (scripts/maps/make-beam.py), its apex at the bottom centre. */
 const BEAM = { width: 80, height: 88 };
@@ -43,9 +49,12 @@ export function useFollowCamera(
   onBearing: (bearing: number | null) => void,
 ) {
   const report = useRef(onBearing);
+  // Read at each fix: a banner turning two lines high must not restart the glide.
+  const padding = useRef({ top, bottom });
   useEffect(() => {
     report.current = onBearing;
-  }, [onBearing]);
+    padding.current = { top, bottom };
+  }, [onBearing, top, bottom]);
   useEffect(() => {
     if (!active) return;
     let bearing: number | null = null;
@@ -65,7 +74,7 @@ export function useFollowCamera(
       // Standing off the route keeps the map; the compass only sets the very first bearing on foot.
       const next = followBearing({ moving, progress, accuracy: p.accuracy }) ?? (bearing === null && s.costing !== 'auto' ? s.heading : null);
       if (next !== null) bearing = bearing === null ? next : smoothTurn(bearing, next, first ? 0 : since, s.costing);
-      const duration = first ? 900 : gap;
+      const duration = first ? 900 : gap * GLIDE_OVERRUN;
       fixAt = now;
       const center = followCenter({ position: p, route: s.route, cumulative: s.routeCumulative, progress, moving, gapMs: duration });
       camera.current?.easeTo({
@@ -73,7 +82,7 @@ export function useFollowCamera(
         zoom: followZoom(s.costing, p.speed ?? null, progress?.toNextM ?? null),
         pitch: followPitch(s.costing),
         ...(northUp ? { bearing: 0 } : bearing !== null ? { bearing } : {}),
-        padding: { top, bottom, left: 0, right: 0 },
+        padding: { ...padding.current, left: 0, right: 0 },
         duration,
         easing: first ? 'ease' : 'linear',
       });
@@ -84,7 +93,7 @@ export function useFollowCamera(
     return useGuidance.subscribe((s, prev) => {
       if (s.position !== prev.position) move();
     });
-  }, [camera, active, top, bottom, northUp]);
+  }, [camera, active, northUp]);
 }
 
 /** A rotation style that eases the short way round (350° → 10° turns 20°, not back 340°). */

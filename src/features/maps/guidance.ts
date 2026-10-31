@@ -242,7 +242,11 @@ export const useGuidance = create<GuidanceState>((set, get) => {
       const sub = background
         ? await Location.watchNavigationAsync(
             {
+              // Every fix, once a second: the follow camera glides from one to the next, and fixes
+              // every 3 m came every 2-3 s on foot, unevenly, so the map stopped and jumped.
               ...options,
+              distanceInterval: 0,
+              timeInterval: 1000,
               automotive: get().costing === 'auto',
               notice: { title: i18n.t('maps:guidance.notice'), body: i18n.t('maps:guidance.toward', { name: target?.name ?? '' }) },
             },

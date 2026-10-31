@@ -3,26 +3,46 @@
 import type { TFunction } from 'i18next';
 import {
   Ambulance,
+  Banknote,
+  BedDouble,
+  Beer,
+  Binoculars,
   Building,
+  Bus,
+  Castle,
+  Church,
+  Coffee,
   Cross,
   Droplet,
   Droplets,
   Flag,
   Flame,
   Fuel,
+  GraduationCap,
   Hammer,
   HeartPulse,
   Hospital,
   House,
   Landmark,
+  Library,
+  Mail,
   MapPin,
+  Mountain,
   Pill,
+  Plane,
   Route,
   Shield,
   ShieldHalf,
+  Ship,
+  ShoppingBag,
   ShoppingCart,
+  SquareParking,
   Tent,
+  TrainFront,
+  Trees,
   Users,
+  Utensils,
+  Waves,
   type LucideIcon,
 } from 'lucide-react-native';
 
@@ -69,6 +89,53 @@ const KIND_ICONS: Record<EmergencyKind, LucideIcon> = {
   embassy: Flag,
 };
 
+/** The basemap's everyday kinds (a tapped restaurant, a bus stop); the rest get a pin. */
+const POI_ICONS: Record<string, LucideIcon> = {
+  restaurant: Utensils,
+  fast_food: Utensils,
+  cafe: Coffee,
+  bar: Beer,
+  pub: Beer,
+  biergarten: Beer,
+  bus_stop: Bus,
+  bus_station: Bus,
+  station: TrainFront,
+  ferry_terminal: Ship,
+  aerodrome: Plane,
+  hotel: BedDouble,
+  hostel: BedDouble,
+  guest_house: BedDouble,
+  motel: BedDouble,
+  camp_site: Tent,
+  alpine_hut: House,
+  parking: SquareParking,
+  post_office: Mail,
+  bank: Banknote,
+  atm: Banknote,
+  school: GraduationCap,
+  university: GraduationCap,
+  college: GraduationCap,
+  kindergarten: GraduationCap,
+  library: Library,
+  park: Trees,
+  garden: Trees,
+  forest: Trees,
+  nature_reserve: Trees,
+  national_park: Trees,
+  peak: Mountain,
+  volcano: Mountain,
+  viewpoint: Binoculars,
+  beach: Waves,
+  place_of_worship: Church,
+  castle: Castle,
+  museum: Landmark,
+  convenience: ShoppingBag,
+  bakery: ShoppingBag,
+  clothes: ShoppingBag,
+  mall: ShoppingBag,
+  department_store: ShoppingBag,
+};
+
 export function isEmergencyKind(kind: string | null | undefined): kind is EmergencyKind {
   return !!kind && kind in EMERGENCY_KINDS;
 }
@@ -78,7 +145,7 @@ export function kindIcon(kind: string | null | undefined, layer?: string): Lucid
   if (kind === 'address' || kind === 'address_approx') return House;
   if (layer === 'road') return Route;
   if (layer === 'place') return Building;
-  return MapPin;
+  return (kind && POI_ICONS[kind]) || MapPin;
 }
 
 export function kindColor(kind: string | null | undefined): string {

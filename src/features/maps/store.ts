@@ -21,6 +21,11 @@ export type SelectedPlace = {
   layer?: string | null;
   context?: string | null;
   osmId?: string | null;
+  /**
+   * Tapped on the map: the street drawn next to it (null: none near), for the card's address line.
+   * Undefined for places from elsewhere (search results bring their own context).
+   */
+  street?: { name: string; native: string } | null;
 };
 
 type MapUiState = {
