@@ -1,0 +1,65 @@
+app.json
+  s_5c276b322e5d3d::t_dfd28dcaf7aea7 168-173
+docs/ARCHITECTURE.md
+  s_5c276b322e5d3d::t_8c9681f0065ebb 1019-1039,1075-1106
+docs/PROGRESS.md
+  s_5c276b322e5d3d::t_2a54b4cca5ea13 43-44,308-329
+modules/nomad-carplay/.gitignore
+  s_5c276b322e5d3d::t_045212f6eb0b9a 1-3
+modules/nomad-carplay/expo-module.config.json
+  s_5c276b322e5d3d::t_c52d1eb154c2be 1-6
+modules/nomad-carplay/index.ts
+  s_5c276b322e5d3d::t_47e279ed4e2460 1-36
+modules/nomad-carplay/ios/CarMapViewController.swift
+  s_5c276b322e5d3d::t_9d7510e52d52bf 1-209
+modules/nomad-carplay/ios/CarPlayController.swift
+  s_5c276b322e5d3d::t_5b9f4a28db258f 1-363
+modules/nomad-carplay/ios/NomadCarPlay.podspec
+  s_5c276b322e5d3d::t_5764c59e5cc8a6 1-34
+modules/nomad-carplay/ios/NomadCarPlayModule.swift
+  s_5c276b322e5d3d::t_7df87b0f128f2c 1-54
+plugins/with-carplay.js
+  s_5c276b322e5d3d::t_f3626b716ef1df 1-87
+src/features/carplay/carplay-core.test.ts
+  s_5c276b322e5d3d::t_496e3420983e66 1-70
+src/features/carplay/register.ts
+  s_5c276b322e5d3d::t_41a89b68dae434 1-8
+src/features/maps/useMapSources.ts
+  s_5c276b322e5d3d::t_97172de58e29f8 20-30,33
+src/features/registry.ts
+  s_5c276b322e5d3d::t_f61ddd275fd69e 8
+src/i18n/locales/en/maps.json
+  s_5c276b322e5d3d::t_57ad568f10ab4b 461-474
+src/i18n/locales/es/maps.json
+  s_5c276b322e5d3d::t_2d24cab74ce0d4 461-474
+docs/CARPLAY_PLAN.md
+  s_5c276b322e5d3d::t_b73f42646be654 1-108
+modules/nomad-carplay/ios/CarLocationManager.swift
+  s_5c276b322e5d3d::t_2d0a1515d0e71f 1-59
+modules/nomad-carplay/ios/CarPlayBoot.swift
+  s_5c276b322e5d3d::t_703e972f1091e5 1-35
+modules/nomad-carplay/ios/CarPlayHub.swift
+  s_5c276b322e5d3d::t_11e003c86ac6a6 1-166
+modules/nomad-carplay/ios/CarPlaySceneDelegate.swift
+  s_5c276b322e5d3d::t_9e4d28c6473b9a 1-34
+src/features/carplay/carplay-core.ts
+  s_5c276b322e5d3d::t_ec4ac09ec10c9c 1-136
+src/features/carplay/carplay.ts
+  s_5c276b322e5d3d::t_c2b61e9f28fccf 1-207
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "429dbb45736d9a3bdced65f1b886f50eee7d5c46",
+  "prompts": {},
+  "sessions": {
+    "s_5c276b322e5d3d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7f0e1c0-a465-4aac-b418-fea5fab56f24",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
