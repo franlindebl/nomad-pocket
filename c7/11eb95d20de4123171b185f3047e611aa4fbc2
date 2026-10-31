@@ -1,0 +1,65 @@
+CLAUDE.md
+  s_9b990e7d0960a2::t_83651130b44f74 26,134
+docs/ARCHITECTURE.md
+  s_9b990e7d0960a2::t_1d56428fc313de 551-581,1356
+docs/E2E.md
+  s_9b990e7d0960a2::t_5e7cca2cb92a80 401
+docs/PROGRESS.md
+  s_9b990e7d0960a2::t_244add33de8212 47,70-74,324-344
+site/privacy.html
+  s_9b990e7d0960a2::t_788a98f914eb04 24,99,128,200
+src/app/(tabs)/(home)/index.tsx
+  s_9b990e7d0960a2::t_6c5c2b1d80dcd8 12,39,101-102,184-198
+src/app/(tabs)/library/index.tsx
+  s_9b990e7d0960a2::t_9230da3b1858e9 19,73-75,116-120,124,204-205,212
+src/app/_layout.tsx
+  s_9b990e7d0960a2::t_d1c5c486180d12 78-81
+src/app/downloads.tsx
+  s_9b990e7d0960a2::t_564c851b72925d 1-2,7,14,29-30,60-70
+src/features/home/readiness.ts
+  s_9b990e7d0960a2::t_395aa8206cffdb 15,60-61,76-81,116-119,126-127,132,135-136,183
+src/features/maps/countries.ts
+  s_9b990e7d0960a2::t_c0cd5be9cb414a 10,46,411-412,431-447,456-460,462-514,516-555,557-563,565-569,571-574
+src/features/registry.ts
+  s_9b990e7d0960a2::t_7a7f78d2205643 9
+src/features/updates/register.ts
+  s_9b990e7d0960a2::t_e801978701583b 1-18
+src/features/updates/updates.ts
+  s_9b990e7d0960a2::t_47287da731517b 1-339
+src/features/updates/zim-check.ts
+  s_9b990e7d0960a2::t_349092292d721e 1-97
+src/i18n/locales/en/home.json
+  s_9b990e7d0960a2::t_21968a309a2706 109
+src/i18n/locales/en/updates.json
+  s_9b990e7d0960a2::t_2b57a820eb77f4 1-40
+src/i18n/locales/es/home.json
+  s_9b990e7d0960a2::t_9e872bd8f8507d 109
+src/i18n/locales/es/updates.json
+  s_9b990e7d0960a2::t_a4e38aa12b82e3 1-40
+src/i18n/resources.ts
+  s_9b990e7d0960a2::t_6420d692b54836 11,21,34,46
+docs/CONTENT_UPDATES_PLAN.md
+  s_9b990e7d0960a2::t_58cff67ad0bca6 1-88
+src/app/updates.tsx
+  s_9b990e7d0960a2::t_013e7923fa1a6e 1-180
+src/features/updates/updates-core.test.ts
+  s_9b990e7d0960a2::t_1751b65995c74d 1-95
+src/features/updates/updates-core.ts
+  s_9b990e7d0960a2::t_698ee70c3706f6 1-114
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c711eb95d20de4123171b185f3047e611aa4fbc2",
+  "prompts": {},
+  "sessions": {
+    "s_9b990e7d0960a2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "dd9a65d9-9c01-4125-9824-1fba3228c08d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
