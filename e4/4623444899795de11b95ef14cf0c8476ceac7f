@@ -1,0 +1,41 @@
+docs/ARCHITECTURE.md
+  s_5c276b322e5d3d::t_d779073b4d5f07 995-1001
+docs/PROGRESS.md
+  s_5c276b322e5d3d::t_44b548b79feabf 318-342
+modules/nomad-voice/android/src/main/java/expo/modules/nomadvoice/NomadVoiceModule.kt
+  s_5c276b322e5d3d::t_b8593ddd4afdc4 5-6,12,14,25-27,37-50,74-77,132-167,180-181
+modules/nomad-voice/index.ts
+  s_5c276b322e5d3d::t_b63e56ad218f6b 11-12
+modules/nomad-voice/ios/NomadVoiceModule.swift
+  s_5c276b322e5d3d::t_6d11bc91cf3951 5-6,24-31,37,43-49,61-73,96-97,114-161
+src/app/(tabs)/maps/index.tsx
+  s_5c276b322e5d3d::t_8468845656116c 317-320,440-442,455,484-486,636-637
+src/features/maps/FollowCamera.tsx
+  s_5c276b322e5d3d::t_934d95d9e5bb78 31-37,49-50,67,69,72-74,84-85,93,106-113,117,120-124,126
+src/features/maps/geo.ts
+  s_5c276b322e5d3d::t_a894c9264508db 20-39
+src/features/maps/tap-core.ts
+  s_5c276b322e5d3d::t_d050237e78ca0b 5,79
+src/features/maps/voice-core.test.ts
+  s_5c276b322e5d3d::t_684b447609ba6e 6,87-130
+src/features/maps/voice-core.ts
+  s_5c276b322e5d3d::t_fca117e86fc0ae 7,117-145
+src/features/maps/voice.ts
+  s_5c276b322e5d3d::t_28405020193dee 4-5,13,19-21,26-30,54-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e44623444899795de11b95ef14cf0c8476ceac7f",
+  "prompts": {},
+  "sessions": {
+    "s_5c276b322e5d3d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7f0e1c0-a465-4aac-b418-fea5fab56f24",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
