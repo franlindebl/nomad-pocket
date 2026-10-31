@@ -1,0 +1,29 @@
+modules/nomad-carplay/ios/CarPlayController.swift
+  s_5c276b322e5d3d::t_e73466bce7874f 120
+src/features/carplay/carplay-core.test.ts
+  s_5c276b322e5d3d::t_0a6bf58aacc395 6,13,48,83-88
+src/features/carplay/carplay-core.ts
+  s_5c276b322e5d3d::t_09fdff86e03864 62-71,77-78,117-118
+src/features/carplay/carplay.ts
+  s_5c276b322e5d3d::t_147b445f292dee 101
+src/i18n/locales/en/maps.json
+  s_5c276b322e5d3d::t_ab1251e7ba3319 474-475
+src/i18n/locales/es/maps.json
+  s_5c276b322e5d3d::t_e29b3b6c4f007e 474-475
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7eb60104d82823a7b3db6bc30539f331e803161c",
+  "prompts": {},
+  "sessions": {
+    "s_5c276b322e5d3d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7f0e1c0-a465-4aac-b418-fea5fab56f24",
+        "model": "unknown"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
