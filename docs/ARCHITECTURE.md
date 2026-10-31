@@ -1082,21 +1082,31 @@ started on the phone shows in the car and the other way round.
   plugin option `entitlement: true` or `CARPLAY_ENTITLEMENT=1` at prebuild (off in `app.json` until
   Apple grants it: a device build with an entitlement its profile lacks doesn't sign).
 - **Started from the car**: Expo starts React Native when the phone's window scene connects. With
-  only the CarPlay scene (phone locked), `CarPlayBoot` starts it into a window no screen shows, and
-  the phone's `SceneDelegate` (rewritten by the plugin) adopts that root view controller later.
+  only the CarPlay scene (phone locked), `CarPlayBoot` starts it and puts its root view, invisible,
+  behind the car's map (in a window no screen shows it never laid out, so the app never rendered and
+  `bootstrap` never ran); the phone's `SceneDelegate` (rewritten by the plugin) adopts that root view
+  controller later.
 - **Map** (`CarMapViewController.swift`): MapLibre Native (`MLNMapView`, the same SPM package and
   version maplibre-react-native links, via `spm_dependency` in the podspec) with the style JSON
   `buildMapStyle` makes for light and dark (the car's appearance picks), the route line, the
-  destination pin. Its own location manager (`CarLocationManager`) runs in the background (MapLibre's
-  default one froze with the phone locked). Following: course up, tilted, user low while
-  navigating; north up otherwise. Map buttons: recentre (only after a pan), zoom ±, pan mode.
+  destination as style layers (MapLibre's default style, a demo map from the internet, never loads:
+  a plain local one until JS sends ours). The position and the following are ours
+  (`CarLocationManager`, a background-capable `CLLocationManager`): MapLibre's user tracking never
+  started there, its map view counts as dormant while the phone app isn't in front. Following: course
+  up, tilted, user low in the free part of the screen while navigating, north up otherwise; the safe
+  area (maneuver panel, preview card) goes in as each camera move's `edgePadding` (as `contentInset`
+  the camera ignored it). The route behind the user is not drawn while navigating. Map buttons:
+  recentre (only after a pan), zoom ±, pan mode; the bar ("Destinos" / "Terminar") never hides.
 - **Templates** (`CarPlayController.swift`): `CPMapTemplate` with "Destinos" → list (Buscar →
   `CPSearchTemplate` over `searchPlaces`; Guardados = markers by distance; Emergencias cerca: one row
   per category → nearest points, health only with `HEALTH_FEATURES`). A pick → `onPick` → JS
   `startGuidance` by car → trip preview (`CPTrip`, estimates, note with tolls / ferry, "Ir") → `onStart`
   → `startNavigation` and a `CPNavigationSession`: maneuver panel (SF Symbols per `maneuverIcon`, the
   next two maneuvers), estimates every fix, paused "Recalculando" while a reroute loads, finished on
-  arrival. "Finalizar" / "Cancelar" (`onEnd`) stops guidance. Straight-line guidance shows as a
+  arrival ("Has llegado" navigation alert with "Terminar"). "Terminar" / "Cancelar" (`onEnd`) stops
+  guidance. The maneuver after the next shows only within 200 m of it (a second row pushes the
+  arrival time off a car screen). Every template call passes a completion handler: CarPlay raises
+  an exception when one fails without it (a pop with nothing to pop killed the app). Straight-line guidance shows as a
   maneuver "Hacia el NE, en línea recta".
 - **JS** (`carplay.ts`, pure `carplay-core.ts`): on connect it pushes the texts, the styles and the
   state; then guidance changes (not the compass), map installs and the language. List requests are

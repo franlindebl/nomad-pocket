@@ -64,6 +64,9 @@ export type GuidanceText = {
   ferry: string;
 };
 
+/** The maneuver after the next shows too ("then…") when it is at most this far after it. */
+export const THEN_WITHIN_M = 200;
+
 /** Index of the straight-line "maneuver": one per compass sector, so the panel changes with it. */
 const LINE_INDEX = -100;
 
@@ -110,7 +113,9 @@ export function carGuidance(input: GuidanceInput, system: MeasurementSystem, tex
         street: m.streets[0] ?? null,
         estimate: estimate(progress.toNextM, remainingSeconds(route, progress.toNextM), system),
       };
-      const after = route.maneuvers[progress.next + 1];
+      // The one after only when it comes close behind (a turn right after a roundabout): on a
+      // car screen a second row pushes the trip's arrival time off the panel.
+      const after = m.distanceM <= THEN_WITHIN_M ? route.maneuvers[progress.next + 1] : undefined;
       if (after) {
         base.nextStep = {
           index: progress.next + 1,

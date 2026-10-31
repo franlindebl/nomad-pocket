@@ -39,12 +39,23 @@ test('on the route: the next maneuver, the one after, and what is left', () => {
   assert.equal(g.step?.instruction, 'Gire a la izquierda hacia Plaza del Carmen.');
   assert.equal(g.step?.street, 'Plaza del Carmen');
   assert.equal(g.step?.estimate.distance.unit, 'm');
+  // Plaza del Carmen is 65 m long: the right turn after it shows too.
   assert.equal(g.nextStep?.index, 2);
   assert.equal(g.nextStep?.icon, 'right');
   assert.equal(g.summary?.distance.unit, 'km');
   assert.equal(g.summary?.seconds, Math.round(route.durationS));
   assert.ok(g.remaining && g.remaining.seconds > 0);
   assert.equal(g.note, route.hasToll ? 'Peajes' : null);
+});
+
+test('the maneuver after the next only when it comes close behind', () => {
+  const far = route.maneuvers.findIndex((m, i) => i > 0 && m.distanceM > 200 && route.maneuvers[i + 1]);
+  assert.ok(far > 0);
+  const at = route.shape[route.maneuvers[far].begin];
+  const near = { lat: at[1], lon: at[0], accuracy: 5 };
+  // Just before that maneuver: it is the next one, and the one after is too far to show.
+  const progress = { ...routeProgress(route, cumulative, near), next: far, toNextM: 30 };
+  assert.equal(carGuidance(input({ position: near, progress }), 'metric', text).nextStep, null);
 });
 
 test('at the destination: arrived', () => {

@@ -1,13 +1,13 @@
-// The car map's location source. MapLibre's default location manager stops when the app is in
-// the background, and with the phone locked in a car only the CarPlay scene is in front: the
-// puck froze. This one is a plain CLLocationManager allowed to run in the background (the app has
-// the location background mode, see app.json), handed to MLNMapView.
+// The car map's location. MapLibre's own user location never started on the car's screen: its map
+// view counts as dormant while the phone app isn't in front, which with CarPlay is most of the
+// time (seen in the simulator: no fix, the camera stuck at 0, 0). So the car map follows the user
+// itself, from this plain CLLocationManager allowed to run in the background (the app has the
+// location background mode, see app.json).
 import CoreLocation
-import MapLibre
 
-final class CarLocationManager: NSObject, MLNLocationManager, CLLocationManagerDelegate {
+final class CarLocationManager: NSObject, CLLocationManagerDelegate {
   private let manager = CLLocationManager()
-  weak var delegate: MLNLocationManagerDelegate?
+  var onFix: ((CLLocation) -> Void)?
 
   override init() {
     super.init()
@@ -22,38 +22,23 @@ final class CarLocationManager: NSObject, MLNLocationManager, CLLocationManagerD
     }
   }
 
-  var authorizationStatus: CLAuthorizationStatus { manager.authorizationStatus }
+  /// The last fix the phone has, before the first new one.
+  var last: CLLocation? { manager.location }
 
-  var headingOrientation: CLDeviceOrientation {
-    get { manager.headingOrientation }
-    set { manager.headingOrientation = newValue }
-  }
-
-  func requestAlwaysAuthorization() {
-    // Never: "While Using" is all the app asks for.
-  }
-
-  func requestWhenInUseAuthorization() {
-    // The phone asks, where the person can read why (the car can't show the prompt).
-  }
-
-  func startUpdatingLocation() { manager.startUpdatingLocation() }
-  func stopUpdatingLocation() { manager.stopUpdatingLocation() }
-
-  // In a car the phone sits anywhere: the course, not the compass, says which way is ahead.
-  func startUpdatingHeading() {}
-  func stopUpdatingHeading() {}
-  func dismissHeadingCalibrationDisplay() {}
+  // Never asks: the car can't show the prompt; the phone asks when the person opens Maps there.
+  func start() { manager.startUpdatingLocation() }
+  func stop() { manager.stopUpdatingLocation() }
 
   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-    delegate?.locationManager(self, didUpdate: locations)
+    if let fix = locations.last { onFix?(fix) }
   }
 
   func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-    delegate?.locationManager(self, didFailWithError: error)
+    // kCLErrorLocationUnknown is transient (a tunnel); the map keeps the last position.
   }
 
   func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-    delegate?.locationManagerDidChangeAuthorization(self)
+    // Granted on the phone while the car shows the map: start now.
+    if manager.authorizationStatus == .authorizedWhenInUse || manager.authorizationStatus == .authorizedAlways { start() }
   }
 }

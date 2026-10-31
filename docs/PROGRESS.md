@@ -41,7 +41,7 @@ can pick up without re-deriving anything.
 | Maps search + Emergencias + straight-line guidance (plan phase 1, `docs/MAPS_NAVIGATION_PLAN.md`) | done — iOS sim + Android emulator (Release, E2E) |
 | Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 237 packs live (every inhabited country; the USA in six regions) since 2026-10-27; E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | built on branch `carplay` (2026-10-31): spoken prompts (iOS + Android, offline system voices), guidance with the screen locked (iOS background location, Android foreground service); iOS sim E2E map-14/17 pass; Android emulator: tour 4/4, foreground service checked by hand (starts with Iniciar, survives Home, ends with Finalizar); not yet heard on a real phone |
-| CarPlay navigation (`docs/CARPLAY_PLAN.md`) | built on branch `carplay` (2026-10-31): map, destinations (search, saved, Emergencias cerca), trip preview, turn-by-turn session; compiles and the app runs, **not yet seen on a CarPlay screen** (Xcode 27's DeviceHub can't be driven headless); the entitlement must be requested by the owner |
+| CarPlay navigation (`docs/CARPLAY_PLAN.md`) | built on branch `carplay` (2026-10-31): map, destinations (search, saved, Emergencias cerca), trip preview, turn-by-turn session; **tested on the CarPlay simulator screen** (Xcode 26.5's Simulator + iOS 26.5 + shim, `scripts/carplay/carplay-sim.sh`), every flow in the plan's "Testing" list works; the entitlement must be requested by the owner, then a real car |
 | Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search; the most capable installed model is the default; on-device dictation; reads the PDFs inside archives (document index) and the family plan; copy and regenerate an answer) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android: app created in Play Console, App content forms done (PEGI 3 since 2026-10-29, see `docs/store/play-listing.md`), 1.1.0 (23) on internal testing, Android screenshots and en-US listing done, 1.1.0 (24) for the closed test **rejected** 2026-10-29 (health apps need an organization account): Android now ships without health features; listing, screenshots, Health apps and content rating redone; **1.1.0 (26) approved for the closed test 2026-10-30**; then 12 testers × 14 days and production (`docs/ANDROID_PLAY.md`) |
 | Preparedness (family plan, emergency kit with expiry reminders, printable PDF, offline guides) | done — iOS sim + Android emulator (E2E) |
@@ -304,6 +304,23 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-31 — CarPlay: seen and fixed on the simulator's car screen
+
+- Xcode 27 has no CarPlay screen (Device Hub); Xcode 26.5 installed next to it for its Simulator.app (owner's
+  go), iOS 26.5 simulator `NP-carplay-26`, Apple's simulator-only CarPlay host crash worked around with
+  `scripts/carplay/sim-shim.m`; synthetic taps on the car screen work with a click state (`tap.swift`), so the
+  whole thing is scripted (`scripts/carplay/carplay-sim.sh`, recipe in `docs/CARPLAY_PLAN.md`, "Testing").
+- Bugs found there and fixed: an empty route polyline crashed MapLibre; the car map never got a position
+  (MapLibre's user tracking is dormant without the phone app in front: own location manager, own camera,
+  user/route/destination as style layers); MapLibre's default demo style was fetched from the internet
+  before ours (now a local placeholder); opened from the car, React Native never rendered (its root view now
+  sits invisible behind the car map); a pop with nothing to pop raised an exception (completion handlers
+  everywhere); the camera ignored the safe area (edge padding per move); overview padding counted twice;
+  the bar hid itself and "Terminar" took two taps (bar always shown); zoom on start; "Has llegado" alert;
+  lists measure from the car's own fix; the second maneuver row only when close (it hid the arrival time).
+- Checked end to end (list in `docs/CARPLAY_PLAN.md`): car-first start then phone adoption, preview,
+  navigation with turn panel and estimates while driving the CG-1, reroute, arrival, end from either side.
 
 ### 2026-10-31 — CarPlay navigation, voice prompts and guidance in the background (branch `carplay`)
 

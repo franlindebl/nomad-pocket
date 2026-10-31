@@ -110,18 +110,19 @@ function pushAll() {
   pushGuidance();
 }
 
-/** Where the lists measure from: guidance's fix, else the last one the phone had. */
-async function here(): Promise<LatLon | null> {
+/** Where the lists measure from: guidance's fix, else the car's, else the last one the phone had. */
+async function here(car: Partial<LatLon>): Promise<LatLon | null> {
   const p = useGuidance.getState().position;
   if (p) return p;
+  if (car.lat != null && car.lon != null) return { lat: car.lat, lon: car.lon };
   const last = await Location.getLastKnownPositionAsync({ maxAge: 10 * 60_000 }).catch(() => null);
   return last ? { lat: last.coords.latitude, lon: last.coords.longitude } : null;
 }
 
 const away = (from: LatLon | null, p: LatLon) => (from ? formatDistance(distanceMeters(from, p)) : null);
 
-async function items(kind: string, category?: string, query?: string): Promise<CarItem[]> {
-  const from = await here();
+async function items(kind: string, category?: string, query?: string, car: Partial<LatLon> = {}): Promise<CarItem[]> {
+  const from = await here(car);
   if (kind === 'saved') {
     const markers = useMarkers.getState().markers;
     const sorted = from ? [...markers].sort((a, b) => distanceMeters(from, a) - distanceMeters(from, b)) : markers;
@@ -155,7 +156,7 @@ export function startCarPlay() {
   });
   car.addListener('onDisconnect', () => useGuidance.getState().keepInBackground(false));
   car.addListener('onRequest', (e) => {
-    items(e.kind, e.category, e.query)
+    items(e.kind, e.category, e.query, { lat: e.lat, lon: e.lon })
       .catch((err) => {
         console.warn('[carplay] list', err);
         return [];

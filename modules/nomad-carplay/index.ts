@@ -7,7 +7,8 @@ type NomadCarPlayEvents = {
   onConnect(): void;
   onDisconnect(): void;
   /** The car wants list items: answer(id, items). */
-  onRequest(e: { id: number; kind: 'saved' | 'emergency' | 'search'; category?: string; query?: string }): void;
+  /** lat/lon: where the car map has the user, when it knows. */
+  onRequest(e: { id: number; kind: 'saved' | 'emergency' | 'search'; category?: string; query?: string; lat?: number; lon?: number }): void;
   /** A destination chosen in the car. */
   onPick(e: { name: string; lat: number; lon: number }): void;
   /** "Ir" in the car's trip preview. */

@@ -80,8 +80,38 @@ pushes there, not on `main`, until the owner merges it).
 - JS side `features/carplay/` (register.ts): mirrors `useGuidance` to the native module,
   answers its requests (list items, search, emergencies nearby) with the existing modules
   (`markers`, `places`, `emergency`), no new data paths.
-- Testing: Xcode simulator, I/O → External Displays → CarPlay; screenshots with
-  `xcrun simctl io booted screenshot --display=external`.
+- Testing: see "Testing in the simulator" below.
+
+## Testing in the simulator (what works, 2026-10-31)
+
+Xcode 27 replaced Simulator.app with Device Hub, which shows no CarPlay screen on public builds
+(FB24785359). What works:
+
+1. **Xcode 26.5 next to Xcode 27** (`/Applications/Xcode-26.5.app`, from developer.apple.com/download/all;
+   `xcode-select` stays on 27, builds come from 27). Only its `Simulator.app` is used.
+2. **An iOS 26.5 simulator** (`NP-carplay-26`): with an iOS 27 one the CarPlay menu item ticks but no
+   screen appears.
+3. **The shim** `scripts/carplay/sim-shim.m`: the 26.4/26.5 simulator's CarPlay host crashes on any map
+   template (`-[CPSTemplateInstance vehicleSupportsDestinationSharing]: unrecognized selector`), a
+   simulator-only Apple bug (Organic Maps PR #13507). Injected with `launchctl setenv
+   DYLD_INSERT_LIBRARIES` in the simulator; lost on every simulator reboot.
+4. **The entitlement** in the build: `CARPLAY_ENTITLEMENT=1 npx expo prebuild --platform ios`.
+
+`scripts/carplay/carplay-sim.sh` does all of it: `setup` (simulator, shim, Simulator.app with the CarPlay
+screen), `install` (install the build and open it on the car screen: a reinstall closes it there),
+`tap X Y` / `tap X Y --still` (taps on the car screen in its screenshot's pixels: plain mouse events
+don't reach it, see `tap.swift`; needs the Accessibility permission for the terminal), `shot`.
+Trips are driven from the phone with Maestro (`travel`), seeded with the Andorra fixtures
+(`e2e/fixtures/{maps,routing}` copied into the app's `Documents/content`). The simulator only sends
+a location when it changes: `xcrun simctl location <udid> set …` after a reinstall.
+
+Checked this way: opening from the car with the phone app closed (React Native starts behind the car's
+map) and then opening the phone (it adopts it); the offline map in the car (day/night), following;
+Destinos → Guardados / Emergencias cerca (empty state) / Buscar with the car keyboard; a trip from the
+phone and one picked in the car: preview (route framed beside the card, time, distance, "Ir"),
+"Cancelar"; navigation: maneuver panel, estimates, the route behind consumed, course up and tilted,
+reroute after leaving the route, arrival ("Has llegado" with "Terminar"), guidance ending by itself a
+minute later; "Terminar" in the bar ends it on the phone too.
 
 ## Phase 4 — after the entitlement
 
