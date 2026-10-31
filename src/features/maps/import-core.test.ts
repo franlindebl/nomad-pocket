@@ -72,6 +72,9 @@ const STREETS_TSV = [
   'street\tCalle de Alcalá\t40.42\t-3.69',
   'path\tCamí de Ronda\t41.9\t3.2',
   'borough\tSalamanca\t40.43\t-3.68',
+  'locality\tMaíllos\t40.9311518\t-3.621884',
+  'isolated_dwelling\tMazacorta\t40.906\t-3.5956',
+  'village\tLozoyuela\t40.9263383\t-3.6176377',
   'village\t台東\t35.71\t139.78',
   'street\t銀座通り\t35.67\t139.76',
   'street\tרחוב יפו\t31.78\t35.22\tCalle Jaffa\tJaffa Road',
@@ -87,6 +90,10 @@ test('streets: the same rows and towns as parseStreetsTsv', async () => {
   const rows = parseStreetsTsv(STREETS_TSV);
   assert.deepEqual(places(d), expected(rows, 'route-x'));
   assert.deepEqual(localities(d), expectedTowns(rows, 'route-x'));
+  // Fields and single farms are found by name but never name a street's town.
+  const towns = localities(d).map((r) => String(r[1]));
+  assert.ok(places(d).some((r) => r[1] === 'Maíllos'));
+  assert.ok(towns.includes('Lozoyuela') && !towns.includes('Maíllos') && !towns.includes('Mazacorta'));
 });
 
 test('insertRows: unnamed rows skipped, towns optional', async () => {

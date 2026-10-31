@@ -11,7 +11,7 @@ import sys
 
 import osmium
 
-# Keep in step with LOCALITY_KINDS in src/features/maps/places-core.ts.
+# LOCALITY_KINDS in src/features/maps/places-core.ts, plus locality and isolated_dwelling (searchable, never context).
 PLACES = {"city", "town", "village", "hamlet", "suburb", "neighbourhood", "quarter", "locality", "borough", "isolated_dwelling"}
 PATHS = {"path", "footway", "cycleway", "bridleway", "steps", "track", "pedestrian"}
 SKIP = {"proposed", "construction", "abandoned", "razed", "platform", "bus_stop", "elevator", "corridor", "services", "rest_area"}

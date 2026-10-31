@@ -315,6 +315,17 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-31 — Maps: a result's town is never a field name
+
+- Owner: "Calle Prados Quemados" (Lozoyuela) showed "· Maíllos". The context line is the nearest place of
+  `map_localities`, and that took every OSM `place=*` node: Maíllos is a `place=locality` (a named field from the
+  imported toponyms, one every few hundred metres around there) 377 m away, Lozoyuela's village node 688 m.
+  `LOCALITY_KINDS` drops `locality` and `isolated_dwelling`: still searchable by name, never a result's town;
+  hamlets (Sieteiglesias, Navas de Buitrago) and city neighbourhoods stay. No pack rebuild (streets.py already
+  writes the kind). Indexes prepared before keep their old rows until the map or pack is prepared again (test
+  builds only, owner's call: no cleanup pass).
+- Checks: tsc, lint, unit tests, i18n.
+
 ### 2026-10-31 — iOS build 25 to TestFlight
 
 - 1.1.0 (25), TestFlight only (build 23 still in App Review): build 24 plus map taps on anything, the smoother follow
