@@ -1,0 +1,73 @@
+CLAUDE.md
+  s_5c276b322e5d3d::t_11b4a588df821b 133
+docs/ARCHITECTURE.md
+  s_5c276b322e5d3d::t_135e03167919b6 1000-1009
+docs/E2E.md
+  s_5c276b322e5d3d::t_9a67b0bc11ccc0 380
+docs/PROGRESS.md
+  s_5c276b322e5d3d::t_20869dbb6727a8 318-333
+docs/STYLE_GUIDE.md
+  s_5c276b322e5d3d::t_b4f759c38f3d8c 52
+modules/nomad-route/android/src/main/java/expo/modules/nomadroute/NomadRouteModule.kt
+  s_5c276b322e5d3d::t_f2352bfd0768fa 112-115
+modules/nomad-route/ios/NRRouter.h
+  s_5c276b322e5d3d::t_5e244670516695 16-17
+modules/nomad-route/ios/NRRouter.mm
+  s_5c276b322e5d3d::t_11d5ae989cd4c6 6,20,87-90
+modules/nomad-route/ios/NomadRouteModule.swift
+  s_5c276b322e5d3d::t_caa9ce1aef824a 67-70
+modules/nomad-route/src/NomadRoute.types.ts
+  s_5c276b322e5d3d::t_28aaa2796eb573 12-13
+modules/nomad-voice/android/src/main/java/expo/modules/nomadvoice/NomadVoiceModule.kt
+  s_5c276b322e5d3d::t_0d772b66640e5b 5-6,26-32,43-45,47,49-52,85-86,143,145
+modules/nomad-voice/index.ts
+  s_5c276b322e5d3d::t_e5851bc99d2c04 11-15
+modules/nomad-voice/ios/NomadVoiceModule.swift
+  s_5c276b322e5d3d::t_0ace0bd46ae9cd 5-6,24,43-46,130,134-140,144-147,158-159
+src/app/(tabs)/maps/index.tsx
+  s_5c276b322e5d3d::t_3459b29a8c3394 41,710-711
+src/features/maps/SpeedBadge.tsx
+  s_5c276b322e5d3d::t_5a1e6ed9e09ad0 1-88
+src/features/maps/routing-core.test.ts
+  s_5c276b322e5d3d::t_b82f895b8d5921 7,17,24-25,378-443
+src/features/maps/routing-core.ts
+  s_5c276b322e5d3d::t_ff050fbae0f14c 150-151,154-218
+src/features/maps/routing.ts
+  s_5c276b322e5d3d::t_4ca09dcb474db6 13,17,23,207-217
+src/features/maps/speed-core.test.ts
+  s_5c276b322e5d3d::t_30a6b7a18e6105 1-75
+src/features/maps/stitch-core.test.ts
+  s_5c276b322e5d3d::t_813e70e78e3a1d 267-286
+src/features/maps/stitch-core.ts
+  s_5c276b322e5d3d::t_6b88ac769ec7d1 189,192,217
+src/features/maps/voice.ts
+  s_5c276b322e5d3d::t_309f612350f81b 6-8,11,16-17,24-27,48-61,72,77,82
+src/i18n/locales/en/maps.json
+  s_5c276b322e5d3d::t_b6a1a31298192d 476-479
+src/i18n/locales/es/maps.json
+  s_5c276b322e5d3d::t_e3351b486d2ab2 476-479
+src/lib/units.test.ts
+  s_5c276b322e5d3d::t_aa1cab8f9d446a 4,79-92
+src/lib/units.ts
+  s_5c276b322e5d3d::t_f880c74d30e0a7 67-82
+src/theme/tokens.ts
+  s_5c276b322e5d3d::t_69834263caee0c 27-30,55-57
+src/features/maps/speed-core.ts
+  s_5c276b322e5d3d::t_4f2cf608dcfebb 1-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "631099ea0ac2e166176858ee5c48afc6d064eb57",
+  "prompts": {},
+  "sessions": {
+    "s_5c276b322e5d3d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7f0e1c0-a465-4aac-b418-fea5fab56f24",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
