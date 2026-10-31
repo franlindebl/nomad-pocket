@@ -145,6 +145,22 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate {
     mapView.setCenter(mapView.convert(centre, toCoordinateFrom: mapView), animated: true)
   }
 
+  /// The drag's last translation, so each update moves the map by what changed.
+  private var dragged = CGPoint.zero
+
+  func beginDrag() {
+    setFollowing(false)
+    dragged = .zero
+  }
+
+  func drag(to translation: CGPoint) {
+    let dx = translation.x - dragged.x, dy = translation.y - dragged.y
+    dragged = translation
+    let size = mapView.bounds.size
+    let centre = CGPoint(x: size.width / 2 - dx, y: size.height / 2 - dy)
+    mapView.setCenter(mapView.convert(centre, toCoordinateFrom: mapView), animated: false)
+  }
+
   private func setFollowing(_ on: Bool) {
     guard on != following else { return }
     following = on

@@ -79,6 +79,7 @@ struct CarStrings: Decodable {
   let categories: [[String]]
   let go: String
   let cancel: String
+  let done: String
   let end: String
   let rerouting: String
   let arrived: String
