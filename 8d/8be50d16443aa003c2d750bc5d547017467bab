@@ -1,0 +1,47 @@
+CLAUDE.md
+  s_5c276b322e5d3d::t_754dcacf83b3a7 133
+docs/ARCHITECTURE.md
+  s_5c276b322e5d3d::t_e839f4ae5d205c 923-929,990-996,1068-1075
+docs/E2E.md
+  s_5c276b322e5d3d::t_465a668721918c 379
+docs/PROGRESS.md
+  s_5c276b322e5d3d::t_20d282a7f90878 318-349
+scripts/routing/build-country.sh
+  s_5c276b322e5d3d::t_8b4c53e14ab9ca 123-134,145,153,162,170,184,200,202
+src/app/(tabs)/maps/index.tsx
+  s_5c276b322e5d3d::t_98605f09d594fd 1-11,43,51-66,107,151-152,155-200,317-319,447,468-474,517-547
+src/features/maps/FollowCamera.tsx
+  s_5c276b322e5d3d::t_72752e90fd979f 7,25-30,52-53,56-57,77,85,96
+src/features/maps/PlaceCard.tsx
+  s_5c276b322e5d3d::t_e530e88ddf2088 1-3,22,46-62,108-112
+src/features/maps/guidance.ts
+  s_5c276b322e5d3d::t_44d3a791dee2b7 245-246,248-249
+src/features/maps/labels.ts
+  s_5c276b322e5d3d::t_38f3ee59909380 6-9,11-14,21,27-28,30,32,36-37,39,41-42,44-45,92-138,148
+src/features/maps/places.ts
+  s_5c276b322e5d3d::t_ff010619848d96 673-692
+src/features/maps/store.ts
+  s_5c276b322e5d3d::t_70f0741a751288 24-28
+src/features/maps/tap-core.test.ts
+  s_5c276b322e5d3d::t_ef0c2ffd448ede 1-156
+src/features/maps/tap-core.ts
+  s_5c276b322e5d3d::t_9580d7a7370ae1 1-103
+scripts/routing/no-routing.py
+  s_5c276b322e5d3d::t_6b1c2663fbc40f 1-97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8d8be50d16443aa003c2d750bc5d547017467bab",
+  "prompts": {},
+  "sessions": {
+    "s_5c276b322e5d3d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7f0e1c0-a465-4aac-b418-fea5fab56f24",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
