@@ -315,6 +315,12 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-10-31 — iOS build 26 to TestFlight
+
+- 1.1.0 (26), TestFlight only (build 23 still in App Review): low bottom cards, reroute chime, straight recentre,
+  speed + limit + over-the-limit beep (631099e). Archived from a clean worktree of the release commit: another
+  session's uncommitted content-updates work was in the main checkout. Tagged `v1.1.0-26`.
+
 ### 2026-10-31 — Navigation: speed, the road's speed limit and an over-the-limit warning
 
 - Owner: show the speed while driving or cycling (not on foot), the posted limit, and a soft beep with the badge

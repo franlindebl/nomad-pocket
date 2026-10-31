@@ -24,7 +24,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 
 - Marketing version: `expo.version` (currently **1.1.0**). Keep `package.json`'s
   `version` equal (not used by the build, but it's what people read).
-- iOS build number: `expo.ios.buildNumber` (currently **"25"**) → `CFBundleVersion`. Bump it
+- iOS build number: `expo.ios.buildNumber` (currently **"26"**) → `CFBundleVersion`. Bump it
   for every upload: App Store Connect rejects a build number it has already seen.
 - Android: `expo.android.versionCode` (currently **26**: 23 and 24 went to Play internal testing, 24 to the rejected closed test; 25 is the build without health features, superseded before review; 26 adds the assistant's no-health fixes). Must grow
   with every Play upload.
@@ -57,6 +57,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.1.0 | 23 | TestFlight 2026-10-28: the assistant finds its sources in English libraries (Apple's router no longer translates queries into Spanish, English noise words dropped, articles looked up by exact title) and keeps small talk out of answers with sources; **submitted to App Review 2026-10-28** (same submission as 1.0.1, after the owner's 2.1(b) reply; new listing `docs/store/listing-1.1.0.md`, auto-release after approval)
 | 1.1.0 | 24 | TestFlight 2026-10-31 (TestFlight only: 1.1.0 build 23 stays in review): spoken turn-by-turn prompts (speaker button to mute them) and guidance that keeps going with the screen locked or the app in the background (`UIBackgroundModes` location + audio, new location purpose string); CarPlay built but switched off (`docs/CARPLAY_PLAN.md`). A store release of it needs a new marketing version and the background-modes review note |
 | 1.1.0 | 25 | TestFlight 2026-10-31 (TestFlight only): build 24 plus any point of the map tapped opens the place card (restaurants, stops, towns; street, number and neighbourhood), a smoother navigation camera (a fix a second, longer glides) and the navigation bar low |
+| 1.1.0 | 26 | TestFlight 2026-10-31 (TestFlight only): build 25 plus every bottom card low (the (i) hides under them), a chime when a reroute changes the way, "Recentrar" straight to the user, and by car/bike the speed with the road's limit sign and a beep over it; archived from a clean worktree (another session's edits were in the checkout) |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.
