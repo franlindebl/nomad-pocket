@@ -64,6 +64,10 @@ public final class NomadRouteModule: Module {
     AsyncFunction("matrix") { (request: String) -> String in
       try self.run { try $0.matrix(request) }
     }.runOnQueue(routeQueue)
+
+    AsyncFunction("traceAttributes") { (request: String) -> String in
+      try self.run { try $0.traceAttributes(request) }
+    }.runOnQueue(routeQueue)
   }
 
   /// Identity of the tile extract a config points at (inode, size, mtime), nil when it

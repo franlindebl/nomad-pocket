@@ -3,7 +3,7 @@
 // No Valhalla header is included here on purpose: inline templates instantiated in this
 // file (unordered_map<GraphId, …>, ptree, …) are weak symbols the linker may pick over
 // the library's own copies, and with them the tile extract loaded but every search came
-// back empty ("No suitable edges", 171) while loose tiles worked. Declaring the four
+// back empty ("No suitable edges", 171) while loose tiles worked. Declaring the few
 // functions we call keeps this file free of Valhalla code.
 #import "NRRouter.h"
 
@@ -17,6 +17,7 @@ void *create_valhalla_actor(const char *config_path, ValhallaMobileHttpClient *h
 void delete_valhalla_actor(void *actor);
 std::string route(const char *request, void *actor);
 std::string matrix(const char *request, void *actor);
+std::string trace_attributes(const char *request, void *actor);
 
 namespace {
 
@@ -81,6 +82,10 @@ NSError *EnvelopeError(NSString *json) {
 
 - (nullable NSString *)matrix:(NSString *)request error:(NSError **)error {
   return [self perform:&matrix request:request error:error];
+}
+
+- (nullable NSString *)traceAttributes:(NSString *)request error:(NSError **)error {
+  return [self perform:&trace_attributes request:request error:error];
 }
 
 @end

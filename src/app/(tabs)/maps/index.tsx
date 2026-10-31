@@ -38,6 +38,7 @@ import { markersGeoJSON, useMarkers } from '@/features/maps/markers';
 import { PlaceCard } from '@/features/maps/PlaceCard';
 import { PointsGlyph } from '@/features/maps/PointDot';
 import { getRegion, regionName, type Region } from '@/features/maps/regions';
+import { SpeedBadge } from '@/features/maps/SpeedBadge';
 import { showPlace, useMapUi } from '@/features/maps/store';
 import { buildMapStyle } from '@/features/maps/style';
 import { nearestStreet, tappedPlace, type TapFeature } from '@/features/maps/tap-core';
@@ -705,6 +706,8 @@ export default function MapScreen() {
           </MapFab>
         )}
       </View>
+
+      {navigating ? <SpeedBadge bottom={freeBottom + (following ? 0 : 44 + space.sm)} /> : null}
 
       {navigating && !following ? (
         <PressableScale

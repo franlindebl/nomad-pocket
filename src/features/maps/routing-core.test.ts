@@ -4,6 +4,7 @@ import { test } from 'node:test';
 
 import {
   assetUrl,
+  bridgeLimitGaps,
   cumulativeDistances,
   decodePolyline,
   isOffRoute,
@@ -13,12 +14,15 @@ import {
   parseManifest,
   parseTarHeader,
   parseRoute,
+  parseSpeedLimits,
   pickPack,
   pointAlong,
   remainingSeconds,
   routeProgress,
   routeRequest,
   routingErrorKind,
+  speedLimitAt,
+  speedLimitRequest,
   tarEntrySpan,
   tileBBox,
   tileCoverage,
@@ -370,4 +374,70 @@ test('covers: a pack across the antimeridian (Fiji) with its bbox and with cells
   assert.ok(!covers({ bbox, cells }, { lat: -14, lon: 178.44 }));
   // Longitude 180 is the first column again, not the next row's.
   assert.equal(cellOf({ lat: -17, lon: 180 }), cellOf({ lat: -17, lon: -180 }));
+});
+
+test('parseSpeedLimits: stretches by shape index, equal neighbours merged, unknown and unlimited as null', () => {
+  const json = JSON.stringify({
+    edges: [
+      { begin_shape_index: 0, end_shape_index: 5 },
+      { speed_limit: 50, begin_shape_index: 5, end_shape_index: 9 },
+      { speed_limit: 50, begin_shape_index: 9, end_shape_index: 12 },
+      { speed_limit: 120, begin_shape_index: 12, end_shape_index: 30 },
+      { speed_limit: 'unlimited', begin_shape_index: 30, end_shape_index: 31 },
+      { speed_limit: 255, begin_shape_index: 31, end_shape_index: 40 },
+    ],
+  });
+  const limits = parseSpeedLimits(json);
+  assert.deepEqual(limits, [
+    { from: 0, to: 5, kmh: null },
+    { from: 5, to: 12, kmh: 50 },
+    { from: 12, to: 30, kmh: 120 },
+    { from: 30, to: 40, kmh: null },
+  ]);
+  assert.equal(speedLimitAt(limits, 4), null);
+  assert.equal(speedLimitAt(limits, 5), 50);
+  assert.equal(speedLimitAt(limits, 11), 50);
+  assert.equal(speedLimitAt(limits, 12), 120);
+  assert.equal(speedLimitAt(limits, 99), null);
+  assert.equal(speedLimitAt(undefined, 3), null);
+});
+
+test('speedLimitRequest walks the route shape with the limits asked for', () => {
+  const req = JSON.parse(speedLimitRequest([[-3.7, 40.4], [-3.71, 40.41]], 'auto'));
+  assert.deepEqual(req.shape, [{ lat: 40.4, lon: -3.7 }, { lat: 40.41, lon: -3.71 }]);
+  assert.equal(req.shape_match, 'edge_walk');
+  assert.ok(req.filters.attributes.includes('edge.speed_limit'));
+});
+
+test('bridgeLimitGaps: a short unknown stretch between known limits keeps the one before', () => {
+  // Vertices every 50 m.
+  const cumulative = Array.from({ length: 30 }, (_, i) => i * 50);
+  const limits = [
+    { from: 0, to: 10, kmh: 50 },
+    { from: 10, to: 12, kmh: null }, // 100 m roundabout
+    { from: 12, to: 20, kmh: 50 },
+    { from: 20, to: 26, kmh: null }, // 300 m: really unknown
+    { from: 26, to: 29, kmh: 90 },
+  ];
+  assert.deepEqual(bridgeLimitGaps(limits, cumulative), [
+    { from: 0, to: 20, kmh: 50 },
+    { from: 20, to: 26, kmh: null },
+    { from: 26, to: 29, kmh: 90 },
+  ]);
+  // Unknown at the start or the end stays unknown.
+  assert.deepEqual(
+    bridgeLimitGaps(
+      [
+        { from: 0, to: 1, kmh: null },
+        { from: 1, to: 5, kmh: 30 },
+        { from: 5, to: 6, kmh: null },
+      ],
+      cumulative,
+    ),
+    [
+      { from: 0, to: 1, kmh: null },
+      { from: 1, to: 5, kmh: 30 },
+      { from: 5, to: 6, kmh: null },
+    ],
+  );
 });

@@ -2,8 +2,8 @@
 // tagged as navigation guidance and takes transient, may-duck audio focus, so music lowers for a
 // prompt and comes back after it, the way Android Auto and car head units expect. Not expo-speech:
 // it sets neither. A phone without any engine (no Google services, nothing installed) stays
-// silent; guidance goes on. The reroute chime is two soft notes made here (no sound file), played
-// the same way.
+// silent; guidance goes on. The chimes (a reroute, going over the speed limit) are soft notes made
+// here (no sound file), played the same way.
 package expo.modules.nomadvoice
 
 import android.content.Context
@@ -23,8 +23,13 @@ import java.util.Locale
 
 private const val UTTERANCE = "nomad-prompt"
 private const val CHIME_RATE = 22050
-/** G5 then C6, seconds: keep in step with iOS's Chime. */
-private val CHIME_NOTES = listOf(784.0 to 0.11, 1047.0 to 0.2)
+/** Hz and seconds per chime (0 Hz: silence); keep in step with iOS's Chime. */
+private val CHIME_NOTES = mapOf(
+  // Two soft rising notes, G5 then C6.
+  "reroute" to listOf(784.0 to 0.11, 1047.0 to 0.2),
+  // A short double beep, D6.
+  "speed" to listOf(1175.0 to 0.09, 0.0 to 0.07, 1175.0 to 0.09),
+)
 
 class NomadVoiceModule : Module() {
   private var tts: TextToSpeech? = null
@@ -35,10 +40,16 @@ class NomadVoiceModule : Module() {
   private var focus: AudioFocusRequest? = null
   private val main = Handler(Looper.getMainLooper())
   private var chiming: AudioTrack? = null
-  private val chimeSamples: ShortArray by lazy {
+  private val chimeSamples = HashMap<String, ShortArray>()
+
+  private fun samples(kind: String): ShortArray = chimeSamples.getOrPut(kind) {
     val out = ArrayList<Short>()
-    for ((hz, seconds) in CHIME_NOTES) {
+    for ((hz, seconds) in CHIME_NOTES[kind] ?: CHIME_NOTES.getValue("reroute")) {
       val n = (CHIME_RATE * seconds).toInt()
+      if (hz == 0.0) {
+        repeat(n) { out.add(0) }
+        continue
+      }
       for (i in 0 until n) {
         val t = i.toDouble() / CHIME_RATE
         // A quick attack and an exponential fade: a bell, not a beep.
@@ -71,8 +82,8 @@ class NomadVoiceModule : Module() {
       }
     }.runOnQueue(Queues.MAIN)
 
-    AsyncFunction("chime") { ->
-      chime()
+    AsyncFunction("chime") { kind: String ->
+      chime(kind)
     }.runOnQueue(Queues.MAIN)
 
     AsyncFunction("stop") { ->
@@ -129,9 +140,9 @@ class NomadVoiceModule : Module() {
     engine.speak(text, TextToSpeech.QUEUE_ADD, null, UTTERANCE)
   }
 
-  private fun chime() {
+  private fun chime(kind: String) {
     if (chiming != null) return
-    val pcm = chimeSamples
+    val pcm = samples(kind)
     val track = try {
       AudioTrack.Builder()
         .setAudioAttributes(

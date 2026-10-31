@@ -64,3 +64,19 @@ export function scaleWater(liters: number, system: MeasurementSystem): { value: 
   const gallons = liters / LITERS_PER_US_GALLON;
   return { value: gallons, unit: 'gal', fractionDigits: gallons < 9.95 ? 1 : 0 };
 }
+
+const KMH_PER_MPH = 1.609344;
+
+/** A speed (m/s, from the GPS) as the region's road signs read it: km/h, or mph in the US and the UK. */
+export function scaleSpeed(mps: number, system: MeasurementSystem): { value: number; unit: 'km/h' | 'mph' } {
+  const kmh = Math.max(0, mps) * 3.6;
+  return system === 'metric' ? { value: Math.round(kmh), unit: 'km/h' } : { value: Math.round(kmh / KMH_PER_MPH), unit: 'mph' };
+}
+
+/**
+ * A posted limit (km/h, as the routing data keeps it) in the region's units. Signs in mph come in
+ * steps of 5 and were stored rounded to whole km/h (25 mph → 40 km/h): back to the nearest 5.
+ */
+export function scaleSpeedLimit(kmh: number, system: MeasurementSystem): number {
+  return system === 'metric' ? kmh : Math.round(kmh / KMH_PER_MPH / 5) * 5;
+}

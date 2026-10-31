@@ -147,7 +147,74 @@ export type Route = {
   hasToll: boolean;
   hasHighway: boolean;
   hasFerry: boolean;
+  /** By car: the posted speed limits along the shape (speedLimitRequest); absent when not asked or not answered. */
+  limits?: SpeedLimit[];
 };
+
+/**
+ * A stretch of the route with one posted speed limit: shape vertices `from`..`to`, km/h, null where
+ * OpenStreetMap doesn't say (no sign is shown then, never a guess).
+ */
+export type SpeedLimit = { from: number; to: number; kmh: number | null };
+
+/**
+ * The limits along a route: Valhalla's trace_attributes walking the route's own shape (edge_walk, so
+ * its edges' shape indices are the route's vertices). The route answer itself carries none.
+ */
+export function speedLimitRequest(shape: [number, number][], costing: Costing): string {
+  return JSON.stringify({
+    shape: shape.map(([lon, lat]) => ({ lat, lon })),
+    costing,
+    shape_match: 'edge_walk',
+    filters: { attributes: ['edge.speed_limit', 'edge.begin_shape_index', 'edge.end_shape_index'], action: 'include' },
+  });
+}
+
+/**
+ * Valhalla's per-edge limits as stretches, neighbours with the same limit merged. Valhalla says
+ * nothing for an unknown limit, and "unlimited" (or 255) for a road without one: neither shows a number.
+ */
+export function parseSpeedLimits(json: string): SpeedLimit[] {
+  const edges = (JSON.parse(json) as { edges?: { speed_limit?: number | string; begin_shape_index?: number; end_shape_index?: number }[] }).edges ?? [];
+  const out: SpeedLimit[] = [];
+  for (const e of edges) {
+    if (typeof e.begin_shape_index !== 'number' || typeof e.end_shape_index !== 'number') continue;
+    const kmh = typeof e.speed_limit === 'number' && e.speed_limit > 0 && e.speed_limit < 255 ? e.speed_limit : null;
+    const last = out[out.length - 1];
+    if (last && last.kmh === kmh && last.to === e.begin_shape_index) last.to = e.end_shape_index;
+    else out.push({ from: e.begin_shape_index, to: e.end_shape_index, kmh });
+  }
+  return out;
+}
+
+/** An unknown stretch shorter than this between two known limits keeps the one before. */
+const LIMIT_GAP_M = 200;
+
+/**
+ * A roundabout or a junction's few metres often carry no maxspeed in OpenStreetMap, inside a stretch
+ * that does: the sign would vanish and come back (and the over-the-limit warning start over). The
+ * last sign still applies there, so a short unknown stretch between two known ones takes the limit
+ * before it. `cumulative`: metres along the shape at each vertex.
+ */
+export function bridgeLimitGaps(limits: SpeedLimit[], cumulative: number[]): SpeedLimit[] {
+  const out: SpeedLimit[] = [];
+  for (const [i, l] of limits.entries()) {
+    const prev = out[out.length - 1];
+    const next = limits[i + 1];
+    const length = (cumulative[l.to] ?? 0) - (cumulative[l.from] ?? 0);
+    const kmh = l.kmh === null && prev?.kmh != null && next?.kmh != null && length < LIMIT_GAP_M ? prev.kmh : l.kmh;
+    if (prev && prev.kmh === kmh && prev.to === l.from) prev.to = l.to;
+    else out.push({ ...l, kmh });
+  }
+  return out;
+}
+
+/** The limit where the user is: on the route's segment `segment` (shape[segment] → shape[segment + 1]). */
+export function speedLimitAt(limits: SpeedLimit[] | undefined, segment: number): number | null {
+  if (!limits) return null;
+  // A vertex where two edges meet belongs to the one starting there.
+  return limits.find((l) => segment >= l.from && segment < l.to)?.kmh ?? null;
+}
 
 type ValhallaManeuver = {
   type: number;

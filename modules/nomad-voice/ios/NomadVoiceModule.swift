@@ -2,8 +2,8 @@
 // audio session alone, so a prompt neither ducks the music nor plays with the screen locked, and
 // CarPlay expects a navigation app's prompts in the voice-prompt mode (the car lowers its audio and
 // routes ours to the speakers). Here the session is set for each prompt and released after it,
-// telling the other app to come back (`.notifyOthersOnDeactivation`). The reroute chime plays in
-// the same session: two soft notes made here, no sound file.
+// telling the other app to come back (`.notifyOthersOnDeactivation`). The chimes (a reroute, going
+// over the speed limit) play in the same session: soft notes made here, no sound file.
 import AVFoundation
 import ExpoModulesCore
 
@@ -21,7 +21,7 @@ public final class NomadVoiceModule: Module {
   }
   /// Voices per language, best quality first (the lookup reads every installed voice).
   private var voices: [String: AVSpeechSynthesisVoice?] = [:]
-  private lazy var chimeSound = Chime.wav()
+  private var chimeSounds: [String: Data] = [:]
   private var player: AVAudioPlayer?
   private lazy var playerListener = PlayerListener { [weak self] in
     self?.queue.async {
@@ -40,8 +40,10 @@ public final class NomadVoiceModule: Module {
       self.synth.speak(utterance)
     }.runOnQueue(queue)
 
-    AsyncFunction("chime") {
-      guard self.player == nil, self.activate(), let player = try? AVAudioPlayer(data: self.chimeSound) else { return }
+    AsyncFunction("chime") { (kind: String) in
+      let sound = self.chimeSounds[kind] ?? Chime.wav(Chime.notes(kind))
+      self.chimeSounds[kind] = sound
+      guard self.player == nil, self.activate(), let player = try? AVAudioPlayer(data: sound) else { return }
       player.delegate = self.playerListener
       player.play()
       self.player = player
@@ -125,15 +127,24 @@ private final class PlayerListener: NSObject, AVAudioPlayerDelegate {
   }
 }
 
-/// The reroute chime: two soft rising notes (G5, C6), a WAV in memory. Keep in step with Android's.
+/// The chimes, WAVs made in memory. Keep in step with Android's.
 enum Chime {
   static let rate = 22050
-  static let notes: [(hz: Double, seconds: Double)] = [(784, 0.11), (1047, 0.2)]
 
-  static func samples() -> [Int16] {
+  /// "reroute": two soft rising notes (G5, C6). "speed": a short double beep (D6), a pause between.
+  /// A note of 0 Hz is silence.
+  static func notes(_ kind: String) -> [(hz: Double, seconds: Double)] {
+    kind == "speed" ? [(1175, 0.09), (0, 0.07), (1175, 0.09)] : [(784, 0.11), (1047, 0.2)]
+  }
+
+  static func samples(_ notes: [(hz: Double, seconds: Double)]) -> [Int16] {
     var out: [Int16] = []
     for note in notes {
       let n = Int(Double(rate) * note.seconds)
+      if note.hz == 0 {
+        out.append(contentsOf: repeatElement(0, count: n))
+        continue
+      }
       for i in 0..<n {
         let t = Double(i) / Double(rate)
         // A quick attack and an exponential fade: a bell, not a beep.
@@ -144,8 +155,8 @@ enum Chime {
     return out
   }
 
-  static func wav() -> Data {
-    let pcm = samples()
+  static func wav(_ notes: [(hz: Double, seconds: Double)]) -> Data {
+    let pcm = samples(notes)
     var data = Data()
     func put<T>(_ value: T) { withUnsafeBytes(of: value) { data.append(contentsOf: $0) } }
     let bytes = UInt32(pcm.count * 2)

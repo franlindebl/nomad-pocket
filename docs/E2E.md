@@ -377,6 +377,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `search-input`, `search-result`, `search-coordinates` | search sheet field, result rows, "go to coordinates" row |
   | `place-card`, `place-guide`, `place-save`, `place-close` | selected place card and its actions |
   | `place-address` | the card's "street, number · locality" line, for a place tapped on the map |
+  | `nav-speed`, `nav-speed-limit` | while navigating by car or bike: the speed badge, and by car the posted limit sign above it (needs fixes with a speed: `simctl location start`, not Maestro's `travel`) |
   | `place-call` | one "Llamar" button per phone number of the place (several numbers = several buttons) |
   | `map-credit` | the "© OpenStreetMap contributors" pill shown when the map first appears (gone after ~5 s or the first gesture) |
   | `guidance-panel`, `guidance-distance`, `guidance-stop` | guidance panel: remaining distance (route) or distance + direction (straight line), stop |
