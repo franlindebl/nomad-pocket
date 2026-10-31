@@ -16,6 +16,7 @@ import { NotEnoughStorageError } from '@/features/downloads/manager';
 import { indexDocuments } from '@/features/library/documents';
 import { AlreadyInstalledError, registerZimFile } from '@/features/library/register';
 import { shareArchive } from '@/features/library/share';
+import { useUpdates } from '@/features/updates/updates';
 import { formatBytes, formatMB } from '@/lib/format';
 import { contentDir, deleteFile, freeBytes, hasRoomFor, partialDir } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
@@ -69,6 +70,9 @@ export default function LibraryScreen() {
   const { t: tc } = useTranslation();
   const langs = useSettings((s) => s.contentLanguages);
   const archives = useItems('zim').filter((i) => !i.isCourse);
+  // Archives (and courses) with a newer edition: a badge on their row, and the way to the updates sheet.
+  const zimUpdates = useUpdates().filter((u) => u.kind === 'zim' && !u.inFlight);
+  const outdated = new Set(zimUpdates.map((u) => u.itemId));
   const [importing, setImporting] = useState(false);
 
   const importZim = async () => {
@@ -109,11 +113,15 @@ export default function LibraryScreen() {
         </View>
       </PressableScale>
 
-      <SectionHeader title={t('onDevice')} />
+      <SectionHeader
+        title={t('onDevice')}
+        action={zimUpdates.length ? tc('updates:downloadsRow', { count: zimUpdates.length }) : undefined}
+        onAction={() => router.push('/updates')}
+      />
       {archives.length ? (
         <ListGroup>
           {archives.map((item) => (
-            <ArchiveRow key={item.id} item={item} onLongPress={() => itemActions(item)} />
+            <ArchiveRow key={item.id} item={item} outdated={outdated.has(item.id)} onLongPress={() => itemActions(item)} />
           ))}
         </ListGroup>
       ) : (
@@ -193,14 +201,15 @@ export default function LibraryScreen() {
   );
 }
 
-function ArchiveRow({ item, onLongPress }: { item: InstalledItem; onLongPress: () => void }) {
+function ArchiveRow({ item, outdated, onLongPress }: { item: InstalledItem; outdated: boolean; onLongPress: () => void }) {
+  const { t } = useTranslation('updates');
   const { colors } = useTheme();
   const illustration = typeof item.meta.illustration === 'string' ? item.meta.illustration : null;
   const Icon = iconByName(undefined);
   return (
     <ListRow
       title={item.title}
-      subtitle={[item.description, formatBytes(item.sizeBytes)].filter(Boolean).join(' · ')}
+      subtitle={[outdated ? t('available') : null, item.description, formatBytes(item.sizeBytes)].filter(Boolean).join(' · ')}
       leading={
         illustration ? (
           <Image source={{ uri: illustration }} style={[styles.illustration, { backgroundColor: colors.surfaceAlt }]} />

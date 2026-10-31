@@ -1,15 +1,17 @@
-import { Download, WifiOff } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { Download, RefreshCw, WifiOff } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 
 import { Platform, View } from 'react-native';
 
-import { Button, Card, EmptyState, ListGroup, Row, Screen, Text } from '@/components/ui';
+import { Button, Card, EmptyState, IconBadge, ListGroup, ListRow, Row, Screen, Text } from '@/components/ui';
 import { DownloadRow } from '@/features/downloads/DownloadRow';
 import { groupDownloads } from '@/features/downloads/groups';
 import { keepsAwake } from '@/features/downloads/keep-awake';
 import { allowMobileData, useActiveDownloads, useDownloads, waitingReason } from '@/features/downloads/manager';
 import { usePreparingCountries } from '@/features/maps/countries';
 import { PreparingCountries } from '@/features/maps/PreparingCountries';
+import { useUpdates } from '@/features/updates/updates';
 import { useSettings } from '@/stores/settings';
 import { space, useTheme } from '@/theme';
 
@@ -24,6 +26,8 @@ export default function DownloadsScreen() {
   const waitingForWifi = rows.filter((r) => r.entry.status === 'queued' && r.waiting === 'wifi');
   // Downloaded countries still being prepared: the last step of their download.
   const preparing = usePreparingCountries();
+  // Newer versions of what is installed: the sheet to update them (one level up the stack).
+  const updates = useUpdates().filter((u) => !u.inFlight).length;
   return (
     <Screen contentStyle={{ paddingTop: space.lg }}>
       {/* Android form sheets have no native header. */}
@@ -52,6 +56,17 @@ export default function DownloadsScreen() {
             onPress={() => allowMobileData(waitingForWifi.flatMap((r) => r.entry.records.map((x) => x.id)))}
           />
         </Card>
+      ) : null}
+      {updates ? (
+        <ListGroup style={{ marginBottom: space.lg }}>
+          <ListRow
+            testID="downloads-updates"
+            title={t('updates:downloadsRow', { count: updates })}
+            leading={<IconBadge icon={RefreshCw} hue="survival" size={36} />}
+            chevron
+            onPress={() => router.push('/updates')}
+          />
+        </ListGroup>
       ) : null}
       {downloads.length === 0 && preparing.length === 0 ? (
         <EmptyState icon={Download} hue="survival" title={t('downloads.empty')} body={t('downloads.emptyBody')} />

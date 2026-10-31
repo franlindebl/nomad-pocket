@@ -106,6 +106,7 @@
     "kitExpired_other": "{{count}} cosas han caducado: cámbialas",
     "kitTodo": "Agua, comida, linterna, radio, botiquín…",
     "mapUpdate": "Hay una versión más reciente: actualízalo mientras tengas conexión",
+    "zimUpdate": "Hay una versión más reciente: actualízala mientras tengas conexión",
     "planMeeting": "Punto de encuentro listo · añade contactos",
     "planContacts_one": "{{count}} contacto · falta el punto de encuentro",
     "planContacts_other": "{{count}} contactos · falta el punto de encuentro"

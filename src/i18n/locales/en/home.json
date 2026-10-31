@@ -106,6 +106,7 @@
     "kitExpired_other": "{{count}} items have expired: replace them",
     "kitTodo": "Water, food, flashlight, radio, first-aid kit…",
     "mapUpdate": "A newer version is out: update it while you're online",
+    "zimUpdate": "A newer version is out: update it while you're online",
     "planMeeting": "Meeting point set · add contacts",
     "planContacts_one": "{{count}} contact · no meeting point yet",
     "planContacts_other": "{{count}} contacts · no meeting point yet"

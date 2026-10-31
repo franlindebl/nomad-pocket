@@ -44,6 +44,7 @@ can pick up without re-deriving anything.
 | CarPlay navigation (`docs/CARPLAY_PLAN.md`) | built on branch `carplay` (2026-10-31): map, destinations (search, saved, Emergencias cerca), trip preview, turn-by-turn session; **tested on the CarPlay simulator screen** (Xcode 26.5's Simulator + iOS 26.5 + shim, `scripts/carplay/carplay-sim.sh`), every flow in the plan's "Testing" list works; the entitlement must be requested by the owner, then a real car |
 | Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search; the most capable installed model is the default; on-device dictation; reads the PDFs inside archives (document index) and the family plan; copy and regenerate an answer) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android: app created in Play Console, App content forms done (PEGI 3 since 2026-10-29, see `docs/store/play-listing.md`), 1.1.0 (23) on internal testing, Android screenshots and en-US listing done, 1.1.0 (24) for the closed test **rejected** 2026-10-29 (health apps need an organization account): Android now ships without health features; listing, screenshots, Health apps and content rating redone; **1.1.0 (26) approved for the closed test 2026-10-30**; then 12 testers × 14 days and production (`docs/ANDROID_PLAY.md`) |
+| Content updates (`docs/CONTENT_UPDATES_PLAN.md`): weekly Kiwix check of installed archives, countries' newer builds, `/updates` sheet, "Actualizar todo" that keeps the old copy until the new one is in, delete-first only on purpose, Home card for urgent ones | done 2026-10-31 — iOS sim (one update and "Actualizar todo" end to end against live Kiwix); delete-first and countries in the sheet not exercised on a device; Android not run |
 | Preparedness (family plan, emergency kit with expiry reminders, printable PDF, offline guides) | done — iOS sim + Android emulator (E2E) |
 | E2E suite (Maestro) + pre-commit hook | done |
 | Pre-release audit (2026-10-26): ~60 verified findings fixed in code and docs | merged to main; device checks and the deferred items below pending |
@@ -65,6 +66,11 @@ can pick up without re-deriving anything.
 Roughly by value. Items A, U and 0 are in progress; 3, 4 and 7 are partly done (see each); the rest are not
 started. (Preparedness was added
 on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
+
+CU. **Content updates, phase 3** (`docs/CONTENT_UPDATES_PLAN.md`): check the delete-first path on a phone with
+   little room and a country update from `/updates` (both built, not exercised); Android run; an E2E flow (needs
+   an outdated archive fixture: rename a fixture to an older date and set `items.version`, as done by hand on
+   2026-10-31); later an optional "update automatically on Wi-Fi" switch.
 
 A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check in ~2 days, with the
    country-coverage work**:
@@ -314,6 +320,27 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-31 — Content updates: tell the person their data is old, update it without losing it
+
+- Owner: nothing said that maps, guides, Wikipedia or courses had newer versions; show it, let them update, and
+  when there is room keep the old version until the new one is in; without room, delete first with the risk said.
+  Plan with the decisions: `docs/CONTENT_UPDATES_PLAN.md` (newer version, not "older than a month": Kiwix
+  publishes only when the source changes, maps every month).
+- New `src/features/updates`: weekly OPDS check of installed archives (kv `updates.zim`, 10 s after launch and on
+  foreground, "Buscar ahora"), one list with countries' newer builds, urgency (≥ 3 months old with a newer one, or
+  a pack the engine can't read), "Actualizar todo" (starts what fits, the rest as old copies are freed;
+  `updates-core.runStep`, tested), delete-first with preflight (connection allowed by "Solo con Wi-Fi", new file
+  reachable, room once the old one is gone; nothing deleted otherwise; user data kept). `/updates` form sheet;
+  Home card for urgent ones (online); row in Downloads; "Actualización disponible" on Library rows and a link in
+  its header; Home's map row now warns only for urgent updates (or > 6 months), not after every monthly build;
+  guides and Wikipedia rows warn too. `countries.ts`: `buildCountries`/`currentCountries`, `incompatible`,
+  `countryInFlight`, `outdatedPieces`. Privacy policy (es + en): the weekly check, names only.
+- Verified on a new iOS 27 simulator (`NP-updates`; the other session's E2E had `NP-e2e`), Release app with this
+  JS bundle: with `devdocs_en_node` faked as 2025-06 the check found 2026-08, Home showed the card, the row
+  updated it (old file deleted, same id); then two faked archives with "Actualizar todo" (13.1 MB) both replaced.
+  Found on the way: Kiwix renamed `wikipedia_en_100_mini` to `wikipedia_en_100` (no flavour), so that fixture
+  gets no update offer (right: another flavour is another product). tsc, lint, tests (444), i18n clean.
 
 ### 2026-10-31 — iOS build 26 to TestFlight
 

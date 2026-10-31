@@ -548,6 +548,37 @@ Home show progress while a piece downloads. Nothing else is asked.
   (opened). `recordCourseOpen`, `setLessonDone`, `resetCourse`, `courseProgress`,
   `nextLesson`, `useCourses` (version counter for re-renders).
 
+### Content updates (`src/features/updates`, `src/app/updates.tsx`; `docs/CONTENT_UPDATES_PLAN.md`)
+- **What counts**: a newer edition exists. ZIM archives: `zim-check.ts` asks Kiwix's OPDS
+  (`resolveLatest`) for every installed archive with a Kiwix name (`kiwixNameOf`: the catalog's
+  `kiwixName`, else the item's catalog id or id; uuid ids of unknown imports and, on Android, health
+  archives are skipped), at most once a week (`register.ts`: 10 s after launch and on every
+  foreground; "Buscar ahora" forces it), and keeps the answers in kv `updates.zim` (offline the last
+  ones stand). Countries: `CountryState.update` (newer map or pack build in the catalogs, or a pack
+  this app's Valhalla can't read: `incompatible`). Models have no versions.
+- **Urgent** (`updates-core.ts isUrgent`): installed data ≥ 3 months old with a newer version, or an
+  incompatible pack. Urgent ones get Home's card (`home-updates`, online only) and the readiness rows'
+  warning (map, guides, Wikipedia; the map row also warns past 6 months, as before). Any update shows
+  in `/updates` (from Downloads and Library's "En el dispositivo" header) and as "Actualización
+  disponible" on Library rows; "Mis mapas" keeps its own ⟳ per country.
+- **Download, then swap**: an archive's update is an ordinary download under the catalog id
+  (`startZim`, meta for `registerZimFile`), whose file name carries the new date; registration
+  replaces the old file once the new one is in (same id: bookmarks, history, course progress,
+  citations stay). A country's is `downloadCountry(…, { update: true })`.
+- **"Actualizar todo"** (`updates.ts updateAll`): a run over the chosen keys in priority order
+  (urgent, then smallest). Each step (`runStep`, pure) starts what fits in free space minus headroom
+  minus what the queue still has to write; the rest waits for running updates to free their old copy
+  (re-stepped on download/content changes, 1 s debounce), and is `blocked` once nothing runs.
+  Failed updates leave the run (retried from Downloads).
+- **Delete first** (`deleteAndUpdate`), only from a row that doesn't fit, after two confirmations:
+  checks a usable connection (Wi-Fi, or mobile data with "Solo con Wi-Fi" off), the new version
+  (ZIM: OPDS again + HEAD on the file; country: both catalogs refresh) and room once the old copy
+  is gone (`fitsAfterFreeing`); only then removes the outdated pieces (a country's outdated map or
+  pack: `outdatedPieces`) with `keepUserData` and downloads. Any check failing throws
+  `UpdatePreflightError` with nothing deleted.
+- `currentCountries()` is `useCountries()` outside React (`buildCountries`); `countryInFlight()`
+  says whether a country's files are on their way.
+
 ### Maps (`src/lib/pmtiles`, `src/features/maps`, `src/app/(tabs)/maps`)
 
 **Extractor** (`src/lib/pmtiles`, pure TS, no `@/` aliases so `node --test` loads it):
@@ -1322,7 +1353,7 @@ Storage layout). `ios/` and `android/` are generated from it.
 |---|---|
 | `github.com/franlindebl/nomad-pocket/releases` (`routing-index`, `routing-<stamp>`; `maps-index`, `maps-<stamp>-<continent>`, stamp = `YYYYMMDD-<run id>`) | routing catalog and packs, country maps catalog and archives, all built by `.github/workflows/country-packages.yml`: our only hosted data. **The two manifests are fetched 4 s after every launch when online** and when a country screen opens; no gating, nothing is sent |
 | `download.kiwix.org` (+ the third-party mirrors of its metalinks) | ZIM files; every https mirror gets a probe of up to 4 MiB, and files download in ranges from several at once |
-| `opds.library.kiwix.org/catalog/v2` | newest ZIM versions, Explore search (the typed text) and thumbnails |
+| `opds.library.kiwix.org/catalog/v2` | newest ZIM versions (at download time, and a weekly check of the installed archives by name: Content updates), Explore search (the typed text) and thumbnails |
 | `build-metadata.protomaps.dev/builds.json`, `build.protomaps.com` | daily planet build, HTTP Range extraction: fallback for a country without a prebuilt map |
 | `huggingface.co` | GGUF models |
 | `overpass-api.de`, `overpass.private.coffee`, `overpass.kumi.systems` (European operators only) | emergency points for a map without bundled points (only the region bbox is sent; public servers, best effort) |
