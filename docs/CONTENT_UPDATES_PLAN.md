@@ -76,8 +76,11 @@ only way is to delete first and download, with the risk that brings. Approved th
 1. Plan (this doc). **Done 2026-10-31.**
 2. Core + ZIM check + updates list + "Actualizar todo" run + `/updates` sheet + Library/Home/
    Downloads entry points + delete-first flow + privacy policy. **2026-10-31 (see PROGRESS).**
-3. Later: optional "update automatically on Wi-Fi"; a notification when an urgent update is found
-   (needs the background fetch the app doesn't have); E2E flow (needs an outdated archive fixture).
+3. E2E: `upd-01-archives`, `upd-02-country` (iOS) and `android-06-updates` against a stand-in
+   catalog of newer editions (`scripts/e2e-updates-feed.py`, `EXPO_PUBLIC_UPDATES_OPDS_URL`;
+   docs/E2E.md, "Content updates"). **Done 2026-10-31.** TestFlight build 27 carries the feature.
+4. Later: optional "update automatically on Wi-Fi"; a notification when an urgent update is found
+   (needs the background fetch the app doesn't have).
 
 ## Risks
 

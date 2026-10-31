@@ -1,0 +1,32 @@
+# UPD-02 — a country whose map and routing pack are older than the catalog's (Andorra seeded as a
+# January build, the local catalog's from October): Home's card, the update from the Updates
+# sheet (map and pack downloaded and swapped in), and "Tus mapas" with the new build's date.
+appId: com.fjlinde.nomadpocket
+tags: [full, updates, seeded-old-country, routing-server, maps-server]
+---
+- runFlow: ../../subflows/launch.yaml
+# The catalogs load ~4 s after launch.
+- extendedWaitUntil:
+    visible: { id: "home-updates" }
+    timeout: 30000
+- tapOn: { id: "home-updates" }
+- extendedWaitUntil:
+    visible: "Andorra.*Mapa y navegación.*"
+    timeout: 10000
+- takeScreenshot: upd-02-01-sheet
+- tapOn: "Andorra.*Mapa y navegación.*"
+- extendedWaitUntil:
+    visible: "Todo al día"
+    timeout: 90000
+- takeScreenshot: upd-02-02-done
+- swipe: { direction: DOWN }
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: "Tus mapas"
+    timeout: 20000
+- tapOn: "Tus mapas"
+- extendedWaitUntil:
+    visible: "Andorra.*oct 2026.*"
+    timeout: 60000
+- assertNotVisible: "Andorra.*Hay un mapa más reciente.*"
+- takeScreenshot: upd-02-03-your-maps

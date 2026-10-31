@@ -41,11 +41,11 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 | Command | Flows | Time | Covers | Needs |
 |---|---|---|---|---|
 | `npm run e2e` | 21 | ~14 min | P0: every screen's main path (incl. map search, Emergencias, road routing and Preparedness) | nothing (offline) |
-| `npm run e2e:full` | 43 | ~27 min | + P1: secondary features (themes, markers, find in page, courses, reminders, PDF…) | nothing (offline) |
-| `npm run e2e:all` | 56 | ~38 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
+| `npm run e2e:full` | 45 | ~30 min | + P1: secondary features (themes, markers, find in page, courses, reminders, PDF…) | nothing (offline) |
+| `npm run e2e:all` | 58 | ~41 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
 | `PLANET_PORT=8766 scripts/e2e.sh --build --tags planet` | 2 | ~12 min | extraction resumed after a kill (`map-22`) and retried after a network failure (`map-23`) (tag `planet`, their own build: rebuild without `PLANET_PORT` before other suites) | nothing (local stand-in planet) |
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape, light and dark | nothing (offline) |
-| `npm run e2e:android` | 4 | ~15 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack | internet, Android emulator |
+| `npm run e2e:android` | 5 | ~18 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack, content updates | internet, Android emulator |
 
 When to run what: smoke before every TestFlight build or after a risky change; full and the
 iPad tour before an App Store release (then look through the iPad screenshots in
@@ -156,6 +156,9 @@ scripts/e2e.sh
      ├─ if tagged `seeded-map`: clone e2e/fixtures/*.pmtiles into Documents/content/maps/
      ├─ if tagged `seeded-route`: clone e2e/fixtures/routing/*.tar into Documents/content/routing/
      ├─ if tagged `seeded-stitch`: clone e2e/fixtures/routing-stitch/* (two packs + crossings) there too
+     ├─ if tagged `seeded-old-country`: Andorra's map and pack into content/{maps,routing} dated
+     │   2026-01-01 (a loose file's build date is its modification time): older than the catalog's
+     ├─ if tagged `updates-server`: serve the stand-in catalog of newer editions (below); else 404
      ├─ if tagged `seeded-model`: clone e2e/fixtures/models/*.gguf into Documents/content/models/
      │   (the app registers loose files there at startup:
      │    src/features/{library,maps,assistant}/register.ts)
@@ -283,6 +286,8 @@ By hand:
 | assistant | `ai-08-dictation` | AI-08 | nightly | — (microphone shown; not tapped: the simulator's audio input aborts the app) |
 | assistant | `ai-09-copy-regenerate` | AI-09 | nightly | seeded (system model: Copy shows "Copiado"; Regenerate answers the last question again) |
 | downloads | `dl-02-controls` | DL-02 | nightly | network |
+| updates | `upd-01-archives` | UPD-01, UPD-02, UPD-03 | full | seeded, updates-server (Home's card, Library's badge and link, the sheet; "Actualizar todo" replaces two archives and leaves the course that can't fit; its delete-first is refused with nothing deleted) |
+| updates | `upd-02-country` | UPD-04 | full | seeded-old-country, routing-server, maps-server (Andorra as a January build: Home's card, update from the sheet, "Tus mapas" with October's build) |
 | prepare | `prep-01-plan` | PREP-01 | smoke | — |
 | prepare | `prep-02-kit` | PREP-02 | smoke | — |
 | prepare | `prep-03-reminder-export` | PREP-03 | full | taps the system notifications alert |
@@ -292,6 +297,28 @@ By hand:
 | android | `android-03-search-emergency` | ANDROID-03 | android | network (Andorra country download) |
 | android | `android-04-prepare` | ANDROID-04 | android | — (offline) |
 | android | `android-05-routing` | ANDROID-05 | android | network (published catalog + Andorra pack from GitHub) |
+| android | `android-06-updates` | ANDROID-06 | android | network (a 1 MB archive from Kiwix), updates-server (its newer edition from the stand-in catalog, through `adb reverse`) |
+
+### Content updates (UPD, ANDROID-06)
+
+The check for newer archive editions (`docs/CONTENT_UPDATES_PLAN.md`) asks
+`EXPO_PUBLIC_UPDATES_OPDS_URL` instead of Kiwix in E2E builds: `scripts/e2e.sh` and
+`scripts/e2e-android.sh` bake `http://localhost:<port>/opds` in and serve the feed that
+`scripts/e2e-updates-feed.py` writes: a "2099-12" edition of `wikipedia_en_100` (mini) and
+`devdocs_en_node` (the fixtures under the new name, so they download and replace the old file) and a
+50 TB one of `freecodecamp_es_all` (never fits: the "no room" and delete-first refusal path). A date no
+real edition reaches, so the fixtures never catch up. On iOS it is served only to `updates-server`
+flows (other flows get a 404: no updates); on Android always, forwarded with `adb reverse`, and the APK
+must allow plain http to localhost: `--build` prebuilds with `NOMAD_E2E=1`
+(`plugins/with-e2e-local-network.js`; a store prebuild removes it). Downloads and Explore keep
+Kiwix's real catalog.
+
+Cases: **UPD-01** newer editions are found and shown (Home's card for old data, Library's badge and
+link, the sheet's rows); **UPD-02** "Actualizar todo" downloads what fits and replaces the old file
+once the new one is in; **UPD-03** an update that can't fit is marked, and its delete-first is refused
+before anything is deleted when even that wouldn't fit; **UPD-04** a country's newer map and pack
+replace the old ones; **ANDROID-06** an archive's update on Android. Not automated: a delete-first update that goes through (it needs a phone
+nearly full; checked by hand, PROGRESS 2026-10-31).
 
 ### Countries in regions (MAP-20, MAP-21)
 
@@ -343,7 +370,8 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
 - Put it in `e2e/flows/<area>/`, named after its main case. Tag `seeded` if it needs the
   ZIM fixtures, `seeded-map` for the map one, `seeded-route` for the routing pack,
   `seeded-stitch` for the two packs to route across,
-  `routing-server` if it downloads a routing pack from the local server, `maps-server` if
+  `routing-server` if it downloads a routing pack from the local server, `updates-server` for the
+  stand-in catalog of newer archive editions, `seeded-old-country` for Andorra as an old build, `maps-server` if
   it needs the local country maps catalog (Andorra), `routing-live`
   if it downloads a published one (needs internet and the live catalog), `seeded-model`
   for the GGUF model, and `network` if it downloads from the internet. A map file

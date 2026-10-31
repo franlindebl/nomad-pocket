@@ -1,0 +1,30 @@
+# ANDROID-06 — content updates on Android: an archive downloaded from Kiwix (1 MB) gets a newer
+# edition from the stand-in catalog that scripts/e2e-android.sh serves through `adb reverse`
+# ("Buscar ahora" in the Updates sheet, opened by link: nothing points to it while there are no
+# updates); updating it downloads the new edition and replaces the old one.
+appId: com.fjlinde.nomadpocket
+tags: [android, network, updates-server]
+---
+- runFlow: ../../subflows/launch.yaml
+- openLink: nomadpocket:///library/resource/devdocs_en_node
+- tapOn: "Descargar · .*"
+- tapOn:   # the emulator is on mobile data: "Descargas solo con Wi-Fi"
+    text: "(?i)usar datos móviles"
+    optional: true
+- extendedWaitUntil:
+    visible: "Abrir"
+    timeout: 120000
+- openLink: nomadpocket:///updates
+- tapOn: { id: "updates-check" }
+- extendedWaitUntil:
+    visible: "Documentación de Node\\.js.*2099.*"
+    timeout: 30000
+- takeScreenshot: 01-update-found
+- tapOn: "Documentación de Node\\.js.*2099.*"
+- tapOn:
+    text: "(?i)usar datos móviles"
+    optional: true
+- extendedWaitUntil:
+    visible: "Todo al día"
+    timeout: 120000
+- takeScreenshot: 02-updated

@@ -168,7 +168,9 @@ under the "not medical advice" banner. Fresh installs (reviewers, closed testers
 2. **Bump** `android.versionCode` in `app.json`; update the "currently" line in `docs/RELEASE.md`; commit.
 3. **Build** from a clean tree at that commit (`docs/RELEASE.md`, "Build an upload"):
    `NOMAD_STORE_BUILD=1 npx expo prebuild --platform android --clean --no-install`, then
-   `cd android && ./gradlew :app:bundleRelease` with `JAVA_HOME` set to Android Studio's jbr.
+   `cd android && ./gradlew :app:bundleRelease` with `JAVA_HOME` set to Android Studio's jbr. (`npm run e2e:android --
+   --build` prebuilds with `NOMAD_E2E=1`, which lets the APK use plain http to localhost for the updates flow;
+   the store prebuild takes that out: check `bundletool dump manifest` has no `networkSecurityConfig`.)
 4. **Verify the AAB**: versionCode; upload certificate SHA-256 `FE:91:1E:57:…:08:58` with
    `"$JAVA_HOME/bin/keytool" -printcert -jarfile <aab>` (the system `keytool` fails: ivm config); permissions
    unchanged (`bundletool dump manifest`). Copy it to `~/Downloads/nomadpocket-<version>-<versionCode>.aab`.

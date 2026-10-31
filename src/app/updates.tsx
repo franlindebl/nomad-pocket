@@ -102,7 +102,7 @@ export default function UpdatesScreen() {
     const what = from && to ? t('row', { from, to, size }) : t('rowNoDate', { size });
     const kind = e.kind === 'country' ? t('kindCountry') : e.isCourse ? t('kindCourse') : null;
     const note = e.broken ? t('broken') : !fitsNow(e) ? t('noRoom') : null;
-    return [[kind, what].filter(Boolean).join(' · '), note].filter(Boolean).join('\n');
+    return [kind, what, note].filter(Boolean).join(' · ');
   };
 
   return (

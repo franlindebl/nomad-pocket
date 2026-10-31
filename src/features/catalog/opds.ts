@@ -232,7 +232,7 @@ export function parseOpdsFeed(xml: string, base: string = OPDS_BASE): OpdsFeed {
 // ---------------------------------------------------------------------------
 // Network
 
-export function buildEntriesUrl(params: SearchParams & { name?: string }): string {
+export function buildEntriesUrl(params: SearchParams & { name?: string }, base: string = OPDS_BASE): string {
   const qs: string[] = [];
   const add = (k: string, v: string | number | undefined) => {
     if (v === undefined || v === '') return;
@@ -245,16 +245,16 @@ export function buildEntriesUrl(params: SearchParams & { name?: string }): strin
   add('name', params.name);
   add('start', params.start);
   add('count', params.count);
-  return `${OPDS_BASE}${ENTRIES_PATH}${qs.length ? `?${qs.join('&')}` : ''}`;
+  return `${base}${ENTRIES_PATH}${qs.length ? `?${qs.join('&')}` : ''}`;
 }
 
-async function fetchFeed(url: string, signal?: AbortSignal): Promise<OpdsFeed> {
+async function fetchFeed(url: string, signal?: AbortSignal, base: string = OPDS_BASE): Promise<OpdsFeed> {
   const res = await fetch(url, {
     signal,
     headers: { Accept: 'application/atom+xml, application/xml;q=0.9, */*;q=0.5' },
   });
   if (!res.ok) throw new Error(`Kiwix catalog request failed: HTTP ${res.status}`);
-  return parseOpdsFeed(await res.text());
+  return parseOpdsFeed(await res.text(), base);
 }
 
 /** Search the online Kiwix library. */
@@ -274,13 +274,14 @@ const FLAVOUR_SUFFIX = /_(mini|nopic|maxi)$/;
  * Resolve the newest published file for a Kiwix book name, or null if unknown.
  * Accepts flavoured names ("wikipedia_es_top_mini"): OPDS indexes books by the
  * unflavoured `<name>`, so the flavour is stripped for the query and matched after.
+ * `base`: another catalog (the E2E suite's stand-in for the content updates check).
  */
-export async function resolveLatest(kiwixName: string, signal?: AbortSignal): Promise<KiwixEntry | null> {
+export async function resolveLatest(kiwixName: string, signal?: AbortSignal, base: string = OPDS_BASE): Promise<KiwixEntry | null> {
   const queries = FLAVOUR_SUFFIX.test(kiwixName)
     ? [kiwixName.replace(FLAVOUR_SUFFIX, ''), kiwixName]
     : [kiwixName];
   for (const name of queries) {
-    const { entries } = await fetchFeed(buildEntriesUrl({ name, count: 100 }), signal);
+    const { entries } = await fetchFeed(buildEntriesUrl({ name, count: 100 }, base), signal, base);
     const matches = entries.filter((e) => e.name === kiwixName);
     if (matches.length > 0) return [...matches].sort(compareNewest)[0];
   }

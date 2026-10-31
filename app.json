@@ -173,6 +173,7 @@
         }
       ],
       "./plugins/with-store-build",
+      "./plugins/with-e2e-local-network",
       [
         "expo-speech-recognition",
         {

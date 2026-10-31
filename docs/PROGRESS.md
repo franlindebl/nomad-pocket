@@ -44,7 +44,7 @@ can pick up without re-deriving anything.
 | CarPlay navigation (`docs/CARPLAY_PLAN.md`) | built on branch `carplay` (2026-10-31): map, destinations (search, saved, Emergencias cerca), trip preview, turn-by-turn session; **tested on the CarPlay simulator screen** (Xcode 26.5's Simulator + iOS 26.5 + shim, `scripts/carplay/carplay-sim.sh`), every flow in the plan's "Testing" list works; the entitlement must be requested by the owner, then a real car |
 | Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search; the most capable installed model is the default; on-device dictation; reads the PDFs inside archives (document index) and the family plan; copy and regenerate an answer) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
 | Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android: app created in Play Console, App content forms done (PEGI 3 since 2026-10-29, see `docs/store/play-listing.md`), 1.1.0 (23) on internal testing, Android screenshots and en-US listing done, 1.1.0 (24) for the closed test **rejected** 2026-10-29 (health apps need an organization account): Android now ships without health features; listing, screenshots, Health apps and content rating redone; **1.1.0 (26) approved for the closed test 2026-10-30**; then 12 testers × 14 days and production (`docs/ANDROID_PLAY.md`) |
-| Content updates (`docs/CONTENT_UPDATES_PLAN.md`): weekly Kiwix check of installed archives, countries' newer builds, `/updates` sheet, "Actualizar todo" that keeps the old copy until the new one is in, delete-first only on purpose, Home card for urgent ones | done 2026-10-31 — iOS sim (one update and "Actualizar todo" end to end against live Kiwix); delete-first and countries in the sheet not exercised on a device; Android not run |
+| Content updates (`docs/CONTENT_UPDATES_PLAN.md`): weekly Kiwix check of installed archives, countries' newer builds, `/updates` sheet, "Actualizar todo" that keeps the old copy until the new one is in, delete-first only on purpose, Home card for urgent ones | done 2026-10-31 — iOS sim + Android emulator E2E (`upd-01`, `upd-02`, `android-06`), delete-first by hand; TestFlight build 27 |
 | Preparedness (family plan, emergency kit with expiry reminders, printable PDF, offline guides) | done — iOS sim + Android emulator (E2E) |
 | E2E suite (Maestro) + pre-commit hook | done |
 | Pre-release audit (2026-10-26): ~60 verified findings fixed in code and docs | merged to main; device checks and the deferred items below pending |
@@ -67,10 +67,9 @@ Roughly by value. Items A, U and 0 are in progress; 3, 4 and 7 are partly done (
 started. (Preparedness was added
 on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
 
-CU. **Content updates, phase 3** (`docs/CONTENT_UPDATES_PLAN.md`): check the delete-first path on a phone with
-   little room and a country update from `/updates` (both built, not exercised); Android run; an E2E flow (needs
-   an outdated archive fixture: rename a fixture to an older date and set `items.version`, as done by hand on
-   2026-10-31); later an optional "update automatically on Wi-Fi" switch.
+CU. **Content updates, next** (`docs/CONTENT_UPDATES_PLAN.md`): the owner tries build 27 on the iPhone; later an
+   optional "update automatically on Wi-Fi" switch. A delete-first update that goes through was checked by hand
+   only (it needs a nearly full phone; E2E covers the refusal).
 
 A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check in ~2 days, with the
    country-coverage work**:
@@ -320,6 +319,28 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-10-31 — Content updates: E2E on iOS and Android
+
+- New flows against a stand-in catalog of newer editions (`scripts/e2e-updates-feed.py`, baked in as
+  `EXPO_PUBLIC_UPDATES_OPDS_URL`; docs/E2E.md, "Content updates"): `upd-01-archives` (Home's card, Library's badge
+  and link, "Actualizar todo" replaces two archives, a 50 TB course is marked and its delete-first refused with
+  nothing deleted), `upd-02-country` (Andorra seeded as a January build, tag `seeded-old-country`, updated from the
+  sheet), `android-06-updates` (an archive downloaded from Kiwix, "Buscar ahora", updated through `adb reverse`).
+  Android needs plain http to localhost in its E2E APK: `plugins/with-e2e-local-network.js` with `NOMAD_E2E=1`
+  (`e2e-android.sh --build` prebuilds with it; a store prebuild removes it). `resolveLatest`/`buildEntriesUrl` take
+  a catalog base. The delete-first check now uses the download manager's network rule (`networkGate`).
+- Results (worktree `e2e-21`, simulator `NP-updates`, port 8775, apart from the other session's `NP-e2e`): updates
+  flows 2/2 (`upd-02` once more after its first version opened "Tus mapas" by link, which iOS asks about), Android
+  tour 5/5. Delete-first that goes through, by hand: a bundle that says nothing fits, Wikipedia 100 → HEAD on the
+  new file, old file deleted, new one in under the same id.
+- Full iOS suite (smoke + full, 45 flows) on that build, paused at the owner's request (other work in progress):
+  34 passed, none failed, 11 not run (the rest of reader, search and settings, and the two updates flows, which
+  passed in their own run). The first attempt stalled when macOS auto-updated Xcode to 27.2: every
+  `simctl` call hung on `xcodebuild -runFirstLaunch` (CoreSimulator missing) until Xcode was opened once; before
+  that a hung Maestro driver (`map-01`, 78 min) left the simulator without its simulated location (`map-10`,
+  `map-12` failed, then passed on the rerun). **Next: the full iOS suite and the Android tour with the owner's
+  other work in.**
 
 ### 2026-10-31 — iOS build 27 to TestFlight
 

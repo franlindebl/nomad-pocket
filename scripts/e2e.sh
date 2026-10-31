@@ -64,6 +64,9 @@ fi
 ROUTING_PORT="${ROUTING_PORT:-8765}"
 export EXPO_PUBLIC_ROUTING_MANIFEST_URL="http://localhost:$ROUTING_PORT/routing-manifest.json"
 export EXPO_PUBLIC_MAPS_MANIFEST_URL="http://localhost:$ROUTING_PORT/maps-manifest.json"
+# The content updates check asks a stand-in catalog (scripts/e2e-updates-feed.py), served for
+# `updates-server` flows only; downloads and Explore keep Kiwix's.
+export EXPO_PUBLIC_UPDATES_OPDS_URL="http://localhost:$ROUTING_PORT/opds"
 
 # Set PLANET_PORT to build an app whose on-device map extraction reads the stand-in planet build
 # (scripts/dev-planet-server.ts, started below for `planet-server` flows) instead of Protomaps.
@@ -92,8 +95,9 @@ xcrun simctl location "$UDID" set 40.4168,-3.7038
 # The country maps catalog (maps-manifest.json) always lists Andorra: the fixture map in
 # e2e/fixtures/maps/ split in two parts, so a country download exercises reassembly.
 SERVER_PID=""
-if printf '%s\n' "${FLOWS[@]}" | xargs grep -lE '^tags:.*[[ ,](routing-server|routing-live|maps-server)[],]' >/dev/null 2>&1; then
+if printf '%s\n' "${FLOWS[@]}" | xargs grep -lE '^tags:.*[[ ,](routing-server|routing-live|maps-server|updates-server)[],]' >/dev/null 2>&1; then
   SERVE="$(mktemp -d)"
+  python3 -I "$ROOT/scripts/e2e-updates-feed.py" "$SERVE" "http://localhost:$ROUTING_PORT" >/dev/null
   if printf '%s\n' "${FLOWS[@]}" | xargs grep -lE '^tags:.*[[ ,]routing-live[],]' >/dev/null 2>&1; then
     curl -fsSL -o "$SERVE/live.json" "https://github.com/franlindebl/nomad-pocket/releases/download/routing-index/routing-manifest.json"
   fi
@@ -187,9 +191,22 @@ reset_app() {
   if grep -qE '^tags:.*[[ ,]seeded-model[],]' "$1"; then
     mkdir -p "$content/models" && cp -c "$ROOT"/e2e/fixtures/models/*.gguf "$content/models/"
   fi
+  # `seeded-old-country`: Andorra's map and pack as a January build (their date is the file's), so the
+  # local catalog's builds are newer: a country update.
+  if grep -qE '^tags:.*[[ ,]seeded-old-country[],]' "$1"; then
+    mkdir -p "$content/maps" "$content/routing"
+    cp "$ROOT/e2e/fixtures/maps/ad.pmtiles" "$content/maps/ad.pmtiles"
+    cp "$ROOT/e2e/fixtures/routing/ad.tar" "$content/routing/ad.tar"
+    touch -t 202601010000 "$content/maps/ad.pmtiles" "$content/routing/ad.tar"
+  fi
   if [[ -n "$SERVER_PID" ]]; then
     if grep -qE '^tags:.*[[ ,]routing-live[],]' "$1"; then cp "$SERVE/live.json" "$SERVE/routing-manifest.json"
     else cp "$SERVE/fixture.json" "$SERVE/routing-manifest.json"; fi
+    # The stand-in catalog of newer editions answers `updates-server` flows only (else 404: no updates).
+    rm -rf "$SERVE/opds"
+    if grep -qE '^tags:.*[[ ,]updates-server[],]' "$1"; then
+      mkdir -p "$SERVE/opds/catalog/v2" && cp "$SERVE/updates-feed.xml" "$SERVE/opds/catalog/v2/entries"
+    fi
   fi
 }
 

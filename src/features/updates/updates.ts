@@ -10,6 +10,7 @@ import { create } from 'zustand';
 import { getItem, removeItem, useContent, type InstalledItem } from '@/features/content/items';
 import { resolveLatest } from '@/features/catalog/opds';
 import { enqueueDownload, NotEnoughStorageError, useDownloads } from '@/features/downloads/manager';
+import { networkGate } from '@/features/downloads/manager-core';
 import { pendingBytes } from '@/features/maps/country-core';
 import { useMapsCatalog, refreshMapsCatalog } from '@/features/maps/country-maps';
 import {
@@ -27,7 +28,7 @@ import { freeBytes, STORAGE_HEADROOM } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
 
 import { byPriority, fitsAfterFreeing, isNewerEdition, isUrgent, parseDataDate, runStep, type RunEntry } from './updates-core';
-import { kiwixNameOf, useZimEditions, type ZimEdition } from './zim-check';
+import { kiwixNameOf, UPDATES_OPDS, useZimEditions, type ZimEdition } from './zim-check';
 
 const ACTIVE = new Set(['queued', 'running', 'paused', 'processing']);
 
@@ -294,10 +295,10 @@ async function reachable(url: string): Promise<boolean> {
 export async function deleteAndUpdate(e: UpdateEntry): Promise<void> {
   if (e.inFlight) return;
   const net = await Network.getNetworkStateAsync().catch(() => null);
-  if (!net || net.isConnected === false || net.isInternetReachable === false) throw new UpdatePreflightError('offline');
-  const wifi = net.type === Network.NetworkStateType.WIFI || net.type === Network.NetworkStateType.ETHERNET;
-  // A download waiting for Wi-Fi would leave the person without either version.
-  if (!wifi && useSettings.getState().wifiOnly) throw new UpdatePreflightError('wifi');
+  // The download manager's own rule: a download waiting for Wi-Fi would leave the person without either version.
+  const gate = net ? networkGate({ type: net.type, isConnected: net.isConnected, isInternetReachable: net.isInternetReachable }, useSettings.getState().wifiOnly) : 'offline';
+  if (gate === 'offline' || gate === 'unknown') throw new UpdatePreflightError('offline');
+  if (gate === 'wifi') throw new UpdatePreflightError('wifi');
   const room = () => {
     const free = freeBytes() - pendingBytes(Object.values(useDownloads.getState().records));
     if (!fitsAfterFreeing(e.needed, e.freed, free, STORAGE_HEADROOM)) throw new UpdatePreflightError('space', e.needed);
@@ -308,7 +309,7 @@ export async function deleteAndUpdate(e: UpdateEntry): Promise<void> {
     const item = e.itemId ? getItem(e.itemId) : null;
     const name = item ? kiwixNameOf(item) : null;
     if (!item || !name) return;
-    const latest = await resolveLatest(name).catch(() => null);
+    const latest = await resolveLatest(name, undefined, UPDATES_OPDS).catch(() => null);
     if (!latest?.url || !isNewerEdition(latest.version, item.version) || !(await reachable(latest.url))) throw new UpdatePreflightError('unreachable');
     const edition: ZimEdition = { name, version: latest.version, url: latest.url, sizeBytes: latest.sizeBytes };
     useZimEditions.setState((s) => ({ latest: { ...s.latest, [item.id]: edition } }));

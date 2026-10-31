@@ -1,0 +1,47 @@
+# UPD-01 — newer editions of the installed archives (the stand-in catalog of scripts/e2e-updates-feed.py):
+# Home's card for old data, Library's badge and link, the Updates sheet; "Actualizar todo" replaces
+# what fits (the old file goes once the new one is in) and leaves what can't fit; that one's
+# delete-first is refused before anything is deleted (50 TB: no room even without the old copy).
+appId: com.fjlinde.nomadpocket
+tags: [full, updates, seeded, updates-server]
+---
+- runFlow: ../../subflows/launch.yaml
+# The check runs ~10 s after launch; Wikipedia 100 (January) is old enough for the card.
+- extendedWaitUntil:
+    visible: { id: "home-updates" }
+    timeout: 45000
+- takeScreenshot: upd-01-01-home
+- tapOn: { id: "books.vertical" }
+- extendedWaitUntil:
+    visible: "Wikipedia 100.*Actualización disponible.*"
+    timeout: 10000
+- assertVisible: "Documentación de Node\\.js.*Actualización disponible.*"
+- tapOn: "3 actualizaciones disponibles"
+- extendedWaitUntil:
+    visible: { id: "updates-all" }
+    timeout: 10000
+- assertVisible: "freeCodeCamp en español.*Curso.*No caben las dos versiones a la vez"
+- assertVisible: "Wikipedia 100.*2099.*"
+- takeScreenshot: upd-01-02-sheet
+- tapOn: { id: "updates-all" }
+# Both small ones download and replace their old copy; the course is left over, "doesn't fit".
+- extendedWaitUntil:
+    visible: { id: "updates-blocked" }
+    timeout: 90000
+- extendedWaitUntil:
+    notVisible: "Documentación de Node\\.js.*2099.*"
+    timeout: 30000
+- assertNotVisible: "Wikipedia 100.*2099.*"
+- assertVisible: "freeCodeCamp en español.*2099.*"
+- takeScreenshot: upd-01-03-after
+- tapOn: "freeCodeCamp en español.*2099.*"
+- assertVisible: "No hay espacio para freeCodeCamp en español"
+- tapOn: "Borrar y descargar"
+- assertVisible: "¿Borrar freeCodeCamp en español primero\\?"
+- tapOn: "Borrar y descargar"
+- extendedWaitUntil:
+    visible: "Ni borrando la versión que tienes hay sitio.*"
+    timeout: 15000
+- tapOn: "OK"
+# Nothing was deleted: the course is still there, still with its update.
+- assertVisible: "freeCodeCamp en español.*2099.*"

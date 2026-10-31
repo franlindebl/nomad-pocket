@@ -17,11 +17,26 @@ AVD="${AVD:-Pixel_API_36}"
 APK="$ROOT/android/app/build/outputs/apk/release/app-release.apk"
 MAESTRO="${MAESTRO:-maestro}"
 
+# The content updates check asks a stand-in catalog of newer editions served below
+# (scripts/e2e-updates-feed.py), forwarded to the emulator's localhost by `adb reverse`.
+UPDATES_PORT="${UPDATES_PORT:-8785}"
+export EXPO_PUBLIC_UPDATES_OPDS_URL="http://localhost:$UPDATES_PORT/opds"
+
 if [[ "${1:-}" == "--build" || ! -f "$APK" ]]; then
   echo "Building ${APK}…"
+  # NOMAD_E2E=1: plain http to localhost allowed (plugins/with-e2e-local-network.js). A store
+  # prebuild (NOMAD_STORE_BUILD=1, docs/ANDROID_PLAY.md) takes it out again.
+  (cd "$ROOT" && NOMAD_E2E=1 npx expo prebuild --platform android --no-install >/dev/null)
   (cd "$ROOT/android" && JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" \
     ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a -q)
 fi
+
+SERVE="$(mktemp -d)"
+python3 -I "$ROOT/scripts/e2e-updates-feed.py" "$SERVE" "http://localhost:$UPDATES_PORT" >/dev/null
+mkdir -p "$SERVE/opds/catalog/v2" && cp "$SERVE/updates-feed.xml" "$SERVE/opds/catalog/v2/entries"
+python3 -m http.server "$UPDATES_PORT" --bind 127.0.0.1 --directory "$SERVE" >/dev/null 2>&1 &
+SERVER_PID=$!
+trap 'kill "$SERVER_PID" 2>/dev/null' EXIT
 
 if ! "$ADB" devices | grep -q "emulator-.*device$"; then
   echo "Starting emulator ${AVD}…"
@@ -32,6 +47,7 @@ if ! "$ADB" devices | grep -q "emulator-.*device$"; then
   until [[ "$("$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == 1 ]]; do sleep 2; done
 fi
 SERIAL="$("$ADB" devices | awk '/^emulator-.*device$/ {print $1; exit}')"
+"$ADB" -s "$SERIAL" reverse "tcp:$UPDATES_PORT" "tcp:$UPDATES_PORT" >/dev/null
 # Mobile data only, so "Wi-Fi only" (on by default) always asks before a download and the
 # flows can require that question ("Usar datos móviles"). Some images connect to AndroidWifi.
 "$ADB" -s "$SERIAL" shell svc wifi disable || true

@@ -6,13 +6,18 @@ import { create } from 'zustand';
 
 import Storage from '@/db/kv';
 import { getResource, isHiddenHealthBook } from '@/features/catalog';
-import { resolveLatest } from '@/features/catalog/opds';
+import { OPDS_BASE, resolveLatest } from '@/features/catalog/opds';
 import { listItems, type InstalledItem } from '@/features/content/items';
 import { HEALTH_FEATURES } from '@/lib/health';
 
 import { checkDue } from './updates-core';
 
 const KEY = 'updates.zim';
+/**
+ * The catalog asked. E2E builds point it at a local stand-in that lists newer editions of the
+ * fixtures (scripts/e2e.sh, scripts/e2e-android.sh); downloads and Explore keep Kiwix's.
+ */
+export const UPDATES_OPDS = process.env.EXPO_PUBLIC_UPDATES_OPDS_URL || OPDS_BASE;
 /** Archives asked about at once (one or two small OPDS requests each). */
 const CONCURRENCY = 3;
 const TIMEOUT_MS = 15_000;
@@ -77,7 +82,7 @@ export async function checkZimEditions(force = false): Promise<void> {
       for (let item = queue.shift(); item; item = queue.shift()) {
         const name = kiwixNameOf(item)!;
         try {
-          const entry = await withTimeout(resolveLatest(name), TIMEOUT_MS);
+          const entry = await withTimeout(resolveLatest(name, undefined, UPDATES_OPDS), TIMEOUT_MS);
           answered++;
           if (entry?.url && entry.version) latest[item.id] = { name, version: entry.version, url: entry.url, sizeBytes: entry.sizeBytes };
         } catch (e) {

@@ -196,3 +196,7 @@ describe('network', () => {
     assert.equal(seen, ctrl.signal);
   });
 });
+
+it('buildEntriesUrl: another catalog (the E2E stand-in for the updates check)', () => {
+  assert.equal(buildEntriesUrl({ name: 'devdocs_en_node', count: 100 }, 'http://localhost:8765/opds'), 'http://localhost:8765/opds/catalog/v2/entries?name=devdocs_en_node&count=100');
+});
