@@ -137,6 +137,11 @@ final class CarPlayHub {
     var body = extra
     body["id"] = id
     body["kind"] = kind
+    // The car's own fix: JS may have none (no trip, the phone locked) and the lists sort by distance.
+    if let here = controller?.map.position {
+      body["lat"] = here.latitude
+      body["lon"] = here.longitude
+    }
     emit("onRequest", body)
     DispatchQueue.main.asyncAfter(deadline: .now() + 8) { [weak self] in
       self?.pending.removeValue(forKey: id)?([])

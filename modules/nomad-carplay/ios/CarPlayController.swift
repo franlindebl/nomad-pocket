@@ -36,8 +36,11 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
     mapTemplate.mapDelegate = self
     mapTemplate.guidanceBackgroundColor = UIColor(red: 0.07, green: 0.2, blue: 0.4, alpha: 1)
     mapTemplate.tripEstimateStyle = .dark
+    // The bar and the map buttons stay: "Terminar" one tap away while driving (with the bar
+    // hiding by itself it took two, and in the simulator a tap on it while it showed only hid it).
+    mapTemplate.hidesButtonsWithNavigationBar = false
+    mapTemplate.automaticallyHidesNavigationBar = false
     map.onFollowingChange = { [weak self] following in self?.recentreButton.isHidden = following }
-    recentreButton.isHidden = true
     mapTemplate.mapButtons = [
       recentreButton,
       mapButton("plus.magnifyingglass") { [weak self] in self?.map.zoom(by: 1) },
@@ -46,7 +49,9 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
         self?.mapTemplate.showPanningInterface(animated: true)
       },
     ]
-    interface.setRootTemplate(mapTemplate, animated: false, completion: nil)
+    // After the buttons are on the template: set before, CarPlay showed it anyway.
+    recentreButton.isHidden = map.following
+    interface.setRootTemplate(mapTemplate, animated: false, completion: Self.logged)
   }
 
   func disconnect() {
@@ -75,13 +80,18 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
       return
     }
     if let tripTarget, tripTarget != target { endTrip(arrived: false) }
+    // A new trip (from the phone, or picked in a list): back to the map, where its preview is.
+    if previous?.target != target && interface.templates.count > 1 { interface.popToRootTemplate(animated: true, completion: Self.logged) }
     if let finished, finished != target { self.finished = nil }
 
     if g.navigating {
       if previewing { hidePreview() }
       // Arrived: the session ends; guidance itself ends a minute later (or on "Finalizar").
       if g.arrived {
-        if session != nil { endTrip(arrived: true) }
+        if session != nil {
+          endTrip(arrived: true)
+          announceArrival(at: target)
+        }
         finished = target
       } else {
         if session == nil && finished != target { startSession(for: target) }
@@ -96,9 +106,9 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
 
   func alert(_ message: String, button: String) {
     let ok = CPAlertAction(title: button, style: .cancel) { [weak self] _ in
-      self?.interface.dismissTemplate(animated: true, completion: nil)
+      self?.interface.dismissTemplate(animated: true, completion: Self.logged)
     }
-    interface.presentTemplate(CPAlertTemplate(titleVariants: [message], actions: [ok]), animated: true, completion: nil)
+    interface.presentTemplate(CPAlertTemplate(titleVariants: [message], actions: [ok]), animated: true, completion: Self.logged)
   }
 
   // MARK: Trip preview
@@ -120,7 +130,10 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
     mapTemplate.showTripPreviews([trip], textConfiguration: text)
     if let summary = g.summary { mapTemplate.update(estimates(summary), for: trip, with: .default) }
     previewing = true
-    map.showOverview(of: target)
+    // Once the preview card is up: the map's safe area then leaves it out.
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+      if self?.previewing == true { self?.map.showOverview(of: target) }
+    }
   }
 
   private func hidePreview() {
@@ -177,6 +190,17 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
     trip = nil
     tripTarget = nil
     map.recentre()
+  }
+
+  /// "Has llegado" over the map for a while; its button ends guidance now (else it ends by itself a
+  /// minute after arriving, as on the phone).
+  private func announceArrival(at target: CarTarget) {
+    guard let strings else { return }
+    let end = CPAlertAction(title: strings.end, style: .default) { _ in CarPlayHub.shared.emit("onEnd") }
+    let alert = CPNavigationAlert(
+      titleVariants: [strings.arrived], subtitleVariants: [target.name], image: UIImage(systemName: "flag.checkered"),
+      primaryAction: end, secondaryAction: nil, duration: 10)
+    mapTemplate.present(navigationAlert: alert, animated: true)
   }
 
   private func makeManeuver(_ step: CarStep) -> CPManeuver {
@@ -244,14 +268,14 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
       title: strings.destinations,
       sections: [CPListSection(items: items), CPListSection(items: nearby, header: strings.emergency, sectionIndexTitle: nil)]
     )
-    interface.pushTemplate(list, animated: true, completion: nil)
+    interface.pushTemplate(list, animated: true, completion: Self.logged)
   }
 
   private func pushResults(title: String, _ results: [CarItem], empty: String) {
     let items = results.prefix(CPListTemplate.maximumItemCount).map(listItem)
     let list = CPListTemplate(title: title, sections: [CPListSection(items: Array(items))])
     if items.isEmpty { list.emptyViewSubtitleVariants = [empty] }
-    interface.pushTemplate(list, animated: true, completion: nil)
+    interface.pushTemplate(list, animated: true, completion: Self.logged)
   }
 
   private func listItem(_ r: CarItem) -> CPListItem {
@@ -266,13 +290,13 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
 
   private func pick(_ r: CarItem) {
     CarPlayHub.shared.emit("onPick", ["name": r.title, "lat": r.lat, "lon": r.lon])
-    interface.popToRootTemplate(animated: true, completion: nil)
+    interface.popToRootTemplate(animated: true, completion: Self.logged)
   }
 
   private func showSearch() {
     let search = CPSearchTemplate()
     search.delegate = self
-    interface.pushTemplate(search, animated: true, completion: nil)
+    interface.pushTemplate(search, animated: true, completion: Self.logged)
   }
 
   func searchTemplate(_ searchTemplate: CPSearchTemplate, updatedSearchText searchText: String, completionHandler: @escaping ([CPListItem]) -> Void) {
@@ -317,6 +341,12 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
   }
 
   // MARK: Helpers
+
+  /// CarPlay raises an exception when a template call fails and no completion handler was passed
+  /// (a pop with nothing to pop killed the app): every call gets this one.
+  private static let logged: (Bool, Error?) -> Void = { _, error in
+    if let error { NSLog("[carplay] template call failed: %@", error.localizedDescription) }
+  }
 
   private func mapButton(_ symbol: String, _ action: @escaping () -> Void) -> CPMapButton {
     let button = CPMapButton { _ in action() }

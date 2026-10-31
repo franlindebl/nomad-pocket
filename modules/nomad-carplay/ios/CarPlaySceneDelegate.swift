@@ -14,8 +14,8 @@ public final class NomadCarPlaySceneDelegate: UIResponder, CPTemplateApplication
     to window: CPWindow
   ) {
     // Opened from the car with the phone app not running: start React Native behind it.
-    CarPlayBoot.ensureReactNative()
     let controller = CarPlayController(interface: interfaceController, window: window)
+    CarPlayBoot.ensureReactNative(behind: window)
     self.controller = controller
     CarPlayHub.shared.controller = controller
     CarPlayHub.shared.emit("onConnect")
