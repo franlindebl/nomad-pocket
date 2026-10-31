@@ -179,7 +179,7 @@ and `expo-sqlite/kv-store` elsewhere): use `db()`, `indexDb()` and `@/db/kv`.
 | Table | Holds |
 |---|---|
 | `map_places` (FTS5) | Offline search index: `names` (indexed, `unicode61 remove_diacritics 2`), name, layer (place/poi/road), kind, lat/lon, `importance` (Protomaps min_zoom; `rank` is reserved by FTS5), `source` (map item id, `pois:<item id>`, `near:<item id>` (detail around the user), `places:<item id>` (a pack's or country map's named places), `streets:<item id>` (a country map's street names), or a routing pack's bare item id for its street names) |
-| `map_localities` | Towns/neighbourhoods of the index (lat-indexed) for "Calle Mayor · Soria" context lines |
+| `map_localities` | Towns/neighbourhoods of the index (lat-indexed) for "Calle Mayor · Soria" context lines: `LOCALITY_KINDS`, places where people live (no `place=locality` fields nor single farms, which still go to `map_places`) |
 | `map_address_streets`, `map_addresses` | House numbers from a pack or country map: one row per street name key (`nameKey`) and source, one `WITHOUT ROWID` row per door (street, lat/lon in 1e-5°, number); ~22 B per door |
 | `index_sources` | Per source: index version/zoom/date, plus the `places:<id>` / `addresses:<id>` markers of imported side files |
 | `map_pois` | Emergency points per map item: OSM id (`n…`/`w…`/`r…`, or `t<lat>,<lon>` when taken from the tiles), kind, category, name, operator, phone, opening hours, emergency (ER yes/no) |

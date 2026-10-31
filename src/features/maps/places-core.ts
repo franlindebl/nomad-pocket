@@ -139,19 +139,13 @@ export function tileRows(
   return rows;
 }
 
-/** Place kinds that name a town or neighbourhood: the "· Soria" context of a result (map_localities). Keep in step with scripts/routing/streets.py. */
-export const LOCALITY_KINDS = new Set([
-  'city',
-  'town',
-  'village',
-  'hamlet',
-  'locality',
-  'suburb',
-  'neighbourhood',
-  'quarter',
-  'macrohood',
-  'isolated_dwelling',
-]);
+/**
+ * Place kinds that name a town or neighbourhood: the "· Soria" context of a result (map_localities). Only places where
+ * people live: OSM's place=locality and isolated_dwelling (named fields, hills, single farms) stay searchable but are
+ * never context, since Spain's imported toponyms put one every few hundred metres and the nearest was a name nobody
+ * knows ("Calle Prados Quemados · Maíllos" in Lozoyuela). scripts/routing/streets.py writes those two kinds as well.
+ */
+export const LOCALITY_KINDS = new Set(['city', 'town', 'village', 'hamlet', 'suburb', 'neighbourhood', 'quarter', 'macrohood']);
 
 /** Protomaps-like min_zoom of a routing pack's place kinds (lower ranks first). */
 export const PLACE_RANK: Record<string, number> = { city: 4, town: 7, village: 10, suburb: 11, borough: 11, isolated_dwelling: 14 };
