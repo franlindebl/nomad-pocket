@@ -70,6 +70,12 @@ test('no route: a straight-line step that changes with the compass sector', () =
   assert.match(g.step?.instruction ?? '', /^line [0-7]$/);
   assert.ok(g.step!.index < -99);
   assert.ok(g.summary && g.remaining);
+  // By car, at a car's speed (the phone's note assumes walking).
+  assert.ok(Math.abs(g.remaining!.seconds - g.remaining!.distance.value * 1000 / 13.9) < 120);
+  // The arrow turns with the way the car goes: the target ahead-left when driving east.
+  const east = carGuidance(input({ routing: 'none', route: null, progress: null, position: { ...start, travel: 90 } }), 'metric', text);
+  const north = carGuidance(input({ routing: 'none', route: null, progress: null, position: { ...start, travel: 0 } }), 'metric', text);
+  assert.equal(((north.step!.rotation! - east.step!.rotation!) + 360) % 360, 90);
   // Computing: no step yet.
   assert.equal(carGuidance(input({ routing: 'loading', route: null, progress: null }), 'metric', text).step, null);
 });

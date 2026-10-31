@@ -32,6 +32,8 @@ struct CarStep: Decodable {
   /// The street, for the short variant of the instruction.
   let street: String?
   let estimate: CarEstimate
+  /// The straight-line arrow's angle, degrees clockwise from the car's way ahead.
+  let rotation: Double?
 }
 
 struct CarTarget: Decodable, Equatable {

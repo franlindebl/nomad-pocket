@@ -19,8 +19,8 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
   private var tripTarget: CarTarget?
   private var previewing = false
   private var session: CPNavigationSession?
-  /// The maneuver on the panel: (route, maneuver index), so a new route redraws it.
-  private var shown: (route: Int, index: Int)?
+  /// What the panel shows: (route, maneuver, the one after or -1), so a change redraws it.
+  private var shown: (route: Int, index: Int, then: Int)?
   private var maneuver: CPManeuver?
   private var paused = false
   /// The trip that reached its destination (no new session for it).
@@ -163,13 +163,14 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
       return
     }
     guard let step = g.step else { return }
-    if shown?.route != g.routeId || shown?.index != step.index || paused {
+    let then = g.nextStep?.index ?? -1
+    if shown?.route != g.routeId || shown?.index != step.index || shown?.then != then || paused {
       let first = makeManeuver(step)
       var upcoming = [first]
       if let next = g.nextStep { upcoming.append(makeManeuver(next)) }
       session.upcomingManeuvers = upcoming
       maneuver = first
-      shown = (g.routeId, step.index)
+      shown = (g.routeId, step.index, then)
       paused = false
     } else if let maneuver {
       session.updateEstimates(estimates(step.estimate), for: maneuver)
@@ -208,7 +209,7 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
     var variants = [step.instruction]
     if let street = step.street, !street.isEmpty, street != step.instruction { variants.append(street) }
     m.instructionVariants = variants
-    m.symbolImage = symbol(for: step.icon)
+    m.symbolImage = symbol(for: step.icon, rotation: step.rotation ?? 0)
     m.initialTravelEstimates = estimates(step.estimate)
     return m
   }
@@ -358,8 +359,9 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
     CPTravelEstimates(distanceRemaining: e.distance.measurement, timeRemaining: e.seconds)
   }
 
-  /// routing-core's ManeuverIcon as an SF Symbol, white on the panel.
-  private func symbol(for icon: String) -> UIImage? {
+  /// routing-core's ManeuverIcon as an SF Symbol, white on the panel; the straight-line arrow turned
+  /// toward the target.
+  private func symbol(for icon: String, rotation: Double = 0) -> UIImage? {
     let names: [String: String] = [
       "start": "location.north.line.fill",
       "arrive": "flag.checkered",
@@ -374,11 +376,21 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
       "roundabout": "arrow.triangle.turn.up.right.circle",
       "merge": "arrow.merge",
       "ferry": "ferry",
-      "straight-line": "location.north.line",
+      "straight-line": "location.north.fill",
     ]
     let config = UIImage.SymbolConfiguration(pointSize: 48, weight: .semibold)
     let image = UIImage(systemName: names[icon] ?? "arrow.up", withConfiguration: config) ?? UIImage(systemName: "arrow.up", withConfiguration: config)
-    return image?.withTintColor(.white, renderingMode: .alwaysOriginal)
+    guard let white = image?.withTintColor(.white, renderingMode: .alwaysOriginal) else { return nil }
+    // Always drawn into a bitmap: CarPlay tinted some symbol images blue and left others white.
+    // Turned inside a square canvas, so a diagonal arrow isn't clipped.
+    let side = max(white.size.width, white.size.height)
+    let format = UIGraphicsImageRendererFormat()
+    format.scale = 3
+    return UIGraphicsImageRenderer(size: CGSize(width: side, height: side), format: format).image { ctx in
+      ctx.cgContext.translateBy(x: side / 2, y: side / 2)
+      ctx.cgContext.rotate(by: rotation * .pi / 180)
+      white.draw(in: CGRect(x: -white.size.width / 2, y: -white.size.height / 2, width: white.size.width, height: white.size.height))
+    }
   }
 
   private func categoryIcon(_ id: String) -> String {
