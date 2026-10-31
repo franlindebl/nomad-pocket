@@ -1,0 +1,89 @@
+app.json
+  s_5c276b322e5d3d::t_e8140c3d57819a 28-32,127
+docs/ANDROID_PLAY.md
+  s_5c276b322e5d3d::t_f0b6f4a42acae5 157
+eslint.config.js
+  s_5c276b322e5d3d::t_786ef38e885af9 15
+locales/en.json
+  s_5c276b322e5d3d::t_bf3334ae82cf85 3
+locales/es.json
+  s_5c276b322e5d3d::t_4c50712060906b 3
+modules/nomad-location/android/src/main/java/expo/modules/nomadlocation/NomadLocationModule.kt
+  s_5c276b322e5d3d::t_13074e79febd5f 7-9,42,62,79,142-157,175,192,248
+modules/nomad-location/expo-module.config.json
+  s_5c276b322e5d3d::t_33d574aab7b6ec 2-5
+modules/nomad-location/index.ts
+  s_5c276b322e5d3d::t_53e39f915ada9f 1-3,10,14,16,18,20,22,25,28-34
+modules/nomad-location/ios/NomadLocation.podspec
+  s_5c276b322e5d3d::t_93cda51b102ee7 1-21
+modules/nomad-voice/.gitignore
+  s_5c276b322e5d3d::t_ee21d4c2e60f97 1-3
+modules/nomad-voice/android/build.gradle
+  s_5c276b322e5d3d::t_2a79fc5a0cb5f6 1-15
+modules/nomad-voice/android/src/main/AndroidManifest.xml
+  s_5c276b322e5d3d::t_27b488e1b503ba 1-8
+modules/nomad-voice/android/src/main/java/expo/modules/nomadvoice/NomadVoiceModule.kt
+  s_5c276b322e5d3d::t_491ff9d389fc2f 1-125
+modules/nomad-voice/expo-module.config.json
+  s_5c276b322e5d3d::t_ab2ff563d21843 1-9
+modules/nomad-voice/index.ts
+  s_5c276b322e5d3d::t_238d15394d48ac 1-15
+modules/nomad-voice/ios/NomadVoice.podspec
+  s_5c276b322e5d3d::t_6a6e6c862d2b29 1-21
+modules/nomad-voice/ios/NomadVoiceModule.swift
+  s_5c276b322e5d3d::t_aab08a7990bda5 1-92
+site/privacy.html
+  s_5c276b322e5d3d::t_50936ff7dc1611 68-70,171-172
+src/features/maps/GuidancePanel.tsx
+  s_5c276b322e5d3d::t_9b117a301c84f3 30-31,42,107,250-258
+src/features/maps/guidance.ts
+  s_5c276b322e5d3d::t_3b6914a8359461 52-53,67-74,104,111-116,231-263,306-321,325-328,346-351
+src/features/maps/register.ts
+  s_5c276b322e5d3d::t_3f4afc739cada2 24,77
+src/features/maps/routing-core.ts
+  s_5c276b322e5d3d::t_57d2c4f3ad9c1f 124-127,156-157,188-189
+src/features/maps/stitch-core.test.ts
+  s_5c276b322e5d3d::t_c83bda29b22ce1 116
+src/features/maps/voice-core.test.ts
+  s_5c276b322e5d3d::t_ab156c473ef529 1-86
+src/features/maps/voice-core.ts
+  s_5c276b322e5d3d::t_2e6e551b9d5506 1-115
+src/i18n/locales/en/maps.json
+  s_5c276b322e5d3d::t_bbe0de55dac2c2 154-155,444-460
+src/i18n/locales/es/maps.json
+  s_5c276b322e5d3d::t_cd53f9a77194d9 154-155,444-460
+src/lib/format.ts
+  s_5c276b322e5d3d::t_4282541186216b 25
+src/lib/location.android.ts
+  s_5c276b322e5d3d::t_cf546b82a1d854 10
+src/lib/location.ts
+  s_5c276b322e5d3d::t_480d545790e44d 18
+src/lib/navigation-watch.ts
+  s_5c276b322e5d3d::t_2a72f27b145cc3 1-32
+src/stores/settings.ts
+  s_5c276b322e5d3d::t_913362b25d0256 28-29,41,62,85,102,115
+modules/nomad-location/android/src/main/AndroidManifest.xml
+  s_5c276b322e5d3d::t_9b1c95d7d61944 4-14
+modules/nomad-location/android/src/main/java/expo/modules/nomadlocation/NavigationService.kt
+  s_5c276b322e5d3d::t_3758a526ac5683 1-84
+modules/nomad-location/ios/NomadLocationModule.swift
+  s_5c276b322e5d3d::t_1c713327d2194b 1-91
+src/features/maps/voice.ts
+  s_5c276b322e5d3d::t_b6cc2e9a9bfacf 1-67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e7490849251d262e5c1d185baaa50cafceee3529",
+  "prompts": {},
+  "sessions": {
+    "s_5c276b322e5d3d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7f0e1c0-a465-4aac-b418-fea5fab56f24",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
