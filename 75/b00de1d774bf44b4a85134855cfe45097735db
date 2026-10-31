@@ -1,0 +1,45 @@
+docs/ARCHITECTURE.md
+  s_5c276b322e5d3d::t_f962b7999ab975 1085-1088,1092-1099,1106-1109
+docs/CARPLAY_PLAN.md
+  s_5c276b322e5d3d::t_07495fcc543f9b 83-114
+docs/PROGRESS.md
+  s_5c276b322e5d3d::t_1e8f676e70a27e 44,308-324
+modules/nomad-carplay/index.ts
+  s_5c276b322e5d3d::t_11392b9c298ea0 10-11
+modules/nomad-carplay/ios/CarMapViewController.swift
+  s_5c276b322e5d3d::t_a9a9bd1afbc71e 5-7,14,18-25,27,39,41-43,49-56,61-62,88-89,93-96,102-103,112,119-124,131-132,138,154-161,163-165,167-168,170-172,175-179,181-182,186-187,190-197,199-200,202-203,206,208-274,276-277,283-285,288-289
+modules/nomad-carplay/ios/CarPlayBoot.swift
+  s_5c276b322e5d3d::t_317517b06cef38 4-8,17,27-32,41-43
+modules/nomad-carplay/ios/CarPlayController.swift
+  s_5c276b322e5d3d::t_42783400579b6b 39-42,52-54,83-84,91-94,109,111,133-136,195-205,271,278,293,299,345-350
+modules/nomad-carplay/ios/CarPlayHub.swift
+  s_5c276b322e5d3d::t_68a54877290f45 140-144
+modules/nomad-carplay/ios/CarPlaySceneDelegate.swift
+  s_5c276b322e5d3d::t_9801034f70c520 18
+scripts/carplay/carplay-sim.sh
+  s_5c276b322e5d3d::t_158ca6f2f1ab57 1-118
+src/features/carplay/carplay-core.test.ts
+  s_5c276b322e5d3d::t_d3ada14a1c0cbd 42,51-60
+src/features/carplay/carplay-core.ts
+  s_5c276b322e5d3d::t_f8a2e0c24d3a44 67-69,116-118
+src/features/carplay/carplay.ts
+  s_5c276b322e5d3d::t_856dbf16f25f1a 113-114,117,124-125,159
+modules/nomad-carplay/ios/CarLocationManager.swift
+  s_5c276b322e5d3d::t_2387bbef9f3157 1-5,8,10,25-26,28-30,33,37,41-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "75b00de1d774bf44b4a85134855cfe45097735db",
+  "prompts": {},
+  "sessions": {
+    "s_5c276b322e5d3d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7f0e1c0-a465-4aac-b418-fea5fab56f24",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Fran Linde Blázquez <fran.linde.blazquez@gmail.com>"
+    }
+  }
+}
