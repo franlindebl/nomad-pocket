@@ -117,6 +117,15 @@ A. **After the pre-release audit** (2026-10-26). Deferred on purpose, **re-check
      Apple FM error codes translated. (Done since: Android release builds with it and the Android tour pass,
      2026-10-28; the Maestro suites run on main, smoke + full 43/43.)
 
+C. **CarPlay + voice + background navigation** (branch `carplay`, `docs/CARPLAY_PLAN.md`), built and tested on the
+   simulator's car screen 2026-10-31. Next, in order:
+   - Owner: request the CarPlay navigation entitlement (draft text at the end of `docs/CARPLAY_PLAN.md`).
+   - Hear the voice prompts on a real phone (walk or drive a short route with "Iniciar"), screen locked.
+   - Merge `carplay` into main when the owner is happy (it changes the location purpose string and the privacy
+     policy; the Android build adds a foreground service: Play Console declaration first, `docs/ANDROID_PLAY.md`).
+   - With the entitlement: `entitlement: true` for `./plugins/with-carplay` in `app.json`, TestFlight, a real car;
+     then the Dashboard and instrument cluster (`docs/CARPLAY_PLAN.md`, "Later").
+
 U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNTRY_REGIONS_PLAN.md`):
    done and live. State at 2026-10-27 (resume point for the "rediseño" session, which also owns
    `scripts/routing/*` and `scripts/maps/*` since the "navegador nomad" session closed):
