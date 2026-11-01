@@ -24,7 +24,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 
 - Marketing version: `expo.version` (currently **1.1.0**). Keep `package.json`'s
   `version` equal (not used by the build, but it's what people read).
-- iOS build number: `expo.ios.buildNumber` (currently **"28"**) → `CFBundleVersion`. Bump it
+- iOS build number: `expo.ios.buildNumber` (currently **"29"**) → `CFBundleVersion`. Bump it
   for every upload: App Store Connect rejects a build number it has already seen.
 - Android: `expo.android.versionCode` (currently **26**: 23 and 24 went to Play internal testing, 24 to the rejected closed test; 25 is the build without health features, superseded before review; 26 adds the assistant's no-health fixes). Must grow
   with every Play upload.
@@ -60,6 +60,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.1.0 | 26 | TestFlight 2026-10-31 (TestFlight only): build 25 plus every bottom card low (the (i) hides under them), a chime when a reroute changes the way, "Recentrar" straight to the user, and by car/bike the speed with the road's limit sign and a beep over it; archived from a clean worktree (another session's edits were in the checkout) |
 | 1.1.0 | 27 | TestFlight 2026-10-31 (TestFlight only): build 26 plus content updates (newer versions of archives, courses and country maps: weekly Kiwix check, "Actualizaciones" sheet, "Actualizar todo" keeping the old copy until the new one is in, delete-first only on purpose, Home card for old data); archived from a clean worktree |
 | 1.1.0 | 28 | TestFlight 2026-11-01 (TestFlight only): build 27 plus the emergency guide (202 bilingual cards from official sources or labelled own wording, `/guide` screens, Home's first aid opens it, vital questions answered with the card word for word, guide cards as the assistant's first sources); archived from a clean worktree |
+| 1.1.0 | 29 | TestFlight 2026-11-01 (TestFlight only): build 28 plus the assistant without a model (vital questions answered from the guide, a banner recommends the model for the device) and the guide search fix ("mi padre no respira" → adult CPR, not drowning; "mi madre sangra mucho" → bleeding, not childbirth); archived from a clean worktree |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.

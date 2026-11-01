@@ -333,6 +333,11 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-01 — iOS build 29 to TestFlight
+
+- 1.1.0 (29), TestFlight only: build 28 plus the assistant without a model and the guide search fix (6a8e92c).
+  Smoke E2E 21/21; archived from a clean worktree (store prebuild). Tagged `v1.1.0-29`.
+
 ### 2026-11-01 — Assistant without a model: vital answers from the guide, a banner recommends a model
 
 - Owner: the guide's vital answers don't need a model, so the chat shouldn't need one either; recommend the
