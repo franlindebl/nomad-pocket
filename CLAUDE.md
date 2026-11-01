@@ -132,7 +132,7 @@ docs/               the docs above + screenshots/ + store/
   holds the whole file in memory: a 2 GB map part got the app killed): use `modules/nomad-files`
   `sha256`, and its `copyInto` for multi-GB copies instead of `FileHandle.readBytes` loops in JS.
 - **Pure, tested modules** (`src/lib/{pmtiles,mvt}`, `features/assistant/{rag-core,models,markdown,dictation-core,report-core,suggestions}`,
-  `features/library/html`, `features/catalog/{opds,health-core}`, `features/downloads/{mirrors,errors,groups,segments-core,budget-core,restore-core}`,
+  `features/library/html`, `features/catalog/{opds,health-core,wikipedia-core}`, `features/downloads/{mirrors,errors,groups,segments-core,budget-core,restore-core}`,
   `features/maps/{glyphs,geo,extraction-core,places-core,import-core,prepare-core,emergency-core,routing-core,stitch-core,follow-core,country-core,country-at-core,phone,region-terms,tap-core,speed-core}`, `features/prepare/{kit,document,passages}`, `features/downloads/manager-core`, `lib/units`, `features/library/{register-core,medical,collection,documents-core}`, `features/content/reconcile-core`, `features/assistant/errors`, `features/credits/credits-core`, `features/updates/updates-core`, `db/{migrate-core,schema}`) use no `@/` aliases and import siblings with `.ts` extensions,
   so `node --test --experimental-strip-types` can load them. Keep it that way and add
   `*.test.ts` next to them.

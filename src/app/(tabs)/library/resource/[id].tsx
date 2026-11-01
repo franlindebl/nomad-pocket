@@ -4,7 +4,7 @@ import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Badge, Button, IconBadge, ProgressBar, Row, Text } from '@/components/ui';
 import { getResource, loc } from '@/features/catalog';
-import { startResourceDownload, useResourceState } from '@/features/catalog/DownloadButton';
+import { startResourceDownload, useCoveringWikipedia, useResourceState } from '@/features/catalog/DownloadButton';
 import { categoryHue, categoryIcon } from '@/features/catalog/icons';
 import { removeItem } from '@/features/content/items';
 import { shareArchive } from '@/features/library/share';
@@ -18,6 +18,7 @@ export default function ResourceSheet() {
   const { t: tc } = useTranslation();
   const resource = getResource(id);
   const { installed, download } = useResourceState(id);
+  const covering = useCoveringWikipedia(id);
   if (!resource) return null;
 
   const active = download && ['queued', 'running', 'paused', 'processing'].includes(download.status);
@@ -91,6 +92,22 @@ export default function ResourceSheet() {
             }
           />
         </Row>
+      ) : covering ? (
+        // A bigger Wikipedia already holds this one: no download, it would only duplicate data.
+        <View style={{ gap: space.md }}>
+          <Text variant="callout" color="textSecondary">
+            {tc('wikipedia.includedIn', { name: loc(covering.option.name) })} {tc('wikipedia.includedHint', { name: loc(covering.option.name) })}
+          </Text>
+          <Button
+            title={tc('wikipedia.openIncluding', { name: loc(covering.option.name) })}
+            size="lg"
+            fullWidth
+            onPress={() => {
+              router.back();
+              router.push({ pathname: '/reader/[itemId]', params: { itemId: covering.item.id } });
+            }}
+          />
+        </View>
       ) : (
         <Button
           title={tc('actions.downloadSize', { size: formatMB(resource.sizeMB) })}

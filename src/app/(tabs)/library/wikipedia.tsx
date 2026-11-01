@@ -2,7 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { ListGroup, Screen, SectionHeader, Text } from '@/components/ui';
-import { catalog, getResource } from '@/features/catalog';
+import { catalog, getResource, loc, type WikipediaOption } from '@/features/catalog';
+import { useCoveringWikipedia } from '@/features/catalog/DownloadButton';
 import { ResourceRow } from '@/features/catalog/ResourceRow';
 import { useSettings } from '@/stores/settings';
 import { space } from '@/theme';
@@ -25,14 +26,23 @@ export default function WikipediaScreen() {
           <View key={lang}>
             <SectionHeader title={`${t('wikipedia')} · ${tc(`language.${lang}`)}`} />
             <ListGroup>
-              {(catalog.wikipedia[lang] ?? []).map((opt) => {
-                const r = getResource(opt.resourceId);
-                if (!r) return null;
-                return <ResourceRow key={opt.id} resource={{ ...r, title: opt.name, description: opt.description }} showIcon={false} />;
-              })}
+              {(catalog.wikipedia[lang] ?? []).map((opt) => (
+                <WikipediaRow key={opt.id} option={opt} />
+              ))}
             </ListGroup>
           </View>
         ))}
     </Screen>
   );
+}
+
+/** One variant. When a bigger one already installed holds it, the row says which instead of what it is. */
+function WikipediaRow({ option }: { option: WikipediaOption }) {
+  const { t } = useTranslation();
+  const covering = useCoveringWikipedia(option.resourceId);
+  const r = getResource(option.resourceId);
+  if (!r) return null;
+  const note = covering ? t('wikipedia.includedIn', { name: loc(covering.option.name) }) : null;
+  const description = note ? { es: note, en: note } : option.description;
+  return <ResourceRow resource={{ ...r, title: option.name, description }} showIcon={false} />;
 }
