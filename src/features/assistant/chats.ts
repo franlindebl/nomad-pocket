@@ -67,7 +67,7 @@ export type ChatSession = {
   preview?: string;
 };
 
-export type Phase = 'loading' | 'thinking' | 'searching' | 'generating';
+export type Phase = 'loading' | 'thinking' | 'searching' | 'searchingGuide' | 'generating';
 
 export type Streaming = {
   sessionId: string;
@@ -156,6 +156,8 @@ type ChatState = {
   messages: ChatMessage[];
   streaming: Streaming | null;
   error: string | null;
+  /** An answer that arrived whole (a guide card), to show from its top: the chat scrolls to it once, then clears it. */
+  reveal: string | null;
   /** Ground answers in the offline library (RAG). Persisted. */
   useLibrary: boolean;
   setUseLibrary: (v: boolean) => void;
@@ -169,6 +171,7 @@ export const useChat = create<ChatState>()(
       messages: [],
       streaming: null,
       error: null,
+      reveal: null,
       useLibrary: true,
       setUseLibrary: (useLibrary) => set({ useLibrary }),
     }),
@@ -319,10 +322,16 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
   // with or without a model: the 4B model's paraphrases put CPR on the side and halved the bleach.
   const vital = !noHealth && !noLibrary && guessIntent(text, history) === 'search' ? vitalCard(guideIndex(lang), text, history) : null;
   if (vital) {
-    answerText = cardAnswer(vital, lang, emergencyNumber().number);
-    sources = [{ n: 1, itemId: GUIDE_SOURCE, path: vital.id, title: vital[lang].title }];
-    searched = true;
-    patchStreaming({ phase: 'generating', text: answerText, sources });
+    // The card is found at once, but a whole page appearing in an instant reads as a glitch: a short "searching
+    // the guide" first, then the card, shown from its top (`reveal`).
+    patchStreaming({ phase: 'searchingGuide' });
+    await new Promise((resolve) => setTimeout(resolve, GUIDE_PAUSE_MS));
+    if (!cancelled()) {
+      answerText = cardAnswer(vital, lang, emergencyNumber().number);
+      sources = [{ n: 1, itemId: GUIDE_SOURCE, path: vital.id, title: vital[lang].title }];
+      searched = true;
+      patchStreaming({ phase: 'generating', text: answerText, sources });
+    }
   }
 
   try {
@@ -465,6 +474,7 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
       // The conversation may have been reopened meanwhile, reloading the old answer.
       messages: cur.activeSessionId === sessionId ? [...cur.messages.filter((m) => m.id !== replaces?.id), msg] : cur.messages,
       error: cur.activeSessionId === sessionId ? failed : cur.error,
+      reveal: vital && cur.activeSessionId === sessionId ? msg.id : cur.reveal,
       sessions: listSessions(),
     });
   } else {
@@ -477,6 +487,9 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
     });
   }
 }
+
+/** How long a guide card "searches" before it shows (it's found at once). */
+const GUIDE_PAUSE_MS = 2000;
 
 /** Answers stopped before generation started (ids of their streaming messages). */
 const cancelledAnswers = new Set<string>();
@@ -494,6 +507,11 @@ export function cancelAnswer() {
 export async function stopAnswer() {
   cancelAnswer();
   await stopGeneration();
+}
+
+/** The chat has scrolled to the answer in `reveal`. */
+export function revealed() {
+  useChat.setState({ reveal: null });
 }
 
 export function dismissError() {

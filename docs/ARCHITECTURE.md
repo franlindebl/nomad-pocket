@@ -1321,7 +1321,9 @@ started on the phone shows in the car and the other way round.
   and reach ≥ 0.75 is answered with `cardAnswer`: header, the card's text unchanged, the notes outside it
   (911 → the local number from `emergencyNumber()`, the card's own `note`) and its provenance, cited as
   source [1] (`guide` / card id). No model call: it's instant, the same on every model, and nothing is
-  paraphrased, and it works with **no model**: without one the chat still opens, a banner over the composer
+  paraphrased (a 2 s "Buscando en la guía de emergencias…" comes first, `GUIDE_PAUSE_MS`: a whole page appearing at
+  once read as a glitch; the chat then scrolls so the question sits at the top and the card reads from its first
+  line, `reveal`, while answers written as they come stay pinned to the bottom), and it works with **no model**: without one the chat still opens, a banner over the composer
   (`ui/ModelBanner.tsx`) recommends the model that fits the device (`recommendModel`) with its download button
   (or the built-in model where there is one), and any other question gets `NO_MODEL_ANSWER` instead of an error.
   The empty chat suggests questions from `suggestions.ts` (`ui/Suggestions.tsx`): four cards that fill in one after

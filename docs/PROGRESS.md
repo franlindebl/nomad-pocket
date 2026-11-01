@@ -333,6 +333,13 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-01 — Guide answers: a short search, then read from the top
+
+- Owner (build 31): guide answers appear at once and the chat lands at their end. Now a vital question shows
+  "Buscando en la guía de emergencias…" for 2 s (stoppable), then the card, and the chat scrolls so the question
+  sits at the top and the card reads from its first line (`reveal` in `chats.ts`, `scrollToIndex` on the inverted
+  list). Answers the model writes still follow the text at the bottom. Checked on the iOS simulator.
+
 ### 2026-11-01 — iOS build 31 to TestFlight
 
 - 1.1.0 (31), TestFlight only: build 30 plus suggestions that fill in on arrival and change every 2.5 s (935efc6).

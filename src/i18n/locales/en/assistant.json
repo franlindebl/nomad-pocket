@@ -63,6 +63,7 @@
   },
   "phase": {
     "searching": "Searching your library…",
+    "searchingGuide": "Searching the emergency guide…",
     "loading": "Loading model…",
     "loadingProgress": "Loading model · {{percent}}",
     "thinking": "Thinking…",

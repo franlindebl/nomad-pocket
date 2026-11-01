@@ -1,13 +1,13 @@
 import { router, Stack } from 'expo-router';
 import { AlertCircle, ChevronDown, Cpu, History, Library, SquarePen, X } from 'lucide-react-native';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Dimensions, FlatList, ScrollView, StyleSheet, View, type HostInstance } from 'react-native';
 import Animated, { useAnimatedKeyboard, useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card, IconBadge, IconButton, PressableScale, Row, Text } from '@/components/ui';
-import { dismissError, newChat, openSession, regenerateLast, retryLast, searchLibraryFor, sendMessage, stopAnswer, useChat, type ChatMessage, type Streaming } from '@/features/assistant/chats';
+import { dismissError, newChat, openSession, regenerateLast, retryLast, revealed, searchLibraryFor, sendMessage, stopAnswer, useChat, type ChatMessage, type Streaming } from '@/features/assistant/chats';
 import { isErrorKey } from '@/features/assistant/errors';
 import { AssistantMessage, UserMessage } from '@/features/assistant/ui/Message';
 import { ModelBanner } from '@/features/assistant/ui/ModelBanner';
@@ -27,7 +27,7 @@ export default function AssistantScreen() {
   const keyboard = useAnimatedKeyboard();
   const model = useActiveModel();
   const libraryItems = useItems('zim');
-  const { messages, streaming, error, useLibrary, setUseLibrary, activeSessionId } = useChat();
+  const { messages, streaming, error, reveal, useLibrary, setUseLibrary, activeSessionId } = useChat();
 
   const sessionStreaming = streaming?.sessionId === activeSessionId ? streaming : null;
   const rows = useMemo<Row_[]>(() => {
@@ -75,6 +75,18 @@ export default function AssistantScreen() {
     [searchableId, regenerableId],
   );
 
+  // A guide card arrives whole: the list (inverted, pinned to the bottom) would show its end. Scroll so the question
+  // sits at the top and the card reads from its first line; answers written as they come stay pinned to the bottom.
+  const listRef = useRef<FlatList<Row_>>(null);
+  useEffect(() => {
+    if (!reveal || rows[0]?.key !== reveal || rows.length < 2) return;
+    const timer = setTimeout(() => {
+      listRef.current?.scrollToIndex({ index: 1, viewPosition: 1, animated: true });
+      revealed();
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [reveal, rows]);
+
   const empty = rows.length === 0;
   const noLibrary = useLibrary && libraryItems.length === 0;
 
@@ -112,7 +124,9 @@ export default function AssistantScreen() {
         </ScrollView>
       ) : (
         <FlatList
+          ref={listRef}
           inverted
+          onScrollToIndexFailed={() => {}}
           data={rows}
           keyExtractor={(r) => r.key}
           renderItem={renderItem}
