@@ -72,9 +72,10 @@ AI. **Assistant quality** (`docs/ASSISTANT_QUALITY_PLAN.md`, measured 2026-10-31
    content 1.94/3. In order: ~~(1) propose Qwen even with Apple Intelligence; (2) retrieval bugs: only the first 8
    archives give full-text hits, duplicated articles across Wikipedias, a leaked `<tool_call>`~~ done 2026-10-31
    (no score change alone: 1.28 vs 1.32, blind); ~~(4) bilingual search (`query_en`)~~ done 2026-10-31 (1.78/3,
-   harmful 5 of 50); ~~(6) the emergency guide~~ done 2026-10-31: all 94 cards in the app, vital ones answer word for
-   word (pilot: 0 harmful on its topics; `docs/EMERGENCY_GUIDE_PLAN.md`); **next: the owner's review list there**
-   (thin vital texts, a few kept typos, health flags); (3) bench before
+   harmful 5 of 50); ~~(6) the emergency guide~~ done 2026-10-31/11-01: 202 cards, vital ones answer word for word
+   (`docs/EMERGENCY_GUIDE_PLAN.md`). **Next (to resume, details in that doc's last section)**: semantic search over
+   the cards (held-out accuracy 75 % with keywords); Qwen bench + blind grading with the 202 cards and a simulator
+   check of the new cards; first-aid review of the 88 own-wording cards; (3) bench before
    assistant changes (`scripts/assistant-bench`); (4) bilingual search (`query_en`); (5) semantic rerank
    (EmbeddingGemma, measure on a phone first); (6) a vetted bilingual emergency guide: every variant gave 3–8
    harmful answers out of 50 (CPR, choking, bleach dose, CO); (7) Spanish Ready.gov/MedlinePlus in the kit.

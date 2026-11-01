@@ -255,3 +255,25 @@ gaps first agreed; agents rejected copyrighted sources (Cruz Roja, AEP, SEGO, NH
 A review by someone with first-aid training matters more now, vital own cards first (`grep -l "kind: own" …` and
 `vital: yes`). Known small issues: some cards have more than 25 keywords; 12 copied sentences not found by the
 checker (PDF artefacts and a CDC page whose spacing differs).
+
+## Next steps (to resume)
+
+1. **Semantic search over the cards** (owner's point 2). Keyword search finds the right card for 98 % of the design
+   questions but 75 % of the held-out ones. Try embeddings (EmbeddingGemma 300M, as in the October rerank experiment
+   `bench.ts --v2`; server recipe in `scripts/assistant-bench/README.md`): embed each card (title + keywords + first
+   lines) once at build time into `guide.json` or a side file, embed the question on the phone, combine with BM25.
+   Measure with `scripts/assistant-bench/evalmatch.ts` on `questions-test.json` / `gold-test.json` (target: right card
+   among the sources ≥ 90 %, no wrong vital answer), then on the phone: model size, load time, memory, battery.
+   Only after that decide whether any card (not only vital ones) may answer alone (`answerCard(…, 'all')`).
+2. **Measure answers and check the app** (owner's point 3):
+   - Qwen bench with the 202 cards on the held-out questions and the original 50: `bench.ts out.jsonl --guide
+     --questions=questions-test.json` (and `--cards=all` as a variant), then blind grading as in October
+     (`mkgrade.py`, two graders, `scores.py`) against A4 and run H.
+   - On the simulator (Release build): the guide list with section 14, a few new cards (gas leak, butane, suicidal
+     thoughts, air raid), vital answers in the chat for them, and Android with health cards hidden.
+3. **Review by someone with first-aid training**: the 88 own-wording cards, vital ones first
+   (`grep -l "kind: own" src/data/guide/*.es.md | xargs grep -l "vital: yes"`).
+4. Small: trim keywords over 25 on 18 cards; the 12 copied sentences the checker doesn't find (PDF artefacts, one CDC
+   page with different spacing); English keywords for the 444 Spanish ones added from the questions.
+
+Working notes: with tokens short, run agents on Sonnet.

@@ -57,3 +57,14 @@ to a question under a shuffled letter) and `key.json`.
 - One copy of an article found in two archives (medicine Wikipedia is inside the full one).
 - Chunks reranked by EmbeddingGemma 300M (cosine to the question; nothing indexed in advance, only the
   candidates are embedded), dropping those under `--mincos` or 0.12 below the best.
+
+## Guide search (no model)
+
+`questions-design.json` (261) and `questions-test.json` (65, held out: never tune keywords on them) are crisis
+questions written by agents playing 16 personas (2026-11-01). `gold-design.json` / `gold-test.json` say which guide
+cards answer each one (labelled by agents against the 202 cards of 2026-11-01; relabel when cards change a lot).
+
+```bash
+node --experimental-strip-types evalmatch.ts questions-test.json gold-test.json      # V=1 lists misses
+node --experimental-strip-types coverage.ts questions-test.json /tmp/cov.json         # what search finds per question
+```
