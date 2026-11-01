@@ -24,14 +24,19 @@
       "photosynthesis": "Explícame la fotosíntesis de forma sencilla"
     },
     "disclaimer": "La IA puede equivocarse. Contrasta lo importante y, en temas de salud, consulta a un profesional.",
-    "disclaimerNoHealth": "La IA puede equivocarse. Contrasta lo importante."
+    "disclaimerNoHealth": "La IA puede equivocarse. Contrasta lo importante.",
+    "bodyNoModel": "Sin modelo de IA respondo a las emergencias vitales con las fichas de la guía. Para todo lo demás, descarga un modelo."
   },
   "noModel": {
-    "title": "Elige un modelo para empezar",
-    "body": "El asistente necesita un modelo de lenguaje en tu dispositivo. Descárgalo una vez (desde unos 500 MB) y úsalo sin conexión para siempre.",
-    "bodySystem": "Tu dispositivo tiene un modelo integrado listo para usar, o puedes descargar uno que funciona igual sin conexión.",
     "action": "Elegir modelo",
     "useSystem": "Usar modelo integrado"
+  },
+  "modelBanner": {
+    "title": "Descarga {{name}} para respuestas completas",
+    "body": "Hasta entonces, solo las emergencias vitales tienen respuesta. Funciona sin conexión una vez descargado.",
+    "downloading": "Descargando {{name}}…",
+    "details": "Ver",
+    "others": "Otros modelos"
   },
   "noLibrary": {
     "title": "Tu biblioteca está vacía",

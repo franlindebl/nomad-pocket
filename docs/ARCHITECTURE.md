@@ -1312,13 +1312,18 @@ started on the phone shows in the car and the other way round.
   can't find there.
 - **Search** (`guide-core.ts`, pure): BM25 per language over title ×3, keywords ×2, text; a match also
   reports `coverage` (share of the question's terms in title + keywords) and `reach` (share anywhere in the
-  card, people words such as "mi padre" left out). `guide.ts` drops the health cards when `HEALTH_FEATURES`
+  card, people words such as "mi padre" left out). Those people and asking words don't score at all ("mi madre
+  sangra mucho" once picked childbirth, whose text says "madre" often), and "adultos" in a title is not a word
+  the question missed ("no respira" is CPR for adults, not drowning). `guide.ts` drops the health cards when `HEALTH_FEATURES`
   is false and keeps one index per language.
 - **Vital answers** (`chats.ts`). A question (intent `search`) whose best card is vital with coverage ≥ 0.5
-  and reach ≥ 0.75 is answered with `vitalAnswer`: header, the card's text unchanged, the notes outside it
+  and reach ≥ 0.75 is answered with `cardAnswer`: header, the card's text unchanged, the notes outside it
   (911 → the local number from `emergencyNumber()`, the card's own `note`) and its provenance, cited as
   source [1] (`guide` / card id). No model call: it's instant, the same on every model, and nothing is
-  paraphrased. A follow-up ("¿y si es un bebé?") is matched with the earlier question's topic
+  paraphrased, and it works with **no model**: without one the chat still opens, a banner over the composer
+  (`ui/ModelBanner.tsx`) recommends the model that fits the device (`recommendModel`) with its download button
+  (or the built-in model where there is one), and any other question gets `NO_MODEL_ANSWER` instead of an error.
+  A follow-up ("¿y si es un bebé?") is matched with the earlier question's topic
   (`followUpTopic`), but the card must still cover the new question. `answerCard(…, 'all')` lets any card answer
   alone the same way (bench `--cards=all`); the app uses `'vital'` (on 65 unseen questions `'all'` picked a wrong
   card 4 times in 16).

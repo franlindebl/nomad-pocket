@@ -6,16 +6,15 @@ import { ActivityIndicator, Dimensions, FlatList, ScrollView, StyleSheet, View, 
 import Animated, { useAnimatedKeyboard, useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, Card, IconBadge, IconButton, PressableScale, Row, Text } from '@/components/ui';
+import { Card, IconBadge, IconButton, PressableScale, Row, Text } from '@/components/ui';
 import { dismissError, newChat, openSession, regenerateLast, retryLast, searchLibraryFor, sendMessage, stopAnswer, useChat, type ChatMessage, type Streaming } from '@/features/assistant/chats';
 import { isErrorKey } from '@/features/assistant/errors';
-import { SYSTEM_MODEL_ID } from '@/features/assistant/models';
 import { AssistantMessage, UserMessage } from '@/features/assistant/ui/Message';
+import { ModelBanner } from '@/features/assistant/ui/ModelBanner';
 import { Composer } from '@/features/assistant/ui/Composer';
 import { useActiveModel } from '@/features/assistant/useActiveModel';
 import { useItems } from '@/features/content/items';
 import { HEALTH_FEATURES } from '@/lib/health';
-import { useSettings } from '@/stores/settings';
 import { layout, radius, space, useTheme } from '@/theme';
 
 type Row_ = { key: string; message?: ChatMessage; streaming?: Streaming };
@@ -95,9 +94,7 @@ export default function AssistantScreen() {
         }}
       />
 
-      {!model.ready ? (
-        <NoModel systemAvailable={model.systemAvailable} />
-      ) : empty ? (
+      {empty ? (
         <ScrollView contentContainerStyle={styles.emptyContent} keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive">
           <View style={styles.hero}>
             <IconBadge icon={Cpu} hue="ai" size={48} />
@@ -105,24 +102,27 @@ export default function AssistantScreen() {
               {t('empty.title')}
             </Text>
             <Text variant="callout" color="textSecondary" align="center" style={{ maxWidth: 320 }}>
-              {useLibrary && !noLibrary ? t('empty.bodyLibrary') : t('empty.body')}
+              {!model.ready ? t('empty.bodyNoModel') : useLibrary && !noLibrary ? t('empty.bodyLibrary') : t('empty.body')}
             </Text>
           </View>
           {noLibrary ? <NoLibraryCard /> : null}
-          <View style={styles.starters}>
-            {STARTERS.map((k) => (
-              <PressableScale
-                key={k}
-                haptic="light"
-                accessibilityRole="button"
-                onPress={() => sendMessage(t(`empty.starters.${k}`))}
-                style={[styles.starter, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                <Text variant="callout" numberOfLines={3}>
-                  {t(`empty.starters.${k}`)}
-                </Text>
-              </PressableScale>
-            ))}
-          </View>
+          {/* Without a model only vital questions get an answer: the starters would all say "download a model". */}
+          {model.ready ? (
+            <View style={styles.starters}>
+              {STARTERS.map((k) => (
+                <PressableScale
+                  key={k}
+                  haptic="light"
+                  accessibilityRole="button"
+                  onPress={() => sendMessage(t(`empty.starters.${k}`))}
+                  style={[styles.starter, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                  <Text variant="callout" numberOfLines={3}>
+                    {t(`empty.starters.${k}`)}
+                  </Text>
+                </PressableScale>
+              ))}
+            </View>
+          ) : null}
           <Text variant="caption" color="textTertiary" align="center" style={{ maxWidth: 320, alignSelf: 'center' }}>
             {t(HEALTH_FEATURES ? 'empty.disclaimer' : 'empty.disclaimerNoHealth')}
           </Text>
@@ -140,19 +140,18 @@ export default function AssistantScreen() {
         />
       )}
 
-      {model.ready ? (
-        <Animated.View style={[styles.composer, bottomStyle]}>
-          {streaming && !sessionStreaming ? <AnsweringElsewhere sessionId={streaming.sessionId} /> : null}
-          <Composer
-            busy={!!sessionStreaming}
-            blocked={!!streaming}
-            useLibrary={useLibrary}
-            onToggleLibrary={setUseLibrary}
-            onSend={(q) => sendMessage(q)}
-            onStop={() => stopAnswer()}
-          />
-        </Animated.View>
-      ) : null}
+      <Animated.View style={[styles.composer, bottomStyle]}>
+        {!model.ready ? <ModelBanner systemAvailable={model.systemAvailable} /> : null}
+        {streaming && !sessionStreaming ? <AnsweringElsewhere sessionId={streaming.sessionId} /> : null}
+        <Composer
+          busy={!!sessionStreaming}
+          blocked={!!streaming}
+          useLibrary={useLibrary}
+          onToggleLibrary={setUseLibrary}
+          onSend={(q) => sendMessage(q)}
+          onStop={() => stopAnswer()}
+        />
+      </Animated.View>
     </View>
   );
 }
@@ -194,34 +193,6 @@ function AnsweringElsewhere({ sessionId }: { sessionId: string }) {
         {t('answeringElsewhere.action')}
       </Text>
     </PressableScale>
-  );
-}
-
-function NoModel({ systemAvailable }: { systemAvailable: boolean }) {
-  const { t } = useTranslation('assistant');
-  const setAiModelId = useSettings((s) => s.setAiModelId);
-  return (
-    <ScrollView contentContainerStyle={styles.emptyContent}>
-      <View style={styles.hero}>
-        <IconBadge icon={Cpu} hue="ai" size={64} />
-        <Text variant="title2" align="center">
-          {t('noModel.title')}
-        </Text>
-        <Text variant="callout" color="textSecondary" align="center" style={{ maxWidth: 330 }}>
-          {systemAvailable ? t('noModel.bodySystem') : t('noModel.body')}
-        </Text>
-        <View style={{ gap: space.sm, alignSelf: 'stretch', marginTop: space.md }}>
-          {systemAvailable ? <Button title={t('noModel.useSystem')} onPress={() => setAiModelId(SYSTEM_MODEL_ID)} fullWidth size="lg" /> : null}
-          <Button
-            title={t('noModel.action')}
-            variant={systemAvailable ? 'secondary' : 'primary'}
-            onPress={() => router.push('/assistant/models')}
-            fullWidth
-            size="lg"
-          />
-        </View>
-      </View>
-    </ScrollView>
   );
 }
 

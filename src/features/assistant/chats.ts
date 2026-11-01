@@ -26,6 +26,7 @@ import {
   isHealthQuestion,
   languageEvidence,
   NO_LIBRARY_ANSWER,
+  NO_MODEL_ANSWER,
   noHealthAnswer,
   NOT_FOUND_ANSWER,
   ragMessageFrame,
@@ -428,7 +429,12 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
       stopped = res.stopped;
     });
   } catch (e) {
-    failed = e instanceof EngineUnavailableError ? e.reason : errorFor(e);
+    // No model ready: vital questions were answered above from the guide; anything else gets a fixed answer
+    // pointing at the model banner, not an error.
+    if (e instanceof EngineUnavailableError) {
+      answerText = NO_MODEL_ANSWER[lang];
+      patchStreaming({ phase: 'generating', text: answerText });
+    } else failed = errorFor(e);
   }
 
   const wasCancelled = cancelled();

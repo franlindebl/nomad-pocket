@@ -333,6 +333,21 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-01 — Assistant without a model: vital answers from the guide, a banner recommends a model
+
+- Owner: the guide's vital answers don't need a model, so the chat shouldn't need one either; recommend the
+  model to download with a banner.
+- The chat opens with no model ready: a banner over the composer names the model recommended for the device
+  (Qwen3.5 4B on the simulator) with its download button and progress, or "Usar modelo integrado" where Apple
+  Intelligence is available; vital questions get their card, anything else a fixed answer pointing at the banner.
+  The starters hide (they would all get that answer).
+- Found on the simulator: "Mi padre no respira" answered with the drowning card and "mi madre no respira" /
+  "mi madre sangra mucho" with childbirth. Fixed: people and asking words no longer score, and "adultos" in a
+  title no longer counts as missed. Regression test over the bundled guide (10 questions, es + en). Held-out
+  sources 75 % → 71 % (2 of 63, not vital), vital answers unchanged (5 of 7 right), design set unchanged.
+- Checked on the iOS simulator (Release app + new bundle): banner, CPR card without a model, the fixed answer,
+  banner gone after choosing the built-in model.
+
 ### 2026-11-01 — iOS build 28 to TestFlight
 
 - 1.1.0 (28), TestFlight only (build 23 still in App Review): build 27 plus the emergency guide (faa1e10…110e78a),

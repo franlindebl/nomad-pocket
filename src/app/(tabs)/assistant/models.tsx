@@ -6,10 +6,11 @@ import { Alert, Platform, StyleSheet, View } from 'react-native';
 
 import { Badge, Button, Card, IconBadge, IconButton, ProgressBar, Row, Screen, SectionHeader, Text } from '@/components/ui';
 import { GGUF_MODELS, modelFit, ramGB, recommendModel, SYSTEM_MODEL_ID, type GgufModel } from '@/features/assistant/models';
-import { downloadModel, OfflineError } from '@/features/assistant/register';
+import { downloadModel } from '@/features/assistant/register';
+import { showDownloadError } from '@/features/assistant/ui/ModelBanner';
 import { HAS_SYSTEM_MODEL, useSystemModel } from '@/features/assistant/system';
 import { removeItem, useItems } from '@/features/content/items';
-import { cancelDownload, NotEnoughStorageError, pauseDownload, resumeDownload, useDownload } from '@/features/downloads/manager';
+import { cancelDownload, pauseDownload, resumeDownload, useDownload } from '@/features/downloads/manager';
 import { formatPercent } from '@/features/assistant/format';
 import { formatBytes } from '@/lib/format';
 import { freeBytes } from '@/lib/storage';
@@ -104,16 +105,6 @@ function SystemModelCard() {
   );
 }
 
-function showError(e: unknown, t: (k: string, o?: Record<string, unknown>) => string) {
-  if (e instanceof NotEnoughStorageError) {
-    Alert.alert(t('errors.generic'), t('storage.notEnough', { needed: formatBytes(e.needed), free: formatBytes(freeBytes()) }));
-  } else if (e instanceof OfflineError) {
-    Alert.alert(t('errors.generic'), t('downloads.needsConnection'));
-  } else {
-    Alert.alert(t('errors.generic'), String((e as Error)?.message ?? e));
-  }
-}
-
 function ModelCard({ model, ram, recommended }: { model: GgufModel; ram: number | null; recommended: boolean }) {
   const { t } = useTranslation('assistant');
   const { t: tc } = useTranslation();
@@ -195,7 +186,7 @@ function ModelCard({ model, ram, recommended }: { model: GgufModel; ram: number 
           icon={ArrowDown}
           size="sm"
           variant={recommended ? 'primary' : 'secondary'}
-          onPress={() => downloadModel(model).catch((e) => showError(e, tc))}
+          onPress={() => downloadModel(model).catch((e) => showDownloadError(e, tc))}
           style={styles.action}
         />
       )}

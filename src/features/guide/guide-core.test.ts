@@ -1,5 +1,6 @@
 /// <reference types="node" />
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { describe, test } from 'node:test';
 
 import { cardNotes, GuideIndex, provenance, sourceCards, visibleCards, cardAnswer, vitalCard, type GuideCard, type GuideText } from './guide-core.ts';
@@ -148,5 +149,31 @@ describe('guide answers', () => {
     assert.ok(a.includes('\n\nLlame al 911. Empuje fuerte y rápido en el centro del pecho.\n\n'));
     assert.ok(a.includes('> Donde el texto dice 911, llama al 112.'));
     assert.ok(a.endsWith('*Fragmento de CDC, «Page» (2026).* [1]'));
+  });
+});
+
+// The bundled guide: the commonest vital questions, whoever they happen to (a "madre" in the question once
+// picked childbirth, "no respira" drowning).
+describe('the bundled guide', () => {
+  const cards: GuideCard[] = JSON.parse(readFileSync(new URL('../../data/guide.json', import.meta.url), 'utf8')).cards;
+  const pick = (q: string, lang: 'es' | 'en') => vitalCard(new GuideIndex(cards, lang), q)?.id;
+
+  test('answers vital questions with the right card', () => {
+    const es: [string, string][] = [
+      ['no respira', 'cpr-adult'],
+      ['Mi padre no respira, qué hago', 'cpr-adult'],
+      ['mi madre no respira', 'cpr-adult'],
+      ['mi mamá se está atragantando', 'choking'],
+      ['mi madre sangra mucho', 'bleeding'],
+      ['lo hemos sacado del agua y no respira', 'drowning'],
+      ['mi bebé no respira', 'cpr-child'],
+    ];
+    for (const [q, id] of es) assert.equal(pick(q, 'es'), id, q);
+    const en: [string, string][] = [
+      ["my dad isn't breathing", 'cpr-adult'],
+      ['my mother is bleeding a lot', 'bleeding'],
+      ["we pulled him out of the water and he's not breathing", 'drowning'],
+    ];
+    for (const [q, id] of en) assert.equal(pick(q, 'en'), id, q);
   });
 });

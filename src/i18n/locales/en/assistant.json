@@ -24,14 +24,19 @@
       "photosynthesis": "Explain photosynthesis simply"
     },
     "disclaimer": "AI can make mistakes. Double-check what matters and, for health questions, consult a professional.",
-    "disclaimerNoHealth": "AI can make mistakes. Double-check what matters."
+    "disclaimerNoHealth": "AI can make mistakes. Double-check what matters.",
+    "bodyNoModel": "Without an AI model I answer vital emergencies with the guide's cards. For everything else, download a model."
   },
   "noModel": {
-    "title": "Choose a model to get started",
-    "body": "The assistant needs a language model on your device. Download one once (from about 500 MB) and use it offline forever.",
-    "bodySystem": "Your device has a built-in model ready to use, or you can download one that works offline the same way.",
     "action": "Choose a model",
     "useSystem": "Use built-in model"
+  },
+  "modelBanner": {
+    "title": "Download {{name}} for full answers",
+    "body": "Until then, only vital emergencies get an answer. It works offline once downloaded.",
+    "downloading": "Downloading {{name}}…",
+    "details": "View",
+    "others": "Other models"
   },
   "noLibrary": {
     "title": "Your library is empty",

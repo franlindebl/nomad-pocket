@@ -61,16 +61,19 @@ export type GuideMatch = {
 // Not the topic: who it happens to ("mi padre no respira" is still the CPR card) and how people ask
 // ("primeros auxilios para…", "síntomas de…", "¿cómo se usa…?").
 const NOT_TOPIC_WORDS = tokenize(
-  'padre madre hijo hija marido mujer esposo esposa abuelo abuela amigo amiga hermano hermana vecino vecina compañero compañera pareja persona alguien gente ' +
+  'padre madre papá mamá hijo hija marido mujer esposo esposa novio novia abuelo abuela amigo amiga hermano hermana vecino vecina compañero compañera pareja persona alguien gente ' +
     'primeros auxilios sintomas síntomas signos señales usar usa uso utilizar seguro segura tratar trato tratamiento curar curo cura actuar pasos ayuda urgente ' +
     'tengo tiene tienes tenemos estoy está estamos llega llegar viene ambulancia ' +
     'ahora mismo ya ahí aquí rápido pronto sí normal grave peligroso puedo puede debo hay sirve vale pasa pasando hago hacemos hacer ' +
-    'father mother son daughter husband wife friend brother sister neighbour neighbor partner person someone people grandfather grandmother ' +
+    'father mother dad mum mom son daughter husband wife boyfriend girlfriend friend brother sister neighbour neighbor partner person someone people grandfather grandmother ' +
     'first aid symptoms signs use used safe treat treatment cure steps help urgent got get gets getting has have having ambulance ' +
     'now right away quick quickly normal serious dangerous can could should must ok okay happening happen do does',
 );
 // "no llega la ambulancia" is no more about the topic than "llega".
 const NOT_TOPIC = new Set([...NOT_TOPIC_WORDS, ...NOT_TOPIC_WORDS.map((t) => `no${t}`)]);
+// The default audience: a title naming it is no more specific than the question ("no respira" is CPR for adults,
+// not drowning, whose one title word the question doesn't say either).
+const DEFAULT_AUDIENCE = new Set(tokenize('adulto adultos adult adults'));
 
 /**
  * Terms for the guide: a negation stays with its word, so "no respira" (CPR) is not "respira" (the recovery
@@ -110,7 +113,7 @@ export class GuideIndex {
       const body = guideTerms(t.body);
       this.bm25.add(c, [...title, ...title, ...title, ...keywords, ...keywords, ...body]);
       this.heads.set(c.id, new Set([...title, ...keywords]));
-      this.titles.set(c.id, [...new Set(title.filter((t) => !NOT_TOPIC.has(t)))]);
+      this.titles.set(c.id, [...new Set(title.filter((t) => !NOT_TOPIC.has(t) && !DEFAULT_AUDIENCE.has(t)))]);
       this.terms.set(c.id, new Set([...title, ...keywords, ...body]));
       for (const t of [...title, ...keywords, ...body]) this.vocabulary.add(t);
     }
@@ -129,7 +132,8 @@ export class GuideIndex {
     const topic = q.filter((t) => !NOT_TOPIC.has(t));
     const weight = topic.map((t) => this.bm25.idf(t));
     const total = weight.reduce((a, b) => a + b, 0);
-    return this.bm25.search(this.expand(q), limit).map(({ item, score }) => {
+    // Only the topic scores: "mi madre no respira" landed on childbirth, whose text says "madre" again and again.
+    return this.bm25.search(this.expand(topic.length ? topic : q), limit).map(({ item, score }) => {
       const head = this.heads.get(item.id)!;
       const all = this.terms.get(item.id)!;
       return {
