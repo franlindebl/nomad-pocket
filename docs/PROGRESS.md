@@ -333,6 +333,12 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-01 — iOS build 28 to TestFlight
+
+- 1.1.0 (28), TestFlight only (build 23 still in App Review): build 27 plus the emergency guide (faa1e10…110e78a),
+  for the owner to try. Smoke E2E passed at the release commit; archived from a clean worktree (store prebuild).
+  Tagged `v1.1.0-28`.
+
 ### 2026-11-01 — Emergency guide: 202 cards from 326 real questions
 
 - Owner: complete the guide overnight, with quality; more questions to find what's missing; workflows OK. Then:
