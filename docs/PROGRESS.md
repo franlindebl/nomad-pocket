@@ -333,6 +333,11 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-01 — iOS build 31 to TestFlight
+
+- 1.1.0 (31), TestFlight only: build 30 plus suggestions that fill in on arrival and change every 2.5 s (935efc6).
+  Smoke E2E 21/21 and `ai-05`; archived from a clean worktree (store prebuild). Tagged `v1.1.0-31`.
+
 ### 2026-11-01 — Suggestions: fill in on arrival, change every 2.5 s
 
 - Owner (build 30): the first change took too long. Now the four cards come up empty and their questions fill in
