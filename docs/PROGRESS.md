@@ -333,6 +333,21 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-01 — iOS build 32 to TestFlight
+
+- 1.1.0 (32), TestFlight only: build 31 plus guide answers that search for 2 s and show from their top (b705a46).
+  Smoke E2E 21/21 (`map-10`, `map-12` failed in 3 s on the first run and passed on the rerun: the known lost
+  simulated location); archived from a clean worktree (store prebuild). Tagged `v1.1.0-32`.
+
+### 2026-11-01 — Wikipedia: a variant you already hold is "Incluida", not a download
+
+- Owner: with "Completa (sin imágenes)" installed, the screen still offered the smaller variants, which would
+  only duplicate data. Kiwix variants nest by scope (top ⊂ all) and depth (mini ⊂ nopic ⊂ maxi):
+  `features/catalog/wikipedia-core.ts` (pure, tested) works out which installed variant holds another. Then the
+  download pill reads "✓ Incluida" and opens the bigger one, the row says which one holds it, and the resource
+  sheet explains it with an "Abrir «…»" button and how to keep only the smaller one (delete the bigger first).
+  A bigger variant (with images) stays downloadable. Checked on the iOS simulator with `wikipedia_es_all_nopic`.
+
 ### 2026-11-01 — Guide answers: a short search, then read from the top
 
 - Owner (build 31): guide answers appear at once and the chat lands at their end. Now a vital question shows

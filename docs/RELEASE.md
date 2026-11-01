@@ -24,7 +24,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 
 - Marketing version: `expo.version` (currently **1.1.0**). Keep `package.json`'s
   `version` equal (not used by the build, but it's what people read).
-- iOS build number: `expo.ios.buildNumber` (currently **"31"**) → `CFBundleVersion`. Bump it
+- iOS build number: `expo.ios.buildNumber` (currently **"32"**) → `CFBundleVersion`. Bump it
   for every upload: App Store Connect rejects a build number it has already seen.
 - Android: `expo.android.versionCode` (currently **26**: 23 and 24 went to Play internal testing, 24 to the rejected closed test; 25 is the build without health features, superseded before review; 26 adds the assistant's no-health fixes). Must grow
   with every Play upload.
@@ -63,6 +63,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.1.0 | 29 | TestFlight 2026-11-01 (TestFlight only): build 28 plus the assistant without a model (vital questions answered from the guide, a banner recommends the model for the device) and the guide search fix ("mi padre no respira" → adult CPR, not drowning; "mi madre sangra mucho" → bleeding, not childbirth); archived from a clean worktree |
 | 1.1.0 | 30 | TestFlight 2026-11-01 (TestFlight only): build 29 plus rotating suggested questions in the assistant (23, each tested to land on its guide card; vital only without a model) and guide search fixes ("se me ha perdido mi hijo" → lost child, not shock); archived from a clean worktree |
 | 1.1.0 | 31 | TestFlight 2026-11-01 (TestFlight only): build 30 plus suggestions that fill in on arrival and change every 2.5 s; archived from a clean worktree |
+| 1.1.0 | 32 | TestFlight 2026-11-01 (TestFlight only): build 31 plus guide answers that "search" for 2 s and show from their top; archived from a clean worktree |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.
