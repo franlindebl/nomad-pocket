@@ -63,11 +63,11 @@ export type GuideMatch = {
 const NOT_TOPIC_WORDS = tokenize(
   'padre madre papá mamá hijo hija marido mujer esposo esposa novio novia abuelo abuela amigo amiga hermano hermana vecino vecina compañero compañera pareja persona alguien gente ' +
     'primeros auxilios sintomas síntomas signos señales usar usa uso utilizar seguro segura tratar trato tratamiento curar curo cura actuar pasos ayuda urgente ' +
-    'tengo tiene tienes tenemos estoy está estamos llega llegar viene ambulancia ' +
+    'tengo tiene tienes tenemos estoy está estamos llega llegar viene ambulancia creo parece ' +
     'ahora mismo ya ahí aquí rápido pronto sí normal grave peligroso puedo puede debo hay sirve vale pasa pasando hago hacemos hacer ' +
     'father mother dad mum mom son daughter husband wife boyfriend girlfriend friend brother sister neighbour neighbor partner person someone people grandfather grandmother ' +
     'first aid symptoms signs use used safe treat treatment cure steps help urgent got get gets getting has have having ambulance ' +
-    'now right away quick quickly normal serious dangerous can could should must ok okay happening happen do does',
+    'now right away quick quickly normal serious dangerous can could should must ok okay happening happen do does think',
 );
 // "no llega la ambulancia" is no more about the topic than "llega".
 const NOT_TOPIC = new Set([...NOT_TOPIC_WORDS, ...NOT_TOPIC_WORDS.map((t) => `no${t}`)]);
@@ -111,7 +111,11 @@ export class GuideIndex {
       const title = guideTerms(t.title);
       const keywords = guideTerms(t.keywords.join(' '));
       const body = guideTerms(t.body);
-      this.bm25.add(c, [...title, ...title, ...title, ...keywords, ...keywords, ...body]);
+      // People and asking words score from the keywords only, which use them as people ask ("se me ha perdido mi
+      // hijo" is the lost child card): "mi madre sangra mucho" landed on childbirth, whose text says "madre" again
+      // and again, and on the after-birth card, whose title names "la madre".
+      const topicOnly = (terms: string[]) => terms.filter((t) => !NOT_TOPIC.has(t));
+      this.bm25.add(c, [...topicOnly(title), ...topicOnly(title), ...topicOnly(title), ...keywords, ...keywords, ...topicOnly(body)]);
       this.heads.set(c.id, new Set([...title, ...keywords]));
       this.titles.set(c.id, [...new Set(title.filter((t) => !NOT_TOPIC.has(t) && !DEFAULT_AUDIENCE.has(t)))]);
       this.terms.set(c.id, new Set([...title, ...keywords, ...body]));
@@ -132,8 +136,7 @@ export class GuideIndex {
     const topic = q.filter((t) => !NOT_TOPIC.has(t));
     const weight = topic.map((t) => this.bm25.idf(t));
     const total = weight.reduce((a, b) => a + b, 0);
-    // Only the topic scores: "mi madre no respira" landed on childbirth, whose text says "madre" again and again.
-    return this.bm25.search(this.expand(topic.length ? topic : q), limit).map(({ item, score }) => {
+    return this.bm25.search(this.expand(q), limit).map(({ item, score }) => {
       const head = this.heads.get(item.id)!;
       const all = this.terms.get(item.id)!;
       return {

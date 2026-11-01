@@ -333,6 +333,24 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-01 — Assistant: rotating suggested questions that are known to work
+
+- Owner: the four fixed starter cards should change with a nice animation and show questions that work well.
+- 23 suggestions (`features/assistant/suggestions.ts`, texts `assistant:suggestions.*`), each tied to its guide card:
+  14 vital (answered with the card, also without a model) and 9 that give the model its card as first source.
+  `suggestions.test.ts` runs every one through the guide search in es and en. Four cards on screen, shuffled per
+  visit; one changes every 4 s (fade out, fade in rising), across the grid; still with Reduce Motion or VoiceOver,
+  and while the tab is off screen. Without a model only the vital ones; on Android none about health (8 left
+  without a model, 17 with). The general-knowledge starter (photosynthesis) is gone: with no Wikipedia it gets
+  "not found".
+- Writing them showed search misses, fixed: "Se me ha perdido mi hijo" picked the shock card ("ha perdido mucha
+  sangre"; people words now score from keywords only, never from titles or text) and "creo que tengo un ataque de
+  pánico" missed ("creo"/"think" are asking words now). Held-out: sources 71 % → 73 %, answer-alone 12/16 → 13/17,
+  vital 5/7; design set 98 %, 205/207. Still missing (for semantic search): "¿Cómo detengo una hemorragia?",
+  "My house is on fire", "Mi coche se está inundando", "What do I do during a panic attack?".
+- E2E: `ai-05` taps `assistant-suggestion-0` (the texts rotate). Checked on the iOS simulator: rotation with
+  Apple Intelligence, vital-only suggestions without a model.
+
 ### 2026-11-01 — iOS build 29 to TestFlight
 
 - 1.1.0 (29), TestFlight only: build 28 plus the assistant without a model and the guide search fix (6a8e92c).

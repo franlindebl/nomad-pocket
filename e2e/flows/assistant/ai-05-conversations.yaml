@@ -4,8 +4,10 @@ tags: [nightly, assistant]
 ---
 - runFlow: ../../subflows/launch.yaml
 - tapOn: { id: "sparkles" }
-- tapOn: "Usar modelo integrado"
-- tapOn: "¿Cómo enciendo fuego si todo está mojado\\?"
+- tapOn:   # the most capable model is already chosen since build 20: the button may not show
+    text: "Usar modelo integrado"
+    optional: true
+- tapOn: { id: "assistant-suggestion-0" }   # the suggestions rotate: whichever is in the first card
 - extendedWaitUntil:
     visible: "Enviar"
     timeout: 120000

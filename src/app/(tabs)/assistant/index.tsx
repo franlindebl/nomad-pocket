@@ -11,6 +11,7 @@ import { dismissError, newChat, openSession, regenerateLast, retryLast, searchLi
 import { isErrorKey } from '@/features/assistant/errors';
 import { AssistantMessage, UserMessage } from '@/features/assistant/ui/Message';
 import { ModelBanner } from '@/features/assistant/ui/ModelBanner';
+import { Suggestions } from '@/features/assistant/ui/Suggestions';
 import { Composer } from '@/features/assistant/ui/Composer';
 import { useActiveModel } from '@/features/assistant/useActiveModel';
 import { useItems } from '@/features/content/items';
@@ -18,9 +19,6 @@ import { HEALTH_FEATURES } from '@/lib/health';
 import { layout, radius, space, useTheme } from '@/theme';
 
 type Row_ = { key: string; message?: ChatMessage; streaming?: Streaming };
-
-// Without health features (src/lib/health.ts) the assistant answers no first-aid question.
-const STARTERS = HEALTH_FEATURES ? (['water', 'burn', 'fire', 'photosynthesis'] as const) : (['water', 'knot', 'fire', 'photosynthesis'] as const);
 
 export default function AssistantScreen() {
   const { t } = useTranslation('assistant');
@@ -106,23 +104,8 @@ export default function AssistantScreen() {
             </Text>
           </View>
           {noLibrary ? <NoLibraryCard /> : null}
-          {/* Without a model only vital questions get an answer: the starters would all say "download a model". */}
-          {model.ready ? (
-            <View style={styles.starters}>
-              {STARTERS.map((k) => (
-                <PressableScale
-                  key={k}
-                  haptic="light"
-                  accessibilityRole="button"
-                  onPress={() => sendMessage(t(`empty.starters.${k}`))}
-                  style={[styles.starter, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                  <Text variant="callout" numberOfLines={3}>
-                    {t(`empty.starters.${k}`)}
-                  </Text>
-                </PressableScale>
-              ))}
-            </View>
-          ) : null}
+          {/* Without a model only vital questions get an answer: the suggestions are those alone. */}
+          <Suggestions key={String(model.ready)} modelReady={model.ready} onPick={(q) => sendMessage(q)} />
           <Text variant="caption" color="textTertiary" align="center" style={{ maxWidth: 320, alignSelf: 'center' }}>
             {t(HEALTH_FEATURES ? 'empty.disclaimer' : 'empty.disclaimerNoHealth')}
           </Text>
@@ -247,18 +230,6 @@ const styles = StyleSheet.create({
   list: { ...layout.column, paddingHorizontal: space.gutter, paddingVertical: space.lg, gap: space.xxl },
   emptyContent: { ...layout.column, flexGrow: 1, justifyContent: 'center', paddingHorizontal: space.gutter, paddingVertical: space.xl, gap: space.xl },
   hero: { alignItems: 'center', gap: space.md },
-  starters: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },
-  starter: {
-    flexBasis: '47%',
-    flexGrow: 1,
-    minHeight: 64,
-    padding: space.md,
-    paddingHorizontal: space.lg,
-    borderRadius: radius.lg,
-    borderCurve: 'continuous',
-    borderWidth: StyleSheet.hairlineWidth,
-    justifyContent: 'center',
-  },
   composer: { ...layout.column, paddingHorizontal: space.md, paddingTop: space.sm },
   pill: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 30, paddingHorizontal: space.md, borderRadius: radius.pill, maxWidth: 220 },
   elsewhere: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginBottom: space.sm, paddingVertical: space.sm, paddingHorizontal: space.md, borderRadius: radius.pill },

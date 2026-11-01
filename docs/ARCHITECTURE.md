@@ -1312,8 +1312,9 @@ started on the phone shows in the car and the other way round.
   can't find there.
 - **Search** (`guide-core.ts`, pure): BM25 per language over title ×3, keywords ×2, text; a match also
   reports `coverage` (share of the question's terms in title + keywords) and `reach` (share anywhere in the
-  card, people words such as "mi padre" left out). Those people and asking words don't score at all ("mi madre
-  sangra mucho" once picked childbirth, whose text says "madre" often), and "adultos" in a title is not a word
+  card, people words such as "mi padre" left out). Those people and asking words score only from the keywords, which
+  use them as people ask ("se me ha perdido mi hijo" is the lost child card), never from the title or the text
+  ("mi madre sangra mucho" once picked childbirth, whose text says "madre" often), and "adultos" in a title is not a word
   the question missed ("no respira" is CPR for adults, not drowning). `guide.ts` drops the health cards when `HEALTH_FEATURES`
   is false and keeps one index per language.
 - **Vital answers** (`chats.ts`). A question (intent `search`) whose best card is vital with coverage ≥ 0.5
@@ -1323,6 +1324,9 @@ started on the phone shows in the car and the other way round.
   paraphrased, and it works with **no model**: without one the chat still opens, a banner over the composer
   (`ui/ModelBanner.tsx`) recommends the model that fits the device (`recommendModel`) with its download button
   (or the built-in model where there is one), and any other question gets `NO_MODEL_ANSWER` instead of an error.
+  The empty chat suggests questions from `suggestions.ts` (`ui/Suggestions.tsx`): four cards, one changing every
+  4 s with a fade (still with Reduce Motion or VoiceOver, and off screen); each one is tested to land on its card
+  in both languages (`suggestions.test.ts`), only vital ones without a model, none whose card the build hides.
   A follow-up ("¿y si es un bebé?") is matched with the earlier question's topic
   (`followUpTopic`), but the card must still cover the new question. `answerCard(…, 'all')` lets any card answer
   alone the same way (bench `--cards=all`); the app uses `'vital'` (on 65 unseen questions `'all'` picked a wrong
