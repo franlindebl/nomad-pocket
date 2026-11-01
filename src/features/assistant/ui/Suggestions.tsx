@@ -1,11 +1,12 @@
-// The assistant's empty screen: four suggested questions (suggestions.ts) that change one at a time, fading out
-// and in, so the screen shows what the assistant answers well. Still with Reduce Motion or VoiceOver on (text
-// that changes under the reader is hard to follow), and while the tab isn't on screen.
+// The assistant's empty screen: four suggested questions (suggestions.ts) that appear one after another each time
+// the screen comes up, then change one at a time, fading out and in, so the screen shows what the assistant answers
+// well. Still with Reduce Motion (no animation at all) or VoiceOver on (text that changes under the reader is hard
+// to follow; they still appear), and while the tab isn't on screen.
 import { useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AccessibilityInfo, StyleSheet, View } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withSequence, withTiming } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { PressableScale, Text } from '@/components/ui';
@@ -15,8 +16,10 @@ import { motion, radius, space, useTheme } from '@/theme';
 import { availableSuggestions, rotate, shuffled, startRotation } from '../suggestions';
 
 const SLOTS = 4;
-/** A card changes every 4 s, so each one stays ~16 s: time to read it. */
-const EVERY_MS = 4000;
+/** The first change 2.5 s after the screen comes up, then one every 2.5 s: each card stays ~10 s. */
+const EVERY_MS = 2500;
+/** On arrival the cards fill in one after another, this far apart. */
+const ENTRY_STAGGER_MS = 110;
 /** Top left, bottom right, top right, bottom left. */
 const SLOT_ORDER = [0, 3, 1, 2];
 
@@ -36,29 +39,53 @@ export function Suggestions({ modelReady, onPick }: { modelReady: boolean; onPic
   }, []);
 
   const rotates = !reduceMotion && !screenReader && pool.length > SLOTS;
+  // Bumped each time the screen comes up: the cards fill in again.
+  const [arrival, setArrival] = useState(0);
   useFocusEffect(
     useCallback(() => {
+      if (!reduceMotion) setArrival((n) => n + 1);
       if (!rotates) return;
       const timer = setInterval(() => setRotation((r) => rotate(r, pool, SLOT_ORDER)), EVERY_MS);
       return () => clearInterval(timer);
-    }, [rotates, pool]),
+    }, [rotates, reduceMotion, pool]),
   );
 
   if (!pool.length) return null;
   return (
     <View style={styles.grid}>
       {rotation.shown.map((key, slot) => (
-        <Slot key={slot} slot={slot} text={t(`suggestions.${key}`)} onPick={onPick} />
+        <Slot key={slot} slot={slot} text={t(`suggestions.${key}`)} arrival={arrival} hidden={!reduceMotion} onPick={onPick} />
       ))}
     </View>
   );
 }
 
+type SlotProps = {
+  slot: number;
+  text: string;
+  /** Changes when the screen comes up: the question fills in again, after the cards before it. */
+  arrival: number;
+  /** Starts empty, waiting for its arrival (not with Reduce Motion). */
+  hidden: boolean;
+  onPick: (question: string) => void;
+};
+
 /** One card: when its question changes, the old one fades out, then the new one fades in rising a little. */
-function Slot({ slot, text, onPick }: { slot: number; text: string; onPick: (question: string) => void }) {
+function Slot({ slot, text, arrival, hidden, onPick }: SlotProps) {
   const { colors } = useTheme();
   const [label, setLabel] = useState(text);
-  const shown = useSharedValue(1);
+  const [startsHidden] = useState(hidden);
+  const shown = useSharedValue(startsHidden ? 0 : 1);
+
+  useEffect(() => {
+    if (!arrival) return;
+    shown.set(
+      withSequence(
+        withTiming(0, { duration: 0 }),
+        withDelay(slot * ENTRY_STAGGER_MS, withTiming(1, { duration: motion.screen, easing: Easing.out(Easing.cubic) })),
+      ),
+    );
+  }, [arrival, slot, shown]);
 
   useEffect(() => {
     if (text === label) return;
@@ -69,7 +96,13 @@ function Slot({ slot, text, onPick }: { slot: number; text: string; onPick: (que
     );
   }, [text, label, shown]);
 
+  // A new question fades in; the first one waits for its arrival instead.
+  const firstLabel = useRef(true);
   useEffect(() => {
+    if (firstLabel.current) {
+      firstLabel.current = false;
+      return;
+    }
     shown.set(withTiming(1, { duration: motion.screen, easing: Easing.out(Easing.cubic) }));
   }, [label, shown]);
 

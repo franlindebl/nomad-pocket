@@ -1324,8 +1324,9 @@ started on the phone shows in the car and the other way round.
   paraphrased, and it works with **no model**: without one the chat still opens, a banner over the composer
   (`ui/ModelBanner.tsx`) recommends the model that fits the device (`recommendModel`) with its download button
   (or the built-in model where there is one), and any other question gets `NO_MODEL_ANSWER` instead of an error.
-  The empty chat suggests questions from `suggestions.ts` (`ui/Suggestions.tsx`): four cards, one changing every
-  4 s with a fade (still with Reduce Motion or VoiceOver, and off screen); each one is tested to land on its card
+  The empty chat suggests questions from `suggestions.ts` (`ui/Suggestions.tsx`): four cards that fill in one after
+  another each time the screen comes up, then one changes every 2.5 s with a fade (no animation with Reduce Motion,
+  no changes with VoiceOver or off screen); each one is tested to land on its card
   in both languages (`suggestions.test.ts`), only vital ones without a model, none whose card the build hides.
   A follow-up ("¿y si es un bebé?") is matched with the earlier question's topic
   (`followUpTopic`), but the card must still cover the new question. `answerCard(…, 'all')` lets any card answer

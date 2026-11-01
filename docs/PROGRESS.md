@@ -333,6 +333,12 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-01 — Suggestions: fill in on arrival, change every 2.5 s
+
+- Owner (build 30): the first change took too long. Now the four cards come up empty and their questions fill in
+  one after another (110 ms apart) each time the screen comes up; the first change 2.5 s later, then one every
+  2.5 s. Checked on the simulator with a screen recording (cards filled by 0.7 s, first change at 2.6 s).
+
 ### 2026-11-01 — iOS build 30 to TestFlight
 
 - 1.1.0 (30), TestFlight only: build 29 plus the rotating suggestions and search fixes (229c4ca). Smoke E2E 21/21,
