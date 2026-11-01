@@ -333,6 +333,11 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-01 — iOS build 30 to TestFlight
+
+- 1.1.0 (30), TestFlight only: build 29 plus the rotating suggestions and search fixes (229c4ca). Smoke E2E 21/21,
+  `ai-05` passes with the new suggestion cards; archived from a clean worktree (store prebuild). Tagged `v1.1.0-30`.
+
 ### 2026-11-01 — Assistant: rotating suggested questions that are known to work
 
 - Owner: the four fixed starter cards should change with a nice animation and show questions that work well.
