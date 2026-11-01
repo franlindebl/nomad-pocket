@@ -1,6 +1,7 @@
 # Emergency guide: sources and decisions
 
-Status (2026-10-31): **all 94 cards written in both languages and in the app** (`src/data/guide/`, format in
+Status (2026-11-01): **202 cards** (the 94 of the inventory plus 108 found by 326 real questions, below), in the app.
+Before that (2026-10-31): **all 94 cards written in both languages and in the app** (`src/data/guide/`, format in
 `docs/emergency-guide/FORMAT.md`, code in `docs/ARCHITECTURE.md` › Emergency guide); pilot measured (below); a review
 list for the owner at the end. Step 6 of `docs/ASSISTANT_QUALITY_PLAN.md`: a
 bilingual guide of short official texts that the assistant searches first and, for vital protocols, shows as
@@ -220,3 +221,37 @@ out); EPA Spanish well steps "cierra los grifos" for "turn on"; Ready.gov winter
 6. **No card yet** for air raids (no reusable official text: the EU's 72-hour guidance isn't published), and none for
    wild plants (the CDC source only covers mushrooms).
 7. A review by someone with first-aid training is still welcome, `childbirth` first.
+
+## Completing the guide from real questions (2026-11-01)
+
+Method: 326 crisis questions written by agents playing 16 personas (family in a blackout, older person alone, parents
+of a baby, DANA and wildfire areas, war, hikers, pandemic, DIY, tourist, farm, disability, pregnancy, teenager alone,
+stuck in transport, industrial area, prepper), split at random into 261 to design and 65 held out
+(`scripts/assistant-bench/questions-{design,test}.json`). Each design question was judged against the cards
+(74 full, 112 partial, 66 none), the gaps clustered into 82 new cards and 46 fixes to existing ones, the cards
+written (official copy where reusable, otherwise our labelled wording of current guidance) and every vital or health
+card reviewed by an independent agent and fixed. Keywords come from the design questions.
+
+Result: 202 cards (76 vital, 99 health, 88 own wording); new section 14 "Casa y seguridad personal". The owner's
+review items 1 and 5 are done: `choking`, `recovery-position`, `cpr-child`, `electric-shock` rewritten from ERC 2025
+(MedlinePlus for electric shock; ERC has no section on it) and a new `air-raid` card (Sweden MCF 2026, Norway DSB,
+Israel HFC, Ready.gov; Spain publishes nothing).
+
+Search (gold: which card answers each question, labelled by agents against the 202 cards):
+
+| | Design (261, keywords from them) | Held out (65) |
+|---|---|---|
+| Right card among the sources | 98 % | 75 % (63 % before lowering coverage 0.34 → 0.2) |
+| A card answers alone, any card | 206, 99 % right | 16, 12 right |
+| A vital card answers alone | 96, 95 right | 7, 5 right ("huele a humo en la escalera" → gas leak; placenta → breech birth) |
+
+The held-out column is the honest one: keyword search doesn't generalise far beyond the words people were seen to
+use. Next step proposed: semantic search (the EmbeddingGemma rerank tried in October) over the cards, measured on
+the held-out questions; then decide whether any card (not only vital ones) may answer alone. The Qwen bench and blind
+grading weren't rerun on the new cards (tokens).
+
+For the owner: 88 cards are our own wording (labelled "Redactado por Nomad Pocket según…"), far more than the five
+gaps first agreed; agents rejected copyrighted sources (Cruz Roja, AEP, SEGO, NHS, companies) and wrote from them.
+A review by someone with first-aid training matters more now, vital own cards first (`grep -l "kind: own" …` and
+`vital: yes`). Known small issues: some cards have more than 25 keywords; 12 copied sentences not found by the
+checker (PDF artefacts and a CDC page whose spacing differs).

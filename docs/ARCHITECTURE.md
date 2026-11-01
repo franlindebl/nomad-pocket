@@ -1319,8 +1319,10 @@ started on the phone shows in the car and the other way round.
   (911 → the local number from `emergencyNumber()`, the card's own `note`) and its provenance, cited as
   source [1] (`guide` / card id). No model call: it's instant, the same on every model, and nothing is
   paraphrased. A follow-up ("¿y si es un bebé?") is matched with the earlier question's topic
-  (`followUpTopic`), but the card must still cover the new question.
-- **As sources** (`rag.ts`). Otherwise up to two cards with coverage ≥ 0.34 are chunked and ranked as their own
+  (`followUpTopic`), but the card must still cover the new question. `answerCard(…, 'all')` lets any card answer
+  alone the same way (bench `--cards=all`); the app uses `'vital'` (on 65 unseen questions `'all'` picked a wrong
+  card 4 times in 16).
+- **As sources** (`rag.ts`). Otherwise up to two cards with coverage ≥ 0.2 are chunked and ranked as their own
   list, which leads `mergeRanked`, so the model sees them first among the library's passages. A guide chip
   (or [n]) opens `/guide/[id]`. `hasLibrary()` counts the guide, so a question is searched even with no archive.
 - **UI.** `/guide` (Home's "Primeros auxilios" on iOS): sections, search, vital badge. `/guide/[id]`: the text,

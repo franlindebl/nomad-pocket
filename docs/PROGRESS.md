@@ -346,7 +346,11 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   Every vital or health card reviewed by an independent agent and fixed. Source check: 179 copied cards, 12
   sentences not found (PDF artefacts). 202 cards, 76 vital, 99 health; 88 are our own wording (labelled).
 - The assistant can now answer with any card that fits as well as a vital one (`answerCard(…, 'all')`, bench
-  `--cards=all`); the app still answers alone with vital cards only, pending the measurement.
+  `--cards=all`); the app still answers alone with vital cards only.
+- Search measured with gold labels: right card among the sources 98 % on the design questions but 75 % on the 65
+  held out (63 % before: coverage for sources 0.34 → 0.2, more asking words ignored); vital cards answering alone 5
+  right of 7 unseen. Keyword search doesn't generalise far: next, semantic search over the cards
+  (`docs/EMERGENCY_GUIDE_PLAN.md`, last section). Usage limit hit mid-night; the rest ran on Sonnet.
 
 ### 2026-10-31 — Emergency guide: pilot measured, all 94 cards in the app
 

@@ -110,10 +110,7 @@ describe('guide search', () => {
 
   test('a non-vital card never answers alone', () => {
     assert.equal(vitalCard(es, 'no tengo agua en la cisterna del inodoro'), null);
-    assert.deepEqual(
-      sourceCards(es, 'no tengo agua en la cisterna del inodoro').map((c) => c.id),
-      ['toilets-no-water'],
-    );
+    assert.equal(sourceCards(es, 'no tengo agua en la cisterna del inodoro')[0]?.id, 'toilets-no-water');
   });
 
   test('a follow-up is matched with the earlier question', () => {
