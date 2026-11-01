@@ -8,7 +8,7 @@ kind: excerpt
 source: Ministerio de Derechos Sociales, Consumo y Agenda 2030 (La Moncloa) | Consumo publica recomendaciones sobre los alimentos conservados en el frigorífico y el congelador tras el apagón eléctrico | https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/derechos-sociales-consumo-agenda-2030/paginas/2025/290425-alimentos-apagon-electrico.aspx | 29/04/2025
 licence: Origen de los datos: sitio web de lamoncloa.gob.es. Ministerio de la Presidencia. Nota del Ministerio de Derechos Sociales, Consumo y Agenda 2030; última actualización: 29/04/2025. El Gobierno de España no patrocina ni respalda esta app.
 see: power-outage, emergency-food, food-after-flood, insulin-no-power
-keywords: nevera, frigorífico, congelador, se ha ido la luz, apagón, corte de luz, sin electricidad, comida de la nevera, tirar la comida, se ha descongelado, volver a congelar, recongelar, carne, pescado, huevos, leche, sobras, cuántas horas aguanta la nevera, comida estropeada, alimentos en mal estado, cristales de hielo, es seguro comer
+keywords: nevera, frigorífico, congelador, se ha ido la luz, apagón, corte de luz, sin electricidad, comida de la nevera, tirar la comida, se ha descongelado, volver a congelar, recongelar, carne, pescado, huevos, leche, sobras, cuántas horas aguanta la nevera, comida estropeada, alimentos en mal estado, cristales de hielo, es seguro comer, cuánto aguanta el congelador, si no abro la puerta, congelador sin luz, pollo, todavía se puede comer, está bueno todavía, carne de la nevera
 ---
 Se debe evaluar cada alimento por separado siguiendo las siguientes recomendaciones. Nunca pruebe un alimento para valorar si es seguro, ni confíe en el aspecto o el olor de la comida.
 

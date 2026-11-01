@@ -9,7 +9,7 @@ source: Centros para el Control y la Prevención de Enfermedades (CDC) | Cómo l
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Centros para el Control y la Prevención de Enfermedades (CDC).
 note: Estas mezclas son para superficies, nunca para el agua de beber; en España, la lejía tiene por ley entre 35 y 60 gramos de cloro activo por litro (Real Decreto 349/1993).
 see: water-bleach, food-after-flood, water-after-flood, flood, handwashing, rubbish-waste
-keywords: lejía, desinfectar, limpiar después de una inundación, agua de la inundación, barro en casa, moho, hongos en la pared, manchas negras en la pared, encimera, platos, suelos, juguetes, cuánta lejía por litro, mezcla de lejía y agua, no mezclar lejía con amoniaco, vapores de cloro, guantes, limpieza después de un desastre, aguas fecales en casa, blanqueador
+keywords: lejía, desinfectar, limpiar después de una inundación, agua de la inundación, barro en casa, moho, hongos en la pared, manchas negras en la pared, encimera, platos, suelos, juguetes, cuánta lejía por litro, mezcla de lejía y agua, no mezclar lejía con amoniaco, vapores de cloro, guantes, limpieza después de un desastre, aguas fecales en casa, blanqueador, limpiar el barro, limpiar la casa del barro, cuánta lejía, lejía para el barro
 ---
 ## Siga las instrucciones de seguridad
 

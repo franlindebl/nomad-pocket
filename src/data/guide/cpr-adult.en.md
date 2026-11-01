@@ -7,8 +7,9 @@ health: yes
 kind: excerpt
 source: MedlinePlus, US National Library of Medicine | CPR (Summary: How is CPR done?) | https://medlineplus.gov/cpr.html | 28/07/2026
 licence: Public domain (US government work). Courtesy of MedlinePlus from the National Library of Medicine.
-see: cpr-child, recovery-position, drowning, heart-attack
-keywords: cpr, not breathing, no pulse, unconscious, unresponsive, collapsed, passed out, cardiac arrest, heart stopped, chest compressions, hands-only cpr, rescue breaths, aed, defibrillator, resuscitation, gasping, not waking up, heart attack collapse
+see: cpr-child, recovery-position, drowning, heart-attack, pacemaker-problems
+note: If the person has a pacemaker or implanted defibrillator (a lump under the skin, usually below the collarbone), do not put the AED pad on top of the device but away from it, and do not delay the shock because of it.
+keywords: cpr, not breathing, no pulse, unconscious, unresponsive, collapsed, passed out, cardiac arrest, heart stopped, chest compressions, hands-only cpr, rescue breaths, aed, defibrillator, resuscitation, gasping, not waking up, heart attack collapse, collapsed after a fall, fell and not responding, aed with pacemaker
 ---
 Before starting CPR, check the person. Tap their shoulder and shout, "Are you okay?" Look to see if they are breathing normally. Gasping or gurgling is not normal breathing. If they do not respond and are not breathing normally, start the steps below right away.
 

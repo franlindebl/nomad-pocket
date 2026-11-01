@@ -8,7 +8,7 @@ kind: translation
 translatedFrom: es
 source: Instituto Nacional de Seguridad y Salud en el Trabajo (INSST) | NTP 546: Primeros auxilios: fracturas, luxaciones y esguinces (Fracturas: Síntomas y signos, Actuación, Inmovilización; Lesión de columna vertebral: Prioridad de actuación) | https://www.insst.es/documentacion/colecciones-tecnicas/ntp-notas-tecnicas-de-prevencion/16-serie-ntp-numeros-541-a-575-ano-2001/ntp-546-primeros-auxilios-fracturas-luxaciones-y-esguinces. | 2001
 licence: Source of the data: Instituto Nacional de Seguridad y Salud en el Trabajo (INSST, Spain), NTP 546 (2001). Reused under Spain's Law 37/2007; translated by Nomad Pocket. INSST does not sponsor or endorse this app.
-see: sprains, bleeding, wounds, shock, head-injury
+see: arm-splint-sling, sprains, bleeding, wounds, shock, head-injury
 keywords: fracture, fractures, broken bone, I broke my arm, broken arm, broken leg, broken wrist, broken ankle, open fracture, bone sticking out, I can see the bone, splint, splinting, improvised splint, immobilise, sling, triangular bandage, can't move the leg, deformed limb, fall, back injury, spine injury, neck injury, don't move the injured person
 ---
 ## Signs and symptoms

@@ -7,8 +7,8 @@ health: no
 kind: excerpt
 source: Agencia Federal para el Manejo de Emergencias (FEMA), Ready.gov | Apagones (Consejos para apagón; Cómo protegerse durante un apagón; Regresando después de un apagón) | https://www.ready.gov/es/apagones | 05/03/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Agencia Federal para el Manejo de Emergencias (FEMA), Ready.gov.
-see: generators, heating-without-power, fridge-outage, phones-batteries, medical-devices, carbon-monoxide
-keywords: apagón, se ha ido la luz, no hay luz, corte de luz, sin electricidad, cuánto aguanta la nevera, nevera, congelador, comida de la nevera, linterna, velas, pilas, batería externa, powerbank, cargador portátil, generador, cocina de gas para calentar, horno para calentar, monóxido de carbono, subida de tensión, desenchufar los aparatos, qué hago si se va la luz, apagón general, mucho frío sin luz, mucho calor sin luz
+see: generators, heating-without-power, fridge-outage, phones-batteries, medical-devices, carbon-monoxide, candle-safety
+keywords: apagón, se ha ido la luz, no hay luz, corte de luz, sin electricidad, cuánto aguanta la nevera, nevera, congelador, comida de la nevera, linterna, velas, pilas, batería externa, powerbank, cargador portátil, generador, cocina de gas para calentar, horno para calentar, monóxido de carbono, subida de tensión, desenchufar los aparatos, qué hago si se va la luz, apagón general, mucho frío sin luz, mucho calor sin luz, apagón de varios días, prepararse para un apagón, estar preparado para un apagón, apagón largo, se ha ido la luz en todo el barrio, apagón en el barrio, sin luz en la calle
 ---
 ## Consejos para apagón
 

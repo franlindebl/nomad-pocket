@@ -9,7 +9,7 @@ source: Instituto Nacional para la Seguridad y Salud Ocupacional (NIOSH), CDC | 
 source: Centros para el Control y la Prevención de Enfermedades (CDC) | Qué hacer después de la picadura de una garrapata (Cómo sacar una garrapata; Tenga en cuenta; Seguimiento) | https://www.cdc.gov/ticks/es/after-a-tick-bite/que-hacer-despues-de-la-picadura-de-una-garrapata.html | 13/11/2025
 licence: Dominio público (obras del Gobierno de EE. UU.). Fuente: Instituto Nacional para la Seguridad y Salud Ocupacional (NIOSH) y Centros para el Control y la Prevención de Enfermedades (CDC).
 see: anaphylaxis, snake-bite, wounds
-keywords: picadura, picadura de abeja, picadura de avispa, avispón, me ha picado, aguijón, hinchazón tras la picadura, alérgico a las abejas, escorpión, alacrán, picadura de escorpión, garrapata, picadura de garrapata, quitar una garrapata, garrapata clavada, pinzas, se ha quedado la cabeza dentro, sarpullido tras garrapata, fiebre tras garrapata, picadura de insecto, hielo en la picadura
+keywords: picadura, picadura de abeja, picadura de avispa, avispón, me ha picado, aguijón, hinchazón tras la picadura, alérgico a las abejas, escorpión, alacrán, picadura de escorpión, garrapata, picadura de garrapata, quitar una garrapata, garrapata clavada, pinzas, se ha quedado la cabeza dentro, sarpullido tras garrapata, fiebre tras garrapata, picadura de insecto, hielo en la picadura, garrapata pegada, mi hijo tiene una garrapata, cómo quito una garrapata, quitar garrapata niño
 ---
 Los trabajadores alérgicos al veneno del insecto podrían morir a causa de un choque anafiláctico. El choque anafiláctico es una reacción alérgica grave que requiere atención médica de emergencia inmediata.
 

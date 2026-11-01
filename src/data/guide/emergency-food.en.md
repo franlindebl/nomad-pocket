@@ -7,8 +7,9 @@ health: no
 kind: excerpt
 source: Ready.gov (FEMA, US Department of Homeland Security) | Food (Suggested Emergency Food Supplies; Food Safety and Sanitation; Cooking) | https://www.ready.gov/food | 12/03/2026
 licence: Public domain (US Government work). Source: Ready.gov, Federal Emergency Management Agency (FEMA).
+note: The European Commission's Preparedness Union Strategy (March 2025) sets out to encourage people to keep essential supplies for a minimum of 72 hours in emergencies.
 see: emergency-kit, water-storage, fridge-outage, cooking-without-power, feeding-babies
-keywords: emergency food, food supply, food stockpile, what food to store, non-perishable food, tinned food, canned food, can opener, how much food, food for several days, pantry, shopping list for an emergency, dry food, food for babies, special diet, swollen can, dented can, cook without power, eat from the can, prepare for a blackout
+keywords: emergency food, food supply, food stockpile, what food to store, non-perishable food, tinned food, canned food, can opener, how much food, food for several days, pantry, shopping list for an emergency, dry food, food for babies, special diet, swollen can, dented can, cook without power, eat from the can, prepare for a blackout, 72 hours, food for a week, food for 3 days, EU recommendation
 ---
 Following a disaster there may be power outages that could last for several days. Stock canned foods, dry mixes and other staples that do not require refrigeration, cooking, water or special preparation. Be sure to include a manual can opener and eating utensils.
 

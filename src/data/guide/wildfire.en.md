@@ -8,7 +8,7 @@ kind: translation
 translatedFrom: es
 source: Protección Civil (Dirección General de Protección Civil y Emergencias, Ministerio del Interior) | Incendios forestales: medidas de autoprotección (infografías "En las proximidades de un incendio" e "Incendio en las cercanías de una casa de campo") | https://www.proteccioncivil.es/coordinacion/gestion-de-riesgos/incendios-forestales | 2021
 licence: Source of the data: Dirección General de Protección Civil y Emergencias (Ministry of the Interior, Spain). Reused under Spain's Law 37/2007; translated by Nomad Pocket. Last updated: not stated (NIPO 126-21-025-9, 2021). Protección Civil does not sponsor or endorse this app.
-see: evacuation, burns, house-fire, shelter-in-place, masks
+see: wildfire-house-prep, evacuation, burns, house-fire, shelter-in-place, masks
 keywords: wildfire, forest fire, bush fire, brush fire, fire in the hills, fire near my house, smoke, lots of smoke, the fire is coming, escape a fire, which way to run, trapped by fire, the fire reached me, clothes on fire, wet cloth, country house, villa, wet the roof, hose, evacuation order, evacuate, stay at home, close the shutters, wind, flames
 ---
 ## Near a fire

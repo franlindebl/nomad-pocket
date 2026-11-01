@@ -7,8 +7,9 @@ health: yes
 kind: copy
 source: Centros para el Control y la Prevención de Enfermedades (CDC) | Cómo cuidarse y cuidar a su familia después de un desastre (hoja informativa CS283563A) | https://www.cdc.gov/natural-disasters/media/pdfs/2024/08/Coping_with_Disaster_ES-v2.pdf | sin fecha (publicada en la página de la CDC del 24/04/2024)
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Centros para el Control y la Prevención de Enfermedades (CDC).
-see: family-plan, caring-sick-person
-keywords: estrés, ansiedad, angustia, nervios, ataque de pánico, no puedo dormir, pesadillas, miedo, tristeza, llorar, trauma, salud mental, apoyo psicológico, me siento desbordado, bloqueado, cómo ayudar a mis hijos, los niños tienen miedo, hablar con los niños, duelo, no puedo más, me siento mal después del desastre, demasiadas noticias
+note: En España, en lugar de la línea SAMHSA: Teléfono de la Esperanza, 717 003 717 (24 horas); si piensa en el suicidio, 024 (gratuito, 24 horas); en una emergencia, 112.
+see: family-plan, caring-sick-person, panic-attack, children-after-disaster, grief-loss, suicidal-thoughts, loneliness-isolation
+keywords: estrés, ansiedad, angustia, nervios, ataque de pánico, no puedo dormir, pesadillas, miedo, tristeza, llorar, trauma, salud mental, apoyo psicológico, me siento desbordado, bloqueado, cómo ayudar a mis hijos, los niños tienen miedo, hablar con los niños, duelo, no puedo más, me siento mal después del desastre, demasiadas noticias, tengo miedo
 ---
 Después de un desastre, es importante que cuide su salud emocional. Preste atención a la forma en que usted y su familia se sienten y actúan.
 

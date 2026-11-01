@@ -8,7 +8,7 @@ kind: translation
 translatedFrom: en
 source: U.S. Food and Drug Administration (FDA) | FDA Offers Tips about Medical Devices and Natural Disasters (General Safety; Power Outage) | https://www.fda.gov/medical-devices/emergency-situations-medical-devices/fda-offers-tips-about-medical-devices-and-natural-disasters | 16/04/2024
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Administración de Alimentos y Medicamentos de EE. UU. (FDA). Traducción de Nomad Pocket.
-see: power-outage, generators, insulin-no-power, medicines-after-disaster, disabilities-older
+see: power-outage, generators, insulin-no-power, medicines-after-disaster, disabilities-older, home-oxygen
 keywords: aparato médico, dispositivo médico, equipo médico, apagón aparato médico, concentrador de oxígeno, oxígeno en casa, respirador, ventilador mecánico, CPAP, máquina de la apnea, monitor de apnea, nebulizador, aspirador de secreciones, bomba de insulina, diálisis en casa, silla de ruedas eléctrica, necesita electricidad, batería de reserva, generador para el aparato, se ha mojado el aparato, se ha desconfigurado al volver la luz, depende de una máquina para vivir
 ---
 ## Seguridad general

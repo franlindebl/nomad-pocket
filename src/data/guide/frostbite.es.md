@@ -9,7 +9,7 @@ translatedFrom: en
 source: Centers for Disease Control and Prevention (CDC) | Preventing Frostbite (What to look out for; Don't wait— take action) | https://www.cdc.gov/winter-weather/prevention/preventing-frostbite.html | 25/08/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Centros para el Control y la Prevención de Enfermedades (CDC). Traducción de Nomad Pocket, sin respaldo de los CDC.
 see: hypothermia, winter-storm, heating-without-power
-keywords: congelación, congelamiento, sabañones, dedos congelados, pies congelados, dedos de los pies congelados, no siento los dedos, dedos dormidos, entumecido, piel blanca, piel grisácea, piel dura, piel como de cera, orejas congeladas, nariz congelada, frotar con nieve, calentar las manos, agua tibia, mucho frío en las manos, perdido en la nieve, frío en la montaña
+keywords: congelación, congelamiento, sabañones, dedos congelados, pies congelados, dedos de los pies congelados, no siento los dedos, dedos dormidos, entumecido, piel blanca, piel grisácea, piel dura, piel como de cera, orejas congeladas, nariz congelada, frotar con nieve, calentar las manos, agua tibia, mucho frío en las manos, perdido en la nieve, frío en la montaña, dedos de los pies blancos, no siento los dedos de los pies, después de salir con la nieve
 ---
 ## A qué debe estar atento
 

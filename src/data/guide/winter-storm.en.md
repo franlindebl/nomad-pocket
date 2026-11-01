@@ -7,7 +7,7 @@ health: no
 kind: excerpt
 source: Federal Emergency Management Agency (FEMA), Ready.gov | Winter Weather (How to Protect Yourself from Winter Weather; Stay Safe During Winter Weather) | https://www.ready.gov/winter-weather | 10/03/2026
 licence: Public domain (US government work). Source: Federal Emergency Management Agency (FEMA), Ready.gov.
-see: heating-without-power, power-outage, generators, hypothermia, frostbite, carbon-monoxide, emergency-kit
+see: heating-without-power, power-outage, generators, hypothermia, frostbite, carbon-monoxide, emergency-kit, snow-shovelling
 keywords: winter storm, snowstorm, blizzard, heavy snow, snowed in, cold wave, extreme cold, freezing, ice, frost, freezing rain, black ice, frozen pipes, cold snap, stuck in the car in the snow, trapped in the car, car kit for winter, shovelling snow, no heating, power cut in winter, weather warning snow, stay home in the snow
 ---
 **IF YOU ARE UNDER A WINTER STORM WARNING, FIND SHELTER RIGHT AWAY**

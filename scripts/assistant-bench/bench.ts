@@ -307,8 +307,9 @@ async function answer(text: string, qid = 0) {
   const budget = rc.tokensToChars(free);
   const rec: any = { lang, health, intent, mode, budget };
   const t0 = Date.now();
-  const vital = GUIDE && intent === 'search' ? gc.vitalCard(guideIdx[lang], text, []) : null;
-  if (vital) return { ...rec, mode: 'vital', sources: [`guide · ${vital[lang].title}`], answer: gc.vitalAnswer(vital, lang, '112'), ms: Date.now() - t0 };
+  // --cards=all: any card that fits the question as well answers alone (not only the vital ones).
+  const vital = GUIDE && intent === 'search' ? gc.answerCard(guideIdx[lang], text, [], flag('cards', 'vital')) : null;
+  if (vital) return { ...rec, mode: 'vital', sources: [`guide · ${vital[lang].title}`], answer: gc.cardAnswer(vital, lang, '112'), ms: Date.now() - t0 };
   if (RETRIEVAL_ONLY) {
     const r: any = V2 ? await retrieve2(text, lang, budget, undefined, flag('qen', '') || undefined) : await retrieve(text, lang, budget);
     Object.assign(rec, { queries: r.queries, candidates: r.candidates, sources: r.sources.map((s: any) => `${s.itemId} · ${s.title}${s.page ? ` p.${s.page}` : ''}`), context: r.userMessage });

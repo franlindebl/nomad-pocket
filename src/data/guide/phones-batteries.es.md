@@ -8,7 +8,7 @@ kind: excerpt
 source: Agencia Federal para el Manejo de Emergencias (FEMA), Ready.gov | Use la Tecnología para Estar Preparado (Haga un plan) | https://www.ready.gov/es/use-la-tecnologia-para-estar-preparado | 13/03/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Agencia Federal para el Manejo de Emergencias (FEMA), Ready.gov.
 see: texts-not-calls, power-outage, radio-alerts, family-plan, documents-money
-keywords: batería del móvil, me queda poca batería, se me acaba la batería, ahorrar batería, modo ahorro de energía, modo bajo consumo, modo avión, cargar el móvil, cargar el móvil sin luz, batería externa, powerbank, cargador portátil, cargador del coche, no hay cobertura, no entran las llamadas, no puedo llamar, mandar un mensaje, SMS en vez de llamar, whatsapp, grupo de la familia, contactos, red móvil saturada, móvil
+keywords: batería del móvil, me queda poca batería, se me acaba la batería, ahorrar batería, modo ahorro de energía, modo bajo consumo, modo avión, cargar el móvil, cargar el móvil sin luz, batería externa, powerbank, cargador portátil, cargador del coche, no hay cobertura, no entran las llamadas, no puedo llamar, mandar un mensaje, SMS en vez de llamar, whatsapp, grupo de la familia, contactos, red móvil saturada, móvil, cómo cargo el móvil sin luz, que dure la batería
 ---
 ## Haga un plan
 

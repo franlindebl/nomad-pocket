@@ -7,8 +7,9 @@ health: no
 kind: excerpt
 source: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA) | Prepare a sus mascotas para los desastres (Haga un Plan; Prepare un kit para sus animales; Prepare a sus mascotas para viajar) | https://www.ready.gov/es/cuidado-de-los-animales | 20/03/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA).
-see: evacuation, emergency-kit, shelter-in-place, family-plan
-keywords: mascotas, perro, gato, evacuar con el perro, llevarme al gato, kit para mascotas, comida para el perro, pienso, transportín, jaula, correa, collar, microchip, mascota perdida, el refugio no admite animales, animales, medicinas del perro, arena del gato, quién cuida a mi perro, dónde se esconde el gato
+note: Los perros guía y de asistencia no son mascotas: por ley en España (Real Decreto 409/2025) pueden entrar con la persona a la que asisten en albergues, refugios, centros asistenciales, alojamientos y transportes colectivos sin pagar más; lleve su distintivo visible en el arnés o el collar.
+see: evacuation, emergency-kit, shelter-in-place, family-plan, pets-dangerous-foods
+keywords: mascotas, perro, gato, evacuar con el perro, llevarme al gato, kit para mascotas, comida para el perro, pienso, transportín, jaula, correa, collar, microchip, mascota perdida, el refugio no admite animales, animales, medicinas del perro, arena del gato, quién cuida a mi perro, dónde se esconde el gato, perro guía, perro de asistencia, me dejan entrar con el perro guía, albergue con mascotas, evacuar con animales
 ---
 ## Haga un Plan
 

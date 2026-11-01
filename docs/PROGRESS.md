@@ -332,6 +332,22 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-01 — Emergency guide: 202 cards from 326 real questions
+
+- Owner: complete the guide overnight, with quality; more questions to find what's missing; workflows OK. Then:
+  tokens are short, use smaller models.
+- 326 new crisis questions from 16 personas (`scripts/assistant-bench/questions-{design,test}.json`): 261 to design
+  the guide, 65 held out to measure it. Gaps judged per question: 74 well covered, 112 partly, 66 not at all.
+- The owner's review items: `choking`, `recovery-position`, `cpr-child` and `electric-shock` rewritten as own wording
+  of ERC 2025 (and MedlinePlus for electric shock); new `air-raid` (Sweden MCF 2026, Norway DSB, Israel HFC,
+  Ready.gov). 82 new cards (gas leak, butane heaters, lifts, asthma, panic, suicidal thoughts, pregnancy, babies in
+  heat and cold, medicines running out, dialysis, calling 112, drones, flood return, scams…; new section 14 "Casa y
+  seguridad personal"), ~20 companion cards and notes on existing ones, 444 Spanish keywords from the questions.
+  Every vital or health card reviewed by an independent agent and fixed. Source check: 179 copied cards, 12
+  sentences not found (PDF artefacts). 202 cards, 76 vital, 99 health; 88 are our own wording (labelled).
+- The assistant can now answer with any card that fits as well as a vital one (`answerCard(…, 'all')`, bench
+  `--cards=all`); the app still answers alone with vital cards only, pending the measurement.
+
 ### 2026-10-31 — Emergency guide: pilot measured, all 94 cards in the app
 
 - Owner: go ahead with the pilot and, if it works, the whole guide.

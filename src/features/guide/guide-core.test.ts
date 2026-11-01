@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { cardNotes, GuideIndex, provenance, sourceCards, visibleCards, vitalAnswer, vitalCard, type GuideCard, type GuideText } from './guide-core.ts';
+import { cardNotes, GuideIndex, provenance, sourceCards, visibleCards, cardAnswer, vitalCard, type GuideCard, type GuideText } from './guide-core.ts';
 
 const text = (title: string, keywords: string[], body: string, extra: Partial<GuideText> = {}): GuideText => ({
   title,
@@ -146,7 +146,7 @@ describe('guide answers', () => {
   });
 
   test('a vital answer is the card unchanged, cited as source 1', () => {
-    const a = vitalAnswer(CARDS[0], 'es', '112');
+    const a = cardAnswer(CARDS[0], 'es', '112');
     assert.ok(a.startsWith('**Guía de emergencias: RCP en adultos**\n\n'));
     assert.ok(a.includes('\n\nLlame al 911. Empuje fuerte y rápido en el centro del pecho.\n\n'));
     assert.ok(a.includes('> Donde el texto dice 911, llama al 112.'));

@@ -8,7 +8,7 @@ kind: excerpt
 source: Centros para el Control y la Prevención de Enfermedades (CDC) | Primeros auxilios de heridas después de un desastre natural (CS285676-B) | https://www.cdc.gov/es/disasters/hurricanes/pdf/woundcare.pdf | 28/10/2017
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Centros para el Control y la Prevención de Enfermedades (CDC).
 see: bleeding, tourniquet, first-aid-kit, pain-relievers, water-after-flood
-keywords: corte, me he cortado, cortadura, tengo un corte, herida en el dedo, herida, heridas, corte, corte profundo, me he cortado, raja, raspón, rasguño, arañazo, herida punzante, me he clavado un clavo, mordedura de perro, mordedura de animal, limpiar una herida, cómo curar una herida, tirita, venda, herida infectada, pus, enrojecimiento, hinchazón, fiebre después de un corte, tétanos, vacuna del tétanos, agua de inundación y heridas
+keywords: corte, me he cortado, cortadura, tengo un corte, herida en el dedo, herida, heridas, corte, corte profundo, me he cortado, raja, raspón, rasguño, arañazo, herida punzante, me he clavado un clavo, mordedura de perro, mordedura de animal, limpiar una herida, cómo curar una herida, tirita, venda, herida infectada, pus, enrojecimiento, hinchazón, fiebre después de un corte, tétanos, vacuna del tétanos, agua de inundación y heridas, me he clavado algo, antitetánica, vacuna antitetánica, herida en el pie con barro, pincharse en el barro
 ---
 Toma las siguientes medidas para protegerte y proteger a tu familia:
 

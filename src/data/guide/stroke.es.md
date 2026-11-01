@@ -8,7 +8,7 @@ kind: excerpt
 source: Centros para el Control y la Prevención de Enfermedades (CDC) | Signos y síntomas de accidente cerebrovascular (Signos y síntomas; Cuándo buscar ayuda de emergencia) | https://www.cdc.gov/stroke/es/signs-symptoms/signos-y-sintomas-de-accidente-cerebrovascular.html | 15/05/2024
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Centros para el Control y la Prevención de Enfermedades (CDC).
 see: heart-attack, cpr-adult, recovery-position
-keywords: ictus, infarto cerebral, derrame cerebral, accidente cerebrovascular, embolia, apoplejía, le está dando un ictus, boca torcida, se le tuerce la boca, cara caída, no puede mover un brazo, se le duerme un lado, habla raro, no puede hablar, habla arrastrada, confusión repentina, mareo repentino, pérdida de equilibrio, ve mal de repente, dolor de cabeza fuerte y repentino, mini derrame, actúe rápido
+keywords: ictus, infarto cerebral, derrame cerebral, accidente cerebrovascular, embolia, apoplejía, le está dando un ictus, boca torcida, se le tuerce la boca, cara caída, no puede mover un brazo, se le duerme un lado, habla raro, no puede hablar, habla arrastrada, confusión repentina, mareo repentino, pérdida de equilibrio, ve mal de repente, dolor de cabeza fuerte y repentino, mini derrame, actúe rápido, me noto la boca torcida, no me sale hablar, no me salen las palabras, es un ictus
 ---
 ### ¿Cuáles son los signos de un accidente cerebrovascular en hombres y mujeres?
 

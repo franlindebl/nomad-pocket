@@ -7,8 +7,8 @@ health: no
 kind: excerpt
 source: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA) | Incidentes con sustancias químicas y materiales peligrosos (Durante un incidente; Después de un incidente) | https://www.ready.gov/es/hazmat | 25/04/2023
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA).
-see: shelter-in-place, evacuation, chemical-burns, poisoning, radiation-decontamination, radio-alerts
-keywords: fuga química, escape químico, vertido químico, ataque químico, gas tóxico, nube tóxica, accidente en una fábrica química, accidente industrial, mercancías peligrosas, olor raro, me pican los ojos, no puedo respirar, cloro, amoniaco, descarrilamiento, camión cisterna, sellar la habitación, cinta adhesiva, confinamiento, contra el viento, descontaminarse, quitarse la ropa, evacuar o quedarse en casa
+see: toxic-cloud-escape, shelter-in-place, evacuation, chemical-burns, poisoning, radiation-decontamination, radio-alerts
+keywords: fuga química, escape químico, vertido químico, ataque químico, gas tóxico, nube tóxica, accidente en una fábrica química, accidente industrial, mercancías peligrosas, olor raro, me pican los ojos, no puedo respirar, cloro, amoniaco, descarrilamiento, camión cisterna, sellar la habitación, cinta adhesiva, confinamiento, descontaminarse, quitarse la ropa, evacuar o quedarse en casa, huele a cloro, nube amarilla, vivo cerca de una fábrica química
 ---
 Los signos de una liberación de sustancias química incluyen dificultad para respirar, irritación ocular, pérdida de coordinación, náuseas o ardor en la nariz, garganta y pulmones.
 

@@ -8,8 +8,9 @@ kind: translation
 translatedFrom: en
 source: Centers for Disease Control and Prevention (CDC) | First Aid for Seizures (How to keep someone safe during a seizure; Extra steps for generalized seizures; When to call for help; What to avoid) | https://www.cdc.gov/epilepsy/first-aid-for-seizures/index.html | 15/05/2024
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Centros para el Control y la Prevención de Enfermedades (CDC). Traducción de Nomad Pocket, sin respaldo de los CDC.
-see: recovery-position, cpr-adult, cpr-child, low-blood-sugar, head-injury
-keywords: convulsión, convulsiones, ataque epiléptico, crisis epiléptica, epilepsia, le está dando un ataque, tiembla en el suelo, sacudidas, se ha caído temblando, mirada perdida, echa espuma por la boca, se ha mordido la lengua, meterle algo en la boca, sujetarle, cuánto dura una convulsión, convulsión febril, niño convulsionando, inconsciente tras la convulsión, 5 minutos, qué hago
+see: recovery-position, cpr-adult, cpr-child, low-blood-sugar, head-injury, fever-children
+note: Convulsión con fiebre en un niño: mientras dura, no lo desnude ni lo moje con agua fría para bajarle la fiebre; si es la primera vez o dura más de 5 minutos, llame al 112, y que lo vea un médico cuando termine.
+keywords: convulsión, convulsiones, ataque epiléptico, crisis epiléptica, epilepsia, le está dando un ataque, tiembla en el suelo, sacudidas, se ha caído temblando, mirada perdida, echa espuma por la boca, se ha mordido la lengua, meterle algo en la boca, sujetarle, cuánto dura una convulsión, convulsión febril, convulsión por fiebre, niño convulsionando, mi niña está convulsionando, inconsciente tras la convulsión, 5 minutos, qué hago, qué hago mientras dura, crisis en el agua, convulsión en la piscina
 ---
 ## Cómo mantener a salvo a una persona durante una convulsión
 

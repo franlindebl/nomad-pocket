@@ -8,7 +8,7 @@ kind: excerpt
 source: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA) | Use la Tecnología para Estar Preparado (Haga un plan) | https://www.ready.gov/es/use-la-tecnologia-para-estar-preparado | 13/03/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA).
 see: phones-batteries, family-plan, radio-alerts, power-outage
-keywords: mejor un mensaje que llamar, mandar un mensaje, SMS, WhatsApp, las llamadas no entran, no puedo llamar, red caída, red saturada, la red móvil ha colapsado, no hay cobertura, líneas colapsadas, ahorrar batería, modo avión, modo ahorro de energía, batería externa, powerbank, cargar el móvil, grupo de la familia, avisar de que estoy bien, el móvil en un apagón
+keywords: mejor un mensaje que llamar, mandar un mensaje, SMS, WhatsApp, las llamadas no entran, no puedo llamar, red caída, red saturada, la red móvil ha colapsado, no hay cobertura, líneas colapsadas, ahorrar batería, modo avión, modo ahorro de energía, batería externa, powerbank, cargar el móvil, grupo de la familia, avisar de que estoy bien, el móvil en un apagón, no sabe nada de mí, cómo le aviso, avisar a mi hijo, avisar a la familia de que estoy bien
 ---
 - **Use los mensajes de texto, las redes sociales y el correo electrónico para conectarse con amigos y familiares durante las emergencias**.
 - Las redes móviles pueden colapsar durante las emergencias, por lo que es difícil realizar y recibir llamadas telefónicas. Los mensajes de texto requieren menos capacidad de banda ancha, lo que significa que pueden transmitirse de manera más confiable en situaciones en las que muchas personas intentan usar sus teléfonos móviles al mismo tiempo.

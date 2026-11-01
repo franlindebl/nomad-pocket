@@ -8,7 +8,7 @@ kind: excerpt
 source: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA) | Haga un Plan (Pasos 1–4) | https://www.ready.gov/es/haga-un-plan | 12/06/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA).
 see: texts-not-calls, radio-alerts, shelter-in-place, evacuation, emergency-kit, disabilities-older
-keywords: plan familiar, plan de emergencia, plan en casa, punto de encuentro, dónde quedamos, nos hemos separado, no encuentro a mi familia, contacto de emergencia, plan de comunicación, cómo nos avisamos, los niños en el colegio, qué hacemos si pasa algo, ponernos de acuerdo, prepararse en familia, ensayar el plan, ruta de evacuación, simulacro en casa
+keywords: plan familiar, plan de emergencia, plan en casa, punto de encuentro, dónde quedamos, nos hemos separado, no encuentro a mi familia, contacto de emergencia, plan de comunicación, cómo nos avisamos, los niños en el colegio, qué hacemos si pasa algo, ponernos de acuerdo, prepararse en familia, ensayar el plan, ruta de evacuación, simulacro en casa, cómo quedamos para encontrarnos, plan de emergencia con mi familia, cada uno está en un sitio, estamos en sitios distintos, cómo nos encontramos
 ---
 ¡Haga un plan hoy! Es posible que su familia no esté reunida al momento de un desastre, de manera que es importante saber qué tipos de desastres podrían afectar su área. Sepa cómo se comunicarán entre sí y cómo se volverán a juntar si se separan del grupo. Establezca un lugar de encuentro de la familia que sea conocido y fácil de encontrar.
 

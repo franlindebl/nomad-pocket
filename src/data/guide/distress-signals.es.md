@@ -8,8 +8,8 @@ kind: translation
 translatedFrom: en
 source: U.S. National Park Service (NPS) | Outdoor Emergency Plan (Ranger tip; What to do if you get lost: 2. Call for help, 3. Wait for help) | https://www.nps.gov/subjects/healthandsafety/upload/NPS-Outdoor-Emergency-Plan-508c.pdf | sin fecha (PDF del 21/06/2023)
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Servicio de Parques Nacionales de EE. UU. (NPS). No se reproduce el emblema del NPS. Traducción de Nomad Pocket, sin respaldo del NPS.
-see: signalling-rescue, explosion, earthquake, direction-no-compass, improvised-shelter
-keywords: señales de socorro, pedir ayuda, SOS, silbato, tres pitidos, linterna, señales con la linterna, espejo, hacer señales a un helicóptero, rescate, perdido, me he perdido, atrapado, socorro, nadie me oye, no tengo cobertura, qué decir al 112, quedarse quieto, rescate en montaña, búsqueda y rescate, hacerme visible
+see: calling-112, signalling-rescue, lost-at-nightfall, explosion, earthquake, direction-no-compass, improvised-shelter
+keywords: señales de socorro, pedir ayuda, SOS, silbato, tres pitidos, linterna, señales con la linterna, espejo, hacer señales a un helicóptero, rescate, perdido, me he perdido, atrapado, socorro, nadie me oye, no tengo cobertura, qué decir al 112, quedarse quieto, rescate en montaña, búsqueda y rescate, hacerme visible, hacer señales
 ---
 ## Consejo del guarda
 

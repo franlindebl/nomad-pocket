@@ -8,7 +8,7 @@ kind: excerpt
 source: Centros para el Control y la Prevención de Enfermedades (CDC) | Tratamiento de los niveles bajos de azúcar en la sangre (hipoglucemia) (La regla de los 15-15; Alimentos para tratar los niveles bajos de azúcar en la sangre; Cómo tratar los niveles gravemente bajos de azúcar en la sangre) | https://www.cdc.gov/diabetes/es/treatment/tratamiento-de-los-niveles-bajos-de-azucar-en-la-sangre-hipoglucemia.html | 25/04/2024
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Centros para el Control y la Prevención de Enfermedades (CDC).
 see: seizures, insulin-no-power, medicines-after-disaster, recovery-position
-keywords: bajada de azúcar, hipoglucemia, hipo, diabético, diabetes, azúcar bajo, le ha bajado el azúcar, tembloroso y sudando, diabético confuso, diabético desmayado, se ha desmayado y es diabético, pastillas de glucosa, glucagón, zumo, azúcar, regla 15-15, insulina, azúcar por debajo de 70, qué darle de comer, niño con el azúcar bajo
+keywords: bajada de azúcar, hipoglucemia, hipo, diabético, diabetes, azúcar bajo, le ha bajado el azúcar, tembloroso y sudando, diabético confuso, diabético desmayado, se ha desmayado y es diabético, pastillas de glucosa, glucagón, zumo, azúcar, regla 15-15, insulina, azúcar por debajo de 70, qué darle de comer, niño con el azúcar bajo, soy diabética, me tiembla todo, sudo frío, me ha bajado el azúcar
 ---
 ## La regla de los 15-15
 

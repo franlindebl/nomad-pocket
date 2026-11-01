@@ -7,8 +7,8 @@ health: no
 kind: excerpt
 source: Cybersecurity and Infrastructure Security Agency (CISA), Office for Bombing Prevention | Suspicious or Unattended? (Suspicious or Unattended Item Postcard) | https://www.cisa.gov/sites/default/files/2025-08/Suspicious_or_Unattended_Item_Postcard_082025_508.pdf | 08/2025
 licence: Public domain (US government work). Source: Cybersecurity and Infrastructure Security Agency (CISA), Office for Bombing Prevention.
-see: explosion, active-attacker
-keywords: suspicious package, suspicious bag, unattended bag, abandoned backpack, abandoned suitcase, left luggage, bomb, possible bomb, explosive device, wires sticking out, strange package, should I touch it, report a package, police, evacuate the area, train station, airport, bus station, metro
+see: explosion, active-attacker, unexploded-ordnance
+keywords: suspicious package, suspicious bag, unattended bag, abandoned backpack, abandoned suitcase, left luggage, bomb, possible bomb, explosive device, wires sticking out, strange package, should I touch it, report a package, police, evacuate the area, train station, airport, bus station, metro, abandoned backpack in the terminal
 ---
 Criminals or terrorists sometimes conceal improvised explosive devices (IEDs) in backpacks, suitcases, or common items.
 Use this process to safely determine if an item is a serious threat or just unattended.

@@ -7,8 +7,9 @@ health: yes
 kind: excerpt
 source: MedlinePlus, Biblioteca Nacional de Medicina de EE. UU. | Reanimación cardiopulmonar (Introducción: ¿Cómo se realiza la reanimación cardiopulmonar?) | https://medlineplus.gov/spanish/cpr.html | 28/07/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Cortesía de MedlinePlus, de la Biblioteca Nacional de Medicina.
-see: cpr-child, recovery-position, drowning, heart-attack
-keywords: rcp, reanimación, reanimación cardiopulmonar, masaje cardiaco, masaje cardíaco, no respira, no responde, inconsciente, se ha desmayado, se ha desplomado, parada cardiaca, paro cardíaco, el corazón se ha parado, no tiene pulso, compresiones torácicas, boca a boca, desfibrilador, dea, respira mal, boquea, no se despierta
+see: cpr-child, recovery-position, drowning, heart-attack, pacemaker-problems
+note: Si la persona lleva marcapasos o desfibrilador implantado (un bulto bajo la piel, normalmente bajo la clavícula), no ponga el parche del DEA encima del aparato sino apartado de él, y no retrase la descarga por ello.
+keywords: rcp, reanimación, reanimación cardiopulmonar, masaje cardiaco, no respira, no responde, inconsciente, se ha desmayado, se ha desplomado, parada cardiaca, paro cardíaco, el corazón se ha parado, no tiene pulso, compresiones torácicas, boca a boca, desfibrilador, dea, respira mal, boquea, no se despierta, se ha desplomado y no respira, no respira qué hago, se ha caído y no contesta, dea marcapasos
 ---
 Antes de comenzar la RCP, evalúe a la persona. Tóquele el hombro y grite ¿Está bien? Revise si respira normalmente. Si jadea o emite sonidos de gorgoteo es porque no respira bien. Si la persona no responde y no respira normal, comience de inmediato los pasos a continuación.
 

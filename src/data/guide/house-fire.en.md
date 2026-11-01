@@ -7,7 +7,7 @@ health: no
 kind: excerpt
 source: Ready.gov (FEMA) | Home Fires (During a Fire; Create and Practice a Fire Escape Plan; After a Fire) | https://www.ready.gov/home-fires | 02/26/2026
 licence: Public domain (US Government work). Source: Ready.gov, Federal Emergency Management Agency (FEMA).
-see: burns, kitchen-oil-fire, carbon-monoxide, distress-signals, family-plan
+see: burns, kitchen-oil-fire, carbon-monoxide, distress-signals, family-plan, candle-safety
 keywords: fire, house fire, fire at home, fire in the flat, fire in the building, smoke in the house, smoke alarm going off, how to get out of a fire, crawl under the smoke, hot door, door is hot, can't get out, trapped by fire, trapped in a room, smoke coming under the door, signal from the window, clothes on fire, stop drop and roll, someone inside, pets inside, escape plan, after a fire
 ---
 ## During a Fire

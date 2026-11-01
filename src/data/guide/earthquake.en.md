@@ -7,7 +7,7 @@ health: no
 kind: excerpt
 source: Ready.gov (FEMA) | Earthquakes (During an Earthquake; Protect Yourself During Earthquakes; After an Earthquake) | https://www.ready.gov/earthquakes | 09/09/2026
 licence: Public domain (US Government work). Source: Ready.gov, Federal Emergency Management Agency (FEMA).
-see: tsunami, house-fire, distress-signals, texts-not-calls, disabilities-older
+see: tsunami, house-fire, distress-signals, texts-not-calls, disabilities-older, earthquake-prepare
 keywords: earthquake, quake, tremor, the ground is shaking, the building is shaking, what to do in an earthquake, drop cover hold on, get under a table, stand in a doorway, should I run outside, earthquake in bed, earthquake while driving, earthquake outside, aftershock, aftershocks, trapped under rubble, trapped after an earthquake, damaged building, collapsed building, earthquake wheelchair, earthquake and tsunami, seismic
 ---
 ## During an Earthquake

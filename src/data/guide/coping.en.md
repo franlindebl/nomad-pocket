@@ -7,7 +7,8 @@ health: yes
 kind: copy
 source: Centers for Disease Control and Prevention (CDC) | Coping with a Disaster or Traumatic Event (factsheet CS283563A) | https://www.cdc.gov/natural-disasters/media/pdfs/2024/08/Coping_with_Disaster_2_English.pdf | 24/04/2024
 licence: Public domain (US government work). Source: Centers for Disease Control and Prevention (CDC).
-see: family-plan, caring-sick-person
+note: In Spain, instead of the SAMHSA line: Teléfono de la Esperanza, 717 003 717 (24 hours); if you are thinking of suicide, 024 (free, 24 hours); in an emergency, 112.
+see: family-plan, caring-sick-person, panic-attack, children-after-disaster, grief-loss, suicidal-thoughts, loneliness-isolation
 keywords: stress, anxiety, distress, panic, panic attack, can't sleep, nightmares, fear, scared, sadness, crying, trauma, mental health, overwhelmed, numb, how to help my children, kids are scared, talking to children, grief, I can't cope, feeling bad after the disaster, news overload
 ---
 After a disaster, it is important to take care of your emotional health. Pay attention to how you and your family members are feeling and acting.

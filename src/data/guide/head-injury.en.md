@@ -7,6 +7,7 @@ health: yes
 kind: excerpt
 source: Centers for Disease Control and Prevention (CDC) | Signs and Symptoms of Concussion (Key points; Signs and symptoms; Concussion danger signs) | https://www.cdc.gov/heads-up/signs-symptoms/index.html | 15/09/2025
 licence: Public domain (US government work). Source: Centers for Disease Control and Prevention (CDC).
+note: If the person fell from higher than 1 metre or 5 stairs, or may have hurt their neck or back (a fall or a hard blow), call 112 and keep their head and neck still; don't move them unless there is immediate danger such as a fire, or you must turn them because they stop breathing or vomit, and then move head, neck and body together as one block.
 see: seizures, recovery-position, cpr-adult, cpr-child, fractures
 keywords: head injury, hit his head, hit her head, bumped head, blow to the head, fell and hit head, concussion, knocked out, passed out after a fall, child fell off bed, baby hit head, headache after a fall, vomiting after hitting head, drowsy after head injury, can't stay awake, confused, unequal pupils, double vision, slurred speech, seizure after head injury, danger signs
 ---

@@ -10,7 +10,8 @@ source: U.S. Fire Administration (USFA), FEMA | Pictograph: Cook Top Fire Safety
 source: U.S. Fire Administration (USFA), FEMA | Cooking Fire Safety (Messages to share) | https://www.usfa.fema.gov/prevention/home-fires/prevent-fires/cooking/ | 28/09/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Administración de Incendios de EE. UU. (USFA), Agencia Federal para el Manejo de Emergencias (FEMA). Traducción de Nomad Pocket.
 see: house-fire, burns, cooking-without-power
-keywords: fuego en la sartén, se ha prendido el aceite, aceite ardiendo, sartén ardiendo, sartén en llamas, freidora en llamas, fuego en la cocina, incendio en la cocina, se quema la sartén, apagar el fuego de la sartén, tapar con una tapa, bandeja del horno, echar agua al aceite, apagar el fuego, el aceite humea, el aceite hierve, vitrocerámica, fogón, freír
+note: Nunca eche agua al aceite ardiendo: el agua hace que el fuego estalle y se extienda; si el fuego no se apaga o se extiende, salga de la cocina cerrando la puerta, salga de casa y llame al 112.
+keywords: fuego en la sartén, se ha prendido el aceite, aceite ardiendo, sartén ardiendo, sartén en llamas, freidora en llamas, fuego en la cocina, incendio en la cocina, se quema la sartén, apagar el fuego de la sartén, tapar con una tapa, bandeja del horno, echar agua al aceite, apagar el fuego, el aceite humea, el aceite hierve, vitrocerámica, fogón, freír, se ha prendido fuego la sartén, echar agua a la sartén, le echo agua
 ---
 Si se produce un pequeño fuego de grasa en una sartén, deslice la tapa sobre la sartén. Apague el fuego de la cocina. No mueva la sartén. Para evitar que el fuego vuelva a empezar, deje la tapa puesta hasta que la sartén se haya enfriado.
 

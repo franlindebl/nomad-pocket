@@ -9,8 +9,8 @@ translatedFrom: en
 source: Cybersecurity and Infrastructure Security Agency (CISA), Office for Bombing Prevention | Suspicious or Unattended? (Suspicious or Unattended Item Postcard) | https://www.cisa.gov/sites/default/files/2025-08/Suspicious_or_Unattended_Item_Postcard_082025_508.pdf | 08/2025
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Agencia de Ciberseguridad y Seguridad de las Infraestructuras de EE. UU. (CISA), Oficina de Prevención de Atentados con Bomba. Traducción de Nomad Pocket, sin respaldo de la CISA.
 note: HOT, R.A.I.N. y SALTY son las siglas en inglés del original (Hidden, Obviously suspicious, not Typical; Recognize, Avoid, Isolate, Notify; Suspicious, Actions, Location, Time, Your actions).
-see: explosion, active-attacker
-keywords: paquete sospechoso, bolsa sospechosa, bolso abandonado, mochila abandonada, maleta abandonada, equipaje olvidado, bomba, posible bomba, artefacto explosivo, cables que salen, paquete raro, lo toco, avisar de un paquete, policía, desalojar la zona, estación de tren, aeropuerto, estación de autobuses, metro, qué hago
+see: explosion, active-attacker, unexploded-ordnance
+keywords: paquete sospechoso, bolsa sospechosa, bolso abandonado, mochila abandonada, maleta abandonada, equipaje olvidado, bomba, posible bomba, artefacto explosivo, cables que salen, paquete raro, lo toco, avisar de un paquete, policía, desalojar la zona, estación de tren, aeropuerto, estación de autobuses, metro, qué hago, mochila abandonada en la terminal
 ---
 Los delincuentes o terroristas a veces ocultan artefactos explosivos improvisados (IED) en mochilas, maletas u objetos corrientes.
 Siga este proceso para determinar de forma segura si un objeto es una amenaza grave o simplemente está desatendido.
@@ -55,4 +55,4 @@ Establezca un perímetro para asegurar la zona y siga indicando a la gente que s
 
 Describa los objetos y las personas sospechosos, las acciones de la persona, el lugar donde está el objeto, la hora en que se colocó y en que se descubrió y lo que usted ha hecho para reducir el riesgo (SALTY).
 
-**AVISE DE LOS OBJETOS SOSPECHOSOS.** Póngase en contacto con la policía local o con el 9-1-1 en caso de emergencia.
+**AVISE DE LOS OBJETOS SOSPECHOSOS.** Póngase en contacto con las fuerzas de seguridad de su zona o con el 9-1-1 en caso de emergencia.

@@ -7,8 +7,8 @@ health: yes
 kind: excerpt
 source: MedlinePlus, Biblioteca Nacional de Medicina de EE. UU. | Primeros auxilios (Introducción: ¿Qué debería tener un botiquín de primeros auxilios básicos?) | https://medlineplus.gov/spanish/firstaid.html | 22/07/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Cortesía de MedlinePlus, de la Biblioteca Nacional de Medicina.
-see: emergency-kit, pain-relievers, medicines-after-disaster, wounds, bleeding
-keywords: botiquín, botiquín de primeros auxilios, qué poner en el botiquín, botiquín de casa, botiquín del coche, tiritas, curitas, apósitos, gasas, gasas estériles, esparadrapo, cinta adhesiva, toallitas antisépticas, desinfectante, guantes desechables, tijeras, guía de primeros auxilios, medicamentos caducados, caducado, material de curas, medicinas de emergencia
+see: emergency-kit, full-first-aid-kit, pain-relievers, medicines-after-disaster, wounds, bleeding
+keywords: botiquín, botiquín de primeros auxilios, qué poner en el botiquín, botiquín de casa, botiquín del coche, tiritas, curitas, apósitos, gasas, gasas estériles, esparadrapo, cinta adhesiva, toallitas antisépticas, desinfectante, guantes desechables, tijeras, guía de primeros auxilios, medicamentos caducados, caducado, material de curas, medicinas de emergencia, botiquín casero, botiquín completo, qué debe llevar un botiquín, botiquín de casa completo
 ---
 ## ¿Qué debería tener un botiquín de primeros auxilios básicos?
 

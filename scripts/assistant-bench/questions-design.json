@@ -1,0 +1,1307 @@
+[
+ {
+  "id": 101,
+  "cat": "auxilios",
+  "q": "Mi padre se ha desplomado en el salón y no respira, ¿qué hago?"
+ },
+ {
+  "id": 102,
+  "cat": "auxilios",
+  "q": "Mi hijo se ha atragantado con un trozo de pan y no puede hablar"
+ },
+ {
+  "id": 103,
+  "cat": "auxilios",
+  "q": "Se me ha caído agua hirviendo del camping gas en la mano, ¿qué me pongo?"
+ },
+ {
+  "id": 104,
+  "cat": "gas-fuego",
+  "q": "Hemos encendido una barbacoa dentro de casa para calentarnos y a mi mujer le duele la cabeza y está mareada"
+ },
+ {
+  "id": 105,
+  "cat": "frio-calor",
+  "q": "Mi abuela vive sola en un quinto sin ascensor y hace un frío que pela, ¿cómo evito que coja hipotermia?"
+ },
+ {
+  "id": 106,
+  "cat": "ninos",
+  "q": "Es agosto, no hay aire acondicionado y mi bebé está muy caliente y no quiere comer"
+ },
+ {
+  "id": 107,
+  "cat": "apagon",
+  "q": "Se ha ido la luz y mi vecino se ha quedado encerrado en el ascensor, ¿cómo le sacamos?"
+ },
+ {
+  "id": 108,
+  "cat": "comida",
+  "q": "¿Cuánto tiempo aguanta la comida del congelador si no abro la puerta?"
+ },
+ {
+  "id": 109,
+  "cat": "comida",
+  "q": "¿Cómo sé si el pollo que tenía en la nevera todavía se puede comer?"
+ },
+ {
+  "id": 110,
+  "cat": "agua",
+  "q": "No sale agua del grifo, ¿cuánta agua necesitamos al día para cuatro personas?"
+ },
+ {
+  "id": 111,
+  "cat": "comida",
+  "q": "¿Cómo cocino sin luz si tengo vitro y no tengo gas?"
+ },
+ {
+  "id": 112,
+  "cat": "higiene-pandemia",
+  "q": "No funciona la cisterna, ¿qué hacemos con el váter?"
+ },
+ {
+  "id": 113,
+  "cat": "frio-calor",
+  "q": "¿Cómo mantengo el piso caliente por la noche sin calefacción?"
+ },
+ {
+  "id": 114,
+  "cat": "apagon",
+  "q": "¿Es peligroso alumbrarse con velas? Tengo niños pequeños"
+ },
+ {
+  "id": 115,
+  "cat": "comunicacion",
+  "q": "No hay cobertura, ¿cómo llamo al 112?"
+ },
+ {
+  "id": 116,
+  "cat": "comunicacion",
+  "q": "¿Cómo me entero de lo que está pasando si no hay internet ni tele?"
+ },
+ {
+  "id": 117,
+  "cat": "energia",
+  "q": "¿Cómo cargo el móvil sin luz y hago que dure la batería?"
+ },
+ {
+  "id": 118,
+  "cat": "comunicacion",
+  "q": "Mi hija estaba en el cole cuando se cortó todo, ¿cómo quedamos para encontrarnos?"
+ },
+ {
+  "id": 119,
+  "cat": "dinero-papeles",
+  "q": "¿Qué papeles importantes debería tener a mano por si tenemos que salir de casa?"
+ },
+ {
+  "id": 120,
+  "cat": "salud",
+  "q": "Mi marido usa una máquina de oxígeno y se le acaba la batería, ¿qué hacemos?"
+ },
+ {
+  "id": 121,
+  "cat": "medicamentos",
+  "q": "Se me acaban las pastillas de la tensión y la farmacia está cerrada"
+ },
+ {
+  "id": 122,
+  "cat": "auxilios",
+  "q": "Mi hijo tiene una reacción alérgica, se le hincha la cara y le cuesta respirar"
+ },
+ {
+  "id": 123,
+  "cat": "ninos",
+  "q": "Mi hijo tiene 39 de fiebre y no puedo llamar al pediatra"
+ },
+ {
+  "id": 124,
+  "cat": "ninos",
+  "q": "Tengo un bebé de meses, ¿cómo preparo el biberón sin agua caliente ni luz?"
+ },
+ {
+  "id": 125,
+  "cat": "seguridad",
+  "q": "Han intentado forzar la puerta del portal esta noche, ¿cómo protejo mi casa?"
+ },
+ {
+  "id": 126,
+  "cat": "animales",
+  "q": "¿Qué hago con el perro si no puedo sacarlo y se acaba su pienso?"
+ },
+ {
+  "id": 127,
+  "cat": "psicologia",
+  "q": "Los niños están asustados y no paran de llorar, ¿cómo les explico lo que pasa?"
+ },
+ {
+  "id": 128,
+  "cat": "psicologia",
+  "q": "Llevo tres días sin dormir de la ansiedad y siento que me ahogo"
+ },
+ {
+  "id": 129,
+  "cat": "auxilios",
+  "q": "Mi vecina se ha caído en la cocina y no contesta, ¿qué hago?"
+ },
+ {
+  "id": 130,
+  "cat": "auxilios",
+  "q": "Me noto la boca torcida y no me sale bien hablar, ¿es un ictus?"
+ },
+ {
+  "id": 131,
+  "cat": "frio-calor",
+  "q": "Con este calor estoy mareada y no sudo, ¿es un golpe de calor?"
+ },
+ {
+  "id": 132,
+  "cat": "frio-calor",
+  "q": "¿Cómo mantengo la casa fresca en una ola de calor si no tengo aire acondicionado?"
+ },
+ {
+  "id": 133,
+  "cat": "gas-fuego",
+  "q": "Tengo el brasero de carbón encendido en la habitación cerrada, ¿es peligroso?"
+ },
+ {
+  "id": 134,
+  "cat": "gas-fuego",
+  "q": "Huele a gas en la cocina, ¿enciendo la luz para mirar?"
+ },
+ {
+  "id": 135,
+  "cat": "comida",
+  "q": "¿Qué comida tengo que tener en casa por si me quedo aislada por la nieve una semana?"
+ },
+ {
+  "id": 136,
+  "cat": "comunicacion",
+  "q": "Soy sorda de un oído y me cuesta hablar por teléfono, ¿puedo avisar al 112 por mensaje?"
+ },
+ {
+  "id": 137,
+  "cat": "frio-calor",
+  "q": "Se me ha congelado la tubería del agua, ¿cómo la descongelo sin romperla?"
+ },
+ {
+  "id": 138,
+  "cat": "frio-calor",
+  "q": "¿Cómo quito la nieve de la puerta sin que me dé algo en el corazón?"
+ },
+ {
+  "id": 139,
+  "cat": "frio-calor",
+  "q": "Tengo los dedos de los pies blancos y no los siento después de salir con la nieve"
+ },
+ {
+  "id": 140,
+  "cat": "medicamentos",
+  "q": "Me he equivocado y me he tomado las pastillas dos veces, ¿qué hago?"
+ },
+ {
+  "id": 141,
+  "cat": "salud",
+  "q": "Soy diabética y me tiembla todo y sudo frío, ¿qué tomo?"
+ },
+ {
+  "id": 142,
+  "cat": "auxilios",
+  "q": "Me he atragantado con un trozo de carne y estoy sola, ¿cómo me lo saco?"
+ },
+ {
+  "id": 143,
+  "cat": "comunicacion",
+  "q": "Mi hijo vive en Madrid y no sabe nada de mí desde que se fue la luz, ¿cómo le aviso?"
+ },
+ {
+  "id": 144,
+  "cat": "psicologia",
+  "q": "Llevo días sola sin ver a nadie por la nevada y estoy muy triste y con miedo"
+ },
+ {
+  "id": 145,
+  "cat": "seguridad",
+  "q": "Ha venido un hombre diciendo que es de la compañía de la luz y quiere entrar en casa, ¿le abro?"
+ },
+ {
+  "id": 146,
+  "cat": "ninos",
+  "q": "Mi bebé de 4 meses no respira y está morado, ¿qué hago?"
+ },
+ {
+  "id": 147,
+  "cat": "ninos",
+  "q": "Mi niña está teniendo una convulsión con la fiebre, ¿qué hago mientras dura?"
+ },
+ {
+  "id": 148,
+  "cat": "medicamentos",
+  "q": "¿Cuánto paracetamol le puedo dar a un niño de 12 kilos?"
+ },
+ {
+  "id": 149,
+  "cat": "ninos",
+  "q": "Mi bebé lleva todo el día con diarrea, ¿cómo sé si se está deshidratando?"
+ },
+ {
+  "id": 150,
+  "cat": "ninos",
+  "q": "¿Cómo se hace suero oral casero para un niño si no hay en la farmacia?"
+ },
+ {
+  "id": 151,
+  "cat": "ninos",
+  "q": "Se ha ido la luz y no puedo esterilizar los biberones, ¿cómo los limpio?"
+ },
+ {
+  "id": 152,
+  "cat": "ninos",
+  "q": "Se nos ha acabado la leche de fórmula, ¿qué le doy a un bebé de 5 meses?"
+ },
+ {
+  "id": 153,
+  "cat": "ninos",
+  "q": "Estoy dando el pecho y con el estrés casi no me sale leche, ¿qué puedo hacer?"
+ },
+ {
+  "id": 154,
+  "cat": "auxilios",
+  "q": "Mi hijo se ha bebido un poco de lejía, ¿le hago vomitar?"
+ },
+ {
+  "id": 155,
+  "cat": "ninos",
+  "q": "Mi hija se ha comido unas pastillas de la abuela, no sé cuántas"
+ },
+ {
+  "id": 156,
+  "cat": "ninos",
+  "q": "Mi hijo se ha caído de la cama y se ha dado en la cabeza, ¿cuándo me preocupo?"
+ },
+ {
+  "id": 157,
+  "cat": "ninos",
+  "q": "Al niño le ha caído agua hirviendo en el brazo, ¿qué le pongo?"
+ },
+ {
+  "id": 158,
+  "cat": "ninos",
+  "q": "Mi niño ha metido los dedos en un enchufe y ha dado un calambre"
+ },
+ {
+  "id": 159,
+  "cat": "auxilios",
+  "q": "Mi hijo tiene el brazo torcido después de caerse, ¿cómo se lo inmovilizo?"
+ },
+ {
+  "id": 160,
+  "cat": "ninos",
+  "q": "No tenemos calefacción y hace frío, ¿cómo mantengo caliente al bebé de noche sin peligro?"
+ },
+ {
+  "id": 161,
+  "cat": "ninos",
+  "q": "Se han acabado los pañales, ¿cómo improviso unos?"
+ },
+ {
+  "id": 162,
+  "cat": "ninos",
+  "q": "Mi bebé tiene el culito rojo y en carne viva, ¿qué hago sin cremas?"
+ },
+ {
+  "id": 163,
+  "cat": "ninos",
+  "q": "¿Qué puede comer un niño de 2 años si solo tenemos latas y comida de despensa?"
+ },
+ {
+  "id": 164,
+  "cat": "ninos",
+  "q": "¿Cuándo empieza a ser peligroso que un niño no coma ni beba?"
+ },
+ {
+  "id": 165,
+  "cat": "psicologia",
+  "q": "Mis hijos tienen pánico con las sirenas y los ruidos, ¿cómo los calmo?"
+ },
+ {
+  "id": 166,
+  "cat": "psicologia",
+  "q": "Mi hijo no para de hacerse pis otra vez desde que pasó todo, ¿es normal?"
+ },
+ {
+  "id": 167,
+  "cat": "refugio-evacuacion",
+  "q": "Si nos separamos en un albergue, ¿cómo me aseguro de que encuentran a mi hijo?"
+ },
+ {
+  "id": 168,
+  "cat": "ninos",
+  "q": "Mi hijo tiene tos y respira haciendo ruido, se le hunden las costillas"
+ },
+ {
+  "id": 169,
+  "cat": "higiene-pandemia",
+  "q": "El niño tiene vómitos y diarrea y los demás empiezan igual, ¿cómo evito contagiarnos todos?"
+ },
+ {
+  "id": 170,
+  "cat": "catastrofes",
+  "q": "El agua ya me llega por las ruedas y el coche se ha calado, ¿me salgo o me quedo dentro?"
+ },
+ {
+  "id": 171,
+  "cat": "auxilios",
+  "q": "Hemos sacado a un hombre del agua y no respira, ¿qué hago?"
+ },
+ {
+  "id": 172,
+  "cat": "salud",
+  "q": "Me he clavado algo en el pie entre el barro, ¿necesito ponerme la antitetánica?"
+ },
+ {
+  "id": 173,
+  "cat": "agua",
+  "q": "¿Se puede beber el agua del grifo después de la riada o hay que hervirla?"
+ },
+ {
+  "id": 174,
+  "cat": "higiene-pandemia",
+  "q": "¿Cómo limpio la casa del barro sin ponerme malo? ¿Uso lejía, cuánta?"
+ },
+ {
+  "id": 175,
+  "cat": "salud",
+  "q": "Mi hijo tiene fiebre y diarrea después de andar por el barro, ¿es grave?"
+ },
+ {
+  "id": 176,
+  "cat": "energia",
+  "q": "El cuadro eléctrico se ha mojado, ¿puedo volver a subir los plomos?"
+ },
+ {
+  "id": 177,
+  "cat": "dinero-papeles",
+  "q": "¿Cómo reclamo los daños de la casa y el coche al Consorcio de Compensación de Seguros?"
+ },
+ {
+  "id": 178,
+  "cat": "dinero-papeles",
+  "q": "Se me han empapado el DNI, las escrituras y los papeles del banco, ¿qué hago?"
+ },
+ {
+  "id": 179,
+  "cat": "psicologia",
+  "q": "Mi hija no duerme desde la riada y tiene pesadillas, ¿cómo la ayudo?"
+ },
+ {
+  "id": 180,
+  "cat": "frio-calor",
+  "q": "Mi abuelo ha estado horas mojado y no para de temblar, está como atontado"
+ },
+ {
+  "id": 181,
+  "cat": "catastrofes",
+  "q": "El humo del incendio se mete en casa y me pica la garganta, ¿cierro todo o me voy?"
+ },
+ {
+  "id": 182,
+  "cat": "salud",
+  "q": "Mi hijo es asmático y hay muchísimo humo del incendio, ¿qué hago?"
+ },
+ {
+  "id": 183,
+  "cat": "animales",
+  "q": "Nos evacuan, ¿me puedo llevar al perro y a los gatos al pabellón?"
+ },
+ {
+  "id": 184,
+  "cat": "animales",
+  "q": "Tengo las cabras y las vacas en el monte y viene el incendio, ¿las suelto?"
+ },
+ {
+  "id": 185,
+  "cat": "catastrofes",
+  "q": "¿Cómo preparo la casa si se acerca el incendio? Persianas, mangueras, bombonas…"
+ },
+ {
+  "id": 186,
+  "cat": "refugio-evacuacion",
+  "q": "¿Qué meto en la mochila si nos dicen que hay que irse en diez minutos?"
+ },
+ {
+  "id": 187,
+  "cat": "catastrofes",
+  "q": "¿Cómo limpio la ceniza del patio y del tejado sin respirarla?"
+ },
+ {
+  "id": 188,
+  "cat": "auxilios",
+  "q": "Me arden y me lloran los ojos por el humo, ¿qué hago?"
+ },
+ {
+  "id": 189,
+  "cat": "auxilios",
+  "q": "¡Se le ha prendido la ropa a mi marido!"
+ },
+ {
+  "id": 190,
+  "cat": "dinero-papeles",
+  "q": "¿Qué ayudas hay para los que lo hemos perdido todo en la DANA y dónde se piden?"
+ },
+ {
+  "id": 191,
+  "cat": "higiene-pandemia",
+  "q": "Con el agua estancada hay un montón de mosquitos, ¿pueden transmitir algo?"
+ },
+ {
+  "id": 192,
+  "cat": "auxilios",
+  "q": "¿Cómo se hace un torniquete con lo que tenga en casa?"
+ },
+ {
+  "id": 193,
+  "cat": "auxilios",
+  "q": "Un vecino lleva horas atrapado bajo unos escombros, ya lo hemos visto, ¿lo sacamos ya?"
+ },
+ {
+  "id": 194,
+  "cat": "guerra-nrbq",
+  "q": "Después de la explosión no oigo bien y me pita el oído, ¿es grave?"
+ },
+ {
+  "id": 195,
+  "cat": "guerra-nrbq",
+  "q": "Oigo un dron zumbando encima del barrio, ¿me escondo o salgo?"
+ },
+ {
+  "id": 196,
+  "cat": "guerra-nrbq",
+  "q": "¿Cuál es el sitio más seguro de un piso si no hay refugio cerca?"
+ },
+ {
+  "id": 197,
+  "cat": "guerra-nrbq",
+  "q": "Han dicho por la radio que hay alerta nuclear, ¿cuánto tiempo tengo que estar dentro?"
+ },
+ {
+  "id": 198,
+  "cat": "guerra-nrbq",
+  "q": "¿Tomo pastillas de yodo? ¿Y los niños cuántas?"
+ },
+ {
+  "id": 199,
+  "cat": "guerra-nrbq",
+  "q": "Huele raro, como a ajo o a cloro, y me pican los ojos, ¿puede ser un ataque químico?"
+ },
+ {
+  "id": 200,
+  "cat": "guerra-nrbq",
+  "q": "Dicen que han soltado algo biológico, ¿cómo protejo a mi familia en casa?"
+ },
+ {
+  "id": 201,
+  "cat": "agua",
+  "q": "Se ha ido la luz y el agua del grifo sale marrón, ¿cómo la hago potable?"
+ },
+ {
+  "id": 202,
+  "cat": "comida",
+  "q": "Han puesto racionamiento, ¿cómo estiro la comida para que nos dure un mes?"
+ },
+ {
+  "id": 203,
+  "cat": "seguridad",
+  "q": "Hay toque de queda, ¿qué pasa si tengo que salir por una urgencia?"
+ },
+ {
+  "id": 204,
+  "cat": "guerra-nrbq",
+  "q": "Hay un trozo de misil sin explotar en el patio, ¿lo puedo mover?"
+ },
+ {
+  "id": 205,
+  "cat": "gas-fuego",
+  "q": "Después del bombardeo huele a gas en la escalera, ¿qué hago?"
+ },
+ {
+  "id": 206,
+  "cat": "psicologia",
+  "q": "Me ha dado un ataque de ansiedad, no puedo respirar y el corazón me va a mil"
+ },
+ {
+  "id": 207,
+  "cat": "auxilios",
+  "q": "Me he clavado la navaja en el muslo y sale sangre a chorro, ¡ayuda!"
+ },
+ {
+  "id": 208,
+  "cat": "aire-libre",
+  "q": "Estoy perdido en el monte y se está haciendo de noche, ¿me quedo quieto o sigo andando?"
+ },
+ {
+  "id": 209,
+  "cat": "aire-libre",
+  "q": "Nos ha pillado una tormenta con rayos en plena cresta, ¿dónde nos metemos?"
+ },
+ {
+  "id": 210,
+  "cat": "aire-libre",
+  "q": "¿Cómo hago potable el agua de un arroyo si no llevo pastillas?"
+ },
+ {
+  "id": 211,
+  "cat": "aire-libre",
+  "q": "¿Cómo monto un refugio rápido para pasar la noche sin tienda?"
+ },
+ {
+  "id": 212,
+  "cat": "aire-libre",
+  "q": "Se me ha muerto el móvil y no tengo brújula, ¿cómo sé dónde está el norte?"
+ },
+ {
+  "id": 213,
+  "cat": "animales",
+  "q": "Me ha mordido una víbora en el tobillo, ¿le hago un torniquete?"
+ },
+ {
+  "id": 214,
+  "cat": "aire-libre",
+  "q": "Me he torcido el tobillo y estoy a 10 km del coche, ¿puedo seguir andando?"
+ },
+ {
+  "id": 215,
+  "cat": "aire-libre",
+  "q": "Mi hijo se ha comido unas bayas del monte que no sé qué son"
+ },
+ {
+  "id": 216,
+  "cat": "animales",
+  "q": "Vamos con el perro y nos hemos cruzado con jabalíes, ¿qué hacemos?"
+ },
+ {
+  "id": 217,
+  "cat": "animales",
+  "q": "Mi hijo tiene una garrapata pegada en la pierna, ¿cómo se la quito bien?"
+ },
+ {
+  "id": 218,
+  "cat": "aire-libre",
+  "q": "¿Cómo hago señales para que me vea el helicóptero de rescate?"
+ },
+ {
+  "id": 219,
+  "cat": "aire-libre",
+  "q": "Viene un incendio forestal hacia nosotros, ¿hacia dónde corremos?"
+ },
+ {
+  "id": 220,
+  "cat": "aire-libre",
+  "q": "Está lloviendo muy fuerte y estamos acampados junto al cauce del barranco"
+ },
+ {
+  "id": 221,
+  "cat": "aire-libre",
+  "q": "A mi compañero lo ha enterrado un alud, ¿qué hacemos ya?"
+ },
+ {
+  "id": 222,
+  "cat": "aire-libre",
+  "q": "Estoy a 3000 metros, me duele mucho la cabeza y he vomitado, ¿es mal de altura?"
+ },
+ {
+  "id": 223,
+  "cat": "aire-libre",
+  "q": "¿Cómo cruzo un río crecido sin que me arrastre la corriente?"
+ },
+ {
+  "id": 224,
+  "cat": "aire-libre",
+  "q": "Llevo dos días perdido y se me acaba la comida, ¿cómo la reparto y cuánto aguanto?"
+ },
+ {
+  "id": 225,
+  "cat": "salud",
+  "q": "Llevo horas sin agua, tengo la boca seca y meo muy oscuro"
+ },
+ {
+  "id": 226,
+  "cat": "auxilios",
+  "q": "Mi amigo se ha dado un golpe en la cabeza al caer, está despierto pero confuso"
+ },
+ {
+  "id": 227,
+  "cat": "aire-libre",
+  "q": "Tengo unas ampollas enormes en los pies y me quedan horas de bajada"
+ },
+ {
+  "id": 228,
+  "cat": "dinero-papeles",
+  "q": "He perdido la cartera con el DNI y las tarjetas en mitad de la travesía, ¿qué hago?"
+ },
+ {
+  "id": 229,
+  "cat": "aire-libre",
+  "q": "Nos hemos separado en la bajada y mi compañero no aparece ni coge el teléfono"
+ },
+ {
+  "id": 230,
+  "cat": "higiene-pandemia",
+  "q": "Mi padre tiene 39 de fiebre y tos, el centro de salud no coge el teléfono. ¿Qué hago en casa?"
+ },
+ {
+  "id": 231,
+  "cat": "salud",
+  "q": "No tengo pulsioxímetro, ¿cómo sé si de verdad le falta el aire?"
+ },
+ {
+  "id": 232,
+  "cat": "higiene-pandemia",
+  "q": "¿Cómo aíslo a un enfermo en un piso pequeño con un solo baño?"
+ },
+ {
+  "id": 233,
+  "cat": "higiene-pandemia",
+  "q": "¿Una FFP2 se puede reutilizar? ¿Cuántas veces?"
+ },
+ {
+  "id": 234,
+  "cat": "higiene-pandemia",
+  "q": "No quedan mascarillas en ningún sitio, ¿cómo hago una casera que sirva de algo?"
+ },
+ {
+  "id": 235,
+  "cat": "medicamentos",
+  "q": "Me quedan pastillas de la tensión para 5 días, ¿puedo tomar media para que me duren más?"
+ },
+ {
+  "id": 236,
+  "cat": "salud",
+  "q": "Mi hijo tiene asma, se ha quedado sin ventolín y le está dando una crisis"
+ },
+ {
+  "id": 237,
+  "cat": "medicamentos",
+  "q": "Estoy embarazada y tengo fiebre, ¿qué puedo tomar sin peligro para el bebé?"
+ },
+ {
+  "id": 238,
+  "cat": "salud",
+  "q": "El bebé ya viene y la ambulancia no llega, ¿cómo atiendo el parto en casa?"
+ },
+ {
+  "id": 239,
+  "cat": "higiene-pandemia",
+  "q": "Mi abuelo ha muerto en casa y no viene nadie. ¿Qué hago con el cuerpo?"
+ },
+ {
+  "id": 240,
+  "cat": "psicologia",
+  "q": "Se ha muerto mi madre en el hospital y no me han dejado despedirme. No puedo con esto"
+ },
+ {
+  "id": 241,
+  "cat": "psicologia",
+  "q": "Mi amigo me ha dicho que no quiere seguir viviendo, ¿qué le digo?"
+ },
+ {
+  "id": 242,
+  "cat": "ninos",
+  "q": "El bebé se ha atragantado con algo y no llora ni tose"
+ },
+ {
+  "id": 243,
+  "cat": "higiene-pandemia",
+  "q": "Mi abuela vive sola y está confinada, ¿cómo le llevo comida sin contagiarla?"
+ },
+ {
+  "id": 244,
+  "cat": "comunicacion",
+  "q": "El 112 está saturado y no me cogen, ¿hay otros números o cómo consigo que me atiendan?"
+ },
+ {
+  "id": 245,
+  "cat": "dinero-papeles",
+  "q": "¿Cómo consigo una receta o la baja si no puedo ir al médico?"
+ },
+ {
+  "id": 246,
+  "cat": "higiene-pandemia",
+  "q": "Me he puesto mala y soy la única que cuida de mis hijos, ¿qué hago?"
+ },
+ {
+  "id": 247,
+  "cat": "dinero-papeles",
+  "q": "Me he quedado sin trabajo por el cierre, ¿qué ayudas puedo pedir?"
+ },
+ {
+  "id": 248,
+  "cat": "salud",
+  "q": "Llevo días en la cama, se me ha hinchado una pierna y me duele la pantorrilla"
+ },
+ {
+  "id": 249,
+  "cat": "gas-fuego",
+  "q": "Se ha apagado la llama del butano y no sé cuánto rato ha estado saliendo gas, ¿es peligroso?"
+ },
+ {
+  "id": 250,
+  "cat": "gas-fuego",
+  "q": "¿Puedo dejar la estufa de butano encendida toda la noche en el dormitorio con la ventana cerrada?"
+ },
+ {
+  "id": 251,
+  "cat": "energia",
+  "q": "¿Dónde pongo el generador de gasolina? ¿Vale en el garaje con la puerta abierta?"
+ },
+ {
+  "id": 252,
+  "cat": "gas-fuego",
+  "q": "La batería del portátil se ha hinchado y huele raro, ¿la tiro a la basura?"
+ },
+ {
+  "id": 253,
+  "cat": "energia",
+  "q": "Tengo una placa solar pequeña de camping, ¿cómo cargo el móvil con ella si está nublado?"
+ },
+ {
+  "id": 254,
+  "cat": "energia",
+  "q": "¿Cómo cargo el móvil con el coche sin quedarme sin batería para arrancarlo?"
+ },
+ {
+  "id": 255,
+  "cat": "higiene-pandemia",
+  "q": "Desde la inundación han aparecido ratas en el sótano, ¿cómo me deshago de ellas sin riesgo?"
+ },
+ {
+  "id": 256,
+  "cat": "refugio-evacuacion",
+  "q": "Se ha roto una tubería y está saliendo agua a chorro por la pared, ¿cómo lo paro?"
+ },
+ {
+  "id": 257,
+  "cat": "refugio-evacuacion",
+  "q": "Con el temporal se ha roto el cristal de la ventana del salón, ¿cómo lo tapo hasta que venga alguien?"
+ },
+ {
+  "id": 258,
+  "cat": "refugio-evacuacion",
+  "q": "Me he quedado sin gasolina en una carretera comarcal y no hay cobertura, ¿qué hago?"
+ },
+ {
+  "id": 259,
+  "cat": "auxilios",
+  "q": "Me ha dado un calambrazo al tocar el cuadro eléctrico y no paro de temblar, ¿tengo que ir al médico?"
+ },
+ {
+  "id": 260,
+  "cat": "dinero-papeles",
+  "q": "No funcionan las tarjetas ni los cajeros, ¿cuánto dinero en efectivo debería tener en casa?"
+ },
+ {
+  "id": 261,
+  "cat": "apagon",
+  "q": "se ha ido la luz en todo el barrio y mis padres no cogen el móvil, qué hago"
+ },
+ {
+  "id": 262,
+  "cat": "gas-fuego",
+  "q": "se ha prendido fuego la sartén con aceite, le echo agua?"
+ },
+ {
+  "id": 263,
+  "cat": "catastrofes",
+  "q": "ha temblado todo el edificio, es un terremoto? nos quedamos dentro?"
+ },
+ {
+  "id": 264,
+  "cat": "seguridad",
+  "q": "alguien está intentando abrir la puerta de casa y no es nadie de mi familia"
+ },
+ {
+  "id": 265,
+  "cat": "refugio-evacuacion",
+  "q": "Estoy en el metro, se ha ido la luz y hay humo en el túnel. ¿Qué hago?"
+ },
+ {
+  "id": 266,
+  "cat": "seguridad",
+  "q": "El tren lleva dos horas parado en mitad del campo y no nos dicen nada. ¿Puedo bajarme a las vías?"
+ },
+ {
+  "id": 267,
+  "cat": "refugio-evacuacion",
+  "q": "Han cerrado el aeropuerto y no hay vuelos. ¿Qué derechos tengo y dónde duermo?"
+ },
+ {
+  "id": 268,
+  "cat": "gas-fuego",
+  "q": "Suena la alarma de incendios en la oficina, estoy en la planta 12. ¿Uso el ascensor?"
+ },
+ {
+  "id": 269,
+  "cat": "seguridad",
+  "q": "En el centro comercial la gente ha empezado a correr y gritar. ¿Hacia dónde voy?"
+ },
+ {
+  "id": 270,
+  "cat": "seguridad",
+  "q": "Creo que hay un tiroteo en el centro comercial. ¿Me escondo o salgo corriendo?"
+ },
+ {
+  "id": 271,
+  "cat": "refugio-evacuacion",
+  "q": "¿Cómo salgo de un vagón de metro si las puertas no se abren?"
+ },
+ {
+  "id": 272,
+  "cat": "seguridad",
+  "q": "Han dejado una mochila abandonada en la terminal. ¿A quién aviso y qué hago?"
+ },
+ {
+  "id": 273,
+  "cat": "apagon",
+  "q": "Se ha ido la luz en toda la ciudad y estoy en el trabajo. ¿Cómo vuelvo a casa sin metro?"
+ },
+ {
+  "id": 274,
+  "cat": "auxilios",
+  "q": "Nos han cortado la autopista por un accidente. ¿Cómo ayudo a los heridos sin empeorarlo?"
+ },
+ {
+  "id": 275,
+  "cat": "refugio-evacuacion",
+  "q": "Me ha llegado un mensaje de alerta al móvil que dice confinamiento, ¿qué significa exactamente?"
+ },
+ {
+  "id": 276,
+  "cat": "guerra-nrbq",
+  "q": "¿Cómo sello las ventanas y las puertas si hay una nube tóxica fuera?"
+ },
+ {
+  "id": 277,
+  "cat": "guerra-nrbq",
+  "q": "¿Apago el aire acondicionado y la calefacción si nos mandan confinarnos?"
+ },
+ {
+  "id": 278,
+  "cat": "guerra-nrbq",
+  "q": "Ha habido una explosión en la planta química y se me han roto los cristales, ¿me quedo o me voy?"
+ },
+ {
+  "id": 279,
+  "cat": "ninos",
+  "q": "Mi hijo está en el colegio y han dicho que confinen, ¿voy a buscarlo?"
+ },
+ {
+  "id": 280,
+  "cat": "guerra-nrbq",
+  "q": "Estoy en el coche cerca del puerto y veo una nube amarilla, ¿qué hago?"
+ },
+ {
+  "id": 281,
+  "cat": "guerra-nrbq",
+  "q": "¿Hacia dónde tengo que huir si hay una fuga, a favor o en contra del viento?"
+ },
+ {
+  "id": 282,
+  "cat": "auxilios",
+  "q": "Me ha salpicado un líquido en la piel y me escuece, ¿con qué me lavo?"
+ },
+ {
+  "id": 283,
+  "cat": "agua",
+  "q": "¿Puedo beber agua del grifo después de un escape químico?"
+ },
+ {
+  "id": 284,
+  "cat": "comida",
+  "q": "¿Se pueden comer las verduras del huerto después de la nube?"
+ },
+ {
+  "id": 285,
+  "cat": "refugio-evacuacion",
+  "q": "¿Cómo sé que ya ha pasado el peligro y puedo abrir las ventanas?"
+ },
+ {
+  "id": 286,
+  "cat": "comunicacion",
+  "q": "¿Qué significan los distintos toques de sirena, el de aviso y el de fin de alerta?"
+ },
+ {
+  "id": 287,
+  "cat": "comunicacion",
+  "q": "¿Llamo al 112 para preguntar qué pasa o es mejor no saturar la línea?"
+ },
+ {
+  "id": 288,
+  "cat": "catastrofes",
+  "q": "Vivo al lado de la refinería, ¿qué tengo que tener preparado en casa por si acaso?"
+ },
+ {
+  "id": 289,
+  "cat": "guerra-nrbq",
+  "q": "¿Cómo me entero de si mi pueblo está dentro del plan de emergencia de la central?"
+ },
+ {
+  "id": 290,
+  "cat": "agua",
+  "q": "¿Cada cuánto hay que cambiar las garrafas de agua que tengo guardadas?"
+ },
+ {
+  "id": 291,
+  "cat": "salud",
+  "q": "¿Qué debe llevar un botiquín casero completo?"
+ },
+ {
+  "id": 292,
+  "cat": "medicamentos",
+  "q": "Mi madre toma pastillas para la tensión, ¿cómo hago reserva de su medicación?"
+ },
+ {
+  "id": 293,
+  "cat": "comunicacion",
+  "q": "¿Cómo hago un plan de emergencia con mi familia si cada uno está en un sitio?"
+ },
+ {
+  "id": 294,
+  "cat": "animales",
+  "q": "¿Qué preparo para el perro y el gato por si hay que irse?"
+ },
+ {
+  "id": 295,
+  "cat": "energia",
+  "q": "¿Es buena idea tener siempre el depósito por encima de la mitad?"
+ },
+ {
+  "id": 296,
+  "cat": "apagon",
+  "q": "¿Qué hago para estar preparado si hay un apagón de varios días?"
+ },
+ {
+  "id": 297,
+  "cat": "energia",
+  "q": "¿Merece la pena comprar una power bank grande o un panel solar?"
+ },
+ {
+  "id": 298,
+  "cat": "comunicacion",
+  "q": "¿Qué radio me compro para enterarme de las noticias sin luz ni internet?"
+ },
+ {
+  "id": 299,
+  "cat": "catastrofes",
+  "q": "¿Qué hago en casa para que aguante mejor un terremoto?"
+ },
+ {
+  "id": 300,
+  "cat": "energia",
+  "q": "¿Sé dónde y cómo cortar el agua, la luz y el gas de mi casa?"
+ },
+ {
+  "id": 301,
+  "cat": "auxilios",
+  "q": "¿Dónde puedo hacer un curso de primeros auxilios en España?"
+ },
+ {
+  "id": 302,
+  "cat": "comunicacion",
+  "q": "¿Cómo me apunto a las alertas de Protección Civil en el móvil?"
+ },
+ {
+  "id": 303,
+  "cat": "dinero-papeles",
+  "q": "Con poco dinero, ¿por dónde empiezo a prepararme?"
+ },
+ {
+  "id": 304,
+  "cat": "comunicacion",
+  "q": "¿Qué número llamo en España si hay emergencia? No sé nada"
+ },
+ {
+  "id": 305,
+  "cat": "dinero-papeles",
+  "q": "Me han robado el pasaporte en el metro, ¿dónde voy?"
+ },
+ {
+  "id": 306,
+  "cat": "dinero-papeles",
+  "q": "Soy extranjero, ¿me cobran si voy a urgencias del hospital?"
+ },
+ {
+  "id": 307,
+  "cat": "ninos",
+  "q": "Mi hijo se ha perdido en la playa, ayuda"
+ },
+ {
+  "id": 308,
+  "cat": "animales",
+  "q": "Me pica una medusa, me duele mucho el brazo"
+ },
+ {
+  "id": 309,
+  "cat": "comunicacion",
+  "q": "¿Cómo digo a la ambulancia mi dirección si no hablo bien español?"
+ },
+ {
+  "id": 310,
+  "cat": "seguridad",
+  "q": "¿Cómo pongo una denuncia en la policía? ¿Hay alguien que hable inglés?"
+ },
+ {
+  "id": 311,
+  "cat": "seguridad",
+  "q": "Estoy encerrado en el ascensor del edificio"
+ },
+ {
+  "id": 312,
+  "cat": "medicamentos",
+  "q": "Se me ha olvidado la insulina en mi país, ¿puedo comprar aquí sin receta?"
+ },
+ {
+  "id": 313,
+  "cat": "seguridad",
+  "q": "Un hombre me sigue por la calle de noche, tengo miedo"
+ },
+ {
+  "id": 314,
+  "cat": "seguridad",
+  "q": "Una chica dice que la han drogado en la discoteca, ¿a quién llamo?"
+ },
+ {
+  "id": 315,
+  "cat": "salud",
+  "q": "Toda la noche vomitando y diarrea, creo que fue la comida"
+ },
+ {
+  "id": 316,
+  "cat": "dinero-papeles",
+  "q": "¿Dónde está la embajada de mi país? Necesito ayuda"
+ },
+ {
+  "id": 317,
+  "cat": "apagon",
+  "q": "Se ha ido la luz en todo el barrio, ¿qué hago?"
+ },
+ {
+  "id": 318,
+  "cat": "auxilios",
+  "q": "Mi amigo ha bebido mucho y no despierta"
+ },
+ {
+  "id": 319,
+  "cat": "seguridad",
+  "q": "El taxista me quiere cobrar mucho, ¿es una estafa? ¿A quién aviso?"
+ },
+ {
+  "id": 320,
+  "cat": "auxilios",
+  "q": "Mi padre ha volcado con el tractor y tiene la pierna atrapada debajo, ¿qué hago?"
+ },
+ {
+  "id": 321,
+  "cat": "auxilios",
+  "q": "Mi abuelo ha estado sulfatando sin mascarilla y ahora vomita y suda mucho"
+ },
+ {
+  "id": 322,
+  "cat": "animales",
+  "q": "La vaca está pariendo y el ternero viene de culo, ¿qué hago?"
+ },
+ {
+  "id": 323,
+  "cat": "auxilios",
+  "q": "Mi hermano ha tocado un cable caído después de la tormenta y está tirado en el suelo"
+ },
+ {
+  "id": 324,
+  "cat": "auxilios",
+  "q": "Hemos comido setas que cogimos en el monte y ahora tenemos vómitos y diarrea"
+ },
+ {
+  "id": 325,
+  "cat": "animales",
+  "q": "Se me han muerto varias gallinas de golpe, ¿puede ser gripe aviar y contagiarnos?"
+ },
+ {
+  "id": 326,
+  "cat": "refugio-evacuacion",
+  "q": "Hay fuego en el edificio, vivo en un quinto y voy en silla de ruedas. ¿Qué hago si no puedo usar el ascensor?"
+ },
+ {
+  "id": 327,
+  "cat": "salud",
+  "q": "Si no puedo dializarme unos días, ¿qué no debo comer ni beber?"
+ },
+ {
+  "id": 328,
+  "cat": "medicamentos",
+  "q": "Me quedan pastillas para la epilepsia para dos días y no hay farmacias abiertas. ¿Puedo tomar media dosis para estirarlas?"
+ },
+ {
+  "id": 329,
+  "cat": "auxilios",
+  "q": "Llevo marcapasos y alguien se ha desmayado. Si uso el desfibrilador, ¿me pasa algo a mí o a él si tuviera uno?"
+ },
+ {
+  "id": 330,
+  "cat": "salud",
+  "q": "Me he dado un golpe fuerte en el pecho donde tengo el marcapasos y me noto el corazón raro. ¿Qué hago?"
+ },
+ {
+  "id": 331,
+  "cat": "refugio-evacuacion",
+  "q": "¿Me dejan entrar con mi perro guía en un albergue de evacuación?"
+ },
+ {
+  "id": 332,
+  "cat": "catastrofes",
+  "q": "Ha temblado la tierra y mi madre está en silla, no la puedo sacar. ¿Mejor quedarnos dentro y dónde nos ponemos?"
+ },
+ {
+  "id": 333,
+  "cat": "refugio-evacuacion",
+  "q": "¿Cómo bajo a una persona en silla de ruedas por las escaleras si estoy yo solo?"
+ },
+ {
+  "id": 334,
+  "cat": "energia",
+  "q": "Mi silla eléctrica se está quedando sin batería y no hay luz. ¿Cómo la cargo o cómo me muevo?"
+ },
+ {
+  "id": 335,
+  "cat": "salud",
+  "q": "Tengo lesión medular, me duele mucho la cabeza de golpe y me sube la tensión. ¿Puede ser disrreflexia? ¿Qué hago?"
+ },
+ {
+  "id": 336,
+  "cat": "salud",
+  "q": "Mi abuelo lleva muchas horas tumbado sin poder moverlo. ¿Cada cuánto hay que cambiarlo de postura para que no le salgan llagas?"
+ },
+ {
+  "id": 337,
+  "cat": "gas-fuego",
+  "q": "¿Es peligroso tener la bombona de oxígeno cerca de una vela o una estufa de butano?"
+ },
+ {
+  "id": 338,
+  "cat": "salud",
+  "q": "Hago diálisis peritoneal en casa y se ha cortado el agua y la luz. ¿Puedo hacer los intercambios a mano?"
+ },
+ {
+  "id": 339,
+  "cat": "refugio-evacuacion",
+  "q": "Se me ha pinchado una rueda de la silla y estoy en la calle con la riada cerca. ¿Cómo me apaño?"
+ },
+ {
+  "id": 340,
+  "cat": "medicamentos",
+  "q": "Con la receta electrónica caída, ¿cómo consigo mi medicación en una farmacia?"
+ },
+ {
+  "id": 341,
+  "cat": "auxilios",
+  "q": "Mi madre tiene epilepsia y se ha caído al agua de la piscina con una crisis. ¿Qué hago al sacarla?"
+ },
+ {
+  "id": 342,
+  "cat": "comunicacion",
+  "q": "Soy ciego, se me ha muerto el móvil y no sé dónde estoy. ¿Cómo pido ayuda en la calle?"
+ },
+ {
+  "id": 343,
+  "cat": "auxilios",
+  "q": "Al que cuida de mí le ha dado un mareo y está en el suelo. Yo no me puedo levantar de la cama. ¿Qué hago?"
+ },
+ {
+  "id": 344,
+  "cat": "salud",
+  "q": "Tengo contracciones cada 5 minutos, ¿cuánto falta para que nazca?"
+ },
+ {
+  "id": 345,
+  "cat": "salud",
+  "q": "El cordón va enrollado al cuello del bebé, ¿qué hago?"
+ },
+ {
+  "id": 346,
+  "cat": "auxilios",
+  "q": "El bebé ha nacido y no llora ni respira, ¿cómo lo reanimo?"
+ },
+ {
+  "id": 347,
+  "cat": "auxilios",
+  "q": "Después del parto no para de sangrar mucho, ¿cómo lo freno?"
+ },
+ {
+  "id": 348,
+  "cat": "salud",
+  "q": "Estoy de 8 semanas y estoy manchando sangre, ¿estoy abortando?"
+ },
+ {
+  "id": 349,
+  "cat": "salud",
+  "q": "Me duele muchísimo un lado de la tripa y estoy de pocas semanas"
+ },
+ {
+  "id": 350,
+  "cat": "salud",
+  "q": "Tengo la cara y las manos muy hinchadas y me duele la cabeza, estoy de 35 semanas"
+ },
+ {
+  "id": 351,
+  "cat": "salud",
+  "q": "Viene de nalgas, ¿se puede parir así sin médico?"
+ },
+ {
+  "id": 352,
+  "cat": "salud",
+  "q": "Estoy de 30 semanas y tengo contracciones, ¿cómo las paro?"
+ },
+ {
+  "id": 353,
+  "cat": "auxilios",
+  "q": "Mi pareja embarazada se ha desmayado, ¿qué hago?"
+ },
+ {
+  "id": 354,
+  "cat": "salud",
+  "q": "Vomito todo lo que como y no retengo ni el agua, ¿es peligroso?"
+ },
+ {
+  "id": 355,
+  "cat": "ninos",
+  "q": "El bebé está muy amarillo a los tres días, ¿es grave?"
+ },
+ {
+  "id": 356,
+  "cat": "salud",
+  "q": "¿Qué tengo que tener preparado en casa para un parto sin hospital?"
+ },
+ {
+  "id": 357,
+  "cat": "higiene-pandemia",
+  "q": "¿Cómo esterilizo tijeras y toallas sin agua corriente?"
+ },
+ {
+  "id": 358,
+  "cat": "salud",
+  "q": "Tengo fiebre y huele mal el flujo una semana después de parir"
+ },
+ {
+  "id": 359,
+  "cat": "refugio-evacuacion",
+  "q": "Hay que evacuar y estoy de 38 semanas, ¿qué me llevo y cómo viajo?"
+ },
+ {
+  "id": 360,
+  "cat": "psicologia",
+  "q": "Estoy muy agobiada y no paro de llorar, tengo miedo de parir sola"
+ },
+ {
+  "id": 361,
+  "cat": "salud",
+  "q": "Me pica todo el cuerpo, sobre todo manos y pies, al final del embarazo"
+ }
+]

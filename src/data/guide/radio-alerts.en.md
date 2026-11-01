@@ -6,10 +6,10 @@ vital: no
 health: no
 kind: translation
 translatedFrom: es
-source: Protección Civil (Secretaría General de Protección Civil y Emergencias, Spanish Ministry of the Interior) | Public Warning System (ES-Alert), frequently asked questions (¿Qué debo hacer si recibo una alerta?; ¿Cómo me llegarán las alertas?; ¿Qué ocurre si se envía una alerta a la zona donde me encuentro…?; ¿ES-Alert sustituirá a las sirenas…?) | https://www.proteccioncivil.es/coordinacion/redes/ran/public-warning-system | undated (accessed 31/10/2026)
+source: Protección Civil (Secretaría General de Protección Civil y Emergencias, Spanish Ministry of the Interior) | Public Warning System (ES-Alert), frequently asked questions (¿Qué debo hacer si recibo una alerta?; ¿Cómo me llegarán las alertas?; ¿Puedo desactivar la recepción de las alertas?; ¿Qué ocurre si se envía una alerta a la zona donde me encuentro…?; ¿ES-Alert sustituirá a las sirenas…?) | https://www.proteccioncivil.es/coordinacion/redes/ran/public-warning-system | undated (accessed 31/10/2026)
 licence: Source of the data: Protección Civil (Secretaría General de Protección Civil y Emergencias, Spanish Ministry of the Interior). Reused under Spain's Law 37/2007; the page shows no update date. Translated by Nomad Pocket. Protección Civil does not sponsor or endorse this app.
-see: shelter-in-place, evacuation, family-plan, texts-not-calls
-keywords: phone alert, ES-Alert, emergency alert, civil protection message, phone beeping, phone went off, loud alarm on my phone, emergency warning, red alert, drill, test alert, sirens, loudspeakers, what to do if I get an alert, radio, battery radio, listen to the radio, stay informed, TV, official news, flood warning
+see: shelter-in-place, evacuation, family-plan, texts-not-calls, radio-and-sirens
+keywords: phone alert, ES-Alert, emergency alert, civil protection message, phone beeping, phone went off, loud alarm on my phone, emergency warning, red alert, drill, test alert, sirens, loudspeakers, what to do if I get an alert, stay informed, official news, flood warning, sign up for alerts, register for ES-Alert, do I need an app, turn on emergency alerts, turn off alerts, pre-alert
 ---
 ## What should I do if I receive an alert?
 
@@ -25,6 +25,12 @@ If one is received, first check whether it is a drill or a test of the system, w
 The alert will be shown on the mobile phone in a similar way to a text message, taking up the full width of the screen, and it will always come with a beep and a vibration.
 
 Given the urgency of the situations for which alerts will be issued, the beep and the vibration will happen even if the phone is silenced, locked, or in “Do not disturb” mode.
+
+## Can I turn off receiving the alerts?
+
+Because of the seriousness and urgency of the situations the system will be used for, the settings defined for the devices do not allow the “Civil Protection Alerts”, which correspond to the highest alert level (Level 1) of the EU-Alert protocol, to be turned off.
+
+The “Civil Protection Pre-Alerts”, corresponding to Level 2 of EU-Alert, because they are an advance warning, can be turned off on the device.
 
 ## What happens if an alert is sent to the area where I am and my phone is:
 

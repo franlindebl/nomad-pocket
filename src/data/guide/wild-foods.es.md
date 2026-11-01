@@ -8,8 +8,8 @@ kind: translation
 translatedFrom: en
 source: Centers for Disease Control and Prevention (CDC) | MMWR 70(10): Health Care Utilization and Outcomes Associated with Accidental Poisonous Mushroom Ingestions — United States, 2016–2018 (Summary; Discussion) | https://www.cdc.gov/mmwr/volumes/70/wr/mm7010a1.htm | 12/03/2021
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Centros para el Control y la Prevención de Enfermedades (CDC), Morbidity and Mortality Weekly Report. Traducción de Nomad Pocket, sin respaldo de los CDC.
-see: poisoning, water-outdoors, emergency-food
-keywords: setas, setas silvestres, hongos, champiñones del campo, coger setas, buscar setas, ir a por setas, esta seta se puede comer, seta venenosa, he comido una seta, intoxicación por setas, amanita, oronja, cocinarlas las hace seguras, un niño se ha comido una seta, comida silvestre, comida del monte
+see: mushroom-poisoning, poisoning, water-outdoors, emergency-food
+keywords: setas, setas silvestres, hongos, champiñones del campo, coger setas, buscar setas, ir a por setas, esta seta se puede comer, seta venenosa, he comido una seta, intoxicación por setas, amanita, oronja, cocinarlas las hace seguras, un niño se ha comido una seta, comida silvestre, comida del monte, hemos comido setas, setas del monte, setas que cogimos, vómitos y diarrea después de comer setas
 ---
 La ingestión de setas venenosas puede causar enfermedades graves y la muerte.
 

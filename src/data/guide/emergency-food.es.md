@@ -7,8 +7,9 @@ health: no
 kind: excerpt
 source: Ready.gov (FEMA, Departamento de Seguridad Nacional de EE. UU.) | Alimentos (Suministros de alimentos de emergencia recomendados; Higiene y seguridad de los alimentos; Cocción) | https://www.ready.gov/es/alimentos | 12/03/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA).
+note: La Estrategia de la Unión de Preparación de la Comisión Europea (marzo de 2025) se propone animar a la población a tener provisiones esenciales para un mínimo de 72 horas en una emergencia.
 see: emergency-kit, water-storage, fridge-outage, cooking-without-power, feeding-babies
-keywords: comida de emergencia, reserva de comida, despensa, qué comida guardar, alimentos no perecederos, latas, conservas, abrelatas, cuánta comida, comida para varios días, lista de la compra para una emergencia, comida seca, comida para bebés, dieta especial, lata hinchada, lata abollada, cocinar sin luz, comer de la lata, prepararse para un apagón, kit de emergencia
+keywords: comida de emergencia, reserva de comida, despensa, qué comida guardar, alimentos no perecederos, latas, conservas, abrelatas, cuánta comida, comida para varios días, lista de la compra para una emergencia, comida seca, comida para bebés, dieta especial, lata hinchada, lata abollada, cocinar sin luz, comer de la lata, prepararse para un apagón, kit de emergencia, aislada por la nieve, comida para una semana, qué comida tener en casa, 72 horas
 ---
 Después de un desastre, es posible que haya cortes de energía que puedan durar varios días. Abastézcase de alimentos enlatados, mezclas secas y demás alimentos básicos que no necesiten refrigeración, cocción, agua ni una preparación especial. Asegúrese de incluir un abrelatas manual y utensilios para comer.
 

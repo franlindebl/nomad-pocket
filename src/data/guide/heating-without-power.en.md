@@ -7,8 +7,9 @@ health: no
 kind: excerpt
 source: Centers for Disease Control and Prevention (CDC) | Safety Guidelines: During & After a Winter Storm (Indoors: Heat your home safely; Light your home safely; Use generators and other appliances safely; Conserve heat) | https://www.cdc.gov/winter-weather/safety/stay-safe-during-after-a-winter-storm-safety.html | 25/08/2026
 licence: Public domain (US government work). Source: Centers for Disease Control and Prevention (CDC).
-see: carbon-monoxide, generators, power-outage, winter-storm, hypothermia, house-fire
-keywords: heating without power, no heating, cold house, how to keep warm without electricity, power cut in winter, space heater, electric heater, fireplace, wood stove, kerosene heater, paraffin heater, gas heater, brazier, stove for heat, oven for heat, candles, flashlight, carbon monoxide, CO detector, keep the heat in, draughts, blankets, sleeping bag
+note: With combustion heaters, charcoal braziers and fireplaces, the room must be ventilated; never put heaters or braziers in a bedroom (Comunidad de Madrid fire service, #CalorSeguro, 2025).
+see: staying-warm-cold-home, carbon-monoxide, generators, power-outage, winter-storm, hypothermia, house-fire, candle-safety
+keywords: heating without power, no heating, cold house, how to keep warm without electricity, power cut in winter, space heater, electric heater, fireplace, wood stove, kerosene heater, paraffin heater, gas heater, brazier, stove for heat, oven for heat, candles, flashlight, carbon monoxide, CO detector, keep the heat in, draughts, blankets, sleeping bag, heater at night, sleeping with the heater on
 ---
 ## Heat your home safely.
 

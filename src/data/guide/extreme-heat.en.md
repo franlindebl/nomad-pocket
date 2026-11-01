@@ -8,7 +8,7 @@ kind: translation
 translatedFrom: es
 source: Ministerio de Sanidad (Spanish Ministry of Health) | Plan Nacional de Actuaciones Preventivas de los Efectos del Exceso de Temperaturas sobre la Salud 2026 (Anexo III. Recomendaciones generales para prevenir los efectos de las altas temperaturas sobre la salud) | https://www.sanidad.gob.es/areas/sanidadAmbiental/riesgosAmbientales/calorExtremo/publicaciones/docs/planNacionalExcesoTemperaturas_2026.pdf | 28/04/2026
 licence: Source of the data: Ministerio de Sanidad (Spain), National Plan of Preventive Actions against the Effects of Excess Temperatures on Health 2026. Reused under Spain's Law 37/2007; last updated 28/04/2026; translated by Nomad Pocket. The Ministry does not sponsor or endorse this app.
-see: heat-stroke, dehydration, power-outage, disabilities-older, pets
+see: heat-stroke, dehydration, power-outage, disabilities-older, pets, keeping-home-cool, babies-heat
 keywords: extreme heat, heatwave, heat wave, very hot, high temperatures, too hot at home, how to cool down, how to stay cool, drink water, dehydration, heat stroke, sunstroke, child left in car, hot car, older people in the heat, baby too hot, pregnant in the heat, medicines in the heat, exercise in the heat, red heat warning, no air conditioning
 ---
 ## General recommendations to prevent the effects of high temperatures on health

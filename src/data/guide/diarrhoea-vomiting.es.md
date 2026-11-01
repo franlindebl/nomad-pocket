@@ -8,8 +8,8 @@ kind: excerpt
 source: MedlinePlus, Biblioteca Nacional de Medicina de EE. UU. | Diarrea (Introducción: otros síntomas; cuándo ver a un profesional de la salud; tratamientos) | https://medlineplus.gov/spanish/diarrhea.html | 09/11/2021
 source: MedlinePlus, Biblioteca Nacional de Medicina de EE. UU. | Náusea y vómitos (Introducción: cuándo ver a un profesional de la salud; tratamientos) | https://medlineplus.gov/spanish/nauseaandvomiting.html | 28/10/2024
 licence: Dominio público (obra del Gobierno de EE. UU.). Cortesía de MedlinePlus, de la Biblioteca Nacional de Medicina.
-see: dehydration, handwashing, water-bleach, boiling-water, caring-sick-person, toilets-no-water
-keywords: diarrea, cagalera, descomposición, heces líquidas, gastroenteritis, virus estomacal, vómitos, vomitar, devolver, náuseas, tengo ganas de vomitar, intoxicación alimentaria, sangre en las heces, heces negras, sangre en el vómito, no retiene líquidos, cuánto dura la diarrea, niño con diarrea, bebé vomitando, qué beber, qué comer, dieta blanda
+see: dehydration, oral-rehydration-home, handwashing, water-bleach, boiling-water, caring-sick-person, toilets-no-water
+keywords: diarrea, cagalera, descomposición, heces líquidas, gastroenteritis, vómitos, vomitar, devolver, náuseas, tengo ganas de vomitar, intoxicación alimentaria, me ha sentado mal la comida, sangre en las heces, heces negras, sangre en el vómito, no retengo ni el agua, vomito todo lo que como, niño con diarrea, bebé con diarrea, bebé vomitando, lleva todo el día con diarrea, toda la noche vomitando, vomitando y con diarrea, qué beber, dieta blanda
 ---
 ## Diarrea
 

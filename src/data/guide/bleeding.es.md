@@ -9,8 +9,9 @@ translatedFrom: en
 source: US Department of Homeland Security (DHS) | Stop the Bleed: Applying a Tourniquet (poster, Step 1) | https://www.dhs.gov/sites/default/files/publications/STB_Applying_Tourniquet_08-06-2018_0.pdf | 06/08/2018
 source: Federal Emergency Management Agency (FEMA), Ready.gov | Until Help Arrives, web tutorial (Stop the Bleeding) | https://www.ready.gov/sites/default/files/2020-07/until-help-arrives-web-tutorial.pdf | Version 1.0 (07/2020)
 licence: Dominio público (obras del Gobierno de EE. UU.). Fuentes: Departamento de Seguridad Nacional de EE. UU. (DHS); Agencia Federal para el Manejo de Emergencias (FEMA). No se reproduce el logotipo de Stop the Bleed. Traducción de Nomad Pocket, sin respaldo del DHS ni de FEMA.
-see: tourniquet, shock
-keywords: hemorragia, sangra mucho, sangra mucho y no para, no para de sangrar, hemorragia grave, corte profundo, sale mucha sangre, sangre a chorro, sangre por todas partes, hacer presión, apretar la herida, cuchillada, herida de bala, se ha cortado una arteria, venda empapada de sangre, herida que no deja de sangrar, se desangra
+see: tourniquet, improvised-tourniquet, shock
+note: Llame al 112 (o pida a alguien que llame) mientras aprieta; si hay un cuchillo u otro objeto clavado en la herida, no lo saque: apriete a ambos lados del objeto.
+keywords: hemorragia, sangra mucho, sangra mucho y no para, no para de sangrar, hemorragia grave, corte profundo, sale mucha sangre, sangre a chorro, sangre por todas partes, hacer presión, apretar la herida, cuchillada, herida de bala, se ha cortado una arteria, venda empapada de sangre, herida que no deja de sangrar, se desangra, me he clavado la navaja, me he clavado un cuchillo, herida en el muslo, cuchillo clavado, sangra la pierna
 ---
 ## Detenga la hemorragia. ¡Ya!
 

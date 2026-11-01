@@ -8,7 +8,8 @@ kind: excerpt
 source: National Institute for Occupational Safety and Health (NIOSH), CDC | Carbon Monoxide Hazards at Work (Overview; Risks; What can be done) | https://www.cdc.gov/niosh/carbon-monoxide/about/index.html | 28/10/2026
 licence: Public domain (US government work). Source: National Institute for Occupational Safety and Health (NIOSH), Centers for Disease Control and Prevention (CDC).
 see: cpr-adult, recovery-position
-keywords: carbon monoxide, CO poisoning, CO alarm going off, generator indoors, gas heater, space heater, charcoal grill indoors, brazier, car running in garage, headache and dizziness, everyone in the house feels sick, sleepy and nauseous, fumes, odorless gas, CO detector, wood stove, boiler fumes
+note: If a barbecue, brazier, heater or generator is burning indoors and someone feels ill: if you can do it at once, turn it off, but everyone get outside now and call 112; don't go back in until you are told it is safe.
+keywords: carbon monoxide, CO poisoning, CO alarm going off, generator indoors, gas heater, space heater, charcoal grill indoors, barbecue indoors, charcoal indoors, brazier, charcoal brazier, brazier lit in the bedroom, closed room, car running in garage, headache and dizziness, she has a headache and is dizzy, everyone in the house feels sick, sleepy and nauseous, fumes, odorless gas, CO detector, wood stove, boiler fumes
 ---
 Carbon monoxide (CO) is a colorless, odorless, and toxic gas.
 

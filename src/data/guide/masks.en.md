@@ -7,7 +7,7 @@ health: yes
 kind: excerpt
 source: Centers for Disease Control and Prevention (CDC) | Masks and Respiratory Viruses Prevention (An additional strategy…; How it works; Steps you can take; Key times for prevention) | https://www.cdc.gov/respiratory-viruses/prevention/masks.html | 18/08/2025
 licence: Public domain (US government work). Source: Centers for Disease Control and Prevention (CDC).
-see: handwashing, caring-sick-person, disinfecting-surfaces
+see: handwashing, caring-sick-person, disinfecting-surfaces, mask-care
 keywords: mask, face mask, which mask, surgical mask, N95, KN95, FFP2, cloth mask, respirator, how to wear a mask, mask fit, does a mask work, flu, covid, virus, epidemic, pandemic, outbreak, infection, contagious, someone coughing, protect from virus, crowded places
 ---
 Wearing a mask can help lower the risk of respiratory virus transmission. When worn by a person with an infection, masks reduce the spread of the virus to others. Masks can also protect wearers from breathing in infectious particles from people around them. Different masks offer different levels of protection. Wearing the most protective one you can comfortably wear for extended periods of time that fits well (completely covering the nose and mouth) is the most effective option.

@@ -8,8 +8,8 @@ kind: translation
 translatedFrom: en
 source: US Army | ATP 3-50.21, Survival (ch. 6, Shelter and Clothing: ¶6-8, 6-9, 6-11–6-14) | https://armypubs.army.mil/epubs/DR_pubs/DR_a/pdf/web/ARN12086_ATP%203-50x21%20FINAL%20WEB%202.pdf | 18/09/2018
 licence: Dominio público (obra del Gobierno de EE. UU.); publicación autorizada, distribución ilimitada. Fuente: Ejército de EE. UU. (US Army), ATP 3-50.21. Traducción de Nomad Pocket, sin respaldo del Ejército de EE. UU.
-see: making-fire, hypothermia, heating-without-power, signalling-rescue, winter-storm, extreme-heat, water-outdoors
-keywords: refugio, refugio de emergencia, refugio improvisado, hacer un refugio, construir un refugio, dormir al raso, pasar la noche fuera, perdido en la montaña, lluvia, frío, viento, lona, plástico, manta térmica, cueva, árbol caído, dónde dormir, vivac, protegerse del frío, sin casa tras el desastre
+see: shelter-lean-to-debris-hut, making-fire, hypothermia, heating-without-power, signalling-rescue, lost-at-nightfall, winter-storm, extreme-heat, water-outdoors
+keywords: refugio, refugio de emergencia, refugio improvisado, hacer un refugio, construir un refugio, dormir al raso, pasar la noche fuera, perdido en la montaña, lluvia, frío, viento, lona, plástico, manta térmica, cueva, árbol caído, dónde dormir, vivac, protegerse del frío, sin casa tras el desastre, refugio rápido, sin tienda, pasar la noche sin tienda, montar un refugio, dormir en el monte
 ---
 Un refugio es cualquier cosa que proteja de los peligros del entorno. Según las condiciones del entorno, el refugio puede ser la prioridad número uno de la persona aislada.
 

@@ -7,8 +7,8 @@ health: yes
 kind: excerpt
 source: Instituto Nacional de Seguridad y Salud en el Trabajo (INSST) | NTP 546: Primeros auxilios: fracturas, luxaciones y esguinces (Fracturas: Síntomas y signos, Actuación, Inmovilización; Lesión de columna vertebral: Prioridad de actuación) | https://www.insst.es/documentacion/colecciones-tecnicas/ntp-notas-tecnicas-de-prevencion/16-serie-ntp-numeros-541-a-575-ano-2001/ntp-546-primeros-auxilios-fracturas-luxaciones-y-esguinces. | 2001
 licence: Origen de los datos: Instituto Nacional de Seguridad y Salud en el Trabajo (INSST), NTP 546 (2001). Reutilización según la Ley 37/2007; el INSST no patrocina ni respalda esta app.
-see: sprains, bleeding, wounds, shock, head-injury
-keywords: fractura, fracturas, hueso roto, se ha roto un hueso, me he roto el brazo, pierna rota, brazo roto, muñeca rota, tobillo roto, fractura abierta, se ve el hueso, hueso fuera, entablillar, férula, tablilla, inmovilizar, cabestrillo, pañuelo triangular, no puede mover la pierna, deformidad, caída, golpe en la espalda, lesión de columna, no mover al herido
+see: arm-splint-sling, sprains, bleeding, wounds, shock, head-injury
+keywords: fractura, fracturas, hueso roto, me he roto el brazo, pierna rota, brazo roto, muñeca rota, tobillo roto, fractura abierta, se ve el hueso, entablillar, férula, tablilla, inmovilizar, cabestrillo, pañuelo triangular, no puede mover la pierna, deformidad, caída, golpe en la espalda, lesión de columna, no mover al herido, brazo torcido, cómo inmovilizo el brazo, se ha caído y tiene el brazo torcido
 ---
 ## Síntomas y signos
 

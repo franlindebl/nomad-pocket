@@ -7,8 +7,9 @@ health: no
 kind: excerpt
 source: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA) | Refugio (Refugio en el lugar) | https://www.ready.gov/es/refugio | 20/03/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA).
+note: En España, Protección Civil pide durante un confinamiento no usar el teléfono, porque los servicios de socorro necesitan las líneas libres, y no ir a buscar a los niños al colegio: sus profesores recibirán instrucciones.
 see: chemical-release, radiation-decontamination, nuclear-explosion, radio-alerts, emergency-kit, evacuation
-keywords: confinamiento, confinarse, refugiarse en casa, quedarse dentro, no salir de casa, nube tóxica, fuga química, escape tóxico, aire contaminado, sellar la habitación, cinta americana, plástico en las ventanas, cerrar las ventanas, apagar el aire acondicionado, habitación interior, rejillas de ventilación, sirenas, humo fuera, accidente nuclear, accidente industrial, qué hago si no puedo salir
+keywords: confinamiento, confinarse, refugiarse en casa, quedarse dentro, no salir de casa, nube tóxica, fuga química, escape tóxico, aire contaminado, sellar la habitación, cinta americana, plástico en las ventanas, cerrar las ventanas, apagar el aire acondicionado, habitación interior, rejillas de ventilación, sirenas, humo fuera, accidente nuclear, accidente industrial, qué hago si no puedo salir, nos han confinado, apagar la calefacción, voy a buscar a los niños al colegio, puedo llamar por teléfono
 ---
 Ya sea que esté en su hogar, en el trabajo o en cualquier otro lugar que frecuente con regularidad, puede haber situaciones en las que es mejor quedarse donde está y evitar cualquier incertidumbre en el exterior.
 

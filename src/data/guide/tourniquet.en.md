@@ -7,7 +7,7 @@ health: yes
 kind: excerpt
 source: US Department of Homeland Security (DHS) | Stop the Bleed: Applying a Tourniquet (poster, Steps 1–7) | https://www.dhs.gov/sites/default/files/publications/STB_Applying_Tourniquet_08-06-2018_0.pdf | 06/08/2018
 licence: Public domain (US government work). Source: US Department of Homeland Security (DHS). The Stop the Bleed logo is not reproduced.
-see: bleeding, shock
+see: bleeding, improvised-tourniquet, shock
 keywords: tourniquet, how to apply a tourniquet, tourniquet arm, tourniquet leg, windlass, bleeding won't stop, leg bleeding, arm bleeding, amputation, severed limb, blood soaking through, stop the bleed, CAT tourniquet, how tight tourniquet, where to put tourniquet
 ---
 A wound on the leg or arm that won’t stop bleeding is a good candidate for a tourniquet.

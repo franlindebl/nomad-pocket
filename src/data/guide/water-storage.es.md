@@ -7,8 +7,9 @@ health: no
 kind: excerpt
 source: Centros para el Control y la Prevención de Enfermedades (CDC) | Cómo crear y almacenar una reserva de agua de emergencia (Cuánta agua de emergencia almacenar; Otras consideraciones; Cómo elegir un recipiente; Limpiar recipientes para almacenar agua; Cómo almacenar el agua) | https://www.cdc.gov/water-emergency/es/about/how-to-create-and-store-an-emergency-water-supply.html | 27/06/2025
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Centros para el Control y la Prevención de Enfermedades (CDC).
+note: Ejemplo: 1 galón son unos 3,8 litros, así que una familia de 4 personas debe guardar como mínimo unos 15 litros por día: unos 45 litros para 3 días y más de 200 litros para 2 semanas.
 see: water-bleach, boiling-water, hidden-water, emergency-kit, emergency-food
-keywords: guardar agua, almacenar agua, reserva de agua, agua de emergencia, cuánta agua guardar, litros por persona y día, agua para 3 días, agua para dos semanas, agua embotellada, garrafas, bidones, recipientes para agua, limpiar garrafas, desinfectar bidones, lejía, cuánto dura el agua guardada, cambiar el agua cada 6 meses, agua para las mascotas, corte de agua, prepararse para un corte de agua
+keywords: guardar agua, almacenar agua, reserva de agua, agua de emergencia, cuánta agua guardar, litros por persona y día, agua para 3 días, agua para dos semanas, agua embotellada, recipientes para agua, limpiar garrafas, desinfectar bidones, cuánto dura el agua guardada, cambiar el agua cada 6 meses, agua para las mascotas, prepararse para un corte de agua, cuánta agua necesitamos al día, agua para cuatro personas, cada cuánto cambiar el agua, renovar el agua guardada, caduca el agua, cuántos litros de agua por persona, litros de agua por persona, cuánta agua por persona, cuánta agua para una familia
 ---
 ## Cuánta agua de emergencia almacenar
 

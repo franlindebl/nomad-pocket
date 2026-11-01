@@ -8,7 +8,7 @@ kind: excerpt
 source: MedlinePlus, US National Library of Medicine | Diarrhea (Summary: other symptoms; when to see a health care provider; treatments) | https://medlineplus.gov/diarrhea.html | 01/06/2025
 source: MedlinePlus, US National Library of Medicine | Nausea and Vomiting (Summary: when to see a health care provider; treatments) | https://medlineplus.gov/nauseaandvomiting.html | 17/09/2024
 licence: Public domain (US government work). Courtesy of MedlinePlus from the National Library of Medicine.
-see: dehydration, handwashing, water-bleach, boiling-water, caring-sick-person, toilets-no-water
+see: dehydration, oral-rehydration-home, handwashing, water-bleach, boiling-water, caring-sick-person, toilets-no-water
 keywords: diarrhea, diarrhoea, loose stools, runny stools, stomach bug, gastroenteritis, stomach flu, vomiting, throwing up, nausea, feel sick, food poisoning, blood in stool, black stools, blood in vomit, can't keep fluids down, how long diarrhea, child diarrhea, baby vomiting, what to drink, what to eat
 ---
 ## Diarrhea

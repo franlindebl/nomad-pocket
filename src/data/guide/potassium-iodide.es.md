@@ -8,7 +8,7 @@ kind: excerpt
 source: Dirección General de Protección Civil y Emergencias, Ministerio del Interior | Guía técnica sobre utilización de yoduro potásico en la profilaxis radiológica, en emergencias nucleares (Anexo II: Información básica a facilitar a los ciudadanos, preguntas 6, 7, 8, 10, 12, 14 y 15; la tabla de dosis, en forma de lista) | https://www.proteccioncivil.es/documents/20121/84954/Guia-Tecnica-sobre-utilizacion-yoduro-potasico.pdf/7f5f78dd-37fd-1fda-2de7-4d879f7ccb68?t=1611318799888 | 02/2012
 licence: Origen de los datos: Dirección General de Protección Civil y Emergencias, Ministerio del Interior. Reutilización según la Ley 37/2007; última actualización: 02/2012 (rev. 00).
 see: nuclear-explosion, radiation-decontamination, shelter-in-place, radio-alerts
-keywords: yoduro potásico, IK, KI, pastillas de yodo, cápsulas de yodo, yodo, radiación, yodo radiactivo, accidente nuclear, central nuclear, fuga radiactiva, bomba nuclear, nube radiactiva, tiroides, proteger el tiroides, dosis de yoduro, dosis para niños, cuándo tomar yodo, sal yodada, farmacia, zona I, Almaraz, Chernóbil, Fukushima
+keywords: yoduro potásico, IK, KI, pastillas de yodo, cápsulas de yodo, yodo, radiación, yodo radiactivo, accidente nuclear, central nuclear, fuga radiactiva, bomba nuclear, nube radiactiva, tiroides, proteger el tiroides, dosis de yoduro, dosis para niños, cuándo tomar yodo, sal yodada, farmacia, zona I, Almaraz, Chernóbil, Fukushima, tomo yodo, pastillas de yodo para niños, cuántas pastillas de yodo, dosis de yodo niños
 ---
 ### ¿Cuándo tiene mayor eficacia la toma de yoduro potásico?
 

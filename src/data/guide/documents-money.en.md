@@ -7,7 +7,7 @@ health: no
 kind: excerpt
 source: Ready.gov, Federal Emergency Management Agency (FEMA) | Financial Preparedness (Financial Preparedness Tips; Be Safe; At Home; Household Identification; Financial and Legal Documentation; Medical Information; Household Contact Information) | https://www.ready.gov/financial-preparedness | 13/03/2026
 licence: Public domain (US government work). Source: Ready.gov, Federal Emergency Management Agency (FEMA).
-see: emergency-kit, evacuation, family-plan
+see: emergency-kit, evacuation, family-plan, papers-cash-spain
 keywords: documents, important papers, ID card, passport, birth certificate, insurance policy, cash, small bills, ATM not working, cash machine, card payments down, money in a blackout, copies of documents, medical records, vaccination records, waterproof bag, cloud backup, scam, fake text, bank, what papers to take
 ---
 - Gather financial and critical personal, household and medical information.

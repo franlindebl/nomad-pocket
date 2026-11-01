@@ -8,8 +8,9 @@ kind: translation
 translatedFrom: es
 source: Instituto Nacional de Seguridad y Salud en el Trabajo (INSST) | NTP 524: Primeros auxilios: quemaduras (Norma general; Quemadura por fuego) | https://www.insst.es/documents/d/portal-insst/ntp_524-pdf | 1999
 licence: Source of the data: Instituto Nacional de Seguridad y Salud en el Trabajo (INSST, Spain), NTP 524 (1999). Reused under Spain's Law 37/2007; translated by Nomad Pocket. INSST does not sponsor or endorse this app.
-see: shock, carbon-monoxide
-keywords: burn, burns, I burned myself, hot oil burn, boiling water burn, scald, scalded, fire burn, iron burn, blister, blisters, how long under cold water, toothpaste on a burn, burn cream, clothes stuck to the burn, clothes on fire, burnt skin, child burned, serious burn
+see: shock, carbon-monoxide, house-fire
+note: Call 112 at once if the burn is large or deep or is on the face, eyes, hands, feet or genitals, and if a child, an older person or someone with a serious existing illness has a burn with blisters or deeper.
+keywords: burn, burns, I burned myself, hot oil burn, boiling water burn, scald, scalded, fire burn, iron burn, blister, blisters, how long under cold water, toothpaste on a burn, burn cream, clothes stuck to the burn, clothes on fire, clothes caught fire, his clothes are burning, my husband is on fire, spilled boiling water on me, what do I put on a burn, burn on my hand, burnt skin, child burned, serious burn
 ---
 ## What to do with a burn
 

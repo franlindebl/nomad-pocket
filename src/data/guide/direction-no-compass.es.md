@@ -9,7 +9,7 @@ translatedFrom: en
 source: US Army | ATP 3-50.21, Survival (ch. 7, Determine Cardinal Direction: ¶7-21, 7-22, 7-33, 7-34, 7-36, 7-44) | https://armypubs.army.mil/epubs/DR_pubs/DR_a/pdf/web/ARN12086_ATP%203-50x21%20FINAL%20WEB%202.pdf | 18/09/2018
 licence: Dominio público (obra del Gobierno de EE. UU.); publicación autorizada, distribución ilimitada. Fuente: Ejército de EE. UU. (US Army), ATP 3-50.21. Traducción de Nomad Pocket, sin respaldo del Ejército de EE. UU.
 see: signalling-rescue, improvised-shelter, evacuation, water-outdoors
-keywords: encontrar el norte, dónde está el norte, sin brújula, orientarse, orientación, perdido, perdido en la montaña, perdido en el bosque, dirección, puntos cardinales, estrella polar, Osa Mayor, el Carro, palo y sombra, el sol y la sombra, este y oeste, musgo en los árboles, navegación, no hay cobertura, sin GPS
+keywords: encontrar el norte, dónde está el norte, sin brújula, orientarse, orientación, perdido, perdido en la montaña, perdido en el bosque, dirección, puntos cardinales, estrella polar, Osa Mayor, el Carro, palo y sombra, el sol y la sombra, este y oeste, musgo en los árboles, navegación, no hay cobertura, sin GPS, cómo sé dónde está el norte
 ---
 ## Usar el sol y las sombras
 

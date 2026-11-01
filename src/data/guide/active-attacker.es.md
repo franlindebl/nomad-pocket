@@ -8,7 +8,7 @@ kind: excerpt
 source: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA) | Ataques en lugares concurridos y públicos (Cómo sobrevivir DURANTE: Corra, Escóndase, Pelee; Cómo estar a salvo DESPUÉS) | https://www.ready.gov/es/ataques-masivos-en-espacios-publicos-concurridos | 07/04/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA).
 see: explosion, suspicious-object, bleeding, tourniquet, coping
-keywords: tirador, tiroteo, hombre armado, alguien con una pistola, disparos, ataque con cuchillo, apuñalamiento, atentado, ataque terrorista, atacante, atropello masivo, corre escóndete pelea, dónde me escondo, atrancar la puerta, cerrar la puerta, llega la policía, manos arriba, ataque en un concierto, festival, pánico, han disparado
+keywords: tirador, tiroteo, hombre armado, alguien con una pistola, disparos, ataque con cuchillo, apuñalamiento, atentado, ataque terrorista, atacante, atropello masivo, corre escóndete pelea, dónde me escondo, atrancar la puerta, cerrar la puerta, llega la policía, manos arriba, ataque en un concierto, festival, pánico, han disparado, tiroteo en el centro comercial, me escondo o salgo corriendo
 ---
 ## Cómo sobrevivir DURANTE: Corra, Escóndase, Pelee
 

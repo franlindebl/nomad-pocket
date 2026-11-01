@@ -7,7 +7,7 @@ health: no
 kind: excerpt
 source: National Park Service (NPS) | Outdoor Emergency Plan (If You Get Lost: 1. Attempt self rescue; If someone in your group becomes lost; For children) | https://www.nps.gov/articles/gtgemergencyplan.htm | 21/06/2023
 licence: Public domain (US government work). Source: National Park Service (NPS).
-see: distress-signals, direction-no-compass, improvised-shelter, making-fire, hypothermia, family-plan
+see: lost-at-nightfall, distress-signals, direction-no-compass, improvised-shelter, making-fire, hypothermia, family-plan
 keywords: lost, I'm lost, lost in the mountains, lost in the woods, lost while hiking, child lost, my child is lost, lost child in the forest, someone in our group is lost, friend is missing, search and rescue, get rescued, rescuers, stay put, hug a tree, wait for help, go back the way I came, retrace my steps, whistle, wave your arms, helicopter
 ---
 ## If you get lost

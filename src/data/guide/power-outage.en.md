@@ -7,7 +7,7 @@ health: no
 kind: excerpt
 source: Federal Emergency Management Agency (FEMA), Ready.gov | Power Outages (Power Outage Tips; How to Protect Yourself During A Power Outage; Returning After A Power Outage) | https://www.ready.gov/power-outages | 04/06/2026
 licence: Public domain (US government work). Source: Federal Emergency Management Agency (FEMA), Ready.gov.
-see: generators, heating-without-power, fridge-outage, phones-batteries, medical-devices, carbon-monoxide
+see: generators, heating-without-power, fridge-outage, phones-batteries, medical-devices, carbon-monoxide, candle-safety
 keywords: power outage, power cut, blackout, the power went out, no electricity, lights went out, what to do in a blackout, how long will the fridge last, freezer, food in the fridge, flashlight, torch, candles, power bank, portable charger, generator, gas stove for heat, oven for heat, carbon monoxide, power surge, unplug appliances, warm place to go, extreme cold no power, extreme heat no power
 ---
 ## Power Outage Tips

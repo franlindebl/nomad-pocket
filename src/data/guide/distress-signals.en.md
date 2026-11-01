@@ -7,7 +7,7 @@ health: no
 kind: excerpt
 source: U.S. National Park Service (NPS) | Outdoor Emergency Plan (Ranger tip; What to do if you get lost: 2. Call for help, 3. Wait for help) | https://www.nps.gov/subjects/healthandsafety/upload/NPS-Outdoor-Emergency-Plan-508c.pdf | undated (PDF of 21/06/2023)
 licence: Public domain (US government work). Source: U.S. National Park Service (NPS). The NPS arrowhead is not reproduced.
-see: signalling-rescue, explosion, earthquake, direction-no-compass, improvised-shelter
+see: calling-112, signalling-rescue, lost-at-nightfall, explosion, earthquake, direction-no-compass, improvised-shelter
 keywords: distress signal, signal for help, SOS, whistle, three whistle blasts, flashlight, torch signal, mirror, signal a helicopter, rescue, lost, trapped, help me, nobody can hear me, no signal on my phone, what to tell emergency services, stay put, mountain rescue, search and rescue, make myself visible
 ---
 ## Ranger tip

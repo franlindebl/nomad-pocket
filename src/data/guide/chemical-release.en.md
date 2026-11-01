@@ -7,8 +7,8 @@ health: no
 kind: excerpt
 source: Ready.gov, Federal Emergency Management Agency (FEMA) | Chemicals and Hazardous Materials Incidents (During an Incident; After an Incident) | https://www.ready.gov/hazmat | 24/04/2023
 licence: Public domain (US government work). Source: Ready.gov, Federal Emergency Management Agency (FEMA).
-see: shelter-in-place, evacuation, chemical-burns, poisoning, radiation-decontamination, radio-alerts
-keywords: chemical leak, chemical spill, chemical attack, toxic gas, toxic cloud, gas leak outside, chemical plant accident, hazmat, strange smell, burning eyes, can't breathe, poison gas, chlorine, ammonia, train derailment, tanker truck accident, seal the room, duct tape, upwind, decontaminate, wash off chemicals, evacuate or stay inside
+see: toxic-cloud-escape, shelter-in-place, evacuation, chemical-burns, poisoning, radiation-decontamination, radio-alerts
+keywords: chemical leak, chemical spill, chemical attack, toxic gas, toxic cloud, gas leak outside, chemical plant accident, industrial accident, hazmat, strange smell, burning eyes, can't breathe, poison gas, chlorine, ammonia, train derailment, tanker truck accident, seal the room, duct tape, decontaminate, wash off chemicals, evacuate or stay inside, smells like chlorine, yellow cloud, I live near a chemical plant
 ---
 Signs of a chemical release include difficulty breathing, eye irritation, loss of coordination, nausea or burning in the nose, throat and lungs.
 

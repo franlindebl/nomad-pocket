@@ -8,7 +8,7 @@ kind: excerpt
 source: Centros para el Control y la Prevención de Enfermedades (CDC) | Cómo prevenir la hipotermia (A qué debe estar atento; No espere, tome medidas) | https://www.cdc.gov/winter-weather/es/prevention/como-prevenir-la-hipotermia.html | 25/08/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Centros para el Control y la Prevención de Enfermedades (CDC).
 see: cpr-adult, cpr-child, drowning
-keywords: hipotermia, congelado, congelándose, tiene mucho frío, muerto de frío, tirita, no para de tiritar, ha dejado de tiritar, se ha caído al agua fría, frío y confuso, frío y somnoliento, habla arrastrada, temperatura baja, temperatura corporal baja, cómo hacerle entrar en calor, calentar a una persona, bebé frío, perdido en la nieve, mojado y con frío, frío en la montaña
+keywords: hipotermia, congelado, congelándose, tiene mucho frío, muerto de frío, tirita, no para de tiritar, ha dejado de tiritar, se ha caído al agua fría, frío y confuso, frío y somnoliento, habla arrastrada, temperatura baja, temperatura corporal baja, cómo hacerle entrar en calor, calentar a una persona, bebé frío, perdido en la nieve, mojado y con frío, frío en la montaña, evitar la hipotermia, persona mayor con frío, no para de temblar, temblando, atontado, horas mojado, abuelo con frío y confuso
 ---
 Los siguientes son signos de advertencia de hipotermia:
 

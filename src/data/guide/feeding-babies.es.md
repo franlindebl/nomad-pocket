@@ -7,8 +7,8 @@ health: yes
 kind: excerpt
 source: Centros para el Control y la Prevención de Enfermedades (CDC) | Preguntas comunes sobre la alimentación de los bebés durante las emergencias (hoja informativa CS328711-O) | https://www.cdc.gov/infant-feeding-emergencies-toolkit/media/pdfs/common-feeding-faqs-es-508.pdf | 01/11/2022
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Centros para el Control y la Prevención de Enfermedades (CDC).
-see: water-bleach, boiling-water, water-storage, food-after-flood, emergency-kit
-keywords: bebé, dar de comer al bebé, leche de fórmula, leche en polvo, leche de fórmula líquida, fórmula lista para usar, biberón, biberones, tetinas, esterilizar biberones, no hay agua limpia para el biberón, dar leche con vasito, dar el pecho, lactancia, leche materna, sacarse leche, leche materna descongelada, nevera portátil, bebé en un albergue, recién nacido
+see: water-bleach, boiling-water, water-storage, food-after-flood, emergency-kit, powdered-formula, sterilizing-without-water, formula-runs-out, breastfeeding-stress
+keywords: bebé, dar de comer al bebé, leche de fórmula, leche en polvo, leche de fórmula líquida, fórmula lista para usar, biberón, biberones, tetinas, esterilizar biberones, no hay agua limpia para el biberón, dar leche con vasito, dar el pecho, lactancia, leche materna, sacarse leche, leche materna descongelada, nevera portátil, bebé en un albergue, recién nacido, preparar el biberón sin agua caliente, biberón sin luz, leche de fórmula fría
 ---
 Durante un desastre natural, amamantar es la manera más segura de alimentar a un bebé.
 

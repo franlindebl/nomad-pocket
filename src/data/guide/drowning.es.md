@@ -12,7 +12,7 @@ source: European Resuscitation Council | European Resuscitation Council Guidelin
 source: European Resuscitation Council | European Resuscitation Council Guidelines 2025: Adult Basic Life Support (Rescue breaths; High quality chest compressions) | https://doi.org/10.1016/j.resuscitation.2025.110771 | 2025
 licence: Redactado por Nomad Pocket según ERC Guidelines 2025 (First Aid; Special Circumstances; Paediatric Life Support; Basic Life Support); texto propio, GPL-3.0-or-later como la app.
 see: cpr-adult, cpr-child, recovery-position, hypothermia
-keywords: ahogamiento, ahogado, se ha ahogado, se está ahogando en el agua, ahogado en la piscina, ahogado en el mar, ahogado en el río, casi se ahoga, lo sacamos del agua, ha tragado agua, no respira después de sacarlo del agua, niño en la piscina, bebé en la bañera, se ha caído al agua, rescate en el agua, socorrista, sumergido, lo arrastró la corriente, inconsciente en el agua
+keywords: ahogamiento, ahogado, se ha ahogado, se está ahogando en el agua, ahogado en la piscina, ahogado en el mar, ahogado en el río, casi se ahoga, lo sacamos del agua, ha tragado agua, no respira después de sacarlo del agua, niño en la piscina, bebé en la bañera, se ha caído al agua, rescate en el agua, socorrista, sumergido, lo arrastró la corriente, inconsciente en el agua, hemos sacado a un hombre del agua, sacado del agua y no respira, no respira tras sacarlo del agua, se ha caído a la piscina con una crisis
 ---
 ## Rescata sin ponerte en peligro
 

@@ -9,7 +9,7 @@ basis: ERC Guidelines 2025: Paediatric Life Support (soporte vital básico pedi�
 source: European Resuscitation Council | European Resuscitation Council Guidelines 2025: Paediatric Life Support (Paediatric basic life support; Foreign body airway obstruction) | https://doi.org/10.1016/j.resuscitation.2025.110767 | 2025
 licence: Redactado por Nomad Pocket según ERC Guidelines 2025 (Paediatric Life Support); texto propio, GPL-3.0-or-later como la app.
 see: cpr-child, choking, recovery-position
-keywords: mi bebé se atraganta, bebé atragantado, el bebé se ahoga, se ha atragantado el bebé, atragantamiento lactante, recién nacido atragantado, el bebé no puede respirar, el bebé no puede llorar, se le ha ido la leche por el otro lado, se ha tragado algo, tiene algo en la garganta, el bebé se pone morado, el bebé se pone azul, golpes en la espalda bebé, compresiones en el pecho bebé, maniobra de Heimlich bebé, obstrucción vía aérea lactante, bebé de meses atragantado
+keywords: mi bebé se atraganta, bebé atragantado, el bebé se ahoga, se ha atragantado el bebé, atragantamiento lactante, recién nacido atragantado, el bebé no puede respirar, el bebé no puede llorar, se le ha ido la leche por el otro lado, se ha tragado algo, tiene algo en la garganta, el bebé se pone morado, el bebé se pone azul, golpes en la espalda bebé, compresiones en el pecho bebé, maniobra de Heimlich bebé, obstrucción vía aérea lactante, bebé de meses atragantado, el bebé se ha atragantado con algo, no llora ni tose, el bebé no tose
 ---
 Sospecha que se atraganta si de repente no puede llorar ni toser, sobre todo mientras come o juega.
 

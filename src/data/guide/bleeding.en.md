@@ -8,8 +8,9 @@ kind: excerpt
 source: US Department of Homeland Security (DHS) | Stop the Bleed: Applying a Tourniquet (poster, Step 1) | https://www.dhs.gov/sites/default/files/publications/STB_Applying_Tourniquet_08-06-2018_0.pdf | 06/08/2018
 source: Federal Emergency Management Agency (FEMA), Ready.gov | Until Help Arrives, web tutorial (Stop the Bleeding) | https://www.ready.gov/sites/default/files/2020-07/until-help-arrives-web-tutorial.pdf | Version 1.0 (07/2020)
 licence: Public domain (US government works). Sources: US Department of Homeland Security (DHS); Federal Emergency Management Agency (FEMA). The Stop the Bleed logo is not reproduced.
-see: tourniquet, shock
-keywords: bleeding, heavy bleeding, bleeding a lot, won't stop bleeding, severe bleeding, hemorrhage, deep cut, gushing blood, spurting blood, blood everywhere, apply pressure, stop the bleed, knife wound, gunshot wound, cut artery, wound soaked with blood, bandage soaked
+see: tourniquet, improvised-tourniquet, shock
+note: Call 112 (or have someone call) while you press; if a knife or other object is still stuck in the wound, do not pull it out: press on both sides of it.
+keywords: bleeding, heavy bleeding, bleeding a lot, won't stop bleeding, severe bleeding, hemorrhage, deep cut, gushing blood, spurting blood, blood everywhere, apply pressure, stop the bleed, knife wound, gunshot wound, cut artery, wound soaked with blood, bandage soaked, stabbed, knife stuck in the wound, object stuck in wound, stab wound in the thigh, leg bleeding
 ---
 ## Stop the bleeding. Now!
 

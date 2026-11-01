@@ -7,8 +7,8 @@ health: yes
 kind: excerpt
 source: National Institute of Arthritis and Musculoskeletal and Skin Diseases (NIAMS), NIH | Sports Injuries: Diagnosis, Treatment, and Steps to Take (Treatment for Serious Injuries; Treatment of Minor Injuries) | https://www.niams.nih.gov/health-topics/sports-injuries/diagnosis-treatment-and-steps-to-take | 09/2024
 licence: Public domain (US government work). Source: National Institute of Arthritis and Musculoskeletal and Skin Diseases (NIAMS), National Institutes of Health.
-see: fractures, pain-relievers
-keywords: sprain, sprained ankle, twisted ankle, I twisted my ankle, rolled my ankle, sprained wrist, twisted knee, strain, pulled muscle, swollen ankle, swelling, bruising, ice, how long to ice, heat or ice, RICE, rest, compression, elastic bandage, elevate, can't put weight on it, is it broken
+see: fractures, pain-relievers, sprain-far-from-help
+keywords: sprain, sprained ankle, twisted ankle, I twisted my ankle, rolled my ankle, sprained wrist, twisted knee, strain, pulled muscle, swollen ankle, swelling, bruising, ice, how long to ice, heat or ice, RICE, rest, compression, elastic bandage, elevate, can't put weight on it, is it broken, can I keep walking, walking on a sprain, strap the ankle
 ---
 ## Treatment for Serious Injuries
 

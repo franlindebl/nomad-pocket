@@ -7,8 +7,8 @@ health: no
 kind: excerpt
 source: Agencia Federal para el Manejo de Emergencias (FEMA), Ready.gov | Tormentas invernales (Cómo protegerse del clima invernal; Manténgase a salvo durante una tormenta invernal) | https://www.ready.gov/es/invierno | 10/03/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Agencia Federal para el Manejo de Emergencias (FEMA), Ready.gov.
-see: heating-without-power, power-outage, generators, hypothermia, frostbite, carbon-monoxide, emergency-kit
-keywords: temporal de nieve, tormenta de nieve, nevada, ventisca, ola de frío, frío extremo, helada, hielo, placas de hielo, lluvia helada, tuberías congeladas, aislados por la nieve, atrapado en el coche por la nieve, atrapado en el coche, kit para el coche en invierno, quitar nieve, palear nieve, sin calefacción, apagón en invierno, aviso por nieve, alerta por frío, nieve en la carretera, Filomena
+see: heating-without-power, power-outage, generators, hypothermia, frostbite, carbon-monoxide, emergency-kit, snow-shovelling
+keywords: temporal de nieve, tormenta de nieve, nevada, ventisca, ola de frío, frío extremo, helada, hielo, placas de hielo, lluvia helada, tuberías congeladas, aislados por la nieve, atrapado en el coche por la nieve, atrapado en el coche, kit para el coche en invierno, quitar nieve, palear nieve, sin calefacción, apagón en invierno, aviso por nieve, alerta por frío, nieve en la carretera, Filomena, aislada por la nieve
 ---
 **SI SE ENCUENTRA BAJO UNA ADVERTENCIA DE TORMENTA INVERNAL, BUSQUE REFUGIO DE INMEDIATO**
 

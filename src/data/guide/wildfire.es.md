@@ -8,8 +8,8 @@ kind: copy
 transcribed: yes
 source: Protección Civil (Dirección General de Protección Civil y Emergencias, Ministerio del Interior) | Incendios forestales: medidas de autoprotección (infografías "En las proximidades de un incendio" e "Incendio en las cercanías de una casa de campo") | https://www.proteccioncivil.es/coordinacion/gestion-de-riesgos/incendios-forestales | 2021
 licence: Origen de los datos: Dirección General de Protección Civil y Emergencias (Ministerio del Interior). Reutilización según la Ley 37/2007; última actualización: no consta (NIPO 126-21-025-9, 2021). Protección Civil no patrocina ni respalda esta app.
-see: evacuation, burns, house-fire, shelter-in-place, masks
-keywords: incendio forestal, incendio, fuego en el monte, fuego cerca de casa, humo, mucho humo, se acerca el fuego, huir del fuego, por dónde escapo, atrapado por el fuego, el fuego me alcanza, se me prende la ropa, trapo mojado, casa de campo, chalet, urbanización, mojar el tejado, manguera, orden de evacuación, desalojo, me quedo en casa, cerrar persianas, viento, llamas
+see: wildfire-house-prep, evacuation, burns, house-fire, shelter-in-place, masks
+keywords: incendio forestal, incendio, fuego en el monte, fuego cerca de casa, humo, mucho humo, se acerca el fuego, huir del fuego, por dónde escapo, atrapado por el fuego, el fuego me alcanza, se me prende la ropa, trapo mojado, casa de campo, chalet, urbanización, mojar el tejado, manguera, orden de evacuación, desalojo, me quedo en casa, cerrar persianas, viento, llamas, nos rodea el fuego
 ---
 ## En las proximidades de un incendio
 

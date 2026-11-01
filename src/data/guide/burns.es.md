@@ -7,8 +7,9 @@ health: yes
 kind: excerpt
 source: Instituto Nacional de Seguridad y Salud en el Trabajo (INSST) | NTP 524: Primeros auxilios: quemaduras (Norma general; Quemadura por fuego) | https://www.insst.es/documents/d/portal-insst/ntp_524-pdf | 1999
 licence: Origen de los datos: Instituto Nacional de Seguridad y Salud en el Trabajo (INSST), NTP 524 (1999). Reutilización según la Ley 37/2007; el INSST no patrocina ni respalda esta app.
-see: shock, carbon-monoxide
-keywords: quemadura, quemaduras, me he quemado, quemadura con aceite, quemadura con agua hirviendo, escaldadura, quemadura con fuego, quemadura de plancha, ampolla, ampollas, cuánto tiempo bajo el agua, pasta de dientes en la quemadura, crema para quemaduras, se le ha pegado la ropa, se ha prendido la ropa, piel quemada, niño quemado, quemadura grave
+see: shock, carbon-monoxide, house-fire
+note: Llame al 112 enseguida si la quemadura es extensa o profunda o está en la cara, los ojos, las manos, los pies o los genitales, y si un niño, una persona mayor o alguien con una enfermedad previa importante tiene una quemadura con ampollas o más profunda.
+keywords: quemadura, me he quemado, quemadura con aceite, quemadura con agua hirviendo, se me ha caído agua hirviendo, le ha caído agua hirviendo, escaldadura, me he escaldado, quemadura con fuego, quemadura de plancha, ampollas, cuánto tiempo bajo el agua, pasta de dientes en la quemadura, crema para quemaduras, qué me pongo en la quemadura, qué le pongo en la quemadura, se le ha pegado la ropa, se le ha prendido la ropa, se ha prendido fuego la ropa, le arde la ropa, mi marido está en llamas, piel quemada, niño quemado, quemadura grave, quemadura en la mano
 ---
 ## Qué hacer ante una quemadura
 

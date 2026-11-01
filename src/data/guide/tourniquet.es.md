@@ -8,7 +8,7 @@ kind: translation
 translatedFrom: en
 source: US Department of Homeland Security (DHS) | Stop the Bleed: Applying a Tourniquet (poster, Steps 1–7) | https://www.dhs.gov/sites/default/files/publications/STB_Applying_Tourniquet_08-06-2018_0.pdf | 06/08/2018
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Departamento de Seguridad Nacional de EE. UU. (DHS). No se reproduce el logotipo de Stop the Bleed. Traducción de Nomad Pocket, sin respaldo del DHS.
-see: bleeding, shock
+see: bleeding, improvised-tourniquet, shock
 keywords: torniquete, cómo poner un torniquete, torniquete en el brazo, torniquete en la pierna, molinete, varilla del torniquete, no para de sangrar, sangra la pierna, sangra el brazo, amputación, le han arrancado la pierna, la sangre empapa la venda, cuánto apretar el torniquete, dónde poner el torniquete, torniquete CAT, hemorragia en una extremidad
 ---
 Una herida en la pierna o el brazo que no deja de sangrar es una buena candidata para un torniquete.

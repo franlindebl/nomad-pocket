@@ -8,7 +8,7 @@ kind: excerpt
 source: Agencia Federal para el Manejo de Emergencias (FEMA), Ready.gov | Apagones (Uso de electrodomésticos durante apagones; Seguridad durante el uso de generadores) | https://www.ready.gov/es/apagones | 05/03/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Agencia Federal para el Manejo de Emergencias (FEMA), Ready.gov.
 see: carbon-monoxide, power-outage, heating-without-power, electric-shock
-keywords: generador, grupo electrógeno, generador de gasolina, generador diésel, generador dentro de casa, generador en el garaje, a qué distancia pongo el generador, generador junto a la ventana, generador bajo la lluvia, echar gasolina al generador, monóxido de carbono, detector de monóxido, alarma de CO, humo del motor, gases del tubo de escape, alargador, alargadera, hornillo de camping dentro de casa, barbacoa dentro de casa, apagón generador
+keywords: generador, grupo electrógeno, generador de gasolina, generador diésel, generador dentro de casa, generador en el garaje, a qué distancia pongo el generador, generador junto a la ventana, generador bajo la lluvia, echar gasolina al generador, monóxido de carbono, detector de monóxido, alarma de CO, humo del motor, gases del tubo de escape, alargador, alargadera, hornillo de camping dentro de casa, barbacoa dentro de casa, apagón generador, dónde pongo el generador, garaje con la puerta abierta, generador en el garaje abierto
 ---
 ## Uso de electrodomésticos durante apagones
 

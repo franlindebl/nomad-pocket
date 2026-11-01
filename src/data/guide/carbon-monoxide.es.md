@@ -9,7 +9,8 @@ translatedFrom: en
 source: National Institute for Occupational Safety and Health (NIOSH), CDC | Carbon Monoxide Hazards at Work (Overview; Risks; What can be done) | https://www.cdc.gov/niosh/carbon-monoxide/about/index.html | 28/10/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Instituto Nacional para la Seguridad y Salud Ocupacional (NIOSH), Centros para el Control y la Prevención de Enfermedades (CDC). Traducción de Nomad Pocket, sin respaldo de NIOSH ni de los CDC.
 see: cpr-adult, recovery-position
-keywords: monóxido, monóxido de carbono, intoxicación por monóxido, intoxicación por CO, brasero, estufa de butano, estufa de gas, calentador de gas, caldera, chimenea, generador dentro de casa, coche encendido en el garaje, dolor de cabeza y mareo, todos en casa se encuentran mal, somnolencia y náuseas, gas sin olor, detector de monóxido, pita el detector de CO, humos
+note: Si hay una barbacoa, un brasero, una estufa o un generador encendido dentro y alguien se encuentra mal: si puede hacerlo en el momento, apáguelo, pero salgan todos al aire libre ya y llame al 112; no vuelvan a entrar hasta que les digan que es seguro.
+keywords: monóxido, monóxido de carbono, intoxicación por monóxido, intoxicación por CO, brasero, estufa de butano, estufa de gas, calentador de gas, caldera, chimenea, generador dentro de casa, coche encendido en el garaje, dolor de cabeza y mareo, todos en casa se encuentran mal, somnolencia y náuseas, gas sin olor, detector de monóxido, pita el detector de CO, humos, barbacoa dentro de casa, carbón dentro de casa, le duele la cabeza y está mareada, brasero de carbón, brasero encendido en la habitación, habitación cerrada
 ---
 El monóxido de carbono (CO) es un gas incoloro, inodoro y tóxico.
 

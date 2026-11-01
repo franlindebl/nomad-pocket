@@ -10,7 +10,7 @@ source: Centros para el Control y la Prevención de Enfermedades (CDC) | Cómo h
 source: Agencia de Protección Ambiental de EE. UU. (EPA) | Qué hay que hacer después de una inundación (pozos privados) | https://espanol.epa.gov/sites/default/files/2017-09/documents/spanish_pdf_on_wells.pdf | sin fecha (archivo de 09/2017)
 licence: Origen de los datos (primer bloque): Ministerio de Sanidad. Reutilización según la Ley 37/2007; última actualización: 03/11/2024. Resto: dominio público (obras del Gobierno de EE. UU.); fuentes: Centros para el Control y la Prevención de Enfermedades (CDC) y Agencia de Protección Ambiental de EE. UU. (EPA).
 see: boiling-water, water-bleach, hidden-water, flood, food-after-flood, electric-shock
-keywords: agua tras la inundación, inundación, riada, DANA, gota fría, agua del grifo después de la riada, se puede beber el agua, agua potable, ayuntamiento, gasoil en el agua, gasolina en el agua, productos químicos en el agua, pozo, pozo inundado, bomba del pozo, agua de pozo, desinfectar el pozo, analizar el agua del pozo, fosa séptica, barro, agua turbia
+keywords: agua tras la inundación, inundación, riada, DANA, gota fría, agua del grifo después de la riada, se puede beber el agua, agua potable, ayuntamiento, gasoil en el agua, gasolina en el agua, productos químicos en el agua, pozo, pozo inundado, bomba del pozo, agua de pozo, desinfectar el pozo, analizar el agua del pozo, fosa séptica, barro, agua turbia, hay que hervirla, beber agua del grifo después de la riada, agua del grifo tras la inundación, es potable el agua del grifo
 ---
 - Utiliza siempre agua potable para beber, cocinar y lavarte los dientes.
 - Tu ayuntamiento es la autoridad que te informará sobre el suministro y consumo de agua, sigue sus indicaciones.

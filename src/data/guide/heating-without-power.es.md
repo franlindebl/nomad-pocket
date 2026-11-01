@@ -7,8 +7,9 @@ health: no
 kind: excerpt
 source: Centros para el Control y la Prevención de Enfermedades (CDC) | Directrices de seguridad: durante y después de una tormenta invernal (Ambientes interiores: Calefaccione su casa de forma segura; Ilumine su casa de forma segura; Use los generadores y otros equipos eléctricos de forma segura; Conserve el calor) | https://www.cdc.gov/winter-weather/es/safety/directrices-de-seguridad-durante-y-despues-de-una-tormenta-invernal.html | 25/08/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Centros para el Control y la Prevención de Enfermedades (CDC).
-see: carbon-monoxide, generators, power-outage, winter-storm, hypothermia, house-fire
-keywords: calefacción sin luz, sin calefacción, hace mucho frío en casa, cómo calentar la casa sin electricidad, se ha ido la luz y hace frío, estufa, estufa eléctrica, radiador, estufa de butano, estufa de gas, estufa de queroseno, estufa de parafina, brasero, chimenea, estufa de leña, encender la cocina para calentar, horno para calentar, velas, linterna, monóxido de carbono, detector de monóxido, no perder el calor, corrientes de aire, mantas, saco de dormir
+note: Con estufas de combustión, braseros de carbón o picón y chimeneas, la habitación debe estar ventilada; no pongas nunca estufas ni braseros en el dormitorio (Bomberos de la Comunidad de Madrid, #CalorSeguro, 2025).
+see: staying-warm-cold-home, carbon-monoxide, generators, power-outage, winter-storm, hypothermia, house-fire, candle-safety
+keywords: calefacción sin luz, sin calefacción, hace mucho frío en casa, cómo calentar la casa sin electricidad, se ha ido la luz y hace frío, estufa, estufa eléctrica, radiador, estufa de butano, estufa de gas, estufa de queroseno, estufa de parafina, brasero, chimenea, estufa de leña, encender la cocina para calentar, horno para calentar, monóxido de carbono, detector de monóxido, no perder el calor, corrientes de aire, mantas, mantener el piso caliente, por la noche sin calefacción, estufa de butano por la noche
 ---
 ## Calefaccione su casa de forma segura
 

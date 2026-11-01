@@ -7,8 +7,8 @@ health: yes
 kind: excerpt
 source: Instituto Nacional de Artritis y Enfermedades Musculoesqueléticas y de la Piel (NIAMS), NIH | Lesiones deportivas: Diagnóstico, tratamiento y pasos a seguir (Tratamiento de lesiones graves; Tratamiento de lesiones menores) | https://www.niams.nih.gov/es/informacion-de-salud/lesiones-deportivas/basics/diagnosis-treatment-and-steps-to-take | 12/2024
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Instituto Nacional de Artritis y Enfermedades Musculoesqueléticas y de la Piel (NIAMS), Institutos Nacionales de la Salud (NIH).
-see: fractures, pain-relievers
-keywords: esguince, esguince de tobillo, torcedura, me he torcido el tobillo, se me ha doblado el tobillo, torcedura de muñeca, rodilla torcida, tirón, distensión, tobillo hinchado, hinchazón, moratón, hielo, cuánto tiempo poner hielo, frío o calor, reposo, vendaje, venda elástica, compresión, elevar la pierna, no puedo apoyar el pie, estará roto
+see: fractures, pain-relievers, sprain-far-from-help
+keywords: esguince, esguince de tobillo, torcedura, me he torcido el tobillo, se me ha doblado el tobillo, torcedura de muñeca, rodilla torcida, tirón, distensión, tobillo hinchado, hinchazón, moratón, hielo, cuánto tiempo poner hielo, frío o calor, reposo, vendaje, venda elástica, compresión, elevar la pierna, no puedo apoyar el pie, estará roto, puedo seguir andando, andar con un esguince, vendar el tobillo
 ---
 ## Tratamiento de lesiones graves
 

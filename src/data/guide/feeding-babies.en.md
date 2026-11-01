@@ -7,8 +7,8 @@ health: yes
 kind: excerpt
 source: Centers for Disease Control and Prevention (CDC) | Questions About Infant Feeding In Emergencies (At a glance; Infant feeding during emergencies; Practical tips for safety and storage) | https://www.cdc.gov/infant-feeding-emergencies-toolkit/php/faqs.html | 12/08/2026
 licence: Public domain (US Government work). Source: Centers for Disease Control and Prevention (CDC).
-see: water-bleach, boiling-water, water-storage, food-after-flood, emergency-kit
-keywords: baby, feeding a baby, infant formula, powdered formula, ready-to-feed formula, formula milk, baby milk, bottle, bottles, teats, sterilise bottles, no clean water for the bottle, cup feeding, breastfeeding, breast milk, expressing milk, frozen breast milk thawed, cool bag, baby in a shelter, newborn
+see: water-bleach, boiling-water, water-storage, food-after-flood, emergency-kit, powdered-formula, sterilizing-without-water, formula-runs-out, breastfeeding-stress
+keywords: baby, feeding a baby, infant formula, powdered formula, ready-to-feed formula, formula milk, baby milk, bottle, bottles, teats, sterilise bottles, no clean water for the bottle, cup feeding, breastfeeding, breast milk, expressing milk, frozen breast milk thawed, cool bag, baby in a shelter, newborn, bottle without hot water, cold formula
 ---
 During a natural disaster, breastfeeding is the safest way to feed an infant.
 

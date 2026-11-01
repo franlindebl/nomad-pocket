@@ -7,8 +7,8 @@ health: yes
 kind: excerpt
 source: MedlinePlus, Biblioteca Nacional de Medicina de EE. UU. | Deshidratación (Introducción: síntomas, tratamientos, prevención) | https://medlineplus.gov/spanish/dehydration.html | 09/01/2024
 licence: Dominio público (obra del Gobierno de EE. UU.). Cortesía de MedlinePlus, de la Biblioteca Nacional de Medicina.
-see: diarrhoea-vomiting, heat-stroke, extreme-heat, feeding-babies, water-bleach
-keywords: deshidratación, deshidratado, mucha sed, boca seca, orina oscura, no hace pis, no orina, pañal seco, llora sin lágrimas, ojos hundidos, mareo, suero oral, suero de rehidratación, sales de rehidratación, electrolitos, bebida isotónica, cuánto beber, no retiene líquidos, vomita el agua, cubitos de hielo, bebé deshidratado, diarrea líquidos
+see: diarrhoea-vomiting, heat-stroke, extreme-heat, feeding-babies, water-bleach, oral-rehydration-home
+keywords: deshidratación, deshidratado, se está deshidratando, cómo sé si se deshidrata, mucha sed, boca seca, orina oscura, pis oscuro, meo muy oscuro, no hace pis, pañal seco, llora sin lágrimas, ojos hundidos, mareo, suero oral, sales de rehidratación, electrolitos, bebida isotónica, cuánto beber, no retiene líquidos, vomita el agua, bebé deshidratado, el niño no quiere beber, cuándo es peligroso que no beba, llevo horas sin agua
 ---
 ## ¿Cuáles son los síntomas de la deshidratación?
 

@@ -9,7 +9,8 @@ source: U.S. Fire Administration (USFA), FEMA | Pictograph: Cook Top Fire Safety
 source: U.S. Fire Administration (USFA), FEMA | Cooking Fire Safety (Messages to share) | https://www.usfa.fema.gov/prevention/home-fires/prevent-fires/cooking/ | 28/09/2026
 licence: Public domain (US Government work). Source: U.S. Fire Administration (USFA), Federal Emergency Management Agency (FEMA).
 see: house-fire, burns, cooking-without-power
-keywords: grease fire, oil fire, pan on fire, frying pan on fire, chip pan fire, the oil caught fire, fire in the kitchen, kitchen fire, cooker fire, stove fire, hob on fire, put out a pan fire, cover with a lid, baking sheet, water on burning oil, turn off the burner, should I move the pan, oil smoking, grease boiling, cooking fire
+note: Never throw water on burning oil: the water makes the fire burst out and spread; if the fire doesn't go out or spreads, leave the kitchen closing the door behind you, get out of the home and call 112.
+keywords: grease fire, oil fire, pan on fire, frying pan on fire, chip pan fire, the oil caught fire, the pan caught fire, fire in the kitchen, kitchen fire, cooker fire, stove fire, hob on fire, put out a pan fire, cover with a lid, baking sheet, water on burning oil, can I throw water on it, water on the pan, turn off the burner, should I move the pan, oil smoking, grease boiling, cooking fire
 ---
 If a small grease fire starts in a pan, slide the pan lid over the pan. Turn off the burner. Do not move the pan. To keep the fire from restarting, leave the lid on until the pan has cooled.
 

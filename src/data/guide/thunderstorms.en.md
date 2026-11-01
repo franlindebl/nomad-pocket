@@ -7,7 +7,7 @@ health: no
 kind: excerpt
 source: Ready.gov (FEMA) | Thunderstorms & Lightning (Make an Emergency Plan; Stay Safe During; Stay Safe After) | https://www.ready.gov/thunderstorms-lightning | 05/11/2026
 licence: Public domain (US Government work). Source: Ready.gov, Federal Emergency Management Agency (FEMA).
-see: flood, power-outage, electric-shock, radio-alerts
+see: lightning-outdoors, flood, power-outage, electric-shock, radio-alerts
 keywords: thunderstorm, storm, lightning, thunder, lightning strike, caught in a storm, storm outside, where to shelter from lightning, is a car safe in lightning, when thunder roars go indoors, shower during a storm, unplug electronics, hail, strong wind, flash flood, flooded road, fallen power lines, fallen trees, after the storm
 ---
 Identify sturdy buildings close to where you live, work, study and play.

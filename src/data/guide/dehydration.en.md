@@ -8,8 +8,8 @@ kind: excerpt
 source: MedlinePlus, US National Library of Medicine | Dehydration (Summary: symptoms, treatments, prevention) | https://medlineplus.gov/dehydration.html | 29/12/2023
 source: Centers for Disease Control and Prevention (CDC) | How to make oral rehydration solution (ORS) (flyer CS 230641) | https://www.cdc.gov/global-water-sanitation-hygiene/media/pdfs/ors_seasia_508.pdf | undated (accessed 31/10/2026)
 licence: Public domain (US government works). Courtesy of MedlinePlus from the National Library of Medicine; source of the ORS steps: Centers for Disease Control and Prevention (CDC).
-see: diarrhoea-vomiting, heat-stroke, extreme-heat, feeding-babies, water-bleach
-keywords: dehydration, dehydrated, very thirsty, dry mouth, dark urine, not peeing, no wet diapers, crying without tears, sunken eyes, dizzy, oral rehydration, ORS, rehydration salts, electrolytes, sports drink, how much to drink, can't keep water down, ice chips, baby dehydrated, diarrhea fluids
+see: diarrhoea-vomiting, heat-stroke, extreme-heat, feeding-babies, water-bleach, oral-rehydration-home
+keywords: dehydration, dehydrated, getting dehydrated, how do I know if I'm dehydrated, very thirsty, dry mouth, dark urine, dark pee, not peeing, no wet diapers, crying without tears, sunken eyes, dizzy, oral rehydration, ORS, rehydration salts, electrolytes, sports drink, how much to drink, can't keep water down, ice chips, baby dehydrated, child won't drink, hours without water, diarrhea fluids
 ---
 ## What are the symptoms of dehydration?
 

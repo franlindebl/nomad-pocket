@@ -7,7 +7,7 @@ health: no
 kind: excerpt
 source: Ready.gov (FEMA) | Tormentas eléctricas y rayos (Haga un plan de emergencia; Manténgase a salvo durante; Manténgase a salvo después) | https://www.ready.gov/es/tormentas-electricas-y-rayos | 03/05/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA).
-see: flood, power-outage, electric-shock, radio-alerts
+see: lightning-outdoors, flood, power-outage, electric-shock, radio-alerts
 keywords: tormenta, tormenta eléctrica, rayo, rayos, relámpagos, truenos, me pilla la tormenta en el campo, tormenta en la calle, dónde me refugio de los rayos, el coche protege de los rayos, ducharse con tormenta, desenchufar aparatos, granizo, granizada, viento fuerte, riada, calle inundada, cables caídos, árboles caídos, después de la tormenta
 ---
 Identifique los edificios resistentes cercanos a donde vive, trabaja, estudia y juega.

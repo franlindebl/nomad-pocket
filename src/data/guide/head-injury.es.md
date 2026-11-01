@@ -8,8 +8,9 @@ kind: translation
 translatedFrom: en
 source: Centers for Disease Control and Prevention (CDC) | Signs and Symptoms of Concussion (Key points; Signs and symptoms; Concussion danger signs) | https://www.cdc.gov/heads-up/signs-symptoms/index.html | 15/09/2025
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Centros para el Control y la Prevención de Enfermedades (CDC). Traducción de Nomad Pocket, sin respaldo de los CDC.
+note: Si la persona se ha caído desde más de 1 metro o 5 escalones, o puede haberse lesionado el cuello o la espalda (una caída o un golpe fuerte), llame al 112 y mantenga quietos su cabeza y su cuello; no la mueva salvo peligro inmediato, como un incendio, o si tiene que girarla porque deja de respirar o vomita, y entonces mueva la cabeza, el cuello y el cuerpo a la vez, en bloque.
 see: seizures, recovery-position, cpr-adult, cpr-child, fractures
-keywords: golpe en la cabeza, se ha dado un golpe en la cabeza, se ha caído y se ha golpeado la cabeza, traumatismo craneal, conmoción cerebral, contusión, se ha quedado inconsciente, perdió el conocimiento, el niño se ha caído de la cama, el bebé se ha golpeado la cabeza, chichón, dolor de cabeza después de un golpe, vómitos después de un golpe, está muy dormido, no se despierta, confuso, pupilas distintas, ve doble, habla rara, convulsiones tras un golpe, señales de alarma
+keywords: golpe en la cabeza, se ha dado un golpe en la cabeza, se ha caído y se ha golpeado la cabeza, traumatismo craneal, conmoción cerebral, contusión, se ha quedado inconsciente, perdió el conocimiento, el niño se ha caído de la cama, el bebé se ha golpeado la cabeza, chichón, dolor de cabeza después de un golpe, vómitos después de un golpe, está muy dormido, no se despierta, confuso, pupilas distintas, ve doble, habla rara, convulsiones tras un golpe, señales de alarma, se ha caído de la cama, golpe en la cabeza niño, está despierto pero confuso, se ha caído y se ha dado en la cabeza
 ---
 ## Puntos clave
 

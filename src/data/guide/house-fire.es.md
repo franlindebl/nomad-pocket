@@ -7,7 +7,7 @@ health: no
 kind: excerpt
 source: Ready.gov (FEMA) | Incendios en el hogar (Durante un incendio; Haga y practique un plan de escape en caso de incendio; Después de un incendio) | https://www.ready.gov/es/incendios-en-el-hogar | 02/26/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA).
-see: burns, kitchen-oil-fire, carbon-monoxide, distress-signals, family-plan
+see: burns, kitchen-oil-fire, carbon-monoxide, distress-signals, family-plan, candle-safety
 keywords: incendio, fuego, incendio en casa, incendio en el piso, fuego en el edificio, humo en casa, sale humo, salta la alarma de humo, cómo salgo de un incendio, gatear bajo el humo, la puerta quema, puerta caliente, no puedo salir, atrapado por el fuego, encerrado en una habitación, entra humo por debajo de la puerta, pedir ayuda por la ventana, se me prende la ropa, se quema la ropa, detenerse tirarse y rodar, queda alguien dentro, mascotas dentro, plan de evacuación, después del incendio
 ---
 ## Durante un incendio

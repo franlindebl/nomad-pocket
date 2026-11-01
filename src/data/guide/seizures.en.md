@@ -7,8 +7,9 @@ health: yes
 kind: excerpt
 source: Centers for Disease Control and Prevention (CDC) | First Aid for Seizures (How to keep someone safe during a seizure; Extra steps for generalized seizures; When to call for help; What to avoid) | https://www.cdc.gov/epilepsy/first-aid-for-seizures/index.html | 15/05/2024
 licence: Public domain (US government work). Source: Centers for Disease Control and Prevention (CDC).
-see: recovery-position, cpr-adult, cpr-child, low-blood-sugar, head-injury
-keywords: seizure, seizures, fit, convulsions, convulsing, epilepsy, epileptic fit, shaking on the floor, jerking, fell down shaking, staring into space, foaming at the mouth, bit his tongue, something in the mouth, hold him down, how long is a seizure, febrile seizure, child having a fit, unconscious after seizure, 5 minutes
+see: recovery-position, cpr-adult, cpr-child, low-blood-sugar, head-injury, fever-children
+note: Seizure with a fever in a child: while it lasts, don't undress them or sponge them with cold water to bring the fever down; if it is the first one or it lasts more than 5 minutes, call 112, and have a doctor see them once it is over.
+keywords: seizure, seizures, fit, convulsions, convulsing, epilepsy, epileptic fit, shaking on the floor, jerking, fell down shaking, staring into space, foaming at the mouth, bit his tongue, something in the mouth, hold him down, how long is a seizure, febrile seizure, seizure with a fever, child having a fit, my child is fitting, unconscious after seizure, 5 minutes, what to do while it lasts, seizure in the water, seizure in the pool
 ---
 ## How to keep someone safe during a seizure
 

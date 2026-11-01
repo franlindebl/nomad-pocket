@@ -7,7 +7,7 @@ health: no
 kind: excerpt
 source: US Army | ATP 3-50.21, Survival (ch. 6, Shelter and Clothing: ¶6-8, 6-9, 6-11–6-14) | https://armypubs.army.mil/epubs/DR_pubs/DR_a/pdf/web/ARN12086_ATP%203-50x21%20FINAL%20WEB%202.pdf | 18/09/2018
 licence: Public domain (US government work); approved for public release, distribution unlimited. Source: US Army, ATP 3-50.21.
-see: making-fire, hypothermia, heating-without-power, signalling-rescue, winter-storm, extreme-heat, water-outdoors
+see: shelter-lean-to-debris-hut, making-fire, hypothermia, heating-without-power, signalling-rescue, lost-at-nightfall, winter-storm, extreme-heat, water-outdoors
 keywords: shelter, emergency shelter, improvised shelter, build a shelter, sleep outdoors, night outside, lost in the mountains, rain, cold, wind, tarp, plastic sheet, space blanket, emergency blanket, cave, fallen tree, where to sleep, camp, protect from the cold, homeless after disaster
 ---
 Shelter is anything that provides protection from environmental hazards. Depending on the environmental conditions, shelter may be the isolated person’s number one priority.

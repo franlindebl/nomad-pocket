@@ -7,8 +7,9 @@ health: no
 kind: excerpt
 source: Centers for Disease Control and Prevention (CDC) | How to Create an Emergency Water Supply (How much emergency water to store; Other considerations; Choosing a container; Cleaning the container before use; Storing the water) | https://www.cdc.gov/water-emergency/about/how-to-create-and-store-an-emergency-water-supply.html | 27/06/2025
 licence: Public domain (US government work). Source: Centers for Disease Control and Prevention (CDC).
+note: Example: 1 gallon is about 3.8 litres, so a family of 4 should store at least about 15 litres a day: about 45 litres for 3 days and over 200 litres for 2 weeks.
 see: water-bleach, boiling-water, hidden-water, emergency-kit, emergency-food
-keywords: store water, water supply, emergency water, how much water to store, water per person per day, gallon per person, 3 days of water, two weeks of water, bottled water, water containers, jerry can, water drum, clean water container, sanitize container, bleach for containers, how long does stored water last, replace water every 6 months, water for pets, prepare for a water cut
+keywords: store water, water supply, emergency water, how much water to store, water per person per day, gallon per person, 3 days of water, two weeks of water, bottled water, water containers, jerry can, water drum, clean water container, sanitize container, bleach for containers, how long does stored water last, replace water every 6 months, water for pets, prepare for a water cut, litres per person per day, water for a family of four, how many litres
 ---
 ## How much emergency water to store
 

@@ -7,8 +7,9 @@ health: no
 kind: excerpt
 source: Ready.gov, Federal Emergency Management Agency (FEMA) | Prepare Your Pets for Disasters (Make a Plan; Build a Kit for Your Pet; Prepare Pets for Travel) | https://www.ready.gov/pets | 20/03/2026
 licence: Public domain (US government work). Source: Ready.gov, Federal Emergency Management Agency (FEMA).
-see: evacuation, emergency-kit, shelter-in-place, family-plan
-keywords: pets, dog, cat, evacuate with my dog, take the cat, pet kit, pet food, carrier, crate, leash, collar, microchip, lost pet, shelter won't take pets, animals, pet medicine, cat litter, someone to look after my dog, where is my cat hiding
+note: Guide and assistance dogs are not pets: by law in Spain (Royal Decree 409/2025) they may go with the person they assist into hostels (albergues), refuges, care centres, accommodation and collective transport at no extra charge; keep their badge visible on the harness or collar.
+see: evacuation, emergency-kit, shelter-in-place, family-plan, pets-dangerous-foods
+keywords: pets, dog, cat, evacuate with my dog, take the cat, pet kit, pet food, carrier, crate, leash, collar, microchip, lost pet, shelter won't take pets, animals, pet medicine, cat litter, someone to look after my dog, where is my cat hiding, guide dog, assistance dog, service dog, can I bring my guide dog to the shelter, pet-friendly shelter, evacuate with animals
 ---
 ## Make a Plan
 

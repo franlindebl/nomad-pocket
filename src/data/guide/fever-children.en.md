@@ -7,7 +7,7 @@ health: yes
 kind: excerpt
 source: US Food and Drug Administration (FDA) | Should You Give Kids Medicine for Coughs and Colds? (Ways to Treat Colds in Infants and Children; Giving Children Cough and Cold Medicines; When to Call a Doctor) | https://www.fda.gov/consumers/consumer-updates/should-you-give-kids-medicine-coughs-and-colds | 07/11/2024
 licence: Public domain (US government work). Source: US Food and Drug Administration (FDA).
-see: pain-relievers, dehydration, seizures, caring-sick-person
+see: pain-relievers, dehydration, seizures, caring-sick-person, child-medicine-doses
 keywords: fever, child fever, baby fever, high temperature, temperature in a baby, newborn fever, how high is too high, when to see a doctor, blue lips, breathing fast, struggling to breathe, wheezing, ribs showing, not drinking, dehydrated child, very sleepy child, ear pain, paracetamol for children, ibuprofen for children, cough medicine for kids, cold medicine baby
 ---
 ## When to Call a Doctor

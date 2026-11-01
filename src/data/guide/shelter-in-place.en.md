@@ -7,8 +7,9 @@ health: no
 kind: excerpt
 source: Ready.gov, Federal Emergency Management Agency (FEMA) | Shelter (Sheltering in Place) | https://www.ready.gov/shelter | 24/09/2026
 licence: Public domain (US government work). Source: Ready.gov, Federal Emergency Management Agency (FEMA).
+note: In Spain, civil protection asks you during a shelter-in-place order (confinamiento) not to use the phone, because the rescue services need the lines free, and not to go and fetch your children from school: their teachers will receive instructions.
 see: chemical-release, radiation-decontamination, nuclear-explosion, radio-alerts, emergency-kit, evacuation
-keywords: shelter in place, stay inside, stay indoors, don't go out, lockdown, confinement, toxic cloud, chemical leak, gas leak outside, contaminated air, seal the room, duct tape, plastic sheeting, close the windows, turn off the air conditioning, interior room, air vents, sirens, smoke outside, nuclear accident, industrial accident
+keywords: shelter in place, stay inside, stay indoors, don't go out, lockdown, confinement, toxic cloud, chemical leak, gas leak outside, contaminated air, seal the room, duct tape, plastic sheeting, close the windows, turn off the air conditioning, interior room, air vents, sirens, smoke outside, nuclear accident, industrial accident, should I pick up my kids from school, can I use the phone
 ---
 Whether you are at home, work or anywhere else you frequent regularly, there may be situations when it's best to stay where you are and avoid any uncertainty outside.
 

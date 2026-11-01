@@ -8,7 +8,7 @@ kind: excerpt
 source: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA) | Evacuación (Antes de una evacuación; Durante una evacuación; Después de una evacuación) | https://www.ready.gov/es/evacuacion | 20/03/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA).
 see: emergency-kit, documents-money, pets, family-plan, flood, wildfire, generators
-keywords: evacuar, evacuación, desalojo, desalojar, orden de evacuación, tenemos que irnos, salir de casa, adónde ir, qué me llevo, mochila, depósito lleno, gasolina, coche, no tengo coche, huir, salir de la ciudad, ruta de escape, cerrar la casa, cerrar el gas, desenchufar, carretera inundada, cables caídos, guerra, se acerca el incendio
+keywords: evacuar, evacuación, desalojo, desalojar, orden de evacuación, tenemos que irnos, salir de casa, adónde ir, qué me llevo, mochila, depósito lleno, gasolina, coche, no tengo coche, huir, salir de la ciudad, ruta de escape, cerrar la casa, cerrar el gas, desenchufar, carretera inundada, cables caídos, guerra, se acerca el incendio, depósito por encima de la mitad, medio depósito, tener gasolina en el coche, por si hay que irse
 ---
 ## Antes de una evacuación
 

@@ -7,7 +7,7 @@ health: no
 kind: excerpt
 source: Centers for Disease Control and Prevention (CDC) | What to Do to Protect Yourself During a Power Outage (Carbon monoxide poisoning) | https://www.cdc.gov/natural-disasters/response/what-to-do-protect-yourself-during-a-power-outage.html | 26/08/2026
 licence: Public domain (US Government work). Source: Centers for Disease Control and Prevention (CDC).
-see: carbon-monoxide, generators, heating-without-power, power-outage, emergency-food
+see: electric-kitchen-outage, carbon-monoxide, generators, heating-without-power, power-outage, emergency-food
 keywords: cook without power, cooking in a blackout, no electricity to cook, camping stove indoors, camp stove, gas stove, barbecue indoors, charcoal grill, charcoal, brazier, heat the house with the oven, gas oven for heating, lantern, tent, caravan, camper, carbon monoxide, CO, headache and dizziness, fumes, power cut, power outage
 ---
 ## Carbon monoxide poisoning

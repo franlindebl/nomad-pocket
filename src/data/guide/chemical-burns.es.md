@@ -8,7 +8,7 @@ kind: excerpt
 source: Instituto Nacional de Seguridad y Salud en el Trabajo (INSST) | NTP 524: Primeros auxilios: quemaduras (Quemadura química; Conclusión) | https://www.insst.es/documents/d/portal-insst/ntp_524-pdf | 1999
 licence: Origen de los datos: Instituto Nacional de Seguridad y Salud en el Trabajo (INSST), NTP 524 (1999). Reutilización según la Ley 37/2007; el INSST no patrocina ni respalda esta app.
 see: burns, poisoning, chemical-release, shock
-keywords: quemadura química, quemaduras químicas, me ha saltado lejía, lejía en la piel, lejía en los ojos, salfumán, amoniaco, ácido en la piel, sosa cáustica, desatascador, producto de limpieza en los ojos, me ha entrado en el ojo, me escuecen los ojos, lavar el ojo, cuánto tiempo lavar, cal viva, cemento en la piel, cáustico, corrosivo, piel quemada por un producto, quitar la ropa, ducha
+keywords: quemadura química, quemaduras químicas, me ha saltado lejía, lejía en la piel, lejía en los ojos, salfumán, amoniaco, ácido en la piel, sosa cáustica, desatascador, producto de limpieza en los ojos, me ha entrado en el ojo, me escuecen los ojos, lavar el ojo, cuánto tiempo lavar, cal viva, cemento en la piel, cáustico, corrosivo, piel quemada por un producto, quitar la ropa, ducha, me ha salpicado, me ha salpicado un líquido, me escuece la piel, líquido en la piel, producto químico en la piel
 ---
 ## Quemadura química
 

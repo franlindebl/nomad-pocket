@@ -9,7 +9,7 @@ source: Centros para el Control y la Prevención de Enfermedades (CDC) | Qué ha
 source: Centros para el Control y la Prevención de Enfermedades (CDC) | Qué hacer: quédese adentro (Vistazo general; Seguridad del agua, los alimentos y los medicamentos) | https://www.cdc.gov/radiation-emergencies/es/response/que-hacer-quedese-adentro.html | 15/06/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Centros para el Control y la Prevención de Enfermedades (CDC).
 see: radiation-decontamination, potassium-iodide, shelter-in-place, radio-alerts, explosion
-keywords: explosión nuclear, bomba nuclear, bomba atómica, ataque nuclear, hongo nuclear, radiación, radiactividad, lluvia radiactiva, nube radiactiva, accidente nuclear, central nuclear, bomba sucia, refugiarse, quedarse en casa, cuánto tiempo dentro, sótano, dónde me escondo, puedo salir, ir a por mis hijos, la comida es segura, agua del grifo, sirenas, guerra nuclear, confinamiento
+keywords: explosión nuclear, bomba nuclear, bomba atómica, ataque nuclear, hongo nuclear, radiación, radiactividad, lluvia radiactiva, nube radiactiva, accidente nuclear, central nuclear, bomba sucia, refugiarse, quedarse en casa, cuánto tiempo dentro, sótano, dónde me escondo, puedo salir, ir a por mis hijos, la comida es segura, agua del grifo, sirenas, guerra nuclear, confinamiento, alerta nuclear, cuánto tiempo tengo que estar dentro, cuántas horas encerrado
 ---
 Durante una emergencia por radiación, vaya adentro lo más pronto posible.
 

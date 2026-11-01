@@ -7,7 +7,7 @@ health: yes
 kind: excerpt
 source: Centers for Disease Control and Prevention (CDC) | MMWR 70(10): Health Care Utilization and Outcomes Associated with Accidental Poisonous Mushroom Ingestions — United States, 2016–2018 (Summary; Discussion) | https://www.cdc.gov/mmwr/volumes/70/wr/mm7010a1.htm | 12/03/2021
 licence: Public domain (US Government work). Source: Centers for Disease Control and Prevention (CDC), Morbidity and Mortality Weekly Report.
-see: poisoning, water-outdoors, emergency-food
+see: mushroom-poisoning, poisoning, water-outdoors, emergency-food
 keywords: wild mushrooms, mushrooms, toadstools, picking mushrooms, foraging, foraged mushrooms, are these mushrooms edible, poisonous mushroom, ate a wild mushroom, mushroom poisoning, death cap, does cooking make them safe, child ate a mushroom, wild food, food from the forest
 ---
 Poisonous mushroom ingestions can result in serious illness and death.

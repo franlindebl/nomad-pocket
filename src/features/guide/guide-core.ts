@@ -39,7 +39,7 @@ export type GuideCard = {
 export const GUIDE_SOURCE = 'guide';
 
 /** Sections in the order of docs/emergency-guide/cards.md; their names are in the `guide` i18n namespace. */
-export const GUIDE_SECTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+export const GUIDE_SECTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
 /** The cards this build may show: none about health without health features (Android, src/lib/health.ts). */
 export function visibleCards(cards: GuideCard[], health: boolean): GuideCard[] {
@@ -149,7 +149,11 @@ export class GuideIndex {
 const VITAL_COVERAGE = 0.5;
 const VITAL_REACH = 0.75;
 
-const vitalOf = (m: GuideMatch | undefined) => (m?.card.vital && m.reach >= VITAL_REACH ? m.card : null);
+/** Which cards may answer alone: the vital ones only, or any card that fits the question as well. */
+export type CardAnswers = 'vital' | 'all';
+
+const answerOf = (m: GuideMatch | undefined, which: CardAnswers) =>
+  m && (which === 'all' || m.card.vital) && m.reach >= VITAL_REACH ? m.card : null;
 
 /**
  * The best card among those whose title and keywords cover the question ("primeros auxilios para una quemadura"
@@ -166,19 +170,24 @@ function bestCovering(matches: GuideMatch[]): GuideMatch | undefined {
 }
 
 /**
- * The vital card that answers `question` on its own, if any. Two cards that fit about as well
- * ("atragantamiento": adults or babies) still give the better one, whose related cards name the other: a
- * model's paraphrase is the risk this avoids.
+ * The card that answers `question` on its own, if any: a vital one, or with `which: 'all'` any card. Two cards
+ * that fit about as well ("atragantamiento": adults or babies) still give the better one, whose related cards
+ * name the other: a model's paraphrase is the risk this avoids.
  */
-export function vitalCard(index: GuideIndex, question: string, history: Turn[] = []): GuideCard | null {
+export function answerCard(index: GuideIndex, question: string, history: Turn[] = [], which: CardAnswers = 'vital'): GuideCard | null {
   const own = index.match(question, 20);
   const topic = history.length ? followUpTopic(question, history) : [];
-  if (!topic.length) return vitalOf(bestCovering(own));
+  if (!topic.length) return answerOf(bestCovering(own), which);
   // A follow-up ("¿y si es un bebé?") is matched with the earlier question's topic, so it doesn't land on
   // whichever card says "bebé" most; the card must still cover what this question asks.
   const best = bestCovering(index.match(`${question} ${topic.join(' ')}`, 20));
   const mine = best && own.find((m) => m.card.id === best.card.id);
-  return mine && mine.coverage >= VITAL_COVERAGE ? vitalOf(mine) : null;
+  return mine && mine.coverage >= VITAL_COVERAGE ? answerOf(mine, which) : null;
+}
+
+/** The vital card that answers `question` on its own, if any. */
+export function vitalCard(index: GuideIndex, question: string, history: Turn[] = []): GuideCard | null {
+  return answerCard(index, question, history, 'vital');
 }
 
 /** Guide cards worth offering the model as sources: some of the question's terms in their title or keywords. */
@@ -221,10 +230,10 @@ export function cardNotes(card: GuideCard, lang: Lang, emergencyNumber: string):
 const HEADER: Record<Lang, string> = { es: 'Guía de emergencias', en: 'Emergency guide' };
 
 /**
- * The answer a vital card gives: its title, its text unchanged, the notes outside it and where it comes
+ * The answer a card gives on its own: its title, its text unchanged, the notes outside it and where it comes
  * from, cited as source [1] so the chip opens the card.
  */
-export function vitalAnswer(card: GuideCard, lang: Lang, emergencyNumber: string): string {
+export function cardAnswer(card: GuideCard, lang: Lang, emergencyNumber: string): string {
   const t = card[lang];
   const notes = cardNotes(card, lang, emergencyNumber).map((n) => `> ${n}`);
   return [`**${HEADER[lang]}: ${t.title}**`, t.body, ...notes, `*${provenance(t, lang)}* [1]`].join('\n\n');

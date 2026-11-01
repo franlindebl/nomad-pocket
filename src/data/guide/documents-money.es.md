@@ -7,7 +7,7 @@ health: no
 kind: excerpt
 source: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA) | Preparación Financiera (consejos iniciales; Manténgase a salvo; En casa; Identificación del Hogar; Documentación Financiera y Legal; Información médica; Información de contacto del hogar) | https://www.ready.gov/es/registros-vitales | 13/03/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA).
-see: emergency-kit, evacuation, family-plan
+see: emergency-kit, evacuation, family-plan, papers-cash-spain
 keywords: documentos, papeles importantes, DNI, pasaporte, partida de nacimiento, libro de familia, póliza de seguro, dinero en efectivo, billetes pequeños, el cajero no funciona, no funciona la tarjeta, no va el datáfono, dinero en un apagón, copias de documentos, historial médico, cartilla de vacunación, bolsa impermeable, guardar en la nube, estafa, mensaje falso, banco, qué papeles me llevo
 ---
 - Recolecte su información financiera y otra información crítica personal, médica y familiar.

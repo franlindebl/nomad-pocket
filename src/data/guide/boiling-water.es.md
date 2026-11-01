@@ -5,10 +5,10 @@ title: Hervir el agua
 vital: no
 health: no
 kind: excerpt
-source: Centros para el Control y la Prevención de Enfermedades (CDC) | Cómo hacer que el agua sea segura en caso de emergencia (Resumen; Hierva) | https://www.cdc.gov/water-emergency/es/about/how-to-make-water-safe.html | 15/01/2025
+source: Centros para el Control y la Prevención de Enfermedades (CDC) | Cómo hacer que el agua sea segura en caso de emergencia (Resumen; Agua con combustible o sustancias químicas tóxicas; Hierva) | https://www.cdc.gov/water-emergency/es/about/how-to-make-water-safe.html | 15/01/2025
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Centros para el Control y la Prevención de Enfermedades (CDC).
 see: water-bleach, water-filters, water-storage, water-after-flood, cooking-without-power
-keywords: hervir agua, hervir el agua, agua hervida, cuánto tiempo hervir el agua, un minuto, que hierva, potabilizar agua, agua potable, agua del grifo no potable, aviso de no beber agua del grifo, agua contaminada, agua turbia, agua tras una inundación, matar microbios, agua para el biberón, el agua hervida sabe rara, montaña, altitud
+keywords: hervir el agua, agua hervida, cuánto tiempo hervir el agua, potabilizar agua, agua potable, agua del grifo no potable, aviso de no beber agua del grifo, agua contaminada, agua turbia, agua tras una inundación, matar microbios, agua para el biberón, el agua hervida sabe rara, montaña, altitud, agua marrón, el agua del grifo sale marrón, agua sucia del grifo, el agua huele a gasolina, agua con gasoil o productos químicos, agua de un arroyo, potabilizar en el monte, hervir agua, un minuto
 ---
 Si sabe o sospecha que su agua no es segura, **no** la use para lo siguiente:
 
@@ -21,6 +21,10 @@ Si sabe o sospecha que su agua no es segura, **no** la use para lo siguiente:
 - Hacer fórmula para bebés
 
 En cambio, use agua embotellada, hervida o tratada para beber, cocinar y la higiene personal. Siga las recomendaciones de su departamento de salud para hervir o tratar el agua.
+
+## Agua con combustible o sustancias químicas tóxicas
+
+Usted no puede hacer que el agua que contiene combustible, sustancias químicas tóxicas o materiales radiactivos sea segura hirviéndola ni desinfectándola. Si sabe o sospecha que su agua contiene combustible o sustancias químicas tóxicas: 1) Use agua embotellada o una fuente de agua diferente 2) Contacte a su departamento de salud para obtener consejos específicos.
 
 ## Hierva
 

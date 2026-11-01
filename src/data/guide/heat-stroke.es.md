@@ -8,7 +8,7 @@ kind: excerpt
 source: Instituto Nacional para la Seguridad y Salud Ocupacional (NIOSH), CDC | Enfermedades relacionadas con el calor (Golpe de calor; Agotamiento por calor) | https://www.cdc.gov/niosh/heat-stress/es/about/enfermedades-relacionadas-con-el-calor.html | 03/03/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Instituto Nacional para la Seguridad y Salud Ocupacional (NIOSH), Centros para el Control y la Prevención de Enfermedades (CDC).
 see: cpr-adult, recovery-position, shock
-keywords: golpe de calor, insolación, agotamiento por calor, mucho calor, se ha desmayado por el calor, se ha mareado con el calor, confuso por el calor, piel caliente y seca, no suda, ha dejado de sudar, fiebre muy alta, temperatura muy alta, ola de calor, cómo enfriar a una persona, baño de agua fría, hielo, deshidratado, calor extremo, mareo calor
+keywords: golpe de calor, insolación, agotamiento por calor, mucho calor, se ha desmayado por el calor, se ha mareado con el calor, confuso por el calor, piel caliente y seca, no suda, ha dejado de sudar, fiebre muy alta, temperatura muy alta, ola de calor, cómo enfriar a una persona, baño de agua fría, hielo, deshidratado, calor extremo, mareo calor, estoy mareada con el calor, no sudo, es un golpe de calor
 ---
 ## Golpe de calor
 

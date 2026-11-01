@@ -7,7 +7,7 @@ health: yes
 kind: excerpt
 source: Administración de Alimentos y Medicamentos de EE. UU. (FDA) | Cuándo dar medicina para la tos y el resfriado a los niños (Formas de tratar los resfriados en bebés y niños; Cómo dar a los niños medicamentos para la tos y el resfriado; Cuándo llamar al médico) | https://www.fda.gov/consumers/articulos-para-el-consumidor-en-espanol/cuando-dar-medicina-para-la-tos-y-el-resfriado-los-ninos | 07/11/2024
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Administración de Alimentos y Medicamentos de EE. UU. (FDA).
-see: pain-relievers, dehydration, seizures, caring-sick-person
+see: pain-relievers, dehydration, seizures, caring-sick-person, child-medicine-doses
 keywords: fiebre, fiebre en niños, fiebre en bebé, el niño tiene fiebre, temperatura alta, calentura, fiebre recién nacido, cuánta fiebre es peligrosa, cuándo ir al médico, urgencias pediatría, labios azules, respira muy rápido, le cuesta respirar, pitos al respirar, se le marcan las costillas, no bebe, niño deshidratado, muy dormido, dolor de oído, paracetamol niños, ibuprofeno niños, jarabe para la tos niños
 ---
 ## Cuándo llamar al médico

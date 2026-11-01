@@ -7,7 +7,7 @@ health: no
 kind: excerpt
 source: Centros para el Control y la Prevención de Enfermedades (CDC) | Qué hacer para protegerse durante un apagón (Intoxicación por monóxido de carbono) | https://www.cdc.gov/natural-disasters/es/response/que-hacer-para-protegerse-durante-un-apagon.html | 26/08/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Centros para el Control y la Prevención de Enfermedades (CDC).
-see: carbon-monoxide, generators, heating-without-power, power-outage, emergency-food
+see: electric-kitchen-outage, carbon-monoxide, generators, heating-without-power, power-outage, emergency-food
 keywords: cocinar sin luz, cocinar en un apagón, se ha ido la luz, sin electricidad, hornillo, camping gas, cocina de camping, barbacoa dentro de casa, carbón, brasero, calentar la casa con el horno, horno de gas, cocina de gas, farol, tienda de campaña, caravana, autocaravana, monóxido de carbono, dolor de cabeza y mareo, humos, gases
 ---
 ## Intoxicación por monóxido de carbono

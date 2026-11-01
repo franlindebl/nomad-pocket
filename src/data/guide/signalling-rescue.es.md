@@ -8,8 +8,8 @@ kind: translation
 translatedFrom: en
 source: National Park Service (NPS) | Outdoor Emergency Plan (If You Get Lost: 1. Attempt self rescue; If someone in your group becomes lost; For children) | https://www.nps.gov/articles/gtgemergencyplan.htm | 21/06/2023
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Servicio de Parques Nacionales de EE. UU. (NPS). Traducción de Nomad Pocket, sin respaldo del NPS.
-see: distress-signals, direction-no-compass, improvised-shelter, making-fire, hypothermia, family-plan
-keywords: perdido, me he perdido, perdido en la montaña, perdido en el bosque, perdido haciendo senderismo, niño perdido, se ha perdido mi hijo, niño perdido en el monte, se ha perdido alguien del grupo, un amigo ha desaparecido, rescate, búsqueda y rescate, que me rescaten, rescatistas, quedarse quieto, abrazar un árbol, esperar ayuda, volver por donde he venido, desandar el camino, silbato, mover los brazos, helicóptero
+see: lost-at-nightfall, distress-signals, direction-no-compass, improvised-shelter, making-fire, hypothermia, family-plan
+keywords: perdido, me he perdido, perdido en la montaña, perdido en el bosque, perdido haciendo senderismo, niño perdido, se ha perdido mi hijo, niño perdido en el monte, se ha perdido alguien del grupo, un amigo ha desaparecido, rescate, búsqueda y rescate, que me rescaten, rescatadores, quedarse quieto, abrazar un árbol, esperar ayuda, volver por donde he venido, desandar el camino, silbato, mover los brazos, perdido en el monte, mi compañero no aparece, he perdido a mi compañero, se ha separado del grupo
 ---
 ## Si te pierdes
 

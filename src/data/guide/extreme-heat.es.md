@@ -7,8 +7,8 @@ health: no
 kind: excerpt
 source: Ministerio de Sanidad | Plan Nacional de Actuaciones Preventivas de los Efectos del Exceso de Temperaturas sobre la Salud 2026 (Anexo III. Recomendaciones generales para prevenir los efectos de las altas temperaturas sobre la salud) | https://www.sanidad.gob.es/areas/sanidadAmbiental/riesgosAmbientales/calorExtremo/publicaciones/docs/planNacionalExcesoTemperaturas_2026.pdf | 28/04/2026
 licence: Origen de los datos: Ministerio de Sanidad, Plan Nacional de Actuaciones Preventivas de los Efectos del Exceso de Temperaturas sobre la Salud 2026. Reutilización según la Ley 37/2007; última actualización: 28/04/2026; el Ministerio de Sanidad no patrocina ni respalda esta app.
-see: heat-stroke, dehydration, power-outage, disabilities-older, pets
-keywords: calor extremo, ola de calor, mucho calor, hace muchísimo calor, altas temperaturas, temperaturas extremas, calor en casa, cómo refrescarse, cómo combatir el calor, beber agua, deshidratación, golpe de calor, insolación, niño en el coche, coche al sol, personas mayores y calor, bebé con calor, embarazada calor, medicinas con calor, hacer deporte con calor, aviso rojo por calor, sin aire acondicionado
+see: heat-stroke, dehydration, power-outage, disabilities-older, pets, keeping-home-cool, babies-heat
+keywords: calor extremo, ola de calor, mucho calor, hace muchísimo calor, altas temperaturas, temperaturas extremas, calor en casa, cómo refrescarse, cómo combatir el calor, beber agua, deshidratación, golpe de calor, insolación, niño en el coche, coche al sol, personas mayores y calor, bebé con calor, embarazada calor, medicinas con calor, hacer deporte con calor, aviso rojo por calor, sin aire acondicionado, ola de calor en casa
 ---
 ## Recomendaciones generales para prevenir los efectos de las altas temperaturas sobre la salud
 

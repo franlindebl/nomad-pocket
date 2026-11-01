@@ -8,7 +8,7 @@ kind: excerpt
 source: Instituto Nacional del Corazón, los Pulmones y la Sangre (NHLBI), NIH | Ataque cardíaco - Síntomas (¿Cuáles son los síntomas de un ataque cardíaco?; Cuándo debe llamar al 9-1-1) | https://www.nhlbi.nih.gov/es/salud/ataque-cardiaco/sintomas | 24/03/2022
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Instituto Nacional del Corazón, los Pulmones y la Sangre (NHLBI), Institutos Nacionales de la Salud (NIH).
 see: cpr-adult, stroke
-keywords: infarto, ataque al corazón, ataque cardíaco, ataque cardiaco, infarto de miocardio, dolor en el pecho, opresión en el pecho, me duele el pecho, dolor en el brazo izquierdo, dolor de mandíbula, le falta el aire, sudor frío, suda mucho, náuseas y dolor de pecho, mareo, palpitaciones, el corazón va muy rápido, angina de pecho, me está dando un infarto, es un infarto
+keywords: infarto, ataque al corazón, ataque cardíaco, ataque cardiaco, infarto de miocardio, dolor en el pecho, opresión en el pecho, me duele el pecho, dolor en el brazo izquierdo, dolor de mandíbula, le falta el aire, sudor frío, suda mucho, náuseas y dolor de pecho, mareo, palpitaciones, el corazón va muy rápido, angina de pecho, me está dando un infarto, es un infarto, me dé algo en el corazón, infarto quitando nieve
 ---
 ## ¿Cuáles son los síntomas de un ataque cardíaco?
 

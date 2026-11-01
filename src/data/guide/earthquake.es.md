@@ -7,8 +7,8 @@ health: no
 kind: excerpt
 source: Ready.gov (FEMA) | Terremotos (Cómo mantenerse a salvo mientras ocurre un terremoto; Protéjase durante los terremotos; Cómo mantenerse a salvo después de un terremoto) | https://www.ready.gov/es/terremotos | 09/09/2026
 licence: Dominio público (obra del Gobierno de EE. UU.). Fuente: Ready.gov, Agencia Federal para el Manejo de Emergencias (FEMA).
-see: tsunami, house-fire, distress-signals, texts-not-calls, disabilities-older
-keywords: terremoto, temblor, seísmo, sismo, está temblando, tiembla el suelo, se mueve el edificio, qué hago en un terremoto, agáchese cúbrase agárrese, meterse debajo de la mesa, ponerse bajo el marco de la puerta, salgo a la calle, terremoto en la cama, terremoto conduciendo, terremoto en la calle, réplica, réplicas, atrapado entre escombros, atrapado tras un terremoto, edificio dañado, se ha caído el edificio, silla de ruedas terremoto, terremoto y tsunami
+see: tsunami, house-fire, distress-signals, texts-not-calls, disabilities-older, earthquake-prepare
+keywords: terremoto, temblor, seísmo, sismo, está temblando, tiembla el suelo, se mueve el edificio, qué hago en un terremoto, agáchese cúbrase agárrese, meterse debajo de la mesa, ponerse bajo el marco de la puerta, salgo a la calle, terremoto en la cama, terremoto conduciendo, terremoto en la calle, réplica, réplicas, atrapado entre escombros, atrapado tras un terremoto, edificio dañado, se ha caído el edificio, silla de ruedas terremoto, terremoto y tsunami, ha temblado todo el edificio, ha temblado la tierra
 ---
 ## Cómo mantenerse a salvo mientras ocurre un terremoto
 
