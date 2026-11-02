@@ -69,7 +69,7 @@ export function Field({ label, multiline, ...rest }: TextInputProps & { label?: 
         </Text>
       ) : null}
       <TextInput
-        placeholderTextColor={colors.textTertiary}
+        placeholderTextColor={colors.textSecondary}
         accessibilityLabel={label}
         multiline={multiline}
         {...rest}

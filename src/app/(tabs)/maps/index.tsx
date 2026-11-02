@@ -648,8 +648,9 @@ export default function MapScreen() {
           haptic="selection"
           pressedScale={0.98}
           style={[styles.search, { top, backgroundColor: colors.surface, shadowColor: colors.shadow, borderColor: colors.border }]}>
-          <Search size={18} color={colors.textTertiary} />
-          <Text variant="callout" color="textTertiary" numberOfLines={1} style={{ flex: 1 }}>
+          {/* The map's main action: white label and a yellow magnifier, not a faint placeholder. */}
+          <Search size={18} color={colors.accent} strokeWidth={2.2} />
+          <Text variant="callout" numberOfLines={1} style={{ flex: 1 }}>
             {t('search.placeholder')}
           </Text>
         </PressableScale>

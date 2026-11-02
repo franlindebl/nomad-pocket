@@ -16,8 +16,12 @@ export const palette = {
     /** The small corner marks of panels (`CornerTicks`). */
     tick: '#5A5A5A',
     text: '#F2F2EF',
+    /** Greys are for secondary text only (subtitles, metadata, placeholders, chevrons). Titles, labels of
+     *  actions and anything someone taps to act use `text` (or the accent): never grey. */
     textSecondary: '#8F8F89',
     textTertiary: '#5F5F5A',
+    /** Decorative marks only (a separator, an "off" dot), never text someone has to read. */
+    faint: '#4A4A46',
     /** Fill of the strongest controls (send, selected chip): signal yellow. */
     ink: '#FFD60A',
     onInk: '#0C0C0C',

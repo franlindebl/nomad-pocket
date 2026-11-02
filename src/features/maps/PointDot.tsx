@@ -19,7 +19,7 @@ export function PointDot({ color, size = 14 }: { color: string; size?: number })
 /** Three category dots; greyed out while the points are hidden. */
 export function PointsGlyph({ off }: { off?: boolean }) {
   const { colors } = useTheme();
-  const dot = (color: string) => <PointDot color={off ? colors.textTertiary : color} size={11} />;
+  const dot = (color: string) => <PointDot color={off ? colors.faint : color} size={11} />;
   return (
     <View style={styles.glyph}>
       {dot(CATEGORY_COLORS.health)}

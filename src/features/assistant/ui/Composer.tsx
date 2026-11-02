@@ -57,7 +57,7 @@ export function Composer({ busy, disabled, blocked, useLibrary, onToggleLibrary,
         placeholder={
           dictation.listening ? t('dictation.listening') : useLibrary ? t('composer.placeholderLibrary') : t('composer.placeholder')
         }
-        placeholderTextColor={colors.textTertiary}
+        placeholderTextColor={colors.textSecondary}
         multiline
         editable={!disabled}
         submitBehavior="newline"
@@ -76,8 +76,8 @@ export function Composer({ busy, disabled, blocked, useLibrary, onToggleLibrary,
             styles.toggle,
             useLibrary ? { backgroundColor: colors.accentSoft, borderColor: colors.accent } : { backgroundColor: 'transparent', borderColor: colors.outline },
           ]}>
-          <Library size={14} color={useLibrary ? colors.accent : colors.textSecondary} strokeWidth={2.2} />
-          <Text variant="caption" tint={useLibrary ? colors.accent : colors.textSecondary} style={styles.toggleLabel}>
+          <Library size={14} color={useLibrary ? colors.accent : colors.text} strokeWidth={2.2} />
+          <Text variant="caption" tint={useLibrary ? colors.accent : colors.text} style={styles.toggleLabel}>
             {t('composer.useLibrary')}
           </Text>
         </PressableScale>
@@ -99,7 +99,7 @@ export function Composer({ busy, disabled, blocked, useLibrary, onToggleLibrary,
                 />
               ) : null}
               <View style={[styles.send, { backgroundColor: dictation.listening ? colors.accent : colors.surfaceAlt }]}>
-                <Mic size={18} color={dictation.listening ? colors.onAccent : colors.textSecondary} strokeWidth={2.2} />
+                <Mic size={18} color={dictation.listening ? colors.onAccent : colors.text} strokeWidth={2.2} />
               </View>
             </PressableScale>
           ) : null}

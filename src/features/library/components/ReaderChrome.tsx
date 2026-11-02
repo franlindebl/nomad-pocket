@@ -200,7 +200,7 @@ export function FindBar({
           onChangeText={onChange}
           onSubmitEditing={() => run(text)}
           placeholder={t('findPlaceholder')}
-          placeholderTextColor={colors.textTertiary}
+          placeholderTextColor={colors.textSecondary}
           returnKeyType="search"
           autoCorrect={false}
           autoCapitalize="none"

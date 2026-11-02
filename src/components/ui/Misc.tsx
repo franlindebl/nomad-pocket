@@ -87,11 +87,11 @@ export function SearchField({ style, onClear, value, ...rest }: TextInputProps &
   const { colors } = useTheme();
   return (
     <View style={[styles.search, { backgroundColor: colors.surface, borderColor: colors.outline }, style]}>
-      <Search size={18} color={colors.textTertiary} />
+      <Search size={18} color={colors.text} />
       <TextInput
         {...rest}
         value={value}
-        placeholderTextColor={colors.textTertiary}
+        placeholderTextColor={colors.textSecondary}
         returnKeyType="search"
         autoCorrect={false}
         clearButtonMode="never"

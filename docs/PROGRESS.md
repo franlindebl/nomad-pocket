@@ -333,6 +333,15 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-02 — Grey only for secondary text; actions in white
+
+- Owner: the map's search bar was hard to read (the faintest grey, 2.9:1) although it is the map's main action; greys
+  are fine for subtitles, not for primary or action text. Map search bar: white label, yellow magnifier. Search
+  fields: white magnifier; placeholders everywhere (search fields, composer, forms, find bar) one grey lighter
+  (`textSecondary`); the composer's library toggle and mic, the model pill's chevron and unselected segmented options
+  in white. Greys stay as they were for subtitles, notes, chevrons, disabled. New `faint` token for decorative marks
+  (the "/" of "5/6", a hidden category's dot). Rule written in `docs/STYLE_GUIDE.md`.
+
 ### 2026-11-02 — iOS build 34 to TestFlight
 
 - 1.1.0 (34), TestFlight only: build 33 plus the "Precisión" look (dark only, black and signal yellow), the compass

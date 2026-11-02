@@ -55,7 +55,7 @@ export default function MarkerSheet() {
           value={name}
           onChangeText={setName}
           placeholder={t('markers.namePlaceholder')}
-          placeholderTextColor={colors.textTertiary}
+          placeholderTextColor={colors.textSecondary}
           autoFocus={!existing}
           returnKeyType="done"
           onSubmitEditing={save}
@@ -72,7 +72,7 @@ export default function MarkerSheet() {
           value={note}
           onChangeText={setNote}
           placeholder={t('markers.notePlaceholder')}
-          placeholderTextColor={colors.textTertiary}
+          placeholderTextColor={colors.textSecondary}
           multiline
           style={[input, styles.multiline]}
           accessibilityLabel={t('markers.note')}

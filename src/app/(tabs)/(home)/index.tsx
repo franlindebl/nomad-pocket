@@ -145,7 +145,7 @@ export default function HomeScreen() {
         <View style={{ flex: 1, gap: space.sm }}>
           <Text variant="display">{tc('appName')}</Text>
           <Row gap={6}>
-            <View style={[styles.netMark, { backgroundColor: online ? colors.textTertiary : colors.accent }]} />
+            <View style={[styles.netMark, { backgroundColor: online ? colors.textSecondary : colors.accent }]} />
             <Text variant="overline" color={online ? 'textSecondary' : 'accent'} testID="home-network">
               {online ? t('network.online') : t('network.offline')}
             </Text>
@@ -229,7 +229,7 @@ export default function HomeScreen() {
           <Row gap={space.sm} align="baseline" style={{ flexShrink: 1 }}>
             <Text style={styles.readyFigure} accessibilityLabel={t('ready.count', { done, total: items.length })} tabular>
               {done}
-              <Text style={styles.readyFigure} color="textTertiary">
+              <Text style={styles.readyFigure} color="faint">
                 /
               </Text>
               {items.length}

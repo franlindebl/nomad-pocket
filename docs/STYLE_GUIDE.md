@@ -44,8 +44,9 @@ Very dark grey (not pure black: OLED smears pure black while scrolling), light i
 | `outline` | `#2E2E2E` | Outlines of controls: icon buttons, chips, inputs, the composer, icon badges |
 | `tick` | `#5A5A5A` | The corner marks of panels (`CornerTicks`) |
 | `text` | `#F2F2EF` | Primary text |
-| `textSecondary` | `#8F8F89` | Secondary text, metadata, mono labels |
-| `textTertiary` | `#5F5F5A` | Placeholders, disabled |
+| `textSecondary` | `#8F8F89` | Secondary text: subtitles, metadata, mono labels, placeholders |
+| `textTertiary` | `#5F5F5A` | Small notes, chevrons, disabled |
+| `faint` | `#4A4A46` | Decorative marks only (the "/" of "5/6", a hidden category's dot); never text to read |
 | `accent` | `#FFD60A` | Signal yellow: primary buttons, progress, active state, links. Reads both as fill and as text on black |
 | `onAccent` | `#0C0C0C` | Text/icons on yellow |
 | `accentSoft` | `#2B2507` | Yellow-tinted backgrounds (a switched-on toggle, citations) with `accent` text |
@@ -64,6 +65,10 @@ computing `#B992FF`, reference `#5DB4FF`, maps `#4FD1A5`, ai `#F2F2EF` (white: n
 courses `#8AA4FF`, neutral `#8F8F89` (`hues` in `tokens.ts`). `tint(hex)` is the hue at 16 %.
 
 Yellow carries dark text, never white; yellow text is fine on the dark surfaces.
+
+**Grey is for secondary text only** (subtitles, metadata, notes, chevrons). Titles and every label of an action — a
+search bar, an option of a segmented control, a toggle, a placeholder that invites the screen's main action — are
+`text` white or the accent, never grey: a grey action reads as disabled.
 
 ## 3. Typography
 
@@ -170,7 +175,8 @@ in their feature (`features/catalog/DownloadButton`, `features/courses/CourseCar
   first aid or survival guides, family plan); a downloads card while something downloads; the
   "Tu preparación" card (the figure "5/6" in Chakra Petch, slanted segments, a status row per piece),
   the continue list and a storage line.
-- **Map:** the "© OpenStreetMap contributors" credit shows when the map first appears and fades
+- **Map:** the search bar is the map's main action: white label and a yellow magnifier, never a faint
+  placeholder. The "© OpenStreetMap contributors" credit shows when the map first appears and fades
   after about five seconds or the first gesture; store screenshots of the map must show it.
 - **Catalog:** category hero → tier cards (Essential / Standard / Comprehensive) with
   size, item count and a one-tap "Download pack".

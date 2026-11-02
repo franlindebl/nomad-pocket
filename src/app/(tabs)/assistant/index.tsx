@@ -166,7 +166,7 @@ function ModelPill({ name }: { name: string | null }) {
       <Text variant="footnote" weight="700" numberOfLines={1}>
         {name ?? t('noModel.action')}
       </Text>
-      <ChevronDown size={14} color={colors.textSecondary} strokeWidth={2.5} />
+      <ChevronDown size={14} color={colors.text} strokeWidth={2.5} />
     </PressableScale>
   );
 }

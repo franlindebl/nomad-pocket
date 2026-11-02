@@ -9,7 +9,7 @@ on the app's near-black. Writes:
   assets/images/splash-icon{,-dark}.png       the glyph on transparent (the splash is dark only)
   site/icon.png, site/favicon.png             the privacy/support site
 
-Colours are the tokens of src/theme/tokens.ts (bg, accent, textSecondary). Rerun after changing them.
+Colours: bg and accent of src/theme/tokens.ts and the bezel grey #8F8F89. Rerun after changing them.
 Needs cairosvg (and the cairo library) and Pillow.
 Usage: python3 -I scripts/brand/make-icons.py
 """

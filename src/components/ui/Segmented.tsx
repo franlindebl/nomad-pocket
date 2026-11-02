@@ -34,7 +34,7 @@ export function Segmented<T extends string>({
               if (!selected) onChange(o.value);
             }}
             style={[styles.segment, selected && { backgroundColor: colors.accent }]}>
-            <Text variant="footnote" weight="600" color={selected ? 'onAccent' : 'textSecondary'} numberOfLines={1}>
+            <Text variant="footnote" weight="600" color={selected ? 'onAccent' : 'text'} numberOfLines={1}>
               {o.label}
             </Text>
           </PressableScale>
