@@ -4,7 +4,12 @@ tags: [full, reader, seeded]
 ---
 - runFlow: ../../subflows/launch.yaml
 - tapOn: { id: "books.vertical" }
-- tapOn: ".*NHS.*|.*[Mm]edicines.*"
+- tapOn: { id: "collection-medicine" }
+# The archive sits in its level of the collection; its row's button opens it.
+- scrollUntilVisible:
+    element: { id: "download-nhs.uk_en_medicines" }
+    centerElement: true
+- tapOn: { id: "download-nhs.uk_en_medicines" }
 - extendedWaitUntil:
     visible: "Buscar en este libro"
     timeout: 15000
@@ -14,7 +19,12 @@ tags: [full, reader, seeded]
 - stopApp
 - launchApp
 - tapOn: { id: "books.vertical" }
-- tapOn: ".*NHS.*|.*[Mm]edicines.*"
+- tapOn: { id: "collection-medicine" }
+# The archive sits in its level of the collection; its row's button opens it.
+- scrollUntilVisible:
+    element: { id: "download-nhs.uk_en_medicines" }
+    centerElement: true
+- tapOn: { id: "download-nhs.uk_en_medicines" }
 - extendedWaitUntil:
     visible: "Buscar en este libro"
     timeout: 15000

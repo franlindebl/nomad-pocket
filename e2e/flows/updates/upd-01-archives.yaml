@@ -12,10 +12,10 @@ tags: [full, updates, seeded, updates-server]
     timeout: 45000
 - takeScreenshot: upd-01-01-home
 - tapOn: { id: "books.vertical" }
+# The Library lists collections, not archives (since build 36): its link to the updates is what shows.
 - extendedWaitUntil:
-    visible: "Wikipedia 100.*Actualización disponible.*"
+    visible: "3 actualizaciones disponibles"
     timeout: 10000
-- assertVisible: "Documentación de Node\\.js.*Actualización disponible.*"
 - tapOn: "3 actualizaciones disponibles"
 - extendedWaitUntil:
     visible: { id: "updates-all" }

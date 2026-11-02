@@ -172,15 +172,23 @@ mode for the status bar) composed at 1080 × 1920 (Play refuses a long side over
 eight screens and kits as iOS (2026-10-29), assistant with the downloaded Qwen3.5 2B. The script also writes
 Play's 512 px icon and the 1024 × 500 feature graphics (`docs/store/play/`).
 
-Current set (2026-10-27, for 1.1.0; texts in `docs/store/listing-1.1.0.md`): home, emergency, route,
-first aid, assistant, family plan, library, kit (iPhone only). Spanish shots use the Spain kit in Madrid,
-English ones the US Northeast kit in New York, each on a simulator in that language and region, with
-fictional family-plan data (555 numbers in English). Screens with the map (`route`, `emergency`) get
-"© OpenStreetMap contributors" under the phone from the script: the in-app credit fades after five
-seconds. How they were made: a store Release build for the simulator with the real catalogs (no
-`EXPO_PUBLIC_*_MANIFEST_URL`), the kit downloaded once per language and cloned into the iPad's app
-container (`cp -c`), `simctl status_bar` at 9:41 (the route shots at the time that matches their
-arrival), `axe` taps and pasted text (`simctl pbcopy` + Cmd-V: `axe type` can't type accents).
+Current set (2026-11-03, for 2.0.0; texts in `docs/store/listing-2.0.0.md`): home, emergency, navigation,
+emergency guide (`04-firstaid`: the guide's index), assistant, family plan, library, kit (iPhone only). Frame
+"D", the owner's pick: the whole frame signal yellow, black Chakra Petch headline, black phone; the header keeps
+the room of a two-line headline so every phone sits at the same size, and the iPad takes smaller type. Spanish
+shots use the Spain kit in Madrid, English ones the US Northeast kit in New York, each on an iOS 27 simulator in
+that language and region (iPhone 17 Pro Max, iPad Pro 13-inch M5), without the complete Wikipedia (a small
+edition instead, to keep the downloads short). Fictional family plan and a full emergency bag are written straight
+into the kv-store (key `prepare`, app closed). Navigation: a route started from a fixed point and
+`simctl location start --speed=…` along it (Madrid: Castellana to La Paz, 50 km/h with the limit sign; New York:
+1st Avenue), with the status bar clock set to match the arrival time. The assistant answer is a non-guide
+question with "Usar mi biblioteca" on (the suggested questions land on guide cards by design); the iPads reuse it
+from the history. Screens with the map (`navigation`, `emergency`) get "© OpenStreetMap contributors" under the
+phone from the script. How they were made: a store Release build for the simulator with the real catalogs (no
+`EXPO_PUBLIC_*_MANIFEST_URL`), the kit downloaded once per language and cloned into the iPad's app container
+(`cp -c` of Documents and Library/Application Support into a fresh install), `simctl status_bar` at 9:41, `axe`
+taps and pasted text (`simctl pbcopy` + Cmd-V: `axe type` can't type accents). Android captures are still the
+1.1.0 set (`python3 scripts/store-screenshots.py iphone ipad` leaves them alone).
 
 ## Privacy / support site
 

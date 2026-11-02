@@ -333,6 +333,22 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-03 — 2.0.0 sent to App Review with new screenshots and texts
+
+- Owner's instructions before going to sleep: send 2.0.0 (39) for review with the new screenshots and texts,
+  automatic release, iOS only (Android/Play screenshots later), CarPlay stays off for a later version.
+- Screenshots redone for the new look: 8 iPhone + 7 iPad per language (es, en), frame "D" (all yellow, black
+  type), captions agreed with the owner (`scripts/store-screenshots.py`; how in `docs/RELEASE.md`). New screens:
+  voice navigation and the emergency guide.
+- Listing texts in `docs/store/listing-2.0.0.md` (guide, voice navigation with the screen locked, speed warning,
+  tap any point, content updates, paper page, 100+ archives; What's new; review notes with the background
+  location + audio paragraph). Set on ASC through the API with the 60 screenshots; build 39 attached.
+- E2E full suite on c545a7d: 39 passed, 5 failed at first; map-20 and map-21 passed on a rerun (flaky region rows), rdr-09 and upd-01 still expected archives on the Library's first screen (gone since build 36's collections) and were adapted, upd-02 passed on the rerun: 44/44.
+- Found while taking them (not fixed): some Spanish guide cards from US sources say "Llame al 911" and inches
+  (`cpr-adult`, `heat-stroke`, `stroke`, `seizures`, `alcohol-poisoning`, `carbon-monoxide`): wrong number for
+  Spain; an English assistant suggestion says "when I call 112" with the country set to the US; on iPad the family
+  plan isn't in the 720 pt column.
+
 ### 2026-11-03 — iOS build 39 to TestFlight
 
 - 2.0.0 (39), TestFlight only (version number chosen by the owner): the upload as 1.1.0 was refused ("train version '1.1.0' is closed"):
