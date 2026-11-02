@@ -333,6 +333,14 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-03 — iOS build 39 to TestFlight
+
+- 2.0.0 (39), TestFlight only (version number chosen by the owner): the upload as 1.1.0 was refused ("train version '1.1.0' is closed"):
+  Apple has approved 1.1.0 (23), so new builds need a higher marketing version. Build 38 plus the collection levels (e41c803, 55e52be) and the other
+  session's toasts above sheets (95efa43, 872b884: without the second, Maestro saw nothing of the app).
+  E2E: lib-01..04 green on the levels, lib-01 + onb-01/02/04 on the toast fix; unit checks green.
+  Tagged `v2.0.0-39`.
+
 ### 2026-11-02 — Library: a collection lists every level, no tier to select
 
 - Owner's call: the tier cards worked as a hidden filter (the selected one listed only its own resources),

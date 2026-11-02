@@ -22,9 +22,9 @@ privately by the maintainer, never in git.
 
 Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo prebuild`.
 
-- Marketing version: `expo.version` (currently **1.1.0**). Keep `package.json`'s
+- Marketing version: `expo.version` (currently **2.0.0**; 1.1.0 (23) approved by Apple by 2026-11-03, which closed its train). Keep `package.json`'s
   `version` equal (not used by the build, but it's what people read).
-- iOS build number: `expo.ios.buildNumber` (currently **"38"**) → `CFBundleVersion`. Bump it
+- iOS build number: `expo.ios.buildNumber` (currently **"39"**) → `CFBundleVersion`. Bump it
   for every upload: App Store Connect rejects a build number it has already seen.
 - Android: `expo.android.versionCode` (currently **26**: 23 and 24 went to Play internal testing, 24 to the rejected closed test; 25 is the build without health features, superseded before review; 26 adds the assistant's no-health fixes). Must grow
   with every Play upload.
@@ -70,6 +70,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.1.0 | 36 | TestFlight 2026-11-02 (TestFlight only): build 35 plus the Library rethought (search first and bigger, everything grouped by collection with "4/18" counts, the search also finds what can be downloaded from the catalog and in Kiwix) |
 | 1.1.0 | 37 | TestFlight 2026-11-02 (TestFlight only): build 36 plus Library counts that know what a bigger edition holds (Wikipedia "4 de 5" with the complete text-only one), the same work in another language under "Otros idiomas" (out of counts and packs: Educación's essential pack 3.7 GB → 0.2 GB), collections that can reach 100 %, and an offer to delete the smaller editions a new download holds |
 | 1.1.0 | 38 | TestFlight 2026-11-02 (TestFlight only): build 37 plus emergency point names on the map in their category colour, placed around the dot (build 37 already left our emergency kinds out of the basemap's POI icons: `skipOurPois` went into its commit by mistake); no E2E run (owner's call) |
+| 2.0.0 | 39 | TestFlight 2026-11-03 (TestFlight only; first 2.0.0, owner's choice: the 1.1.0 train closed once Apple approved 1.1.0): build 38 plus collections that list every level with what it adds (no tier to select; a level's button downloads only that level), long press on installed rows, and toasts above sheets and modals (kept out of the accessibility tree) |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.
