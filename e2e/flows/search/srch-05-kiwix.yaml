@@ -1,0 +1,18 @@
+# SRCH-05 — online, the Library search offers the same words in Kiwix's whole catalog: the row opens
+# Explore with the query already typed.
+appId: com.fjlinde.nomadpocket
+tags: [nightly, search, network]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "books.vertical" }
+- tapOn: { id: "library-search" }
+- inputText: "wikipedia"
+- scrollUntilVisible:
+    element: { id: "search-kiwix" }
+    centerElement: true
+- tapOn: { id: "search-kiwix" }
+- extendedWaitUntil:
+    visible: ".*Wikipedia.*"
+    timeout: 20000
+- assertVisible: "wikipedia"
+- takeScreenshot: 01-explore-with-query

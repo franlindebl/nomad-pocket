@@ -1,8 +1,15 @@
-# SRCH-01 — with nothing installed, search says there is nothing to search.
+# SRCH-01 — with nothing installed, search says so and still finds what the catalog offers to download.
 appId: com.fjlinde.nomadpocket
 tags: [smoke, search]
 ---
 - runFlow: ../../subflows/launch.yaml
 - tapOn: { id: "books.vertical" }
-- tapOn: "Buscar en tu biblioteca"
-- assertVisible: "Aún no hay nada que buscar"
+- tapOn: { id: "library-search" }
+- assertVisible: "Aún no tienes libros"
+# With nothing downloaded, the search still finds what the bundled catalog offers (offline too).
+- inputText: "wikipedia"
+- extendedWaitUntil:
+    visible: "Puedes descargarlo|PUEDES DESCARGARLO"
+    timeout: 10000
+- assertVisible: ".*consulta rápida.*"
+- takeScreenshot: 01-catalog-hits

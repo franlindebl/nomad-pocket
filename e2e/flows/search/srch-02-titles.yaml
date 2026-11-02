@@ -4,7 +4,7 @@ tags: [smoke, search, seeded]
 ---
 - runFlow: ../../subflows/launch.yaml
 - tapOn: { id: "books.vertical" }
-- tapOn: "Buscar en tu biblioteca"
+- tapOn: { id: "library-search" }
 - inputText: "Jackson"
 - extendedWaitUntil:
     visible: "Michael Jackson.*"

@@ -16,8 +16,9 @@ tags: [ipad, seeded, seeded-map]
     timeout: 10000
 - takeScreenshot: 01-home
 - tapOn: { text: "Biblioteca", index: 0 }
-- assertVisible: "En tu dispositivo"
+- assertVisible: "Colecciones|COLECCIONES"
 - takeScreenshot: 02-library
+- tapOn: { id: "collection-wikipedia" }
 - tapOn: "Wikipedia 100.*"
 - extendedWaitUntil:
     visible: "Buscar en este libro"
@@ -38,6 +39,7 @@ tags: [ipad, seeded, seeded-map]
 - takeScreenshot: 06-article-landscape
 - setOrientation: PORTRAIT
 - tapOn: { id: "BackButton" }
+- tapOn: { id: "BackButton" }   # out of the Wikipedia collection, back to the Library
 - tapOn: { text: "Mapas", index: 0 }
 - extendedWaitUntil:
     visible: "Tus mapas"
@@ -49,8 +51,8 @@ tags: [ipad, seeded, seeded-map]
 - takeScreenshot: 07b-map-region
 - tapOn: { text: "Biblioteca", index: 0 }
 - scrollUntilVisible:
-    element: { id: "open-courses" }
-- tapOn: { id: "open-courses" }
+    element: { id: "collection-courses" }
+- tapOn: { id: "collection-courses" }
 - tapOn: "freeCodeCamp en español.*"
 - extendedWaitUntil:
     visible: { id: "lesson-check-1" }

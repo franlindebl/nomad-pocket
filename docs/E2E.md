@@ -250,6 +250,7 @@ By hand:
 | search | `srch-01-no-archives` | SRCH-01 | smoke | — |
 | search | `srch-02-titles` | SRCH-02 | smoke | seeded |
 | search | `srch-03-fulltext` | SRCH-03, SRCH-04 | smoke | seeded |
+| search | `srch-05-kiwix` | SRCH-05 | nightly | network |
 | reader | `rdr-02-search-in-book` | RDR-02 | smoke | seeded |
 | reader | `rdr-03-bookmark` | RDR-03 | smoke | seeded |
 | reader | `rdr-04-history-nav` | RDR-04, RDR-06, RDR-08 | full | seeded |
@@ -433,7 +434,9 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `downloads-keep-awake` | Downloads sheet: the "the screen stays on while downloading" note (while something runs or installs; DL-02) |
   | `download-preparing` | Downloads sheet: a downloaded country still being prepared (search, emergency points), with its progress |
   | `kit-country`, `kit-guides`, `kit-wikipedia`, `kit-assistant` | setup wizard kit rows (the whole row toggles) |
-  | `open-courses` | Courses card in the Library |
+  | `library-search`, `continue-reading` | Library: the big search block (opens `/search`), the "Seguir leyendo" row |
+  | `collection-<key>` | Library: a collection row (`medicine`, `survival`, `wikipedia`, `agriculture`, `diy`, `education`, `computing`, `courses`, `other`); archives are opened inside their collection |
+  | `search-kiwix` | search screen: "Buscar «…» en Kiwix" (online only) |
   | `settings-country`, `settings-credits` | Settings: your country, Credits & licenses |
   | `credits-source`, `credits-gpl`, `credits-js`, `credits-search` | Credits screen: source link, GPL text, JavaScript packages, package search |
   | `emergency-call`, `emergency-share`, `emergency-position`, `emergency-number-country` | Emergencias sheet: call, share position, position text, the country whose number it is |
@@ -447,7 +450,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `meeting-place`, `meeting-details`, `meeting-pin-<id>`, `meeting-save` | meeting point sheet |
   | `adults-plus`/`-minus`/`-value` (also `children-`, `pets-`), `kit-progress`, `kit-<item>`, `kit-<item>-details`, `kit-add` | kit screen |
   | `item-name`, `item-add-expiry`, `expiry-month`, `item-save` | kit item sheet |
-  | `house`, `map`, `books.vertical`, `text.bubble` | tabs (SF Symbol ids, set by iOS); Courses is inside the Library (`subflows/open-courses.yaml`) |
+  | `house`, `map`, `books.vertical`, `text.bubble` | tabs (SF Symbol ids, set by iOS); Courses is a collection of the Library (`subflows/open-courses.yaml`) |
   | `BackButton` | the native header's back button |
 
 - A control inside another button is invisible to VoiceOver and to Maestro (iOS merges it

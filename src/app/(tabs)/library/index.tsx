@@ -1,26 +1,28 @@
 import * as DocumentPicker from 'expo-document-picker';
 import { File } from 'expo-file-system';
-import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import { Compass, FileDown, Globe, GraduationCap } from 'lucide-react-native';
-import { useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { Clock, Compass, FileDown } from 'lucide-react-native';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Platform, StyleSheet, View } from 'react-native';
+import { Alert, Platform, ScrollView, StyleSheet } from 'react-native';
 
 import { showToast } from '@/components/Toast';
-import { Card, IconBadge, ListGroup, ListRow, PressableScale, Screen, SearchField, SectionHeader, Text } from '@/components/ui';
-import { catalog, loc, matchesLanguages, sumMB, tierResources } from '@/features/catalog';
-import { categoryHue, iconByName } from '@/features/catalog/icons';
-import { removeItem, useItems, type InstalledItem } from '@/features/content/items';
+import { Card, Chip, IconBadge, ListGroup, ListRow, Screen, SectionHeader, Text } from '@/components/ui';
+import { catalog } from '@/features/catalog';
+import { useItems } from '@/features/content/items';
 import { NotEnoughStorageError } from '@/features/downloads/manager';
+import { catalogHasLanguages, collectionOfItem, openCollection, useCollections } from '@/features/library/collections';
+import { CollectionRow } from '@/features/library/components/CollectionRow';
+import { SearchHero } from '@/features/library/components/SearchHero';
 import { indexDocuments } from '@/features/library/documents';
+import { recentHistory, type HistoryEntry } from '@/features/library/history';
+import { suggestedSearches } from '@/features/library/recent-searches';
 import { AlreadyInstalledError, registerZimFile } from '@/features/library/register';
-import { shareArchive } from '@/features/library/share';
 import { useUpdates } from '@/features/updates/updates';
-import { formatBytes, formatMB } from '@/lib/format';
+import { formatBytes, formatRelativeDate } from '@/lib/format';
 import { contentDir, deleteFile, freeBytes, hasRoomFor, partialDir } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
-import { radius, space, useTheme } from '@/theme';
+import { space } from '@/theme';
 
 /**
  * Bring a picked file into content/zim and register it. Existing archives are never
@@ -61,26 +63,39 @@ async function importZimFile(asset: DocumentPicker.DocumentPickerAsset) {
   }
 }
 
-/** Survival first: what you need in a crisis before what you learn with time. */
-const CATEGORY_ORDER = ['medicine', 'survival', 'agriculture', 'diy', 'education', 'computing'];
-const categoryRank = (slug: string) => (CATEGORY_ORDER.indexOf(slug) + 1 || CATEGORY_ORDER.length + 1);
-
+/**
+ * The Library: search first (it's the tab's main action), then the collections by topic, each saying how
+ * much of it is on the phone. An archive lives in one collection only; its screen lists what you have,
+ * then what's missing (owner's decision, 2026-11-02: proposal A of the library rethink).
+ */
 export default function LibraryScreen() {
   const { t } = useTranslation('library');
   const { t: tc } = useTranslation();
   const langs = useSettings((s) => s.contentLanguages);
-  const archives = useItems('zim').filter((i) => !i.isCourse);
-  // Archives (and courses) with a newer edition: a badge on their row, and the way to the updates sheet.
+  const books = useItems('zim');
+  const collections = useCollections();
   const zimUpdates = useUpdates().filter((u) => u.kind === 'zim' && !u.inFlight);
-  const outdated = new Set(zimUpdates.map((u) => u.itemId));
   const [importing, setImporting] = useState(false);
+  // Reading history and recent searches change in other screens: read them again when the tab shows.
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [starters, setStarters] = useState<string[]>([]);
+  useFocusEffect(
+    useCallback(() => {
+      setHistory(recentHistory(5));
+      setStarters(suggestedSearches());
+    }, []),
+  );
+  const last = history.find((h) => books.some((b) => b.id === h.itemId));
+  const lastItem = last ? books.find((b) => b.id === last.itemId) : undefined;
+  const suggestions = books.length ? starters : [];
 
   const importZim = async () => {
     const res = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: false, multiple: false });
     if (res.canceled || !res.assets?.[0]) return;
     setImporting(true);
     try {
-      await importZimFile(res.assets[0]);
+      const item = await importZimFile(res.assets[0]);
+      showToast(t('imported', { title: item.title, collection: collections.find((c) => c.key === collectionOfItem(item))?.title ?? t('other') }));
     } catch (e) {
       if (e instanceof AlreadyInstalledError) {
         showToast(t('importDuplicate', { title: e.item.title }));
@@ -92,90 +107,54 @@ export default function LibraryScreen() {
     }
   };
 
-  const confirmDelete = (item: InstalledItem) =>
-    Alert.alert(item.title, tc('settings:deleteConfirm', { title: item.title, size: formatBytes(item.sizeBytes) }), [
-      { text: tc('actions.cancel'), style: 'cancel' },
-      { text: tc('actions.delete'), style: 'destructive', onPress: () => removeItem(item.id) },
-    ]);
-  // Long press: send it to another phone, or delete it.
-  const itemActions = (item: InstalledItem) =>
-    Alert.alert(item.title, formatBytes(item.sizeBytes), [
-      { text: t('share'), onPress: () => shareArchive(item).catch((e) => Alert.alert(t('shareFailed'), String((e as Error)?.message ?? e))) },
-      { text: tc('actions.delete'), style: 'destructive', onPress: () => confirmDelete(item) },
-      { text: tc('actions.cancel'), style: 'cancel' },
-    ]);
-
   return (
     <Screen title={tc('tabs.library')}>
-      <PressableScale onPress={() => router.push('/search')} pressedScale={0.99} accessibilityRole="search">
-        <View pointerEvents="none">
-          <SearchField placeholder={t('searchPlaceholder')} editable={false} />
-        </View>
-      </PressableScale>
-
-      <SectionHeader
-        title={t('onDevice')}
-        action={zimUpdates.length ? tc('updates:downloadsRow', { count: zimUpdates.length }) : undefined}
-        onAction={() => router.push('/updates')}
-      />
-      {archives.length ? (
-        <ListGroup>
-          {archives.map((item) => (
-            <ArchiveRow key={item.id} item={item} outdated={outdated.has(item.id)} onLongPress={() => itemActions(item)} />
+      <SearchHero books={books.length} onPress={() => router.push('/search')} />
+      {suggestions.length ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.bleed} contentContainerStyle={styles.chips}>
+          {suggestions.map((q) => (
+            <Chip key={q} label={q} onPress={() => router.push({ pathname: '/search', params: { q } })} />
           ))}
-        </ListGroup>
-      ) : (
-        <Card style={{ gap: space.xs }}>
+        </ScrollView>
+      ) : null}
+
+      {last && lastItem ? (
+        <>
+          <SectionHeader title={t('continueReading')} />
+          <ListGroup>
+            <ListRow
+              testID="continue-reading"
+              title={last.title}
+              subtitle={`${lastItem.title} · ${formatRelativeDate(last.visitedAt)}`}
+              leading={<IconBadge icon={Clock} hue="survival" size={36} />}
+              chevron
+              onPress={() => router.push({ pathname: '/reader/[itemId]', params: { itemId: last.itemId, path: last.path } })}
+            />
+          </ListGroup>
+        </>
+      ) : null}
+
+      {!books.length ? (
+        <Card style={{ gap: space.xs, marginTop: space.lg }}>
           <Text variant="headline">{t('onDeviceEmpty')}</Text>
           <Text variant="footnote" color="textSecondary">
             {t('onDeviceEmptyBody')}
           </Text>
         </Card>
-      )}
+      ) : null}
 
-      <SectionHeader title={t('wikipedia')} />
-      <Card onPress={() => router.push('/library/wikipedia')} style={styles.wikiCard}>
-        <IconBadge icon={Globe} hue="reference" size={48} />
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text variant="title3">{t('wikipedia')}</Text>
-          <Text variant="footnote" color="textSecondary">
-            {t('wikipediaBody')}
-          </Text>
-        </View>
-      </Card>
+      <SectionHeader
+        title={t('categories')}
+        action={zimUpdates.length ? tc('updates:downloadsRow', { count: zimUpdates.length }) : undefined}
+        onAction={() => router.push('/updates')}
+      />
+      <ListGroup>
+        {collections.map((c) => (
+          <CollectionRow key={c.key} collection={c} onPress={() => openCollection(c.key)} />
+        ))}
+      </ListGroup>
 
-      <Card onPress={() => router.push('/library/courses')} style={[styles.wikiCard, { marginTop: space.md }]} testID="open-courses">
-        <IconBadge icon={GraduationCap} hue="education" size={48} />
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text variant="title3">{tc('tabs.courses')}</Text>
-          <Text variant="footnote" color="textSecondary">
-            {t('coursesBody')}
-          </Text>
-        </View>
-      </Card>
-
-      <SectionHeader title={t('categories')} />
-      <View style={styles.grid}>
-        {[...catalog.categories].sort((a, b) => categoryRank(a.slug) - categoryRank(b.slug)).map((c) => {
-          const all = tierResources(c, c.tiers[c.tiers.length - 1], langs);
-          const essential = c.tiers[0] ? tierResources(c, c.tiers[0], langs) : [];
-          return (
-            <Card key={c.slug} style={styles.tile} onPress={() => router.push({ pathname: '/library/category/[slug]', params: { slug: c.slug } })}>
-              <IconBadge icon={iconByName(c.icon)} hue={c.hue ?? categoryHue(c.slug)} size={44} />
-              <View style={{ gap: 2 }}>
-                <Text variant="headline" numberOfLines={1}>
-                  {loc(c.name)}
-                </Text>
-                <Text variant="caption" color="textSecondary" tabular>
-                  {t('resources', { count: all.length })} · {formatMB(sumMB(essential))}+
-                </Text>
-              </View>
-            </Card>
-          );
-        })}
-      </View>
-
-      <SectionHeader title={tc('actions.seeAll')} />
+      <SectionHeader title={t('outsideCatalog')} />
       <ListGroup>
         <ListRow
           title={t('explore')}
@@ -192,7 +171,7 @@ export default function LibraryScreen() {
           onPress={importing ? undefined : importZim}
         />
       </ListGroup>
-      {catalog.categories.length && !Object.values(catalog.resources).some((r) => matchesLanguages(r, langs)) ? (
+      {catalog.categories.length && !catalogHasLanguages(langs) ? (
         <Text variant="footnote" color="textSecondary" style={{ marginTop: space.md }}>
           {t('noResultsLang')}
         </Text>
@@ -201,33 +180,7 @@ export default function LibraryScreen() {
   );
 }
 
-function ArchiveRow({ item, outdated, onLongPress }: { item: InstalledItem; outdated: boolean; onLongPress: () => void }) {
-  const { t } = useTranslation('updates');
-  const { colors } = useTheme();
-  const illustration = typeof item.meta.illustration === 'string' ? item.meta.illustration : null;
-  const Icon = iconByName(undefined);
-  return (
-    <ListRow
-      title={item.title}
-      subtitle={[outdated ? t('available') : null, item.description, formatBytes(item.sizeBytes)].filter(Boolean).join(' · ')}
-      leading={
-        illustration ? (
-          <Image source={{ uri: illustration }} style={[styles.illustration, { backgroundColor: colors.surfaceAlt }]} />
-        ) : (
-          <IconBadge icon={Icon} hue={categoryHue(item.category)} size={40} />
-        )
-      }
-      chevron
-      onPress={() => router.push({ pathname: '/reader/[itemId]', params: { itemId: item.id } })}
-      onLongPress={onLongPress}
-    />
-  );
-}
-
 const styles = StyleSheet.create({
-  wikiCard: { flexDirection: 'row', alignItems: 'center', gap: space.lg },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },
-  tile: { flexBasis: '47%', flexGrow: 1, gap: space.lg, minHeight: 132, justifyContent: 'space-between' },
-  illustration: { width: 40, height: 40, borderRadius: radius.md },
+  bleed: { marginHorizontal: -space.gutter, marginTop: space.md },
+  chips: { paddingHorizontal: space.gutter, gap: space.sm },
 });
-

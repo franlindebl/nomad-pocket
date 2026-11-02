@@ -25,7 +25,7 @@ tags: [smoke, home, seeded]
 - assertVisible: "España"
 - swipe: { direction: DOWN }
 - tapOn: { id: "books.vertical" }
-- assertVisible: "En tu dispositivo|EN TU DISPOSITIVO"
+- assertVisible: "Colecciones|COLECCIONES"
 - tapOn: { id: "map" }
 - extendedWaitUntil:
     visible: "Descarga el mapa de tu país"

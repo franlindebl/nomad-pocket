@@ -333,6 +333,23 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-02 — Library rethought: search first, everything by topic
+The owner found the Library confusing: "En tu dispositivo" (by state), "Wikipedia" holding Courses (by
+source) and "Colecciones" (by topic, but really the download catalog) mixed three criteria, and the search
+looked like a grey list filter. Four proposals (artifact "Biblioteca de Nomad Pocket"); the owner chose A.
+- The tab opens with a big search block (yellow magnifier, white "¿Qué necesitas saber?", "dentro de tus N
+  libros · sin conexión"), suggested searches (recent queries that opened a result, then starter words),
+  "Seguir leyendo", one list of collections and "Fuera del catálogo" (Kiwix, import).
+- Every archive lives in one collection (`collections-core.ts`, tested): the catalog's categories,
+  Wikipedia and Courses as collections too, "Otros archivos" for unknown ones. Each row says what of it
+  is on the device and "4/18" with slanted segments; each collection screen lists the archives on the
+  device first (long press: share, delete), then the tiers under "Para descargar".
+- The search finds what you don't have yet: after your archives, "Puedes descargarlo" (bundled catalog,
+  `catalog/search-core.ts`, works offline), and online a row to search Kiwix with the same words.
+- E2E: archives are opened inside their collection (`collection-<key>`), the search block is
+  `library-search`; SRCH-01 now checks catalog hits with an empty library, LIB-02 deletes inside
+  collections.
+
 ### 2026-11-02 — Map follows the user; navigation recentres itself
 
 - Owner: the map opened on the user but stayed put as they moved. Now, once the camera lands on them (on open or

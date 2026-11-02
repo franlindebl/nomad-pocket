@@ -96,10 +96,10 @@ tags: [android, network]
     visible: "Abrir"
     timeout: 180000
 - back
-- tapOn: { point: "63%,93%" }   # Biblioteca: Cursos is a section of it
+- tapOn: { point: "63%,93%" }   # Biblioteca: Cursos is one of its collections
 - scrollUntilVisible:
-    element: { id: "open-courses" }
-- tapOn: { id: "open-courses" }
+    element: { id: "collection-courses" }
+- tapOn: { id: "collection-courses" }
 - tapOn: "freeCodeCamp en español.*"
 - extendedWaitUntil:
     visible: { id: "lesson-check-1" }

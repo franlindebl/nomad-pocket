@@ -9,6 +9,9 @@ import { catalog, courseResources, getResource, loc } from '@/features/catalog';
 import { iconByName } from '@/features/catalog/icons';
 import { useItems } from '@/features/content/items';
 import { CourseCard } from '@/features/courses/CourseCard';
+import { useCollections } from '@/features/library/collections';
+import { COURSES } from '@/features/library/collections-core';
+import { CollectionCount } from '@/features/library/components/CollectionCount';
 import { courseProgress, getCourse, useCourses } from '@/features/courses/courses';
 import { useSettings } from '@/stores/settings';
 import { space } from '@/theme';
@@ -20,6 +23,7 @@ export default function CoursesScreen() {
   const version = useCourses((s) => s.version);
   const [subject, setSubject] = useState<string | null>(null);
   const [, setTick] = useState(0);
+  const collection = useCollections().find((c) => c.key === COURSES);
 
   // Progress depends on reader history, which changes outside this screen.
   useFocusEffect(useCallback(() => setTick((n) => n + 1), []));
@@ -32,7 +36,8 @@ export default function CoursesScreen() {
 
   return (
     <Screen title={t('common:tabs.courses')}>
-      <SectionHeader title={t('myCourses')} style={{ marginTop: 0 }} />
+      {collection ? <CollectionCount collection={collection} /> : null}
+      <SectionHeader title={t('myCourses')} />
       {installed.length ? (
         <View style={{ gap: space.md }}>
           {installed.map((item) => {

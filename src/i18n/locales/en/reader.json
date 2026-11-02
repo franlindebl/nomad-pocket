@@ -43,11 +43,11 @@
   "loading": "Opening…",
   "dismiss": "Dismiss",
   "globalSearch": "Search",
-  "globalPlaceholder": "Search all your books",
+  "globalPlaceholder": "Search your books and the catalog",
   "inPdfs": "in its PDFs",
   "pdfPage": "{{title}} · p. {{page}}",
-  "noArchives": "Nothing to search yet",
-  "noArchivesBody": "Download a book from the library and search it here, offline.",
+  "noArchives": "No books yet",
+  "noArchivesBody": "Type what you are looking for to see what you can download and read offline.",
   "toc": "Contents",
   "tocEmpty": "This page has no sections",
   "tocEmptyBody": "Short pages and front pages usually have no contents list.",
@@ -60,5 +60,11 @@
   "page": "Page",
   "pageDark": "Dark",
   "pagePaper": "Paper",
-  "pagePaperHint": "Dark text on cream: easier on the eyes for long reads."
+  "pagePaperHint": "Dark text on cream: easier on the eyes for long reads.",
+  "inYourBooks": "In your books",
+  "notInBooks": "It's not in your books.",
+  "noArchivesYet": "You have no books downloaded yet.",
+  "canDownload": "You can download it",
+  "searchKiwix": "Search Kiwix for “{{query}}”",
+  "searchKiwixBody": "Thousands more archives · online"
 }

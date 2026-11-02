@@ -17,11 +17,13 @@ type BarProps = {
   trackColor?: string;
   /** Draw the bar as this many slanted segments (a count out of a few, e.g. the kit's 6 pieces). */
   segments?: number;
+  /** Space between segments (many segments in a narrow bar want less). */
+  gap?: number;
   style?: StyleProp<ViewStyle>;
 };
 
 /** Flat square bar (signal-yellow fill), or slanted segments for a small count. */
-export function ProgressBar({ value, height, color, trackColor, segments, style }: BarProps) {
+export function ProgressBar({ value, height, color, trackColor, segments, gap, style }: BarProps) {
   const { colors } = useTheme();
   const progress = useSharedValue(clamp(value));
   useEffect(() => {
@@ -33,7 +35,7 @@ export function ProgressBar({ value, height, color, trackColor, segments, style 
     const on = Math.round(clamp(value) * segments);
     const h = height ?? 9;
     return (
-      <View {...a11y} style={[styles.segments, { height: h, paddingHorizontal: h / 2 }, style]}>
+      <View {...a11y} style={[styles.segments, { height: h, paddingHorizontal: h / 2 }, gap !== undefined && { gap }, style]}>
         {Array.from({ length: segments }, (_, i) => (
           <View
             key={i}

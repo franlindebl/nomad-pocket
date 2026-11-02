@@ -4,6 +4,10 @@ import { View } from 'react-native';
 import { ListGroup, Screen, SectionHeader, Text } from '@/components/ui';
 import { catalog, getResource, loc, type WikipediaOption } from '@/features/catalog';
 import { useCoveringWikipedia } from '@/features/catalog/DownloadButton';
+import { useCollections } from '@/features/library/collections';
+import { WIKIPEDIA } from '@/features/library/collections-core';
+import { ArchiveRow } from '@/features/library/components/ArchiveRow';
+import { CollectionCount } from '@/features/library/components/CollectionCount';
 import { ResourceRow } from '@/features/catalog/ResourceRow';
 import { useSettings } from '@/stores/settings';
 import { space } from '@/theme';
@@ -12,6 +16,7 @@ export default function WikipediaScreen() {
   const { t } = useTranslation('library');
   const { t: tc } = useTranslation();
   const langs = useSettings((s) => s.contentLanguages);
+  const collection = useCollections().find((c) => c.key === WIKIPEDIA);
   return (
     <Screen>
       <View style={{ gap: space.xs, paddingTop: space.md }}>
@@ -19,7 +24,18 @@ export default function WikipediaScreen() {
         <Text variant="callout" color="textSecondary">
           {t('wikipediaPickBody')}
         </Text>
+        {collection ? <CollectionCount collection={collection} /> : null}
       </View>
+      {collection?.members.length ? (
+        <>
+          <SectionHeader title={t('onDevice')} />
+          <ListGroup>
+            {collection.members.map((item) => (
+              <ArchiveRow key={item.id} item={item} />
+            ))}
+          </ListGroup>
+        </>
+      ) : null}
       {(['es', 'en'] as const)
         .filter((l) => langs.includes(l))
         .map((lang) => (

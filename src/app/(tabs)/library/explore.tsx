@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { ArrowDown, Check, CloudOff } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,7 +29,9 @@ function toKiwixQuery(q: string): string | undefined {
 export default function ExploreScreen() {
   const { t } = useTranslation('library');
   const contentLangs = useSettings((s) => s.contentLanguages);
-  const [query, setQuery] = useState('');
+  // The Library search hands over what the person typed ("Search Kiwix for …").
+  const { q } = useLocalSearchParams<{ q?: string }>();
+  const [query, setQuery] = useState(q ?? '');
   const [lang, setLang] = useState<string>(contentLangs[0] ?? 'es');
   const [entries, setEntries] = useState<KiwixEntry[]>([]);
   const [loading, setLoading] = useState(false);

@@ -70,14 +70,15 @@ src/
     (tabs)/(home)/index      Home: network state, "En una emergencia" actions, downloads, "Tu preparación" checklist, continue carousel
     (tabs)/(home)/prepare/   index (hub, PDF export, offline guides), plan, kit; sheets:
                              entry (contact/number/person), meeting, item
-    (tabs)/library/          index (installed + Wikipedia + Courses + categories + import), category/[slug]
-                             (tiers), resource/[id] (sheet), wikipedia (size picker),
-                             explore (Kiwix OPDS search), courses (my courses + explore), course/[id] (syllabus)
+    (tabs)/library/          index (search block, "Seguir leyendo", collections, Kiwix + import), category/[slug]
+                             (on the device + tiers), resource/[id] (sheet), wikipedia (on the device + size picker),
+                             explore (Kiwix OPDS search, ?q=), courses (my courses + explore), course/[id] (syllabus),
+                             others (archives in no collection)
     (tabs)/maps/             index (full-screen map), sheets: regions ("Tus mapas"), pick (countries),
                              download (one country), markers, marker, search, emergency, route-steps
     (tabs)/assistant/        index (chat), models, conversations (sheet)
     reader/[itemId]          ZIM reader (?path=)
-    search                   global search across installed archives
+    search                   Library search (?q=): inside installed archives, then catalog matches, then Kiwix (online)
     downloads                downloads sheet
     settings/                settings (modal stack), country (picker), credits, packages, license (Credits)
     onboarding               setup wizard (full-screen modal)
@@ -425,6 +426,29 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
   `library/medical.ts` (`looksMedical`) to show the medical disclaimer for unknown archives.
 - `scripts/validate-catalog.mjs` checks the schema and that every URL resolves with the
   expected size. Edit the JSON by hand; keep ES and EN texts.
+- `search-core.ts` (`searchCatalog`): word search of titles and descriptions (accents and case
+  ignored, every query word starts a word, title matches first) for the Library search's
+  "Puedes descargarlo" layer. The catalog is bundled, so it works offline.
+
+### Library tab (`src/app/(tabs)/library`, `features/library/collections*.ts`)
+Organised by topic only (2026-11-02, proposal A of the library rethink): the search block
+(`SearchHero`, the tab's main action), suggested searches (`recent-searches.ts`: queries that led to an
+opened result, then starter words; no health words without health features), "Seguir leyendo" (the
+newest history entry whose archive is installed), the collections, then "Fuera del catálogo" (Kiwix
+explore, ZIM import).
+- `collections-core.ts` (pure, tested) files every installed ZIM in exactly one collection: courses →
+  `courses`; a resource listed in a category's tiers → the first such category in `COLLECTION_ORDER`
+  (so topical Wikipedias stay in medicine/computing); the catalog's `reference` resources or a
+  whole-Wikipedia Kiwix name (`wikipedia_<lang>_{all,top,100}…`) → `wikipedia`; the archive's own
+  `category` if it's one of ours; else `other` ("Otros archivos", shown only when not empty).
+- `collections.ts` (`useCollections`): per collection its members, `have/total` (catalog resources in
+  the content languages plus any extra member) and the hint for an empty one (essential pack size,
+  smallest Wikipedia). `openCollection(key)` routes to `category/[slug]`, `wikipedia`, `courses` or
+  `others`; each of those screens lists the archives on the device first (`ArchiveRow`: open, long
+  press to share or delete), then what can be downloaded.
+- `/search` (root stack) searches the installed archives (titles / full text, PDFs), then the catalog
+  (`searchCatalog`, minus what's installed, content languages only), then offers the same query in
+  Kiwix explore when online (`/library/explore?q=`).
 
 ### Onboarding kit (`src/app/onboarding.tsx`, `features/onboarding/kit.ts`)
 Welcome (crisis message, app language; content languages follow it: es → es+en, en → en)

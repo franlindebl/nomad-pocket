@@ -1,7 +1,8 @@
-# Opens the seeded "Wikipedia 100" archive in the reader from the Library tab.
+# Opens the seeded "Wikipedia 100" archive in the reader from the Library tab (its Wikipedia collection).
 appId: com.fjlinde.nomadpocket
 ---
 - tapOn: { id: "books.vertical" }
+- tapOn: { id: "collection-wikipedia" }
 - tapOn: "Wikipedia 100.*"
 - extendedWaitUntil:
     visible: "Buscar en este libro"

@@ -3,9 +3,10 @@ appId: com.fjlinde.nomadpocket
 ---
 - tapOn: { id: "books.vertical" }
 - scrollUntilVisible:
-    element: { id: "open-courses" }
+    element: { id: "collection-courses" }
     direction: DOWN
-- tapOn: { id: "open-courses" }
+    centerElement: true
+- tapOn: { id: "collection-courses" }
 - extendedWaitUntil:
     visible: "Mis cursos"
     timeout: 10000

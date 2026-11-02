@@ -12,6 +12,7 @@ export default function Layout() {
       <Stack.Screen name="category/[slug]" options={{ title: '', headerTransparent: true }} />
       <Stack.Screen name="wikipedia" options={{ title: tl('wikipedia') }} />
       <Stack.Screen name="explore" options={{ title: tl('explore') }} />
+      <Stack.Screen name="others" options={{ title: tl('other') }} />
       <Stack.Screen name="courses" options={{ title: '', headerTransparent: true }} />
       <Stack.Screen name="course/[id]" options={{ title: '', headerTransparent: true }} />
       <Stack.Screen

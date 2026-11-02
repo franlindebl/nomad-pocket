@@ -43,11 +43,11 @@
   "loading": "Abriendo…",
   "dismiss": "Cerrar",
   "globalSearch": "Buscar",
-  "globalPlaceholder": "Busca en todos tus libros",
+  "globalPlaceholder": "Busca en tus libros y en el catálogo",
   "inPdfs": "en sus PDF",
   "pdfPage": "{{title}} · pág. {{page}}",
-  "noArchives": "Aún no hay nada que buscar",
-  "noArchivesBody": "Descarga un libro desde la biblioteca y búscalo aquí, sin conexión.",
+  "noArchives": "Aún no tienes libros",
+  "noArchivesBody": "Escribe lo que buscas y verás qué puedes descargar para leerlo sin conexión.",
   "toc": "Índice",
   "tocEmpty": "Esta página no tiene secciones",
   "tocEmptyBody": "Las páginas cortas o las portadas no suelen tener índice.",
@@ -60,5 +60,11 @@
   "page": "Fondo",
   "pageDark": "Oscuro",
   "pagePaper": "Papel",
-  "pagePaperHint": "Texto oscuro sobre crema: más cómodo para leer mucho rato."
+  "pagePaperHint": "Texto oscuro sobre crema: más cómodo para leer mucho rato.",
+  "inYourBooks": "En tus libros",
+  "notInBooks": "No está en tus libros.",
+  "noArchivesYet": "Aún no tienes libros descargados.",
+  "canDownload": "Puedes descargarlo",
+  "searchKiwix": "Buscar «{{query}}» en Kiwix",
+  "searchKiwixBody": "Miles de archivos más · con conexión"
 }

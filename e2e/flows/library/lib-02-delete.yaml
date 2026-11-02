@@ -1,10 +1,15 @@
-# LIB-02 + LIB-05 — long-press offers Share and Delete; Delete asks first: Cancel keeps it, Delete removes
-# it; empty state at the end.
+# LIB-02 + LIB-05 — long-press on an archive (inside its collection) offers Share and Delete; Delete asks
+# first: Cancel keeps it, Delete removes it; the collections count it out. (The seeded course stays, so
+# the Library's empty state doesn't show: the courses collection still has it.)
 appId: com.fjlinde.nomadpocket
 tags: [smoke, library, seeded]
 ---
 - runFlow: ../../subflows/launch.yaml
 - tapOn: { id: "books.vertical" }
+- scrollUntilVisible:
+    element: { id: "collection-computing" }
+    centerElement: true
+- tapOn: { id: "collection-computing" }
 - longPressOn: "Documentación de Node.js.*"
 - assertVisible: "Compartir"
 - tapOn: "Eliminar"
@@ -15,11 +20,29 @@ tags: [smoke, library, seeded]
 - tapOn: "Eliminar"
 - tapOn: "Eliminar"
 - assertNotVisible: "Documentación de Node.js.*"
+- tapOn: { id: "BackButton" }
+- scrollUntilVisible:
+    element: { id: "collection-wikipedia" }
+    direction: UP
+    centerElement: true
+- tapOn: { id: "collection-wikipedia" }
 - longPressOn: "Wikipedia 100.*"
 - tapOn: "Eliminar"
 - tapOn: "Eliminar"
+- tapOn: { id: "BackButton" }
+- scrollUntilVisible:
+    element: { id: "collection-medicine" }
+    direction: UP
+    centerElement: true
+- tapOn: { id: "collection-medicine" }
 - longPressOn: ".*NHS.*|.*[Mm]edicines.*"
 - tapOn: "Eliminar"
 - tapOn: "Eliminar"
-- assertVisible: "Tu biblioteca está vacía"
-- takeScreenshot: 01-library-empty
+- tapOn: { id: "BackButton" }
+- scrollUntilVisible:
+    element: "Medicina, 0 de .*"
+    direction: UP
+- scrollUntilVisible:
+    element: "Informática y tecnología, 0 de .*"
+    centerElement: true
+- takeScreenshot: 01-library-after-delete

@@ -21,6 +21,9 @@ import { categoryHue, iconByName } from '@/features/catalog/icons';
 import { ResourceRow } from '@/features/catalog/ResourceRow';
 import { useContent } from '@/features/content/items';
 import { useDownloads } from '@/features/downloads/manager';
+import { useCollections } from '@/features/library/collections';
+import { ArchiveRow } from '@/features/library/components/ArchiveRow';
+import { CollectionCount } from '@/features/library/components/CollectionCount';
 import { formatBytes, formatMB } from '@/lib/format';
 import { freeBytes } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
@@ -35,6 +38,7 @@ export default function CategoryScreen() {
   const langs = useSettings((s) => s.contentLanguages);
   const recommended = category?.tiers.find((x) => x.recommended) ?? category?.tiers[0];
   const [tierSlug, setTierSlug] = useState(recommended?.slug);
+  const collection = useCollections().find((c) => c.key === slug);
   if (!category) return null;
   const tier = category.tiers.find((x) => x.slug === tierSlug) ?? category.tiers[0];
   const h = hue(category.hue ?? categoryHue(category.slug));
@@ -47,9 +51,21 @@ export default function CategoryScreen() {
         <Text variant="body" color="textSecondary">
           {loc(category.description)}
         </Text>
+        {collection ? <CollectionCount collection={collection} /> : null}
       </View>
 
-      <SectionHeader title={t('tiers')} />
+      {collection?.members.length ? (
+        <>
+          <SectionHeader title={t('onDevice')} />
+          <ListGroup>
+            {collection.members.map((item) => (
+              <ArchiveRow key={item.id} item={item} />
+            ))}
+          </ListGroup>
+        </>
+      ) : null}
+
+      <SectionHeader title={t('toDownload')} />
       <View style={{ gap: space.md }}>
         {category.tiers.map((x) => (
           <TierCard

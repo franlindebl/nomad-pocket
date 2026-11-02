@@ -4,7 +4,7 @@ tags: [full, library]
 ---
 - runFlow: ../../subflows/launch.yaml
 - tapOn: { id: "books.vertical" }
-- tapOn: "Wikipedia, Elige.*"
+- tapOn: { id: "collection-wikipedia" }
 - assertVisible: "Elige tu Wikipedia"
 - assertVisible: "Consulta rápida.*"
 - takeScreenshot: 01-wikipedia-picker

@@ -178,8 +178,15 @@ in their feature (`features/catalog/DownloadButton`, `features/courses/CourseCar
 - **Map:** the search bar is the map's main action: white label and a yellow magnifier, never a faint
   placeholder. The "© OpenStreetMap contributors" credit shows when the map first appears and fades
   after about five seconds or the first gesture; store screenshots of the map must show it.
-- **Catalog:** category hero → tier cards (Essential / Standard / Comprehensive) with
-  size, item count and a one-tap "Download pack".
+- **Library:** search first, as the tab's main action: a big block with a yellow magnifier and corner
+  marks, a white question ("¿Qué necesitas saber?") and a mono line saying what it searches ("dentro de
+  tus 7 libros · sin conexión"), so it never reads as a filter of the list below. Then suggested
+  searches (chips), "Seguir leyendo", the collections (one list, one row each: icon, name, what of it is
+  on the device, slanted segments and a mono "4/18") and "Fuera del catálogo". Everything is grouped by
+  topic only: never a separate "on the device" list.
+- **Collection:** hero (icon, name, "4 de 18 en tu dispositivo", segments) → the archives on the device
+  → "Para descargar": tier cards (Essential / Standard / Comprehensive) with size, item count and a
+  one-tap "Download pack".
 - **Detail:** title, publisher, language, size, date, description, single primary CTA
   that becomes a progress bar while downloading.
 - **Reader:** full-bleed content, minimal toolbar (back, forward, search,
