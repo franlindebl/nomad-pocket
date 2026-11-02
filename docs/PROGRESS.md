@@ -333,6 +333,12 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-02 — iOS build 36 to TestFlight
+
+- 1.1.0 (36), TestFlight only: build 35 plus the Library rethought (search first, collections by topic,
+  catalog and Kiwix results in the search) and the map following the user while browsing. Smoke E2E 21/21
+  on the Release build; archived with the store prebuild. Tagged `v1.1.0-36`.
+
 ### 2026-11-02 — Library rethought: search first, everything by topic
 The owner found the Library confusing: "En tu dispositivo" (by state), "Wikipedia" holding Courses (by
 source) and "Colecciones" (by topic, but really the download catalog) mixed three criteria, and the search
