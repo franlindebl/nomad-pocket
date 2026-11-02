@@ -11,7 +11,7 @@ import {
 } from '@maplibre/maplibre-react-native';
 import * as Location from '@/lib/location';
 import { router, useNavigation } from 'expo-router';
-import { Layers, LocateFixed, MapPin, Navigation, Navigation2, Route, Search } from 'lucide-react-native';
+import { Layers, Locate, LocateFixed, MapPin, Navigation, Navigation2, Route, Search } from 'lucide-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Linking, StyleSheet, View } from 'react-native';
@@ -53,6 +53,10 @@ const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: 
 const TAP_SLOP = 16;
 /** Half the side (pt) of the box searched for the tapped place's street: tap-core keeps one within 60 m. */
 const STREET_SLOP = 120;
+/** The camera's flight to the user ("my location", opening the map); following starts when it lands. */
+const FLY_MS = 1200;
+/** Navigating, the map looked around by hand goes back to following the user after this long untouched. */
+const RECENTER_MS = 12_000;
 
 /** The basemap's style layers a tap reads, by kind (style.ts names them "<source>:<protomaps layer>"). */
 function tapLayers(style: { layers: { id: string }[] }) {
@@ -129,12 +133,38 @@ export default function MapScreen() {
   // or pinched since (then they are looking somewhere on purpose).
   const openedRef = useRef(false);
   const [openFix, setOpenFix] = useState<{ lat: number; lon: number } | null>(null);
+  const flewOnOpen = useRef(false);
   const [moved, setMoved] = useState(false);
   // Navigation view ("Iniciar"): the camera follows the user, the way ahead up
   // (FollowCamera), until the user pans the map. Per trip: it holds the target.
   const [touchedFor, setTouchedFor] = useState<typeof target>(null);
   const following = navigating && !!target && touchedFor !== target;
   const followingRef = useRef(false);
+  // Browsing (no trip): the camera keeps the user centred as they move (MapLibre's own tracking, so a
+  // pinch zooms around them and keeps it), from when it lands on them until a pan, which the native
+  // side reports through onTrackUserLocationChange. Any other move of ours turns it off first: on
+  // Android a tracking camera would pull the map back to the user at the next fix (aside()).
+  const [tracking, setTracking] = useState(false);
+  const trackUser = tracking && !target;
+  const trackUserRef = useRef(false);
+  const pendingMove = useRef<(() => void) | null>(null);
+  const followTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** When the user last panned, pinched or turned the map (ms). */
+  const touchedAt = useRef(0);
+  useEffect(() => {
+    trackUserRef.current = trackUser;
+    // Tracking is off on the native side now: the move that waited for it can run.
+    const move = pendingMove.current;
+    if (trackUser || !move) return;
+    pendingMove.current = null;
+    move();
+  }, [trackUser]);
+  useEffect(
+    () => () => {
+      if (followTimer.current) clearTimeout(followTimer.current);
+    },
+    [],
+  );
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [panelHeight, setPanelHeight] = useState(0);
   const [bannerHeight, setBannerHeight] = useState(0);
@@ -234,11 +264,13 @@ export default function MapScreen() {
 
   useEffect(() => {
     if (!request || !cameraRef.current) return;
-    if ('bounds' in request) {
-      cameraRef.current.fitBounds(request.bounds, { padding: { top: 80, bottom: 80, left: 40, right: 40 }, duration: 900 });
-    } else {
-      cameraRef.current.flyTo({ center: request.center, zoom: request.zoom ?? 15, duration: 1200 });
-    }
+    aside(() => {
+      if ('bounds' in request) {
+        cameraRef.current?.fitBounds(request.bounds, { padding: { top: 80, bottom: 80, left: 40, right: 40 }, duration: 900 });
+      } else {
+        cameraRef.current?.flyTo({ center: request.center, zoom: request.zoom ?? 15, duration: 1200 });
+      }
+    });
   }, [request]);
 
   const markerData = useMemo(() => markersGeoJSON(markers), [markers]);
@@ -367,8 +399,19 @@ export default function MapScreen() {
     followingRef.current = following;
   }, [following, target]);
 
+  // Navigating and looking around by hand (a pan, "overview"): back to following once the map has been
+  // left alone a while, like Google Maps; a driver shouldn't have to find "Recentrar".
+  useEffect(() => {
+    if (!navigating || following) return;
+    const timer = setInterval(() => {
+      if (Date.now() - touchedAt.current >= RECENTER_MS) setTouchedFor(null);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [navigating, following]);
+
   /** The whole trip, flat and north up. */
   async function overview() {
+    touchedAt.current = Date.now();
     setTouchedFor(target);
     const box =
       route?.bbox ??
@@ -385,7 +428,43 @@ export default function MapScreen() {
     cameraRef.current?.fitBounds([...box], { padding: tripPadding, duration: 700 });
   }
 
+  /** Starts following the user after `ms` (a camera move on its way), unless they touch the map meanwhile. */
+  function followAfter(ms: number) {
+    if (followTimer.current) clearTimeout(followTimer.current);
+    const asked = Date.now();
+    followTimer.current = setTimeout(() => {
+      followTimer.current = null;
+      // Not with a trip on the map: its own camera rules there, and following would come back when it ends.
+      if (touchedAt.current < asked && !useGuidance.getState().target) setTracking(true);
+    }, ms);
+  }
+
+  /** A camera move away from the user: following stops first (and a pending start is dropped). */
+  function aside(move: () => void) {
+    if (followTimer.current) clearTimeout(followTimer.current);
+    followTimer.current = null;
+    if (!trackUserRef.current) return move();
+    pendingMove.current = move;
+    setTracking(false);
+  }
+
+  /** Flies to the user and follows them once there. */
+  function goToUser(lon: number, lat: number, minZoom: number) {
+    const zoom = Math.max(useMapUi.getState().viewport?.zoom ?? 0, minZoom);
+    aside(() => cameraRef.current?.flyTo({ center: [lon, lat], zoom, duration: FLY_MS }));
+    followAfter(FLY_MS);
+  }
+
+  /** North up again; a map following the user goes on following. */
+  function north() {
+    const wasTracking = trackUserRef.current;
+    aside(() => cameraRef.current?.setStop({ bearing: 0, duration: 400, easing: 'ease' }));
+    if (wasTracking) followAfter(400);
+  }
+
   async function locate() {
+    // Already on the user and following them: the button is lit, nothing to do.
+    if (trackUserRef.current) return;
     let perm = await Location.getForegroundPermissionsAsync();
     if (!perm.granted && perm.canAskAgain) perm = await Location.requestForegroundPermissionsAsync();
     if (!perm.granted) {
@@ -401,8 +480,7 @@ export default function MapScreen() {
       const pos =
         (await Location.getLastKnownPositionAsync({ maxAge: 60_000 })) ??
         (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }));
-      const zoom = Math.max(useMapUi.getState().viewport?.zoom ?? 0, 14);
-      cameraRef.current?.flyTo({ center: [pos.coords.longitude, pos.coords.latitude], zoom, duration: 1200 });
+      goToUser(pos.coords.longitude, pos.coords.latitude, 14);
     } catch {
       Alert.alert(t('location.unavailable'));
     } finally {
@@ -428,15 +506,16 @@ export default function MapScreen() {
     })().catch((e) => console.warn('[maps] cannot show the user on open', e));
   }, [tabFocused, style]);
   useEffect(() => {
-    // Set once per mount.
-    if (!openFix) return;
+    // Set once per mount. The fix can beat the native map's loading (Android): a flight before that is
+    // dropped, and following would then start on the whole world.
+    if (!openFix || !mapLoaded || flewOnOpen.current) return;
+    flewOnOpen.current = true;
     // While the fix came, the user moved the map, opened a place or started a trip.
     if (moved || request || target) return;
-    const zoom = Math.max(useMapUi.getState().viewport?.zoom ?? 0, 13);
-    cameraRef.current?.flyTo({ center: [openFix.lon, openFix.lat], zoom, duration: 1200 });
-    // Only when the fix arrives.
+    goToUser(openFix.lon, openFix.lat, 13);
+    // Only when the fix arrives and the map is ready.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [openFix]);
+  }, [openFix, mapLoaded]);
 
   // Until the camera has reached the user, the map's own dot shows where they are (the arrow sits at
   // the screen's following point, where they will be once it arrives).
@@ -459,12 +538,17 @@ export default function MapScreen() {
           onDidFinishLoadingMap={() => setMapLoaded(true)}
           onRegionWillChange={safe((e) => {
             if (!e.nativeEvent.userInteraction) return;
+            touchedAt.current = Date.now();
             setMoved(true);
             setCredit(false);
             // A pan or a pinch: the user wants to look around, stop following.
             if (navigating) setTouchedFor(target);
           })}
-          onRegionIsChanging={safe((e) => setBearing(Number(e.nativeEvent.bearing)))}
+          onRegionIsChanging={safe((e) => {
+            // A long drag keeps the navigation camera from coming back mid-gesture.
+            if (e.nativeEvent.userInteraction) touchedAt.current = Date.now();
+            setBearing(Number(e.nativeEvent.bearing));
+          })}
           onRegionDidChange={safe((e) => {
             const { center, zoom, bounds, bearing: b } = e.nativeEvent;
             setBearing(Number(b));
@@ -481,7 +565,16 @@ export default function MapScreen() {
             const [lon, lat] = e.nativeEvent.lngLat;
             router.push({ pathname: '/maps/marker', params: { lat: String(lat), lon: String(lon) } });
           })}>
-          <Camera ref={cameraRef} initialViewState={initialView} maxZoom={19} />
+          <Camera
+            ref={cameraRef}
+            initialViewState={initialView}
+            maxZoom={19}
+            trackUserLocation={trackUser ? 'default' : undefined}
+            onTrackUserLocationChange={safe((e) => {
+              // A pan (or a move of the map's own) ended it on the native side.
+              if (!e.nativeEvent.trackUserLocation) setTracking(false);
+            })}
+          />
           {/* Following: the arrow (FollowArrow) stands for the user, once the camera is on them. */}
           {showUser && !arrived ? <NativeUserLocation /> : null}
           {showUser && tabFocused && !arrived ? <HeadingBeam /> : null}
@@ -680,7 +773,7 @@ export default function MapScreen() {
         {Math.abs(bearing) > 1 && !following ? (
           <MapFab
             accessibilityLabel={t('controls.north')}
-            onPress={() => cameraRef.current?.setStop({ bearing: 0, duration: 400, easing: 'ease' })}>
+            onPress={north}>
             <View style={{ transform: [{ rotate: `${-bearing}deg` }] }}>
               <Navigation2 size={21} color={hues.medicine} fill={hues.medicine} strokeWidth={1.5} />
             </View>
@@ -702,8 +795,20 @@ export default function MapScreen() {
         {following ? (
           <MapFab testID="map-overview" icon={Route} accessibilityLabel={t('controls.overview')} onPress={overview} />
         ) : (
-          <MapFab accessibilityLabel={t('controls.locate')} onPress={locate} active={showUser}>
-            {locating ? <ActivityIndicator color={colors.accent} /> : <LocateFixed size={21} color={showUser ? colors.accent : colors.text} />}
+          // Lit while the map follows the user (pressing it then does nothing), plain once they look elsewhere.
+          <MapFab
+            testID="map-locate"
+            accessibilityLabel={t('controls.locate')}
+            onPress={locate}
+            selected={trackUser}
+            style={trackUser ? { borderColor: colors.accent, borderWidth: 2 } : undefined}>
+            {locating ? (
+              <ActivityIndicator color={colors.accent} />
+            ) : trackUser ? (
+              <LocateFixed size={21} color={colors.accent} strokeWidth={2.4} />
+            ) : (
+              <Locate size={21} color={colors.text} strokeWidth={2} />
+            )}
           </MapFab>
         )}
       </View>

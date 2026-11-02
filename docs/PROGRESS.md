@@ -333,6 +333,23 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-02 — Map follows the user; navigation recentres itself
+
+- Owner: the map opened on the user but stayed put as they moved. Now, once the camera lands on them (on open or
+  "my location"), it follows them with MapLibre's own tracking until they pan; the button is lit while following
+  (accent border, `selected`; pressing it then does nothing) and plain once they look elsewhere, pressing it flies
+  back and follows again. Lit rather than disabled (owner asked; a greyed button reads as "no GPS"). A pinch keeps
+  following. Search results, places and regions turn following off before moving (`aside()`: on Android a tracking
+  camera would pull the map back at the next fix); "north" keeps it. Never with a trip on the map.
+- Navigating, a pan (or the overview) no longer stays forever: 12 s untouched (`RECENTER_MS`) and the camera follows
+  again, like Google Maps; a long drag keeps it away.
+- The flight to the user on open now waits for the native map to load: on Android the fix came first and the flight
+  was dropped (the map stayed on the whole world).
+- Checked on the iOS 27 simulator and the Android emulator (simulated drive; on Android a `gps` test provider fed by
+  `adb shell cmd location providers set-test-provider-location`, since a provider Maestro left mocked ignores
+  `adb emu geo fix`): opens on the user and follows, a pan stops it, "my location" resumes, a coordinates search
+  moves away and stays; navigating, "Recentrar" goes away by itself after ~12 s.
+
 ### 2026-11-02 — iOS build 35 to TestFlight
 
 - 1.1.0 (35), TestFlight only: build 34 plus actions in white instead of grey (map search bar, search fields,

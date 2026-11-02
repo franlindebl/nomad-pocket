@@ -1056,7 +1056,8 @@ came for 10 s while moving (standing brings none: the 3 m filter); on foot and b
 native puck and the map's beam hide meanwhile. "Norte arriba" (`map-north-up`, persisted
 `navNorthUp`) keeps the map north up and turns the arrow with the direction of travel; its FAB
 shows where north is. A pan/pinch (`onRegionWillChange` with `userInteraction`) stops following for
-that trip (`Recentrar` pill brings it back); the route button in the FAB column
+that trip (`Recentrar` pill brings it back, and so does leaving the map untouched for 12 s,
+`RECENTER_MS`, like Google Maps; the overview counts as a touch); the route button in the FAB column
 (replacing "my location") shows the whole trip flat and north-up. Stopping guidance
 flattens the map. Following = `navigating` and not panned on this trip (`touchedFor`
 holds the target).
@@ -1111,6 +1112,15 @@ owner on 2026-10-26.
 location (only while undetermined; the setup wizard never asks) and flies to the user, unless
 they panned, a place was opened or a trip is set meanwhile. Search ranks and measures from the
 map's centre, so it starts from the user too.
+**Following the user while browsing**: once the camera lands on the user (on open, or "my location",
+`map-locate`) it follows them as they move with MapLibre's own `trackUserLocation="default"` (a pinch
+zooms around the user and keeps it; the bearing stays the user's). A pan ends it on the native side,
+reported by `onTrackUserLocationChange`; the button is then plain again, lit (accent border,
+`selected`) while following, and pressing it lit does nothing. Every other camera move of ours away
+from the user (a search result, a place, a region) goes through `aside()`, which turns tracking off and
+moves once that has rendered: on Android a tracking camera pulls the map back to the user at the next
+fix. "North" keeps following. Never with a trip on the map (`trackUser = tracking && !target`): the
+navigation camera below is ours, not this one.
 **Map screen extras**: search pill (opens `maps/search`), red Emergencias FAB
 (`maps/emergency`, also from a Home card via `unstable_settings.initialRouteName`), GeoJSON
 layers for emergency points (category colours, labels from z15, tap → place card), the
