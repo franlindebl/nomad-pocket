@@ -333,6 +333,15 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-02 — New app icon and splash: the compass in black and yellow
+
+- Two rounds of proposals (artifacts: four directions, then compass and radiation-trefoil variants); the owner chose
+  "B · Brújula": the existing compass idea redrawn in the new look (grey graduated bezel, yellow north half, outline
+  south half, near-black). The radiation trefoil was dropped (it reads "nuclear" before "survival").
+- `scripts/brand/make-icons.py` draws every asset from one vector source: Icon Composer layers + `icon.json` fill,
+  `icon.png` (opaque), Android adaptive foreground/background/monochrome (adaptive background colour `#0C0C0C` in
+  `app.json`), notification icon, splash glyph, site icon and favicon.
+
 ### 2026-11-02 — Reader: optional paper page (dark text on cream)
 
 - Owner: with the app dark only, long reading should have a more comfortable option; dark stays the default. Research

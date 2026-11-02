@@ -113,6 +113,12 @@ Numbers that change (sizes, percentages, progress) use `fontVariant: ['tabular-n
   sizes 16 / 20 / 24. The assistant is a message icon (`MessageSquareText`), never sparkles.
 - Tab bar: native icons (SF Symbols on iOS, Material Symbols on Android) via Expo
   Router `NativeTabs`, tinted yellow; the bar keeps Liquid Glass / Material 3.
+- **App icon and splash** ("B · Brújula", owner's pick 2026-11-02): a graduated grey bezel, the north half of the
+  needle in signal yellow, the south half in outline, on `#0C0C0C`. One vector source,
+  `scripts/brand/make-icons.py` (cairosvg + Pillow), writes the iOS 26 Icon Composer layers
+  (`assets/expo.icon/Assets/{ring,needle}.svg`; the fill colour is in `icon.json`), `icon.png`, the Android adaptive
+  layers (foreground shrunk into the safe circle) and monochrome, the notification icon (no ticks), the splash glyph
+  and the site's icon/favicon. Rerun it after changing the design or the colours, then prebuild.
 - Category icons sit in an **IconBadge**: a 40×40 square, `bg` fill, 1 px `outline`, the icon stroked
   in the category hue.
 
