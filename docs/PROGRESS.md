@@ -333,6 +333,12 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-02 — iOS build 35 to TestFlight
+
+- 1.1.0 (35), TestFlight only: build 34 plus actions in white instead of grey (map search bar, search fields,
+  placeholders, composer toggle, segmented options). Smoke E2E with `--build`; archived with the store prebuild.
+  Tagged `v1.1.0-35`.
+
 ### 2026-11-02 — Grey only for secondary text; actions in white
 
 - Owner: the map's search bar was hard to read (the faintest grey, 2.9:1) although it is the map's main action; greys

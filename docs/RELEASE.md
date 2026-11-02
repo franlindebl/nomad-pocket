@@ -24,7 +24,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 
 - Marketing version: `expo.version` (currently **1.1.0**). Keep `package.json`'s
   `version` equal (not used by the build, but it's what people read).
-- iOS build number: `expo.ios.buildNumber` (currently **"34"**) → `CFBundleVersion`. Bump it
+- iOS build number: `expo.ios.buildNumber` (currently **"35"**) → `CFBundleVersion`. Bump it
   for every upload: App Store Connect rejects a build number it has already seen.
 - Android: `expo.android.versionCode` (currently **26**: 23 and 24 went to Play internal testing, 24 to the rejected closed test; 25 is the build without health features, superseded before review; 26 adds the assistant's no-health fixes). Must grow
   with every Play upload.
@@ -66,6 +66,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.1.0 | 32 | TestFlight 2026-11-01 (TestFlight only): build 31 plus guide answers that "search" for 2 s and show from their top; archived from a clean worktree |
 | 1.1.0 | 33 | TestFlight 2026-11-01 (TestFlight only): build 32 plus Wikipedia variants already held by an installed bigger one shown as "Incluida" (no duplicate download); archived from a clean worktree |
 | 1.1.0 | 34 | TestFlight 2026-11-02 (TestFlight only): build 33 plus the new look "Precisión" (dark only, black and signal yellow, square panels with corner marks, cut corners on key controls, Chakra Petch + IBM Plex), the compass icon and splash redrawn to match, and an optional paper page in the reader (dark text on cream) |
+| 1.1.0 | 35 | TestFlight 2026-11-02 (TestFlight only): build 34 plus actions in white instead of grey (the map's search bar with a yellow magnifier, search fields, placeholders, the composer's toggle, unselected options) |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.
