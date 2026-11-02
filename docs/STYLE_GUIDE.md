@@ -10,7 +10,7 @@ capitals) and never the cream-and-orange look of AI-generated apps it replaced.
 
 **The app is dark only.** `app.json` fixes `userInterfaceStyle: "dark"`, there is no appearance setting,
 and the theme has one palette (`useTheme()` returns it; `scheme` is always `'dark'`). The reader shows
-archives with its dark CSS (invert, media re-inverted).
+archives with its dark CSS (invert, media re-inverted) unless the person turns on **paper** (below).
 
 All tokens live in `src/theme/tokens.ts`. Never hard-code a color, size or radius in
 a screen — use the theme.
@@ -171,7 +171,15 @@ in their feature (`features/catalog/DownloadButton`, `features/courses/CourseCar
 - **Detail:** title, publisher, language, size, date, description, single primary CTA
   that becomes a progress bar while downloading.
 - **Reader:** full-bleed content, minimal toolbar (back, forward, search,
-  bookmark, text size, more — the table of contents lives in More). Auto-hiding on scroll is planned, not built yet.
+  bookmark, text and page, more — the table of contents lives in More). Auto-hiding on scroll is planned, not built yet.
+  The "Texto y fondo" popover holds the text size and the **page**: *Oscuro* (default) or *Papel*, near-black text
+  on cream `#F2E6CE` (`paper` token; `readerPaper` setting). Why paper looks like this (owner asked for the research,
+  2026-11-02): dark text on a light background reads better than light on dark, for all ages and above all with small
+  text (Piepenbrock, Mayr & Buchner, *Ergonomics* 2013 and 2014: the "positive polarity advantage"); warm
+  backgrounds (peach, orange, yellow) improved reading over cool ones for readers with and without dyslexia
+  (Rello & Bigham, ASSETS 2017, 341 Spanish speakers); the British Dyslexia Association advises against pure white
+  (glare) in favour of cream or off-white. There is no peer-reviewed evidence for sepia as such: the cream is a
+  warm, not-white page, not a "sepia filter". The toolbar stays dark.
 - **Sheets** (`formSheet`) for pickers and confirmations instead of alerts.
 - **Wide screens (iPad):** content is a centred column of `layout.maxContentWidth` (720 pt).
   `Screen` does it; screens with their own `ScrollView`/`FlatList` spread `layout.column`

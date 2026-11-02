@@ -4,7 +4,7 @@ tags: [full, reader, seeded]
 ---
 - runFlow: ../../subflows/launch.yaml
 - runFlow: ../../subflows/open-wikipedia.yaml
-- tapOn: "Tamaño del texto"
+- tapOn: "Texto y fondo"
 - tapOn: "Texto más grande"
 - tapOn: "Texto más grande"
 - takeScreenshot: 01-text-larger

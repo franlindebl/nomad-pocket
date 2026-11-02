@@ -134,6 +134,7 @@ class NomadZimModule : Module() {
       Prop("archiveId") { view: ZimWebView, id: String? -> view.archiveId = id }
       Prop("path") { view: ZimWebView, path: String? -> view.requestedPath = path }
       Prop("darkMode") { view: ZimWebView, on: Boolean? -> view.setDarkMode(on ?: false) }
+      Prop("paperMode") { view: ZimWebView, on: Boolean? -> view.setPaperMode(on ?: false) }
       Prop("textZoom") { view: ZimWebView, percent: Double? -> view.setTextZoom((percent ?: 100.0).toInt()) }
 
       OnViewDidUpdateProps { view: ZimWebView -> view.loadRequestedIfNeeded() }

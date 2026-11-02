@@ -45,6 +45,9 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
 
   @Volatile
   private var darkMode = false
+
+  @Volatile
+  private var paperMode = false
   private var zoomPercent = 100
   private var lastPayload: Map<String, Any?> = emptyMap()
 
@@ -171,6 +174,14 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
     if (on == darkMode) return
     darkMode = on
     webView.evaluateJavascript(if (on) ENABLE_DARK_JS else DISABLE_DARK_JS, null)
+    webView.evaluateJavascript(if (paperMode && !on) ENABLE_PAPER_JS else DISABLE_PAPER_JS, null)
+  }
+
+  /** Warm "paper" page for reading (dark text on cream). Dark mode wins when both are on. */
+  fun setPaperMode(on: Boolean) {
+    if (on == paperMode) return
+    paperMode = on
+    webView.evaluateJavascript(if (on && !darkMode) ENABLE_PAPER_JS else DISABLE_PAPER_JS, null)
   }
 
   fun setTextZoom(percent: Int) {
@@ -293,7 +304,7 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
 
       if (mime == "text/html" && request.isForMainFrame) {
         val html = h.data(info.path) ?: return notFound()
-        val body = injectStyles(String(html, Charsets.UTF_8), darkMode).toByteArray(Charsets.UTF_8)
+        val body = injectStyles(String(html, Charsets.UTF_8), darkMode, paperMode).toByteArray(Charsets.UTF_8)
         headers["Content-Length"] = body.size.toString()
         return WebResourceResponse(mime, encoding, 200, "OK", headers, ByteArrayInputStream(body))
       }
@@ -387,6 +398,12 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
       "html:not([data-nomad-native-dark]){filter:invert(1) hue-rotate(180deg)!important;background:#fff!important}" +
         "html:not([data-nomad-native-dark]) :is(img:not(.mwe-math-fallback-image-inline):not(.mwe-math-fallback-image-display):not([src$=\".svg\" i]):not([src*=\".svg?\" i]),picture,video,canvas,iframe,embed,object,svg image,[style*=\"background-image\"]){filter:invert(1) hue-rotate(180deg)!important}"
 
+    // Paper mode: a cream sheet multiplied over the page. White turns cream, black text stays black and every
+    // authored colour keeps its hue, so archives need no per-site rules (docs/STYLE_GUIDE.md, Reader).
+    private const val PAPER_CSS =
+      "html{background:#fff!important}" +
+        "html::after{content:\"\";position:fixed;top:0;left:0;right:0;bottom:0;background:#F2E6CE;mix-blend-mode:multiply;pointer-events:none;z-index:2147483647}"
+
     // Always on. Image-less archives ("nopic" Wikipedia) keep each image as a transparent SVG of its
     // size inside its bordered frame: empty boxes all over the article. Hide those placeholders and
     // the frames (figures, template table cells) that hold nothing else: a caption says little without its picture.
@@ -417,10 +434,18 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
 
     private const val DISABLE_DARK_JS = "(function(){var s=document.getElementById('nomad-dark');if(s)s.remove();})();"
 
+    private const val ENABLE_PAPER_JS =
+      "(function(){if(document.getElementById('nomad-paper'))return;var s=document.createElement('style');s.id='nomad-paper';" +
+        "s.textContent=" + "'" + PAPER_CSS + "'" + ";(document.head||document.documentElement).appendChild(s);})();"
+
+    private const val DISABLE_PAPER_JS = "(function(){var s=document.getElementById('nomad-paper');if(s)s.remove();})();"
+
     private val HEAD_TAG = Regex("<head[^>]*>", RegexOption.IGNORE_CASE)
 
-    fun injectStyles(html: String, dark: Boolean): String {
-      val style = "<style id=\"nomad-base\">$BASE_CSS</style>" + if (dark) "<style id=\"nomad-dark\">$DARK_CSS</style>" else ""
+    fun injectStyles(html: String, dark: Boolean, paper: Boolean = false): String {
+      val style = "<style id=\"nomad-base\">$BASE_CSS</style>" +
+        (if (dark) "<style id=\"nomad-dark\">$DARK_CSS</style>" else "") +
+        (if (paper && !dark) "<style id=\"nomad-paper\">$PAPER_CSS</style>" else "")
       val m = HEAD_TAG.find(html) ?: return style + html
       return html.substring(0, m.range.last + 1) + style + html.substring(m.range.last + 1)
     }

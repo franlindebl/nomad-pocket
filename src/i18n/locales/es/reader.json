@@ -5,7 +5,7 @@
   "searchArchivePlaceholder": "Buscar en {{title}}",
   "bookmark": "Guardar",
   "removeBookmark": "Quitar de guardados",
-  "textSize": "Tamaño del texto",
+  "textSize": "Texto y fondo",
   "smaller": "Texto más pequeño",
   "larger": "Texto más grande",
   "resetSize": "Restablecer",
@@ -55,5 +55,10 @@
   "collectionFiles_one": "{{count}} archivo",
   "collectionFiles_other": "{{count}} archivos",
   "noViewer": "Ninguna app puede abrir este PDF",
-  "noViewerBody": "Instala un lector de PDF en este dispositivo para leerlo."
+  "noViewerBody": "Instala un lector de PDF en este dispositivo para leerlo.",
+  "textSizeLabel": "Tamaño del texto",
+  "page": "Fondo",
+  "pageDark": "Oscuro",
+  "pagePaper": "Papel",
+  "pagePaperHint": "Texto oscuro sobre crema: más cómodo para leer mucho rato."
 }

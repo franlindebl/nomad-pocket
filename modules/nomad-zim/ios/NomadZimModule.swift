@@ -129,6 +129,9 @@ public final class NomadZimModule: Module {
       Prop("darkMode") { (view: ZimWebView, on: Bool?) in
         view.setDarkMode(on ?? false)
       }
+      Prop("paperMode") { (view: ZimWebView, on: Bool?) in
+        view.setPaperMode(on ?? false)
+      }
       Prop("textZoom") { (view: ZimWebView, percent: Double?) in
         view.setTextZoom(Int(percent ?? 100))
       }

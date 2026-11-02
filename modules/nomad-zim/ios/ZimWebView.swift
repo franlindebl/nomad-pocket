@@ -24,6 +24,7 @@ final class ZimWebView: ExpoView, WKNavigationDelegate, WKUIDelegate {
   private var loadedArchiveId: String?
   private var loadedRequestedPath: String??
   private var darkMode = false
+  private var paperMode = false
   private var textZoom = 100
   private var lastNavigationPayload: [String: AnyHashable] = [:]
   /// Loads wait for the offline content rule list (compiled once per launch, async).
@@ -145,6 +146,14 @@ final class ZimWebView: ExpoView, WKNavigationDelegate, WKUIDelegate {
     webView.evaluateJavaScript("window.__nomadSetDark && window.__nomadSetDark(\(on));", completionHandler: nil)
   }
 
+  /// Warm "paper" page for reading (dark text on cream). Dark mode wins when both are on.
+  func setPaperMode(_ on: Bool) {
+    guard on != paperMode else { return }
+    paperMode = on
+    installUserScripts()
+    webView.evaluateJavaScript("window.__nomadSetPaper && window.__nomadSetPaper(\(on));", completionHandler: nil)
+  }
+
   func setTextZoom(_ percent: Int) {
     let value = max(50, min(300, percent))
     guard value != textZoom else { return }
@@ -156,7 +165,7 @@ final class ZimWebView: ExpoView, WKNavigationDelegate, WKUIDelegate {
   private func installUserScripts() {
     let controller = webView.configuration.userContentController
     controller.removeAllUserScripts()
-    let source = ZimWebScripts.bootstrap(dark: darkMode, zoom: textZoom)
+    let source = ZimWebScripts.bootstrap(dark: darkMode, paper: paperMode, zoom: textZoom)
     controller.addUserScript(WKUserScript(source: source, injectionTime: .atDocumentStart, forMainFrameOnly: true))
     controller.addUserScript(WKUserScript(source: "window.__nomadApply && window.__nomadApply();", injectionTime: .atDocumentEnd, forMainFrameOnly: true))
   }
@@ -395,6 +404,14 @@ enum ZimWebScripts {
   html:not([data-nomad-native-dark]) :is(img:not(.mwe-math-fallback-image-inline):not(.mwe-math-fallback-image-display):not([src$=".svg" i]):not([src*=".svg?" i]),picture,video,canvas,iframe,embed,object,svg image,[style*="background-image"]){filter:invert(1) hue-rotate(180deg)!important}
   """
 
+  /// CSS for paper mode: a cream sheet multiplied over the page. White turns cream, black text stays
+  /// black and every authored colour keeps its hue, so archives need no per-site rules. Studies favour
+  /// dark text on a light, warm, not pure white background (docs/STYLE_GUIDE.md, Reader).
+  static let paperCSS = """
+  html{background:#fff!important}
+  html::after{content:"";position:fixed;top:0;left:0;right:0;bottom:0;background:#F2E6CE;mix-blend-mode:multiply;pointer-events:none;z-index:2147483647}
+  """
+
   /// Always on. Image-less archives ("nopic" Wikipedia) keep each image as a transparent SVG of its
   /// size inside its bordered frame: empty boxes all over the article. Hide those placeholders and
   /// the frames (figures, template table cells) that hold nothing else: a caption says little without its picture.
@@ -404,13 +421,15 @@ enum ZimWebScripts {
   td:has(> figure:only-child img[src*="alt-text-clip"]):not(:has(img:not([src*="alt-text-clip"]))){display:none!important}
   """
 
-  static func bootstrap(dark: Bool, zoom: Int) -> String {
+  static func bootstrap(dark: Bool, paper: Bool, zoom: Int) -> String {
     let css = darkCSS.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "`", with: "\\`")
+    let paperCss = paperCSS.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "`", with: "\\`")
     let base = baseCSS.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "`", with: "\\`")
     return """
     (function(){
-      var state = { dark: \(dark), zoom: \(zoom) };
+      var state = { dark: \(dark), paper: \(paper), zoom: \(zoom) };
       var css = `\(css)`;
+      var paperCss = `\(paperCss)`;
       var baseCss = `\(base)`;
       // Background luminance of the page as authored (our style off), or null when unknown.
       function pageLuminance(el){
@@ -432,6 +451,12 @@ enum ZimWebScripts {
           if (lum !== null) document.documentElement.toggleAttribute('data-nomad-native-dark', lum < 0.2);
         } else if (el) { el.remove(); }
       }
+      function applyPaper(){
+        var el = document.getElementById('nomad-paper');
+        if (state.paper && !state.dark) {
+          if (!el) { el = document.createElement('style'); el.id = 'nomad-paper'; el.textContent = paperCss; (document.head || document.documentElement).appendChild(el); }
+        } else if (el) { el.remove(); }
+      }
       function applyBase(){
         if (document.getElementById('nomad-base')) return;
         var el = document.createElement('style'); el.id = 'nomad-base'; el.textContent = baseCss;
@@ -442,8 +467,9 @@ enum ZimWebScripts {
         root.style.webkitTextSizeAdjust = state.zoom + '%';
         root.style.textSizeAdjust = state.zoom + '%';
       }
-      window.__nomadApply = function(){ applyBase(); applyDark(); applyZoom(); };
-      window.__nomadSetDark = function(on){ state.dark = !!on; applyDark(); };
+      window.__nomadApply = function(){ applyBase(); applyDark(); applyPaper(); applyZoom(); };
+      window.__nomadSetDark = function(on){ state.dark = !!on; applyDark(); applyPaper(); };
+      window.__nomadSetPaper = function(on){ state.paper = !!on; applyPaper(); };
       window.__nomadSetZoom = function(z){ state.zoom = z; applyZoom(); };
       window.__nomadApply();
       // Stylesheets may finish after DOMContentLoaded: check the page background again.

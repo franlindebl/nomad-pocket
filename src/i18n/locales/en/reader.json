@@ -5,7 +5,7 @@
   "searchArchivePlaceholder": "Search {{title}}",
   "bookmark": "Bookmark",
   "removeBookmark": "Remove bookmark",
-  "textSize": "Text size",
+  "textSize": "Text and page",
   "smaller": "Smaller text",
   "larger": "Larger text",
   "resetSize": "Reset",
@@ -55,5 +55,10 @@
   "collectionFiles_one": "{{count}} file",
   "collectionFiles_other": "{{count}} files",
   "noViewer": "No app can open this PDF",
-  "noViewerBody": "Install a PDF reader on this device to read it."
+  "noViewerBody": "Install a PDF reader on this device to read it.",
+  "textSizeLabel": "Text size",
+  "page": "Page",
+  "pageDark": "Dark",
+  "pagePaper": "Paper",
+  "pagePaperHint": "Dark text on cream: easier on the eyes for long reads."
 }

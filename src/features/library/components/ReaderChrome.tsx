@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Dimensions, Keyboard, Platform, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { IconButton, PressableScale, Text } from '@/components/ui';
+import { IconButton, PressableScale, Segmented, Text } from '@/components/ui';
 import { fontFamily, radius, space, typography, useTheme } from '@/theme';
 
 export type ToolbarAction = {
@@ -105,7 +105,7 @@ export function TextSizeControl({ percent, onChange }: { percent: number; onChan
   return (
     <View style={{ gap: space.sm }}>
       <Text variant="overline" color="textSecondary">
-        {t('textSize')}
+        {t('textSizeLabel')}
       </Text>
       <View style={styles.sizeRow}>
         <IconButton icon={Minus} accessibilityLabel={t('smaller')} onPress={() => step(-10)} disabled={percent <= 70} />
@@ -116,6 +116,29 @@ export function TextSizeControl({ percent, onChange }: { percent: number; onChan
         </PressableScale>
         <IconButton icon={Plus} accessibilityLabel={t('larger')} onPress={() => step(10)} disabled={percent >= 200} />
       </View>
+    </View>
+  );
+}
+
+/** Dark page (the app's default) or warm paper: dark text on cream, for long reading. */
+export function PageModeControl({ paper, onChange }: { paper: boolean; onChange: (paper: boolean) => void }) {
+  const { t } = useTranslation('reader');
+  return (
+    <View style={{ gap: space.sm }}>
+      <Text variant="overline" color="textSecondary">
+        {t('page')}
+      </Text>
+      <Segmented<'dark' | 'paper'>
+        value={paper ? 'paper' : 'dark'}
+        onChange={(v) => onChange(v === 'paper')}
+        options={[
+          { value: 'dark', label: t('pageDark') },
+          { value: 'paper', label: t('pagePaper') },
+        ]}
+      />
+      <Text variant="caption" color="textSecondary">
+        {t('pagePaperHint')}
+      </Text>
     </View>
   );
 }

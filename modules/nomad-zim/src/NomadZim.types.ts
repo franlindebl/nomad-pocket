@@ -77,6 +77,8 @@ export type ZimWebViewProps = {
   /** Path to show; "" or undefined = main page. Changing it navigates. */
   path?: string;
   darkMode?: boolean;
+  /** Warm paper page (dark text on cream) for long reading; ignored while `darkMode` is on. */
+  paperMode?: boolean;
   /** Text size in percent (100 = default). */
   textZoom?: number;
   onNavigationChange?: (event: { nativeEvent: ZimNavigationEvent }) => void;

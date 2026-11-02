@@ -33,6 +33,8 @@ export const palette = {
     dangerSoft: '#3A1513',
     /** The user's position on the map (puck + compass beam: scripts/maps/make-beam.py). */
     location: '#4C8DF6',
+    /** The reader's optional paper page (dark text on cream); the same cream is in ZimWebView's paper CSS. */
+    paper: '#F2E6CE',
     /** A speed limit sign: white, red ring, black figures, like the real one. */
     signFace: '#FFFFFF',
     signRing: '#D93D42',

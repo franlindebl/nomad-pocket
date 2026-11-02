@@ -12,6 +12,8 @@ type SettingsState = {
   contentLanguages: AppLanguage[];
   wifiOnly: boolean;
   readerTextScale: number;
+  /** The reader shows pages on warm paper (dark text on cream) instead of the app's dark mode. */
+  readerPaper: boolean;
   onboarded: boolean;
   /** Selected local AI model id (catalog id), or 'system' for the OS model. */
   aiModelId: string | null;
@@ -28,6 +30,7 @@ type SettingsState = {
   setContentLanguages: (l: AppLanguage[]) => void;
   setWifiOnly: (v: boolean) => void;
   setReaderTextScale: (v: number) => void;
+  setReaderPaper: (v: boolean) => void;
   setOnboarded: (v: boolean) => void;
   setAiModelId: (id: string | null) => void;
   setCountry: (id: string | null) => void;
@@ -44,6 +47,7 @@ export const useSettings = create<SettingsState>()(
       contentLanguages: deviceLanguage() === 'es' ? ['es', 'en'] : ['en'],
       wifiOnly: true,
       readerTextScale: 1,
+      readerPaper: false,
       onboarded: false,
       aiModelId: null,
       country: null,
@@ -58,6 +62,7 @@ export const useSettings = create<SettingsState>()(
       setContentLanguages: (contentLanguages) => set({ contentLanguages }),
       setWifiOnly: (wifiOnly) => set({ wifiOnly }),
       setReaderTextScale: (readerTextScale) => set({ readerTextScale }),
+      setReaderPaper: (readerPaper) => set({ readerPaper }),
       setOnboarded: (onboarded) => set({ onboarded }),
       setAiModelId: (aiModelId) => set({ aiModelId }),
       setCountry: (country) => set({ country }),
@@ -79,6 +84,7 @@ export const useSettings = create<SettingsState>()(
         contentLanguages,
         wifiOnly,
         readerTextScale,
+        readerPaper,
         onboarded,
         aiModelId,
         country,
@@ -91,6 +97,7 @@ export const useSettings = create<SettingsState>()(
         contentLanguages,
         wifiOnly,
         readerTextScale,
+        readerPaper,
         onboarded,
         aiModelId,
         country,

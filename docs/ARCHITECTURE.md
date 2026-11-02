@@ -460,14 +460,18 @@ Home show progress while a piece downloads. Nothing else is asked.
   Android uses Maven `org.kiwix:libkiwix` with a Kotlin `ZimRegistry` (closed archives
   are disposed after 120 s so in-flight reads finish; R8 keep rules in
   `consumer-rules.pro`). All libzim work runs off the main thread.
-- `<ZimWebView archiveId path darkMode textZoom onNavigationChange onLoadEnd onExternalLink />`
+- `<ZimWebView archiveId path darkMode paperMode textZoom onNavigationChange onLoadEnd onExternalLink />`
   serves `zim://<uuid>/<path>` (iOS, `WKURLSchemeHandler`, persistent website data store) or
   `https://<uuid>.zim.local/<path>` (Android, `shouldInterceptRequest`, wide viewport; a
   per-archive origin, so PouchDB/IndexedDB storage is per archive and there is no wildcard
   CORS), with HTTP Range (206) for media and redirects resolved. Ref: `goBack`, `goForward`,
   `reload`, `loadPath`, `findInPage`, `clearFind`, `setTextZoom`, `setDarkMode`. Dark mode =
   CSS invert with media re-inverted (not math images nor SVG images: logos and drawings stay legible inverted with their background); the page always sees `prefers-color-scheme: light`; pages
-  dark by design get `data-nomad-native-dark` and are left alone. An always-on style hides the
+  dark by design get `data-nomad-native-dark` and are left alone. Paper mode (`paperMode`, ignored while
+  `darkMode` is on) = a fixed `html::after` sheet of cream `#F2E6CE` with `mix-blend-mode: multiply` over a white
+  `html`: white turns cream, black text stays black, authored colours keep their hue, no per-site rules
+  (iOS: a `nomad-paper` style from the bootstrap script, `__nomadSetPaper`; Android: injected into the HTML
+  response and toggled by JS). An always-on style hides the
   transparent placeholders of image-less ("nopic") archives and the frames holding only them.
 - **Archive pages are offline by design** (the purpose is "no network", not script blocking):
   iOS compiles a `WKContentRuleList` (blocks `^https?:`, `^wss?:`, `^ftp:`; once per launch,
@@ -503,7 +507,8 @@ Home show progress while a piece downloads. Nothing else is asked.
 - Reader (`app/reader/[itemId].tsx` + `library/components`): toolbar (back/forward page
   history, in-book search sheet, bookmark, text size popover, more), table of contents
   (h2/h3), find in page (iOS JS highlighter with counts, Android native find),
-  library/history sheet, medical disclaimer for `medical` items, dark mode, spinner until
+  library/history sheet, medical disclaimer for `medical` items, dark page by default or optional paper
+  (the "Texto y fondo" popover, `readerPaper` in settings), spinner until
   the first page loads.
 - Document collections (`library/collection.ts` pure + `components/CollectionView.tsx`): the zimgit-*
   archives come from Kiwix's nautilus scraper, whose main page is a desktop Bootstrap app around

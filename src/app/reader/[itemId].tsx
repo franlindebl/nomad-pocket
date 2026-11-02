@@ -25,7 +25,7 @@ import { useItems } from '@/features/content/items';
 import { fileKind, type CollectionDoc } from '@/features/library/collection';
 import { ArchiveSearchSheet } from '@/features/library/components/ArchiveSearchSheet';
 import { CollectionView } from '@/features/library/components/CollectionView';
-import { DisclaimerBanner, FindBar, MenuItem, Popover, ReaderToolbar, TextSizeControl } from '@/features/library/components/ReaderChrome';
+import { DisclaimerBanner, FindBar, MenuItem, PageModeControl, Popover, ReaderToolbar, TextSizeControl } from '@/features/library/components/ReaderChrome';
 import { ReaderLibrarySheet } from '@/features/library/components/ReaderLibrarySheet';
 import { ReaderTocSheet } from '@/features/library/components/ReaderTocSheet';
 import { isBookmarked, recordVisit, toggleBookmark } from '@/features/library/history';
@@ -75,6 +75,8 @@ export default function ReaderScreen() {
   const textScale = useSettings((s) => s.readerTextScale);
   const setTextScale = useSettings((s) => s.setReaderTextScale);
   const textZoom = Math.round((textScale || 1) * 100);
+  const paper = useSettings((s) => s.readerPaper);
+  const setPaper = useSettings((s) => s.setReaderPaper);
 
   const medical = !!item?.meta.medical;
 
@@ -270,13 +272,15 @@ export default function ReaderScreen() {
     <View style={[styles.flex, { backgroundColor: colors.bg }]}>
       <Stack.Screen options={{ title }} />
       {showDisclaimer ? <DisclaimerBanner text={tc('health.disclaimer')} onDismiss={dismissDisclaimer} /> : null}
-      <View style={styles.flex}>
+      {/* Paper: the overscroll behind the page matches its cream (the same value as ZimWebView's paper CSS). */}
+      <View style={[styles.flex, paper && { backgroundColor: colors.paper }]}>
         <ZimWebView
           ref={web}
           style={styles.flex}
           archiveId={itemId}
           path={path ?? ''}
-          darkMode
+          darkMode={!paper}
+          paperMode={paper}
           textZoom={textZoom}
           onNavigationChange={onNavigationChange}
           onLoadEnd={onLoadEnd}
@@ -289,7 +293,10 @@ export default function ReaderScreen() {
         ) : null}
         {panel === 'text' ? (
           <Popover onDismiss={() => setPanel(null)}>
-            <TextSizeControl percent={textZoom} onChange={(p) => setTextScale(p / 100)} />
+            <View style={{ gap: space.lg }}>
+              <TextSizeControl percent={textZoom} onChange={(p) => setTextScale(p / 100)} />
+              <PageModeControl paper={paper} onChange={setPaper} />
+            </View>
           </Popover>
         ) : null}
         {panel === 'more' ? (

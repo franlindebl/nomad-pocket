@@ -1,4 +1,4 @@
-# RDR-10 — the reader's dark CSS (the app is dark only; visual check of the screenshot).
+# RDR-10 — the reader dark (the default) and on optional paper (visual check of the screenshots).
 appId: com.fjlinde.nomadpocket
 tags: [full, reader, seeded]
 ---
@@ -9,3 +9,11 @@ tags: [full, reader, seeded]
     visible: "Born"
     timeout: 10000
 - takeScreenshot: 01-reader-dark
+# Paper page (optional, off by default): dark text on cream, and back to dark.
+- tapOn: "Texto y fondo"
+- tapOn: "Papel"
+- tapOn: { id: "popover-dismiss" }
+- takeScreenshot: 02-reader-paper
+- tapOn: "Texto y fondo"
+- tapOn: "Oscuro"
+- tapOn: { id: "popover-dismiss" }

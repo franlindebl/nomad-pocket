@@ -333,6 +333,19 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-02 — Reader: optional paper page (dark text on cream)
+
+- Owner: with the app dark only, long reading should have a more comfortable option; dark stays the default. Research
+  (summary in `docs/STYLE_GUIDE.md`, Reader): positive polarity reads better (Piepenbrock et al. 2013/2014), warm
+  backgrounds beat cool ones (Rello & Bigham 2017, 341 Spanish speakers), the BDA advises cream over pure white; no
+  study backs "sepia" itself. So: near-black text on cream `#F2E6CE`.
+- `ZimWebView` gets `paperMode` (iOS bootstrap script `nomad-paper` + `__nomadSetPaper`; Android injected style + JS
+  toggle): a fixed `html::after` cream sheet with `mix-blend-mode: multiply`, so every archive's own colours keep their
+  hue without per-site CSS. Dark wins when both are on.
+- Reader: the toolbar's "Aa" is now "Texto y fondo" (text size + a Oscuro / Papel switch); `readerPaper` setting,
+  `paper` token for the overscroll. E2E: RDR-10 also takes the paper screenshot; RDR-05 and LIB-01 use the new label.
+  Checked on the iOS simulator (Wikipedia article on paper); RDR-10, RDR-05, LIB-01 green.
+
 ### 2026-11-02 — New look "Precisión": dark only, black and signal yellow
 
 - Owner: the UI looked like every AI-generated app (and like Claude's own: cream background, terracotta accent,
