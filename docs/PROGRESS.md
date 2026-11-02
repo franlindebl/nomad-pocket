@@ -333,6 +333,12 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-02 — iOS build 34 to TestFlight
+
+- 1.1.0 (34), TestFlight only: build 33 plus the "Precisión" look (dark only, black and signal yellow), the compass
+  icon and splash redrawn to match, and the reader's optional paper page. Smoke E2E 21/21 (`--build`); archived with
+  the store prebuild. Tagged `v1.1.0-34`. Store screenshots still show the old look (to redo before a submission).
+
 ### 2026-11-02 — New app icon and splash: the compass in black and yellow
 
 - Two rounds of proposals (artifacts: four directions, then compass and radiation-trefoil variants); the owner chose

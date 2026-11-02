@@ -14,7 +14,7 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.fjlinde.nomadpocket",
-      "buildNumber": "33",
+      "buildNumber": "34",
       "supportsTablet": true,
       "infoPlist": {
         "CFBundleDevelopmentRegion": "es",
