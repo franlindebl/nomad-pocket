@@ -333,6 +333,19 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-02 — Library: a collection lists every level, no tier to select
+
+- Owner's call: the tier cards worked as a hidden filter (the selected one listed only its own resources),
+  so "2 de 9" up top never showed what was missing. The category screen now lists every level in turn
+  ("Nivel 1 · Esencial": Recomendado, "have of total", size, description, "Descargar nivel" or "Nivel
+  completo") with the resources it adds, installed ones with "Abrir"; then "Otros idiomas"; then "También
+  en tu dispositivo" for archives no level lists. The top "En tu dispositivo" list is gone (rows say it).
+- A level's button downloads only that level's missing resources, not the levels before it (owner).
+  Catalog tier descriptions lose "Incluye todo lo de …". Onboarding's kit still takes tiers cumulatively.
+- `ResourceRow` takes `outdated` ("Actualización disponible · …"), which the old archive rows showed.
+- E2E: `pack-download` → `pack-download-<tier slug>` (lib-03, android-01). Checked on the iOS simulator
+  (Medicina 5+1+3 = 9, Educación 4+7+7 = 18 with Wikilibros "Incluida").
+
 ### 2026-11-02 — iOS build 38 to TestFlight
 
 - 1.1.0 (38), TestFlight only: build 37 plus emergency point names in their colour around the dot

@@ -1,11 +1,16 @@
+// A collection (Medicine, Survival…): every level with everything it adds, one after another, so the
+// whole catalog of the topic is on one screen and what's missing shows (owner's decision, 2026-11-02;
+// before, the levels were cards you selected and the list below showed only the selected one). Each
+// level downloads only its own resources. Then the same works in other languages, then the archives on
+// the phone that no level lists (imports, a language the person no longer reads).
 import { useLocalSearchParams } from 'expo-router';
 import { Check } from 'lucide-react-native';
-import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Badge, Button, Card, IconBadge, ListGroup, PressableScale, Row, Screen, SectionHeader, Text } from '@/components/ui';
+import { Badge, Button, Card, IconBadge, ListGroup, Row, Screen, SectionHeader, Text } from '@/components/ui';
 import {
   downloadResource,
   getCategory,
@@ -14,6 +19,7 @@ import {
   tierOwnResources,
   tierResources,
   type CatalogCategory,
+  type CatalogResource,
   type CatalogTier,
 } from '@/features/catalog';
 import { showDownloadError } from '@/features/catalog/DownloadButton';
@@ -26,10 +32,11 @@ import { useDownloads } from '@/features/downloads/manager';
 import { useCollections } from '@/features/library/collections';
 import { ArchiveRow } from '@/features/library/components/ArchiveRow';
 import { CollectionCount } from '@/features/library/components/CollectionCount';
+import { useUpdates } from '@/features/updates/updates';
 import { formatBytes, formatMB } from '@/lib/format';
 import { freeBytes } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
-import { radius, space, useTheme } from '@/theme';
+import { space, useTheme } from '@/theme';
 
 export default function CategoryScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -38,15 +45,24 @@ export default function CategoryScreen() {
   const { t } = useTranslation('library');
   const { hue } = useTheme();
   const langs = useSettings((s) => s.contentLanguages);
-  const recommended = category?.tiers.find((x) => x.recommended) ?? category?.tiers[0];
-  const [tierSlug, setTierSlug] = useState(recommended?.slug);
   const collection = useCollections().find((c) => c.key === slug);
   const other = useOtherLanguage();
+  const items = useContent((s) => s.items);
+  const updates = useUpdates();
   if (!category) return null;
-  const tier = category.tiers.find((x) => x.slug === tierSlug) ?? category.tiers[0];
   const h = hue(category.hue ?? categoryHue(category.slug));
-  const [inTier] = splitByLanguage(tierOwnResources(tier, langs), other);
-  const [, otherLanguages] = splitByLanguage(tierResources(category, category.tiers[category.tiers.length - 1], langs), other);
+  const all = tierResources(category, category.tiers[category.tiers.length - 1], langs);
+  const [, otherLanguages] = splitByLanguage(all, other);
+  const listed = new Set(all.map((r) => r.id));
+  const unlisted = collection?.members.filter((m) => !listed.has(m.catalogId ?? m.id)) ?? [];
+  // Installed archives a newer edition replaces: their rows say so (the Library's archive rows did).
+  const outdated = new Set(
+    updates
+      .filter((u) => u.kind === 'zim' && !u.inFlight)
+      .map((u) => items.find((i) => i.id === u.itemId)?.catalogId)
+      .filter(Boolean),
+  );
+  const row = (r: CatalogResource) => <ResourceRow key={r.id} resource={r} hue={category.hue} outdated={outdated.has(r.id)} />;
 
   return (
     <Screen contentStyle={{ paddingTop: insets.top + 56 }} contentInsetAdjustmentBehavior="never">
@@ -59,61 +75,26 @@ export default function CategoryScreen() {
         {collection ? <CollectionCount collection={collection} /> : null}
       </View>
 
-      {collection?.members.length ? (
-        <>
-          <SectionHeader title={t('onDevice')} />
-          <ListGroup>
-            {collection.members.map((item) => (
-              <ArchiveRow key={item.id} item={item} />
-            ))}
-          </ListGroup>
-        </>
-      ) : null}
-
-      <SectionHeader title={t('toDownload')} />
-      <View style={{ gap: space.md }}>
-        {category.tiers.map((x) => (
-          <TierCard
-            key={x.slug}
-            category={category}
-            tier={x}
-            selected={x.slug === tier.slug}
-            onSelect={() => setTierSlug(x.slug)}
-            langs={langs}
-            other={other}
-          />
-        ))}
-      </View>
-
-      <SectionHeader title={`${t('inThisTier')} · ${loc(tier.name)}`} />
-      {tier.includesTier ? (
-        <Text variant="footnote" color="textSecondary" style={{ marginBottom: space.sm, paddingHorizontal: space.xs }}>
-          {t('tierIncludes', { tier: loc(category.tiers.find((x) => x.slug === tier.includesTier)?.name) })}
-        </Text>
-      ) : null}
-      {inTier.length ? (
-        <ListGroup>
-          {inTier.map((r) => (
-            <ResourceRow key={r.id} resource={r} hue={category.hue} />
-          ))}
-        </ListGroup>
-      ) : (
-        <Card>
-          <Text variant="footnote" color="textSecondary">
-            {t('noResultsLang')}
-          </Text>
-        </Card>
-      )}
+      {category.tiers.map((tier, i) => (
+        <Level key={tier.slug} category={category} tier={tier} n={i + 1} resources={splitByLanguage(tierOwnResources(tier, langs), other)[0]} row={row} />
+      ))}
 
       {otherLanguages.length ? (
         <>
           <SectionHeader title={t('otherLanguages')} />
-          <Text variant="footnote" color="textSecondary" style={{ marginBottom: space.sm, paddingHorizontal: space.xs }}>
+          <Text variant="footnote" color="textSecondary" style={styles.note}>
             {t('otherLanguagesBody')}
           </Text>
+          <ListGroup>{otherLanguages.map(row)}</ListGroup>
+        </>
+      ) : null}
+
+      {unlisted.length ? (
+        <>
+          <SectionHeader title={t('alsoOnDevice')} />
           <ListGroup>
-            {otherLanguages.map((r) => (
-              <ResourceRow key={r.id} resource={r} hue={category.hue} />
+            {unlisted.map((item) => (
+              <ArchiveRow key={item.id} item={item} />
             ))}
           </ListGroup>
         </>
@@ -122,39 +103,38 @@ export default function CategoryScreen() {
   );
 }
 
-function TierCard({
+/** One level: what it adds, how many of those you have, and a button that downloads the missing ones. */
+function Level({
   category,
   tier,
-  selected,
-  onSelect,
-  langs,
-  other,
+  n,
+  resources,
+  row,
 }: {
   category: CatalogCategory;
   tier: CatalogTier;
-  selected: boolean;
-  onSelect: () => void;
-  langs: string[];
-  /** The same works in another language: not in the pack (features/catalog/editions.ts). */
-  other: Set<string>;
+  n: number;
+  /** The level's own resources in the person's languages, without the same works in another language. */
+  resources: CatalogResource[];
+  row: (r: CatalogResource) => ReactNode;
 }) {
   const { t } = useTranslation('library');
   const { t: tc } = useTranslation();
-  const { colors } = useTheme();
   const items = useContent((s) => s.items);
   const downloads = useDownloads((s) => s.records);
-  // What the pack downloads: no works in another language, no edition a bigger one in it holds.
-  const resources = withoutHeld(splitByLanguage(tierResources(category, tier, langs), other)[0]);
+  // An edition a bigger installed one holds counts as had (the text-only Wikibooks next to the one with images).
+  const have = resources.filter((r) => hasOrHeld(items, r.id)).length;
+  const done = resources.length > 0 && have === resources.length;
+  // What the button downloads: no edition another one in the level holds.
+  const pack = withoutHeld(resources);
   // A failed or cancelled record doesn't make a resource "handled": enqueueDownload takes it again.
   const inFlight = (id: string) => {
     const status = downloads[id]?.status;
     return !!status && status !== 'failed' && status !== 'cancelled';
   };
-  // An edition a bigger installed one holds is not missing (the text-only Wikibooks next to the one with images).
-  const missing = resources.filter((r) => !hasOrHeld(items, r.id) && !inFlight(r.id));
-  const done = resources.length > 0 && resources.every((r) => hasOrHeld(items, r.id));
+  const missing = pack.filter((r) => !hasOrHeld(items, r.id) && !inFlight(r.id));
 
-  const downloadPack = () => {
+  const download = () => {
     const size = sumMB(missing) * 1e6;
     Alert.alert(
       t('packConfirmTitle', { name: `${loc(category.name)} · ${loc(tier.name)}` }),
@@ -181,59 +161,59 @@ function TierCard({
     );
   };
 
-  // The pack button sits beside the card's button, not inside it, so VoiceOver can reach it.
-  const action =
-    selected && resources.length ? (
-      done ? (
-        <Badge label={t('packInstalled')} tone="success" icon={Check} />
-      ) : missing.length ? (
-        <Button testID="pack-download" title={t('downloadPack', { size: formatMB(sumMB(missing)) })} onPress={downloadPack} size="md" />
-      ) : null
-    ) : null;
-
   return (
-    <View
-      style={[
-        styles.tier,
-        {
-          backgroundColor: colors.surface,
-          borderColor: selected ? colors.ink : colors.border,
-          borderWidth: selected ? 2 : StyleSheet.hairlineWidth,
-        },
-      ]}>
-      <PressableScale
-        testID={`tier-${tier.slug}`}
-        onPress={onSelect}
-        haptic="selection"
-        pressedScale={0.99}
-        accessibilityRole="button"
-        accessibilityState={{ selected }}
-        style={[styles.tierBody, action && styles.tierBodyWithAction]}>
+    <>
+      <SectionHeader title={`${t('level', { n })} · ${loc(tier.name)}`} />
+      <View style={styles.intro}>
         <Row style={{ justifyContent: 'space-between' }}>
           <Row gap={space.sm}>
-            <Text variant="title3">{loc(tier.name)}</Text>
             {tier.recommended ? <Badge label={t('recommended')} tone="accent" /> : null}
+            {resources.length ? (
+              <Text variant="footnote" color={have ? 'text' : 'textSecondary'} tabular>
+                {t('levelHave', { have, total: resources.length })}
+              </Text>
+            ) : null}
           </Row>
-          <Text variant="headline" tabular>
-            {formatMB(sumMB(resources))}
-          </Text>
+          {pack.length ? (
+            <Text variant="headline" tabular>
+              {formatMB(sumMB(pack))}
+            </Text>
+          ) : null}
         </Row>
         <Text variant="footnote" color="textSecondary">
           {loc(tier.description)}
         </Text>
-        <Text variant="caption" color="textTertiary">
-          {t('resources', { count: resources.length })}
-        </Text>
-      </PressableScale>
-      {action ? <View style={styles.tierAction}>{action}</View> : null}
-    </View>
+        {done ? (
+          <View style={styles.action}>
+            <Badge label={t('levelDone')} tone="success" icon={Check} />
+          </View>
+        ) : missing.length ? (
+          <View style={styles.action}>
+            <Button
+              testID={`pack-download-${tier.slug}`}
+              title={t('downloadLevel', { size: formatMB(sumMB(missing)) })}
+              onPress={download}
+              size="md"
+            />
+          </View>
+        ) : null}
+      </View>
+      {resources.length ? (
+        <ListGroup>{resources.map(row)}</ListGroup>
+      ) : (
+        <Card>
+          <Text variant="footnote" color="textSecondary">
+            {t('noResultsLang')}
+          </Text>
+        </Card>
+      )}
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   hero: { gap: space.md, paddingTop: space.lg },
-  tier: { borderRadius: radius.lg, borderCurve: 'continuous', overflow: 'hidden' },
-  tierBody: { padding: space.lg, gap: space.sm },
-  tierBodyWithAction: { paddingBottom: space.sm },
-  tierAction: { paddingHorizontal: space.lg, paddingBottom: space.lg, paddingTop: space.xs, alignItems: 'flex-start' },
+  intro: { gap: space.sm, paddingHorizontal: space.xs, marginBottom: space.md },
+  action: { alignItems: 'flex-start', paddingTop: space.xs },
+  note: { marginBottom: space.sm, paddingHorizontal: space.xs },
 });

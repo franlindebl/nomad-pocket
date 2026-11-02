@@ -1,13 +1,16 @@
-# LIB-03 — a collection shows its tiers and confirms before downloading a pack.
+# LIB-03 — a collection lists every level with its resources and confirms before downloading one level.
 appId: com.fjlinde.nomadpocket
 tags: [full, library]
 ---
 - runFlow: ../../subflows/launch.yaml
 - tapOn: { id: "books.vertical" }
 - tapOn: "Medicina.*"
-- assertVisible: "Para descargar|PARA DESCARGAR"
-- tapOn: { id: "pack-download" }
+- assertVisible: "Nivel 1 · Esencial|NIVEL 1 · ESENCIAL"
+- tapOn: { id: "pack-download-medicine-essential" }
 - assertVisible: "¿Descargar .*"
 - takeScreenshot: 01-pack-confirm
 - tapOn: "Cancelar"
-- assertVisible: "Descargar pack · .*"
+- assertVisible: "Descargar nivel · .*"
+- scrollUntilVisible:
+    element: "Nivel 3 · Completo|NIVEL 3 · COMPLETO"
+    direction: DOWN

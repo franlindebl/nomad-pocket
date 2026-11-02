@@ -444,9 +444,13 @@ explore, ZIM import).
 - `collections.ts` (`useCollections`): per collection its members (archives filed in it plus the catalog
   archives it lists that another collection filed: freeCodeCamp is a course and in Computing),
   `have/total` (`collectionCount`) and the hint for an empty one (essential pack size, smallest Wikipedia).
-  `openCollection(key)` routes to `category/[slug]`, `wikipedia`, `courses` or `others`; each of those
-  screens lists the archives on the device first (`ArchiveRow`: open, long press to share or delete),
-  then what can be downloaded, then "Otros idiomas".
+  `openCollection(key)` routes to `category/[slug]`, `wikipedia`, `courses` or `others`. The category
+  screen lists every tier as "Nivel n" with only the resources it adds (`tierOwnResources`), installed or
+  not (`ResourceRow`: "Abrir", "Incluida", or the download button; "Actualización disponible" when a newer
+  edition is out), with "have of total" and a button that downloads that level's missing resources only
+  (not the levels before it); then "Otros idiomas", then "También en tu dispositivo" for members no tier
+  lists (`ArchiveRow`). Wikipedia, Courses and Others list the archives on the device first, then what can
+  be downloaded, then "Otros idiomas". Onboarding's kit still takes tiers cumulatively (`tierResources`).
 - Editions and languages (`features/catalog/editions-core.ts`, pure, tested; `editions.ts` the hooks;
   owner's decisions 2026-11-02):
   - *Editions*: a Kiwix name `<book>_{top,all}_{mini,nopic,maxi}` holds another of the same book when it
@@ -458,8 +462,8 @@ explore, ZIM import).
     not on updates of the same archive).
   - *Languages*: resources sharing `sameAs` in `catalog.json` are the same work in another language.
     With the app language's one visible, the others (`otherLanguageSet`) go under "Otros idiomas" at the
-    end of the category, Wikipedia and Courses screens: out of `have/total` and out of packs, even when
-    installed (they still show under "En tu dispositivo"). Content with no counterpart in the app's
+    end of the category, Wikipedia and Courses screens: out of `have/total` and out of level downloads, even
+    when installed (they show with "Abrir" under "Otros idiomas"). Content with no counterpart in the app's
     language (English-only, `mul`) always counts. `validate-catalog` refuses two resources of one
     language in a `sameAs` group.
   - `collectionCount(mainIds, otherIds, members, has)`: `has` is "installed anywhere or held", so a

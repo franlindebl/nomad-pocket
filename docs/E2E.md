@@ -392,7 +392,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `reader-back`, `reader-forward`, `reader-search`, `reader-bookmark`, `reader-text`, `reader-more` | reader toolbar |
   | `find-previous`, `find-next`, `find-close` | find in page |
   | `popover-dismiss` | backdrop that closes a reader popover |
-  | `tier-<slug>`, `pack-download` | collection tier card and its download button |
+  | `pack-download-<tier slug>` | a collection level's download button (`pack-download-medicine-essential`) |
   | `resource-<id>`, `download-<id>` | catalog row and its download / open / pause button |
   | `lesson-<n>`, `lesson-check-<n>` | course lesson (1-based) and its done check |
   | `marker-name`, `marker-note` | fields of the place sheet |

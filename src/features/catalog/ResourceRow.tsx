@@ -11,12 +11,24 @@ import { useCovering } from './editions';
 import { loc } from './index';
 import type { CatalogResource } from './types';
 
-export function ResourceRow({ resource, hue, showIcon = true }: { resource: CatalogResource; hue?: Hue; showIcon?: boolean }) {
+export function ResourceRow({
+  resource,
+  hue,
+  showIcon = true,
+  outdated = false,
+}: {
+  resource: CatalogResource;
+  hue?: Hue;
+  showIcon?: boolean;
+  /** Installed, and a newer edition is out: say so first. */
+  outdated?: boolean;
+}) {
   const { t } = useTranslation();
   const Icon = categoryIcon(resource.category);
   // A bigger edition on the phone already holds this one: say which instead of what it is.
   const covering = useCovering(resource.id);
-  const description = covering ? t('included.in', { name: covering.name }) : loc(resource.description);
+  const about = covering ? t('included.in', { name: covering.name }) : loc(resource.description);
+  const description = outdated ? `${t('updates:available')} · ${about}` : about;
   // The download button sits beside the row's button, not inside it, so VoiceOver can reach it.
   return (
     <View style={styles.row}>

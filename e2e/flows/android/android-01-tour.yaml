@@ -12,11 +12,11 @@ tags: [android, network]
 - takeScreenshot: 02-settings
 - back
 
-# Collection tier: the pack button sits beside the tier's button (B1).
+# Collection level: its download button confirms first.
 - tapOn: { point: "63%,93%" }   # Biblioteca
 - assertNotVisible: "Medicina.*"   # no health features on Android (src/lib/health.ts)
 - tapOn: "Supervivencia.*"
-- tapOn: { id: "pack-download" }
+- tapOn: { id: "pack-download-survival-essential" }
 - assertVisible: "¿Descargar .*"
 - takeScreenshot: 03-pack-confirm
 - tapOn: "(?i)cancelar"

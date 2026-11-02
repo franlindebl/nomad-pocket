@@ -184,9 +184,11 @@ in their feature (`features/catalog/DownloadButton`, `features/courses/CourseCar
   searches (chips), "Seguir leyendo", the collections (one list, one row each: icon, name, what of it is
   on the device, slanted segments and a mono "4/18") and "Fuera del catálogo". Everything is grouped by
   topic only: never a separate "on the device" list.
-- **Collection:** hero (icon, name, "4 de 18 en tu dispositivo", segments) → the archives on the device
-  → "Para descargar": tier cards (Essential / Standard / Comprehensive) with size, item count and a
-  one-tap "Download pack".
+- **Collection:** hero (icon, name, "4 de 18 en tu dispositivo", segments) → every level in turn ("NIVEL 1 ·
+  ESENCIAL", "Recomendado", "2 de 5", size, description, "Descargar nivel · 1,8 GB" or "Nivel completo") with
+  the resources it adds (installed ones with "Abrir") → "Otros idiomas" → "También en tu dispositivo"
+  (archives no level lists). Nothing to select: levels are never a filter of the list (owner, 2026-11-02),
+  and a level's button downloads only that level.
 - **Detail:** title, publisher, language, size, date, description, single primary CTA
   that becomes a progress bar while downloading.
 - **Reader:** full-bleed content, minimal toolbar (back, forward, search,

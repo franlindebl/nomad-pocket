@@ -1827,8 +1827,8 @@
             "en": "Standard"
           },
           "description": {
-            "es": "Enciclopedias de salud completas. Incluye todo lo de Esencial.",
-            "en": "Complete consumer health encyclopedias. Includes everything in Essential."
+            "es": "Enciclopedias de salud completas.",
+            "en": "Complete consumer health encyclopedias."
           },
           "includesTier": "medicine-essential",
           "resources": [
@@ -1843,8 +1843,8 @@
             "en": "Comprehensive"
           },
           "description": {
-            "es": "Libros de texto, patología y vídeos de nivel profesional. Incluye todo lo de Estándar.",
-            "en": "Professional textbooks, pathology and videos. Includes everything in Standard."
+            "es": "Libros de texto, patología y vídeos de nivel profesional.",
+            "en": "Professional textbooks, pathology and videos."
           },
           "includesTier": "medicine-standard",
           "resources": [
@@ -1896,8 +1896,8 @@
             "en": "Standard"
           },
           "description": {
-            "es": "Planes oficiales ante desastres, habilidades de campo y radiocomunicación. Incluye todo lo de Esencial.",
-            "en": "Official disaster planning, field skills and radio communications. Includes everything in Essential."
+            "es": "Planes oficiales ante desastres, habilidades de campo y radiocomunicación.",
+            "en": "Official disaster planning, field skills and radio communications."
           },
           "includesTier": "survival-essential",
           "resources": [
@@ -1916,8 +1916,8 @@
             "en": "Comprehensive"
           },
           "description": {
-            "es": "Biblioteca completa: recuperación tras desastres, alimentos, agua y tecnología apropiada. Incluye todo lo de Estándar.",
-            "en": "Complete library: post-disaster recovery, food, water and appropriate technology. Includes everything in Standard."
+            "es": "Biblioteca completa: recuperación tras desastres, alimentos, agua y tecnología apropiada.",
+            "en": "Complete library: post-disaster recovery, food, water and appropriate technology."
           },
           "includesTier": "survival-standard",
           "resources": [
@@ -1970,8 +1970,8 @@
             "en": "Standard"
           },
           "description": {
-            "es": "Diccionario, literatura clásica, vídeos educativos y libros de ciencias. Incluye todo lo de Esencial.",
-            "en": "Dictionary, classic literature, educational videos and STEM textbooks. Includes everything in Essential."
+            "es": "Diccionario, literatura clásica, vídeos educativos y libros de ciencias.",
+            "en": "Dictionary, classic literature, educational videos and STEM textbooks."
           },
           "includesTier": "education-essential",
           "resources": [
@@ -1992,8 +1992,8 @@
             "en": "Comprehensive"
           },
           "description": {
-            "es": "Biblioteca educativa completa con libros ilustrados y charlas TED. Incluye todo lo de Estándar.",
-            "en": "Complete educational library with illustrated textbooks and TED talks. Includes everything in Standard."
+            "es": "Biblioteca educativa completa con libros ilustrados y charlas TED.",
+            "en": "Complete educational library with illustrated textbooks and TED talks."
           },
           "includesTier": "education-standard",
           "resources": [
@@ -2045,8 +2045,8 @@
             "en": "Standard"
           },
           "description": {
-            "es": "Tecnología sencilla y miles de preguntas sobre el hogar. Incluye todo lo de Esencial.",
-            "en": "Low-tech solutions and thousands of home improvement answers. Includes everything in Essential."
+            "es": "Tecnología sencilla y miles de preguntas sobre el hogar.",
+            "en": "Low-tech solutions and thousands of home improvement answers."
           },
           "includesTier": "diy-essential",
           "resources": [
@@ -2061,8 +2061,8 @@
             "en": "Comprehensive"
           },
           "description": {
-            "es": "Guías paso a paso para reparar electrónica y electrodomésticos. Incluye todo lo de Estándar.",
-            "en": "Step-by-step guides for electronics and appliances. Includes everything in Standard."
+            "es": "Guías paso a paso para reparar electrónica y electrodomésticos.",
+            "en": "Step-by-step guides for electronics and appliances."
           },
           "includesTier": "diy-standard",
           "resources": [
@@ -2109,8 +2109,8 @@
             "en": "Standard"
           },
           "description": {
-            "es": "Huerto, cocina y conservación de alimentos. Incluye todo lo de Esencial.",
-            "en": "Gardening, cooking and food preservation. Includes everything in Essential."
+            "es": "Huerto, cocina y conservación de alimentos.",
+            "en": "Gardening, cooking and food preservation."
           },
           "includesTier": "agriculture-essential",
           "resources": [
@@ -2127,8 +2127,8 @@
             "en": "Comprehensive"
           },
           "description": {
-            "es": "Autosuficiencia: vídeos de granja y textos agrícolas clásicos. Incluye todo lo de Estándar.",
-            "en": "Self-sufficiency: homesteading videos and classic agricultural texts. Includes everything in Standard."
+            "es": "Autosuficiencia: vídeos de granja y textos agrícolas clásicos.",
+            "en": "Self-sufficiency: homesteading videos and classic agricultural texts."
           },
           "includesTier": "agriculture-standard",
           "resources": [
@@ -2180,8 +2180,8 @@
             "en": "Standard"
           },
           "description": {
-            "es": "Preguntas de programación, Arduino, Raspberry Pi y más documentación. Incluye todo lo de Esencial.",
-            "en": "Programming Q&A, Arduino, Raspberry Pi and more docs. Includes everything in Essential."
+            "es": "Preguntas de programación, Arduino, Raspberry Pi y más documentación.",
+            "en": "Programming Q&A, Arduino, Raspberry Pi and more docs."
           },
           "includesTier": "computing-essential",
           "resources": [
@@ -2200,8 +2200,8 @@
             "en": "Comprehensive"
           },
           "description": {
-            "es": "Electrónica a fondo, robótica y charlas sobre tecnología. Incluye todo lo de Estándar.",
-            "en": "In-depth electronics, robotics and technology talks. Includes everything in Standard."
+            "es": "Electrónica a fondo, robótica y charlas sobre tecnología.",
+            "en": "In-depth electronics, robotics and technology talks."
           },
           "includesTier": "computing-standard",
           "resources": [
