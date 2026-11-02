@@ -353,6 +353,12 @@ Checked on the iOS 27 simulator with the real Andorra package at z15–18 (BonÀ
 framed dot with a blue name before, a single green dot after); the generated style passes
 `validateStyleMin`.
 
+Without the basemap's copy, a dot whose name collided lost it (BonÀrea at z16). Our labels
+now try below, above, left and right of the dot (`text-variable-anchor`, radial offset 0.8)
+and take the dot's category colour instead of grey, so the name also says what the place is.
+Same spot in Andorra: at z15 Font d'Aigua (twice), veritas, Farmàcia Edelweiss and Valira
+gained names, and BonÀrea keeps its name at z16 (green, to the left).
+
 ### 2026-11-02 — Library counts: editions held, other languages apart
 The owner saw "Wikipedia 1 de 10" with the complete text-only Wikipedia installed. The 10 were five Spanish
 plus five English variants, and the count ignored that the installed one holds three smaller ones.

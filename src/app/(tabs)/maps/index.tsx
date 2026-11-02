@@ -5,6 +5,7 @@ import {
   Map,
   NativeUserLocation,
   type CameraRef,
+  type CircleLayerSpecification,
   type InitialViewState,
   type MapRef,
   type PressEvent,
@@ -57,6 +58,20 @@ const STREET_SLOP = 120;
 const FLY_MS = 1200;
 /** Navigating, the map looked around by hand goes back to following the user after this long untouched. */
 const RECENTER_MS = 12_000;
+/** An emergency point's category colour: its dot and its name, so the name says what it is. */
+const CATEGORY_COLOR: NonNullable<CircleLayerSpecification['paint']>['circle-color'] = [
+  'match',
+  ['get', 'category'],
+  'health',
+  CATEGORY_COLORS.health,
+  'security',
+  CATEGORY_COLORS.security,
+  'water',
+  CATEGORY_COLORS.water,
+  'supplies',
+  CATEGORY_COLORS.supplies,
+  CATEGORY_COLORS.official,
+];
 
 /** The basemap's style layers a tap reads, by kind (style.ts names them "<source>:<protomaps layer>"). */
 function tapLayers(style: { layers: { id: string }[] }) {
@@ -648,19 +663,7 @@ export default function MapScreen() {
               id="emergency-dot"
               paint={{
                 'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 4, 15, 7],
-                'circle-color': [
-                  'match',
-                  ['get', 'category'],
-                  'health',
-                  CATEGORY_COLORS.health,
-                  'security',
-                  CATEGORY_COLORS.security,
-                  'water',
-                  CATEGORY_COLORS.water,
-                  'supplies',
-                  CATEGORY_COLORS.supplies,
-                  CATEGORY_COLORS.official,
-                ],
+                'circle-color': CATEGORY_COLOR,
                 'circle-stroke-color': colors.surface,
                 'circle-stroke-width': 2,
               }}
@@ -673,11 +676,14 @@ export default function MapScreen() {
                 'text-field': ['get', 'name'],
                 'text-font': ['Noto Sans Regular'],
                 'text-size': 11,
-                'text-anchor': 'top',
-                'text-offset': [0, 0.8],
+                // Below the dot if it fits, else above or beside it: with one place only, a
+                // dot in a dense street often lost its name to a neighbour's label.
+                'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
+                'text-radial-offset': 0.8,
+                'text-justify': 'auto',
                 'text-optional': true,
               }}
-              paint={{ 'text-color': colors.textSecondary, 'text-halo-color': colors.surface, 'text-halo-width': 1.4 }}
+              paint={{ 'text-color': CATEGORY_COLOR, 'text-halo-color': colors.surface, 'text-halo-width': 1.4 }}
             />
           </GeoJSONSource>
           <GeoJSONSource id="route" data={routeData}>

@@ -1040,7 +1040,9 @@ tags.
 **One mark per place** (`style.ts`, `skipOurPois`): the basemap `pois` layer skips every
 emergency kind (`EMERGENCY_KINDS`; in practice supermarket, drinking_water and townhall, the
 ones both draw). Otherwise our dot sat inside Protomaps' framed icon and the two labels (ours
-grey, theirs in the category colour) took turns as the zoom changed collisions.
+grey, theirs in the category colour) took turns as the zoom changed collisions. Our names
+(`emergency-label`, z15+) are drawn in the dot's category colour (`CATEGORY_COLOR` in the
+map screen) and try below, above, left and right of the dot before giving up.
 
 **Compass beam** (`HeadingBeam.tsx`): while "show my location" is on and the Maps tab is in
 front (tab `focus`/`blur`; a sheet over the map keeps it), a fan under the native puck
