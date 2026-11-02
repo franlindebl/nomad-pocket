@@ -38,12 +38,14 @@ function enterFromTop(values: EntryAnimationsValues) {
 // Form sheets and modals are native view controllers presented above the whole React tree, so a pill
 // drawn at the root sat under their dimmed backdrop. On iOS the pill lives in its own window above
 // them; the overlay stays mounted so the exit animation can play, and passes touches through.
+// Its container is an accessibility-modal view by default, which hides the whole app behind it from
+// VoiceOver and from the XCTest snapshot Maestro reads (every E2E flow saw an empty screen): turn that off.
 // Android draws its sheets inside the activity's view tree (FullWindowOverlay is iOS-only).
 /** Floating confirmation pill at the top of the screen. Mount once at the root. */
 export function ToastHost() {
   if (Platform.OS !== 'ios') return <ToastPill />;
   return (
-    <FullWindowOverlay>
+    <FullWindowOverlay unstable_accessibilityContainerViewIsModal={false}>
       <ToastPill />
     </FullWindowOverlay>
   );

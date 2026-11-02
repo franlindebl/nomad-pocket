@@ -355,6 +355,10 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   `FullWindowOverlay` (its own window, kept mounted for the exit animation; touches pass through).
   Checked on the iOS 27 simulator (Release) with Descargas open over onboarding; swipe and taps under
   the overlay still work. Android unchanged (FullWindowOverlay is iOS-only); not looked at there.
+- Follow-up (2026-11-03): with it, every Maestro flow failed at launch (`onboarding-start` not visible;
+  the hierarchy held only the status bar). The overlay's container is accessibility-modal by default
+  (`RNSFullWindowOverlay.mm`), which hides the whole app from the XCTest snapshot, and from VoiceOver.
+  `ToastHost` now passes `unstable_accessibilityContainerViewIsModal={false}`.
 
 ### 2026-11-02 — iOS build 38 to TestFlight
 
