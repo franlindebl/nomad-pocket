@@ -1,11 +1,8 @@
-# RDR-10 — reader in dark mode (visual check of the screenshot).
+# RDR-10 — the reader's dark CSS (the app is dark only; visual check of the screenshot).
 appId: com.fjlinde.nomadpocket
 tags: [full, reader, seeded]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "open-settings" }
-- tapOn: "Oscuro"
-- swipe: { direction: DOWN }
 - runFlow: ../../subflows/open-wikipedia.yaml
 - tapOn: "Michael Jackson"
 - extendedWaitUntil:

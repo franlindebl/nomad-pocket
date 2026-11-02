@@ -1,18 +1,15 @@
-// User preferences, persisted in SQLite's key-value store (sync reads at startup).
-import { Appearance } from 'react-native';
+// User preferences, persisted in SQLite's key-value store (sync reads at startup). The app is dark
+// only (2026-11-02): an old stored `theme` key is ignored.
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import { deviceLanguage, setLanguage, type AppLanguage } from '@/i18n';
 import { kvStorage } from '@/lib/kv';
 
-export type ThemePreference = 'system' | 'light' | 'dark';
-
 type SettingsState = {
   language: AppLanguage;
   /** Languages to show in the content catalog. */
   contentLanguages: AppLanguage[];
-  theme: ThemePreference;
   wifiOnly: boolean;
   readerTextScale: number;
   onboarded: boolean;
@@ -29,7 +26,6 @@ type SettingsState = {
   navVoice: boolean;
   setLanguage: (l: AppLanguage) => void;
   setContentLanguages: (l: AppLanguage[]) => void;
-  setTheme: (t: ThemePreference) => void;
   setWifiOnly: (v: boolean) => void;
   setReaderTextScale: (v: number) => void;
   setOnboarded: (v: boolean) => void;
@@ -41,16 +37,11 @@ type SettingsState = {
   setNavVoice: (v: boolean) => void;
 };
 
-function applyTheme(theme: ThemePreference) {
-  Appearance.setColorScheme(theme === 'system' ? 'unspecified' : theme);
-}
-
 export const useSettings = create<SettingsState>()(
   persist(
     (set) => ({
       language: deviceLanguage(),
       contentLanguages: deviceLanguage() === 'es' ? ['es', 'en'] : ['en'],
-      theme: 'system',
       wifiOnly: true,
       readerTextScale: 1,
       onboarded: false,
@@ -65,10 +56,6 @@ export const useSettings = create<SettingsState>()(
         set({ language });
       },
       setContentLanguages: (contentLanguages) => set({ contentLanguages }),
-      setTheme: (theme) => {
-        applyTheme(theme);
-        set({ theme });
-      },
       setWifiOnly: (wifiOnly) => set({ wifiOnly }),
       setReaderTextScale: (readerTextScale) => set({ readerTextScale }),
       setOnboarded: (onboarded) => set({ onboarded }),
@@ -90,7 +77,6 @@ export const useSettings = create<SettingsState>()(
       partialize: ({
         language,
         contentLanguages,
-        theme,
         wifiOnly,
         readerTextScale,
         onboarded,
@@ -103,7 +89,6 @@ export const useSettings = create<SettingsState>()(
       }) => ({
         language,
         contentLanguages,
-        theme,
         wifiOnly,
         readerTextScale,
         onboarded,
@@ -117,7 +102,6 @@ export const useSettings = create<SettingsState>()(
       onRehydrateStorage: () => (state) => {
         if (!state) return;
         setLanguage(state.language);
-        applyTheme(state.theme);
       },
     },
   ),

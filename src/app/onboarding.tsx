@@ -1,6 +1,6 @@
 import * as Device from 'expo-device';
 import { router } from 'expo-router';
-import { BookOpen, Check, Compass, Map, ShieldCheck, Sparkles, Stethoscope, Tent, Users, X, type LucideIcon } from 'lucide-react-native';
+import { BookOpen, Check, Compass, Map, ShieldCheck, MessageSquareText, Stethoscope, Tent, Users, X, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
@@ -323,7 +323,7 @@ export default function OnboardingScreen() {
                 HEALTH_FEATURES
                   ? { icon: Stethoscope, hue: 'medicine' as Hue, key: 'pointGuides' }
                   : { icon: Tent, hue: 'survival' as Hue, key: 'pointGuidesNoHealth' },
-                { icon: Sparkles, hue: 'ai' as Hue, key: 'pointAi' },
+                { icon: MessageSquareText, hue: 'ai' as Hue, key: 'pointAi' },
                 { icon: Users, hue: 'survival' as Hue, key: 'pointPlan' },
               ].map((p) => (
                 <Row key={p.key} gap={space.md}>
@@ -453,7 +453,7 @@ export default function OnboardingScreen() {
               />
               <KitRow
                 testID="kit-assistant"
-                icon={Sparkles}
+                icon={MessageSquareText}
                 hue="ai"
                 title={t('onboarding.kit.assistant')}
                 body={
@@ -552,9 +552,9 @@ const styles = StyleSheet.create({
   flex: { flex: 1, gap: space.lg },
   dots: { gap: 6, marginBottom: space.lg },
   close: { marginLeft: 'auto' },
-  dot: { height: 8, borderRadius: 4 },
+  dot: { height: 8 },
   content: { gap: space.lg, paddingBottom: space.xl },
-  logo: { width: 80, height: 80, borderRadius: 24, alignItems: 'center', justifyContent: 'center', borderCurve: 'continuous' },
+  logo: { width: 80, height: 80, alignItems: 'center', justifyContent: 'center' },
   piece: {
     flexDirection: 'row',
     alignItems: 'center',

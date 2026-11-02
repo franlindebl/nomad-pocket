@@ -1,12 +1,12 @@
 import type { NativeStackNavigationOptions } from 'expo-router';
 
-import { fontFamily, useTheme } from '@/theme';
+import { displayFamily, useTheme } from '@/theme';
 
 /** Screen options shared by every stack (tab stacks and root). */
 export function useStackOptions(): NativeStackNavigationOptions {
   const { colors } = useTheme();
   return {
-    headerTitleStyle: { fontFamily, fontWeight: '600', color: colors.text },
+    headerTitleStyle: { fontFamily: displayFamily, fontWeight: '600', color: colors.text },
     headerLargeTitleStyle: { color: colors.text },
     headerBackButtonDisplayMode: 'minimal',
     headerShadowVisible: false,

@@ -1,6 +1,6 @@
 import '@/i18n';
 
-import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider, useNavigationContainerRef, type ErrorBoundaryProps } from 'expo-router';
+import { DarkTheme, router, Stack, ThemeProvider, useNavigationContainerRef, type ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { AlertTriangle } from 'lucide-react-native';
@@ -14,7 +14,7 @@ import { ToastHost } from '@/components/Toast';
 import { EmptyState } from '@/components/ui';
 import { bootstrap } from '@/features/bootstrap';
 import { useSettings } from '@/stores/settings';
-import { fontFamily, palette, useTheme } from '@/theme';
+import { displayFamily, useTheme } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -37,7 +37,7 @@ export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
 }
 
 export default function RootLayout() {
-  const { scheme, colors } = useTheme();
+  const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigationContainerRef();
 
@@ -51,19 +51,19 @@ export default function RootLayout() {
     });
   }, [navigation]);
 
-  const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
+  const base = DarkTheme;
   const navTheme = {
     ...base,
     colors: { ...base.colors, background: colors.bg, card: colors.bg, text: colors.text, border: colors.border, primary: colors.accent },
   };
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: palette[scheme].bg }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>
       <ThemeProvider value={navTheme}>
         <Stack
           screenOptions={{
-            headerTitleStyle: { fontFamily, fontWeight: '600' },
-            headerLargeTitleStyle: { fontFamily, fontWeight: '800' },
+            headerTitleStyle: { fontFamily: displayFamily, fontWeight: '600' },
+            headerLargeTitleStyle: { fontFamily: displayFamily, fontWeight: '700' },
             headerBackButtonDisplayMode: 'minimal',
             headerShadowVisible: false,
             headerStyle: { backgroundColor: colors.bg },
@@ -87,7 +87,7 @@ export default function RootLayout() {
           <Stack.Screen name="guide/[id]" options={{ title: '' }} />
         </Stack>
         <ToastHost />
-        <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+        <StatusBar style="light" />
       </ThemeProvider>
     </GestureHandlerRootView>
   );

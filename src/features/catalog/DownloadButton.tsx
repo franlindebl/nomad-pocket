@@ -8,7 +8,7 @@ import { useContent } from '@/features/content/items';
 import { askMobileData, NotEnoughStorageError, pauseDownload, resumeDownload, useDownload, useWaitingReason } from '@/features/downloads/manager';
 import { formatBytes, formatMB } from '@/lib/format';
 import { freeBytes } from '@/lib/storage';
-import { radius, space, useTheme } from '@/theme';
+import { space, useTheme } from '@/theme';
 
 import { catalog, downloadResource, loc, OfflineError } from './index';
 import type { CatalogResource } from './types';
@@ -162,7 +162,6 @@ const styles = StyleSheet.create({
     gap: 5,
     height: 32,
     paddingHorizontal: space.md,
-    borderRadius: radius.pill,
   },
-  lang: { borderWidth: 1, borderRadius: 5, paddingHorizontal: 4, height: 18, justifyContent: 'center' },
+  lang: { borderWidth: 1, paddingHorizontal: 4, height: 18, justifyContent: 'center' },
 });

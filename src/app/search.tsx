@@ -20,7 +20,7 @@ type Section = { item: InstalledItem; data: ZimSearchHit[]; pdf?: boolean };
 
 export default function GlobalSearchScreen() {
   const { t } = useTranslation('reader');
-  const { colors, scheme } = useTheme();
+  const { colors } = useTheme();
   const archives = useItems('zim');
   const ids = useMemo(() => archives.map((a) => a.id), [archives]);
   const [query, setQuery] = useState('');
@@ -93,7 +93,7 @@ export default function GlobalSearchScreen() {
           <View
             style={[
               styles.card,
-              { backgroundColor: colors.surface, borderColor: scheme === 'light' ? colors.border : 'transparent' },
+              { backgroundColor: colors.surface, borderColor: colors.border },
               index === 0 && styles.cardTop,
               index === section.data.length - 1 && styles.cardBottom,
             ]}>

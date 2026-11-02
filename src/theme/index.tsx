@@ -1,5 +1,3 @@
-import { useColorScheme } from 'react-native';
-
 import { hues, palette, tint, type ColorScheme, type Colors, type Hue } from './tokens';
 
 export * from './tokens';
@@ -10,11 +8,13 @@ export type Theme = {
   hue: (h: Hue) => { fg: string; bg: string };
 };
 
+const THEME: Theme = {
+  scheme: 'dark',
+  colors: palette.dark,
+  hue: (h) => ({ fg: hues[h], bg: tint(hues[h]) }),
+};
+
+/** The app is dark only: one fixed theme (kept as a hook so screens don't care). */
 export function useTheme(): Theme {
-  const scheme: ColorScheme = useColorScheme() === 'dark' ? 'dark' : 'light';
-  return {
-    scheme,
-    colors: palette[scheme],
-    hue: (h) => ({ fg: hues[h], bg: tint(hues[h], scheme) }),
-  };
+  return THEME;
 }

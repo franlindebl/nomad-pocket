@@ -1,57 +1,39 @@
-// Design tokens. See docs/STYLE_GUIDE.md — never hard-code these values in screens.
+// Design tokens ("Precisión": dark only, black and signal yellow). See docs/STYLE_GUIDE.md —
+// never hard-code these values in screens.
 import { Platform, type TextStyle } from 'react-native';
 
+/** The app has one scheme: dark (app.json `userInterfaceStyle`, owner's decision 2026-11-02). */
 export const palette = {
-  light: {
-    bg: '#F6F5F2',
-    surface: '#FFFFFF',
-    surfaceAlt: '#EEECE7',
-    surfacePressed: '#E6E3DD',
-    border: '#E3E0D9',
-    text: '#18171B',
-    textSecondary: '#6A6760',
-    textTertiary: '#9B978E',
-    ink: '#18171B',
-    onInk: '#FFFFFF',
-    accent: '#F2643A',
-    accentSoft: '#FDE7DF',
-    onAccent: '#FFFFFF',
-    success: '#2F9E5B',
-    successSoft: '#DDF3E5',
-    warning: '#D68A00',
-    warningSoft: '#FCEFD3',
-    danger: '#D93D42',
-    dangerSoft: '#FBE1E1',
-    /** The user's position on the map (puck + compass beam: scripts/maps/make-beam.py). */
-    location: '#1A73E8',
-    /** A speed limit sign: white, red ring, black figures, in both schemes like the real one. */
-    signFace: '#FFFFFF',
-    signRing: '#D93D42',
-    signText: '#18171B',
-    overlay: 'rgba(24,23,27,0.45)',
-    shadow: 'rgba(24,23,27,0.12)',
-  },
   dark: {
-    bg: '#0D0D0F',
-    surface: '#17171A',
-    surfaceAlt: '#202024',
-    surfacePressed: '#28282D',
-    border: '#2A2A30',
-    text: '#F4F3EF',
-    textSecondary: '#A3A09A',
-    textTertiary: '#6E6B66',
-    ink: '#F4F3EF',
-    onInk: '#0D0D0F',
-    accent: '#FF7A4F',
-    accentSoft: '#3A1F17',
-    onAccent: '#FFFFFF',
-    success: '#46C47A',
-    successSoft: '#12301F',
-    warning: '#F5B02E',
-    warningSoft: '#33260C',
-    danger: '#FF6369',
-    dangerSoft: '#3A1517',
+    bg: '#0C0C0C',
+    surface: '#131313',
+    surfaceAlt: '#1B1B1B',
+    surfacePressed: '#242424',
+    /** Hairlines, dividers and panel outlines. */
+    border: '#232323',
+    /** Outlines of controls (icon buttons, chips, inputs): a step brighter than `border`. */
+    outline: '#2E2E2E',
+    /** The small corner marks of panels (`CornerTicks`). */
+    tick: '#5A5A5A',
+    text: '#F2F2EF',
+    textSecondary: '#8F8F89',
+    textTertiary: '#5F5F5A',
+    /** Fill of the strongest controls (send, selected chip): signal yellow. */
+    ink: '#FFD60A',
+    onInk: '#0C0C0C',
+    /** Signal yellow: progress, active state, the one primary action. Works as fill and as text. */
+    accent: '#FFD60A',
+    accentSoft: '#2B2507',
+    onAccent: '#0C0C0C',
+    success: '#3DD68C',
+    successSoft: '#0E2A1D',
+    warning: '#FF9F0A',
+    warningSoft: '#33220A',
+    danger: '#FF453A',
+    dangerSoft: '#3A1513',
+    /** The user's position on the map (puck + compass beam: scripts/maps/make-beam.py). */
     location: '#4C8DF6',
+    /** A speed limit sign: white, red ring, black figures, like the real one. */
     signFace: '#FFFFFF',
     signRing: '#D93D42',
     signText: '#18171B',
@@ -61,29 +43,29 @@ export const palette = {
 } as const;
 
 export type ColorScheme = keyof typeof palette;
-export type ColorToken = keyof (typeof palette)['light'];
+export type ColorToken = keyof (typeof palette)['dark'];
 export type Colors = { [K in ColorToken]: string };
 
+/** Category hues: icon strokes and subtle tints only, never large fills. Tuned to read on black. */
 export const hues = {
-  medicine: '#E5484D',
-  survival: '#F76B15',
-  education: '#3E63DD',
-  diy: '#12A594',
-  agriculture: '#46A758',
-  computing: '#8E4EC6',
-  reference: '#0090FF',
-  maps: '#0B8A8A',
-  ai: '#7C5CFF',
-  courses: '#3E63DD',
-  neutral: '#6A6760',
+  medicine: '#FF6B6B',
+  survival: '#FFD60A',
+  education: '#8AA4FF',
+  diy: '#3DD6C3',
+  agriculture: '#86D96B',
+  computing: '#B992FF',
+  reference: '#5DB4FF',
+  maps: '#4FD1A5',
+  ai: '#F2F2EF',
+  courses: '#8AA4FF',
+  neutral: '#8F8F89',
 } as const;
 
 export type Hue = keyof typeof hues;
 
-/** Hue at 12% (light) / 20% (dark) opacity, for icon badge and tint backgrounds. */
-export function tint(hex: string, scheme: ColorScheme): string {
-  const alpha = scheme === 'dark' ? '33' : '1F';
-  return `${hex}${alpha}`;
+/** Hue at 16% opacity, for tint backgrounds. */
+export function tint(hex: string): string {
+  return `${hex}29`;
 }
 
 export const space = {
@@ -99,29 +81,38 @@ export const space = {
   gutter: 20,
 } as const;
 
+/** Square by design: corners are 0 and the important ones are cut (`Chamfer`), not rounded. */
 export const radius = {
-  sm: 8,
-  md: 12,
-  lg: 18,
-  xl: 26,
+  sm: 2,
+  md: 2,
+  lg: 0,
+  xl: 0,
   pill: 999,
 } as const;
 
-export const fontFamily = Platform.select({ web: 'Inter, system-ui, sans-serif', default: 'Inter' });
+/** The diagonal cut of chamfered corners (`Chamfer`): small controls / big blocks. */
+export const chamfer = { sm: 7, md: 10, lg: 16 } as const;
 
-type Variant = Pick<TextStyle, 'fontSize' | 'lineHeight' | 'fontWeight' | 'letterSpacing' | 'textTransform'>;
+/** Text font (IBM Plex Sans). Display and labels use their own families through `typography`. */
+export const fontFamily = Platform.select({ web: "'IBM Plex Sans', system-ui, sans-serif", default: 'IBM Plex Sans' });
+/** Titles, figures and button labels: Chakra Petch (its letters already have cut corners). */
+export const displayFamily = Platform.select({ web: "'Chakra Petch', system-ui, sans-serif", default: 'Chakra Petch' });
+/** Labels, sizes and code: IBM Plex Mono. */
+export const monoFamily = Platform.select({ web: "'IBM Plex Mono', ui-monospace, monospace", default: 'IBM Plex Mono' });
+
+type Variant = Pick<TextStyle, 'fontFamily' | 'fontSize' | 'lineHeight' | 'fontWeight' | 'letterSpacing' | 'textTransform'>;
 
 export const typography = {
-  display: { fontSize: 34, lineHeight: 40, fontWeight: '800', letterSpacing: -0.8 },
-  title1: { fontSize: 28, lineHeight: 34, fontWeight: '700', letterSpacing: -0.6 },
-  title2: { fontSize: 22, lineHeight: 28, fontWeight: '700', letterSpacing: -0.4 },
-  title3: { fontSize: 19, lineHeight: 24, fontWeight: '600', letterSpacing: -0.2 },
-  headline: { fontSize: 16, lineHeight: 22, fontWeight: '600', letterSpacing: -0.1 },
-  body: { fontSize: 16, lineHeight: 24, fontWeight: '400', letterSpacing: 0 },
-  callout: { fontSize: 15, lineHeight: 21, fontWeight: '500', letterSpacing: 0 },
-  footnote: { fontSize: 13, lineHeight: 18, fontWeight: '500', letterSpacing: 0 },
-  caption: { fontSize: 12, lineHeight: 16, fontWeight: '500', letterSpacing: 0.1 },
-  overline: { fontSize: 11, lineHeight: 14, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase' },
+  display: { fontFamily: displayFamily, fontSize: 28, lineHeight: 32, fontWeight: '700', letterSpacing: 0.3, textTransform: 'uppercase' },
+  title1: { fontFamily: displayFamily, fontSize: 25, lineHeight: 30, fontWeight: '700', letterSpacing: 0 },
+  title2: { fontFamily: displayFamily, fontSize: 21, lineHeight: 26, fontWeight: '600', letterSpacing: 0 },
+  title3: { fontFamily: displayFamily, fontSize: 18, lineHeight: 23, fontWeight: '600', letterSpacing: 0 },
+  headline: { fontFamily, fontSize: 16, lineHeight: 22, fontWeight: '600', letterSpacing: -0.1 },
+  body: { fontFamily, fontSize: 16, lineHeight: 24, fontWeight: '400', letterSpacing: 0 },
+  callout: { fontFamily, fontSize: 15, lineHeight: 21, fontWeight: '500', letterSpacing: 0 },
+  footnote: { fontFamily, fontSize: 13, lineHeight: 18, fontWeight: '500', letterSpacing: 0 },
+  caption: { fontFamily, fontSize: 12, lineHeight: 16, fontWeight: '500', letterSpacing: 0.1 },
+  overline: { fontFamily: monoFamily, fontSize: 11, lineHeight: 14, fontWeight: '500', letterSpacing: 1.3, textTransform: 'uppercase' },
 } satisfies Record<string, Variant>;
 
 export type TypographyVariant = keyof typeof typography;

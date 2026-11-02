@@ -13,12 +13,12 @@ import { layout, radius, space, useTheme } from '@/theme';
  */
 export default function PackagesScreen() {
   const { t } = useTranslation('settings');
-  const { colors, scheme } = useTheme();
+  const { colors } = useTheme();
   const [query, setQuery] = useState('');
   const kind = useLocalSearchParams<{ kind?: string }>().kind === 'android' ? 'android' : 'js';
   const all = getCredits()[kind];
   const list = useMemo(() => filterCredits(all, query), [all, query]);
-  const border = scheme === 'light' ? colors.border : 'transparent';
+  const border = colors.border;
 
   return (
     <FlatList

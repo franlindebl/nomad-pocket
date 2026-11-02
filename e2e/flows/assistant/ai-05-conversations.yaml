@@ -3,7 +3,7 @@ appId: com.fjlinde.nomadpocket
 tags: [nightly, assistant]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "sparkles" }
+- tapOn: { id: "text.bubble" }
 - tapOn:   # the most capable model is already chosen since build 20: the button may not show
     text: "Usar modelo integrado"
     optional: true

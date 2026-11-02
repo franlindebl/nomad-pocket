@@ -6,5 +6,6 @@ export * from './Misc';
 export * from './Pressable';
 export * from './Progress';
 export * from './Screen';
+export * from './Shapes';
 export * from './Text';
 export * from './Segmented';

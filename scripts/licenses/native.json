@@ -448,12 +448,20 @@
       "text": "texts/noto-sans-OFL.txt"
     },
     {
-      "id": "inter",
-      "name": "Inter (app font)",
+      "id": "chakra-petch",
+      "name": "Chakra Petch (app font)",
       "license": "OFL-1.1",
-      "copyright": ["Copyright (c) 2016 The Inter Project Authors"],
-      "url": "https://github.com/rsms/inter",
-      "text": "texts/inter-OFL.txt"
+      "copyright": ["Copyright 2018 The Chakra Petch Project Authors"],
+      "url": "https://github.com/cadsondemak/Chakra-Petch",
+      "text": "texts/chakra-petch-OFL.txt"
+    },
+    {
+      "id": "ibm-plex",
+      "name": "IBM Plex Sans and IBM Plex Mono (app fonts)",
+      "license": "OFL-1.1",
+      "copyright": ["Copyright © 2017 IBM Corp. with Reserved Font Name \"Plex\""],
+      "url": "https://github.com/IBM/plex",
+      "text": "texts/ibm-plex-OFL.txt"
     }
   ],
   "jsTexts": {

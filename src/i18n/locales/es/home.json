@@ -66,7 +66,10 @@
     "plan": "Mi plan familiar",
     "call": "Llamar al {{number}}",
     "callAmbulance": "Llamar al {{number}} (ambulancia)",
-    "callPolice": "Llamar al {{number}} (policía)"
+    "callPolice": "Llamar al {{number}} (policía)",
+    "callLabel": "Llamar a emergencias",
+    "callLabelAmbulance": "Llamar a una ambulancia",
+    "callLabelPolice": "Llamar a la policía"
   },
   "downloadsHint": "Déjalo con Wi‑Fi y cargando. Puedes seguir usando la app.",
   "ready": {
@@ -108,7 +111,8 @@
     "zimUpdate": "Hay una versión más reciente: actualízala mientras tengas conexión",
     "planMeeting": "Punto de encuentro listo · añade contactos",
     "planContacts_one": "{{count}} contacto · falta el punto de encuentro",
-    "planContacts_other": "{{count}} contactos · falta el punto de encuentro"
+    "planContacts_other": "{{count}} contactos · falta el punto de encuentro",
+    "label": "listos"
   },
   "storageLine": "Usas {{used}} · {{free}} libres"
 }

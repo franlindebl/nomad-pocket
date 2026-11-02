@@ -323,6 +323,6 @@ export function GuidancePanel({ bottom, top, mapBearing, onHeight, onBannerHeigh
 
 const styles = StyleSheet.create({
   wrap: { position: 'absolute', left: space.lg, right: space.lg },
-  arrow: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center' },
+  arrow: { width: 64, height: 64, alignItems: 'center', justifyContent: 'center' },
   bar: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.md },
 });

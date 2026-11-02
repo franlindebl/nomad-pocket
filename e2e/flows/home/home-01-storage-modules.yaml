@@ -30,5 +30,5 @@ tags: [smoke, home, seeded]
 - extendedWaitUntil:
     visible: "Descarga el mapa de tu país"
     timeout: 15000
-- tapOn: { id: "sparkles" }
+- tapOn: { id: "text.bubble" }
 - assertVisible: "Elige un modelo para empezar|¿En qué te ayudo\\?"

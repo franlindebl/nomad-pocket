@@ -179,5 +179,5 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   thumb: { width: 44, height: 44, borderRadius: radius.md },
-  dl: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
+  dl: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
 });

@@ -5,7 +5,7 @@ appId: com.fjlinde.nomadpocket
 tags: [smoke, assistant]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "sparkles" }
+- tapOn: { id: "text.bubble" }
 - assertVisible: "¿En qué te ayudo\\?|Elige un modelo para empezar"
 - takeScreenshot: 01-assistant
 - tapOn: "Modelo: .*"

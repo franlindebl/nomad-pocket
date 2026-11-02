@@ -1,9 +1,10 @@
 import type { LucideIcon } from 'lucide-react-native';
 import { ActivityIndicator, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { radius, space, useTheme, type ColorToken } from '@/theme';
+import { chamfer, displayFamily, space, useTheme, type ColorToken } from '@/theme';
 
 import { PressableScale } from './Pressable';
+import { ChamferFill } from './Shapes';
 import { Text } from './Text';
 
 export type ButtonVariant = 'primary' | 'accent' | 'secondary' | 'ghost' | 'danger';
@@ -25,9 +26,9 @@ type Props = {
 };
 
 const SIZES = {
-  sm: { height: 34, px: space.md, icon: 16, text: 'footnote' as const },
-  md: { height: 44, px: space.lg, icon: 18, text: 'headline' as const },
-  lg: { height: 54, px: space.xl, icon: 20, text: 'headline' as const },
+  sm: { height: 34, px: space.md, icon: 16, font: 12, cut: chamfer.sm },
+  md: { height: 44, px: space.lg, icon: 18, font: 14, cut: chamfer.md },
+  lg: { height: 54, px: space.xl, icon: 20, font: 15, cut: chamfer.md },
 };
 
 export function Button({
@@ -46,14 +47,15 @@ export function Button({
 }: Props) {
   const { colors } = useTheme();
   const s = SIZES[size];
-  const scheme: Record<ButtonVariant, { bg: string; fg: ColorToken }> = {
-    primary: { bg: colors.ink, fg: 'onInk' },
-    accent: { bg: colors.accent, fg: 'onAccent' },
-    secondary: { bg: colors.surfaceAlt, fg: 'text' },
+  // Primary (and accent, its alias) is the signal-yellow block with a cut corner; the rest are square.
+  const looks: Record<ButtonVariant, { bg: string; fg: ColorToken; cut?: boolean; border?: string }> = {
+    primary: { bg: colors.accent, fg: 'onAccent', cut: true },
+    accent: { bg: colors.accent, fg: 'onAccent', cut: true },
+    secondary: { bg: colors.surfaceAlt, fg: 'text', border: colors.outline },
     ghost: { bg: 'transparent', fg: 'text' },
     danger: { bg: colors.dangerSoft, fg: 'danger' },
   };
-  const { bg, fg } = scheme[variant];
+  const { bg, fg, cut, border } = looks[variant];
   const fgColor = colors[fg];
 
   return (
@@ -67,16 +69,18 @@ export function Button({
       haptic={variant === 'ghost' ? 'selection' : 'light'}
       style={[
         styles.base,
-        { backgroundColor: bg, height: s.height, paddingHorizontal: s.px },
+        { backgroundColor: cut ? 'transparent' : bg, height: s.height, paddingHorizontal: s.px },
+        border && { borderWidth: 1, borderColor: border },
         fullWidth && styles.full,
         style,
       ]}>
+      {cut ? <ChamferFill color={bg} cut={s.cut} /> : null}
       {loading ? (
         <ActivityIndicator color={fgColor} />
       ) : (
         <View style={styles.row}>
           {Icon ? <Icon size={s.icon} color={fgColor} strokeWidth={2.2} /> : null}
-          <Text variant={s.text} color={fg} numberOfLines={1}>
+          <Text variant="headline" color={fg} numberOfLines={1} style={[styles.label, { fontSize: s.font, lineHeight: s.font + 4 }]}>
             {title}
           </Text>
           {IconRight ? <IconRight size={s.icon} color={fgColor} strokeWidth={2.2} /> : null}
@@ -100,8 +104,9 @@ type IconButtonProps = {
 
 export function IconButton({ icon: Icon, onPress, accessibilityLabel, size = 40, variant = 'filled', color, style, disabled, testID }: IconButtonProps) {
   const { colors } = useTheme();
-  const bg = variant === 'filled' ? colors.surfaceAlt : variant === 'ink' ? colors.ink : 'transparent';
+  const bg = variant === 'filled' ? colors.surface : variant === 'ink' ? colors.ink : 'transparent';
   const fg = color ?? (variant === 'ink' ? colors.onInk : colors.text);
+  const outline = variant === 'filled' ? { borderWidth: 1, borderColor: colors.outline } : null;
   return (
     <PressableScale
       testID={testID}
@@ -112,7 +117,7 @@ export function IconButton({ icon: Icon, onPress, accessibilityLabel, size = 40,
       haptic="selection"
       pressedScale={0.92}
       hitSlop={6}
-      style={[{ width: size, height: size, borderRadius: size / 2, backgroundColor: bg }, styles.center, style]}>
+      style={[{ width: size, height: size, backgroundColor: bg }, outline, styles.center, style]}>
       <Icon size={Math.round(size * 0.48)} color={fg} strokeWidth={2} />
     </PressableScale>
   );
@@ -120,11 +125,10 @@ export function IconButton({ icon: Icon, onPress, accessibilityLabel, size = 40,
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    borderCurve: 'continuous',
   },
+  label: { fontFamily: displayFamily, fontWeight: '600', letterSpacing: 0.9, textTransform: 'uppercase' },
   full: { alignSelf: 'stretch' },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   center: { alignItems: 'center', justifyContent: 'center' },

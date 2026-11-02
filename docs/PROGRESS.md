@@ -333,6 +333,33 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-02 — New look "Precisión": dark only, black and signal yellow
+
+- Owner: the UI looked like every AI-generated app (and like Claude's own: cream background, terracotta accent,
+  Inter, identical hairline cards, pastel icon squares, a floating pill composer with ✦). Two rounds of
+  proposals (claude.ai artifacts); the owner dropped light mode and chose "Precisión": square shapes finished
+  with fine detail instead of the first, too heavy "Señal" try (2 px borders, all capitals).
+- Dark only: `app.json` `userInterfaceStyle: "dark"`, one palette in `theme/tokens.ts`, `useTheme()` returns a
+  fixed theme (no `useColorScheme`), the appearance setting and its strings are gone (an old stored `theme` key is
+  ignored), the splash is the dark one, the reader always uses its dark CSS.
+- Tokens: `#0C0C0C` background, `#131313` panels, signal yellow `#FFD60A` as the one accent (fill and text),
+  orange warnings so they never read as the brand, new `outline`/`tick` tokens, hues retuned for black, radii 0,
+  `chamfer` cuts. Fonts: Chakra Petch (titles, figures, buttons), IBM Plex Sans (text), IBM Plex Mono (labels),
+  all OFL, bundled as static files; Inter removed; Credits updated (`scripts/licenses/native.json`).
+- Components: `Shapes.tsx` adds `CornerTicks` (corner marks on panels) and `ChamferFill` (SVG fill with a cut
+  corner, it measures itself). Card / ListGroup square with outline + marks; primary buttons yellow with a cut
+  corner and Chakra capitals; square icon buttons, chips, segmented, badges (mono), search field, map buttons;
+  `ProgressBar segments` (slanted segments); IconBadge is a square outline with the hue on the stroke.
+- Home: the emergency number is one big yellow block with a cut corner and a faint hatch (`home-call`, same
+  accessible label "Llamar al 112"), then three panels (nearby, first aid / guides, plan); readiness shows "5/6"
+  in Chakra with one segment per piece. Assistant: the user's message is a yellow block (cut bottom-right),
+  message icon instead of sparkles (also the tab: `text.bubble` / `chat`), square composer with yellow marks.
+- Checked on the iOS simulator (Release): home, library, Wikipedia, resource sheet, assistant and a guide answer,
+  map, settings, kit; Android emulator (Release APK): home with the new fonts. Smoke E2E 21/21 on iOS after
+  updating the flows (the assistant tab is `text.bubble`; SET-02 themes removed; RDR-10, X-01, SET-01 and the
+  iPad tour no longer touch the appearance setting). Store screenshots, the app icon and the splash still show
+  the old look (next: icon proposals in vector, Icon Composer layers + Android adaptive/monochrome).
+
 ### 2026-11-01 — iOS build 33 to TestFlight
 
 - 1.1.0 (33), TestFlight only: build 32 plus Wikipedia variants already held by a bigger installed one shown as

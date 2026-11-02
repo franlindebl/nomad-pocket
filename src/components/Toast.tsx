@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { create } from 'zustand';
 
 import { Text } from '@/components/ui';
-import { radius, space, useTheme } from '@/theme';
+import { space, useTheme } from '@/theme';
 
 type Toast = { id: number; message: string };
 
@@ -55,9 +55,9 @@ export function ToastHost() {
       exiting={FadeOutUp.duration(200)}
       pointerEvents="none"
       accessibilityLiveRegion="polite"
-      style={[styles.toast, { top: insets.top + space.sm, backgroundColor: colors.ink, shadowColor: colors.shadow }]}>
+      style={[styles.toast, { top: insets.top + space.sm, backgroundColor: colors.surfaceAlt, borderColor: colors.outline, shadowColor: colors.shadow }]}>
       <CheckCircle2 size={18} color={colors.accent} />
-      <Text variant="footnote" weight="600" color="onInk" numberOfLines={2} style={{ flexShrink: 1 }}>
+      <Text variant="footnote" weight="600" numberOfLines={2} style={{ flexShrink: 1 }}>
         {toast.message}
       </Text>
     </Animated.View>
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     gap: space.sm,
     paddingHorizontal: space.lg,
     paddingVertical: space.md,
-    borderRadius: radius.pill,
+    borderWidth: 1,
     shadowOpacity: 1,
     shadowRadius: 24,
     shadowOffset: { width: 0, height: 8 },

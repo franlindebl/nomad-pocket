@@ -16,7 +16,7 @@ import { Composer } from '@/features/assistant/ui/Composer';
 import { useActiveModel } from '@/features/assistant/useActiveModel';
 import { useItems } from '@/features/content/items';
 import { HEALTH_FEATURES } from '@/lib/health';
-import { layout, radius, space, useTheme } from '@/theme';
+import { layout, space, useTheme } from '@/theme';
 
 type Row_ = { key: string; message?: ChatMessage; streaming?: Streaming };
 
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   emptyContent: { ...layout.column, flexGrow: 1, justifyContent: 'center', paddingHorizontal: space.gutter, paddingVertical: space.xl, gap: space.xl },
   hero: { alignItems: 'center', gap: space.md },
   composer: { ...layout.column, paddingHorizontal: space.md, paddingTop: space.sm },
-  pill: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 30, paddingHorizontal: space.md, borderRadius: radius.pill, maxWidth: 220 },
-  elsewhere: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginBottom: space.sm, paddingVertical: space.sm, paddingHorizontal: space.md, borderRadius: radius.pill },
-  error: { flexDirection: 'row', alignItems: 'center', gap: space.sm, padding: space.md, borderRadius: radius.md },
+  pill: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 30, paddingHorizontal: space.md, maxWidth: 220 },
+  elsewhere: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginBottom: space.sm, paddingVertical: space.sm, paddingHorizontal: space.md },
+  error: { flexDirection: 'row', alignItems: 'center', gap: space.sm, padding: space.md },
 });

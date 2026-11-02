@@ -5,7 +5,7 @@ tags: [smoke, settings]
 - runFlow: ../../subflows/launch.yaml
 - tapOn: { id: "open-settings" }
 - tapOn: "English"
-- assertVisible: "Appearance"
+- assertVisible: "App language"
 - takeScreenshot: 01-settings-en
 - tapOn: "Español"
-- assertVisible: "Apariencia"
+- assertVisible: "Idioma de la app"

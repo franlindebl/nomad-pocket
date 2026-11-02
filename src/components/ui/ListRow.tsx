@@ -5,6 +5,7 @@ import { StyleSheet, View, type AccessibilityRole, type AccessibilityState, type
 import { space, useTheme } from '@/theme';
 
 import { PressableScale } from './Pressable';
+import { CornerTicks } from './Shapes';
 import { Text } from './Text';
 
 type Props = {
@@ -97,19 +98,19 @@ export function ListRow({
   );
 }
 
-/** Groups rows into an inset card with hairline separators. */
+/** Groups rows into a square panel (outline + corner marks) with hairline separators. */
 export function ListGroup({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
-  const { colors, scheme } = useTheme();
+  const { colors } = useTheme();
   const items = (Array.isArray(children) ? children : [children]).flat().filter(Boolean);
   return (
-    <View
-      style={[styles.group, { backgroundColor: colors.surface, borderColor: scheme === 'light' ? colors.border : 'transparent' }, style]}>
+    <View style={[styles.group, { backgroundColor: colors.surface, borderColor: colors.border }, style]}>
       {items.map((child, i) => (
         <View key={i}>
           {i > 0 ? <View style={[styles.separator, { backgroundColor: colors.border }]} /> : null}
           {child}
         </View>
       ))}
+      <CornerTicks />
     </View>
   );
 }
@@ -129,9 +130,7 @@ const styles = StyleSheet.create({
   rowWithAction: { flex: 1, paddingRight: 0 },
   actionRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingRight: space.lg },
   group: {
-    borderRadius: 18,
-    borderCurve: 'continuous',
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     overflow: 'hidden',
   },
   separator: { height: StyleSheet.hairlineWidth, marginLeft: space.lg },

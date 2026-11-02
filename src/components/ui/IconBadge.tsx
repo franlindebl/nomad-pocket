@@ -12,26 +12,25 @@ type Props = {
   style?: StyleProp<ViewStyle>;
 };
 
-/** Category icon in a rounded tinted square (40×40 by default). */
+/** Category icon in a square outline (40×40 by default): the hue colours the stroke only. */
 export function IconBadge({ icon: Icon, hue = 'neutral', color, size = 40, style }: Props) {
-  const { scheme } = useTheme();
+  const { colors } = useTheme();
   const fg = color ?? hues[hue];
-  const bg = `${fg}${scheme === 'dark' ? '33' : '1F'}`;
   return (
     <View
       style={[
         {
           width: size,
           height: size,
-          borderRadius: Math.round(size * 0.3),
-          borderCurve: 'continuous',
-          backgroundColor: bg,
+          borderWidth: 1,
+          borderColor: colors.outline,
+          backgroundColor: colors.bg,
           alignItems: 'center',
           justifyContent: 'center',
         },
         style,
       ]}>
-      <Icon size={Math.round(size * 0.5)} color={fg} strokeWidth={size >= 48 ? 1.75 : 2} />
+      <Icon size={Math.round(size * 0.48)} color={fg} strokeWidth={size >= 48 ? 1.6 : 1.9} />
     </View>
   );
 }

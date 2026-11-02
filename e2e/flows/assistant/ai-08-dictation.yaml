@@ -5,7 +5,7 @@ appId: com.fjlinde.nomadpocket
 tags: [nightly, assistant]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "sparkles" }
+- tapOn: { id: "text.bubble" }
 - runFlow:
     when:
       visible: "Usar modelo integrado"

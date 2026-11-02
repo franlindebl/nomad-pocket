@@ -2,7 +2,7 @@ import { NativeTabs } from 'expo-router/native-tabs';
 import { Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { useTheme } from '@/theme';
+import { displayFamily, useTheme } from '@/theme';
 
 export default function TabsLayout() {
   const { t } = useTranslation();
@@ -10,10 +10,10 @@ export default function TabsLayout() {
   return (
     <NativeTabs
       tintColor={colors.accent}
-      labelStyle={{ fontFamily: 'Inter', fontWeight: '600' }}
+      labelStyle={{ fontFamily: displayFamily, fontWeight: '600' }}
       // iOS gets Liquid Glass for free; on Android match the app palette instead of Material defaults.
       {...(Platform.OS === 'android'
-        ? { backgroundColor: colors.surface, indicatorColor: colors.accentSoft, rippleColor: colors.surfacePressed, iconColor: colors.textSecondary }
+        ? { backgroundColor: colors.bg, indicatorColor: colors.accentSoft, rippleColor: colors.surfacePressed, iconColor: colors.textSecondary }
         : {})}>
       <NativeTabs.Trigger name="(home)">
         <NativeTabs.Trigger.Label>{t('tabs.home')}</NativeTabs.Trigger.Label>
@@ -29,7 +29,7 @@ export default function TabsLayout() {
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="assistant">
         <NativeTabs.Trigger.Label>{t('tabs.assistant')}</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf={{ default: 'sparkles', selected: 'sparkles' }} md="auto_awesome" />
+        <NativeTabs.Trigger.Icon sf={{ default: 'text.bubble', selected: 'text.bubble.fill' }} md="chat" />
       </NativeTabs.Trigger>
     </NativeTabs>
   );

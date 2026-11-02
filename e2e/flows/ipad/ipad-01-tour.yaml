@@ -63,8 +63,7 @@ tags: [ipad, seeded, seeded-map]
 - tapOn: { id: "open-settings" }
 - assertVisible: "Idioma de la app"
 - takeScreenshot: 10-settings
-- tapOn: "Oscuro"
 - swipe: { direction: DOWN }
 - setOrientation: LANDSCAPE_LEFT
-- takeScreenshot: 11-home-dark-landscape
+- takeScreenshot: 11-home-landscape
 - setOrientation: PORTRAIT

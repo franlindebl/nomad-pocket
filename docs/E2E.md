@@ -41,10 +41,10 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 | Command | Flows | Time | Covers | Needs |
 |---|---|---|---|---|
 | `npm run e2e` | 21 | ~14 min | P0: every screen's main path (incl. map search, Emergencias, road routing and Preparedness) | nothing (offline) |
-| `npm run e2e:full` | 45 | ~30 min | + P1: secondary features (themes, markers, find in page, courses, reminders, PDF…) | nothing (offline) |
-| `npm run e2e:all` | 58 | ~41 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
+| `npm run e2e:full` | 44 | ~30 min | + P1: secondary features (markers, find in page, courses, reminders, PDF…) | nothing (offline) |
+| `npm run e2e:all` | 57 | ~41 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
 | `PLANET_PORT=8766 scripts/e2e.sh --build --tags planet` | 2 | ~12 min | extraction resumed after a kill (`map-22`) and retried after a network failure (`map-23`) (tag `planet`, their own build: rebuild without `PLANET_PORT` before other suites) | nothing (local stand-in planet) |
-| `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape, light and dark | nothing (offline) |
+| `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape | nothing (offline) |
 | `npm run e2e:android` | 5 | ~18 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack, content updates | internet, Android emulator |
 
 When to run what: smoke before every TestFlight build or after a risky change; full and the
@@ -239,7 +239,6 @@ By hand:
 | home | `home-02-header` | HOME-02, DL-01 | smoke | — |
 | home | `x-01-persistence` | X-01 | smoke | seeded |
 | settings | `set-01-language` | SET-01 | smoke | — |
-| settings | `set-02-theme` | SET-02 | full | — |
 | settings | `set-03-storage` | SET-03, SET-04 | full | seeded |
 | settings | `set-05-credits` | SET-05 | full | — (GPL notice, source/licence links, libkiwix, a JS package's licence via search) |
 | library | `lib-01-open` | LIB-01, RDR-01 | smoke | seeded |
@@ -447,7 +446,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `meeting-place`, `meeting-details`, `meeting-pin-<id>`, `meeting-save` | meeting point sheet |
   | `adults-plus`/`-minus`/`-value` (also `children-`, `pets-`), `kit-progress`, `kit-<item>`, `kit-<item>-details`, `kit-add` | kit screen |
   | `item-name`, `item-add-expiry`, `expiry-month`, `item-save` | kit item sheet |
-  | `house`, `map`, `books.vertical`, `sparkles` | tabs (SF Symbol ids, set by iOS); Courses is inside the Library (`subflows/open-courses.yaml`) |
+  | `house`, `map`, `books.vertical`, `text.bubble` | tabs (SF Symbol ids, set by iOS); Courses is inside the Library (`subflows/open-courses.yaml`) |
   | `BackButton` | the native header's back button |
 
 - A control inside another button is invisible to VoiceOver and to Maestro (iOS merges it

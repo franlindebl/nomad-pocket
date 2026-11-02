@@ -3,8 +3,8 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, TextInput, View } from 'react-native';
 
-import { PressableScale, Text } from '@/components/ui';
-import { fontFamily, radius, space, typography, useTheme } from '@/theme';
+import { ChamferFill, CornerTicks, PressableScale, Text } from '@/components/ui';
+import { chamfer, fontFamily, monoFamily, space, typography, useTheme } from '@/theme';
 
 import { joinDictation } from '../dictation-core';
 import { useDictation } from '../dictation';
@@ -23,7 +23,7 @@ type Props = {
 
 export function Composer({ busy, disabled, blocked, useLibrary, onToggleLibrary, onSend, onStop }: Props) {
   const { t } = useTranslation('assistant');
-  const { colors, scheme } = useTheme();
+  const { colors } = useTheme();
   const [text, setText] = useState('');
   const canSend = !!text.trim() && !busy && !blocked && !disabled;
   // What was typed when dictation started: the spoken text goes after it.
@@ -50,11 +50,7 @@ export function Composer({ busy, disabled, blocked, useLibrary, onToggleLibrary,
   };
 
   return (
-    <View
-      style={[
-        styles.box,
-        { backgroundColor: colors.surface, borderColor: scheme === 'light' ? colors.border : colors.surfaceAlt, shadowColor: colors.shadow },
-      ]}>
+    <View style={[styles.box, { backgroundColor: colors.surface, borderColor: colors.outline }]}>
       <TextInput
         value={text}
         onChangeText={edit}
@@ -76,9 +72,12 @@ export function Composer({ busy, disabled, blocked, useLibrary, onToggleLibrary,
           accessibilityLabel={t('composer.useLibrary')}
           accessibilityHint={useLibrary ? t('composer.useLibraryOn') : t('composer.useLibraryOff')}
           onPress={() => onToggleLibrary(!useLibrary)}
-          style={[styles.toggle, { backgroundColor: useLibrary ? colors.accentSoft : colors.surfaceAlt }]}>
-          <Library size={15} color={useLibrary ? colors.accent : colors.textSecondary} strokeWidth={2.2} />
-          <Text variant="footnote" weight="600" tint={useLibrary ? colors.accent : colors.textSecondary}>
+          style={[
+            styles.toggle,
+            useLibrary ? { backgroundColor: colors.accentSoft, borderColor: colors.accent } : { backgroundColor: 'transparent', borderColor: colors.outline },
+          ]}>
+          <Library size={14} color={useLibrary ? colors.accent : colors.textSecondary} strokeWidth={2.2} />
+          <Text variant="caption" tint={useLibrary ? colors.accent : colors.textSecondary} style={styles.toggleLabel}>
             {t('composer.useLibrary')}
           </Text>
         </PressableScale>
@@ -122,29 +121,25 @@ export function Composer({ busy, disabled, blocked, useLibrary, onToggleLibrary,
               accessibilityState={{ disabled: !canSend }}
               onPress={send}
               pressedScale={0.9}
-              style={[styles.send, { backgroundColor: canSend ? colors.ink : colors.surfaceAlt }]}>
-              <ArrowUp size={18} color={canSend ? colors.onInk : colors.textTertiary} strokeWidth={2.5} />
+              style={[styles.send, { backgroundColor: canSend ? 'transparent' : colors.surfaceAlt }]}>
+              {canSend ? <ChamferFill color={colors.accent} cut={chamfer.sm} /> : null}
+              <ArrowUp size={18} color={canSend ? colors.onAccent : colors.textTertiary} strokeWidth={2.5} />
             </PressableScale>
           )}
         </View>
       </View>
+      <CornerTicks color={colors.accent} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   box: {
-    borderRadius: radius.xl,
-    borderCurve: 'continuous',
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     paddingTop: space.md,
     paddingHorizontal: space.md,
     paddingBottom: space.sm,
     gap: space.sm,
-    shadowOpacity: 1,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
   },
   input: {
     fontSize: typography.body.fontSize,
@@ -156,9 +151,10 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   toolbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  toggle: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 32, paddingHorizontal: space.md, borderRadius: radius.pill },
+  toggle: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 32, paddingHorizontal: space.md, borderWidth: 1 },
+  toggleLabel: { fontFamily: monoFamily, fontSize: 11, letterSpacing: 0.6, textTransform: 'uppercase' },
   actions: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  send: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  send: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   mic: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  halo: { position: 'absolute', width: 36, height: 36, borderRadius: 18 },
+  halo: { position: 'absolute', width: 36, height: 36 },
 });

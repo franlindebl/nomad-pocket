@@ -224,5 +224,5 @@ export default function CourseScreen() {
 const styles = StyleSheet.create({
   lesson: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingLeft: space.lg },
   lessonBody: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space.md, paddingRight: space.lg, paddingVertical: 14 },
-  check: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  check: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center' },
 });

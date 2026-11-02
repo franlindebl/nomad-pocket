@@ -66,7 +66,10 @@
     "plan": "My family plan",
     "call": "Call {{number}}",
     "callAmbulance": "Call {{number}} (ambulance)",
-    "callPolice": "Call {{number}} (police)"
+    "callPolice": "Call {{number}} (police)",
+    "callLabel": "Call emergency services",
+    "callLabelAmbulance": "Call an ambulance",
+    "callLabelPolice": "Call the police"
   },
   "downloadsHint": "Leave it on Wi‑Fi and charging. You can keep using the app.",
   "ready": {
@@ -108,7 +111,8 @@
     "zimUpdate": "A newer version is out: update it while you're online",
     "planMeeting": "Meeting point set · add contacts",
     "planContacts_one": "{{count}} contact · no meeting point yet",
-    "planContacts_other": "{{count}} contacts · no meeting point yet"
+    "planContacts_other": "{{count}} contacts · no meeting point yet",
+    "label": "ready"
   },
   "storageLine": "Using {{used}} · {{free}} free"
 }

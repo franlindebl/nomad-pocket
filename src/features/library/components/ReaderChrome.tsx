@@ -74,14 +74,14 @@ export function ReaderToolbar({ actions, children }: { actions: ToolbarAction[];
 /** Small floating card anchored above the toolbar. */
 export function Popover({ children, onDismiss }: { children: ReactNode; onDismiss: () => void }) {
   const { t } = useTranslation('reader');
-  const { colors, scheme } = useTheme();
+  const { colors } = useTheme();
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
       <PressableScale testID="popover-dismiss" style={StyleSheet.absoluteFill} onPress={onDismiss} pressedScale={1} accessibilityLabel={t('dismiss')} />
       <View
         style={[
           styles.popover,
-          { backgroundColor: colors.surface, borderColor: scheme === 'light' ? colors.border : 'transparent', shadowColor: colors.shadow },
+          { backgroundColor: colors.surface, borderColor: colors.outline, shadowColor: colors.shadow },
         ]}>
         {children}
       </View>

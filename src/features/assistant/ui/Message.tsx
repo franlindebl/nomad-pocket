@@ -1,17 +1,17 @@
 import { router } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
-import { BookOpen, Copy, Flag, Library, RefreshCw, Sparkles } from 'lucide-react-native';
+import { BookOpen, Copy, Flag, Library, MessageSquareText, RefreshCw } from 'lucide-react-native';
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Constants from 'expo-constants';
 import { ActivityIndicator, Linking, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 import { showToast } from '@/components/Toast';
-import { Button, IconButton, PressableScale, Text } from '@/components/ui';
+import { Button, ChamferFill, IconButton, PressableScale, Text } from '@/components/ui';
 import { GUIDE_SOURCE } from '@/features/guide/guide-core';
 import { PLAN_SOURCE } from '@/features/prepare/passages';
 import { formatPercent } from '../format';
-import { radius, space, useTheme } from '@/theme';
+import { chamfer, monoFamily, space, useTheme } from '@/theme';
 
 import type { ChatMessage, MessageSource, Phase } from '../chats';
 import { toPlainText } from '../markdown';
@@ -38,19 +38,21 @@ export const UserMessage = memo(function UserMessage({ message }: { message: Cha
   const { colors } = useTheme();
   return (
     <View style={styles.userRow}>
-      <View style={[styles.userBubble, { backgroundColor: colors.surfaceAlt }]}>
-        <Text selectable>{message.content}</Text>
+      <View style={styles.userBubble}>
+        <ChamferFill color={colors.accent} cut={chamfer.md} corner="bottomRight" />
+        <Text selectable color="onAccent">
+          {message.content}
+        </Text>
       </View>
     </View>
   );
 });
 
 function Avatar() {
-  const { hue } = useTheme();
-  const ai = hue('ai');
+  const { colors } = useTheme();
   return (
-    <View style={[styles.avatar, { backgroundColor: ai.bg }]} accessibilityElementsHidden>
-      <Sparkles size={14} color={ai.fg} strokeWidth={2.2} />
+    <View style={[styles.avatar, { borderColor: colors.outline }]} accessibilityElementsHidden>
+      <MessageSquareText size={14} color={colors.accent} strokeWidth={2} />
     </View>
   );
 }
@@ -74,9 +76,9 @@ export function SourceChips({ sources }: { sources: MessageSource[] }) {
               accessibilityRole="link"
               accessibilityLabel={`${s.n}. ${label}`}
               onPress={() => openSource(s)}
-              style={[styles.chip, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-              <View style={[styles.chipNum, { backgroundColor: colors.accentSoft }]}>
-                <Text variant="caption" weight="700" tint={colors.accent} tabular>
+              style={[styles.chip, { backgroundColor: colors.surface, borderColor: colors.outline }]}>
+              <View style={[styles.chipNum, { backgroundColor: colors.accent }]}>
+                <Text variant="caption" color="onAccent" tabular style={{ fontFamily: monoFamily }}>
                   {s.n}
                 </Text>
               </View>
@@ -202,14 +204,11 @@ const styles = StyleSheet.create({
   userBubble: {
     paddingHorizontal: space.lg,
     paddingVertical: space.md,
-    borderRadius: radius.xl,
-    borderBottomRightRadius: radius.sm,
-    borderCurve: 'continuous',
     maxWidth: '100%',
   },
   assistantRow: { flexDirection: 'row', gap: space.md, alignItems: 'flex-start' },
   assistantBody: { flex: 1, gap: space.md, paddingTop: 2 },
-  avatar: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginTop: 0 },
+  avatar: { width: 28, height: 28, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginTop: 0 },
   status: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 24 },
   actions: { flexDirection: 'row', gap: space.xs, marginLeft: -space.sm, marginTop: -space.sm },
   searchLibrary: { alignSelf: 'flex-start' },
@@ -222,10 +221,9 @@ const styles = StyleSheet.create({
     height: 34,
     paddingLeft: 5,
     paddingRight: space.md,
-    borderRadius: radius.pill,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     maxWidth: 260,
   },
-  chipNum: { minWidth: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
+  chipNum: { minWidth: 22, height: 22, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5 },
   chipTitle: { flexShrink: 1 },
 });

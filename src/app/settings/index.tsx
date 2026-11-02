@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { Database, GraduationCap, Map, Scale, ShieldCheck, Sparkles, Trash2, Wand2 } from 'lucide-react-native';
+import { Database, GraduationCap, Map, Scale, ShieldCheck, MessageSquareText, Trash2, Wand2 } from 'lucide-react-native';
 import { Alert, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -14,7 +14,7 @@ import { getRegion, regionName } from '@/features/maps/regions';
 import type { AppLanguage } from '@/i18n';
 import { formatBytes } from '@/lib/format';
 import { freeBytes, totalBytes } from '@/lib/storage';
-import { useSettings, type ThemePreference } from '@/stores/settings';
+import { useSettings } from '@/stores/settings';
 import { space, useTheme } from '@/theme';
 
 const PRIVACY_URL = 'https://franlindebl.github.io/nomad-pocket/privacy.html';
@@ -64,18 +64,6 @@ export default function SettingsScreen() {
             ]}
           />
         </View>
-        <View style={{ padding: space.lg, gap: space.md }}>
-          <Text variant="headline">{t('theme')}</Text>
-          <Segmented<ThemePreference>
-            value={s.theme}
-            onChange={s.setTheme}
-            options={[
-              { value: 'system', label: t('themeSystem') },
-              { value: 'light', label: t('themeLight') },
-              { value: 'dark', label: t('themeDark') },
-            ]}
-          />
-        </View>
         <ListRow
           testID="settings-country"
           title={t('country')}
@@ -122,7 +110,7 @@ export default function SettingsScreen() {
             subtitle={`${t(`kind.${item.kind}`)} · ${formatBytes(item.sizeBytes, undefined, lang)}`}
             leading={
               <IconBadge
-                icon={item.kind === 'map' ? Map : item.kind === 'model' ? Sparkles : item.isCourse ? GraduationCap : Database}
+                icon={item.kind === 'map' ? Map : item.kind === 'model' ? MessageSquareText : item.isCourse ? GraduationCap : Database}
                 hue={item.kind === 'map' ? 'maps' : item.kind === 'model' ? 'ai' : item.isCourse ? 'education' : 'reference'}
                 size={36}
               />

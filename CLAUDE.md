@@ -88,7 +88,7 @@ plugins/            config plugins (Android backup rules, no Firebase)   locales
 scripts/            check-i18n, validate-catalog, licenses.mjs (+ licenses/), e2e*, maps/ (asset generators),
                     routing/ (pack builds), store-screenshots
 e2e/                Maestro flows, subflows, fixtures     site/  privacy/support site (GitHub Pages)
-assets/             fonts (Inter), icons, splash, maps/basemap-assets.zip
+assets/             fonts (Chakra Petch, IBM Plex Sans/Mono), icons, splash, maps/basemap-assets.zip
 docs/               the docs above + screenshots/ + store/
 ```
 
@@ -106,6 +106,8 @@ docs/               the docs above + screenshots/ + store/
   content only through `features/content/items.ts` (one exception: ZIM id migration in
   `library/register.ts` rewrites rows directly). Details in ARCHITECTURE.md.
 - **UI.** Use `src/components/ui` and theme tokens; never hard-code colors, sizes or radii.
+  The app is **dark only** with one palette (the "Precisión" look: black, signal yellow, square panels
+  with corner marks, cut corners on key controls; `docs/STYLE_GUIDE.md`). Don't add light-mode branches.
   Tab roots draw their title with `<Screen title=…>` + `largeTitle()` (native large titles
   render blank inside native tabs on iOS 26). Screens with their own `ScrollView`/`FlatList`
   spread `layout.column` into the content style (720 pt centred column on iPad).

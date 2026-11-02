@@ -1,6 +1,6 @@
 import { StyleSheet, Switch as RNSwitch, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { radius, useTheme } from '@/theme';
+import { useTheme } from '@/theme';
 
 import { PressableScale } from './Pressable';
 import { Text } from './Text';
@@ -18,9 +18,9 @@ export function Segmented<T extends string>({
   onChange: (v: T) => void;
   style?: StyleProp<ViewStyle>;
 }) {
-  const { colors, scheme } = useTheme();
+  const { colors } = useTheme();
   return (
-    <View style={[styles.track, { backgroundColor: colors.surfaceAlt }, style]} accessibilityRole="tablist">
+    <View style={[styles.track, { backgroundColor: colors.surface, borderColor: colors.outline }, style]} accessibilityRole="tablist">
       {options.map((o) => {
         const selected = o.value === value;
         return (
@@ -33,12 +33,8 @@ export function Segmented<T extends string>({
             onPress={() => {
               if (!selected) onChange(o.value);
             }}
-            style={[
-              styles.segment,
-              selected && { backgroundColor: scheme === 'dark' ? colors.surfacePressed : colors.surface, shadowColor: colors.shadow },
-              selected && styles.selectedShadow,
-            ]}>
-            <Text variant="footnote" weight="600" color={selected ? 'text' : 'textSecondary'} numberOfLines={1}>
+            style={[styles.segment, selected && { backgroundColor: colors.accent }]}>
+            <Text variant="footnote" weight="600" color={selected ? 'onAccent' : 'textSecondary'} numberOfLines={1}>
               {o.label}
             </Text>
           </PressableScale>
@@ -63,7 +59,6 @@ export function Switch({ value, onValueChange, accessibilityLabel }: { value: bo
 }
 
 const styles = StyleSheet.create({
-  track: { flexDirection: 'row', padding: 3, borderRadius: radius.md, borderCurve: 'continuous' },
-  segment: { flex: 1, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 9, borderCurve: 'continuous' },
-  selectedShadow: { shadowOpacity: 1, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
+  track: { flexDirection: 'row', padding: 3, borderWidth: 1 },
+  segment: { flex: 1, height: 32, alignItems: 'center', justifyContent: 'center' },
 });

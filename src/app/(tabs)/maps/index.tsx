@@ -44,7 +44,7 @@ import { buildMapStyle } from '@/features/maps/style';
 import { nearestStreet, tappedPlace, type TapFeature } from '@/features/maps/tap-core';
 import { useMapItems } from '@/features/maps/useMapSources';
 import { useSettings } from '@/stores/settings';
-import { hues, radius, space, useTheme } from '@/theme';
+import { hues, space, useTheme } from '@/theme';
 
 /** Emergency points are drawn from this zoom on (fewer would be a cloud of dots). */
 const POI_MIN_ZOOM = 11;
@@ -810,8 +810,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: space.sm,
     paddingHorizontal: space.lg,
-    borderRadius: radius.pill,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     shadowOpacity: 1,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
@@ -827,8 +826,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: space.sm,
     paddingHorizontal: space.lg,
-    borderRadius: radius.pill,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     shadowOpacity: 1,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },

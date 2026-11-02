@@ -52,7 +52,7 @@ export default function ReaderScreen() {
   const { itemId, path, title: docTitle } = useLocalSearchParams<{ itemId: string; path?: string; title?: string }>();
   const { t } = useTranslation('reader');
   const { t: tc } = useTranslation();
-  const { colors, scheme } = useTheme();
+  const { colors } = useTheme();
   const item = useItems('zim').find((i) => i.id === itemId);
 
   const [openState, setOpenState] = useState<
@@ -276,7 +276,7 @@ export default function ReaderScreen() {
           style={styles.flex}
           archiveId={itemId}
           path={path ?? ''}
-          darkMode={scheme === 'dark'}
+          darkMode
           textZoom={textZoom}
           onNavigationChange={onNavigationChange}
           onLoadEnd={onLoadEnd}

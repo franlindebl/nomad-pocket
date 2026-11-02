@@ -1,8 +1,8 @@
 import { memo, useMemo, type ReactNode } from 'react';
-import { Platform, Text as RNText, ScrollView, StyleSheet, View } from 'react-native';
+import { Text as RNText, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Text } from '@/components/ui';
-import { radius, space, useTheme } from '@/theme';
+import { monoFamily, radius, space, useTheme } from '@/theme';
 
 import { parseMarkdown, type Inline } from '../markdown';
 
@@ -16,7 +16,7 @@ type Props = {
   caret?: boolean;
 };
 
-const mono = Platform.select({ ios: 'Menlo', default: 'monospace' });
+const mono = monoFamily;
 
 function InlineNodes({ nodes, onCite, citable }: { nodes: Inline[]; onCite?: (n: number) => void; citable?: Set<number> }): ReactNode {
   const { colors } = useTheme();

@@ -4,19 +4,22 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, TextInput, View, type StyleProp, type TextInputProps, type ViewStyle } from 'react-native';
 
-import { fontFamily, radius, space, typography, useTheme, type Hue } from '@/theme';
+import { fontFamily, monoFamily, space, typography, useTheme, type Hue } from '@/theme';
 
 import { Button } from './Button';
 import { IconBadge } from './IconBadge';
 import { PressableScale } from './Pressable';
 import { Text } from './Text';
 
+/** Mono label followed by a hairline that runs to the edge (and an optional action at the end). */
 export function SectionHeader({ title, action, onAction, style }: { title: string; action?: string; onAction?: () => void; style?: StyleProp<ViewStyle> }) {
+  const { colors } = useTheme();
   return (
     <View style={[styles.sectionHeader, style]}>
       <Text variant="overline" color="textSecondary">
         {title}
       </Text>
+      <View style={[styles.sectionRule, { backgroundColor: colors.border }]} />
       {action && onAction ? (
         <Pressable onPress={onAction} hitSlop={10} accessibilityRole="button">
           <Text variant="footnote" color="accent" weight="600">
@@ -49,9 +52,9 @@ export function Chip({
       accessibilityState={{ selected: !!selected }}
       onPress={onPress}
       haptic="selection"
-      style={[styles.chip, { backgroundColor: selected ? colors.ink : colors.surfaceAlt }]}>
-      {Icon ? <Icon size={14} color={selected ? colors.onInk : colors.text} strokeWidth={2.2} /> : null}
-      <Text variant="footnote" weight="600" color={selected ? 'onInk' : 'text'}>
+      style={[styles.chip, selected ? { backgroundColor: colors.accent, borderColor: colors.accent } : { backgroundColor: colors.surface, borderColor: colors.outline }]}>
+      {Icon ? <Icon size={14} color={selected ? colors.onAccent : colors.text} strokeWidth={2.2} /> : null}
+      <Text variant="footnote" weight="600" color={selected ? 'onAccent' : 'text'}>
         {label}
       </Text>
     </PressableScale>
@@ -72,7 +75,7 @@ export function Badge({ label, tone = 'neutral', icon: Icon }: { label: string; 
   return (
     <View style={[styles.badge, { backgroundColor: map.bg }]}>
       {Icon ? <Icon size={12} color={map.fg} strokeWidth={2.5} /> : null}
-      <Text variant="caption" weight="600" tint={map.fg}>
+      <Text variant="caption" tint={map.fg} style={styles.badgeLabel}>
         {label}
       </Text>
     </View>
@@ -83,7 +86,7 @@ export function SearchField({ style, onClear, value, ...rest }: TextInputProps &
   const { t } = useTranslation();
   const { colors } = useTheme();
   return (
-    <View style={[styles.search, { backgroundColor: colors.surfaceAlt }, style]}>
+    <View style={[styles.search, { backgroundColor: colors.surface, borderColor: colors.outline }, style]}>
       <Search size={18} color={colors.textTertiary} />
       <TextInput
         {...rest}
@@ -149,18 +152,19 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: space.sm,
     marginTop: space.xxl,
     marginBottom: space.sm,
-    paddingHorizontal: space.xs,
+    paddingHorizontal: space.xxs,
   },
+  sectionRule: { flex: 1, height: 1 },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     height: 34,
     paddingHorizontal: 14,
-    borderRadius: radius.pill,
+    borderWidth: 1,
   },
   badge: {
     flexDirection: 'row',
@@ -168,17 +172,16 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 8,
     height: 22,
-    borderRadius: radius.pill,
     alignSelf: 'flex-start',
   },
+  badgeLabel: { fontFamily: monoFamily, fontSize: 10.5, letterSpacing: 0.6, textTransform: 'uppercase' },
   search: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.sm,
     height: 44,
     paddingHorizontal: space.md,
-    borderRadius: radius.md,
-    borderCurve: 'continuous',
+    borderWidth: 1,
   },
   searchInput: { flex: 1, fontSize: typography.body.fontSize, paddingVertical: 0 },
   empty: { alignItems: 'center', justifyContent: 'center', gap: space.md, paddingVertical: space.huge, paddingHorizontal: space.xxl },

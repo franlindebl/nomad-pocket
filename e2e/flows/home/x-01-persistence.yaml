@@ -1,11 +1,8 @@
-# X-01 — settings, bookmarks, places and course progress survive an app restart.
+# X-01 — bookmarks, places and course progress survive an app restart.
 appId: com.fjlinde.nomadpocket
 tags: [smoke, cross, seeded]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "open-settings" }
-- tapOn: "Oscuro"
-- swipe: { direction: DOWN }
 - runFlow: ../../subflows/open-wikipedia.yaml
 - tapOn: "Guardar"
 - tapOn: { id: "BackButton" }
@@ -25,7 +22,7 @@ tags: [smoke, cross, seeded]
 - stopApp
 - launchApp
 - assertNotVisible: "Siguiente"
-- takeScreenshot: 01-relaunched-dark
+- takeScreenshot: 01-relaunched
 - tapOn: { id: "map" }
 - tapOn: "Lugares guardados"
 - assertVisible: "Refugio.*"

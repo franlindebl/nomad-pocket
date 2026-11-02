@@ -6,7 +6,7 @@
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "nomadpocket",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
     "locales": {
       "es": "./locales/es.json",
       "en": "./locales/en.json"
@@ -53,13 +53,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#F6F5F2",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 120,
-          "dark": {
-            "backgroundColor": "#0D0D0F",
-            "image": "./assets/images/splash-icon-dark.png"
-          }
+          "backgroundColor": "#0C0C0C",
+          "image": "./assets/images/splash-icon-dark.png",
+          "imageWidth": 120
         }
       ],
       [
@@ -67,37 +63,67 @@
         {
           "ios": {
             "fonts": [
-              "./assets/fonts/Inter_400Regular.ttf",
-              "./assets/fonts/Inter_500Medium.ttf",
-              "./assets/fonts/Inter_600SemiBold.ttf",
-              "./assets/fonts/Inter_700Bold.ttf",
-              "./assets/fonts/Inter_800ExtraBold.ttf"
+              "./assets/fonts/ChakraPetch-Medium.ttf",
+              "./assets/fonts/ChakraPetch-SemiBold.ttf",
+              "./assets/fonts/ChakraPetch-Bold.ttf",
+              "./assets/fonts/IBMPlexSans-Regular.ttf",
+              "./assets/fonts/IBMPlexSans-Medium.ttf",
+              "./assets/fonts/IBMPlexSans-SemiBold.ttf",
+              "./assets/fonts/IBMPlexSans-Bold.ttf",
+              "./assets/fonts/IBMPlexMono-Regular.ttf",
+              "./assets/fonts/IBMPlexMono-Medium.ttf"
             ]
           },
           "android": {
             "fonts": [
               {
-                "fontFamily": "Inter",
+                "fontFamily": "Chakra Petch",
                 "fontDefinitions": [
                   {
-                    "path": "./assets/fonts/Inter_400Regular.ttf",
-                    "weight": 400
-                  },
-                  {
-                    "path": "./assets/fonts/Inter_500Medium.ttf",
+                    "path": "./assets/fonts/ChakraPetch-Medium.ttf",
                     "weight": 500
                   },
                   {
-                    "path": "./assets/fonts/Inter_600SemiBold.ttf",
+                    "path": "./assets/fonts/ChakraPetch-SemiBold.ttf",
                     "weight": 600
                   },
                   {
-                    "path": "./assets/fonts/Inter_700Bold.ttf",
+                    "path": "./assets/fonts/ChakraPetch-Bold.ttf",
                     "weight": 700
+                  }
+                ]
+              },
+              {
+                "fontFamily": "IBM Plex Sans",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/IBMPlexSans-Regular.ttf",
+                    "weight": 400
                   },
                   {
-                    "path": "./assets/fonts/Inter_800ExtraBold.ttf",
-                    "weight": 800
+                    "path": "./assets/fonts/IBMPlexSans-Medium.ttf",
+                    "weight": 500
+                  },
+                  {
+                    "path": "./assets/fonts/IBMPlexSans-SemiBold.ttf",
+                    "weight": 600
+                  },
+                  {
+                    "path": "./assets/fonts/IBMPlexSans-Bold.ttf",
+                    "weight": 700
+                  }
+                ]
+              },
+              {
+                "fontFamily": "IBM Plex Mono",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/IBMPlexMono-Regular.ttf",
+                    "weight": 400
+                  },
+                  {
+                    "path": "./assets/fonts/IBMPlexMono-Medium.ttf",
+                    "weight": 500
                   }
                 ]
               }

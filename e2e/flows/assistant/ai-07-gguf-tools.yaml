@@ -6,7 +6,7 @@ appId: com.fjlinde.nomadpocket
 tags: [nightly, assistant, seeded, seeded-model]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "sparkles" }
+- tapOn: { id: "text.bubble" }
 # The seeded model became the active one: the chat opens directly.
 - assertVisible: ".*Qwen3\\.5 0\\.8B"
 - tapOn: "Pregunta .*"

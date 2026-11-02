@@ -1,5 +1,5 @@
 import * as Device from 'expo-device';
-import { ArrowDown, Check, Cpu, Pause, Play, ShieldCheck, Sparkles, Trash2, X } from 'lucide-react-native';
+import { ArrowDown, Check, Cpu, Pause, Play, ShieldCheck, MessageSquareText, Star, Trash2, X } from 'lucide-react-native';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Platform, StyleSheet, View } from 'react-native';
@@ -89,7 +89,7 @@ function SystemModelCard() {
   return (
     <Card style={{ gap: space.md }}>
       <Row gap={space.md} align="flex-start">
-        <IconBadge icon={Sparkles} hue="ai" size={44} />
+        <IconBadge icon={MessageSquareText} hue="ai" size={44} />
         <View style={{ flex: 1, gap: 4 }}>
           <Row gap={space.sm} style={{ flexWrap: 'wrap' }}>
             <Text variant="headline">{t('models.systemProvider.apple')}</Text>
@@ -136,7 +136,7 @@ function ModelCard({ model, ram, recommended }: { model: GgufModel; ram: number 
       <View style={{ gap: 6 }}>
         <Row gap={space.sm} style={[{ flexWrap: 'wrap' }, installed && active && { paddingRight: 36 }]}>
           <Text variant="title3">{model.name}</Text>
-          {recommended ? <Badge label={t('models.recommended')} tone="accent" icon={Sparkles} /> : null}
+          {recommended ? <Badge label={t('models.recommended')} tone="accent" icon={Star} /> : null}
           {active ? <Badge label={t('models.active')} tone="success" icon={Check} /> : null}
         </Row>
         <Text variant="footnote" color="textSecondary">

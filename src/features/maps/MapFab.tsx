@@ -7,7 +7,7 @@ import { useTheme } from '@/theme';
 
 const SIZE = 46;
 
-/** Floating round map control: surface fill + the soft floating shadow. */
+/** Floating square map control: surface fill, outline and the soft floating shadow. */
 export function MapFab({
   icon: Icon,
   onPress,
@@ -38,7 +38,7 @@ export function MapFab({
       onPress={onPress}
       haptic="selection"
       pressedScale={0.92}
-      style={[styles.fab, { backgroundColor: colors.surface, shadowColor: colors.shadow, borderColor: colors.border }, style]}>
+      style={[styles.fab, { backgroundColor: colors.surface, shadowColor: colors.shadow, borderColor: colors.outline }, style]}>
       {children ?? (Icon ? <Icon size={21} color={active ? colors.accent : colors.text} strokeWidth={2} /> : null)}
     </PressableScale>
   );
@@ -48,10 +48,9 @@ const styles = StyleSheet.create({
   fab: {
     width: SIZE,
     height: SIZE,
-    borderRadius: SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     shadowOpacity: 1,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
