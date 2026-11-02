@@ -346,6 +346,14 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 - E2E: `pack-download` → `pack-download-<tier slug>` (lib-03, android-01). Checked on the iOS simulator
   (Medicina 5+1+3 = 9, Educación 4+7+7 = 18 with Wikilibros "Incluida").
 
+### 2026-11-02 — Toasts above sheets and modals (iOS)
+
+- The toast pill sat under the dimmed backdrop of form sheets (Descargas) and modals: they are native
+  view controllers presented above the whole React tree. `ToastHost` now draws it inside
+  `FullWindowOverlay` (its own window, kept mounted for the exit animation; touches pass through).
+  Checked on the iOS 27 simulator (Release) with Descargas open over onboarding; swipe and taps under
+  the overlay still work. Android unchanged (FullWindowOverlay is iOS-only); not looked at there.
+
 ### 2026-11-02 — iOS build 38 to TestFlight
 
 - 1.1.0 (38), TestFlight only: build 37 plus emergency point names in their colour around the dot

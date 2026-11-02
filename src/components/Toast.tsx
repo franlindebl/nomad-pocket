@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { AccessibilityInfo, Platform, StyleSheet } from 'react-native';
 import Animated, { FadeOutUp, withSpring, type EntryAnimationsValues } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FullWindowOverlay } from 'react-native-screens';
 import { create } from 'zustand';
 
 import { Text } from '@/components/ui';
@@ -34,8 +35,21 @@ function enterFromTop(values: EntryAnimationsValues) {
   };
 }
 
+// Form sheets and modals are native view controllers presented above the whole React tree, so a pill
+// drawn at the root sat under their dimmed backdrop. On iOS the pill lives in its own window above
+// them; the overlay stays mounted so the exit animation can play, and passes touches through.
+// Android draws its sheets inside the activity's view tree (FullWindowOverlay is iOS-only).
 /** Floating confirmation pill at the top of the screen. Mount once at the root. */
 export function ToastHost() {
+  if (Platform.OS !== 'ios') return <ToastPill />;
+  return (
+    <FullWindowOverlay>
+      <ToastPill />
+    </FullWindowOverlay>
+  );
+}
+
+function ToastPill() {
   const toast = useToasts((s) => s.current);
   const hide = useToasts((s) => s.hide);
   const insets = useSafeAreaInsets();
