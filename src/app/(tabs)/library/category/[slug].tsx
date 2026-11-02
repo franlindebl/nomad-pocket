@@ -30,6 +30,7 @@ import { ResourceRow } from '@/features/catalog/ResourceRow';
 import { useContent } from '@/features/content/items';
 import { useDownloads } from '@/features/downloads/manager';
 import { useCollections } from '@/features/library/collections';
+import { showArchiveActions } from '@/features/library/archive-actions';
 import { ArchiveRow } from '@/features/library/components/ArchiveRow';
 import { CollectionCount } from '@/features/library/components/CollectionCount';
 import { useUpdates } from '@/features/updates/updates';
@@ -62,7 +63,18 @@ export default function CategoryScreen() {
       .map((u) => items.find((i) => i.id === u.itemId)?.catalogId)
       .filter(Boolean),
   );
-  const row = (r: CatalogResource) => <ResourceRow key={r.id} resource={r} hue={category.hue} outdated={outdated.has(r.id)} />;
+  const row = (r: CatalogResource) => {
+    const item = items.find((i) => i.catalogId === r.id);
+    return (
+      <ResourceRow
+        key={r.id}
+        resource={r}
+        hue={category.hue}
+        outdated={outdated.has(r.id)}
+        onLongPress={item ? () => showArchiveActions(item) : undefined}
+      />
+    );
+  };
 
   return (
     <Screen contentStyle={{ paddingTop: insets.top + 56 }} contentInsetAdjustmentBehavior="never">
@@ -76,7 +88,14 @@ export default function CategoryScreen() {
       </View>
 
       {category.tiers.map((tier, i) => (
-        <Level key={tier.slug} category={category} tier={tier} n={i + 1} resources={splitByLanguage(tierOwnResources(tier, langs), other)[0]} row={row} />
+        <Level
+          key={tier.slug}
+          category={category}
+          tier={tier}
+          n={i + 1}
+          resources={splitByLanguage(tierOwnResources(tier, langs), other)[0]}
+          row={row}
+        />
       ))}
 
       {otherLanguages.length ? (

@@ -16,12 +16,15 @@ export function ResourceRow({
   hue,
   showIcon = true,
   outdated = false,
+  onLongPress,
 }: {
   resource: CatalogResource;
   hue?: Hue;
   showIcon?: boolean;
   /** Installed, and a newer edition is out: say so first. */
   outdated?: boolean;
+  /** The installed archive's menu (share, delete), as the Library's archive rows have it. */
+  onLongPress?: () => void;
 }) {
   const { t } = useTranslation();
   const Icon = categoryIcon(resource.category);
@@ -36,6 +39,7 @@ export function ResourceRow({
         testID={`resource-${resource.id}`}
         pressedScale={0.99}
         onPress={() => router.push({ pathname: '/library/resource/[id]', params: { id: resource.id } })}
+        onLongPress={onLongPress}
         style={styles.body}
         accessibilityRole="button">
         {showIcon ? <IconBadge icon={Icon} hue={hue ?? categoryHue(resource.category)} size={40} /> : null}

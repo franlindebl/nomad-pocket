@@ -342,8 +342,10 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   en tu dispositivo" for archives no level lists. The top "En tu dispositivo" list is gone (rows say it).
 - A level's button downloads only that level's missing resources, not the levels before it (owner).
   Catalog tier descriptions lose "Incluye todo lo de …". Onboarding's kit still takes tiers cumulatively.
-- `ResourceRow` takes `outdated` ("Actualización disponible · …"), which the old archive rows showed.
-- E2E: `pack-download` → `pack-download-<tier slug>` (lib-03, android-01). Checked on the iOS simulator
+- `ResourceRow` takes `outdated` ("Actualización disponible · …") and `onLongPress`: installed rows keep
+  the archive menu (Compartir / Eliminar, now `library/archive-actions.ts`, shared with `ArchiveRow`).
+- E2E: `pack-download` → `pack-download-<tier slug>` (lib-03, android-01); lib-02 scrolls to the
+  archive in its level and checks the count after deleting. lib-01..04 green on a build without 95efa43. Checked on the iOS simulator
   (Medicina 5+1+3 = 9, Educación 4+7+7 = 18 with Wikilibros "Incluida").
 
 ### 2026-11-02 — Toasts above sheets and modals (iOS)
