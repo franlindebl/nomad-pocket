@@ -333,6 +333,13 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-02 — iOS build 38 to TestFlight
+
+- 1.1.0 (38), TestFlight only: build 37 plus emergency point names in their colour around the dot
+  (9e7a710). Build 37 already carried `skipOurPois` (`style.ts`): another session's uncommitted edit
+  went into c61c07e with `git add -A`. No E2E for this one (owner's call); unit checks green.
+  Tagged `v1.1.0-38`.
+
 ### 2026-11-02 — iOS build 37 to TestFlight
 
 - 1.1.0 (37), TestFlight only: build 36 plus the Library counts that know held editions and other
