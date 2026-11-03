@@ -222,5 +222,12 @@ Gotchas seen so far:
 - Screenshots: `docs/store/marketing/<lang>/android/01…08` (1080 × 1920, from the `Nomad_Shots` AVD in demo mode),
   captions in `scripts/store-screenshots.py` (`ANDROID_CAPTIONS`, `caption_for`). They must show no health content
   (04 is a survival guide, not first aid).
+  Current set (2026-11-03, for 2.0.0, yellow frame): home, emergency, navigation, guides (an archive article on the
+  paper page), assistant, family plan, library, kit; Spain kit in Madrid / US Northeast kit in New York, per-app
+  locale (`cmd locale set-app-locales`), SystemUI demo mode at 9:41, GPS with `adb emu geo fix lon lat alt sats
+  knots` (the speed needs sats and velocity; a script feeds one fix a second along 1st Avenue / the Castellana).
+  Turn "Health" off in "Points on the map" for the navigation shot, so no clinic or pharmacy labels show (turn it
+  back on after). Emergency keeps hospitals, as the 1.1.0 set did. Upload them to Play together with an Android
+  2.0.0 build, not before: the listing must match the binary.
 - Icon 512 px and feature graphics 1024 × 500: `docs/store/play/`.
 - Texts: `docs/store/play-listing.md` (Play has no subtitle or keywords; the short description does that job).

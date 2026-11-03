@@ -333,6 +333,17 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-03 — Android / Google Play screenshots in the yellow style
+
+- 8 + 8 Android captures redone like the iOS ones (`docs/store/marketing/<lang>/android/`, `docs/ANDROID_PLAY.md`
+  section 8), with no health content; new `03-navigation` replaces `03-route`. Play icon and feature graphics
+  regenerated in yellow (`docs/store/play/`). Not uploaded: they go to Play with an Android 2.0.0 build.
+- Seen while taking them (not fixed): the 2B model on the emulator gives weak answers to library questions (unrelated
+  sources such as "WWE Great Balls of Fire", "Space debris"); the Android guide index has no entry point in the UI;
+  `zimgit-knots_en` mentions sutures for medical use; the navigation bar cuts the arrival time ("llegad…"); the
+  Emergency screen showed the previous country's number (112, Spain) for a moment after the position jumped to New
+  York (an emulator teleport; it corrects itself on the next fix); Spanish plan names typed without accents (adb).
+
 ### 2026-11-03 — README rewritten around the redesign and the website's copy
 
 - Both READMEs (en, es) now open with the website's headline, the App Store badge (Google Play: coming soon)

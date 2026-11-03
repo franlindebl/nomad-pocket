@@ -187,8 +187,9 @@ from the history. Screens with the map (`navigation`, `emergency`) get "© OpenS
 phone from the script. How they were made: a store Release build for the simulator with the real catalogs (no
 `EXPO_PUBLIC_*_MANIFEST_URL`), the kit downloaded once per language and cloned into the iPad's app container
 (`cp -c` of Documents and Library/Application Support into a fresh install), `simctl status_bar` at 9:41, `axe`
-taps and pasted text (`simctl pbcopy` + Cmd-V: `axe type` can't type accents). Android captures are still the
-1.1.0 set (`python3 scripts/store-screenshots.py iphone ipad` leaves them alone).
+taps and pasted text (`simctl pbcopy` + Cmd-V: `axe type` can't type accents). Android captures (2026-11-03, same
+yellow frame, `python3 scripts/store-screenshots.py android`): the same 8 screens on the `Nomad_Shots` emulator with
+the store APK, without health content (`docs/ANDROID_PLAY.md`, section 8).
 
 ## Website (landing, privacy, support)
 
