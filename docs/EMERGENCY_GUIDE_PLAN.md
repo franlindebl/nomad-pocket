@@ -85,7 +85,8 @@ inventories, one table row per card with the URLs that were opened, dates, licen
    linked.
 2. Excerpts: **yes**, whole sentences or paragraphs left out, nothing reworded, marked "Fragmento".
 3. US details: **text as it is plus a fixed note outside it** ("En España: 112 · Información Toxicológica 91 562 04
-   20"), metric equivalents in brackets marked as ours.
+   20"), metric equivalents in brackets marked as ours. **Changed 2026-11-03** (owner): "911" in the text is shown as
+   the person's own number when it is another one, and the note says the original says 911 (`cardBody`/`cardNotes`).
 4. Gaps: the owner asked to reproduce them anyway from the original sources, credited. Not possible as such: the ERC
    2025 guidelines are "© European Resuscitation Council 2025. All rights reserved" with no reproduction without the
    ERC's permission, and so are Red Cross and AHA; credit is not a licence. Asking for permission would take too long,

@@ -6,11 +6,11 @@ import { View } from 'react-native';
 import { Badge, Card, ListGroup, ListRow, Row, Screen, SectionHeader, Text } from '@/components/ui';
 import { Markdown } from '@/features/assistant/ui/Markdown';
 import { getGuideCard } from '@/features/guide/guide';
-import { cardNotes, provenance } from '@/features/guide/guide-core';
+import { cardBody, cardNotes, provenance } from '@/features/guide/guide-core';
 import { useEmergencyNumber } from '@/features/maps/emergency';
 import { space, useTheme } from '@/theme';
 
-/** One card of the emergency guide: its text as the source has it, the notes of ours outside it, and where it comes from. */
+/** One card of the emergency guide: its text as the source has it (the local number for a US 911), the notes of ours outside it, and where it comes from. */
 export default function GuideCardScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, i18n } = useTranslation('guide');
@@ -32,7 +32,7 @@ export default function GuideCardScreen() {
           <Badge label={t('vital')} tone="danger" />
         </View>
       ) : null}
-      <Markdown text={text.body} />
+      <Markdown text={cardBody(card, lang, number)} />
 
       {notes.length ? (
         <Card style={{ marginTop: space.xl, gap: space.sm }} testID="guide-notes">

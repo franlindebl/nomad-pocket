@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { describe, test } from 'node:test';
 
-import { cardNotes, GuideIndex, provenance, sourceCards, visibleCards, cardAnswer, vitalCard, type GuideCard, type GuideText } from './guide-core.ts';
+import { cardBody, cardNotes, GuideIndex, provenance, sourceCards, visibleCards, cardAnswer, vitalCard, type GuideCard, type GuideText } from './guide-core.ts';
 
 const text = (title: string, keywords: string[], body: string, extra: Partial<GuideText> = {}): GuideText => ({
   title,
@@ -136,18 +136,26 @@ describe('guide answers', () => {
     assert.equal(provenance(CARDS[2].es, 'es'), 'Redactado por Nomad Pocket según ERC 2025.');
   });
 
+  test('the text shows the local number where a US source says 911', () => {
+    assert.equal(cardBody(CARDS[0], 'es', '112'), 'Llame al 112. Empuje fuerte y rápido en el centro del pecho.');
+    assert.equal(cardBody(CARDS[0], 'en', '911'), 'Call 911. Push hard and fast in the center of the chest.');
+    assert.equal(cardBody(CARDS[0], 'en', '999'), 'Call 999. Push hard and fast in the center of the chest.');
+    const own: GuideCard = { ...CARDS[0], es: { ...CARDS[0].es, kind: 'own', basis: 'ERC 2025' } };
+    assert.equal(cardBody(own, 'es', '112'), CARDS[0].es.body);
+  });
+
   test('notes point 911 to the local number and add the card note', () => {
-    assert.deepEqual(cardNotes(CARDS[0], 'es', '112'), ['Donde el texto dice 911, llama al 112.']);
+    assert.deepEqual(cardNotes(CARDS[0], 'es', '112'), ['El texto original es de EE. UU. y dice 911; aquí aparece tu número de emergencias, el 112.']);
     assert.deepEqual(cardNotes(CARDS[0], 'en', '911'), ['Emergency number: 911.']);
     assert.deepEqual(cardNotes(CARDS[4], 'es', '112'), ['Número de emergencias: 112.', 'En España la lejía va del 3,5 al 6 %.']);
     assert.deepEqual(cardNotes(CARDS[5], 'es', '112'), []);
   });
 
-  test('a vital answer is the card unchanged, cited as source 1', () => {
+  test('a vital answer is the card (local number aside), cited as source 1', () => {
     const a = cardAnswer(CARDS[0], 'es', '112');
     assert.ok(a.startsWith('**Guía de emergencias: RCP en adultos**\n\n'));
-    assert.ok(a.includes('\n\nLlame al 911. Empuje fuerte y rápido en el centro del pecho.\n\n'));
-    assert.ok(a.includes('> Donde el texto dice 911, llama al 112.'));
+    assert.ok(a.includes('\n\nLlame al 112. Empuje fuerte y rápido en el centro del pecho.\n\n'));
+    assert.ok(a.includes('> El texto original es de EE. UU. y dice 911; aquí aparece tu número de emergencias, el 112.'));
     assert.ok(a.endsWith('*Fragmento de CDC, «Page» (2026).* [1]'));
   });
 });

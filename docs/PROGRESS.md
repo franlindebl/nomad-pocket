@@ -333,6 +333,23 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-03 — Guide cards show the local number, no 112 question for the US
+
+- Owner asked to fix what the screenshots turned up. Guide cards copied from US sources (heart attack, CPR, stroke,
+  seizures, heat stroke, house fire, active attacker…: 17 cards, 34 texts in Spanish and English) told the reader to call 911
+  and only a note under the card gave the right number. Now the card's text shows the person's own emergency number
+  where the source says 911 (`cardBody` in `guide-core.ts`, used by the guide screen and by vital answers in the
+  chat), and the note says the original is from the US and says 911. `own` cards are left as written; US 911 users
+  see the text unchanged. The owner's earlier rule ("text as it is plus a note") changed with this; FORMAT.md and
+  the plan say so.
+- The suggestion "What should I say when I call 112?" only appears where the emergency number is 112 (its card is
+  about Spain's and Europe's 112): `Suggestion.number`.
+- "8,000 feet" in altitude sickness gets its metric equivalent [≈ 2,400 m, Nomad note] like the other US units.
+  The other inches/feet/gallons already had one or are vague ("a few inches").
+- iPad family plan: the report was wrong. Both captures (es, en) show it in the 720 pt column, like every screen
+  built on `<Screen>`; nothing to fix.
+- Not in a build yet: after 2.0.0 (in review). Unit tests 488/488, tsc, lint, i18n clean; not checked on the simulator.
+
 ### 2026-11-03 — 2.0.0 sent to App Review with new screenshots and texts
 
 - Owner's instructions before going to sleep: send 2.0.0 (39) for review with the new screenshots and texts,

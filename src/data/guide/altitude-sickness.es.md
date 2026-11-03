@@ -55,4 +55,4 @@ El MAM mejora rápidamente al bajar 300 m (1.000 pies) o más, sobre todo si el 
 ## Consejos para evitar el mal de altura
 
 - Suba poco a poco. Evite pasar en un solo día de una altitud baja a una altitud superior a 9.000 pies (2.750 m) sobre el nivel del mar. Si es posible, pase unos días a 8.000–9.000 pies [≈ 2.400–2.750 m, nota de Nomad] antes de subir más. Así su cuerpo tiene tiempo de adaptarse a los niveles más bajos de oxígeno.
-- No beba alcohol ni haga ejercicio intenso durante al menos las primeras 48 horas después de llegar a una altitud superior a 8.000 pies.
+- No beba alcohol ni haga ejercicio intenso durante al menos las primeras 48 horas después de llegar a una altitud superior a 8.000 pies [≈ 2.400 m, nota de Nomad].

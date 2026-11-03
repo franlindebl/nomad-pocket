@@ -10,6 +10,8 @@ export type Suggestion = {
   card: string;
   /** Answered with the card itself, no model needed. */
   vital: boolean;
+  /** Offered only where this is the emergency number (the 112 card is about Spain and Europe, not the US's 911). */
+  number?: string;
 };
 
 export const SUGGESTIONS: Suggestion[] = [
@@ -24,7 +26,7 @@ export const SUGGESTIONS: Suggestion[] = [
   { key: 'oilFire', card: 'kitchen-oil-fire', vital: true },
   { key: 'heatStroke', card: 'heat-stroke', vital: true },
   { key: 'generator', card: 'generators', vital: true },
-  { key: 'call112', card: 'calling-112', vital: true },
+  { key: 'call112', card: 'calling-112', vital: true, number: '112' },
   { key: 'lostChild', card: 'lost-child', vital: true },
   { key: 'carbonMonoxide', card: 'carbon-monoxide', vital: true },
   { key: 'fridge', card: 'fridge-outage', vital: false },
@@ -38,9 +40,9 @@ export const SUGGESTIONS: Suggestion[] = [
   { key: 'water', card: 'boiling-water', vital: false },
 ];
 
-/** The suggestions this screen can offer: cards this build shows, and only vital ones without a model. */
-export function availableSuggestions(hasCard: (id: string) => boolean, modelReady: boolean): Suggestion[] {
-  return SUGGESTIONS.filter((s) => hasCard(s.card) && (modelReady || s.vital));
+/** The suggestions this screen can offer: cards this build shows, only vital ones without a model, none about another number. */
+export function availableSuggestions(hasCard: (id: string) => boolean, modelReady: boolean, emergencyNumber: string): Suggestion[] {
+  return SUGGESTIONS.filter((s) => hasCard(s.card) && (modelReady || s.vital) && (!s.number || s.number === emergencyNumber));
 }
 
 /** A shuffled copy (Fisher–Yates), so each visit starts with different questions. */

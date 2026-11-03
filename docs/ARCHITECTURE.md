@@ -1386,8 +1386,9 @@ started on the phone shows in the car and the other way round.
   the question missed ("no respira" is CPR for adults, not drowning). `guide.ts` drops the health cards when `HEALTH_FEATURES`
   is false and keeps one index per language.
 - **Vital answers** (`chats.ts`). A question (intent `search`) whose best card is vital with coverage ≥ 0.5
-  and reach ≥ 0.75 is answered with `cardAnswer`: header, the card's text unchanged, the notes outside it
-  (911 → the local number from `emergencyNumber()`, the card's own `note`) and its provenance, cited as
+  and reach ≥ 0.75 is answered with `cardAnswer`: header, the card's text unchanged but for a US source's "911",
+  shown as the local number from `emergencyNumber()` (`cardBody`; the guide screen does the same), the notes outside it
+  (that the original says 911, or the number; the card's own `note`) and its provenance, cited as
   source [1] (`guide` / card id). No model call: it's instant, the same on every model, and nothing is
   paraphrased (a 2 s "Buscando en la guía de emergencias…" comes first, `GUIDE_PAUSE_MS`: a whole page appearing at
   once read as a glitch; the chat then scrolls so the question sits at the top and the card reads from its first

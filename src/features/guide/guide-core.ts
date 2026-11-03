@@ -223,12 +223,31 @@ export function provenance(text: GuideText, lang: Lang): string {
 
 const US_EMERGENCY_RE = /\b9-?1-?1\b/;
 
-/** Notes shown outside the card's text: the local emergency number, and the card's own note. */
+/** Whether the text is a US source's that tells the reader to call 911 while their number is another one. */
+function swapsNumber(text: GuideText, emergencyNumber: string): boolean {
+  return text.kind !== 'own' && emergencyNumber !== '911' && US_EMERGENCY_RE.test(text.body);
+}
+
+/**
+ * The card's text as the app shows it: the source's, except that "911" becomes the person's own emergency number
+ * when it isn't 911 (a vital card read in a hurry must not send someone in Spain to dial 911). A note outside the
+ * text says the original says 911. Our own cards never tell anyone to call 911, so they stay as written.
+ */
+export function cardBody(card: GuideCard, lang: Lang, emergencyNumber: string): string {
+  const t = card[lang];
+  return swapsNumber(t, emergencyNumber) ? t.body.replace(/\b9-?1-?1\b/g, emergencyNumber) : t.body;
+}
+
+/** Notes shown outside the card's text: the local emergency number (or that it stands for the source's 911), and the card's own note. */
 export function cardNotes(card: GuideCard, lang: Lang, emergencyNumber: string): string[] {
   const t = card[lang];
   const out: string[] = [];
-  if (US_EMERGENCY_RE.test(t.body) && emergencyNumber !== '911') {
-    out.push(lang === 'es' ? `Donde el texto dice 911, llama al ${emergencyNumber}.` : `Where the text says 911, call ${emergencyNumber}.`);
+  if (swapsNumber(t, emergencyNumber)) {
+    out.push(
+      lang === 'es'
+        ? `El texto original es de EE. UU. y dice 911; aquí aparece tu número de emergencias, el ${emergencyNumber}.`
+        : `The original text is from the US and says 911; here it shows your emergency number, ${emergencyNumber}.`,
+    );
   } else if (card.health || card.vital) {
     out.push(lang === 'es' ? `Número de emergencias: ${emergencyNumber}.` : `Emergency number: ${emergencyNumber}.`);
   }
@@ -239,11 +258,11 @@ export function cardNotes(card: GuideCard, lang: Lang, emergencyNumber: string):
 const HEADER: Record<Lang, string> = { es: 'Guía de emergencias', en: 'Emergency guide' };
 
 /**
- * The answer a card gives on its own: its title, its text unchanged, the notes outside it and where it comes
+ * The answer a card gives on its own: its title, its text (the local number aside, unchanged), the notes outside it and where it comes
  * from, cited as source [1] so the chip opens the card.
  */
 export function cardAnswer(card: GuideCard, lang: Lang, emergencyNumber: string): string {
   const t = card[lang];
   const notes = cardNotes(card, lang, emergencyNumber).map((n) => `> ${n}`);
-  return [`**${HEADER[lang]}: ${t.title}**`, t.body, ...notes, `*${provenance(t, lang)}* [1]`].join('\n\n');
+  return [`**${HEADER[lang]}: ${t.title}**`, cardBody(card, lang, emergencyNumber), ...notes, `*${provenance(t, lang)}* [1]`].join('\n\n');
 }

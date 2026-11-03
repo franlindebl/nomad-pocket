@@ -11,6 +11,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 import { PressableScale, Text } from '@/components/ui';
 import { getGuideCard } from '@/features/guide/guide';
+import { emergencyNumber } from '@/features/maps/emergency';
 import { motion, radius, space, useTheme } from '@/theme';
 
 import { availableSuggestions, rotate, shuffled, startRotation } from '../suggestions';
@@ -29,7 +30,7 @@ export function Suggestions({ modelReady, onPick }: { modelReady: boolean; onPic
   const reduceMotion = useReducedMotion();
   const [screenReader, setScreenReader] = useState(false);
   // Shuffled once per mount: a new chat starts with other questions.
-  const [pool] = useState(() => shuffled(availableSuggestions((id) => !!getGuideCard(id), modelReady)).map((s) => s.key));
+  const [pool] = useState(() => shuffled(availableSuggestions((id) => !!getGuideCard(id), modelReady, emergencyNumber().number)).map((s) => s.key));
   const [rotation, setRotation] = useState(() => startRotation(pool, SLOTS));
 
   useEffect(() => {

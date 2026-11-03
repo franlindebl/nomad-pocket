@@ -54,4 +54,4 @@ AMS improves rapidly with a descent of 300 m (1,000 ft) or more, especially if e
 ## Tips to Avoid Altitude Illness
 
 - Ascend gradually. Avoid traveling from a low elevation to an elevation higher than 9,000 feet (2,750 m) above sea level in one day. If possible, spend a few days at 8,000–9,000 feet [≈ 2,400–2,750 m, Nomad note] before traveling to a higher elevation. This gives your body time to adjust to the lower oxygen levels.
-- Do not drink alcohol or do heavy exercise for at least the first 48 hours after you arrive at an elevation above 8,000 feet.
+- Do not drink alcohol or do heavy exercise for at least the first 48 hours after you arrive at an elevation above 8,000 feet [≈ 2,400 m, Nomad note].

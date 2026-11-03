@@ -30,11 +30,17 @@ test('every suggestion lands on its card, in both languages', () => {
   }
 });
 
+test('the 112 question only where 112 is the number', () => {
+  const keys = (n: string) => availableSuggestions(() => true, true, n).map((s) => s.key);
+  assert.ok(keys('112').includes('call112'));
+  assert.deepEqual(keys('911'), keys('112').filter((k) => k !== 'call112'));
+});
+
 test('without a model only vital suggestions, and none whose card is hidden', () => {
-  const all = availableSuggestions(() => true, true);
+  const all = availableSuggestions(() => true, true, '112');
   assert.equal(all.length, SUGGESTIONS.length);
-  assert.ok(availableSuggestions(() => true, false).every((s) => s.vital));
-  const noHealth = availableSuggestions((id) => !byId.get(id)?.health, true);
+  assert.ok(availableSuggestions(() => true, false, '112').every((s) => s.vital));
+  const noHealth = availableSuggestions((id) => !byId.get(id)?.health, true, '112');
   assert.ok(noHealth.length >= 8, 'enough left on Android');
   assert.ok(noHealth.every((s) => !byId.get(s.card)!.health));
 });

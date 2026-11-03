@@ -54,8 +54,10 @@ Front matter, one `key: value` per line (no nesting, no quotes needed):
 3. **Structure** may follow the source's: `##`/`###` headings, `-` bullets, `1.` numbered steps, `**bold**` where the
    source has it. No tables, no links, no images (the app's Markdown has none). A heading the source doesn't have may be
    added only if it is a word or two naming the part ("## Qué hacer"); prefer the source's own headings.
-4. **US details stay** (911, °F, gallons, inches, US brands): the app shows a fixed note with the person's own emergency
-   number outside the text. A metric equivalent may follow a US unit in brackets, marked as ours:
+4. **US details stay** (911, °F, gallons, inches, US brands). Write "911" as the source has it: when the person's
+   emergency number is another one, the app shows that number in its place (`cardBody`, not in `own` cards) and a note
+   outside the text says the original says 911 (since 2026-11-03, the owner's call: a vital card read in a hurry must
+   not send someone in Spain to dial 911). A metric equivalent may follow a US unit in brackets, marked as ours:
    `95 °F [≈ 35 °C, nota de Nomad]` / `2 inches [≈ 5 cm, Nomad note]`. Nothing else in brackets.
 5. **Short**: the protocol, not the page. Aim for 120–350 words; leave out background, statistics, prevention (unless
    the card is about prevention), "learn more", course adverts, contact boxes. A vital card is read in a hurry: the steps
