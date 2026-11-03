@@ -9,9 +9,20 @@ import { resources, type Namespace } from './resources';
 export const SUPPORTED_LANGUAGES = ['es', 'en'] as const;
 export type AppLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
+/** Spain's other official languages: whoever has their phone in one of them reads Spanish. */
+const READS_SPANISH = new Set(['ca', 'gl', 'eu', 'oc', 'ast']);
+
+/**
+ * The app language from the device's preferred languages, in order: the first the app has, a Spanish co-official
+ * one counting as Spanish (Catalan first, then English: Spanish), else English.
+ */
 export function deviceLanguage(): AppLanguage {
-  const code = getLocales()[0]?.languageCode ?? 'en';
-  return (SUPPORTED_LANGUAGES as readonly string[]).includes(code) ? (code as AppLanguage) : 'en';
+  for (const { languageCode } of getLocales()) {
+    if (!languageCode) continue;
+    if ((SUPPORTED_LANGUAGES as readonly string[]).includes(languageCode)) return languageCode as AppLanguage;
+    if (READS_SPANISH.has(languageCode)) return 'es';
+  }
+  return 'en';
 }
 
 const namespaces = Object.keys(resources.es) as Namespace[];

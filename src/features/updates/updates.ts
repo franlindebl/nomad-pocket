@@ -299,9 +299,11 @@ export async function deleteAndUpdate(e: UpdateEntry): Promise<void> {
   const gate = net ? networkGate({ type: net.type, isConnected: net.isConnected, isInternetReachable: net.isInternetReachable }, useSettings.getState().wifiOnly) : 'offline';
   if (gate === 'offline' || gate === 'unknown') throw new UpdatePreflightError('offline');
   if (gate === 'wifi') throw new UpdatePreflightError('wifi');
-  const room = () => {
+  // Checked again with the fresh numbers right before deleting: a newer, bigger edition published since the list
+  // was built must not leave the person with the old version gone and nothing queued.
+  const room = (needed = e.needed) => {
     const free = freeBytes() - pendingBytes(Object.values(useDownloads.getState().records));
-    if (!fitsAfterFreeing(e.needed, e.freed, free, STORAGE_HEADROOM)) throw new UpdatePreflightError('space', e.needed);
+    if (!fitsAfterFreeing(needed, e.freed, free, STORAGE_HEADROOM)) throw new UpdatePreflightError('space', needed);
   };
   room();
 
@@ -313,7 +315,7 @@ export async function deleteAndUpdate(e: UpdateEntry): Promise<void> {
     if (!latest?.url || !isNewerEdition(latest.version, item.version) || !(await reachable(latest.url))) throw new UpdatePreflightError('unreachable');
     const edition: ZimEdition = { name, version: latest.version, url: latest.url, sizeBytes: latest.sizeBytes };
     useZimEditions.setState((s) => ({ latest: { ...s.latest, [item.id]: edition } }));
-    room();
+    room(edition.sizeBytes ?? e.needed);
     await removeItem(item.id, { keepUserData: true });
     startZim(item, edition);
     return;
@@ -326,9 +328,11 @@ export async function deleteAndUpdate(e: UpdateEntry): Promise<void> {
   if (!c || !offer || countryInFlight(c.regionId)) return;
   const pieces = outdatedPieces(c);
   if (!pieces.length) return;
-  room();
   // Its regions now: once their maps are deleted the plan no longer sees them on the phone.
   const regions = c.regions.length ? [...c.regions] : undefined;
+  // planCountry counts the whole queue, which room() subtracts from the free space already.
+  const pending = pendingBytes(Object.values(useDownloads.getState().records));
+  room(Math.max(0, planCountry(offer, undefined, { update: true, regions }).needed - pending));
   for (const piece of pieces) await removeItem(piece.id, { keepUserData: true });
   downloadCountry(offer, undefined, { regions });
 }

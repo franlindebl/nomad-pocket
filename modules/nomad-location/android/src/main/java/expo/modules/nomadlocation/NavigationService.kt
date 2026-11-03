@@ -13,6 +13,8 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.Manifest
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
@@ -36,8 +38,16 @@ class NavigationService : Service() {
       }
     } catch (e: Exception) {
       // Not allowed now (permission revoked, or started from the background): guidance goes on
-      // while the app is in front, as before.
+      // while the app is in front, as before. A service started with startForegroundService must
+      // still call startForeground once, or Android kills the app (ForegroundServiceDidNotStartInTime):
+      // try it without the location type, then leave.
       Log.w("NomadLocation", "navigation service can't run in the foreground", e)
+      try {
+        startForeground(NOTIFICATION_ID, notification)
+        stopForeground(STOP_FOREGROUND_REMOVE)
+      } catch (again: Exception) {
+        Log.w("NomadLocation", "navigation service can't start at all", again)
+      }
       stopSelf()
     }
     // Killed with the app: guidance restarts from JS, not from a sticky service with no one to feed.
@@ -68,6 +78,10 @@ class NavigationService : Service() {
 
   companion object {
     fun start(context: Context, title: String, body: String) {
+      // Without location permission the typed service can't start: don't ask Android for one it will refuse.
+      val granted = listOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+        .any { context.checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED }
+      if (!granted) return
       val intent = Intent(context, NavigationService::class.java).putExtra(EXTRA_TITLE, title).putExtra(EXTRA_BODY, body)
       try {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) context.startForegroundService(intent) else context.startService(intent)

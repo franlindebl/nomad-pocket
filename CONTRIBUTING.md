@@ -45,7 +45,9 @@ and may not be available to a free developer account. Simulators and emulators a
 
 ## Before you open a pull request
 
-The pre-commit hook (installed by `npm install`) runs the first four checks, about 5-10 s:
+The pre-commit hook (`npm install` points git at `.githooks/`, unless you already use another hooks path) runs the
+first four checks and that `src/data/guide.json` is up to date, about 5-10 s. The other hooks there only run a
+personal hook of the same name from `.git/hooks.local/` if you have one; nothing else touches your commits.
 
 ```bash
 npx tsc --noEmit
@@ -61,7 +63,7 @@ Also, when they apply:
 - `npm run check:catalog` after editing `src/data/catalog.json`.
 - `node scripts/licenses.mjs` after changing dependencies or `scripts/licenses/native.json`
   (`--check` fails on a stale `src/data/licenses.json`).
-- Look at UI changes running (Release build on a simulator, light and dark) and run the Maestro
+- Look at UI changes running (Release build on a simulator; the app is dark only) and run the Maestro
   suite if you touched a flow it covers: [docs/E2E.md](docs/E2E.md).
 - Every user-facing string goes through i18next in both `es` and `en`; use the design system in
   `src/components/ui` and theme tokens: [docs/STYLE_GUIDE.md](docs/STYLE_GUIDE.md).

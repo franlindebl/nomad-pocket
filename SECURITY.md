@@ -18,14 +18,14 @@ if you want to be credited.
 
 ## What is in scope
 
-- The app (`src/`) and its native modules (`modules/nomad-zim`, `modules/nomad-llm`,
-  `modules/nomad-route`) on iOS and Android: for example the reader's sandbox for archive pages,
+- The app (`src/`) and its native modules (`modules/`: `nomad-zim`, `nomad-llm`, `nomad-route`, `nomad-files`,
+  `nomad-location`, `nomad-voice`, `nomad-carplay`) on iOS and Android: for example the reader's sandbox for archive pages,
   how downloaded files are verified and stored, the local databases, deep links and what leaves
   the device.
 - The CI that builds and publishes the country packages (`.github/workflows/`, `scripts/maps/`,
   `scripts/routing/`): anything that could make the published maps, routing packs or catalogs
   carry content the workflow didn't build, or leak the repository's credentials.
-- The privacy site (`site/`).
+- The website (`site/`, nomad-pocket.app).
 
 ## What is not
 
@@ -37,4 +37,4 @@ if you want to be credited.
 
 ## Supported versions
 
-Only the latest App Store / TestFlight release (and the `main` branch) gets fixes.
+Only the latest App Store / TestFlight and Google Play releases (and the `main` branch) get fixes.

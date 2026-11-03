@@ -6,6 +6,7 @@
 // document is written in one transaction, so an index cut short by a kill resumes where it
 // stopped. Pure half: documents-core.ts.
 import { indexDb, indexDbAsync, indexWrite } from '@/db';
+import Storage from '@/db/kv';
 import { getItem, listItems } from '@/features/content/items';
 
 import {
@@ -103,6 +104,23 @@ async function documentNames(itemId: string, mainPath: string | null) {
   return { collection, links };
 }
 
+/**
+ * The document being read right now, kept across launches: PDFKit or pdfbox taking the app down on one PDF must not do
+ * it again on every launch. A leftover mark means the last read never finished: that PDF is marked failed and skipped.
+ */
+const READING_KEY = 'docs.reading';
+
+async function skipCrashedDocument(itemId: string, done: Set<string>) {
+  const [item, path] = (Storage.getItemSync(READING_KEY) ?? '').split('\n');
+  // Another archive's mark is that archive's to handle (an old one is overwritten by the next read).
+  if (item !== itemId) return;
+  Storage.removeItemSync(READING_KEY);
+  if (!path || done.has(path)) return;
+  console.warn(`[docs] ${itemId}: ${path} stopped the app last time, skipped`);
+  await indexWrite(() => insertDocument(background(), { itemId, path, title: path, pages: 0, textPages: 0, rows: [], status: 'failed' }));
+  done.add(path);
+}
+
 async function indexArchive(itemId: string) {
   const item = getItem(itemId);
   const uuid = typeof item?.meta.uuid === 'string' ? item.meta.uuid : null;
@@ -124,6 +142,7 @@ async function indexArchive(itemId: string) {
   );
   if (pdfs.length) {
     const done = new Set(indexDb().getAllSync<{ path: string }>('SELECT path FROM doc_files WHERE item_id = ?', itemId).map((r) => r.path));
+    await skipCrashedDocument(itemId, done);
     const names = await documentNames(itemId, typeof item.meta.mainPath === 'string' ? item.meta.mainPath : null);
     const started = Date.now();
     let read = 0;
@@ -131,7 +150,9 @@ async function indexArchive(itemId: string) {
     for (const pdf of pdfs) {
       if (done.has(pdf.path)) continue;
       if (dropped.has(itemId) || !getItem(itemId)) return;
+      Storage.setItemSync(READING_KEY, `${itemId}\n${pdf.path}`);
       const text = await getPdfText(itemId, pdf.path, MAX_PAGES);
+      Storage.removeItemSync(READING_KEY);
       if (dropped.has(itemId)) return;
       const { rows, textPages } = await passagesOf(text?.pages ?? []);
       const title = documentTitle(pdf.path, { collection: names.collection.get(pdf.path), link: names.links.get(pdf.path), pdf: text?.title });

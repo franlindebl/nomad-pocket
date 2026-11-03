@@ -333,6 +333,18 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-03 — Audit leftovers: update space check, Android navigation start, PDF crash guard, language
+
+- Delete-first update checks the space again with the fresh sizes (the new ZIM edition's, the country plan's) right
+  before deleting anything (`updates.ts`).
+- Android navigation service: not asked for without location permission; if the typed `startForeground` fails it
+  still calls `startForeground` once before stopping (else ForegroundServiceDidNotStartInTime takes the app down).
+- PDF document index: the PDF being read is marked in kv (`docs.reading`); a mark left by a crash makes that PDF
+  `failed` and skipped next launch instead of crashing on every start.
+- App language: the first of the device's preferred languages the app has; Catalan, Galician, Basque, Aranese and
+  Asturian count as Spanish.
+- CONTRIBUTING (what the hooks do, dark only) and SECURITY (every native module, the website, Google Play) updated.
+
 ### 2026-11-03 — Guide: Spain's numbers say so; medical notices; wording about sources
 
 - Own-wording cards with Spain-only numbers (024, 016, 091, 062, Teléfono de la Esperanza, Toxicología) say "en España"
