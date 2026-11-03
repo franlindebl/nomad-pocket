@@ -15,7 +15,7 @@ keywords: he perdido la cartera, cartera perdida, me han robado la cartera, cart
 ## Cartera perdida o robada
 
 1. **Llama ya a tu banco** (o al teléfono de tu tarjeta) para bloquear las tarjetas.
-2. **Denuncia la pérdida o el robo** en una comisaría de la Policía Nacional (091) o en un cuartel de la Guardia Civil (062). Guarda una copia de la denuncia.
+2. **Denuncia la pérdida o el robo**; en España, en una comisaría de la Policía Nacional (091) o en un cuartel de la Guardia Civil (062). Guarda una copia de la denuncia.
 3. **Pide cita previa** en una oficina de expedición del DNI para sacar uno nuevo. Si no llevas la denuncia, el funcionario hace una denuncia administrativa antes de expedirlo.
 4. **Si tu DNI tiene certificado electrónico**, ve a la oficina también para anularlo, para que nadie lo use por internet.
 5. Mientras tanto, usa las copias que tengas (fotos o escaneos).

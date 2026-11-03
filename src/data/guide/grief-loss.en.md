@@ -21,4 +21,4 @@ keywords: grief, my mother died, my father died, a relative died, I lost a loved
 5. **If you couldn't say goodbye:** funerals are a way of saying goodbye and sharing memories. If you weren't there, you can talk about the person and say their name, write down what you remember and gather photos or keepsakes in a box.
 6. **With children:** be honest and use simple words. Say "died": "lost" or "passed away" confuse.
 7. **Ask for help at your health centre** if your mood has been low for more than 2 weeks, if what you are doing is not helping, or if months go by and you cannot return to your usual activities.
-8. **If you are thinking of ending your life or of not going on living:** call 024 (free, confidential, 24 hours). To talk to someone, Teléfono de la Esperanza, 717 003 717. In immediate danger, 112.
+8. **If you are thinking of ending your life or of not going on living:** in Spain, call 024 (free, confidential, 24 hours). To talk to someone, Teléfono de la Esperanza, 717 003 717. In immediate danger, 112.

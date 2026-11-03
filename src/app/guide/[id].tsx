@@ -33,6 +33,11 @@ export default function GuideCardScreen() {
         </View>
       ) : null}
       <Markdown text={cardBody(card, lang, number)} />
+      {card.health ? (
+        <Text variant="caption" color="textTertiary" style={{ marginTop: space.md }}>
+          {t('common:health.disclaimer')}
+        </Text>
+      ) : null}
 
       {notes.length ? (
         <Card style={{ marginTop: space.xl, gap: space.sm }} testID="guide-notes">

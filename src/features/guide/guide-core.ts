@@ -260,6 +260,17 @@ function poisonNote(text: GuideText, lang: Lang, country: string | null): string
     : '1-800-222-1222 is the US poison line and only works there.';
 }
 
+/** Spain-only lines the cards give: 024, 016, 091, 062, Teléfono de la Esperanza, Toxicología, 900 numbers. */
+const SPAIN_NUMBER_RE = /(?<!\d)(?:024|016|091|062|717 ?003 ?717|91 562 04 20|900 ?\d{3} ?\d{3})(?![\d])/;
+
+/** The note for someone outside Spain reading a card whose phone numbers are Spain's (null when not needed). */
+function spainNumbersNote(text: GuideText, lang: Lang, emergencyNumber: string, country: string | null): string | null {
+  if (!country || country === 'es' || !SPAIN_NUMBER_RE.test(`${text.body}\n${text.note ?? ''}`)) return null;
+  return lang === 'es'
+    ? `Los teléfonos de esta ficha son de España. Si estás en otro país, llama a tu número de emergencias, el ${emergencyNumber}.`
+    : `The phone numbers on this card are Spain's. In another country, call your emergency number, ${emergencyNumber}.`;
+}
+
 /**
  * Notes shown outside the card's text: the local emergency number (or that it stands for the source's 911), a poison
  * line that works where the person is, and the card's own note. `country` is the one the number is for (null: unknown).
@@ -278,6 +289,8 @@ export function cardNotes(card: GuideCard, lang: Lang, emergencyNumber: string, 
   }
   const poison = poisonNote(t, lang, country);
   if (poison) out.push(poison);
+  const spain = spainNumbersNote(t, lang, emergencyNumber, country);
+  if (spain) out.push(spain);
   if (t.note) out.push(t.note);
   return out;
 }

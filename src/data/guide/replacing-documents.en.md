@@ -15,7 +15,7 @@ keywords: lost my wallet, lost wallet, wallet stolen, lost my ID, DNI stolen, DN
 ## Lost or stolen wallet
 
 1. **Call your bank now** (or your card's phone line) to block the cards.
-2. **Report the loss or theft** at a Policía Nacional station (091) or a Guardia Civil post (062). Keep a copy of the report.
+2. **Report the loss or theft**; in Spain, at a Policía Nacional station (091) or a Guardia Civil post (062). Keep a copy of the report.
 3. **Book an appointment** (cita previa) at a DNI issuing office to get a new one. If you don't bring the report, the officer makes an administrative report before issuing it.
 4. **If your DNI has an electronic certificate**, go to the office to cancel it too, so that nobody can use it online.
 5. Meanwhile, use any copies you have (photos or scans).

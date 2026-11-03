@@ -15,7 +15,7 @@ Si sientes que te siguen, hazle caso a tu intuición y actúa pronto.
 
 1. **Ve a un sitio con gente y luz:** una tienda abierta, un bar, una farmacia de guardia, una gasolinera o una calle concurrida. Entra y pide ayuda.
 2. Para comprobar si te siguen, cruza la calle o cambia de dirección. Si la persona sigue detrás, no lo dudes.
-3. **Llama al 112** o al 091 (Policía Nacional) y di dónde estás y cómo es la persona. Si no puedes hablar, mira la ficha de ayuda sin llamada de voz.
+3. **Llama al 112** o, en España, al 091 (Policía Nacional) y di dónde estás y cómo es la persona. Si no puedes hablar, mira la ficha de ayuda sin llamada de voz.
 4. Pide ayuda a quien tengas cerca. Habla alto y claro, y di lo que pasa: «Me está siguiendo».
 5. Comparte tu ubicación con alguien de confianza y dile que estás en apuros.
 6. Evita calles solitarias, callejones y descampados. Mantente cerca de gente y de la luz.
@@ -24,4 +24,4 @@ Si sientes que te siguen, hazle caso a tu intuición y actúa pronto.
 
 ## Si es violencia de género
 
-Llama al **016**. Es gratuito, funciona las 24 horas y no aparece en la factura. Pero la llamada sí queda en el registro del teléfono: bórrala si alguien puede mirar tu móvil. Si hay peligro inmediato, llama al 112.
+En España, llama al **016**. Es gratuito, funciona las 24 horas y no aparece en la factura. Pero la llamada sí queda en el registro del teléfono: bórrala si alguien puede mirar tu móvil. Si hay peligro inmediato, llama al 112.

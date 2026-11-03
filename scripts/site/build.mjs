@@ -138,8 +138,8 @@ const COPY = {
       {
         screen: 'firstaid', icon: 'heartPulse', hue: HUE.survival, over: 'Guía de emergencia',
         h3: 'Qué hacer, paso a paso',
-        p: 'Más de 200 fichas de fuentes oficiales: reanimación, hemorragias, quemaduras, atragantamiento, incendios, inundaciones… En la app desde el primer minuto, sin descargar nada.',
-        checks: ['Textos breves, pensados para leerse con prisa', 'Cada ficha cita su fuente oficial', 'Búsqueda instantánea dentro de la guía'],
+        p: 'Más de 200 fichas basadas en fuentes oficiales: reanimación, hemorragias, quemaduras, atragantamiento, incendios, inundaciones… En la app desde el primer minuto, sin descargar nada.',
+        checks: ['Textos breves, pensados para leerse con prisa', 'Cada ficha cita su fuente', 'Búsqueda instantánea dentro de la guía'],
         note: 'Primeros auxilios e información médica: en iPhone y iPad.',
         alt: 'Guía de emergencias con fichas de primeros auxilios',
       },
@@ -296,8 +296,8 @@ const COPY = {
       {
         screen: 'firstaid', icon: 'heartPulse', hue: HUE.survival, over: 'Emergency guide',
         h3: 'What to do, step by step',
-        p: '200+ cards from official sources: CPR, bleeding, burns, choking, fires, floods… In the app from the first minute, nothing to download.',
-        checks: ['Short texts, written to be read in a hurry', 'Every card cites its official source', 'Instant search inside the guide'],
+        p: '200+ cards based on official sources: CPR, bleeding, burns, choking, fires, floods… In the app from the first minute, nothing to download.',
+        checks: ['Short texts, written to be read in a hurry', 'Every card cites its source', 'Instant search inside the guide'],
         note: 'First aid and medical information: on iPhone and iPad.',
         alt: 'Emergency guide with first-aid cards',
       },

@@ -204,3 +204,20 @@ describe('the bundled guide', () => {
     for (const [q, id] of en) assert.equal(pick(q, 'en'), id, q);
   });
 });
+
+test('a card with Spain-only numbers gets a note outside Spain only', () => {
+  const base = CARDS[5];
+  const text = (body: string): GuideText => ({ ...base.en, kind: 'own', basis: 'Línea 024', body });
+  const crisis: GuideCard = { ...base, es: text('En España, llama al 024.'), en: text('In Spain, call 024.') };
+  assert.deepEqual(cardNotes(crisis, 'en', '911', 'us'), [
+    "The phone numbers on this card are Spain's. In another country, call your emergency number, 911.",
+  ]);
+  assert.deepEqual(cardNotes(crisis, 'es', '911', 'mx'), [
+    'Los teléfonos de esta ficha son de España. Si estás en otro país, llama a tu número de emergencias, el 911.',
+  ]);
+  assert.deepEqual(cardNotes(crisis, 'es', '112', 'es'), []);
+  assert.deepEqual(cardNotes(crisis, 'en', '911', null), []);
+  // 112 and years are not Spain-only numbers.
+  const plain: GuideCard = { ...base, en: text('Call 112. Since 2024, also by text.') };
+  assert.deepEqual(cardNotes(plain, 'en', '911', 'us'), []);
+});

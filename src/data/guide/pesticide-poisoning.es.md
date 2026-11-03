@@ -18,7 +18,7 @@ keywords: intoxicación por pesticidas, pesticida, pesticidas, plaguicida, fitos
 ---
 1. **Protégete primero.** Ponte guantes de goma (nitrilo o butilo; los de látex o vinilo no protegen) y no toques con la piel su ropa, su vómito ni el producto.
 2. **Sácalo al aire libre** enseguida, lejos de donde se ha echado. En un sitio cerrado, abre puertas y ventanas. Si para entrar necesitarías protección que no tienes, no entres: llama al 112 y espera.
-3. **Llama al 112** si tiene síntomas después de usar el producto (mira abajo), aunque parezcan leves: puede empeorar y dejar de respirar de repente. Si dudas de si es peligroso: Información Toxicológica, 91 562 04 20 (24 horas).
+3. **Llama al 112** si tiene síntomas después de usar el producto (mira abajo), aunque parezcan leves: puede empeorar y dejar de respirar de repente. Si dudas de si es peligroso: el Servicio de Información Toxicológica de España, 91 562 04 20 (24 horas).
 4. **Quítale la ropa y el calzado** contaminados y déjalos en una bolsa cerrada.
 5. **Lava la piel y el pelo** con mucha agua y jabón, también detrás de las orejas, bajo las uñas y en los pliegues. Si está débil o torpe, lávalo tumbado, no de pie.
 6. **Si le ha entrado en los ojos**, quita las lentillas, mantén el párpado abierto y lava con agua limpia que corra suave, al menos 15 minutos. Sin colirios ni otros productos.

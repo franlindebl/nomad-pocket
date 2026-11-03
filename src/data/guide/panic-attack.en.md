@@ -56,5 +56,7 @@ If you go into labour and can't get to hospital, call 112: they can guide you by
 ## Help
 
 - If the anxiety doesn't go away or you can't cope with it, tell your doctor or your health centre.
+In Spain:
+
 - Teléfono de la Esperanza: 717 003 717, at any hour.
 - If you are thinking of ending your life: 024, free, confidential, 24 hours.

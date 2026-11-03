@@ -24,6 +24,6 @@ Pasar días sin ver a nadie (por una nevada, un apagón, una inundación o un co
 4. **Haz cosas que te gusten y te relajen**, como cantar, pintar u otras actividades.
 5. **Cuida el cuerpo**: duerme, come sano y evita el alcohol y otras drogas.
 6. **Infórmate sin saturarte**: noticias de fuentes oficiales, una o dos veces al día.
-7. **Pide ayuda si la necesitas.** El Teléfono de la Esperanza (717 003 717) atiende a todas horas. Si piensas en quitarte la vida, llama al 024 (gratuito, 24 horas). En una emergencia, al 112.
+7. **Pide ayuda si la necesitas.** En España, el Teléfono de la Esperanza (717 003 717) atiende a todas horas. Si piensas en quitarte la vida, llama al 024 (gratuito, 24 horas). En una emergencia, al 112.
 
 Si la tristeza o el miedo te impiden hacer tu vida diaria durante varios días seguidos, consulta con tu centro de salud.

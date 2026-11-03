@@ -18,7 +18,7 @@ keywords: pesticide poisoning, pesticide, pesticides, crop spray, farm chemicals
 ---
 1. **Protect yourself first.** Put on rubber gloves (nitrile or butyl; latex or vinyl gloves don't protect) and don't touch their clothes, vomit or the product with bare skin.
 2. **Get them into fresh air** at once, away from where it was used. In an enclosed place, open doors and windows. If going in would need protection you don't have, don't go in: call 112 and wait.
-3. **Call 112** if they have symptoms after using the product (see below), even if they seem mild: they can get worse and stop breathing suddenly. If you're not sure whether it's dangerous: Spain's poison information service (Información Toxicológica), 91 562 04 20 (24 hours).
+3. **Call 112** if they have symptoms after using the product (see below), even if they seem mild: they can get worse and stop breathing suddenly. If you're not sure whether it's dangerous: Spain's Toxicology Information Service (Servicio de Información Toxicológica), 91 562 04 20 (24 hours).
 4. **Take off their contaminated clothes and shoes** and put them in a closed bag.
 5. **Wash skin and hair** with plenty of water and soap, also behind the ears, under the nails and in skin folds. If they are weak or clumsy, wash them lying down, not standing.
 6. **If it got in the eyes**, remove contact lenses, hold the eyelid open and wash with clean, gently running water for at least 15 minutes. No eye drops or other products.

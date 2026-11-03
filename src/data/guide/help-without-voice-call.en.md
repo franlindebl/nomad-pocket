@@ -20,7 +20,7 @@ keywords: I'm deaf, hard of hearing, deaf in one ear, hard for me to talk on the
 ## If you can't hear well or can't speak
 
 1. **Sign up now**, before you need it. Each region has its own system (an app such as "112 Accesible", or SMS to 112) and they usually ask you to register first: an SMS to 112 when you are not registered may get no answer. Ask your local deaf association.
-2. **SVIsual** (CNSE): sign-language video interpreting and a text chat with channels for 112, 091, 062 and 016. Free, 24 hours, registration needed.
+2. **SVIsual** (CNSE), in Spain: sign-language video interpreting and a text chat with channels for 112, 091, 062 and 016. Free, 24 hours, registration needed.
 3. **AlertCops** (Ministry of the Interior): a free app to alert the National Police and the Guardia Civil by chat, with your location.
 4. If someone is nearby, have them call for you.
 

@@ -16,7 +16,7 @@ Your safety is worth more than anything in the house.
 ## If someone is trying to get in now
 
 1. **Do not open** and do not confront the person.
-2. **Call 112.** You can also call 091 (Policía Nacional) or 062 (Guardia Civil). Give your address and say what is happening.
+2. **Call 112.** In Spain, you can also call 091 (Policía Nacional) or 062 (Guardia Civil). Give your address and say what is happening.
 3. Turn on the lights and make noise (shout, bang on a wall or sound an alarm). Most of the time, whoever is trying to get in leaves.
 4. If there are other people, gather them. Shut yourselves in a room with the door locked or blocked, and take the phone.
 5. If the person is already inside, do not look for them or follow them. Leave the house if you can do so without meeting them; if not, stay shut in and quiet until the police arrive.

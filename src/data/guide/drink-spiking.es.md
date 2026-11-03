@@ -23,6 +23,6 @@ Se encuentra de pronto muy borracha o muy mareada tras beber poco, está confusa
 4. **No le des más alcohol**, comida ni medicinas, y no la hagas vomitar.
 5. **Llévala al hospital** o espera a la ambulancia. Pide que le hagan **análisis de sangre y de orina cuanto antes**: algunas sustancias desaparecen del cuerpo en pocas horas. Si necesita orinar antes, recoge la orina en un recipiente limpio y llévala.
 6. **Si hay posibilidad de agresión sexual:** que no se duche, no se lave ni se cambie de ropa antes de ser atendida, para no borrar pruebas. Si ya se cambió, guarda la ropa en una bolsa de papel. En el hospital la atenderán y podrán recoger pruebas. Denunciar es decisión suya y puede hacerlo después.
-7. **Apoyo y denuncia:** el **016** (24 horas, gratuito) atiende la violencia contra las mujeres y orienta sobre los centros de crisis de cada comunidad. También el **091** (Policía Nacional) y el **062** (Guardia Civil), y el **112** en urgencias.
+7. **Apoyo y denuncia:** en España, el **016** (24 horas, gratuito) atiende la violencia contra las mujeres y orienta sobre los centros de crisis de cada comunidad. También el **091** (Policía Nacional) y el **062** (Guardia Civil), y el **112** en urgencias.
 
 No es culpa suya. Créela y acompáñala.

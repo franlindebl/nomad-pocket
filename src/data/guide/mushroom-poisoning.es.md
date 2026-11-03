@@ -19,6 +19,6 @@ keywords: intoxicación por setas, envenenamiento por setas, he comido setas y m
 4. **Aunque mejore, no lo des por curado.** Con estas setas, al día siguiente de comerlas la persona puede parecer mejor y, a los 3–5 días, fallarle el hígado. Hace falta que la vea y la siga un médico.
 5. **Guarda lo que quede de las setas** (crudas, cocinadas o los trozos que se tiraron) y, si vomita, también el vómito. Llévalo al hospital: sirve para saber qué seta era.
 6. **Cuenta a los sanitarios** a qué hora comisteis, cuándo empezaron los síntomas, cómo se cocinaron y dónde se cogieron.
-7. **Si alguien ha comido una seta y no sabes si es peligrosa**, llama al Servicio de Información Toxicológica: 91 562 04 20, las 24 horas.
+7. **Si alguien ha comido una seta y no sabes si es peligrosa**, llama al Servicio de Información Toxicológica de España: 91 562 04 20, las 24 horas.
 
 Cocinar no destruye las toxinas de la oronja verde.

@@ -24,7 +24,7 @@ Además del botiquín básico (tiritas, gasas, esparadrapo, antiséptico, guante
 - Vendas.
 - Pinzas.
 - Mascarillas.
-- Una lista con los teléfonos de emergencia: 112 y el Servicio de Información Toxicológica, 91 562 04 20.
+- Una lista con los teléfonos de emergencia: 112 y el Servicio de Información Toxicológica de España, 91 562 04 20.
 
 ## Medicinas
 

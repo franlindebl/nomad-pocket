@@ -24,7 +24,7 @@ Besides the basic kit (plasters, gauze, tape, antiseptic, gloves and scissors), 
 - Bandages.
 - Tweezers.
 - Face masks.
-- A list of emergency phone numbers: 112 and Spain's Servicio de Información Toxicológica, 91 562 04 20.
+- A list of emergency phone numbers: 112 and Spain's Toxicology Information Service (Servicio de Información Toxicológica), 91 562 04 20.
 
 ## Medicines
 

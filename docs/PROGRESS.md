@@ -333,6 +333,17 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-03 — Guide: Spain's numbers say so; medical notices; wording about sources
+
+- Own-wording cards with Spain-only numbers (024, 016, 091, 062, Teléfono de la Esperanza, Toxicología) say "en España"
+  / "in Spain"; outside Spain (`country` known and not `es`) every card whose text or note has one of them gets the note
+  "Los teléfonos de esta ficha son de España. Si estás en otro país, llama a tu número de emergencias, el …"
+  (`spainNumbersNote` in `guide-core.ts`, tested; 22 cards).
+- Health cards show the "not medical advice" caption under the text; in a conversation the assistant's disclaimer stays
+  under the message box (the empty chat already had it).
+- Guide intro and website: "from official sources or written from them" / "based on official sources"; "every card
+  cites its source". No non-endorsement line (each own card already says it isn't an official text).
+
 ### 2026-11-03 — 2.0.1 hardening: emergency numbers, privacy policy, WebView, downloads, shared packs
 
 - Emergency numbers: Niue 999 (was its calling code, 683), Honduras 911 (was 195), Saint-Barthélemy 112 (was 17);

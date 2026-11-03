@@ -21,4 +21,4 @@ keywords: duelo, se ha muerto mi madre, ha muerto mi padre, ha muerto un familia
 5. **Si no pudiste despedirte:** los funerales son una forma de despedida y de compartir recuerdos. Si no estuviste, puedes hablar de la persona y decir su nombre, escribir lo que recuerdas y reunir fotos o recuerdos en una caja.
 6. **Con niños:** sé sincero y usa palabras sencillas. Di «ha muerto»: «se ha perdido» o «nos ha dejado» confunden.
 7. **Pide ayuda en tu centro de salud** si llevas más de 2 semanas con el ánimo bajo, si lo que haces no te ayuda, o si pasan los meses y no puedes volver a tus actividades de siempre.
-8. **Si piensas en quitarte la vida o en no seguir viviendo:** llama al 024 (gratuito, confidencial, las 24 horas). Para hablar con alguien, Teléfono de la Esperanza, 717 003 717. En peligro inmediato, 112.
+8. **Si piensas en quitarte la vida o en no seguir viviendo:** en España, llama al 024 (gratuito, confidencial, las 24 horas). Para hablar con alguien, el Teléfono de la Esperanza, 717 003 717. En peligro inmediato, 112.

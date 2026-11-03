@@ -20,7 +20,7 @@ keywords: soy sorda, soy sordo, no oigo bien, sordo de un oído, me cuesta habla
 ## Si no oyes bien o no puedes hablar
 
 1. **Date de alta ahora**, antes de necesitarlo. Cada comunidad tiene su sistema (una app como «112 Accesible», o SMS al 112) y suelen pedir registro previo: un SMS al 112 sin estar dado de alta puede no recibir respuesta. Pregunta en tu asociación de personas sordas.
-2. **SVIsual** (CNSE): videointerpretación en lengua de signos y chat de texto con canales para el 112, el 091, el 062 y el 016. Gratis, 24 horas, con registro previo.
+2. **SVIsual** (CNSE), en España: videointerpretación en lengua de signos y chat de texto con canales para el 112, el 091, el 062 y el 016. Gratis, 24 horas, con registro previo.
 3. **AlertCops** (Ministerio del Interior): app gratuita para avisar por chat a la Policía Nacional y la Guardia Civil, con tu ubicación.
 4. Si hay alguien cerca, que llame por ti.
 

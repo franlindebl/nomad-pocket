@@ -24,6 +24,6 @@ Spending days without seeing anyone (because of snow, a blackout, a flood or a l
 4. **Do things you enjoy and find relaxing**, such as singing, painting or other activities.
 5. **Look after your body**: sleep, eat healthily and avoid alcohol and other drugs.
 6. **Stay informed without overload**: news from official sources, once or twice a day.
-7. **Ask for help if you need it.** Teléfono de la Esperanza (717 003 717) answers at any hour. If you are thinking of ending your life, call 024 (free, 24 hours). In an emergency, call 112.
+7. **Ask for help if you need it.** In Spain, Teléfono de la Esperanza (717 003 717) answers at any hour. If you are thinking of ending your life, call 024 (free, 24 hours). In an emergency, call 112.
 
 If sadness or fear stops you getting on with daily life for several days in a row, contact your health centre.

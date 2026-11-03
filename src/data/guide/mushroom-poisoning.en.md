@@ -19,6 +19,6 @@ keywords: mushroom poisoning, poisoned by mushrooms, ate mushrooms and feel ill,
 4. **Even if they get better, don't assume they are cured.** With these mushrooms, the day after eating them the person may seem better and, 3–5 days after, the liver can fail. A doctor needs to see them and follow them up.
 5. **Keep whatever is left of the mushrooms** (raw, cooked or the bits that were thrown away) and, if the person vomits, the vomit too. Take it to the hospital: it helps tell which mushroom it was.
 6. **Tell the health staff** what time you ate, when the symptoms started, how the mushrooms were cooked and where they were picked.
-7. **If someone has eaten a mushroom and you don't know whether it is dangerous**, call Spain's Servicio de Información Toxicológica: 91 562 04 20, 24 hours a day.
+7. **If someone has eaten a mushroom and you don't know whether it is dangerous**, call Spain's Toxicology Information Service (Servicio de Información Toxicológica): 91 562 04 20, 24 hours a day.
 
 Cooking does not destroy the death cap's toxins.

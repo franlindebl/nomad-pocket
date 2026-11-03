@@ -23,6 +23,6 @@ Suddenly very drunk or dizzy after drinking little, confused, very drowsy, unabl
 4. **Do not give her more alcohol**, food or medicines, and do not make her vomit.
 5. **Take her to hospital** or wait for the ambulance. Ask for **blood and urine tests as soon as possible**: some substances leave the body within a few hours. If she needs to urinate first, collect the urine in a clean container and bring it.
 6. **If sexual assault is possible:** she should not shower, wash or change clothes before being seen, so evidence is not lost. If she has already changed, keep the clothes in a paper bag. At the hospital she will be cared for and evidence can be collected. Reporting is her decision and she can do it later.
-7. **Support and reporting:** **016** (24 hours, free) deals with violence against women and can direct her to the crisis centres of each region. Also **091** (Policía Nacional) and **062** (Guardia Civil), and **112** in an emergency.
+7. **Support and reporting:** in Spain, **016** (24 hours, free) deals with violence against women and can direct her to the crisis centres of each region. Also **091** (Policía Nacional) and **062** (Guardia Civil), and **112** in an emergency.
 
 It is not her fault. Believe her and stay with her.

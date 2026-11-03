@@ -42,4 +42,4 @@ keywords: cuánto paracetamol le doy, cuánto paracetamol le puedo dar a un niñ
 - Que beba a menudo; si toma pecho, sigue dándoselo. No lo abrigues de más ni lo mojes con agua fría.
 - El medicamento es para que esté más a gusto, no para bajar la fiebre a toda costa.
 - **Llama al 112 o ve a urgencias** si tiene menos de 3 meses y 38 °C o más, le cuesta respirar, está muy adormilado o no reacciona, tiene una convulsión, el cuello rígido, manchas que no se borran al apretar un vaso encima, o está deshidratado (pañal casi seco, llora sin lágrimas). Si la fiebre dura más de 3 días, que lo vea un médico.
-- **Si le has dado de más**, aunque esté bien: Información Toxicológica, 91 562 04 20, o urgencias.
+- **Si le has dado de más**, aunque esté bien: el Servicio de Información Toxicológica de España, 91 562 04 20, o urgencias.

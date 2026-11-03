@@ -15,7 +15,7 @@ If you feel you are being followed, trust your instinct and act early.
 
 1. **Go somewhere with people and light:** an open shop, a bar, an on-duty pharmacy, a petrol station or a busy street. Go in and ask for help.
 2. To check whether you are being followed, cross the street or change direction. If the person stays behind you, do not doubt it.
-3. **Call 112** or 091 (Policía Nacional) and say where you are and what the person looks like. If you cannot speak, see the card on getting help without a voice call.
+3. **Call 112** or, in Spain, 091 (Policía Nacional) and say where you are and what the person looks like. If you cannot speak, see the card on getting help without a voice call.
 4. Ask anyone nearby for help. Speak loudly and clearly and say what is happening: "He is following me".
 5. Share your location with someone you trust and tell them you are in trouble.
 6. Avoid empty streets, alleys and waste ground. Stay near people and light.
@@ -24,4 +24,4 @@ If you feel you are being followed, trust your instinct and act early.
 
 ## If it is gender violence
 
-Call **016**. It is free, works 24 hours a day and does not appear on the phone bill. But the call does stay in the phone's call log: delete it if someone could check your phone. If the danger is immediate, call 112.
+In Spain, call **016**. It is free, works 24 hours a day and does not appear on the phone bill. But the call does stay in the phone's call log: delete it if someone could check your phone. If the danger is immediate, call 112.

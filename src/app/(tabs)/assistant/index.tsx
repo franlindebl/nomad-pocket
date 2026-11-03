@@ -148,6 +148,12 @@ export default function AssistantScreen() {
           onSend={(q) => sendMessage(q)}
           onStop={() => stopAnswer()}
         />
+        {/* The empty chat shows it above; in a conversation it stays under the box, one line. */}
+        {!empty ? (
+          <Text variant="caption" color="textTertiary" align="center" numberOfLines={2}>
+            {t(HEALTH_FEATURES ? 'empty.disclaimer' : 'empty.disclaimerNoHealth')}
+          </Text>
+        ) : null}
       </Animated.View>
     </View>
   );

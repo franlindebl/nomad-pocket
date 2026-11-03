@@ -56,5 +56,7 @@ Si te pones de parto y no llegas al hospital, llama al 112: pueden guiarte por t
 ## Ayuda
 
 - Si la ansiedad no se va o no puedes con ella, díselo a tu médico o a tu centro de salud.
+En España:
+
 - Teléfono de la Esperanza: 717 003 717, a cualquier hora.
 - Si piensas en quitarte la vida: 024, gratuito, confidencial, 24 horas.

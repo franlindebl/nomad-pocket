@@ -16,7 +16,7 @@ Tu seguridad vale más que cualquier cosa de la casa.
 ## Si alguien intenta entrar ahora
 
 1. **No abras** y no te enfrentes a esa persona.
-2. **Llama al 112.** También puedes llamar al 091 (Policía Nacional) o al 062 (Guardia Civil). Di tu dirección y qué está pasando.
+2. **Llama al 112.** En España, también puedes llamar al 091 (Policía Nacional) o al 062 (Guardia Civil). Di tu dirección y qué está pasando.
 3. Enciende las luces y haz ruido (grita, golpea una pared o haz sonar una alarma). Lo normal es que quien intenta entrar se vaya.
 4. Si hay más personas, júntalas. Encerraos en una habitación con la puerta cerrada con llave o atrancada, y con el móvil.
 5. Si la persona ya está dentro, no la busques ni la sigas. Sal de la casa si puedes hacerlo sin cruzarte con ella; si no, quédate encerrado y en silencio hasta que llegue la policía.
