@@ -113,6 +113,19 @@ export function routePacksFor<P extends Pick<ManifestPack, 'id' | 'regionId'>>(p
   return shared ? [shared] : [];
 }
 
+/**
+ * The packs (by id) another installed country still routes with, so deleting `removing` must keep them: Haiti and
+ * the Dominican Republic share one pack, and deleting either must not take the other's roads.
+ */
+export function packsStillUsed<P extends Pick<ManifestPack, 'id' | 'regionId'>>(packs: P[], removing: string, installed: readonly string[]): Set<string> {
+  const used = new Set<string>();
+  for (const regionId of installed) {
+    if (regionId === removing) continue;
+    for (const p of routePacksFor(packs, regionId)) used.add(p.id);
+  }
+  return used;
+}
+
 // --- Countries in regions (docs/COUNTRY_REGIONS_PLAN.md) ------------------------
 
 /**

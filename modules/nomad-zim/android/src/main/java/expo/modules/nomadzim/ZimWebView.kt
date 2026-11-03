@@ -11,6 +11,8 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.webkit.WebViewCompat
+import androidx.webkit.WebViewFeature
 import expo.modules.kotlin.AppContext
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.viewevent.EventDispatcher
@@ -87,6 +89,12 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
       textZoom = zoomPercent
     }
     view.webViewClient = Client()
+    // Archive pages stay offline: shouldInterceptRequest and the CSP cover every request, but not WebRTC's STUN/ICE
+    // traffic, which could reach the network (and leak the IP) from a hostile archive's script. Removed before any
+    // page script runs, in every frame (WebView 87+, the DOCUMENT_START_SCRIPT feature).
+    if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
+      WebViewCompat.addDocumentStartJavaScript(view, NO_WEBRTC_JS, setOf("*"))
+    }
     view.setFindListener { active, matches, done ->
       if (done) {
         pendingFind?.resolve(mapOf("found" to (matches > 0), "matches" to matches, "active" to if (matches > 0) active + 1 else 0))
@@ -411,6 +419,9 @@ class ZimWebView(context: Context, appContext: AppContext) : ExpoView(context, a
       "img[src^=\"data:image/svg+xml\"][src*=\"alt-text-clip\"]{display:none!important}" +
         ":is(figure,.thumb,.tsingle,.gallerybox):has(img[src*=\"alt-text-clip\"]):not(:has(img:not([src*=\"alt-text-clip\"]))){display:none!important}" +
         "td:has(> figure:only-child img[src*=\"alt-text-clip\"]):not(:has(img:not([src*=\"alt-text-clip\"]))){display:none!important}"
+
+    /** Removes WebRTC from every frame (see createWebView). */
+    private const val NO_WEBRTC_JS = "(function(){for(var k of ['RTCPeerConnection','webkitRTCPeerConnection','RTCDataChannel','RTCIceCandidate','RTCSessionDescription','RTCRtpSender','RTCRtpReceiver','RTCRtpTransceiver']){try{Object.defineProperty(window,k,{value:undefined,writable:false,configurable:false})}catch(e){}}})();"
 
     /** Marks pages whose authored background (our style off) is already dark. */
     private const val NATIVE_DARK_JS = """(function(){

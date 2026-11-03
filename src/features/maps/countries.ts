@@ -7,7 +7,7 @@ import * as Location from '@/lib/location';
 import { useEffect, useMemo, useState } from 'react';
 import { create } from 'zustand';
 
-import { getItem, removeItem, useContent, useItems, type InstalledItem } from '@/features/content/items';
+import { getItem, listItems, removeItem, useContent, useItems, type InstalledItem } from '@/features/content/items';
 import { recordGroup, summarize } from '@/features/downloads/groups';
 import { cancelDownload, dismissDownload, NotEnoughStorageError, resumeDownloads, useDownloads, type DownloadRecord } from '@/features/downloads/manager';
 import i18n from '@/i18n';
@@ -21,6 +21,7 @@ import {
   countryWidePacks,
   isNewer,
   packOutdated,
+  packsStillUsed,
   partAt,
   pendingBytes,
   routePacksFor,
@@ -529,9 +530,11 @@ function buildCountries(
     if (!id || !country(id)) continue;
     recordsBy.set(id, [...(recordsBy.get(id) ?? []), r]);
   }
-  // A pack goes with the country whose map uses it (Haiti uses the Dominican Republic's).
+  // A pack goes with its own country when that one is installed, else with the country whose map uses it (Haiti
+  // uses the Dominican Republic's).
   for (const p of packs) {
-    const owner = [...byCountry.values()].find((c) => routePacksFor([{ id: p.catalogId ?? '', regionId: p.meta.regionId ?? '' }], c.regionId).length);
+    const own = p.meta.regionId ? byCountry.get(p.meta.regionId) : undefined;
+    const owner = own ?? [...byCountry.values()].find((c) => routePacksFor([{ id: p.catalogId ?? '', regionId: p.meta.regionId ?? '' }], c.regionId).length);
     const c = owner ?? (p.meta.regionId ? country(p.meta.regionId) : null);
     if (!c) continue;
     c.packs.push(p);
@@ -617,10 +620,18 @@ export async function removeCountry(c: CountryState) {
   for (const id of new Set([...countryMapDownloadIds(c.regionId), ...records.map((r) => r.id)])) await cancelDownload(id);
   // Read again: an assembly that finished meanwhile registered its item after `c` was read.
   for (const m of c.maps) if (m.catalogId) mapIds.add(m.catalogId);
-  const items = [mapItemId(c.regionId), ...c.maps.map((m) => m.id), ...[...mapIds].map(mapItemId), ...c.packs.map((p) => p.id), ...[...packIds].map(routePackId)];
+  // A pack another installed country routes with stays (Haiti and the Dominican Republic share one).
+  const installed = listItems('map')
+    .map((m) => (m as MapItem).meta.regionId)
+    .filter((id): id is string => !!id);
+  const catalogPacks = useRoutingCatalog.getState().manifest?.packs ?? [];
+  const known = [...catalogPacks, ...c.packs.map((p) => ({ id: p.catalogId ?? '', regionId: p.meta.regionId ?? '' }))];
+  const keep = packsStillUsed(known, c.regionId, installed);
+  const packItems = [...c.packs.filter((p) => !keep.has(p.catalogId ?? '')).map((p) => p.id), ...[...packIds].filter((id) => !keep.has(id)).map(routePackId)];
+  const items = [mapItemId(c.regionId), ...c.maps.map((m) => m.id), ...[...mapIds].map(mapItemId), ...packItems];
   for (const id of new Set(items)) if (id && getItem(id)) await removeItem(id);
   mapIds.forEach(discardCountryMapFiles);
-  packIds.forEach(discardPackFiles);
+  packIds.forEach((id) => !keep.has(id) && discardPackFiles(id));
 }
 
 /** One region of a country in regions: cancels what is coming and deletes its map and pack (the last one takes the country). */

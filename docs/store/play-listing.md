@@ -89,7 +89,7 @@ emulator (Android tour, `docs/E2E.md`).
 | Government app | No |
 | Financial features | None |
 | Health apps | **"My app doesn't provide any health features"** (from 1.1.0 (26), the build without them). The first submission declared "Emergency and First Aid" and "Medical Reference and Education" and was rejected on 2026-10-29: those categories need an organization account. Play support (ticket of 2026-10-29) said what to remove; `src/lib/health.ts` turns it off on Android |
-| Actions / foreground services | None declared (the manifest has no foreground service, no exact alarms, no background location) |
+| Actions / foreground services | **To declare with the release that ships it (2.0.x):** Foreground service permissions › Location: turn-by-turn navigation the person starts, kept going with the screen off (`NavigationService`, type `location`, notification "Navegación en curso"); attach a short video of starting a trip and locking the screen. No exact alarms, no background location (`ACCESS_BACKGROUND_LOCATION` is not requested) |
 
 ## Content rating (2026-10-29, build without health features)
 

@@ -2,7 +2,8 @@
 // tagged as navigation guidance and takes transient, may-duck audio focus, so music lowers for a
 // prompt and comes back after it, the way Android Auto and car head units expect. Not expo-speech:
 // it sets neither. A phone without any engine (no Google services, nothing installed) stays
-// silent; guidance goes on. The chimes (a reroute, going over the speed limit) are soft notes made
+// silent; guidance goes on. Only voices installed on the device are used, never a network one (street names
+// would leave the phone, against the privacy policy): without one for the language, silence. The chimes (a reroute, going over the speed limit) are soft notes made
 // here (no sound file), played the same way.
 package expo.modules.nomadvoice
 
@@ -12,10 +13,12 @@ import android.media.AudioFocusRequest
 import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.speech.tts.Voice
 import expo.modules.kotlin.functions.Queues
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
@@ -41,6 +44,13 @@ class NomadVoiceModule : Module() {
   private val main = Handler(Looper.getMainLooper())
   private var chiming: AudioTrack? = null
   private val chimeSamples = HashMap<String, ShortArray>()
+  /** The offline voice picked per language tag (null: none installed). */
+  private val voices = HashMap<String, Voice?>()
+  /** Asks the engine to synthesise on the device only. */
+  private val offlineParams = Bundle().apply {
+    putString(TextToSpeech.Engine.KEY_FEATURE_EMBEDDED_SYNTHESIS, "true")
+    putString(TextToSpeech.Engine.KEY_FEATURE_NETWORK_SYNTHESIS, "false")
+  }
 
   private fun samples(kind: String): ShortArray = chimeSamples.getOrPut(kind) {
     val out = ArrayList<Short>()
@@ -132,12 +142,24 @@ class NomadVoiceModule : Module() {
 
   private fun say(text: String, language: String) {
     val engine = tts ?: return
-    val locale = Locale.forLanguageTag(language)
-    // A Spanish prompt read by an English voice helps no one: without a voice for it, silence.
-    if (engine.isLanguageAvailable(locale) < TextToSpeech.LANG_AVAILABLE) return
-    if (engine.voice?.locale != locale) engine.language = locale
+    // A Spanish prompt read by an English voice helps no one, and a network voice would send the street names
+    // away: without an installed voice for the language, silence.
+    val voice = voices.getOrPut(language) { offlineVoice(engine, Locale.forLanguageTag(language)) } ?: return
+    if (engine.voice != voice) engine.voice = voice
     acquire()
-    engine.speak(text, TextToSpeech.QUEUE_ADD, null, UTTERANCE)
+    engine.speak(text, TextToSpeech.QUEUE_ADD, offlineParams, UTTERANCE)
+  }
+
+  /** The best installed, offline voice for the locale: same country first, then same language. */
+  private fun offlineVoice(engine: TextToSpeech, locale: Locale): Voice? {
+    val usable = (engine.voices ?: return null).filter { v ->
+      !v.isNetworkConnectionRequired &&
+        TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in v.features &&
+        v.locale.language == locale.language
+    }
+    return usable
+      .sortedWith(compareByDescending<Voice> { locale.country.isNotEmpty() && it.locale.country == locale.country }.thenByDescending { it.quality })
+      .firstOrNull()
   }
 
   private fun chime(kind: String) {

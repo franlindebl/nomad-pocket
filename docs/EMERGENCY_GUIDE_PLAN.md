@@ -92,8 +92,8 @@ inventories, one table row per card with the URLs that were opened, dates, licen
    ERC's permission, and so are Red Cross and AHA; credit is not a licence. Asking for permission would take too long,
    so **for the five gap cards only, our own wording of the current guidance** (ERC 2025, WHO, CDC): procedures are
    not protected, their wording is. Each such card says "Redactado por Nomad Pocket según <guía, año>" (never passed
-   off as an official text), every sentence is checked against the guideline it follows, and a review by someone with
-   first-aid training is welcome later (not blocking).
+   off as an official text), every sentence is checked against the guideline it follows, and the cards had a first-aid review
+   (2026-11-03).
 5. Lejía: not answered yet (default: the CDC/EPA table as it is, with the note on Spanish concentrations).
 
 ## Pilot (done 2026-10-31)
@@ -221,7 +221,7 @@ out); EPA Spanish well steps "cierra los grifos" for "turn on"; Ready.gov winter
    "4,000 miligramos" on `pain-relievers`, the English acronyms on `suspicious-object`.
 6. **No card yet** for air raids (no reusable official text: the EU's 72-hour guidance isn't published), and none for
    wild plants (the CDC source only covers mushrooms).
-7. A review by someone with first-aid training is still welcome, `childbirth` first.
+7. ~~First-aid review~~ done 2026-11-03.
 
 ## Completing the guide from real questions (2026-11-01)
 
@@ -252,9 +252,9 @@ the held-out questions; then decide whether any card (not only vital ones) may a
 grading weren't rerun on the new cards (tokens).
 
 For the owner: 88 cards are our own wording (labelled "Redactado por Nomad Pocket según…"), far more than the five
-gaps first agreed; agents rejected copyrighted sources (Cruz Roja, AEP, SEGO, NHS, companies) and wrote from them.
-A review by someone with first-aid training matters more now, vital own cards first (`grep -l "kind: own" …` and
-`vital: yes`). Known small issues: some cards have more than 25 keywords; 12 copied sentences not found by the
+gaps first agreed; agents left out sources whose texts can't be reused (Cruz Roja, AEP, SEGO, NHS, companies) and
+wrote our own wording following the public guidelines. First-aid review of the own-wording cards: done 2026-11-03.
+Known small issues: some cards have more than 25 keywords; 12 copied sentences not found by the
 checker (PDF artefacts and a CDC page whose spacing differs).
 
 ## Next steps (to resume)
@@ -272,8 +272,7 @@ checker (PDF artefacts and a CDC page whose spacing differs).
      (`mkgrade.py`, two graders, `scores.py`) against A4 and run H.
    - On the simulator (Release build): the guide list with section 14, a few new cards (gas leak, butane, suicidal
      thoughts, air raid), vital answers in the chat for them, and Android with health cards hidden.
-3. **Review by someone with first-aid training**: the 88 own-wording cards, vital ones first
-   (`grep -l "kind: own" src/data/guide/*.es.md | xargs grep -l "vital: yes"`).
+3. ~~First-aid review of the 88 own-wording cards~~ done 2026-11-03.
 4. Small: trim keywords over 25 on 18 cards; the 12 copied sentences the checker doesn't find (PDF artefacts, one CDC
    page with different spacing); English keywords for the 444 Spanish ones added from the questions.
 

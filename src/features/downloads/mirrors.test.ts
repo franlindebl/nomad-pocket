@@ -79,7 +79,12 @@ test('contentRangeTotal', () => {
  * A fake network: each host answers ranges at `bps` bytes per second of fake time, in 64 KiB
  * reads, after `latency` ms. `ranges: false` answers 200 (a mirror ignoring Range).
  */
-function fakeNet(hosts: Record<string, { bps: number; latency?: number; ranges?: boolean; fail?: boolean }>, size: number, metalink?: string) {
+function fakeNet(
+  hosts: Record<string, { bps: number; latency?: number; ranges?: boolean; fail?: boolean }>,
+  size: number,
+  metalink?: string,
+  sha256?: string,
+) {
   let t = 0;
   const now = () => t;
   const asked: string[] = [];
@@ -87,6 +92,8 @@ function fakeNet(hosts: Record<string, { bps: number; latency?: number; ranges?:
     asked.push(url);
     if (url.endsWith('.meta4'))
       return { status: metalink ? 200 : 404, ok: !!metalink, headers: { get: () => null }, body: null, text: async () => metalink ?? '' };
+    if (url.endsWith('.sha256'))
+      return { status: sha256 ? 200 : 404, ok: !!sha256, headers: { get: () => null }, body: null, text: async () => `${sha256}  w.zim\n` };
     const host = /^https:\/\/([^/]+)/.exec(url)![1];
     const h = hosts[host];
     if (!h || h.fail) throw new Error('Network request failed');
@@ -221,4 +228,18 @@ test('planSources falls back to the original URL when the metalink or every mirr
     [url],
   );
   assert.equal(plan.integrity.size, 1000);
+});
+
+test('planSources checks a file without metalink against Kiwix\'s .sha256', async () => {
+  const url = 'https://download.kiwix.org/zim/w.zim';
+  const hash = 'A86C31B93E9800AAE2CD812EF18CBF9C087A7537784C62FBC259DB7F9F9D18C0';
+  const net = fakeNet({ 'download.kiwix.org': { bps: 1e6 } }, 1000, undefined, hash);
+  const plan = await planSources(url, { fetch: net.fetch });
+  assert.equal(plan.integrity.sha256, hash.toLowerCase());
+  assert.deepEqual(
+    plan.sources.map((s) => s.url),
+    [url],
+  );
+  // A 404 metalink is final: no second try.
+  assert.equal(net.asked.filter((u) => u.endsWith('.meta4')).length, 1);
 });

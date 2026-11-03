@@ -497,6 +497,13 @@
   "url": "http://source.android.com"
  },
  {
+  "id": "androidx.webkit:webkit",
+  "name": "androidx.webkit:webkit",
+  "version": "1.14.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
   "id": "androidx.window:window",
   "name": "androidx.window:window",
   "version": "1.5.1",

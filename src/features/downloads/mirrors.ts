@@ -25,6 +25,9 @@ const PROBE_BYTES = 4 * 1024 * 1024;
 const PROBE_WINDOW_MS = 2000;
 const PROBE_TIMEOUT_MS = 5000;
 const META_TIMEOUT_MS = 4000;
+/** A second, patient try: without the metalink the file would come with no size or hash to check. */
+const META_RETRY_MS = 12000;
+const SHA256_TIMEOUT_MS = 8000;
 
 /** The parts of a fetch Response this needs: expo/fetch in the app (it streams), Node's in tests. */
 export type ProbeResponse = {
@@ -60,6 +63,31 @@ async function fetchWithTimeout(fetch: ProbeFetch, url: string, ms: number): Pro
     return await fetch(url, { signal: controller.signal });
   } finally {
     clearTimeout(timer);
+  }
+}
+
+/** The metalink, tried twice; null when it can't be had. */
+async function fetchMetalink(fetch: ProbeFetch, url: string): Promise<string | null> {
+  for (const ms of [META_TIMEOUT_MS, META_RETRY_MS]) {
+    try {
+      const res = await fetchWithTimeout(fetch, `${url}.meta4`, ms);
+      if (res.ok) return await res.text();
+      if (res.status === 404) return null;
+    } catch {
+      // timed out or failed: once more with more time
+    }
+  }
+  return null;
+}
+
+/** Kiwix's own `<file>.sha256` ("<hex>  <name>"), the hash to check against when the metalink is missing. */
+export async function fetchSha256(fetch: ProbeFetch, url: string): Promise<string | undefined> {
+  try {
+    const res = await fetchWithTimeout(fetch, `${url}.sha256`, SHA256_TIMEOUT_MS);
+    if (!res.ok) return undefined;
+    return /^\s*([0-9a-f]{64})\b/i.exec(await res.text())?.[1]?.toLowerCase();
+  } catch {
+    return undefined;
   }
 }
 
@@ -206,9 +234,12 @@ export async function planSources(
   let pieces: Pieces | undefined;
   try {
     const filename = url.split('/').pop() ?? '';
-    const res = await fetchWithTimeout(o.fetch, `${url}.meta4`, META_TIMEOUT_MS);
-    if (!res.ok) return single();
-    const xml = await res.text();
+    const xml = await fetchMetalink(o.fetch, url);
+    // No metalink: one transfer, still checked against Kiwix's published sha-256 when there is one.
+    if (xml === null) {
+      const sha256 = await fetchSha256(o.fetch, url);
+      return single(sha256 ? { sha256 } : {});
+    }
     integrity = parseMetalinkIntegrity(xml, filename);
     pieces = parseMetalinkPieces(xml, filename, integrity.size);
     const avoid = o.avoid ?? [];

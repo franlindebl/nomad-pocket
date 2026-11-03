@@ -168,6 +168,7 @@ final class ZimWebView: ExpoView, WKNavigationDelegate, WKUIDelegate {
     let source = ZimWebScripts.bootstrap(dark: darkMode, paper: paperMode, zoom: textZoom)
     controller.addUserScript(WKUserScript(source: source, injectionTime: .atDocumentStart, forMainFrameOnly: true))
     controller.addUserScript(WKUserScript(source: "window.__nomadApply && window.__nomadApply();", injectionTime: .atDocumentEnd, forMainFrameOnly: true))
+    controller.addUserScript(WKUserScript(source: ZimWebScripts.noWebRTC, injectionTime: .atDocumentStart, forMainFrameOnly: false))
   }
 
   // MARK: - Find in page
@@ -395,6 +396,11 @@ enum ZimContentRules {
 }
 
 enum ZimWebScripts {
+  /// Archive pages stay offline: the scheme handler, the CSP and the content rules cover every request, but not
+  /// WebRTC's STUN/ICE traffic, which could reach the network (and leak the IP) from a hostile archive's script.
+  /// Removed before any page script runs, in every frame.
+  static let noWebRTC = "(function(){for(var k of ['RTCPeerConnection','webkitRTCPeerConnection','RTCDataChannel','RTCIceCandidate','RTCSessionDescription','RTCRtpSender','RTCRtpReceiver','RTCRtpTransceiver']){try{Object.defineProperty(window,k,{value:undefined,writable:false,configurable:false})}catch(e){}}})();"
+
   /// CSS for dark mode: invert the page, then re-invert media so photos look right.
   /// Math formulas (black glyph images) and SVG images (logos, icons, drawings: freeCodeCamp's white
   /// header logo stayed white on its inverted, now light, bar) stay inverted so they remain readable.

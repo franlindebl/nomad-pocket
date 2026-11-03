@@ -15,6 +15,7 @@ import {
   pendingBytes,
   routePacksFor,
   type PlannedArchive,
+  packsStillUsed,
 } from './country-core.ts';
 
 const file = (name: string, size = 10) => ({ name, size, sha256: 'x' });
@@ -254,4 +255,16 @@ test('partAt finds the part of a country across the antimeridian by map bbox', (
   assert.ok(partAt([part], { lat: -18.14, lon: 178.44 }));
   assert.ok(partAt([part], { lat: -16.8, lon: -179.9 }));
   assert.equal(partAt([part], { lat: -18.14, lon: 0 }), null);
+});
+
+test('packsStillUsed keeps the pack another installed country routes with', () => {
+  const packs = [
+    { id: 'do', regionId: 'do' },
+    { id: 'es', regionId: 'es' },
+  ];
+  // Haiti routes with the Dominican Republic's pack: deleting either keeps it while the other is installed.
+  assert.deepEqual([...packsStillUsed(packs, 'ht', ['ht', 'do'])], ['do']);
+  assert.deepEqual([...packsStillUsed(packs, 'do', ['do', 'ht'])], ['do']);
+  assert.deepEqual([...packsStillUsed(packs, 'do', ['do', 'es'])], ['es']);
+  assert.equal(packsStillUsed(packs, 'ht', ['ht']).size, 0);
 });

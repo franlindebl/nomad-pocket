@@ -33,6 +33,8 @@ export async function downloadModel(model: GgufModel) {
     url: model.url,
     filename: model.filename,
     expectedBytes: model.sizeBytes,
+    // A truncated or altered file never reaches llama.cpp's GGUF parser: the manager deletes it.
+    integrity: { size: model.sizeBytes, sha256: model.sha256 },
     meta: { modelId: model.id },
   });
 }

@@ -305,7 +305,9 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
   counted for 2 s from the first byte, through `expo/fetch`, which streams) and ranked; the
   quickest to answer is often a slow one. Any other URL (GitHub Releases, Hugging Face) is one
   source, asked a one-byte range to learn whether it takes ranges and its exact size. The
-  metalink's `<size>`, sha-256 and 4 MiB sha-1 `<pieces>` are kept. The finished file is
+  metalink's `<size>`, sha-256 and 4 MiB sha-1 `<pieces>` are kept. The metalink gets a second, 12 s try (a 404 is
+  final); without it the file comes in one transfer, still checked against Kiwix's own `<file>.sha256` when that
+  answers (`fetchSha256`). The finished file is
   checked against size + sha-256 (`modules/nomad-files` `sha256`, native, 4 MiB blocks; not `File.digest`: see below); a bad copy is deleted,
   the row says it is damaged and the retry avoids that mirror (single transfers only: a
   segmented file has many). Manifest downloads pass `EnqueueInput.integrity` (size + sha-256)
@@ -526,7 +528,10 @@ Home show progress while a piece downloads. Nothing else is asked.
   `X-DNS-Prefetch-Control: off`). Android refuses top-level `data:` navigations. There is no
   UUID registry: each view serves only its own item's archive, and only when the URL host is
   that archive's UUID. `getContent` (native) returns null for non-text MIME types and entries
-  over 8 MB. `isInspectable` only in DEBUG.
+  over 8 MB. `isInspectable` only in DEBUG. WebRTC (STUN/ICE, which neither the CSP nor the rule list covers) is
+  removed before any page script runs, in every frame: an `atDocumentStart` user script on iOS,
+  `WebViewCompat.addDocumentStartJavaScript` (androidx.webkit) on Android. `plugins/with-android-webview-privacy.js`
+  opts the WebView out of usage metrics and Safe Browsing (local URLs only).
 - **External links**: only tapped main-frame links count (Android `hasGesture &&
   isForMainFrame`; iOS `linkActivated` + top frame), schemes `http/https/mailto/tel/geo`. Native
   emits `onExternalLink {url, label}` and never opens anything; the reader shows a localised
@@ -1261,7 +1266,8 @@ started on the phone shows in the car and the other way round.
   on Android the bridge isn't linked, the status is `unsupported`, `HAS_SYSTEM_MODEL`
   (`system.ts`) hides the system model in the models screen and onboarding, and a stale
   `aiModelId === 'system'` is reset at startup. The Android assistant uses GGUF models only.
-- `models.ts`: curated GGUF list, URLs pinned to a Hugging Face commit with exact sizes:
+- `models.ts`: curated GGUF list, URLs pinned to a Hugging Face commit with exact sizes and sha-256 (the LFS oid,
+  `x-linked-etag`), passed as the download's integrity so a bad copy is deleted before llama.cpp parses it:
 
   | id | Size | Min RAM | Context |
   |---|---|---|---|

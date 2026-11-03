@@ -75,7 +75,7 @@ AI. **Assistant quality** (`docs/ASSISTANT_QUALITY_PLAN.md`, measured 2026-10-31
    harmful 5 of 50); ~~(6) the emergency guide~~ done 2026-10-31/11-01: 202 cards, vital ones answer word for word
    (`docs/EMERGENCY_GUIDE_PLAN.md`). **Next (to resume, details in that doc's last section)**: semantic search over
    the cards (held-out accuracy 75 % with keywords); Qwen bench + blind grading with the 202 cards and a simulator
-   check of the new cards; first-aid review of the 88 own-wording cards; (3) bench before
+   check of the new cards; (3) bench before
    assistant changes (`scripts/assistant-bench`); (4) bilingual search (`query_en`); (5) semantic rerank
    (EmbeddingGemma, measure on a phone first); (6) a vetted bilingual emergency guide: every variant gave 3–8
    harmful answers out of 50 (CPR, choking, bleach dose, CO); (7) Spanish Ready.gov/MedlinePlus in the kit.
@@ -333,6 +333,24 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-03 — 2.0.1 hardening: emergency numbers, privacy policy, WebView, downloads, shared packs
+
+- Emergency numbers: Niue 999 (was its calling code, 683), Honduras 911 (was 195), Saint-Barthélemy 112 (was 17);
+  the generator ignores "(+NNN)" calling codes. Only those three rows changed.
+- Privacy policy (es/en, 2026-11-03): covers Android and the website; plan/kit also in system backups; Protomaps'
+  `build-metadata.protomaps.dev`; spoken directions use an installed voice, offline; new sections "Correos que nos
+  envías", "Esta web" (GitHub Pages, no cookies or analytics, the language-notice flag in localStorage) and "Tus
+  derechos" (access, correction, deletion; AEPD).
+- Android voice prompts use an installed offline voice only (never a network one); none for the language: silence.
+- Archive reader: WebRTC removed in every frame (iOS user script, Android androidx.webkit document-start script);
+  Android WebView opted out of usage metrics and Safe Browsing (config plugin). androidx.webkit 1.14.0 in the credits.
+- Downloads: GGUF models checked against size + sha-256 (pinned LFS hashes); a Kiwix file whose `.meta4` doesn't
+  come gets a second try, then Kiwix's `.sha256`.
+- Countries: deleting Haiti or the Dominican Republic keeps the routing pack the other still uses
+  (`packsStillUsed`, tested); a shared pack is listed under its own country when both are installed.
+- Play listing doc: the navigation foreground service is to be declared with the release that ships it.
+- Emergency guide: the own-wording cards had their first-aid review (2026-11-03).
+
 ### 2026-11-03 — Small launch fixes: affiliation notice, privacy URL, Android credits, repo settings
 
 - README (es/en) and the website say Nomad Pocket is independent, not affiliated with or endorsed by Crosstalk
@@ -342,7 +360,8 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 - Credits: `androidTexts` in `scripts/licenses/native.json` gives artifacts whose POM says only "BSD License" their own
   text (device-year-class 2.1.0, Bolts 1.4.0: LICENSE + PATENTS); every Android artifact now has a text.
 - GitHub: Dependabot alerts on; ruleset "Protect main" (no deletion, no force-push; repository admins bypass).
-  Pending: verify `nomad-pocket.app` for the account (TXT record at GoDaddy).
+  `nomad-pocket.app` verified for the account (TXT `_github-pages-challenge-franlindebl` at GoDaddy). GitHub Support ticket
+  #4946539 asks to purge the unreachable commits (the 2026-10-26 one, #4910800, never got an answer).
 
 ### 2026-11-03 — Repo: tidy before promoting it
 

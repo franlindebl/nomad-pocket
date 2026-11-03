@@ -1,6 +1,7 @@
 // Curated downloadable GGUF models for the local assistant (llama.rn).
 // URLs are pinned to a Hugging Face commit so the size below stays exact
-// (HEAD-checked 2026-10-24: x-linked-size == content-length == sizeBytes).
+// (HEAD-checked 2026-10-24: x-linked-size == content-length == sizeBytes), and sha256 is the file's LFS
+// hash (x-linked-etag), so the download manager checks both before the model is loaded.
 // No `@/` imports: unit tests load this file directly.
 
 export type GgufModel = {
@@ -13,6 +14,8 @@ export type GgufModel = {
   url: string;
   filename: string;
   sizeBytes: number;
+  /** SHA-256 of the file (Hugging Face's LFS oid at the pinned commit). */
+  sha256: string;
   /** Device RAM below which the model is not offered as a fit. */
   minRamGB: number;
   /** Context window used at load time (tokens). */
@@ -43,6 +46,7 @@ export const GGUF_MODELS: GgufModel[] = [
     url: 'https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF/resolve/6ab461498e2023f6e3c1baea90a8f0fe38ab64d0/Qwen3.5-0.8B-Q4_K_M.gguf',
     filename: 'Qwen3.5-0.8B-Q4_K_M.gguf',
     sizeBytes: 532_517_120,
+    sha256: 'bd258782e35f7f458f8aced1adc053e6e92e89bc735ba3be89d38a06121dc517',
     minRamGB: 3,
     contextTokens: 4096,
     tools: 'thinking',
@@ -60,6 +64,7 @@ export const GGUF_MODELS: GgufModel[] = [
     url: 'https://huggingface.co/unsloth/Qwen3.5-2B-GGUF/resolve/f6d5376be1edb4d416d56da11e5397a961aca8ae/Qwen3.5-2B-Q4_K_M.gguf',
     filename: 'Qwen3.5-2B-Q4_K_M.gguf',
     sizeBytes: 1_280_835_840,
+    sha256: 'aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223',
     minRamGB: 4,
     contextTokens: 4096,
     tools: 'thinking',
@@ -77,6 +82,7 @@ export const GGUF_MODELS: GgufModel[] = [
     url: 'https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/e87f176479d0855a907a41277aca2f8ee7a09523/Qwen3.5-4B-Q4_K_M.gguf',
     filename: 'Qwen3.5-4B-Q4_K_M.gguf',
     sizeBytes: 2_740_937_888,
+    sha256: '00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4',
     minRamGB: 7,
     contextTokens: 6144,
     tools: 'thinking',
@@ -94,6 +100,7 @@ export const GGUF_MODELS: GgufModel[] = [
     url: 'https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/0314792d7f1f7e229411f620751375812bb9faf2/gemma-4-E2B-it-Q4_K_M.gguf',
     filename: 'gemma-4-E2B-it-Q4_K_M.gguf',
     sizeBytes: 3_106_738_272,
+    sha256: '740185b21d22ceb83a11c3aa62ad5842ef32c70f6096d756bbee85a1e4ec34b8',
     minRamGB: 8,
     contextTokens: 6144,
     tools: 'direct',

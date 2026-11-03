@@ -50,6 +50,9 @@ OVERRIDES = {
     'bo': ('118', 'ambulance', 'checked: 110 police, 118 ambulance, 119 fire'),
     'lk': ('1990', 'ambulance', 'checked: 118/119 police, 1990 ambulance (Suwa Seriya), 110/111 fire'),
     'ae': ('998', 'ambulance', 'checked: 999 police, 998 ambulance, 997 fire'),
+    'hn': ('911', 'all', 'Sistema Nacional de Emergencias 911 reaches every service; 195 is the ambulance'),
+    'bl': ('112', 'all', 'French territory: 112 reaches every service (15 SAMU, 17 police, 18 fire)'),
+    'nu': ('999', 'all', '999 reaches police, fire and ambulance; the page lists only local (+683) lines'),
 }
 # Countries whose row on the page reads doubtful: kept as derived, flagged for review.
 DOUBTFUL = {}
@@ -111,6 +114,8 @@ def numbers(cell):
     """The numbers in a cell, in order ("10 111" is one number, "112 or 999" two)."""
     if re.fullmatch(r'[\d ]+', cell.strip() or 'x'):
         cell = cell.replace(' ', '')
+    # "(+683) 4333" is a calling code and a local line, not a short emergency number.
+    cell = re.sub(r'\(\+\d+\)', ' ', cell)
     return re.findall(r'\b\d{2,5}\b', cell)
 
 

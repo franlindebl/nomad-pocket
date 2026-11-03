@@ -1,6 +1,6 @@
 {
  "source": "Wikipedia, \"List of emergency telephone numbers\", with corrections (scripts/maps/make-emergency-numbers.py).",
- "checked": "2026-10-29",
+ "checked": "2026-11-03",
  "numbers": {
   "af": {
    "n": "112",
@@ -298,8 +298,7 @@
    "for": "ambulance"
   },
   "hn": {
-   "n": "195",
-   "for": "ambulance"
+   "n": "911"
   },
   "hk": {
    "n": "999"
@@ -519,7 +518,7 @@
    "n": "112"
   },
   "nu": {
-   "n": "683"
+   "n": "999"
   },
   "no": {
    "n": "112"
@@ -622,8 +621,7 @@
    "n": "911"
   },
   "bl": {
-   "n": "17",
-   "for": "ambulance"
+   "n": "112"
   },
   "kn": {
    "n": "911"

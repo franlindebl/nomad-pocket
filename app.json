@@ -191,6 +191,7 @@
       "./plugins/with-android-backup-rules",
       "./plugins/with-android-no-firebase",
       "./plugins/with-android-no-install-referrer",
+      "./plugins/with-android-webview-privacy",
       [
         "./plugins/with-carplay",
         {

@@ -21,6 +21,8 @@ dependencies {
   implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
   // FileProvider, to hand a PDF to the system viewer.
   implementation 'androidx.core:core:1.13.1'
+  // WebViewCompat.addDocumentStartJavaScript: WebRTC removed from archive pages before their scripts run.
+  implementation 'androidx.webkit:webkit:1.14.0'
   // PDF text for the library's document index (Apache-2.0). Bouncy Castle is only needed for
   // certificate-encrypted PDFs; password-less RC4/AES ones decrypt with javax.crypto.
   implementation('com.tom-roush:pdfbox-android:2.0.27.0') {
