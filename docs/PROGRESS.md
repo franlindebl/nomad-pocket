@@ -333,6 +333,11 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-02 — Courses: every card full width
+In "Explorar cursos" the cards sat in a wrapping row and each took the width of its text (owner's
+screenshot on build 36). `CourseCard`'s wide style is now `width: '100%'` instead of `alignSelf: 'stretch'`,
+which only widened it inside a column.
+
 ### 2026-11-02 — iOS build 36 to TestFlight
 
 - 1.1.0 (36), TestFlight only: build 35 plus the Library rethought (search first, collections by topic,

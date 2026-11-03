@@ -61,7 +61,9 @@ export function CourseCard({ resource, progress, lessons, wide }: { resource: Ca
 
 const styles = StyleSheet.create({
   card: { width: 240 },
-  wide: { alignSelf: 'stretch' },
+  // Full width wherever it sits: `alignSelf: 'stretch'` only widened it in a column, and in the wrapping
+  // row of "Explorar cursos" each card took the width of its text.
+  wide: { width: '100%' },
   band: { height: 76, padding: space.lg, justifyContent: 'space-between', flexDirection: 'row', alignItems: 'flex-start', borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg },
   body: { padding: space.lg, gap: space.xs },
 });
