@@ -1,0 +1,14 @@
+{
+  "name": "Nomad Pocket",
+  "short_name": "Nomad Pocket",
+  "description": "Offline maps, emergency help, guides, Wikipedia and AI on your phone.",
+  "start_url": "./",
+  "display": "browser",
+  "background_color": "#0C0C0C",
+  "theme_color": "#0C0C0C",
+  "icons": [
+    { "src": "img/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "related_applications": [{ "platform": "itunes", "url": "https://apps.apple.com/app/id6826502392" }]
+}

@@ -12,7 +12,7 @@ locally with `xcodebuild` (no EAS). Android: signed AABs built locally with Grad
 | Apple team | `F3VY6C7GKX` |
 | App Store Connect app | 6826502392 (SKU `nomadpocket`, primary locale es-ES) |
 | Categories | Books, Education |
-| Privacy / support site | https://franlindebl.github.io/nomad-pocket/ (`site/`) |
+| Website (landing, privacy, support) | https://nomad-pocket.app once the domain is wired (until then https://franlindebl.github.io/nomad-pocket/, which then redirects) (`site/`) |
 
 The App Store Connect API key used for uploads lives outside the repo
 (`~/.appstoreconnect/private_keys/AuthKey_<KEY_ID>.p8`); its key id and issuer id are kept
@@ -190,14 +190,42 @@ phone from the script. How they were made: a store Release build for the simulat
 taps and pasted text (`simctl pbcopy` + Cmd-V: `axe type` can't type accents). Android captures are still the
 1.1.0 set (`python3 scripts/store-screenshots.py iphone ipad` leaves them alone).
 
-## Privacy / support site
+## Website (landing, privacy, support)
 
-`site/` (`index.html`, `privacy.html`, `style.css`, icons) is deployed to GitHub Pages
-by `.github/workflows/pages.yml` on every push to `main` that touches `site/**`. Keep the
-privacy policy in line with what the app does (no accounts, no analytics, no data leaves
-the device except content download requests and the catalog checks). Update its "Last updated" date
-whenever the policy changes, in both languages, and re-check the host list against
-`docs/ARCHITECTURE.md` (External services).
+`site/` is a static site deployed to GitHub Pages by `.github/workflows/pages.yml` on every push to `main`
+that touches `site/**`. It holds the landing page (`index.html` in Spanish at the root, `en/index.html`),
+`privacy.html` (both languages, also the support/privacy URL of both stores), `404.html`, `sitemap.xml`,
+`robots.txt` and `site.webmanifest`. Same "Precisión" look as the app: `style.css` (tokens, self-hosted font
+subsets in `site/fonts`, the document pages) and `landing.css`. No analytics and no third-party requests.
+
+- **The landing page is generated:** edit the copy (es and en side by side) in `scripts/site/build.mjs`, then
+  `node scripts/site/build.mjs` (`--check` fails if `site/` is stale). Don't hand-edit `site/index.html`,
+  `site/en/index.html` or `site/sitemap.xml`.
+- **Images:** `python3 scripts/site/images.py [--extra DIR]` turns the raw store captures
+  (`docs/store/screenshots/<lang>/iphone/NN-name.png`, matched by name: home, navigation|route, emergency,
+  firstaid|guide, assistant, library, kit) into `site/img/screens/<lang>/*.webp` and draws the social cards
+  `site/img/og-<lang>.jpg`. A screen missing in one language falls back to the other; missing in both, the page
+  shows the feature's icon instead of a phone. Rerun `build.mjs` after it.
+- **Google Play:** when the listing is public, set `GOOGLE_PLAY` in `build.mjs` to the store URL and rebuild:
+  the "coming soon" chip becomes Google's badge (`site/img/badge-google-play-<lang>.png`). Also drop
+  "Próximamente / coming soon" from the Android FAQ answers.
+- **Store badges** are Apple's and Google's official artwork, unmodified (Apple: marketing toolbox, black,
+  es-es / en-us). Keep the trademark lines in the footer.
+- **Domain `nomad-pocket.app`** (bought at GoDaddy; `.app` is HTTPS-only, GitHub Pages issues the certificate).
+  Order matters, or the github.io URL the apps link to breaks: (1) at GoDaddy, DNS: four `A` records for `@` to
+  185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153 (optionally `AAAA` 2606:50c0:8000::153,
+  …8001::153, …8002::153, …8003::153) and `CNAME` `www` → `franlindebl.github.io`; remove GoDaddy's parking
+  records for `@`; (2) wait until `dig nomad-pocket.app +short` answers those IPs; (3) set the custom domain
+  `nomad-pocket.app` under the repo's Settings › Pages (the site deploys from Actions, so a `CNAME` file in
+  `site/` would be ignored; `gh api -X PUT repos/franlindebl/nomad-pocket/pages -f cname=nomad-pocket.app`); (4) tick "Enforce
+  HTTPS" once the certificate is issued. GitHub then redirects `franlindebl.github.io/nomad-pocket/*` to the
+  domain, so the URLs already in the apps and store listings keep working. Optionally verify the domain for the
+  account (Settings › Pages › Verified domains) so nobody else can claim it.
+- Keep the privacy policy in line with what the app does (no accounts, no analytics, no data leaves the device
+  except content download requests and the catalog checks). Update its "Last updated" date whenever the policy
+  changes, in both languages, and re-check the host list against `docs/ARCHITECTURE.md` (External services).
+  The landing page's claims (0 accounts, ads, trackers, servers; 200+ cards, 100+ archives, 14 courses) must stay
+  true too.
 
 ## Android (Google Play)
 

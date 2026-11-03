@@ -2,71 +2,342 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nomad Pocket · Conocimiento sin conexión</title>
-  <meta name="description" content="Wikipedia, guías médicas y de supervivencia, mapas, cursos e IA local, sin conexión. Offline Wikipedia, survival and medical guides, maps, courses and on-device AI.">
-  <link rel="icon" href="favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Nomad Pocket: la app de emergencia que funciona sin internet</title>
+  <meta name="description" content="Mapas y rutas sin conexión, hospitales cercanos, guía de emergencia, Wikipedia e IA en tu móvil. Para apagones, caídas de internet y ciberataques. Gratis.">
+  <link rel="canonical" href="https://nomad-pocket.app/">
+  <link rel="alternate" hreflang="es" href="https://nomad-pocket.app/">
+  <link rel="alternate" hreflang="en" href="https://nomad-pocket.app/en/">
+  <link rel="alternate" hreflang="x-default" href="https://nomad-pocket.app/">
+  <meta name="theme-color" content="#0C0C0C">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-itunes-app" content="app-id=6826502392">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Nomad Pocket">
+  <meta property="og:title" content="Nomad Pocket: la app de emergencia que funciona sin internet">
+  <meta property="og:description" content="Mapas y rutas sin conexión, hospitales cercanos, guía de emergencia, Wikipedia e IA en tu móvil. Para apagones, caídas de internet y ciberataques. Gratis.">
+  <meta property="og:url" content="https://nomad-pocket.app/">
+  <meta property="og:image" content="https://nomad-pocket.app/img/og-es.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Nomad Pocket: cuando se cae internet, tu móvil sigue sabiendo.">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="favicon.png" sizes="48x48">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preload" href="fonts/ChakraPetch-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="landing.css">
+  <script>document.documentElement.classList.add('js')</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"MobileApplication","@id":"https://nomad-pocket.app/#app","name":"Nomad Pocket","alternateName":"Nomad Pocket: Kit Offline","description":"Mapas y rutas sin conexión, hospitales cercanos, guía de emergencia, Wikipedia e IA en tu móvil. Para apagones, caídas de internet y ciberataques. Gratis.","url":"https://nomad-pocket.app/","image":"https://nomad-pocket.app/img/icon-512.png","screenshot":["https://nomad-pocket.app/img/screens/es/home.webp","https://nomad-pocket.app/img/screens/es/navigation.webp","https://nomad-pocket.app/img/screens/es/emergency.webp","https://nomad-pocket.app/img/screens/es/firstaid.webp","https://nomad-pocket.app/img/screens/es/assistant.webp","https://nomad-pocket.app/img/screens/es/library.webp","https://nomad-pocket.app/img/screens/es/plan.webp","https://nomad-pocket.app/img/screens/es/kit.webp"],"operatingSystem":"iOS 16.4, iPadOS 16.4","applicationCategory":"UtilitiesApplication","inLanguage":["es","en"],"isAccessibleForFree":true,"license":"https://www.gnu.org/licenses/gpl-3.0.html","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"installUrl":"https://apps.apple.com/app/nomad-pocket-kit-offline/id6826502392","downloadUrl":"https://apps.apple.com/app/nomad-pocket-kit-offline/id6826502392","author":{"@type":"Person","name":"Fran Linde Blázquez"},"sameAs":["https://apps.apple.com/app/nomad-pocket-kit-offline/id6826502392","https://github.com/franlindebl/nomad-pocket"]},{"@type":"WebSite","@id":"https://nomad-pocket.app/#site","name":"Nomad Pocket","url":"https://nomad-pocket.app/","inLanguage":"es"},{"@type":"FAQPage","inLanguage":"es","mainEntity":[{"@type":"Question","name":"¿De verdad funciona sin internet?","acceptedAnswer":{"@type":"Answer","text":"Sí. Solo necesitas conexión para descargar el contenido (mejor con wifi) y para buscar actualizaciones. Después, mapas, rutas, búsqueda de calles, puntos de emergencia, guía, biblioteca y asistente funcionan en modo avión."}},{"@type":"Question","name":"¿El GPS funciona sin datos?","acceptedAnswer":{"@type":"Answer","text":"Sí. El GPS recibe la señal de los satélites, no de internet, así que el mapa te sitúa aunque no haya cobertura. La primera posición puede tardar algo más que con datos."}},{"@type":"Question","name":"¿Cuánto espacio ocupa?","acceptedAnswer":{"@type":"Answer","text":"Tú eliges. El asistente de bienvenida propone un kit para tu país y tu espacio libre (mapa y navegación, guías esenciales, Wikipedia y asistente) y puedes desactivar cada pieza. Un país ocupa desde unas decenas de MB hasta varios GB."}},{"@type":"Question","name":"¿Funciona en mi país?","acceptedAnswer":{"@type":"Answer","text":"Hay mapas, rutas y puntos de emergencia de casi todos los países del mundo, y un mapa mundial viene incluido desde el primer segundo. La app está en español e inglés, y la biblioteca tiene contenido en muchos idiomas."}},{"@type":"Question","name":"¿Es gratis? ¿Dónde está el truco?","acceptedAnswer":{"@type":"Answer","text":"No hay truco: es gratis, sin anuncios, sin compras y sin suscripciones. Es un proyecto de código abierto sin servidor propio, así que no hay nada que cobrar ni datos que vender."}},{"@type":"Question","name":"¿Qué dispositivos son compatibles?","acceptedAnswer":{"@type":"Answer","text":"iPhone y iPad con iOS 16.4 o posterior. Android 8.0 o posterior, muy pronto en Google Play. El asistente usa Apple Intelligence donde está disponible; si no, descargas un modelo desde la app (desde unos 500 MB; los más grandes necesitan más memoria)."}},{"@type":"Question","name":"¿Y en Android?","acceptedAnswer":{"@type":"Answer","text":"Está en revisión en Google Play y llegará pronto, con mapas, rutas, emergencias, biblioteca, plan y asistente. Los primeros auxilios y la información médica solo están en iPhone y iPad."}},{"@type":"Question","name":"¿Recogéis mis datos?","acceptedAnswer":{"@type":"Answer","text":"No. No hay cuentas, ni analítica, ni publicidad, ni rastreo. Lo que haces en la app se queda en tu dispositivo. Los detalles, en la política de privacidad."}},{"@type":"Question","name":"¿Sustituye a los servicios de emergencia?","acceptedAnswer":{"@type":"Answer","text":"No. Te ayuda cuando no hay red, pero la IA puede equivocarse y la información médica no sustituye a un profesional. Si puedes, llama siempre al número de emergencias."}}]}]}</script>
 </head>
 <body>
-<main>
-  <header class="brand">
-    <img src="icon.png" alt="Nomad Pocket">
-    <div>
-      <div class="name">Nomad Pocket</div>
-      <div class="tag">El conocimiento que nunca se desconecta</div>
-    </div>
-    <nav class="lang"><a href="#es">Español</a><a href="#en">English</a></nav>
-  </header>
+<a class="skip" href="#main">Saltar al contenido</a>
+<div class="lang-hint" data-test="!es"><div class="wrap"><span>This page is also in English. <a href="en/" hreflang="en">Read in English →</a></span><button type="button" aria-label="×">×</button></div></div>
 
-  <section id="es" lang="es">
-    <span class="pill">iPhone · iPad · Android próximamente</span>
-    <h1>Todo lo que necesitas saber, sin cobertura.</h1>
-    <p class="lead">Descarga mientras tienes conexión tu país con mapa, rutas y servicios de emergencia, Wikipedia, guías médicas y de supervivencia, libros y cursos, y úsalos en cualquier parte sin internet. Con un asistente de IA que funciona en tu móvil.</p>
-    <div class="grid">
-      <div class="card"><strong>Biblioteca</strong>Wikipedia, medicina, supervivencia, libros y cursos con búsqueda de texto completo.</div>
-      <div class="card"><strong>Mapas y navegación</strong>Una descarga por país: mapa de OpenStreetMap, rutas en coche, a pie y en bici, y buscador de calles y portales, sin conexión.</div>
-      <div class="card"><strong>Emergencias y plan</strong>Hospitales, farmacias y agua cerca de ti, primeros auxilios, plan familiar y mochila de emergencia.</div>
-      <div class="card"><strong>IA local</strong>Responde a partir de tu biblioteca, con fuentes, sin enviar nada.</div>
-    </div>
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="./"><img src="icon.png" width="34" height="34" alt=""><span>Nomad Pocket</span></a>
+    <nav class="site-nav" aria-label="Secciones">
+      <a href="#escenarios">Por qué</a>
+      <a href="#funciones">Funciones</a>
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#privacidad">Privacidad</a>
+      <a href="#preguntas">Preguntas</a>
+    </nav>
+    <a class="lang-switch" href="en/" hreflang="en" lang="en" title="Read in English">EN</a>
+    <a class="btn btn-primary btn-sm" href="#descargar">Descargar</a>
+  </div>
+</header>
 
-    <h2>Soporte</h2>
-    <p>¿Dudas, errores o sugerencias? Escríbenos a <a href="mailto:fran.linde.blazquez@gmail.com">fran.linde.blazquez@gmail.com</a>
-      o abre una incidencia en <a href="https://github.com/franlindebl/nomad-pocket/issues">GitHub</a>.</p>
-    <h3>¿Necesito internet?</h3>
-    <p>Solo para descargar el contenido y consultar los catálogos. Después, todo funciona sin conexión.</p>
-    <h3>¿Cuánto espacio ocupa?</h3>
-    <p>Tú eliges. El asistente de bienvenida propone un kit para tu país y tu espacio libre (mapa y navegación del país, guías esenciales, Wikipedia y asistente) y puedes desactivar cada pieza. Un país ocupa desde unas decenas de MB hasta varios GB. Puedes añadir o quitar contenido cuando quieras desde la Biblioteca, Mapas o Ajustes.</p>
-    <h3>¿Qué dispositivos son compatibles con el asistente?</h3>
-    <p>En dispositivos con Apple Intelligence puedes usar el modelo integrado. En el resto, y en Android, descarga un modelo desde la app (desde unos 500 MB); los modelos más grandes necesitan más memoria.</p>
-    <h3>¿Recogéis mis datos?</h3>
-    <p>No. Lee la <a href="privacy.html">política de privacidad</a>.</p>
+<main id="main" class="landing">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <p class="status"><i></i><b>Sin conexión</b> · todo funciona</p>
+        <h1>Cuando se cae internet, tu móvil <em>sigue sabiendo.</em></h1>
+        <p class="lead">Mapas con rutas, hospitales cercanos, una guía de emergencia, Wikipedia y una IA que vive en tu teléfono. <strong>Lo preparas hoy con conexión; mañana funciona sin red.</strong> Gratis y de código abierto.</p>
+        <div class="stores"><a class="badge-ios" href="https://apps.apple.com/app/nomad-pocket-kit-offline/id6826502392" data-where="hero"><img src="img/badge-app-store-es.svg" width="162" height="54" alt="Descargar en el App Store"></a><span class="soon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg><span><small>Próximamente</small><strong>Android · Google Play</strong></span></span></div>
+        <ul class="facts"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>100 % gratis</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Código abierto</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Sin cuentas</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Sin anuncios</li></ul>
+      </div>
+      <div class="devices" aria-hidden="false">
+        <div class="phone"><img src="img/screens/es/home.webp" width="600" height="1304" alt="Inicio de Nomad Pocket: llamar a emergencias y estado de preparación" fetchpriority="high" decoding="async"></div>
+        <div class="phone"><img src="img/screens/es/navigation.webp" width="600" height="1304" alt="Navegación guiada por voz sin conexión" loading="lazy" decoding="async"></div>
+        <span class="tag-float t1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Ruta sin internet</span>
+        <span class="tag-float t2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h.01"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/><path d="M5 12.859a10 10 0 0 1 5.17-2.69"/><path d="M19 12.859a10 10 0 0 0-2.007-1.523"/><path d="M2 8.82a15 15 0 0 1 4.177-2.643"/><path d="M22 8.82a15 15 0 0 0-11.288-3.764"/><path d="m2 2 20 20"/></svg>Sin red · todo funciona</span>
+      </div>
+    </div>
   </section>
 
-  <section id="en" lang="en">
-    <h1>Everything you need to know, no signal required.</h1>
-    <p class="lead">While you're online, download your country with its map, routes and emergency services, plus Wikipedia, medical and survival guides, books and courses, and use them anywhere without internet. With an AI assistant that runs on your phone.</p>
-    <div class="grid">
-      <div class="card"><strong>Library</strong>Wikipedia, medicine, survival, books and courses with full-text search.</div>
-      <div class="card"><strong>Maps and navigation</strong>One download per country: an OpenStreetMap map, routes by car, on foot and by bike, and street and address search, offline.</div>
-      <div class="card"><strong>Emergencies and plan</strong>Hospitals, pharmacies and water near you, first aid, a family plan and an emergency-bag checklist.</div>
-      <div class="card"><strong>On-device AI</strong>Answers from your library, with sources, sending nothing.</div>
-    </div>
+  <div class="ticker" aria-hidden="true"><div class="ticker-track"><ul><li>Apagón</li><li>Caída de internet</li><li>Ciberataque</li><li>Tormenta</li><li>Inundación</li><li>Sin cobertura</li><li>Sin roaming</li><li>Fallo informático masivo</li></ul><ul><li>Apagón</li><li>Caída de internet</li><li>Ciberataque</li><li>Tormenta</li><li>Inundación</li><li>Sin cobertura</li><li>Sin roaming</li><li>Fallo informático masivo</li></ul></div></div>
 
-    <h2>Support</h2>
-    <p>Questions, bugs or ideas? Email <a href="mailto:fran.linde.blazquez@gmail.com">fran.linde.blazquez@gmail.com</a>
-      or open an issue on <a href="https://github.com/franlindebl/nomad-pocket/issues">GitHub</a>.</p>
-    <h3>Do I need internet?</h3>
-    <p>Only to download content and check the catalogs. After that, everything works offline.</p>
-    <h3>How much space does it take?</h3>
-    <p>You decide. The welcome wizard suggests a kit for your country and free space (country map and navigation, essential guides, Wikipedia and the assistant) and you can switch off each piece. A country takes from a few tens of MB to several GB. Add or remove content anytime from the Library, Maps or Settings.</p>
-    <h3>Which devices support the assistant?</h3>
-    <p>On devices with Apple Intelligence you can use the built-in model. Otherwise, and on Android, download a model in the app (from about 500 MB); larger models need more memory.</p>
-    <h3>Do you collect my data?</h3>
-    <p>No. Read the <a href="privacy.html#en">privacy policy</a>.</p>
+  <section class="section" id="escenarios">
+    <div class="wrap">
+      <p class="overline"><span><b>01</b> / Por qué</span></p>
+      <div class="story">
+        <div>
+          <p class="stamp">28·04·2025<small>12:33 · Península Ibérica</small></p>
+        </div>
+        <div>
+          <h2 class="h2">¿Y si mañana <em>se cae internet?</em></h2>
+          <p>Aquel lunes, España y Portugal se quedaron sin luz durante horas. Sin electricidad, las antenas de telefonía aguantaron lo que les duraron las baterías, y <strong>muchos móviles se quedaron sin datos ni cobertura</strong>: sin mapas, sin buscador, sin forma de consultar qué hacer.</p>
+          <p>Un apagón, un ciberataque, una tormenta o un fallo informático masivo bastan para dejar el móvil mudo justo cuando más falta hace. <strong>Nomad Pocket guarda lo esencial en el propio teléfono</strong>, para que siga funcionando cuando todo lo demás falla.</p>
+        </div>
+      </div>
+      <div class="grid-3">
+        <article class="tile ticks reveal"><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.513 4.856 13.12 2.17a.5.5 0 0 1 .86.46l-1.377 4.317"/><path d="M15.656 10H20a1 1 0 0 1 .78 1.63l-1.72 1.773"/><path d="M16.273 16.273 10.88 21.83a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14H4a1 1 0 0 1-.78-1.63l4.507-4.643"/><path d="m2 2 20 20"/></svg></span><h3>Apagón</h3><p>Sin luz, las antenas aguantan poco. Tus mapas, tus guías y tu plan siguen en el móvil.</p></article>
+        <article class="tile ticks reveal"><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h.01"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/><path d="M5 12.859a10 10 0 0 1 5.17-2.69"/><path d="M19 12.859a10 10 0 0 0-2.007-1.523"/><path d="M2 8.82a15 15 0 0 1 4.177-2.643"/><path d="M22 8.82a15 15 0 0 0-11.288-3.764"/><path d="m2 2 20 20"/></svg></span><h3>Caída de internet</h3><p>Falla tu operador o un gran servicio en la nube. Nada de lo que llevas depende de ellos.</p></article>
+        <article class="tile ticks reveal"><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg></span><h3>Ciberataque</h3><p>Si atacan las redes o los servicios que usas, lo tuyo sigue en tu teléfono, intacto.</p></article>
+        <article class="tile ticks reveal"><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973"/><path d="m13 12-3 5h4l-3 5"/></svg></span><h3>Tormenta o inundación</h3><p>Cuando el temporal tumba la red, sabes dónde está el refugio, el agua o el hospital.</p></article>
+        <article class="tile ticks reveal"><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg></span><h3>Sin cobertura</h3><p>Montaña, mar, una carretera perdida: rutas y respuestas sin una sola barra de señal.</p></article>
+        <article class="tile ticks reveal"><span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></span><h3>De viaje</h3><p>En otro país, sin roaming ni tarjeta local, con su mapa y sus números de emergencia.</p></article>
+      </div>
+
+      <div class="sim ticks reveal" data-cut="Cortar la conexión" data-restore="Volver a conectar">
+        <div class="sim-head">
+          <p class="net">Red: <b class="on">Conectado</b><b class="off">Sin conexión</b></p>
+          <button class="btn btn-secondary btn-sm" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/></svg><span>Cortar la conexión</span></button>
+        </div>
+        <div class="sim-cols" aria-live="polite">
+          <div class="sim-col normal">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="22" height="22"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>Un móvil cualquiera</h3>
+            <ul><li>Mapas y rutas<span class="st"><span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Funciona</span><span class="off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>Sin conexión</span></span></li><li>El hospital más cercano<span class="st"><span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Funciona</span><span class="off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>Sin conexión</span></span></li><li>Qué hacer ante una emergencia<span class="st"><span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Funciona</span><span class="off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>Sin conexión</span></span></li><li>Wikipedia<span class="st"><span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Funciona</span><span class="off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>Sin conexión</span></span></li><li>Asistente de IA<span class="st"><span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Funciona</span><span class="off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>Sin conexión</span></span></li></ul>
+          </div>
+          <div class="sim-col ours">
+            <h3><img src="icon.png" width="24" height="24" alt="">Con Nomad Pocket</h3>
+            <ul><li>Mapas y rutas<span class="st"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Funciona</span></li><li>El hospital más cercano<span class="st"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Funciona</span></li><li>Qué hacer ante una emergencia<span class="st"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Funciona</span></li><li>Wikipedia<span class="st"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Funciona</span></li><li>Asistente de IA<span class="st"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Funciona</span></li></ul>
+          </div>
+        </div>
+        <p class="sim-foot">Tus mapas, guías y respuestas están en el móvil, no en un servidor: si la red cae, no dependen de ella.</p>
+      </div>
+    </div>
   </section>
 
-  <footer>© 2026 Fran Linde Blázquez and contributors · Open source (GPL‑3.0-or-later) · <a href="https://github.com/franlindebl/nomad-pocket">GitHub</a> · <a href="privacy.html">Privacidad / Privacy</a></footer>
+  <section class="section" id="funciones">
+    <div class="wrap">
+      <p class="overline"><span><b>02</b> / Qué llevas en el bolsillo</span></p>
+      <h2 class="h2">Un kit de supervivencia <em>que cabe en tu móvil</em></h2>
+      <p class="intro">Todo lo que buscarías en internet en una emergencia, descargado de antemano y listo para usar sin red.</p>
+      <div class="numbers ticks"><div><strong>200+</strong><span>fichas de emergencia</span></div><div><strong>100+</strong><span>archivos de conocimiento</span></div><div><strong>14</strong><span>cursos</span></div><div><strong>0 €</strong><span>sin compras ni anuncios</span></div></div>
+      
+      <article class="feature">
+        <div class="feature-copy reveal">
+          <p class="overline" style="--hue:#4FD1A5"><span class="icon-badge" style="--hue:#4FD1A5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg></span>Mapas y navegación</p>
+          <h3>Mapas que no se apagan</h3>
+          <p>Tu país entero en el móvil: cada calle, camino y edificio. Calcula rutas en coche, a pie o en bici sin red, con indicaciones por voz que siguen guiándote con la pantalla bloqueada.</p>
+          <ul class="checks"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Busca cualquier calle o número de portal sin internet</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Aviso del límite de velocidad de cada vía</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Brújula, coordenadas y UTM, lugares guardados</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Casi todos los países del mundo, y un mapa mundial incluido</span></li></ul>
+        </div>
+        <div class="feature-media reveal">
+          <div class="phone"><img src="img/screens/es/navigation.webp" width="600" height="1304" alt="Navegación por voz sin conexión en Madrid" loading="lazy" decoding="async"></div><div class="fallback ticks" style="--hue:#4FD1A5" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg></div>
+        </div>
+      </article>
+      <article class="feature">
+        <div class="feature-copy reveal">
+          <p class="overline" style="--hue:#FF6B6B"><span class="icon-badge" style="--hue:#FF6B6B"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18v-6a5 5 0 1 1 10 0v6"/><path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"/><path d="M21 12h1"/><path d="M18.5 4.5 18 5"/><path d="M2 12h1"/><path d="M12 2v1"/><path d="m4.929 4.929.707.707"/><path d="M12 12v6"/></svg></span>Emergencias</p>
+          <h3>Lo que necesitas, a tu alrededor</h3>
+          <p>Hospitales, farmacias, desfibriladores, policía, bomberos, agua potable y refugios, ordenados por distancia y dirección. Un toque y te lleva hasta allí.</p>
+          <ul class="checks"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Llama al número de emergencias de tu país</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Comparte tu posición exacta por mensaje (coordenadas y UTM)</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>El GPS no necesita datos: sabes dónde estás aunque no haya cobertura</span></li></ul>
+        </div>
+        <div class="feature-media reveal">
+          <div class="phone"><img src="img/screens/es/emergency.webp" width="600" height="1304" alt="Hospitales y servicios de emergencia cercanos, sin conexión" loading="lazy" decoding="async"></div><div class="fallback ticks" style="--hue:#FF6B6B" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18v-6a5 5 0 1 1 10 0v6"/><path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"/><path d="M21 12h1"/><path d="M18.5 4.5 18 5"/><path d="M2 12h1"/><path d="M12 2v1"/><path d="m4.929 4.929.707.707"/><path d="M12 12v6"/></svg></div>
+        </div>
+      </article>
+      <article class="feature">
+        <div class="feature-copy reveal">
+          <p class="overline" style="--hue:#FFD60A"><span class="icon-badge" style="--hue:#FFD60A"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/></svg></span>Guía de emergencia</p>
+          <h3>Qué hacer, paso a paso</h3>
+          <p>Más de 200 fichas de fuentes oficiales: reanimación, hemorragias, quemaduras, atragantamiento, incendios, inundaciones… En la app desde el primer minuto, sin descargar nada.</p>
+          <ul class="checks"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Textos breves, pensados para leerse con prisa</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Cada ficha cita su fuente oficial</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Búsqueda instantánea dentro de la guía</span></li></ul>
+          <p class="note">Primeros auxilios e información médica: en iPhone y iPad.</p>
+        </div>
+        <div class="feature-media reveal">
+          <div class="phone"><img src="img/screens/es/firstaid.webp" width="600" height="1304" alt="Guía de emergencias con fichas de primeros auxilios" loading="lazy" decoding="async"></div><div class="fallback ticks" style="--hue:#FFD60A" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/></svg></div>
+        </div>
+      </article>
+      <article class="feature">
+        <div class="feature-copy reveal">
+          <p class="overline" style="--hue:#F2F2EF"><span class="icon-badge" style="--hue:#F2F2EF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M13 8H7"/><path d="M17 12H7"/></svg></span>Asistente sin conexión</p>
+          <h3>Una IA que no necesita internet</h3>
+          <p>Pregúntale «¿cómo potabilizo agua?» en mitad de la nada: responde con tu biblioteca y te enseña las fuentes. Funciona en tu teléfono, con Apple Intelligence o con un modelo abierto que descargas.</p>
+          <ul class="checks"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Las preguntas urgentes las responde con la guía, incluso sin modelo</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Dicta tus preguntas: la voz se procesa en el dispositivo</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Ni tus preguntas ni sus respuestas salen del móvil</span></li></ul>
+        </div>
+        <div class="feature-media reveal">
+          <div class="phone"><img src="img/screens/es/assistant.webp" width="600" height="1304" alt="Asistente de IA respondiendo sin conexión con fuentes" loading="lazy" decoding="async"></div><div class="fallback ticks" style="--hue:#F2F2EF" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M13 8H7"/><path d="M17 12H7"/></svg></div>
+        </div>
+      </article>
+      <article class="feature">
+        <div class="feature-copy reveal">
+          <p class="overline" style="--hue:#5DB4FF"><span class="icon-badge" style="--hue:#5DB4FF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg></span>Biblioteca</p>
+          <h3>Todo el conocimiento, sin red</h3>
+          <p>Wikipedia entera o sus artículos esenciales, según tu espacio. Más de 100 archivos de supervivencia, agua y alimentos, agricultura, reparaciones y más, y miles del catálogo de Kiwix.</p>
+          <ul class="checks"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Búsqueda de texto completo en todos tus libros</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>14 cursos para aprender lo que haga falta</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Lectura en oscuro o en modo papel</span></li></ul>
+        </div>
+        <div class="feature-media reveal">
+          <div class="phone"><img src="img/screens/es/library.webp" width="600" height="1304" alt="Biblioteca offline con Wikipedia y guías" loading="lazy" decoding="async"></div><div class="fallback ticks" style="--hue:#5DB4FF" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg></div>
+        </div>
+      </article>
+      <article class="feature">
+        <div class="feature-copy reveal">
+          <p class="overline" style="--hue:#8AA4FF"><span class="icon-badge" style="--hue:#8AA4FF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 10h8"/><path d="M8 18h8"/><path d="M8 22v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg></span>Plan y mochila</p>
+          <h3>Tu familia sabe qué hacer</h3>
+          <p>Puntos de encuentro, contactos y datos de cada uno, también en PDF para imprimir. Y una mochila de emergencia a la medida de tu hogar, con avisos de caducidad.</p>
+          <ul class="checks"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Agua, comida y medicación calculadas para tu casa y los días que elijas</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Recordatorios locales antes de que algo caduque</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Tu plan no sale del móvil salvo que tú lo compartas</span></li></ul>
+        </div>
+        <div class="feature-media reveal">
+          <div class="phone"><img src="img/screens/es/plan.webp" width="600" height="1304" alt="Plan familiar con puntos de encuentro y contactos" loading="lazy" decoding="async"></div><div class="fallback ticks" style="--hue:#8AA4FF" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 10h8"/><path d="M8 18h8"/><path d="M8 22v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="como-funciona">
+    <div class="wrap">
+      <p class="overline"><span><b>03</b> / Cómo funciona</span></p>
+      <h2 class="h2">Listo <em>en un minuto</em></h2>
+      <p class="intro">Prepáralo hoy, mientras tienes conexión. Mañana no hará falta.</p>
+      <ol class="steps" role="list">
+        <li class="step ticks reveal"><span class="n">01</span><div class="bar" aria-hidden="true"><i class="on"></i><i></i><i></i></div><h3>Elige tu país</h3><p>La app te propone un kit a la medida de tu país y del espacio de tu teléfono: mapa y rutas, guías, Wikipedia y asistente.</p></li>
+        <li class="step ticks reveal"><span class="n">02</span><div class="bar" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i></div><h3>Descárgalo con wifi</h3><p>Déjalo descargando. Inicio te dice lo preparado que estás y lo que falta, para completarlo mientras aún hay red.</p></li>
+        <li class="step ticks reveal"><span class="n">03</span><div class="bar" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i></div><h3>Úsalo sin conexión</h3><p>En modo avión, en un apagón o en mitad del monte. Y cuando haya versiones nuevas de tus mapas, te avisa.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="privacidad">
+    <div class="wrap">
+      <p class="overline"><span><b>04</b> / Tuya y de nadie más</span></p>
+      <h2 class="h2">Nada que rastrear. <em>Nada que pueda caerse.</em></h2>
+      <div class="split">
+        <div class="panel ticks reveal">
+          <span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <h3>Privada por diseño</h3>
+          <p>No recogemos ningún dato: tu plan, tus contactos, tu ubicación y tus preguntas no salen de tu móvil. Y como Nomad Pocket no depende de ningún servidor propio, no hay nada que pueda caerse.</p>
+          <div class="zeros"><div><strong>0</strong><span>cuentas</span></div><div><strong>0</strong><span>anuncios</span></div><div><strong>0</strong><span>rastreadores</span></div><div><strong>0</strong><span>servidores propios</span></div></div>
+          <a class="btn btn-secondary" href="privacy.html">Leer la política de privacidad</a>
+        </div>
+        <div class="panel ticks reveal">
+          <span class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></span>
+          <h3>Código abierto, de verdad</h3>
+          <p>Nomad Pocket es software libre (GPL‑3.0) inspirado en Project N.O.M.A.D. Puedes leer cada línea, proponer cambios o compilarla tú. Se apoya en datos abiertos:</p>
+          <ul class="credits"><li>OpenStreetMap</li><li>Wikipedia</li><li>Kiwix</li><li>Protomaps</li><li>Valhalla</li></ul>
+          <a class="btn btn-secondary" href="https://github.com/franlindebl/nomad-pocket"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>Ver el código en GitHub</a>
+          <p class="small" style="margin:16px 0 0">Nomad Pocket no está afiliada a estos proyectos.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="preguntas">
+    <div class="wrap">
+      <p class="overline"><span><b>05</b> / Preguntas</span></p>
+      <h2 class="h2">Preguntas <em>frecuentes</em></h2>
+      <div class="faq">
+        <details open><summary>¿De verdad funciona sin internet?</summary><p>Sí. Solo necesitas conexión para descargar el contenido (mejor con wifi) y para buscar actualizaciones. Después, mapas, rutas, búsqueda de calles, puntos de emergencia, guía, biblioteca y asistente funcionan en modo avión.</p></details>
+        <details><summary>¿El GPS funciona sin datos?</summary><p>Sí. El GPS recibe la señal de los satélites, no de internet, así que el mapa te sitúa aunque no haya cobertura. La primera posición puede tardar algo más que con datos.</p></details>
+        <details><summary>¿Cuánto espacio ocupa?</summary><p>Tú eliges. El asistente de bienvenida propone un kit para tu país y tu espacio libre (mapa y navegación, guías esenciales, Wikipedia y asistente) y puedes desactivar cada pieza. Un país ocupa desde unas decenas de MB hasta varios GB.</p></details>
+        <details><summary>¿Funciona en mi país?</summary><p>Hay mapas, rutas y puntos de emergencia de casi todos los países del mundo, y un mapa mundial viene incluido desde el primer segundo. La app está en español e inglés, y la biblioteca tiene contenido en muchos idiomas.</p></details>
+        <details><summary>¿Es gratis? ¿Dónde está el truco?</summary><p>No hay truco: es gratis, sin anuncios, sin compras y sin suscripciones. Es un proyecto de código abierto sin servidor propio, así que no hay nada que cobrar ni datos que vender.</p></details>
+        <details><summary>¿Qué dispositivos son compatibles?</summary><p>iPhone y iPad con iOS 16.4 o posterior. Android 8.0 o posterior, muy pronto en Google Play. El asistente usa Apple Intelligence donde está disponible; si no, descargas un modelo desde la app (desde unos 500 MB; los más grandes necesitan más memoria).</p></details>
+        <details><summary>¿Y en Android?</summary><p>Está en revisión en Google Play y llegará pronto, con mapas, rutas, emergencias, biblioteca, plan y asistente. Los primeros auxilios y la información médica solo están en iPhone y iPad.</p></details>
+        <details><summary>¿Recogéis mis datos?</summary><p>No. No hay cuentas, ni analítica, ni publicidad, ni rastreo. Lo que haces en la app se queda en tu dispositivo. Los detalles, en la <a href="privacy.html">política de privacidad</a>.</p></details>
+        <details><summary>¿Sustituye a los servicios de emergencia?</summary><p>No. Te ayuda cuando no hay red, pero la IA puede equivocarse y la información médica no sustituye a un profesional. Si puedes, llama siempre al número de emergencias.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section id="descargar">
+    <div class="wrap">
+      <div class="cta reveal">
+        <div>
+          <h2 class="h2">Prepárate hoy. <br>Mañana puede ser tarde.</h2>
+          <p>Gratis, de código abierto y listo en un minuto. Funciona cuando todo lo demás falla.</p>
+        </div>
+        <div class="stores"><a class="badge-ios" href="https://apps.apple.com/app/nomad-pocket-kit-offline/id6826502392" data-where="cta"><img src="img/badge-app-store-es.svg" width="162" height="54" alt="Descargar en el App Store"></a><span class="soon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg><span><small>Próximamente</small><strong>Android · Google Play</strong></span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="soporte" style="padding-top:56px">
+    <div class="wrap">
+      <div class="support panel ticks">
+        <div>
+          <h2>¿Dudas, errores o ideas?</h2>
+          <p>Escríbenos o abre una incidencia: respondemos a todo.</p>
+        </div>
+        <div class="actions">
+          <a class="btn btn-secondary btn-sm" href="mailto:fran.linde.blazquez@gmail.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>Escribir un correo</a>
+          <a class="btn btn-secondary btn-sm" href="https://github.com/franlindebl/nomad-pocket/issues"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>Incidencias en GitHub</a>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <a class="logo" href="./"><img src="icon.png" width="34" height="34" alt=""><span>Nomad Pocket</span></a>
+        <p class="tagline">El conocimiento que nunca se desconecta</p>
+      </div>
+      <nav aria-label="Footer">
+        <a href="privacy.html">Privacidad</a>
+        <a href="https://github.com/franlindebl/nomad-pocket">GitHub</a>
+        <a href="#soporte">Soporte</a>
+        <a href="en/">English</a>
+      </nav>
+    </div>
+    <p class="credits-line">App gratuita y de código abierto creada por <a href="https://github.com/franlindebl">Fran Linde Blázquez</a> · Código fuente: <a href="https://github.com/franlindebl/nomad-pocket">github.com/franlindebl/nomad-pocket</a></p>
+    <div class="legal"><p>© 2026 Fran Linde Blázquez y colaboradores · Software libre bajo licencia GPL‑3.0 o posterior.</p><p>La IA puede equivocarse y la información médica no sustituye a un profesional. En una emergencia, llama siempre a los servicios de emergencia si puedes.</p><p>Apple, el logotipo de Apple, iPhone y iPad son marcas comerciales de Apple Inc., registradas en EE. UU. y otros países. App Store es una marca de servicio de Apple Inc. Google Play es una marca de Google LLC.</p></div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // Outage simulator: the "normal phone" column goes dark, ours keeps working.
+  var sim = document.querySelector('.sim');
+  if (sim) {
+    var btn = sim.querySelector('button'), label = btn.querySelector('span'), touched = false;
+    var set = function (off) {
+      if (off) sim.setAttribute('data-offline', ''); else sim.removeAttribute('data-offline');
+      btn.setAttribute('aria-pressed', String(off));
+      label.textContent = off ? sim.dataset.restore : sim.dataset.cut;
+    };
+    btn.addEventListener('click', function () { touched = true; set(!sim.hasAttribute('data-offline')); });
+    var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!calm && 'IntersectionObserver' in window) {
+      var seen = new IntersectionObserver(function (e) {
+        if (!e[0].isIntersecting) return;
+        seen.disconnect();
+        setTimeout(function () { if (!touched) set(true); }, 1200);
+      }, { threshold: 0.6 });
+      seen.observe(sim);
+    }
+  }
+  // Fade sections in as they scroll into view.
+  var items = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    items.forEach(function (el) { io.observe(el); });
+  } else items.forEach(function (el) { el.classList.add('in'); });
+  // Suggest the other language once, when the browser's differs from the page's.
+  var hint = document.querySelector('.lang-hint');
+  try {
+    var want = hint.dataset.test, nav = (navigator.language || '').toLowerCase().slice(0, 2);
+    var differs = want.charAt(0) === '!' ? nav && nav !== want.slice(1) : nav === want;
+    if (differs && !localStorage.getItem('np-lang-hint')) hint.classList.add('show');
+    hint.querySelector('button').addEventListener('click', function () {
+      hint.classList.remove('show');
+      try { localStorage.setItem('np-lang-hint', '1'); } catch (e) {}
+    });
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>
