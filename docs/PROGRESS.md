@@ -333,6 +333,12 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-02 — iOS build 37 to TestFlight
+
+- 1.1.0 (37), TestFlight only: build 36 plus the Library counts that know held editions and other
+  languages (below). Smoke E2E 21/21 on the Release build (`lib-02` now expects Computing at 1: the seeded
+  freeCodeCamp course is listed there too). Tagged `v1.1.0-37`.
+
 ### 2026-11-02 — Map: one mark per place (no basemap icon under our points)
 
 The owner saw points "outlined in blue" with a blue name that turned into a plain dot with a
