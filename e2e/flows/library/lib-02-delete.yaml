@@ -1,6 +1,7 @@
 # LIB-02 + LIB-05 — long-press on an archive (inside its collection) offers Share and Delete; Delete asks
 # first: Cancel keeps it, Delete removes it; the collections count it out. (The seeded course stays, so
-# the Library's empty state doesn't show: the courses collection still has it.)
+# the Library's empty state doesn't show: the courses collection still has it. It is freeCodeCamp, which
+# Computing lists too, so Computing still counts 1.)
 appId: com.fjlinde.nomadpocket
 tags: [smoke, library, seeded]
 ---
@@ -43,6 +44,6 @@ tags: [smoke, library, seeded]
     element: "Medicina, 0 de .*"
     direction: UP
 - scrollUntilVisible:
-    element: "Informática y tecnología, 0 de .*"
+    element: "Informática y tecnología, 1 de .*"
     centerElement: true
 - takeScreenshot: 01-library-after-delete

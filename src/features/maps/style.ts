@@ -6,6 +6,7 @@ import { layers, namedFlavor } from '@protomaps/basemaps';
 import type { StyleSpecification } from '@maplibre/maplibre-react-native';
 
 import type { MapAssets } from './assets';
+import { EMERGENCY_KINDS } from './emergency-core';
 
 export type MapSourceInput = { id: string; fileUri: string };
 
@@ -37,6 +38,20 @@ function tameServiceRoads(layer: Layer, id: string): Layer {
   return layer;
 }
 
+/**
+ * The emergency points draw supermarkets, fountains and town halls themselves. Protomaps
+ * draws them too, as a framed icon with its label in the category colour, at the same
+ * spot: our dot sat inside its frame, and label collisions picked our grey name or its
+ * coloured one depending on the zoom. One mark per place: the basemap skips our kinds.
+ * (Its POI filter is an expression, unlike the road layers' legacy ones.)
+ */
+function skipOurPois(layer: Layer, id: string): Layer {
+  const filter = ('filter' in layer ? layer.filter : undefined) as unknown[] | undefined;
+  if (id !== 'pois' || !filter || filter[0] !== 'all') return layer;
+  const ours = ['!', ['in', ['get', 'kind'], ['literal', Object.keys(EMERGENCY_KINDS)]]];
+  return { ...layer, filter: [...filter, ours] } as unknown as Layer;
+}
+
 /** `pmtiles://` + absolute file URL, the scheme MapLibre Native reads locally. */
 export function pmtilesUrl(fileUri: string): string {
   const uri = fileUri.startsWith('file://') ? fileUri : `file://${fileUri}`;
@@ -61,7 +76,7 @@ export function buildMapStyle(opts: {
     style.sources[s.id] = { type: 'vector', url: pmtilesUrl(s.fileUri), attribution: ATTRIBUTION };
     for (const layer of layers(s.id, flavor, { lang: opts.lang })) {
       if (layer.type === 'background') continue;
-      style.layers.push({ ...tameServiceRoads(layer as Layer, layer.id), id: `${s.id}:${layer.id}` } as Layer);
+      style.layers.push({ ...skipOurPois(tameServiceRoads(layer as Layer, layer.id), layer.id), id: `${s.id}:${layer.id}` } as Layer);
     }
   }
   return style;

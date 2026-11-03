@@ -1,10 +1,15 @@
 // The Library's collections, in the order the tab shows them, each with the archives on the phone that
-// belong to it and how many the catalog offers (collections-core.ts files each archive in exactly one).
+// belong to it and how many the catalog offers. collections-core.ts files each archive in exactly one,
+// but a collection also shows (and counts) the catalog archives it lists that another one filed: a course
+// in Computing, a book two categories list. Works in another language stay out of the counts and the
+// packs (features/catalog/editions.ts), and so do editions a bigger installed one already holds.
 import { router } from 'expo-router';
 import { FolderOpen, Globe, GraduationCap, type LucideIcon } from 'lucide-react-native';
 import { useMemo } from 'react';
 
-import { catalog, courseResources, loc, matchesLanguages, sumMB, tierResources } from '@/features/catalog';
+import { catalog, courseResources, getResource, loc, matchesLanguages, sumMB, tierResources } from '@/features/catalog';
+import { hasOrHeld, otherLanguageSet } from '@/features/catalog/editions';
+import { withoutHeld } from '@/features/catalog/editions-core';
 import { categoryHue, iconByName } from '@/features/catalog/icons';
 import { useItems, type InstalledItem } from '@/features/content/items';
 import i18n from '@/i18n';
@@ -45,19 +50,22 @@ function wikipediaIds(langs: string[]): string[] {
 export function useCollections(): Collection[] {
   const items = useItems('zim');
   const langs = useSettings((s) => s.contentLanguages);
+  const primary = useSettings((s) => s.language);
   const lang = i18n.language;
   return useMemo(() => {
     const t = i18n.getFixedT(lang, 'library');
-    const byKey = new Map<string, InstalledItem[]>();
-    for (const item of items) {
-      const key = collectionOfItem(item);
-      byKey.set(key, [...(byKey.get(key) ?? []), item]);
-    }
+    const other = otherLanguageSet(langs, primary);
+    const main = (ids: string[]) => ids.filter((id) => !other.has(id));
+    const has = (id: string) => hasOrHeld(items, id);
     const make = (key: string, title: string, icon: LucideIcon, hue: Hue, catalogIds: string[], emptyHint: string): Collection => {
-      const members = byKey.get(key) ?? [];
+      const listed = new Set(catalogIds);
+      const members = items.filter((i) => collectionOfItem(i) === key || (!!i.catalogId && listed.has(i.catalogId)));
+      const mainIds = main(catalogIds);
       const { have, total } = collectionCount(
-        catalogIds,
+        mainIds,
+        catalogIds.filter((id) => other.has(id)),
         members.map((m) => m.catalogId ?? m.id),
+        has,
       );
       return { key, title, icon, hue, members, have, total, emptyHint };
     };
@@ -65,17 +73,17 @@ export function useCollections(): Collection[] {
     for (const key of COLLECTION_ORDER) {
       if (key === WIKIPEDIA) {
         const ids = wikipediaIds(langs);
-        const smallest = ids.map((id) => catalog.resources[id]).filter(Boolean)[0];
+        const smallest = main(ids).map(getResource).filter(Boolean)[0];
         out.push(make(key, t('wikipedia'), Globe, 'reference', ids, smallest ? t('wikipediaFrom', { size: formatMB(smallest.sizeMB) }) : ''));
       } else if (key === COURSES) {
         out.push(make(key, t('common:tabs.courses'), GraduationCap, 'education', courseResources(langs).map((r) => r.id), t('coursesBody')));
       } else if (key === OTHER) {
-        if (byKey.get(OTHER)?.length) out.push(make(key, t('other'), FolderOpen, 'neutral', [], ''));
+        if (items.some((i) => collectionOfItem(i) === OTHER)) out.push(make(key, t('other'), FolderOpen, 'neutral', [], ''));
       } else {
         const c = catalog.categories.find((x) => x.slug === key);
         if (!c) continue;
         const all = tierResources(c, c.tiers[c.tiers.length - 1], langs);
-        const essential = c.tiers[0] ? tierResources(c, c.tiers[0], langs) : [];
+        const essential = c.tiers[0] ? withoutHeld(tierResources(c, c.tiers[0], langs).filter((r) => !other.has(r.id))) : [];
         const hint = essential.length ? t('essentialPack', { size: formatMB(sumMB(essential)) }) : '';
         out.push(make(key, loc(c.name), iconByName(c.icon), c.hue ?? categoryHue(c.slug), all.map((r) => r.id), hint));
       }
@@ -87,7 +95,7 @@ export function useCollections(): Collection[] {
       if (all.length) out.push(make(c.slug, loc(c.name), iconByName(c.icon), c.hue ?? categoryHue(c.slug), all.map((r) => r.id), ''));
     }
     return out;
-  }, [items, langs, lang]);
+  }, [items, langs, primary, lang]);
 }
 
 /** Whether any catalog resource is in the user's content languages (else the Library says to change them). */

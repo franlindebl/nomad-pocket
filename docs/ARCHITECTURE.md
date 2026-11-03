@@ -441,11 +441,29 @@ explore, ZIM import).
   (so topical Wikipedias stay in medicine/computing); the catalog's `reference` resources or a
   whole-Wikipedia Kiwix name (`wikipedia_<lang>_{all,top,100}…`) → `wikipedia`; the archive's own
   `category` if it's one of ours; else `other` ("Otros archivos", shown only when not empty).
-- `collections.ts` (`useCollections`): per collection its members, `have/total` (catalog resources in
-  the content languages plus any extra member) and the hint for an empty one (essential pack size,
-  smallest Wikipedia). `openCollection(key)` routes to `category/[slug]`, `wikipedia`, `courses` or
-  `others`; each of those screens lists the archives on the device first (`ArchiveRow`: open, long
-  press to share or delete), then what can be downloaded.
+- `collections.ts` (`useCollections`): per collection its members (archives filed in it plus the catalog
+  archives it lists that another collection filed: freeCodeCamp is a course and in Computing),
+  `have/total` (`collectionCount`) and the hint for an empty one (essential pack size, smallest Wikipedia).
+  `openCollection(key)` routes to `category/[slug]`, `wikipedia`, `courses` or `others`; each of those
+  screens lists the archives on the device first (`ArchiveRow`: open, long press to share or delete),
+  then what can be downloaded, then "Otros idiomas".
+- Editions and languages (`features/catalog/editions-core.ts`, pure, tested; `editions.ts` the hooks;
+  owner's decisions 2026-11-02):
+  - *Editions*: a Kiwix name `<book>_{top,all}_{mini,nopic,maxi}` holds another of the same book when it
+    is as wide and as deep (`wikipedia_es_all_nopic` holds `wikipedia_es_top_mini`; Wikibooks maxi holds
+    nopic). A held resource counts as had, its row says "Ya está dentro de «X»" and its button opens X
+    (`useCovering`); packs skip editions another one in the pack holds (`withoutHeld`). When a new archive
+    finishes, `library/redundant.ts` offers to delete the installed editions it holds (an alert naming the
+    holder and the space freed; deferred to the next foreground when the download ends in background;
+    not on updates of the same archive).
+  - *Languages*: resources sharing `sameAs` in `catalog.json` are the same work in another language.
+    With the app language's one visible, the others (`otherLanguageSet`) go under "Otros idiomas" at the
+    end of the category, Wikipedia and Courses screens: out of `have/total` and out of packs, even when
+    installed (they still show under "En tu dispositivo"). Content with no counterpart in the app's
+    language (English-only, `mul`) always counts. `validate-catalog` refuses two resources of one
+    language in a `sameAs` group.
+  - `collectionCount(mainIds, otherIds, members, has)`: `has` is "installed anywhere or held", so a
+    collection can reach 100 % even when a course or another category filed one of its archives.
 - `/search` (root stack) searches the installed archives (titles / full text, PDFs), then the catalog
   (`searchCatalog`, minus what's installed, content languages only), then offers the same query in
   Kiwix explore when online (`/library/explore?q=`).
@@ -1018,6 +1036,11 @@ private/no) and underground service roads are hidden and the rest drawn at half 
 an untagged garage ramp (`service=driveway` with no access, a `parking_aisle` with
 `layer=-1` but no `tunnel`) still shows, as a thin line. The real fix there is the OSM
 tags.
+
+**One mark per place** (`style.ts`, `skipOurPois`): the basemap `pois` layer skips every
+emergency kind (`EMERGENCY_KINDS`; in practice supermarket, drinking_water and townhall, the
+ones both draw). Otherwise our dot sat inside Protomaps' framed icon and the two labels (ours
+grey, theirs in the category colour) took turns as the zoom changed collisions.
 
 **Compass beam** (`HeadingBeam.tsx`): while "show my location" is on and the Maps tab is in
 front (tab `focus`/`blur`; a sheet over the map keeps it), a fan under the native puck

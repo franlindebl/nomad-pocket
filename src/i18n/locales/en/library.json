@@ -56,5 +56,14 @@
   "countLabel": "{{have}} of {{total}} downloaded",
   "haveOnDevice": "{{have}} of {{total}} on this device · {{size}}",
   "noneOnDevice": "0 of {{total}} downloaded",
-  "toDownload": "To download"
+  "toDownload": "To download",
+  "otherLanguages": "Other languages",
+  "otherLanguagesBody": "The same content in another language. Optional: not in the count or the packs.",
+  "redundant": {
+    "title_one": "You no longer need “{{name}}”",
+    "title_other": "You no longer need {{count}} archives",
+    "body_one": "Everything in it is already in “{{holder}}”, which you just downloaded. Delete the file? Frees {{size}}.",
+    "body_other": "{{names}}\n\nEverything in them is already in “{{holder}}”, which you just downloaded. Delete the files? Frees {{size}}.",
+    "keep": "Keep"
+  }
 }

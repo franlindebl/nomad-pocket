@@ -10,9 +10,9 @@ import { formatBytes, formatMB } from '@/lib/format';
 import { freeBytes } from '@/lib/storage';
 import { space, useTheme } from '@/theme';
 
-import { catalog, downloadResource, loc, OfflineError } from './index';
+import { useCovering } from './editions';
+import { downloadResource, OfflineError } from './index';
 import type { CatalogResource } from './types';
-import { coveringWikipedia } from './wikipedia-core';
 
 /**
  * Explain a failed download start. `retry` is offered when there was no connection.
@@ -46,15 +46,6 @@ export function useResourceState(resourceId: string) {
   return { installed, download };
 }
 
-/** The installed Wikipedia that already holds this one (a bigger variant in the same language), if any. */
-export function useCoveringWikipedia(resourceId: string) {
-  const option = useContent((s) =>
-    coveringWikipedia(catalog.wikipedia, resourceId, (id) => s.items.some((i) => i.catalogId === id || i.id === id)),
-  );
-  const item = useContent((s) => (option ? s.items.find((i) => i.catalogId === option.resourceId || i.id === option.resourceId) : undefined));
-  return option && item ? { option, item } : null;
-}
-
 /**
  * Compact download control for a catalog resource:
  * size pill → progress ring (tap to pause/resume) → "Open".
@@ -63,7 +54,7 @@ export function DownloadButton({ resource, onOpen }: { resource: CatalogResource
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { installed, download } = useResourceState(resource.id);
-  const covering = useCoveringWikipedia(resource.id);
+  const covering = useCovering(resource.id);
   const waiting = useWaitingReason(download ? [download] : []);
 
   if (installed) {
@@ -109,7 +100,7 @@ export function DownloadButton({ resource, onOpen }: { resource: CatalogResource
     );
   }
 
-  // A bigger Wikipedia already holds this one: downloading it would only duplicate data,
+  // A bigger edition already holds this one: downloading it would only duplicate data,
   // so the button opens that one instead (to keep only the smaller one, delete the bigger first).
   if (covering) {
     return (
@@ -117,12 +108,12 @@ export function DownloadButton({ resource, onOpen }: { resource: CatalogResource
         testID={`download-${resource.id}`}
         haptic="light"
         accessibilityRole="button"
-        accessibilityLabel={t('wikipedia.includedOpen', { name: loc(covering.option.name) })}
+        accessibilityLabel={t('included.open', { name: covering.name })}
         onPress={() => router.push({ pathname: '/reader/[itemId]', params: { itemId: covering.item.id } })}
         style={[styles.pill, { backgroundColor: colors.surfaceAlt }]}>
         <Check size={14} color={colors.textSecondary} strokeWidth={2.5} />
         <Text variant="footnote" weight="600" color="textSecondary">
-          {t('wikipedia.included')}
+          {t('included.label')}
         </Text>
       </PressableScale>
     );

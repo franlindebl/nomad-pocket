@@ -88,11 +88,11 @@
     "en": "English",
     "mul": "Multiple languages"
   },
-  "wikipedia": {
-    "included": "Included",
-    "includedIn": "You already have it inside “{{name}}”.",
-    "includedOpen": "Included in {{name}}. Open",
-    "includedHint": "To keep only this version, delete “{{name}}” first.",
+  "included": {
+    "label": "Included",
+    "in": "Already inside “{{name}}”.",
+    "open": "Included in {{name}}. Open",
+    "hint": "To keep only this version, delete “{{name}}” first.",
     "openIncluding": "Open “{{name}}”"
   }
 }

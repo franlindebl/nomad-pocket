@@ -83,6 +83,7 @@ for (const [key, r] of Object.entries(resources)) {
     else if (!subjectSlugs.has(r.subject)) err(w, `subject "${r.subject}" is not in courseSubjects`);
   } else if (r.subject !== undefined) warn(w, 'subject set but isCourse is not');
   if (r.medical !== undefined && typeof r.medical !== 'boolean') err(w, 'medical must be boolean');
+  if (r.sameAs !== undefined && !nonEmpty(r.sameAs)) err(w, 'sameAs is empty');
   if (r.url && r.version && !r.url.includes(`_${r.version}`)) warn(w, `url does not contain version ${r.version}`);
 }
 
@@ -185,6 +186,17 @@ for (const r of Object.values(resources)) {
   if (isObj(r) && r.isCourse && !courseSet.has(r.id)) err(`resources.${r.id}`, 'isCourse but missing from courses');
 }
 for (const id of Object.keys(resources)) if (!referenced.has(id)) warn(`resources.${id}`, 'not referenced by any tier, course or wikipedia option');
+// sameAs: the same work in other languages, so a group holds at most one resource per language.
+const sameAs = new Map();
+for (const r of Object.values(resources)) {
+  if (!isObj(r) || !nonEmpty(r.sameAs)) continue;
+  sameAs.set(r.sameAs, [...(sameAs.get(r.sameAs) ?? []), r]);
+}
+for (const [key, list] of sameAs) {
+  if (list.length < 2) warn(`sameAs.${key}`, `only ${list[0].id} uses it`);
+  const langs = list.map((r) => r.language);
+  if (new Set(langs).size !== langs.length) err(`sameAs.${key}`, `two resources in the same language (${list.map((r) => r.id).join(', ')})`);
+}
 
 // ---------------------------------------------------------------------------
 // URL checks

@@ -2,8 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { ListGroup, Screen, SectionHeader, Text } from '@/components/ui';
-import { catalog, getResource, loc, type WikipediaOption } from '@/features/catalog';
-import { useCoveringWikipedia } from '@/features/catalog/DownloadButton';
+import { catalog, getResource, type WikipediaOption } from '@/features/catalog';
+import { useOtherLanguage } from '@/features/catalog/editions';
 import { useCollections } from '@/features/library/collections';
 import { WIKIPEDIA } from '@/features/library/collections-core';
 import { ArchiveRow } from '@/features/library/components/ArchiveRow';
@@ -17,6 +17,12 @@ export default function WikipediaScreen() {
   const { t: tc } = useTranslation();
   const langs = useSettings((s) => s.contentLanguages);
   const collection = useCollections().find((c) => c.key === WIKIPEDIA);
+  const other = useOtherLanguage();
+  const shown = (['es', 'en'] as const).filter((l) => langs.includes(l));
+  // A language whose Wikipedia is the same as the app language's goes under "Other languages".
+  const isOther = (l: 'es' | 'en') => (catalog.wikipedia[l] ?? []).every((o) => other.has(o.resourceId));
+  const main = shown.filter((l) => !isOther(l));
+  const others = shown.filter(isOther);
   return (
     <Screen>
       <View style={{ gap: space.xs, paddingTop: space.md }}>
@@ -36,29 +42,42 @@ export default function WikipediaScreen() {
           </ListGroup>
         </>
       ) : null}
-      {(['es', 'en'] as const)
-        .filter((l) => langs.includes(l))
-        .map((lang) => (
-          <View key={lang}>
-            <SectionHeader title={`${t('wikipedia')} · ${tc(`language.${lang}`)}`} />
-            <ListGroup>
-              {(catalog.wikipedia[lang] ?? []).map((opt) => (
-                <WikipediaRow key={opt.id} option={opt} />
-              ))}
-            </ListGroup>
-          </View>
-        ))}
+      {main.map((lang) => (
+        <View key={lang}>
+          <SectionHeader title={`${t('wikipedia')} · ${tc(`language.${lang}`)}`} />
+          <WikipediaList lang={lang} />
+        </View>
+      ))}
+      {others.length ? (
+        <>
+          <SectionHeader title={t('otherLanguages')} />
+          <Text variant="footnote" color="textSecondary" style={{ marginBottom: space.sm, paddingHorizontal: space.xs }}>
+            {t('otherLanguagesBody')}
+          </Text>
+          {others.map((lang) => (
+            <View key={lang} style={{ marginBottom: space.md }}>
+              <WikipediaList lang={lang} />
+            </View>
+          ))}
+        </>
+      ) : null}
     </Screen>
   );
 }
 
-/** One variant. When a bigger one already installed holds it, the row says which instead of what it is. */
+function WikipediaList({ lang }: { lang: 'es' | 'en' }) {
+  return (
+    <ListGroup>
+      {(catalog.wikipedia[lang] ?? []).map((opt) => (
+        <WikipediaRow key={opt.id} option={opt} />
+      ))}
+    </ListGroup>
+  );
+}
+
+/** One variant, named by its size option ("Completa (sin imágenes)"); ResourceRow says when a bigger one holds it. */
 function WikipediaRow({ option }: { option: WikipediaOption }) {
-  const { t } = useTranslation();
-  const covering = useCoveringWikipedia(option.resourceId);
   const r = getResource(option.resourceId);
   if (!r) return null;
-  const note = covering ? t('wikipedia.includedIn', { name: loc(covering.option.name) }) : null;
-  const description = note ? { es: note, en: note } : option.description;
-  return <ResourceRow resource={{ ...r, title: option.name, description }} showIcon={false} />;
+  return <ResourceRow resource={{ ...r, title: option.name, description: option.description }} showIcon={false} />;
 }

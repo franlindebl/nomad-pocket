@@ -17,6 +17,8 @@ import {
   type CatalogTier,
 } from '@/features/catalog';
 import { showDownloadError } from '@/features/catalog/DownloadButton';
+import { withoutHeld } from '@/features/catalog/editions-core';
+import { hasOrHeld, splitByLanguage, useOtherLanguage } from '@/features/catalog/editions';
 import { categoryHue, iconByName } from '@/features/catalog/icons';
 import { ResourceRow } from '@/features/catalog/ResourceRow';
 import { useContent } from '@/features/content/items';
@@ -39,9 +41,12 @@ export default function CategoryScreen() {
   const recommended = category?.tiers.find((x) => x.recommended) ?? category?.tiers[0];
   const [tierSlug, setTierSlug] = useState(recommended?.slug);
   const collection = useCollections().find((c) => c.key === slug);
+  const other = useOtherLanguage();
   if (!category) return null;
   const tier = category.tiers.find((x) => x.slug === tierSlug) ?? category.tiers[0];
   const h = hue(category.hue ?? categoryHue(category.slug));
+  const [inTier] = splitByLanguage(tierOwnResources(tier, langs), other);
+  const [, otherLanguages] = splitByLanguage(tierResources(category, category.tiers[category.tiers.length - 1], langs), other);
 
   return (
     <Screen contentStyle={{ paddingTop: insets.top + 56 }} contentInsetAdjustmentBehavior="never">
@@ -75,6 +80,7 @@ export default function CategoryScreen() {
             selected={x.slug === tier.slug}
             onSelect={() => setTierSlug(x.slug)}
             langs={langs}
+            other={other}
           />
         ))}
       </View>
@@ -85,9 +91,9 @@ export default function CategoryScreen() {
           {t('tierIncludes', { tier: loc(category.tiers.find((x) => x.slug === tier.includesTier)?.name) })}
         </Text>
       ) : null}
-      {tierOwnResources(tier, langs).length ? (
+      {inTier.length ? (
         <ListGroup>
-          {tierOwnResources(tier, langs).map((r) => (
+          {inTier.map((r) => (
             <ResourceRow key={r.id} resource={r} hue={category.hue} />
           ))}
         </ListGroup>
@@ -98,6 +104,20 @@ export default function CategoryScreen() {
           </Text>
         </Card>
       )}
+
+      {otherLanguages.length ? (
+        <>
+          <SectionHeader title={t('otherLanguages')} />
+          <Text variant="footnote" color="textSecondary" style={{ marginBottom: space.sm, paddingHorizontal: space.xs }}>
+            {t('otherLanguagesBody')}
+          </Text>
+          <ListGroup>
+            {otherLanguages.map((r) => (
+              <ResourceRow key={r.id} resource={r} hue={category.hue} />
+            ))}
+          </ListGroup>
+        </>
+      ) : null}
     </Screen>
   );
 }
@@ -108,26 +128,31 @@ function TierCard({
   selected,
   onSelect,
   langs,
+  other,
 }: {
   category: CatalogCategory;
   tier: CatalogTier;
   selected: boolean;
   onSelect: () => void;
   langs: string[];
+  /** The same works in another language: not in the pack (features/catalog/editions.ts). */
+  other: Set<string>;
 }) {
   const { t } = useTranslation('library');
   const { t: tc } = useTranslation();
   const { colors } = useTheme();
   const items = useContent((s) => s.items);
   const downloads = useDownloads((s) => s.records);
-  const resources = tierResources(category, tier, langs);
+  // What the pack downloads: no works in another language, no edition a bigger one in it holds.
+  const resources = withoutHeld(splitByLanguage(tierResources(category, tier, langs), other)[0]);
   // A failed or cancelled record doesn't make a resource "handled": enqueueDownload takes it again.
   const inFlight = (id: string) => {
     const status = downloads[id]?.status;
     return !!status && status !== 'failed' && status !== 'cancelled';
   };
-  const missing = resources.filter((r) => !items.some((i) => i.catalogId === r.id) && !inFlight(r.id));
-  const done = resources.length > 0 && resources.every((r) => items.some((i) => i.catalogId === r.id));
+  // An edition a bigger installed one holds is not missing (the text-only Wikibooks next to the one with images).
+  const missing = resources.filter((r) => !hasOrHeld(items, r.id) && !inFlight(r.id));
+  const done = resources.length > 0 && resources.every((r) => hasOrHeld(items, r.id));
 
   const downloadPack = () => {
     const size = sumMB(missing) * 1e6;

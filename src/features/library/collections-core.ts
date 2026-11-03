@@ -49,9 +49,21 @@ export function collectionOf(item: CollectionItem, index: CollectionIndex): stri
   return OTHER;
 }
 
-/** How many of a collection are on the phone: its catalog resources plus any extra archive filed in it. */
-export function collectionCount(catalogIds: string[], memberIds: (string | null)[]): { have: number; total: number } {
-  const known = new Set(catalogIds);
-  const extra = memberIds.filter((id) => !id || !known.has(id)).length;
-  return { have: memberIds.length, total: known.size + extra };
+/**
+ * How many of a collection are on the phone. `mainIds` are the catalog resources that count (the app's
+ * language, content with no counterpart in it, language-neutral ones); `otherIds` the same works in
+ * another language, which never count. `has` says whether a resource is on the phone anywhere (another
+ * collection may file it: a course, a book two categories list) or held by a bigger edition that is.
+ * Members outside both lists (imports, archives the catalog doesn't know) count as one more each.
+ */
+export function collectionCount(
+  mainIds: string[],
+  otherIds: string[],
+  memberIds: (string | null)[],
+  has: (id: string) => boolean,
+): { have: number; total: number } {
+  const main = new Set(mainIds);
+  const other = new Set(otherIds);
+  const extra = memberIds.filter((id) => !id || (!main.has(id) && !other.has(id))).length;
+  return { have: [...main].filter(has).length + extra, total: main.size + extra };
 }

@@ -85,6 +85,7 @@
         "en": "The NIH consumer health encyclopedia: diseases, conditions, drugs and supplements."
       },
       "language": "en",
+      "sameAs": "medlineplus",
       "url": "https://download.kiwix.org/zim/zimit/medlineplus.gov_en_all_2025-01.zim",
       "sizeMB": 1945,
       "version": "2025-01",
@@ -103,6 +104,7 @@
         "en": "Curated medical articles from Wikipedia, with images."
       },
       "language": "en",
+      "sameAs": "wikipedia_medicine",
       "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_en_medicine_maxi_2026-10.zim",
       "sizeMB": 1864,
       "version": "2026-10",
@@ -159,6 +161,7 @@
         "en": "Over 50,000 medicine and health articles from Spanish Wikipedia, text only."
       },
       "language": "es",
+      "sameAs": "wikipedia_medicine",
       "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_es_medicine_nopic_2026-10.zim",
       "sizeMB": 171,
       "version": "2026-10",
@@ -177,6 +180,7 @@
         "en": "Health information from the US National Library of Medicine: conditions, drugs and tests."
       },
       "language": "es",
+      "sameAs": "medlineplus",
       "url": "https://download.kiwix.org/zim/zimit/medlineplus.gov_es_all_2024-12.zim",
       "sizeMB": 1767,
       "version": "2024-12",
@@ -298,6 +302,7 @@
         "en": "Official US disaster planning: weather, fire, evacuation plans and emergency kits."
       },
       "language": "en",
+      "sameAs": "readygov",
       "url": "https://download.kiwix.org/zim/zimit/ready.gov_en_all_2026-10.zim",
       "sizeMB": 2064,
       "version": "2026-10",
@@ -485,6 +490,7 @@
         "en": "Official disaster preparedness guidance in Spanish: kits, family plans, severe weather and evacuation."
       },
       "language": "es",
+      "sameAs": "readygov",
       "url": "https://download.kiwix.org/zim/zimit/ready.gov_es_all_2026-10.zim",
       "sizeMB": 2066,
       "version": "2026-10",
@@ -519,6 +525,7 @@
         "en": "Open textbooks covering math, science, computing and more."
       },
       "language": "en",
+      "sameAs": "wikibooks_nopic",
       "url": "https://download.kiwix.org/zim/wikibooks/wikibooks_en_all_nopic_2026-04.zim",
       "sizeMB": 3508,
       "version": "2026-04",
@@ -553,6 +560,7 @@
         "en": "Tutorials, courses and learning materials for all levels."
       },
       "language": "en",
+      "sameAs": "wikiversity",
       "url": "https://download.kiwix.org/zim/wikiversity/wikiversity_en_all_nopic_2026-08.zim",
       "sizeMB": 1630,
       "version": "2026-08",
@@ -644,6 +652,7 @@
         "en": "Open textbooks with full illustrations and diagrams."
       },
       "language": "en",
+      "sameAs": "wikibooks_maxi",
       "url": "https://download.kiwix.org/zim/wikibooks/wikibooks_en_all_maxi_2026-04.zim",
       "sizeMB": 6178,
       "version": "2026-04",
@@ -746,6 +755,7 @@
         "en": "Free Spanish textbooks on science, languages, computing and more."
       },
       "language": "es",
+      "sameAs": "wikibooks_nopic",
       "url": "https://download.kiwix.org/zim/wikibooks/wikibooks_es_all_nopic_2025-10.zim",
       "sizeMB": 112,
       "version": "2025-10",
@@ -865,6 +875,7 @@
         "en": "Spanish Wikibooks textbooks with all illustrations."
       },
       "language": "es",
+      "sameAs": "wikibooks_maxi",
       "url": "https://download.kiwix.org/zim/wikibooks/wikibooks_es_all_maxi_2025-10.zim",
       "sizeMB": 350,
       "version": "2025-10",
@@ -933,6 +944,7 @@
         "en": "Step-by-step repair guides for electronics, appliances and vehicles."
       },
       "language": "en",
+      "sameAs": "ifixit",
       "url": "https://download.kiwix.org/zim/ifixit/ifixit_en_all_2025-12.zim",
       "sizeMB": 3571,
       "version": "2025-12",
@@ -967,6 +979,7 @@
         "en": "Step-by-step repair guides in Spanish for phones, computers, appliances and more."
       },
       "language": "es",
+      "sameAs": "ifixit",
       "url": "https://download.kiwix.org/zim/ifixit/ifixit_es_all_2026-03.zim",
       "sizeMB": 3681,
       "version": "2026-03",
@@ -1137,6 +1150,7 @@
         "en": "Interactive programming exercises: JavaScript, algorithms and data structures."
       },
       "language": "en",
+      "sameAs": "freecodecamp",
       "url": "https://download.kiwix.org/zim/freecodecamp/freecodecamp_en_all_2026-08.zim",
       "sizeMB": 8,
       "version": "2026-08",
@@ -1377,6 +1391,7 @@
         "en": "Interactive programming courses in Spanish: JavaScript, algorithms and challenges."
       },
       "language": "es",
+      "sameAs": "freecodecamp",
       "url": "https://download.kiwix.org/zim/freecodecamp/freecodecamp_es_all_2026-10.zim",
       "sizeMB": 12,
       "version": "2026-10",
@@ -1447,6 +1462,7 @@
         "en": "Interactive physics, chemistry, biology and math simulations from the University of Colorado, in Spanish."
       },
       "language": "es",
+      "sameAs": "phet",
       "url": "https://download.kiwix.org/zim/phet/phet_es_all_2026-08.zim",
       "sizeMB": 109,
       "version": "2026-08",
@@ -1466,6 +1482,7 @@
         "en": "Free courses and learning materials in Spanish."
       },
       "language": "es",
+      "sameAs": "wikiversity",
       "url": "https://download.kiwix.org/zim/wikiversity/wikiversity_es_all_maxi_2026-10.zim",
       "sizeMB": 41,
       "version": "2026-10",
@@ -1524,6 +1541,7 @@
         "en": "Interactive science and math simulations from the University of Colorado."
       },
       "language": "en",
+      "sameAs": "phet",
       "url": "https://download.kiwix.org/zim/phet/phet_en_all_2026-08.zim",
       "sizeMB": 109,
       "version": "2026-08",
@@ -1600,6 +1618,7 @@
         "en": "The best 50,000 articles, summarized with minimal images. Great for quick lookups."
       },
       "language": "es",
+      "sameAs": "wikipedia_top_mini",
       "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_es_top_mini_2026-10.zim",
       "sizeMB": 217,
       "version": "2026-10",
@@ -1617,6 +1636,7 @@
         "en": "The best 50,000 articles in full, without images."
       },
       "language": "es",
+      "sameAs": "wikipedia_top_nopic",
       "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_es_top_nopic_2026-10.zim",
       "sizeMB": 1209,
       "version": "2026-10",
@@ -1634,6 +1654,7 @@
         "en": "All 2+ million articles, summarized."
       },
       "language": "es",
+      "sameAs": "wikipedia_all_mini",
       "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_es_all_mini_2026-10.zim",
       "sizeMB": 4114,
       "version": "2026-10",
@@ -1651,6 +1672,7 @@
         "en": "All 2+ million articles in full, without images."
       },
       "language": "es",
+      "sameAs": "wikipedia_all_nopic",
       "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_es_all_nopic_2026-10.zim",
       "sizeMB": 13298,
       "version": "2026-10",
@@ -1668,6 +1690,7 @@
         "en": "All 2+ million articles with every image. Needs a lot of space."
       },
       "language": "es",
+      "sameAs": "wikipedia_all_maxi",
       "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_es_all_maxi_2026-10.zim",
       "sizeMB": 36517,
       "version": "2026-10",
@@ -1685,6 +1708,7 @@
         "en": "The best 50,000 articles, summarized with minimal images. Great for quick lookups."
       },
       "language": "en",
+      "sameAs": "wikipedia_top_mini",
       "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_en_top_mini_2026-09.zim",
       "sizeMB": 297,
       "version": "2026-09",
@@ -1702,6 +1726,7 @@
         "en": "The best 50,000 articles in full, without images."
       },
       "language": "en",
+      "sameAs": "wikipedia_top_nopic",
       "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_en_top_nopic_2026-09.zim",
       "sizeMB": 2746,
       "version": "2026-09",
@@ -1719,6 +1744,7 @@
         "en": "All 6+ million articles, summarized."
       },
       "language": "en",
+      "sameAs": "wikipedia_all_mini",
       "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_en_all_mini_2026-09.zim",
       "sizeMB": 14387,
       "version": "2026-09",
@@ -1736,6 +1762,7 @@
         "en": "All 6+ million articles in full, without images."
       },
       "language": "en",
+      "sameAs": "wikipedia_all_nopic",
       "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_en_all_nopic_2026-06.zim",
       "sizeMB": 52691,
       "version": "2026-06",
@@ -1753,6 +1780,7 @@
         "en": "All 6+ million articles with every image. Needs a lot of space."
       },
       "language": "en",
+      "sameAs": "wikipedia_all_maxi",
       "url": "https://download.kiwix.org/zim/wikipedia/wikipedia_en_all_maxi_2026-08.zim",
       "sizeMB": 127418,
       "version": "2026-08",

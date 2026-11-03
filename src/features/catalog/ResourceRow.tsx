@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { IconBadge, PressableScale, Row, Text } from '@/components/ui';
@@ -6,11 +7,16 @@ import { space, type Hue } from '@/theme';
 
 import { categoryHue, categoryIcon } from './icons';
 import { DownloadButton, LanguageTag } from './DownloadButton';
+import { useCovering } from './editions';
 import { loc } from './index';
 import type { CatalogResource } from './types';
 
 export function ResourceRow({ resource, hue, showIcon = true }: { resource: CatalogResource; hue?: Hue; showIcon?: boolean }) {
+  const { t } = useTranslation();
   const Icon = categoryIcon(resource.category);
+  // A bigger edition on the phone already holds this one: say which instead of what it is.
+  const covering = useCovering(resource.id);
+  const description = covering ? t('included.in', { name: covering.name }) : loc(resource.description);
   // The download button sits beside the row's button, not inside it, so VoiceOver can reach it.
   return (
     <View style={styles.row}>
@@ -29,7 +35,7 @@ export function ResourceRow({ resource, hue, showIcon = true }: { resource: Cata
             <LanguageTag language={resource.language} />
           </Row>
           <Text variant="footnote" color="textSecondary" numberOfLines={2}>
-            {loc(resource.description)}
+            {description}
           </Text>
         </View>
       </PressableScale>

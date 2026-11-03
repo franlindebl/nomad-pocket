@@ -13,6 +13,7 @@ import { NomadZim, isNomadZimAvailable } from '../../../modules/nomad-zim';
 
 import { dropDocuments, indexDocuments, reconcileDocuments } from './documents';
 import { looksMedical } from './medical';
+import { offerRedundantCleanup } from './redundant';
 import { fallbackZimId, retargetSources, zimFileStem, zimRegistrationId } from './register-core';
 import { closeArchive, excludeFromBackup, openArchive, type ZimInfo } from './zim';
 
@@ -171,8 +172,12 @@ export async function registerZimFile(
 }
 
 registerCompletionHandler('zim', async (file, record) => {
+  // An update of an archive already here replaces it: only a new one can make smaller editions redundant.
+  const catalogId = str((record.meta as ZimDownloadMeta | undefined)?.catalogId);
+  const isNew = !catalogId || !listItems('zim').some((i) => i.catalogId === catalogId);
   const item = await registerZimFile(file.uri, record.meta);
   indexDocuments(item.id);
+  if (isNew) offerRedundantCleanup(item);
 });
 
 onItemRemoved('zim', (item) => {

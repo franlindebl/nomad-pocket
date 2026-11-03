@@ -14,6 +14,11 @@ export type CatalogResource = {
   title: Localized;
   description: Localized;
   language: ContentLanguage;
+  /**
+   * Shared by the same work in other languages ("ifixit" on ifixit_es_all and ifixit_en_all). The one
+   * not in the app's language goes under "Other languages" (features/catalog/editions-core.ts).
+   */
+  sameAs?: string;
   /** Direct .zim URL of the pinned version (fallback when OPDS is unreachable). */
   url: string;
   sizeMB: number;

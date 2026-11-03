@@ -6,6 +6,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { Card, Chip, IconBadge, Row, Screen, SectionHeader, Text } from '@/components/ui';
 import { catalog, courseResources, getResource, loc } from '@/features/catalog';
+import { splitByLanguage, useOtherLanguage } from '@/features/catalog/editions';
 import { iconByName } from '@/features/catalog/icons';
 import { useItems } from '@/features/content/items';
 import { CourseCard } from '@/features/courses/CourseCard';
@@ -24,6 +25,7 @@ export default function CoursesScreen() {
   const [subject, setSubject] = useState<string | null>(null);
   const [, setTick] = useState(0);
   const collection = useCollections().find((c) => c.key === COURSES);
+  const other = useOtherLanguage();
 
   // Progress depends on reader history, which changes outside this screen.
   useFocusEffect(useCallback(() => setTick((n) => n + 1), []));
@@ -32,7 +34,11 @@ export default function CoursesScreen() {
   const available = courseResources(langs);
   const subjects = catalog.courseSubjects.filter((s) => available.some((r) => r.subject === s.slug));
   const filtered = subject ? available.filter((r) => r.subject === subject) : available;
-  const notInstalled = filtered.filter((r) => !installed.some((i) => i.catalogId === r.id));
+  // The same course in another language goes last, under "Other languages" (features/catalog/editions.ts).
+  const [notInstalled, otherLanguages] = splitByLanguage(
+    filtered.filter((r) => !installed.some((i) => i.catalogId === r.id)),
+    other,
+  );
 
   return (
     <Screen title={t('common:tabs.courses')}>
@@ -80,6 +86,19 @@ export default function CoursesScreen() {
           <CourseCard key={r.id} resource={r} wide />
         ))}
       </Row>
+      {otherLanguages.length ? (
+        <>
+          <SectionHeader title={t('library:otherLanguages')} />
+          <Text variant="footnote" color="textSecondary" style={{ paddingHorizontal: space.xs }}>
+            {t('library:otherLanguagesBody')}
+          </Text>
+          <Row style={{ flexWrap: 'wrap', marginTop: space.md }} gap={space.md} align="stretch">
+            {otherLanguages.map((r) => (
+              <CourseCard key={r.id} resource={r} wide />
+            ))}
+          </Row>
+        </>
+      ) : null}
     </Screen>
   );
 }

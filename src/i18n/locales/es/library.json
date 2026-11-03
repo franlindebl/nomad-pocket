@@ -56,5 +56,14 @@
   "countLabel": "{{have}} de {{total}} descargados",
   "haveOnDevice": "{{have}} de {{total}} en tu dispositivo · {{size}}",
   "noneOnDevice": "0 de {{total}} descargados",
-  "toDownload": "Para descargar"
+  "toDownload": "Para descargar",
+  "otherLanguages": "Otros idiomas",
+  "otherLanguagesBody": "Lo mismo en otro idioma. Opcional: no cuenta en el total ni entra en los packs.",
+  "redundant": {
+    "title_one": "Ya no necesitas «{{name}}»",
+    "title_other": "Ya no necesitas {{count}} archivos",
+    "body_one": "Todo su contenido ya está en «{{holder}}», que acabas de descargar. ¿Borrar el archivo? Liberas {{size}}.",
+    "body_other": "{{names}}\n\nTodo su contenido ya está en «{{holder}}», que acabas de descargar. ¿Borrar los archivos? Liberas {{size}}.",
+    "keep": "Mantener"
+  }
 }

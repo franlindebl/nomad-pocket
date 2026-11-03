@@ -333,6 +333,41 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-02 — Map: one mark per place (no basemap icon under our points)
+
+The owner saw points "outlined in blue" with a blue name that turned into a plain dot with a
+grey name when zooming. Every supermarket, fountain and town hall was drawn twice at the same
+spot: our emergency dot, and Protomaps' POI icon (a rounded square framed in the category
+colour, blue for shops and grey for civic, with its label in that colour). Our dot sat inside
+the frame, and MapLibre's label collisions showed our grey name at one zoom and the basemap's
+coloured one at the next. `style.ts` (`skipOurPois`) now leaves every emergency kind out of
+the basemap `pois` layer; bars, shops, post offices and the rest keep their icons. Side
+effect: hiding a category with the points button also hides those places from the basemap.
+Checked on the iOS 27 simulator with the real Andorra package at z15–18 (BonÀrea at z16:
+framed dot with a blue name before, a single green dot after); the generated style passes
+`validateStyleMin`.
+
+### 2026-11-02 — Library counts: editions held, other languages apart
+The owner saw "Wikipedia 1 de 10" with the complete text-only Wikipedia installed. The 10 were five Spanish
+plus five English variants, and the count ignored that the installed one holds three smaller ones.
+Decisions (owner): the same work in another language goes under "Otros idiomas", out of counts and packs,
+even when that one is the only copy installed; WikiMed (en) pairs with Wikipedia médica (es); after a
+download, offer to delete the smaller editions it holds, naming the holder.
+- `features/catalog/editions-core.ts` replaces `wikipedia-core.ts`: edition coverage for any Kiwix
+  `<book>_{top,all}_{mini,nopic,maxi}` (Wikipedia, Wikibooks), `otherLanguageIds` from the new `sameAs`
+  key in `catalog.json` (14 groups: the five Wikipedia sizes, Wikipedia médica, MedlinePlus, Ready.gov,
+  Wikibooks ×2, iFixit, freeCodeCamp, PhET, Wikiversity), `withoutHeld` for packs.
+- Counts: Wikipedia now 4 de 5 in the owner's case. A Spanish user's totals: Wikipedia 10 → 5, Medicina 11 → 9,
+  Supervivencia 18 → 17, Educación 21 → 18, Bricolaje 6 → 5, Informática 18 → 17, Cursos 14 → 11.
+- Packs no longer download the English duplicate: Educación esencial 3.7 GB → 0.2 GB (it carried English
+  Wikibooks), Medicina estándar 4.2 → 2.3 GB, Supervivencia estándar 11.9 → 9.8 GB, Bricolaje completo
+  10.5 → 6.9 GB; the complete Educación pack no longer takes Wikibooks text-only next to the one with images.
+- Fixed: a collection never reached 100 % when another collection filed one of its archives (courses
+  listed in Computing, Medicina and Educación; "Comida para emergencias" in Agricultura). Collections now
+  count and list the catalog archives they offer wherever they are filed.
+- New archive → `library/redundant.ts` asks "Ya no necesitas «…»", naming the archive that holds it and
+  the space it frees.
+
 ### 2026-11-02 — Courses: every card full width
 In "Explorar cursos" the cards sat in a wrapping row and each took the width of its text (owner's
 screenshot on build 36). `CourseCard`'s wide style is now `width: '100%'` instead of `alignSelf: 'stretch'`,

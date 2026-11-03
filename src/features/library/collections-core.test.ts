@@ -57,7 +57,21 @@ test('courses, known categories and the rest', () => {
 });
 
 test('count: catalog resources plus extra archives filed in the collection', () => {
-  assert.deepEqual(collectionCount(['a', 'b', 'c'], []), { have: 0, total: 3 });
-  assert.deepEqual(collectionCount(['a', 'b', 'c'], ['a', 'c']), { have: 2, total: 3 });
-  assert.deepEqual(collectionCount(['a', 'b'], ['a', null, 'imported']), { have: 3, total: 4 });
+  const none = () => false;
+  assert.deepEqual(collectionCount(['a', 'b', 'c'], [], [], none), { have: 0, total: 3 });
+  const installed = new Set(['a', 'c']);
+  assert.deepEqual(collectionCount(['a', 'b', 'c'], [], ['a', 'c'], (id) => installed.has(id)), { have: 2, total: 3 });
+  assert.deepEqual(collectionCount(['a', 'b'], [], ['a', null, 'imported'], (id) => id === 'a'), { have: 3, total: 4 });
+});
+
+test('a resource filed in another collection, or held by a bigger edition, still counts', () => {
+  // freeCodeCamp is filed under Courses, but Computing lists it too; "top" is inside the installed "all".
+  const has = (id: string) => ['freecodecamp_es_all', 'wiki_all'].includes(id) || id === 'wiki_top';
+  assert.deepEqual(collectionCount(['freecodecamp_es_all', 'devdocs'], [], [], has), { have: 1, total: 2 });
+  assert.deepEqual(collectionCount(['wiki_top', 'wiki_all', 'wiki_maxi'], [], ['wiki_all'], has), { have: 2, total: 3 });
+});
+
+test('the same work in another language neither counts nor adds to the total when installed', () => {
+  const has = (id: string) => id === 'ifixit_en';
+  assert.deepEqual(collectionCount(['ifixit_es', 'stack_en'], ['ifixit_en'], ['ifixit_en'], has), { have: 0, total: 2 });
 });
