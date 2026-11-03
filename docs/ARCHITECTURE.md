@@ -1388,7 +1388,8 @@ started on the phone shows in the car and the other way round.
 - **Vital answers** (`chats.ts`). A question (intent `search`) whose best card is vital with coverage ≥ 0.5
   and reach ≥ 0.75 is answered with `cardAnswer`: header, the card's text unchanged but for a US source's "911",
   shown as the local number from `emergencyNumber()` (`cardBody`; the guide screen does the same), the notes outside it
-  (that the original says 911, or the number; the card's own `note`) and its provenance, cited as
+  (that the original says 911, or the number; for a US source's Poison Control, Spain's toxicology line to people in
+  Spain or that 1-800-222-1222 only works in the US; the card's own `note`) and its provenance, cited as
   source [1] (`guide` / card id). No model call: it's instant, the same on every model, and nothing is
   paraphrased (a 2 s "Buscando en la guía de emergencias…" comes first, `GUIDE_PAUSE_MS`: a whole page appearing at
   once read as a glitch; the chat then scrolls so the question sits at the top and the card reads from its first

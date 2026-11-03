@@ -238,8 +238,33 @@ export function cardBody(card: GuideCard, lang: Lang, emergencyNumber: string): 
   return swapsNumber(t, emergencyNumber) ? t.body.replace(/\b9-?1-?1\b/g, emergencyNumber) : t.body;
 }
 
-/** Notes shown outside the card's text: the local emergency number (or that it stands for the source's 911), and the card's own note. */
-export function cardNotes(card: GuideCard, lang: Lang, emergencyNumber: string): string[] {
+/** A US source that sends the reader to US Poison Control (its number, or just "poison control center"). */
+const US_POISON_RE = /poison control|poison help|control de intoxicaciones|1-800-222-1222/i;
+/** Countries Poison Help (1-800-222-1222) answers: the US and its territories in regions.json. */
+const POISON_HELP_COUNTRIES = new Set(['us', 'pr']);
+
+/** The note that points a US source's poison line to one that works where the person is, if any. */
+function poisonNote(text: GuideText, lang: Lang, country: string | null): string | null {
+  // A pet poison line is the vet's business, not a human one's.
+  const human = text.body.replace(/pet poison control/gi, '');
+  if (text.kind === 'own' || !country || POISON_HELP_COUNTRIES.has(country) || !US_POISON_RE.test(human)) return null;
+  // Spain's Servicio de Información Toxicológica (INTCF), 24 h; the only national poison line the guide has a source for.
+  if (country === 'es') {
+    return lang === 'es'
+      ? 'En España, el Servicio de Información Toxicológica atiende las 24 horas en el 91 562 04 20.'
+      : 'In Spain, the Toxicology Information Service (Servicio de Información Toxicológica) answers 24 hours a day on 91 562 04 20.';
+  }
+  if (!text.body.includes('1-800-222-1222')) return null;
+  return lang === 'es'
+    ? 'El 1-800-222-1222 es el teléfono de toxicología de EE. UU. y solo funciona allí.'
+    : '1-800-222-1222 is the US poison line and only works there.';
+}
+
+/**
+ * Notes shown outside the card's text: the local emergency number (or that it stands for the source's 911), a poison
+ * line that works where the person is, and the card's own note. `country` is the one the number is for (null: unknown).
+ */
+export function cardNotes(card: GuideCard, lang: Lang, emergencyNumber: string, country: string | null = null): string[] {
   const t = card[lang];
   const out: string[] = [];
   if (swapsNumber(t, emergencyNumber)) {
@@ -251,6 +276,8 @@ export function cardNotes(card: GuideCard, lang: Lang, emergencyNumber: string):
   } else if (card.health || card.vital) {
     out.push(lang === 'es' ? `Número de emergencias: ${emergencyNumber}.` : `Emergency number: ${emergencyNumber}.`);
   }
+  const poison = poisonNote(t, lang, country);
+  if (poison) out.push(poison);
   if (t.note) out.push(t.note);
   return out;
 }
@@ -261,8 +288,8 @@ const HEADER: Record<Lang, string> = { es: 'Guía de emergencias', en: 'Emergenc
  * The answer a card gives on its own: its title, its text (the local number aside, unchanged), the notes outside it and where it comes
  * from, cited as source [1] so the chip opens the card.
  */
-export function cardAnswer(card: GuideCard, lang: Lang, emergencyNumber: string): string {
+export function cardAnswer(card: GuideCard, lang: Lang, emergencyNumber: string, country: string | null = null): string {
   const t = card[lang];
-  const notes = cardNotes(card, lang, emergencyNumber).map((n) => `> ${n}`);
+  const notes = cardNotes(card, lang, emergencyNumber, country).map((n) => `> ${n}`);
   return [`**${HEADER[lang]}: ${t.title}**`, cardBody(card, lang, emergencyNumber), ...notes, `*${provenance(t, lang)}* [1]`].join('\n\n');
 }

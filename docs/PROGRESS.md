@@ -333,6 +333,16 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-03 — Spain's toxicology line on US poison-control cards
+
+- Cards copied from US sources that send the reader to US Poison Control (cooking without power: 1-800-222-1222 in
+  both languages; pain relievers in English; stings and ticks: "poison control center") now get a note for people
+  in Spain: "Servicio de Información Toxicológica, 24 h, 91 562 04 20" (the INTCF line our own poisoning cards
+  already give). Elsewhere outside the US, a card with the 1-800 number says it only works in the US. Pet poison
+  lines are left alone. `cardNotes`/`cardAnswer` take the country of the emergency number (`emergencyNumber().country`).
+- The build 39 worktree (`../nomad-wt39`) is deleted.
+- Unit tests 489/489, tsc, lint, i18n clean; not checked on the simulator.
+
 ### 2026-11-03 — Guide cards show the local number, no 112 question for the US
 
 - Owner asked to fix what the screenshots turned up. Guide cards copied from US sources (heart attack, CPR, stroke,

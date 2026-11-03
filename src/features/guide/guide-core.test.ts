@@ -151,6 +151,25 @@ describe('guide answers', () => {
     assert.deepEqual(cardNotes(CARDS[5], 'es', '112'), []);
   });
 
+  test('a US poison line points to one that works where the person is', () => {
+    const poison = (body: string, kind: GuideText['kind'] = 'excerpt') =>
+      card('co', false, false, text('CO', ['co'], body, { kind }), text('CO', ['co'], body, { kind }));
+    const us = poison('Call 911 or your local Poison Control Center at 1-800-222-1222.');
+    assert.deepEqual(cardNotes(us, 'es', '112', 'es'), [
+      'El texto original es de EE. UU. y dice 911; aquí aparece tu número de emergencias, el 112.',
+      'En España, el Servicio de Información Toxicológica atiende las 24 horas en el 91 562 04 20.',
+    ]);
+    assert.deepEqual(cardNotes(us, 'en', '112', 'fr').slice(1), ['1-800-222-1222 is the US poison line and only works there.']);
+    assert.deepEqual(cardNotes(us, 'en', '911', 'us'), []);
+    assert.deepEqual(cardNotes(us, 'en', '112', null), [cardNotes(us, 'en', '112')[0]]);
+    // No number in the text: only Spain's line is worth adding.
+    const center = poison('Contact a qualified health care provider or poison control center.');
+    assert.deepEqual(cardNotes(center, 'es', '112', 'es'), ['En España, el Servicio de Información Toxicológica atiende las 24 horas en el 91 562 04 20.']);
+    assert.deepEqual(cardNotes(center, 'es', '112', 'fr'), []);
+    assert.deepEqual(cardNotes(poison('Call Poison Control.', 'own'), 'es', '112', 'es'), []);
+    assert.deepEqual(cardNotes(poison('Call your veterinarian or a pet poison control center.'), 'en', '112', 'es'), []);
+  });
+
   test('a vital answer is the card (local number aside), cited as source 1', () => {
     const a = cardAnswer(CARDS[0], 'es', '112');
     assert.ok(a.startsWith('**Guía de emergencias: RCP en adultos**\n\n'));

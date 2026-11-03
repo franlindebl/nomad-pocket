@@ -15,12 +15,12 @@ export default function GuideCardScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, i18n } = useTranslation('guide');
   const { colors } = useTheme();
-  const { number } = useEmergencyNumber();
+  const { number, country } = useEmergencyNumber();
   const lang = i18n.language === 'es' ? 'es' : 'en';
   const card = getGuideCard(id);
   if (!card) return <Stack.Screen options={{ title: '' }} />;
   const text = card[lang];
-  const notes = cardNotes(card, lang, number);
+  const notes = cardNotes(card, lang, number, country);
   const notice =
     text.kind === 'own' ? t('ownNotice') : text.kind === 'translation' ? t(text.translatedFrom === 'es' ? 'translationNoticeEs' : 'translationNotice') : null;
 

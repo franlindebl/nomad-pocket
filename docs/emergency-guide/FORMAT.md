@@ -57,7 +57,9 @@ Front matter, one `key: value` per line (no nesting, no quotes needed):
 4. **US details stay** (911, °F, gallons, inches, US brands). Write "911" as the source has it: when the person's
    emergency number is another one, the app shows that number in its place (`cardBody`, not in `own` cards) and a note
    outside the text says the original says 911 (since 2026-11-03, the owner's call: a vital card read in a hurry must
-   not send someone in Spain to dial 911). A metric equivalent may follow a US unit in brackets, marked as ours:
+   not send someone in Spain to dial 911). US Poison Control (1-800-222-1222, "poison control center") also stays in the
+   text: the app adds Spain's Servicio de Información Toxicológica (91 562 04 20) in a note for people in Spain, and
+   elsewhere outside the US says the 1-800 number only works there. A metric equivalent may follow a US unit in brackets, marked as ours:
    `95 °F [≈ 35 °C, nota de Nomad]` / `2 inches [≈ 5 cm, Nomad note]`. Nothing else in brackets.
 5. **Short**: the protocol, not the page. Aim for 120–350 words; leave out background, statistics, prevention (unless
    the card is about prevention), "learn more", course adverts, contact boxes. A vital card is read in a hurry: the steps

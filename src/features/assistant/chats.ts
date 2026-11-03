@@ -327,7 +327,8 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
     patchStreaming({ phase: 'searchingGuide' });
     await new Promise((resolve) => setTimeout(resolve, GUIDE_PAUSE_MS));
     if (!cancelled()) {
-      answerText = cardAnswer(vital, lang, emergencyNumber().number);
+      const here = emergencyNumber();
+      answerText = cardAnswer(vital, lang, here.number, here.country);
       sources = [{ n: 1, itemId: GUIDE_SOURCE, path: vital.id, title: vital[lang].title }];
       searched = true;
       patchStreaming({ phase: 'generating', text: answerText, sources });
