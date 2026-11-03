@@ -341,8 +341,9 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 - `version` 2.0.1, `ios.buildNumber` 40; store prebuild, archived and uploaded; tagged `v2.0.1-40`.
 - Play: store settings website now `https://nomad-pocket.app/` (published); the privacy URL change sent to review by
   the owner (the closed test is not affected: it is the same build and track).
-- Next: once 2.0.1 has its App Store version, set its privacy policy URL (es-ES, es-MX, en-US, en-GB) and send it to
-  review with the owner's OK.
+- App Store: version 2.0.1 created with build 40 (auto-release after approval); privacy policy URL
+  `https://nomad-pocket.app/privacy.html` (`#en` for en-US/en-GB) and support URL `https://nomad-pocket.app/` in the four
+  locales; "What's New" texts approved by the owner; **submitted to App Review 2026-11-04 00:28** (WAITING_FOR_REVIEW).
 
 ### 2026-11-03 — Checks before 2.0.1: Hexagon licensing, simulator, store privacy URLs
 
