@@ -5,145 +5,155 @@
 <h1 align="center">Nomad Pocket</h1>
 
 <p align="center">
-  <b>Tu kit de supervivencia sin conexión, en el móvil.</b><br>
-  Mapas con navegación, emergencias cercanas, primeros auxilios, Wikipedia y un asistente con IA<br>
-  que siguen funcionando cuando internet no: durante días, semanas o meses.<br>
+  <b>Navegador GPS y guías de supervivencia en tu móvil, aunque haya un apagón.</b><br>
+  Prepáralo hoy mientras tienes conexión; mañana funciona sin internet, sin cobertura y sin luz.<br>
+  Hospitales cercanos, una guía de emergencia, Wikipedia, cursos y una IA que vive en tu teléfono. Gratis y de código abierto.<br>
   <sub>Inspirada en <a href="https://github.com/Crosstalk-Solutions/project-nomad">Project N.O.M.A.D.</a> de Crosstalk Solutions.</sub>
 </p>
 
 <p align="center">
-  <img alt="iOS 16.4+" src="https://img.shields.io/badge/iOS-16.4%2B-black?logo=apple">
-  <img alt="Android 8+" src="https://img.shields.io/badge/Android-8%2B-3DDC84?logo=android&logoColor=white">
-  <img alt="Licencia: GPL-3.0-or-later" src="https://img.shields.io/badge/licencia-GPL--3.0--or--later-blue">
-  <img alt="Funciona sin conexión" src="https://img.shields.io/badge/funciona-100%25%20sin%20conexi%C3%B3n-e8582a">
-  <img alt="Sin rastreo" src="https://img.shields.io/badge/rastreo-ninguno-2f8a4c">
+  <a href="https://apps.apple.com/app/nomad-pocket-kit-offline/id6826502392"><img src="site/img/badge-app-store-es.svg" height="48" alt="Descargar en el App Store"></a><br>
+  <sub>Android · Google Play: muy pronto</sub>
 </p>
 
 <p align="center">
-  <a href="README.md">🇬🇧 Read in English</a>
+  <img alt="iOS 16.4+" src="https://img.shields.io/badge/iOS-16.4%2B-0c0c0c?logo=apple">
+  <img alt="Android 8+" src="https://img.shields.io/badge/Android-8%2B-0c0c0c?logo=android&logoColor=3DDC84">
+  <img alt="Licencia: GPL-3.0 o posterior" src="https://img.shields.io/badge/licencia-GPL--3.0--or--later-0c0c0c">
+  <img alt="Funciona sin conexión" src="https://img.shields.io/badge/funciona-100%25%20sin%20conexi%C3%B3n-FFD60A">
+  <img alt="Sin rastreo" src="https://img.shields.io/badge/rastreo-ninguno-FFD60A">
 </p>
 
 <p align="center">
-  <img src="docs/readme/hero-es.jpg" alt="Nomad Pocket: tu kit, Inicio, mapa sin conexión, emergencias cercanas y la biblioteca" width="100%">
+  <a href="https://nomad-pocket.app/">nomad-pocket.app</a> · <a href="README.md">🇬🇧 Read in English</a>
+</p>
+
+<p align="center">
+  <img src="docs/readme/hero-es.jpg" alt="Nomad Pocket: tu kit, Inicio con el número de emergencias, navegación sin conexión, emergencias cerca y el asistente sin conexión" width="100%">
 </p>
 
 ---
 
-## Por qué
+## ¿Y si mañana se cae internet?
 
-Cuando cae la red, el móvil deja de servir para casi todo. Un apagón como el de España y
-Portugal en abril de 2025, una DANA, un terremoto, un conflicto o simplemente estar lejos de
-cualquier antena: los mapas no cargan, el buscador no responde y la información que más
-necesitas se queda fuera de tu alcance.
+El 28 de abril de 2025, España y Portugal se quedaron sin luz durante horas. Las antenas de
+telefonía aguantaron lo que duraron sus baterías y muchos móviles se quedaron sin datos ni
+cobertura: sin mapas, sin buscador, sin forma de consultar qué hacer. Basta un apagón, un
+ciberataque, una tormenta o un fallo informático masivo (en julio de 2024 una sola
+actualización defectuosa tumbó millones de ordenadores en todo el mundo) para que tu móvil
+enmudezca justo cuando más lo necesitas.
 
-Y no solo por la naturaleza. Hoy todo funciona con software, y el software falla a gran
-escala: en julio de 2024 una sola actualización defectuosa dejó fuera de servicio millones
-de ordenadores en todo el mundo, con vuelos cancelados y hospitales y bancos afectados. Los
-ciberataques contra redes eléctricas, operadoras de telecomunicaciones y proveedores en la
-nube no paran de crecer, y un ataque masivo a esas infraestructuras podría dejar regiones
-enteras sin internet durante días o semanas. Cuanto menos dependamos de la conexión para lo
-esencial, más seguros estaremos.
+**Nomad Pocket guarda lo esencial en el propio teléfono**, para que siga funcionando cuando
+todo lo demás falla:
 
-**Nomad Pocket está hecha para ese momento.** La preparas una vez mientras tienes conexión y
-tu móvil sigue sabiendo dónde estás, cómo llegar a un sitio, dónde está el hospital o el agua
-potable más cercanos, cómo curar una herida y la respuesta a casi cualquier pregunta. Sin
-conexión, sin cuenta y sin servidores.
+- **Apagón**: sin luz, las antenas aguantan poco. Tus mapas, guías y plan siguen en tu móvil.
+- **Caída de internet o ciberataque**: falla tu operador o un gran servicio en la nube. Nada de lo que llevas depende de ellos.
+- **Tormenta o inundación**: cuando el temporal tumba la red, sabes dónde está el refugio, el agua o el hospital.
+- **Sin cobertura**: montaña, mar, una carretera perdida: rutas y respuestas sin una sola raya.
+- **De viaje**: en el extranjero sin roaming ni SIM local, con el mapa y los números de emergencia del país.
 
-Lleva la idea de [Project N.O.M.A.D.](https://github.com/Crosstalk-Solutions/project-nomad)
-(un servidor de conocimiento sin conexión) al dispositivo que todo el mundo lleva encima.
+Sin conexión, sin cuenta, sin servidores. Lleva la idea de
+[Project N.O.M.A.D.](https://github.com/Crosstalk-Solutions/project-nomad) (un servidor de
+conocimiento sin conexión) al dispositivo que todos llevamos encima.
 
-## Lista en un minuto
-
-<table>
-  <tr>
-    <td align="center" width="33%"><img src="docs/readme/es/welcome.jpg" width="240" alt="Bienvenida"></td>
-    <td align="center" width="33%"><img src="docs/readme/es/country.jpg" width="240" alt="Elige tu país"></td>
-    <td align="center" width="33%"><img src="docs/readme/es/kit.jpg" width="240" alt="Tu kit"></td>
-  </tr>
-  <tr>
-    <td align="center"><b>1. Abre la app</b><br>Idioma detectado, nada que configurar.</td>
-    <td align="center"><b>2. Elige tu país</b><br>Ya viene preseleccionado.</td>
-    <td align="center"><b>3. Descarga tu kit</b><br>Una propuesta calculada para tu país y tu móvil. Quita lo que no quieras.</td>
-  </tr>
-</table>
-
-Y ya está. Déjalo con Wi‑Fi mientras descarga; a partir de ahí todo funciona sin conexión.
-Inicio te muestra cómo de preparado estás y qué te falta, para que lo completes mientras
-aún tengas internet.
-
-## Qué incluye
-
-### 🆘 En una emergencia
-
-- **Emergencias cerca**: hospitales, farmacias, policía, bomberos, agua potable, refugios,
-  desfibriladores y más, ordenados por distancia y dirección, y con un toque para que te
-  guíe hasta allí. Sin conexión.
-- **Llamar al 112 / 911** con un toque y **compartir tu posición** (coordenadas y UTM) por
-  mensaje.
-- **Primeros auxilios** a un toque desde Inicio.
-- **Tu plan familiar**: puntos de encuentro, contactos y los datos médicos de cada uno,
-  también en un PDF para imprimir.
+## Listo en un minuto
 
 <table>
   <tr>
-    <td align="center" width="33%"><img src="docs/readme/es/home.jpg" width="240" alt="Inicio"></td>
-    <td align="center" width="33%"><img src="docs/readme/es/emergency.jpg" width="240" alt="Emergencias cerca"></td>
-    <td align="center" width="33%"><img src="docs/readme/es/plan.jpg" width="240" alt="Plan familiar"></td>
+    <td align="center" width="40%"><img src="docs/readme/es/kit.jpg" width="240" alt="Tu contenido sin conexión: el kit propuesto para tu país"></td>
+    <td>
+      <b>1. Elige tu país.</b> La app te propone un kit a la medida de tu país y del espacio de tu
+      teléfono: mapa y rutas, guías, Wikipedia y asistente. Desactiva lo que no quieras.<br><br>
+      <b>2. Descárgalo con wifi.</b> Déjalo descargando. Inicio te dice lo preparado que estás y lo
+      que falta, para completarlo mientras aún hay red.<br><br>
+      <b>3. Úsalo sin conexión.</b> En modo avión, en un apagón o en mitad del monte. Cuando haya
+      versiones nuevas de tus mapas o archivos, te avisa.
+    </td>
   </tr>
 </table>
 
-### 🗺️ Mapas y navegación sin conexión
+## Qué llevas dentro
 
-- **Una descarga por país, con todo dentro**: el mapa con el máximo detalle (todas las
-  calles, caminos y edificios), rutas paso a paso en coche, a pie y en bici, los puntos de
-  emergencia, y todas las calles, lugares y portales para el buscador (una dirección te lleva
-  a la puerta, o junto a ella si OpenStreetMap no tiene ese número).
-- **Mapa básico del mundo incluido en la app**: hay mapa desde el primer segundo; cada país se descarga con todo su detalle.
-- Vista de navegación que te sigue, haz de la brújula, lugares guardados, coordenadas y UTM.
-- Mapas y navegación sin conexión de todos los países (menos algunos territorios
-  deshabitados). Canadá, Rusia y Estados Unidos vienen con un nivel de zoom menos (z14), para
-  que el mapa no pase de 10 GB.
+**200+** fichas de emergencia · **100+** archivos de conocimiento · **14** cursos · **0 €**, sin compras ni anuncios
+
+### 🆘 Emergencias
+
+- **El número de emergencias de tu país** en un botón grande en Inicio, y un botón SOS en el mapa.
+- **Emergencias cerca**: hospitales, farmacias, desfibriladores, policía, bomberos, agua
+  potable y refugios, ordenados por distancia y dirección. Un toque y te lleva hasta allí.
+- **Comparte tu posición exacta** por mensaje (coordenadas y UTM). El GPS no necesita datos:
+  sabes dónde estás aunque no haya cobertura.
+- **Guía de emergencia**: más de 200 fichas de fuentes oficiales (reanimación, hemorragias,
+  quemaduras, atragantamiento, incendios, inundaciones…), textos breves pensados para leerse
+  con prisa, cada uno con su fuente. En la app desde el primer minuto, sin descargar nada.
 
 <table>
   <tr>
-    <td align="center" width="50%"><img src="docs/readme/es/map.jpg" width="240" alt="Mapa sin conexión"></td>
-    <td align="center" width="50%"><img src="docs/readme/es/your-maps.jpg" width="240" alt="Tus mapas"></td>
+    <td align="center" width="33%"><img src="docs/readme/es/home.jpg" width="240" alt="Inicio: llamar a emergencias y estado de tu preparación"></td>
+    <td align="center" width="33%"><img src="docs/readme/es/emergency.jpg" width="240" alt="Emergencias cerca, sin conexión"></td>
+    <td align="center" width="33%"><img src="docs/readme/es/firstaid.jpg" width="240" alt="Guía de emergencia con fichas de primeros auxilios"></td>
   </tr>
 </table>
 
-### 📚 Biblioteca de conocimiento
+<sub>Primeros auxilios e información médica: en iPhone y iPad.</sub>
 
-- **Wikipedia** a la medida de tu espacio: desde los artículos más leídos (~250 MB) hasta la
-  enciclopedia completa.
-- **Más de 90 colecciones seleccionadas**: medicina y primeros auxilios, supervivencia, agua
-  y comida, agricultura, educación, bricolaje y reparaciones, informática. Y miles más del catálogo de
-  [Kiwix](https://kiwix.org), o tus propios archivos ZIM.
-- Un lector con búsqueda en todo el texto, marcadores, buscar en la página, tamaño de letra
-  y modo oscuro.
-- **14 cursos** (salud, ciencia, matemáticas, programación…) con tu progreso guardado.
-
-### ✨ Un asistente con IA que funciona en tu móvil
-
-- Usa **Apple Intelligence** si tu iPhone o iPad lo tiene, o descarga un modelo abierto
-  (Qwen 3.5, Gemma 4) que funciona en local con llama.cpp. En Android, solo modelos
-  descargables.
-- **Responde a partir de tu biblioteca, citando las fuentes**, que puedes abrir: "¿cómo
-  potabilizo agua?" funciona en mitad de la nada.
-- Nada de lo que le preguntas sale del dispositivo.
+### 🗺️ Mapas y navegación
 
 <table>
   <tr>
-    <td align="center" width="50%"><img src="docs/readme/es/library.jpg" width="240" alt="Biblioteca"></td>
-    <td align="center" width="50%"><img src="docs/readme/es/assistant.jpg" width="240" alt="Asistente sin conexión"></td>
+    <td align="center" width="40%"><img src="docs/readme/es/navigation.jpg" width="240" alt="Navegación giro a giro sin conexión"></td>
+    <td>
+      <b>Tu país entero en el móvil</b>: cada calle, camino y edificio, en una sola descarga que
+      trae también sus rutas, sus puntos de emergencia y cada calle, lugar y portal para el
+      buscador.<br><br>
+      <b>Rutas en coche, a pie o en bici</b> sin red, con indicaciones por voz que siguen
+      guiándote con la pantalla bloqueada, y aviso del límite de velocidad de cada vía.<br><br>
+      Brújula, coordenadas y UTM, lugares guardados. Casi todos los países del mundo, y un mapa
+      básico del mundo incluido desde el primer segundo. Canadá, Rusia y Estados Unidos van por
+      regiones.
+    </td>
   </tr>
 </table>
 
-### 🎒 Prepárate
+### 📚 Biblioteca y ✨ asistente sin conexión
 
-- **Tu preparación**, en Inicio: mapa, guías, Wikipedia, asistente, plan familiar y mochila de
-  emergencia, cada uno con su estado, y un aviso cuando tu mapa se queda antiguo.
-- **Mochila de emergencia** calculada para tu hogar (litros de agua, calorías, días), con
-  avisos de caducidad.
+- **Wikipedia**, a la medida de tu espacio: desde sus artículos esenciales (~250 MB) hasta la
+  enciclopedia entera.
+- **Más de 100 archivos** de medicina, supervivencia, agua y alimentos, agricultura,
+  reparaciones, educación e informática, y miles más del catálogo de [Kiwix](https://kiwix.org),
+  o tus propios archivos ZIM.
+- Búsqueda de texto completo en todos tus libros, marcadores y lectura en oscuro o en modo
+  papel. **14 cursos** con seguimiento del progreso.
+- **Una IA que no necesita internet**: pregúntale «¿cómo potabilizo agua?» en mitad de la nada
+  y responde con tu biblioteca, con fuentes que puedes abrir. Usa **Apple Intelligence** donde
+  está disponible, o un modelo abierto que descargas (Qwen 3.5, Gemma 4) y que funciona en local
+  con llama.cpp; en Android, los modelos descargables son la única opción.
+- Las preguntas urgentes las responde con la guía de emergencia, incluso sin modelo. Dicta tus
+  preguntas: la voz se procesa en el dispositivo. Nada de lo que preguntas sale de tu móvil.
+
+<table>
+  <tr>
+    <td align="center" width="50%"><img src="docs/readme/es/library.jpg" width="240" alt="Biblioteca sin conexión con Wikipedia y colecciones"></td>
+    <td align="center" width="50%"><img src="docs/readme/es/assistant.jpg" width="240" alt="Asistente sin conexión respondiendo con fuentes"></td>
+  </tr>
+</table>
+
+### 🎒 Plan y mochila
+
+<table>
+  <tr>
+    <td align="center" width="40%"><img src="docs/readme/es/plan.jpg" width="240" alt="Plan familiar con puntos de encuentro y contactos"></td>
+    <td>
+      <b>Tu familia sabe qué hacer</b>: puntos de encuentro, contactos y datos de cada uno, también
+      en PDF para imprimir. Tu plan no sale del móvil salvo que tú lo compartas.<br><br>
+      <b>Una mochila de emergencia a la medida de tu hogar</b>: agua, comida y medicación
+      calculadas para tu casa y los días que elijas, con recordatorios locales antes de que algo
+      caduque.<br><br>
+      <b>Tu preparación</b> en Inicio: mapa, guías, Wikipedia, asistente, plan y mochila, cada uno
+      con su estado.
+    </td>
+  </tr>
+</table>
 
 ## Privada por diseño
 
@@ -154,7 +164,48 @@ de países disponibles, en servidores públicos (Kiwix y sus espejos, GitHub Rel
 Hugging Face y servidores públicos de Overpass, que solo ven los límites de una región). Las
 páginas de los libros que lees no pueden acceder a la red. Al abrir la app con conexión se
 consultan los catálogos en GitHub, que ve tu dirección IP.
-[Política de privacidad](https://franlindebl.github.io/nomad-pocket/privacy.html).
+[Política de privacidad](https://nomad-pocket.app/privacy.html).
+
+## Preguntas frecuentes
+
+<details>
+<summary><b>¿De verdad funciona sin internet?</b></summary>
+
+Sí. Solo necesitas conexión para descargar el contenido (mejor con wifi) y para buscar
+actualizaciones. Después, mapas, rutas, búsqueda de calles, puntos de emergencia, guía,
+biblioteca y asistente funcionan en modo avión.
+</details>
+
+<details>
+<summary><b>¿El GPS funciona sin datos?</b></summary>
+
+Sí. El GPS recibe la señal de los satélites, no de internet, así que el mapa te sitúa aunque
+no haya cobertura. La primera posición puede tardar algo más que con datos.
+</details>
+
+<details>
+<summary><b>¿Cuánto espacio ocupa?</b></summary>
+
+Tú eliges. El asistente de bienvenida propone un kit para tu país y tu espacio libre, y puedes
+desactivar cada pieza. El mapa de un país ocupa desde unas decenas de MB hasta varios GB.
+</details>
+
+<details>
+<summary><b>¿Qué dispositivos son compatibles? ¿Y Android?</b></summary>
+
+iPhone y iPad con iOS 16.4 o posterior, en el App Store. Android 8.0 o posterior llegará a
+Google Play con mapas, rutas, emergencias, biblioteca, plan y asistente; los primeros auxilios
+y la información médica solo están en iPhone y iPad. El asistente usa Apple Intelligence donde
+está disponible; si no, descargas un modelo desde la app (desde unos 500 MB; los más grandes
+necesitan más memoria).
+</details>
+
+<details>
+<summary><b>¿Sustituye a los servicios de emergencia?</b></summary>
+
+No. Te ayuda cuando no hay red, pero la IA puede equivocarse y la información médica no
+sustituye a un profesional. Si puedes, llama siempre al número de emergencias.
+</details>
 
 ## Código abierto, datos abiertos
 
@@ -184,20 +235,17 @@ Las ideas, los avisos de fallos y los pull requests son bienvenidos: lee antes
 compilar desde un clon limpio, las comprobaciones). Problemas de seguridad:
 [SECURITY.md](SECURITY.md). Buenos sitios para empezar:
 
-- **Pruébala en tu móvil** (compílala desde el código, abajo) y
-  [abre un issue](https://github.com/franlindebl/nomad-pocket/issues) con lo que falló o te
-  confundió.
+- **Pruébala en tu móvil** y [abre un issue](https://github.com/franlindebl/nomad-pocket/issues)
+  con lo que falló o te confundió.
 - **Traducciones**: la app habla español e inglés (`src/i18n/locales`).
 - **Contenido**: propón colecciones para el catálogo (`src/data/catalog.json`).
 - **Países**: ayuda a llevar la navegación sin conexión a más sitios (`scripts/routing/packs.json`).
 
 ## Estado
 
-Este README describe la versión **1.1.0** (descargas por país y rediseño de kit de
-supervivencia), en revisión en la App Store (build 23, desde el 28-10-2026; sustituyó a la 1.0.1
-en el mismo envío) y en TestFlight para los probadores del autor; hasta que salga, compila desde
-el código para probar lo descrito aquí. Google Play llegará pronto. Avance, pendientes
-y limitaciones conocidas: [docs/PROGRESS.md](docs/PROGRESS.md).
+En el [App Store](https://apps.apple.com/app/nomad-pocket-kit-offline/id6826502392) para iPhone
+y iPad; Android llegará muy pronto a Google Play. Avance, pendientes y limitaciones conocidas:
+[docs/PROGRESS.md](docs/PROGRESS.md).
 
 ## Para desarrolladores
 
@@ -216,17 +264,18 @@ npm run e2e            # suite funcional de Maestro en el simulador de iOS
 
 Necesita Node 22.6+, Xcode (27+ para el simulador de iOS 27 que usan Apple Intelligence y la
 suite E2E; las compilaciones normales pueden funcionar con Xcode 26) y Android Studio. No hace
-falta ninguna cuenta para compilar en simulador o emulador. Documentación (en inglés):
-[Desarrollo](docs/DEVELOPMENT.md) · [Arquitectura](docs/ARCHITECTURE.md) ·
+falta ninguna cuenta para compilar en simulador o emulador. Las capturas del README se generan
+a partir de las capturas de las tiendas con `python3 scripts/site/images.py`. Documentación (en
+inglés): [Desarrollo](docs/DEVELOPMENT.md) · [Arquitectura](docs/ARCHITECTURE.md) ·
 [Guía de estilo](docs/STYLE_GUIDE.md) · [Tests E2E](docs/E2E.md) · [Publicación](docs/RELEASE.md) ·
-[Plan del rediseño](docs/UX_SURVIVAL_PLAN.md) · [Contribuir](CONTRIBUTING.md) · [Seguridad](SECURITY.md) · [Guía para agentes](CLAUDE.md)
+[Android y Google Play](docs/ANDROID_PLAY.md) · [Contribuir](CONTRIBUTING.md) · [Seguridad](SECURITY.md) · [Guía para agentes](CLAUDE.md)
 
 ## Aviso
 
 Nomad Pocket es una herramienta de preparación, no sustituye a los servicios de emergencia
 ni al consejo médico profesional. Los mapas, los puntos de emergencia y las guías vienen de
-fuentes abiertas y pueden estar incompletos o desactualizados. En una emergencia, llama
-siempre a tu número de emergencias.
+fuentes abiertas y pueden estar incompletos o desactualizados, y la IA puede equivocarse. En
+una emergencia, llama siempre a tu número de emergencias.
 
 ## Créditos y licencia
 
@@ -240,3 +289,6 @@ copyright y texto de licencia, está en la app, en **Ajustes › Créditos y lic
 con `node scripts/licenses.mjs`). Datos de mapas © colaboradores de OpenStreetMap (ODbL); los
 archivos de `e2e/fixtures` son datos de prueba de terceros, ver
 [e2e/fixtures/README.md](e2e/fixtures/README.md).
+Apple, el logotipo de Apple, iPhone y iPad son marcas comerciales de Apple Inc., registradas en
+EE. UU. y en otros países. App Store es una marca de servicio de Apple Inc. Google Play es una
+marca comercial de Google LLC.

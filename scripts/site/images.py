@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Build the landing page's images (site/img) from the raw store captures.
+"""Build the landing page's and the README's images from the raw store captures.
 
 Reads docs/store/screenshots/<lang>/iphone/NN-name.png (the same simulator captures
 scripts/store-screenshots.py frames for the stores) and writes:
   site/img/screens/<lang>/<key>.webp   phone screens, 600 px wide (shown at ~300 pt, 2x)
   site/img/og-<lang>.jpg               1200 x 630 social card (Open Graph / X)
   site/img/apple-touch-icon.png        180 px, site/img/icon-512.png (manifest, JSON-LD)
+  docs/readme/<lang>/<key>.jpg         README screens, 480 px wide (shown at 240 px, 2x), 1 px panel border
+  docs/readme/hero-<lang>.jpg          README banner: five phones on the app's black, grid and corner ticks
 A screen missing in one language falls back to the other one, so the page never shows a hole;
 rerun after a new round of captures. Extra source folders (laid out like docs/store/screenshots)
 can be passed with --extra DIR; they are searched after the store captures.
@@ -19,6 +21,7 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / 'docs/store/screenshots'
 OUT = ROOT / 'site/img'
+README = ROOT / 'docs/readme'
 FONTS = ROOT / 'assets/fonts'
 ICON = ROOT / 'assets/images/icon.png'
 LANGS = ('es', 'en')
@@ -126,6 +129,44 @@ def og_card(lang: str, screen: Path | None, dst: Path):
     canvas.save(dst, quality=88, optimize=True, progressive=True)
 
 
+# The README banner's phones, left to right; the middle one sits higher.
+HERO = ('kit', 'home', 'navigation', 'emergency', 'assistant')
+
+
+def readme_screen(src: Path, dst: Path):
+    # JPEG has no transparency and GitHub's page is white or near black, so the screen gets
+    # square corners and a thin border, like the app's panels, instead of a rounded phone.
+    img = Image.open(src).convert('RGB')
+    img = img.resize((480, round(480 * img.height / img.width)), Image.LANCZOS)
+    ImageDraw.Draw(img).rectangle((0, 0, img.width - 1, img.height - 1), outline=BORDER, width=2)
+    img.save(dst, quality=84, optimize=True, progressive=True)
+
+
+def readme_hero(shots, dst: Path):
+    pw, gap, margin, lift = 340, 44, 80, 64
+    ph = round(pw * 2868 / 1320)
+    W = len(shots) * (pw + 20) + (len(shots) - 1) * gap + 2 * margin
+    H = ph + 20 + lift + 2 * margin
+    canvas = Image.new('RGB', (W, H), BG)
+    draw = ImageDraw.Draw(canvas)
+    for x in range(0, W, 40):
+        draw.line([(x, 0), (x, H)], fill=(18, 18, 18))
+    for y in range(0, H, 40):
+        draw.line([(0, y), (W, y)], fill=(18, 18, 18))
+    corner_ticks(draw, (28, 28, W - 28, H - 28), size=26)
+    mid = len(shots) // 2
+    for i, src in enumerate(shots):
+        if not src:
+            continue
+        shot = Image.open(src).convert('RGB').resize((pw, ph), Image.LANCZOS)
+        frame = rounded(Image.new('RGB', (pw + 20, ph + 20), (26, 26, 26)), 56)
+        frame.alpha_composite(rounded(shot, 46), (10, 10))
+        # Phones step down from the middle one, which sits highest.
+        y = margin + round(lift * abs(i - mid) / max(mid, 1))
+        canvas.paste(frame, (margin + i * (pw + 20 + gap), y), frame)
+    canvas.save(dst, quality=86, optimize=True, progressive=True)
+
+
 def main(argv):
     roots = [SRC]
     args = list(argv)
@@ -147,6 +188,14 @@ def main(argv):
             img.save(folder / f'{key}.webp', quality=82, method=6)
             print(f'  {lang}/{key}: {src.relative_to(src.parents[2])}')
         og_card(lang, find_capture(lang, SCREENS['home'], roots), OUT / f'og-{lang}.jpg')
+
+        readme = README / lang
+        readme.mkdir(parents=True, exist_ok=True)
+        for key, words in SCREENS.items():
+            src = find_capture(lang, words, roots)
+            if src:
+                readme_screen(src, readme / f'{key}.jpg')
+        readme_hero([find_capture(lang, SCREENS[k], roots) for k in HERO], README / f'hero-{lang}.jpg')
 
     icon = Image.open(ICON).convert('RGB')
     icon.resize((180, 180), Image.LANCZOS).save(OUT / 'apple-touch-icon.png', optimize=True)

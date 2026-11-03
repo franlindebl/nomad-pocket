@@ -204,10 +204,12 @@ subsets in `site/fonts`, the document pages) and `landing.css`. No analytics and
 - **Images:** `python3 scripts/site/images.py [--extra DIR]` turns the raw store captures
   (`docs/store/screenshots/<lang>/iphone/NN-name.png`, matched by name: home, navigation|route, emergency,
   firstaid|guide, assistant, library, kit) into `site/img/screens/<lang>/*.webp` and draws the social cards
-  `site/img/og-<lang>.jpg`. A screen missing in one language falls back to the other; missing in both, the page
+  `site/img/og-<lang>.jpg`, plus the README's screens (`docs/readme/<lang>/*.jpg`) and banner
+  (`docs/readme/hero-<lang>.jpg`). A screen missing in one language falls back to the other; missing in both, the page
   shows the feature's icon instead of a phone. Rerun `build.mjs` after it.
 - **Google Play:** when the listing is public, set `GOOGLE_PLAY` in `build.mjs` to the store URL and rebuild:
-  the "coming soon" chip becomes Google's badge (`site/img/badge-google-play-<lang>.png`). Also drop
+  the "coming soon" chip becomes Google's badge (`site/img/badge-google-play-<lang>.png`). In both READMEs, swap the
+  "Google Play: coming soon" line under the App Store badge for that badge, and update Status and the FAQ. Also drop
   "Próximamente / coming soon" from the Android FAQ answers.
 - **Store badges** are Apple's and Google's official artwork, unmodified (Apple: marketing toolbox, black,
   es-es / en-us). Keep the trademark lines in the footer.

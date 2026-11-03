@@ -333,6 +333,23 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-03 — README rewritten around the redesign and the website's copy
+
+- Both READMEs (en, es) now open with the website's headline, the App Store badge (Google Play: coming soon)
+  and a link to nomad-pocket.app; the "Why" became the site's blackout story plus its scenarios; "Ready in a
+  minute" follows the site's three steps; each feature block takes the site's copy and adds what the old
+  README missed: the emergency guide (200+ cards, official sources), the country's number on Home and the SOS
+  button, spoken guidance with the screen locked, speed limits, dictation, answers from the guide without a
+  model, content update notices. Added a short FAQ (collapsible), the Android note on first aid and medical
+  information, Apple/Google trademark lines; Status no longer names builds (it went stale); privacy link on
+  nomad-pocket.app; `UX_SURVIVAL_PLAN.md` swapped for `ANDROID_PLAY.md` in the developer docs.
+- Screens: the old light, orange captures of 2026-10-26 are gone (welcome, country, map and your-maps
+  deleted; the owner agreed onboarding shots weren't needed, the kit screen covers it).
+  `scripts/site/images.py` now also writes `docs/readme/<lang>/*.jpg` (480 px, 1 px panel border) and the
+  banner `docs/readme/hero-<lang>.jpg` (kit, Home, navigation, emergency, assistant on the app's black) from
+  the same store captures as the site; the site's images come out byte-identical. `docs/RELEASE.md` says
+  so, and that the READMEs need the Play badge when `GOOGLE_PLAY` is set.
+
 ### 2026-11-03 — Spain's toxicology line on US poison-control cards
 
 - Cards copied from US sources that send the reader to US Poison Control (cooking without power: 1-800-222-1222 in
