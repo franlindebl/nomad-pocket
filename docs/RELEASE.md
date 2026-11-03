@@ -239,10 +239,10 @@ subsets in `site/fonts`, the document pages) and `landing.css`. No analytics and
 Policies, current state of the tracks, the health gate and the step-by-step release with Play Console's
 gotchas: **`docs/ANDROID_PLAY.md`** (start there). This section keeps the build and signing details.
 
-Play Console: personal developer account; Nomad Pocket is app <app-id>, created 2026-10-29. **1.1.0 (versionCode 23) on
-internal testing since 2026-10-29** (tag `v1.1.0-android-23` on fc268d6, the commit it was built from;
-testers: email list "Nomad Pocket interno", the owner's two accounts; join link
-the internal-test link in Play Console). **1.1.0 (24) on closed testing**
+Play Console: personal developer account; Nomad Pocket was created there on 2026-10-29. **1.1.0 (versionCode 23)
+on internal testing since 2026-10-29** (tag `v1.1.0-android-23` on fc268d6, the commit it was built from;
+testers: email list "Nomad Pocket interno", the owner's two accounts; join link in Play Console).
+**1.1.0 (24) on closed testing**
 (track "Prueba cerrada - Alpha", the account's "Friends and family" list;
 all countries), sent to Google's review on 2026-10-29 with the listings and App content forms (tag
 `v1.1.0-android-24` on 10a265b) and **rejected** the same day: health apps need an organization account.

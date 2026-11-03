@@ -42,7 +42,8 @@ npm install
   (simulator) and it registers at startup.
 - `prepare` (`scripts/git-hooks.mjs`) sets `git config core.hooksPath .githooks` only when no
   hooks path is set (an existing one is left alone) (pre-commit: tsc, lint, unit tests, i18n).
-  Skip once with `git commit --no-verify`.
+  Skip once with `git commit --no-verify`. The other hooks in `.githooks/` only run a personal hook of
+  the same name from `.git/hooks.local/` when there is one (git skips `.git/hooks` once `core.hooksPath` is set).
 - After any dependency change run `node scripts/licenses.mjs` (regenerates
   `src/data/licenses.json`, the Credits screen; `--check` fails if it is stale). When you bump a
   fetch script, podspec or Gradle version of a native library, update

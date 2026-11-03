@@ -333,6 +333,14 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-03 — Repo: tidy before promoting it
+
+- Docs: dropped Play account internals (ids, test links, other apps) and street-level test examples; the dev
+  network notes now just say "a TLS-intercepting network".
+- Git hooks: `.githooks/` keeps pre-commit (tsc, lint, tests, i18n, guide); commit-msg, post-commit and pre-push
+  only run a personal hook of the same name from `.git/hooks.local/` when there is one, so contributors get
+  nothing beyond the checks.
+
 ### 2026-11-03 — Android / Google Play screenshots in the yellow style
 
 - 8 + 8 Android captures redone like the iOS ones (`docs/store/marketing/<lang>/android/`, `docs/ANDROID_PLAY.md`

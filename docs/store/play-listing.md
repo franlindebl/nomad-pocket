@@ -4,7 +4,7 @@ Policies, track state and release steps: `docs/ANDROID_PLAY.md`. This file holds
 
 Everything Play Console asks before the first release, adapted from the App Store listing approved by
 the owner (`listing-1.1.0.md`; the owner approved this file on 2026-10-29). **In Play Console since
-2026-10-29** (app id <app-id>): app created, App content forms saved, store settings, the es-ES
+2026-10-29**: app created, App content forms saved, store settings, the es-ES
 listing texts, icon and feature graphic, and later the same day the es-ES and en-US listings complete with
 the Android phone screenshots (`docs/store/marketing/<lang>/android/`). Automatic protection (Play's installer check) is **off**: it injects Google's
 closed code into the app (owner's decision, no proprietary code next to libkiwix). Play limits: app name 30, short description 80, full description 4000.

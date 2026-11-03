@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# core.hooksPath (.githooks) makes git skip .git/hooks: this runs a personal hook of the same name from
+# .git/hooks.local/ when there is one (never in the repo).
+set -euo pipefail
+hook="$(git rev-parse --git-common-dir)/hooks.local/$(basename "$0")"
+if [ -x "$hook" ]; then exec "$hook" "$@"; fi

@@ -15,7 +15,8 @@ Details that already live elsewhere are linked, not repeated:
 ## 1. Hard rules (read before touching Android or Play Console)
 
 1. **No health features on Android.** The Play account is personal. Google Play only lets organization
-   accounts publish apps with health features, and the owner won't create one. Anything about health, medicine or first aid is gated on `HEALTH_FEATURES`
+   accounts publish apps with health features, and the owner won't create one. Anything about health, medicine
+   or first aid is gated on `HEALTH_FEATURES`
    (`src/lib/health.ts`, false on Android). New code that touches health **must** be gated on it (section 4).
 2. **`HEALTH_FEATURES` is fixed at build time, never remote.** Play forbids turning on, after review, features
    the declarations don't list. No server flag, no catalog field, no kv switch may bring health back on Android.
@@ -41,7 +42,7 @@ Details that already live elsewhere are linked, not repeated:
 | Item | State |
 |---|---|
 | Play account | Personal |
-| App | Nomad Pocket, id <app-id>, package `com.fjlinde.nomadpocket`, created 2026-10-29 |
+| App | Nomad Pocket, package `com.fjlinde.nomadpocket`, created 2026-10-29 |
 | Internal testing | 1.1.0 (23), list "Nomad Pocket interno" (the owner's two accounts). Still has health features: internal only |
 | Closed testing ("Prueba cerrada - Alpha") | 1.1.0 (24) **rejected** 2026-10-29 (health apps need an organization). **1.1.0 (26) approved and live for testers 2026-10-30** (sent the same day with the redone listing and forms, 15 changes). Join: https://play.google.com/apps/testing/com.fjlinde.nomadpocket. Testers: account list "Friends and family", all countries |
 | Production | Not yet. A new app in a personal account needs a closed test with **≥ 12 opted-in testers for 14 days in a row** before it can apply |
@@ -164,8 +165,8 @@ under the "not medical advice" banner. Fresh installs (reviewers, closed testers
 ## 6. Release procedure (Android)
 
 1. **Code ready**: `npx tsc --noEmit`, `npx expo lint`, `npm test`, `npm run check:i18n`; Android tour
-   (`npm run e2e:android`, on a network without TLS interception: one that intercepts TLS breaks the emulator's downloads). Health-related change → section 4
-   checklist.
+   (`npm run e2e:android`, on a network without TLS interception: one that intercepts TLS breaks the emulator's
+   downloads). Health-related change → section 4 checklist.
 2. **Bump** `android.versionCode` in `app.json`; update the "currently" line in `docs/RELEASE.md`; commit.
 3. **Build** from a clean tree at that commit (`docs/RELEASE.md`, "Build an upload"):
    `NOMAD_STORE_BUILD=1 npx expo prebuild --platform android --clean --no-install`, then
