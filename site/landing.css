@@ -121,7 +121,7 @@
 .status b { color: var(--text); font-weight: 500; }
 @keyframes blink { to { visibility: hidden; } }
 .hero h1 {
-  font: 700 clamp(42px, 6.6vw, 82px)/0.96 var(--display);
+  font: 700 clamp(34px, 4.9vw, 62px)/1 var(--display);
   text-transform: uppercase;
   letter-spacing: 0.002em;
   margin: 0 0 24px;

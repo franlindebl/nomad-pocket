@@ -364,6 +364,9 @@ All eight screens come from the 2.0.0 store captures. Domain wired: GoDaddy DNS 
 for `@` (parking record replaced) and `www` → `franlindebl.github.io`; the Pages custom domain is `nomad-pocket.app`, so
 `franlindebl.github.io/nomad-pocket/*` (the privacy URL in the apps and listings) redirects to it. Pending: Google's badge
 when the Play listing is public.
+Headline chosen by the owner after it went live: "Navegador GPS y guías de supervivencia en tu móvil, aunque haya un
+apagón" (EN "GPS navigation and survival guides on your phone, even in a blackout"); title, description, lead and
+social cards follow it.
 
 ### 2026-11-03 — iOS build 39 to TestFlight
 

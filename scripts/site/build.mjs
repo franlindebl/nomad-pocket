@@ -59,11 +59,11 @@ const HUE = { maps: '#4FD1A5', medicine: '#FF6B6B', survival: '#FFD60A', ai: '#F
 const COPY = {
   es: {
     path: '/',
-    title: 'Nomad Pocket: la app de emergencia que funciona sin internet',
+    title: 'Nomad Pocket: la app de emergencia que funciona en un apagón y sin internet',
     description:
-      'Mapas y rutas sin conexión, hospitales cercanos, guía de emergencia, Wikipedia e IA en tu móvil. Para apagones, caídas de internet y ciberataques. Gratis.',
+      'Navegador GPS, guías de supervivencia, hospitales cercanos, Wikipedia, cursos e IA en tu móvil, aunque haya un apagón o se caiga internet. Gratis y de código abierto.',
     ogLocale: 'es_ES',
-    ogAlt: 'Nomad Pocket: cuando se cae internet, tu móvil sigue sabiendo.',
+    ogAlt: 'Nomad Pocket: navegador GPS y guías de supervivencia en tu móvil, aunque haya un apagón.',
     skip: 'Saltar al contenido',
     nav: [['#escenarios', 'Por qué'], ['#funciones', 'Funciones'], ['#como-funciona', 'Cómo funciona'], ['#privacidad', 'Privacidad'], ['#preguntas', 'Preguntas']],
     ids: { scenarios: 'escenarios', features: 'funciones', how: 'como-funciona', privacy: 'privacidad', faq: 'preguntas', download: 'descargar', support: 'soporte' },
@@ -75,8 +75,8 @@ const COPY = {
     googlePlayAlt: 'Disponible en Google Play',
     hero: {
       status: ['Sin conexión', 'todo funciona'],
-      h1: 'Cuando se cae internet, tu móvil <em>sigue sabiendo.</em>',
-      lead: 'Mapas con rutas, hospitales cercanos, una guía de emergencia, Wikipedia y una IA que vive en tu teléfono. <strong>Lo preparas hoy con conexión; mañana funciona sin red.</strong> Gratis y de código abierto.',
+      h1: 'Navegador GPS y guías de supervivencia en tu móvil, <em>aunque haya un apagón.</em>',
+      lead: '<strong>Lo preparas hoy con conexión y mañana funciona sin internet, sin cobertura y sin luz.</strong> Con hospitales cercanos, Wikipedia, cursos y una IA que vive en tu teléfono. Gratis y de código abierto.',
       facts: ['100 % gratis', 'Código abierto', 'Sin cuentas', 'Sin anuncios'],
       tag1: 'Sin red · todo funciona',
       tag2: 'Ruta sin internet',
@@ -217,11 +217,11 @@ const COPY = {
 
   en: {
     path: '/en/',
-    title: 'Nomad Pocket: the emergency app that works without internet',
+    title: 'Nomad Pocket: the emergency app that works in a blackout, offline',
     description:
-      'Offline maps and routes, nearby hospitals, an emergency guide, Wikipedia and AI on your phone. For blackouts, internet outages and cyberattacks. Free.',
+      'GPS navigation, survival guides, nearby hospitals, Wikipedia, courses and AI on your phone, even in a blackout or an internet outage. Free and open source.',
     ogLocale: 'en_US',
-    ogAlt: 'Nomad Pocket: when the internet goes down, your phone still knows.',
+    ogAlt: 'Nomad Pocket: GPS navigation and survival guides on your phone, even in a blackout.',
     skip: 'Skip to content',
     nav: [['#scenarios', 'Why'], ['#features', 'Features'], ['#how-it-works', 'How it works'], ['#privacy', 'Privacy'], ['#faq', 'FAQ']],
     ids: { scenarios: 'scenarios', features: 'features', how: 'how-it-works', privacy: 'privacy', faq: 'faq', download: 'download', support: 'support' },
@@ -233,8 +233,8 @@ const COPY = {
     googlePlayAlt: 'Get it on Google Play',
     hero: {
       status: ['Offline', 'everything works'],
-      h1: 'When the internet goes down, your phone <em>still knows.</em>',
-      lead: 'Maps with routes, nearby hospitals, an emergency guide, Wikipedia and an AI that lives on your phone. <strong>Set it up today while you’re online; tomorrow it works with no network.</strong> Free and open source.',
+      h1: 'GPS navigation and survival guides on your phone, <em>even in a blackout.</em>',
+      lead: '<strong>Set it up today while you’re online; tomorrow it works with no internet, no signal and no power.</strong> With nearby hospitals, Wikipedia, courses and an AI that lives on your phone. Free and open source.',
       facts: ['100% free', 'Open source', 'No accounts', 'No ads'],
       tag1: 'No network · all works',
       tag2: 'Route with no internet',

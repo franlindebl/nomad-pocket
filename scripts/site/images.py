@@ -45,10 +45,10 @@ SECONDARY = (143, 143, 137)
 ACCENT = (255, 214, 10)
 
 OG_TEXT = {
-    'es': ('SIN CONEXIÓN · FUNCIONA IGUAL', ['CUANDO SE CAE', 'INTERNET, TU MÓVIL', 'SIGUE SABIENDO.'],
-           'Mapas, emergencias, guía, Wikipedia e IA sin red.'),
-    'en': ('OFFLINE · STILL WORKS', ['WHEN THE INTERNET', 'GOES DOWN, YOUR', 'PHONE STILL KNOWS.'],
-           'Maps, emergency help, guides, Wikipedia and AI with no network.'),
+    'es': ('SIN CONEXIÓN · FUNCIONA IGUAL', ['NAVEGADOR GPS Y', 'GUÍAS DE', 'SUPERVIVENCIA,', 'AUNQUE HAYA UN APAGÓN.'],
+           'En tu móvil, sin internet. Gratis.'),
+    'en': ('OFFLINE · STILL WORKS', ['GPS NAVIGATION AND', 'SURVIVAL GUIDES,', 'EVEN IN A BLACKOUT.'],
+           'On your phone, no internet needed. Free.'),
 }
 
 
@@ -103,11 +103,13 @@ def og_card(lang: str, screen: Path | None, dst: Path):
     draw.rectangle((x + 84, 124, x + 94, 134), fill=ACCENT)
     draw.text((x + 104, 120), over, font=font('IBMPlexMono-Medium.ttf', 17), fill=SECONDARY)
 
-    title = font('ChakraPetch-Bold.ttf', 62)
-    y = 200
+    # Four lines need a smaller size to leave room for the subtitle and the bar.
+    size = 62 if len(lines) <= 3 else 50
+    title = font('ChakraPetch-Bold.ttf', size)
+    y = 200 if len(lines) <= 3 else 190
     for i, line in enumerate(lines):
         draw.text((x, y), line, font=title, fill=ACCENT if i == len(lines) - 1 else TEXT)
-        y += 70
+        y += size + 8
     draw.text((x, y + 22), sub, font=font('IBMPlexSans-Regular.ttf', 25), fill=SECONDARY)
     # Yellow bar with the cut corner, the app's key-control shape.
     bx, by, bw, bh, cut = x, y + 82, 150, 12, 10
