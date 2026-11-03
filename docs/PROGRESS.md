@@ -333,6 +333,17 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-04 — 2.0.1 (40) to TestFlight
+
+- Checks: tsc, lint, unit tests 487/487, i18n, licences; E2E smoke + full 44/44 (`e2e/artifacts/20261103-231752`),
+  iPad tour 1/1 (screens looked at); a walk on the simulator (Home, guide card with the 112 note, Maps, Library,
+  assistant answering "mi padre no respira" with the CPR card and the AI notice, Settings).
+- `version` 2.0.1, `ios.buildNumber` 40; store prebuild, archived and uploaded; tagged `v2.0.1-40`.
+- Play: store settings website now `https://nomad-pocket.app/` (published); the privacy URL change sent to review by
+  the owner (the closed test is not affected: it is the same build and track).
+- Next: once 2.0.1 has its App Store version, set its privacy policy URL (es-ES, es-MX, en-US, en-GB) and send it to
+  review with the owner's OK.
+
 ### 2026-11-03 — Checks before 2.0.1: Hexagon licensing, simulator, store privacy URLs
 
 - Hexagon (Android): the AAB carries `assets/ggml-hexagon/libggml-htp-v73…v85.so` (~4 MB) and the
