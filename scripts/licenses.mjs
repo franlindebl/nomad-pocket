@@ -104,10 +104,13 @@ for (const [key, entry] of Object.entries(lock.packages)) {
 js.sort((a, b) => a.name.localeCompare(b.name) || a.version.localeCompare(b.version));
 
 // Android: every Maven artifact of the release APK (scripts/licenses/android-deps.mjs), with the
-// standard text of the first licence we have one for; none for terms that aren't open source
+// standard text of the first licence we have one for, or the artifact's own text (`androidTexts`, for licences
+// with no SPDX id in the POM, like Facebook's "BSD License"); none for terms that aren't open source
 // (Google Play services: `url`).
 const androidFile = path.join(here, 'android.json');
 const android = (fs.existsSync(androidFile) ? JSON.parse(fs.readFileSync(androidFile, 'utf8')) : []).map((a) => {
+  const own = hand.androidTexts?.[a.id];
+  if (own) return { ...a, text: addText(readHand(own)) };
   const ids = a.license.split(/\s+OR\s+/);
   const id = ids.find((x) => hand.spdxFallback?.[x]);
   return { ...a, text: addText(id ? readHand(hand.spdxFallback[id]) : null), ...(id ? { standard: true } : {}) };

@@ -12,7 +12,7 @@ locally with `xcodebuild` (no EAS). Android: signed AABs built locally with Grad
 | Apple team | `F3VY6C7GKX` |
 | App Store Connect app | 6826502392 (SKU `nomadpocket`, primary locale es-ES) |
 | Categories | Books, Education |
-| Website (landing, privacy, support) | https://nomad-pocket.app once the domain is wired (until then https://franlindebl.github.io/nomad-pocket/, which then redirects) (`site/`) |
+| Website (landing, privacy, support) | https://nomad-pocket.app (`site/`; the old https://franlindebl.github.io/nomad-pocket/ URLs redirect to it) |
 
 The App Store Connect API key used for uploads lives outside the repo
 (`~/.appstoreconnect/private_keys/AuthKey_<KEY_ID>.p8`); its key id and issuer id are kept

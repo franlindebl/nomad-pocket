@@ -186,7 +186,7 @@ const COPY = {
       ossP: 'Nomad Pocket es software libre (GPL‑3.0) inspirado en Project N.O.M.A.D. Puedes leer cada línea, proponer cambios o compilarla tú. Se apoya en datos abiertos:',
       credits: ['OpenStreetMap', 'Wikipedia', 'Kiwix', 'Protomaps', 'Valhalla'],
       github: 'Ver el código en GitHub',
-      disclaimer: 'Nomad Pocket no está afiliada a estos proyectos.',
+      disclaimer: 'Nomad Pocket es un proyecto independiente: no está afiliada a Crosstalk Solutions (Project N.O.M.A.D.) ni a estos proyectos, ni cuenta con su respaldo.',
     },
     faqHead: { over: ['05', 'Preguntas'], h2: 'Preguntas <em>frecuentes</em>' },
     faq: [
@@ -344,7 +344,7 @@ const COPY = {
       ossP: 'Nomad Pocket is free software (GPL‑3.0) inspired by Project N.O.M.A.D. You can read every line, suggest changes or build it yourself. It stands on open data:',
       credits: ['OpenStreetMap', 'Wikipedia', 'Kiwix', 'Protomaps', 'Valhalla'],
       github: 'See the code on GitHub',
-      disclaimer: 'Nomad Pocket is not affiliated with these projects.',
+      disclaimer: 'Nomad Pocket is an independent project, not affiliated with or endorsed by Crosstalk Solutions (Project N.O.M.A.D.) or these projects.',
     },
     faqHead: { over: ['05', 'FAQ'], h2: 'Frequently asked <em>questions</em>' },
     faq: [

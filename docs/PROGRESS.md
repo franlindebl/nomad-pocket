@@ -333,6 +333,17 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-03 — Small launch fixes: affiliation notice, privacy URL, Android credits, repo settings
+
+- README (es/en) and the website say Nomad Pocket is independent, not affiliated with or endorsed by Crosstalk
+  Solutions / Project N.O.M.A.D.; CLAUDE.md says "inspired by".
+- Settings opens `https://nomad-pocket.app/privacy.html` (was the github.io URL, which redirects); Play listing doc
+  updated. The App Store / Play Console listing URLs still to change by hand.
+- Credits: `androidTexts` in `scripts/licenses/native.json` gives artifacts whose POM says only "BSD License" their own
+  text (device-year-class 2.1.0, Bolts 1.4.0: LICENSE + PATENTS); every Android artifact now has a text.
+- GitHub: Dependabot alerts on; ruleset "Protect main" (no deletion, no force-push; repository admins bypass).
+  Pending: verify `nomad-pocket.app` for the account (TXT record at GoDaddy).
+
 ### 2026-11-03 — Repo: tidy before promoting it
 
 - Docs: dropped Play account internals (ids, test links, other apps) and street-level test examples; the dev

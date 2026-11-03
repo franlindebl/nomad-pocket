@@ -27,8 +27,8 @@ apply for production (seen on another app's dashboard, 2026-10-29). Plan for it:
 | Category | Books & Reference (Libros y obras de consulta) |
 | Tags | Offline maps, Emergency, Encyclopedia, Survival, Navigation (pick the closest Play offers) |
 | Contact email | fran.linde.blazquez@gmail.com |
-| Website | https://franlindebl.github.io/nomad-pocket/ |
-| Privacy policy | https://franlindebl.github.io/nomad-pocket/privacy.html |
+| Website | https://nomad-pocket.app/ |
+| Privacy policy | https://nomad-pocket.app/privacy.html |
 
 ## Short description (80)
 

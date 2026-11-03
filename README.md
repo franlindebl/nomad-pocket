@@ -276,7 +276,8 @@ call your local emergency number.
 
 Inspired by [Project N.O.M.A.D.](https://github.com/Crosstalk-Solutions/project-nomad) by
 Crosstalk Solutions. Made possible by Kiwix, Wikipedia, OpenStreetMap, Protomaps, MapLibre,
-Valhalla and llama.cpp.
+Valhalla and llama.cpp. Nomad Pocket is an independent project: it is not affiliated with or
+endorsed by Crosstalk Solutions, Project N.O.M.A.D. or any of these projects.
 
 Copyright (C) 2026 Fran Linde Blázquez and contributors. GPL-3.0-or-later: see
 [LICENSE](LICENSE). Every bundled library, font and data set with its version, copyright and

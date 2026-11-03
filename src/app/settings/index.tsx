@@ -17,7 +17,7 @@ import { freeBytes, totalBytes } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
 import { space, useTheme } from '@/theme';
 
-const PRIVACY_URL = 'https://franlindebl.github.io/nomad-pocket/privacy.html';
+const PRIVACY_URL = 'https://nomad-pocket.app/privacy.html';
 
 export default function SettingsScreen() {
   const { t, i18n } = useTranslation('settings');

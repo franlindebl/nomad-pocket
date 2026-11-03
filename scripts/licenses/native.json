@@ -467,6 +467,10 @@
   "jsTexts": {
     "@protomaps/basemaps": "texts/protomaps-basemaps.txt"
   },
+  "androidTexts": {
+    "com.facebook.device.yearclass:yearclass": "texts/device-year-class-2.1.0.txt",
+    "com.parse.bolts:bolts-tasks": "texts/bolts-android-1.4.0.txt"
+  },
   "spdxFallback": {
     "MIT": "texts/spdx/MIT.txt",
     "ISC": "texts/spdx/ISC.txt",

@@ -1,7 +1,7 @@
 # Nomad Pocket — guide for Claude sessions
 
-Nomad Pocket is an offline-first iOS + Android app (Expo / React Native) that brings
-[Project N.O.M.A.D.](https://github.com/Crosstalk-Solutions/project-nomad) to phones:
+Nomad Pocket is an offline-first iOS + Android app (Expo / React Native) inspired by
+[Project N.O.M.A.D.](https://github.com/Crosstalk-Solutions/project-nomad) (independent, not affiliated with it):
 download knowledge (Kiwix ZIM archives: Wikipedia, medicine, survival, DIY, books,
 courses), offline maps and a local AI model while online, then use it all with no
 connection. GPL-3.0-or-later, public repo `github.com/franlindebl/nomad-pocket`, bundle id
