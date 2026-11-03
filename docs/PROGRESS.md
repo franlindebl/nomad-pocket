@@ -333,6 +333,18 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-03 — Checks before 2.0.1: Hexagon licensing, simulator, store privacy URLs
+
+- Hexagon (Android): the AAB carries `assets/ggml-hexagon/libggml-htp-v73…v85.so` (~4 MB) and the
+  `librnllama_*_hexagon_opencl` variant. They are ggml's Hexagon backend (MIT); QuRT/HAP symbols are undefined (the
+  device's DSP runtime), and `libOpenCL.so` / `libcdsprpc` are the device's: no Qualcomm code in the APK. Noted in
+  the llama.cpp credits entry.
+- iOS Release on the simulator (New York location): guide intro, "en España" labels, the outside-Spain note (911),
+  the health caption and the assistant disclaimer under the box all show; smoke E2E 21/21.
+- Privacy URL: Play Console App content › Privacy policy = `https://nomad-pocket.app/privacy.html`, saved in the
+  publishing overview (not sent). App Store Connect: locked while 2.0.0 is live (API 409); set it on the 2.0.1
+  version's app info (es-ES, es-MX, en-US, en-GB). Play's store-settings website still the github.io URL (redirects).
+
 ### 2026-11-03 — Audit leftovers: update space check, Android navigation start, PDF crash guard, language
 
 - Delete-first update checks the space again with the fresh sizes (the new ZIM edition's, the country plan's) right

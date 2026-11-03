@@ -275,7 +275,7 @@
       "license": "MIT",
       "copyright": ["Copyright (c) 2023-2026 The ggml authors"],
       "url": "https://github.com/ggml-org/llama.cpp",
-      "note": "Compiled from the copy inside llama.rn 0.13.0-rc.8 (https://github.com/mybigday/llama.rn).",
+      "note": "Compiled from the copy inside llama.rn 0.13.0-rc.8 (https://github.com/mybigday/llama.rn). On Android this includes ggml's Hexagon backend for Qualcomm NPUs (libggml-htp-v73…v85), also MIT; the Qualcomm runtime it calls is the device's own.",
       "text": "texts/llama.cpp.txt"
     },
     {
