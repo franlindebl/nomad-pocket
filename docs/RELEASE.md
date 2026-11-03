@@ -221,6 +221,10 @@ subsets in `site/fonts`, the document pages) and `landing.css`. No analytics and
   HTTPS" once the certificate is issued. GitHub then redirects `franlindebl.github.io/nomad-pocket/*` to the
   domain, so the URLs already in the apps and store listings keep working. Optionally verify the domain for the
   account (Settings › Pages › Verified domains) so nobody else can claim it.
+- **Google Search Console**: domain property `nomad-pocket.app` (owner's Google account), verified by a `TXT @`
+  `google-site-verification=…` record at GoDaddy: keep it or the property loses verification. Sitemap
+  `https://nomad-pocket.app/sitemap.xml` submitted 2026-11-03 (read OK, 3 pages). After a big change to the
+  landing, URL inspection › Request indexing speeds up the refresh.
 - Keep the privacy policy in line with what the app does (no accounts, no analytics, no data leaves the device
   except content download requests and the catalog checks). Update its "Last updated" date whenever the policy
   changes, in both languages, and re-check the host list against `docs/ARCHITECTURE.md` (External services).
