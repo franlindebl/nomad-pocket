@@ -246,7 +246,7 @@
 .sim[data-offline] .normal .st { color: var(--danger); }
 .sim[data-offline] .normal .st .on { display: none; }
 .sim[data-offline] .normal .st .off { display: inline-flex; }
-.sim[data-offline] .ours .st { color: var(--accent); }
+.sim[data-offline] .ours .st { color: var(--success); }
 .sim-foot { padding: 16px 22px; border-top: 1px solid var(--border); color: var(--text-2); font-size: 15px; margin: 0; }
 .btn[aria-pressed='true'] { background: var(--danger); color: #fff; }
 
