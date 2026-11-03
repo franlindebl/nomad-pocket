@@ -149,7 +149,7 @@ helps the request). The next build carries `UIBackgroundModes` location + audio;
 > audio while they play. To try it: download Andorra, open Maps, tap a place, choose "Take me there" and
 > then "Start".
 
-## Entitlement request (draft for the owner)
+## Entitlement request (sent 2026-11-04)
 
 Form: developer.apple.com/contact/carplay → "Navigation". Suggested text:
 

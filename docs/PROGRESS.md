@@ -333,6 +333,14 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-04 — CarPlay entitlement requested
+
+- Sent Apple's CarPlay form (developer.apple.com/contact/carplay, type Navigation) with the texts drafted in
+  `docs/CARPLAY_PLAN.md` (updated: live on the App Store, emergencies, iPhone ↔ car hand-off), the App Store URL and
+  three car-screen captures from the simulator (Emergencias cerca › Salud, trip preview, turn-by-turn), Andorra data.
+  The owner accepted the CarPlay Entitlement Addendum. Apple answers by email; then Phase 4 of the plan.
+- Local `ios/` was prebuilt with CarPlay on for the captures and regenerated without it afterwards.
+
 ### 2026-11-04 — 2.0.1 (40) to TestFlight
 
 - Checks: tsc, lint, unit tests 487/487, i18n, licences; E2E smoke + full 44/44 (`e2e/artifacts/20261103-231752`),
