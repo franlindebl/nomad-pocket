@@ -1,0 +1,8 @@
+# CarPlay check (scripts/carplay/e2e-carplay.sh): "Terminar" on the car ends the phone's guidance too.
+appId: com.fjlinde.nomadpocket
+---
+- extendedWaitUntil:
+    notVisible: { id: "guidance-next" }
+    timeout: 10000
+- assertVisible: { id: "map-search" }
+- takeScreenshot: phone-trip-ended

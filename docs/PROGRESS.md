@@ -346,7 +346,16 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   simulator's window raised): map following in Andorra, Destinos › Emergencias cerca › Salud (hospital 1.1 km),
   trip preview, "Ir", maneuver panel and estimates, "Terminar".
 - Listing for review: `docs/store/listing-2.2.0.md` (What's new, one CarPlay line in the description, App Review
-  paragraph on CarPlay).
+  paragraph on CarPlay), approved by the owner; set through the App Store Connect API in es-ES, es-MX, en-US and
+  en-GB. Full suite 42/44 (map-10, map-12 failed while the archive loaded the Mac; both passed alone), iPad 1/1.
+  Archived from a clean worktree of 02b1a24 (store prebuild), uploaded, tagged `v2.2.0-42`, **submitted to App
+  Review 2026-11-04** (auto-release). CarPlay screenshots for the listing: next version (owner).
+- New `npm run e2e:carplay` (`scripts/carplay/e2e-carplay.sh`, docs/E2E.md "CarPlay"): no E2E flow covered CarPlay
+  (Maestro can't see the car screen), so car steps are `carplay-sim.sh` taps checked by reading the car screen's
+  text with Vision (`scripts/carplay/ocr.swift`), phone steps Maestro (`e2e/flows/carplay/car-00-prepare.yaml`,
+  `e2e/subflows/carplay/`). `carplay-sim.sh setup` now raises its simulator's window before choosing CarPlay.
+  Passes on 2.2.0 (42)'s code (CAR-01…04: opened from the car, emergency trip with preview/Ir/Terminar, the phone
+  adopting the car's app, a phone trip shown and ended on the car).
 
 ### 2026-11-04 — Git hooks: repair a hooks path that no longer exists
 

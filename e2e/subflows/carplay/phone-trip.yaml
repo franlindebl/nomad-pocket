@@ -1,0 +1,23 @@
+# CarPlay check (scripts/carplay/e2e-carplay.sh): a trip started on the phone, which the car must show.
+# Runs on the app as the car left it (no relaunch: the phone adopted the React Native the car started).
+appId: com.fjlinde.nomadpocket
+---
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: { id: "map-search" }
+    timeout: 20000
+- tapOn: { id: "map-search" }
+- inputText: "42.4637, 1.4913"
+- tapOn: { id: "search-coordinates" }
+- extendedWaitUntil:
+    visible: { id: "place-card" }
+    timeout: 10000
+- tapOn: { id: "place-guide" }
+- extendedWaitUntil:
+    visible: { id: "guidance-start" }
+    timeout: 30000
+- tapOn: { id: "guidance-start" }
+- extendedWaitUntil:
+    visible: { id: "guidance-next" }
+    timeout: 15000
+- takeScreenshot: phone-trip

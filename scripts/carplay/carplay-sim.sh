@@ -100,6 +100,10 @@ case "${1:-}" in
     shim
     open -a "$XCODE26/Contents/Developer/Applications/Simulator.app" --args -CurrentDeviceUDID "$(udid)"
     sleep 8
+    # The menu acts on the front device window: with other simulators booted, it may not be this one.
+    osascript -e 'tell application "Simulator" to activate' \
+      -e "tell application \"System Events\" to tell process \"Simulator\" to perform action \"AXRaise\" of (first window whose name starts with \"$DEVICE – \")" >/dev/null
+    sleep 1
     osascript -e 'tell application "System Events" to tell process "Simulator" to click menu item "CarPlay" of menu 1 of menu item "External Displays" of menu 1 of menu bar item "I/O" of menu bar 1' >/dev/null
     echo "CarPlay screen open on $DEVICE ($(udid)); install the app with: $0 install"
     ;;

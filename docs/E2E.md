@@ -46,6 +46,7 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 | `PLANET_PORT=8766 scripts/e2e.sh --build --tags planet` | 2 | ~12 min | extraction resumed after a kill (`map-22`) and retried after a network failure (`map-23`) (tag `planet`, their own build: rebuild without `PLANET_PORT` before other suites) | nothing (local stand-in planet) |
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape | nothing (offline) |
 | `npm run e2e:android` | 5 | ~18 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack, content updates | internet, Android emulator |
+| `npm run e2e:carplay` | 1 + car steps | ~5 min | CarPlay on the simulator's car screen: opened from the car, Destinos › Emergencias cerca › trip preview › Ir › Terminar, the phone adopting the app the car started, a phone trip shown and ended on the car (section CarPlay) | Xcode 26.5's Simulator + iOS 26.5 simulator (`scripts/carplay/carplay-sim.sh setup`), a Release build with CarPlay on, Accessibility permission for the terminal |
 
 When to run what: smoke before every TestFlight build or after a risky change; full and the
 iPad tour before an App Store release (then look through the iPad screenshots in
@@ -298,6 +299,29 @@ By hand:
 | android | `android-04-prepare` | ANDROID-04 | android | — (offline) |
 | android | `android-05-routing` | ANDROID-05 | android | network (published catalog + Andorra pack from GitHub) |
 | android | `android-06-updates` | ANDROID-06 | android | network (a 1 MB archive from Kiwix), updates-server (its newer edition from the stand-in catalog, through `adb reverse`) |
+| carplay | `car-00-prepare` | CAR-01…CAR-04 (with `scripts/carplay/e2e-carplay.sh`) | carplay | routing-server, maps-server; the iOS 26.5 CarPlay simulator |
+
+### CarPlay (CAR, `npm run e2e:carplay`)
+
+Maestro can't see the car screen: nothing of it reaches an accessibility tree, and only Xcode 26.5's Simulator
+with an iOS 26.5 simulator shows it at all (`docs/CARPLAY_PLAN.md`, "Testing in the simulator"). So
+`scripts/carplay/e2e-carplay.sh` mixes both: phone steps are Maestro (`e2e/flows/carplay/car-00-prepare.yaml`
+through `scripts/e2e.sh` for the fresh install and the local catalogs; `e2e/subflows/carplay/*` run straight on
+the app as the car left it), car steps are taps from `carplay-sim.sh tap` and checks of the car screen's text,
+read from its screenshot with Vision (`scripts/carplay/ocr.swift`, lines of "x y<TAB>text" in the 800×480
+screenshot's pixels, the same coordinates `tap` takes). Rows and bar buttons are tapped by their text; the
+preview's green "Ir" is too short for the OCR, so it is tapped under the estimates.
+
+| Case | What |
+|---|---|
+| CAR-01 | Opened from the car with the phone app closed: the car's map with "Destinos" (React Native started by the car) |
+| CAR-02 | Destinos › Emergencias cerca › Salud lists the hospital; picking it shows the trip preview (llegada, Cancelar); "Ir" starts turn-by-turn (maneuver distance, "Terminar"); "Terminar" goes back to the map |
+| CAR-03 | The phone opened afterwards adopts the app the car started (its tab bar shows, not a blank window) |
+| CAR-04 | A trip started on the phone ("Iniciar") shows on the car with its estimates; "Terminar" on the car ends it on the phone |
+
+Run it after `npm run e2e -- --build` while `app.json` has CarPlay on (the suite's build is the one it installs),
+and not at the same time as another suite: both serve the local catalogs on port 8765. Results in
+`e2e/artifacts/carplay-<timestamp>/` (each car screen as `NN.png` with its text in `NN.txt`).
 
 ### Content updates (UPD, ANDROID-06)
 

@@ -1,0 +1,42 @@
+# CAR-00 — the phone side of the CarPlay check (scripts/carplay/e2e-carplay.sh, docs/E2E.md "CarPlay"):
+# Andorra downloaded from the local catalogs (map + routing pack with its emergency points), the way
+# map-15 does it, so the car has a map, routes and "Emergencias cerca" to show. Runs on the iOS 26.5
+# simulator with the CarPlay screen (NP-carplay-26), never in the phone suites (only tagged `carplay`).
+appId: com.fjlinde.nomadpocket
+tags: [carplay, routing-server, maps-server]
+---
+- setLocation:
+    latitude: 42.5063
+    longitude: 1.5218
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: { id: "map-search" }
+    timeout: 20000
+- tapOn: { id: "map-search" }
+- inputText: "42.4637, 1.4913"
+- tapOn: { id: "search-coordinates" }
+- extendedWaitUntil:
+    visible: { id: "place-card" }
+    timeout: 10000
+- tapOn: { id: "place-guide" }
+- extendedWaitUntil:
+    visible: { id: "guidance-get-routing" }
+    timeout: 30000
+- tapOn: { id: "guidance-get-routing" }
+- extendedWaitUntil:
+    visible: { id: "country-download" }
+    timeout: 20000
+- tapOn: { id: "country-download" }
+- extendedWaitUntil:
+    visible: { id: "guidance-next" }
+    timeout: 90000
+- assertNotVisible: "En línea recta.*"
+- tapOn: { id: "guidance-stop" }
+# The emergency points reach the index a moment after the download.
+- tapOn: { id: "map-emergency" }
+- tapOn: { id: "emergency-cat-health" }
+- extendedWaitUntil:
+    visible: "(?s).*Verge de Meritxell.*"
+    timeout: 30000
+- takeScreenshot: 01-ready

@@ -7,7 +7,7 @@ a CarPlay paragraph in the App Review notes.
 
 ## Description: maps section
 
-Add after "Rutas en coche, a pie y en bici…" / "Driving, walking and cycling routes…":
+Add after "Rutas en coche, a pie y en bici sin conexión…" / "Offline routes by car, on foot and by bike…":
 
 - es: `• CarPlay: el mapa y la navegación giro a giro en la pantalla del coche, también sin cobertura`
 - en: `• CarPlay: the map and turn-by-turn navigation on your car's screen, even with no coverage`
