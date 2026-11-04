@@ -41,7 +41,8 @@ npm install
   ~10 GB disk. Copy a `.tar` into the app's `Documents/content/routing/`
   (simulator) and it registers at startup.
 - `prepare` (`scripts/git-hooks.mjs`) sets `git config core.hooksPath .githooks` only when no
-  hooks path is set (an existing one is left alone) (pre-commit: tsc, lint, unit tests, i18n).
+  hooks path is set (an existing one is left alone, unless it points to a folder that no longer exists, which
+  makes git run no hooks at all) (pre-commit: tsc, lint, unit tests, i18n).
   Skip once with `git commit --no-verify`. The other hooks in `.githooks/` only run a personal hook of
   the same name from `.git/hooks.local/` when there is one (git skips `.git/hooks` once `core.hooksPath` is set).
 - After any dependency change run `node scripts/licenses.mjs` (regenerates

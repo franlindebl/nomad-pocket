@@ -334,6 +334,12 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-04 — Git hooks: repair a hooks path that no longer exists
+
+- This clone's `core.hooksPath` still pointed to the folder's old name, so git ran no hooks at all (no pre-commit
+  checks) and said nothing. `scripts/git-hooks.mjs` (`npm install`) now takes over a path that doesn't exist, as it
+  does an unset one; an existing path is still left alone. Fixed in this clone.
+
 ### 2026-11-04 — 2.1.0 (41) to TestFlight
 
 - Version 2.1.0, iOS build 41 (Android versionCode 27, not uploaded): 2.0.1 plus the essential content and the
