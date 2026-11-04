@@ -7,9 +7,8 @@
 // goes to where they will be at the next fix and lasts a little longer, so the map glides
 // on instead of stopping at every fix one fix behind (follow-core). The arrow is a plain
 // view at the padded centre: it stays put while the map moves under it (the native puck
-// would lag the camera). In the background it sends nothing (nobody sees the map): an ease
-// queued as iOS terminates the app ran after React Native's willTerminate teardown had freed
-// the scheduler's delegate and crashed the exit (TestFlight 2.0.1 (40), Scheduler.cpp:336).
+// would lag the camera). In the background it sends nothing: nobody sees the map, and background
+// location would otherwise keep easing it at every fix.
 import type { CameraRef } from '@maplibre/maplibre-react-native';
 import { Navigation2 } from 'lucide-react-native';
 import { useEffect, useRef, useState, type RefObject } from 'react';
