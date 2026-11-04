@@ -7,11 +7,13 @@
 // goes to where they will be at the next fix and lasts a little longer, so the map glides
 // on instead of stopping at every fix one fix behind (follow-core). The arrow is a plain
 // view at the padded centre: it stays put while the map moves under it (the native puck
-// would lag the camera).
+// would lag the camera). In the background it sends nothing (nobody sees the map): an ease
+// queued as iOS terminates the app ran after React Native's willTerminate teardown had freed
+// the scheduler's delegate and crashed the exit (TestFlight 2.0.1 (40), Scheduler.cpp:336).
 import type { CameraRef } from '@maplibre/maplibre-react-native';
 import { Navigation2 } from 'lucide-react-native';
 import { useEffect, useRef, useState, type RefObject } from 'react';
-import { Image, StyleSheet } from 'react-native';
+import { AppState, Image, StyleSheet } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { useTheme } from '@/theme';
@@ -83,6 +85,7 @@ export function useFollowCamera(
       const now = Date.now();
       // The end of the first move takes the latest fix.
       if (now < settling) return;
+      if (AppState.currentState !== 'active') return;
       const since = now - fixAt;
       if (!first) gap = 0.7 * gap + 0.3 * Math.min(GLIDE_MAX, Math.max(GLIDE_MIN, since));
       const progress = s.route ? s.progress : null;
@@ -117,8 +120,13 @@ export function useFollowCamera(
     const unsubscribe = useGuidance.subscribe((s, prev) => {
       if (s.position !== prev.position) move();
     });
+    // Back in the foreground: catch up with the user at once instead of at the next fix.
+    const appState = AppState.addEventListener('change', (state) => {
+      if (state === 'active') move();
+    });
     return () => {
       unsubscribe();
+      appState.remove();
       if (wait) clearTimeout(wait);
       setSettled(false);
     };

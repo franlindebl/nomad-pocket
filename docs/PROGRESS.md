@@ -334,6 +334,23 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-04 — Crash on exit while following: no camera eases in the background
+
+- TestFlight crash report from 2.0.1 (40), iPhone 15 Pro, iOS 27.0.1 (fetched with the ASC API:
+  `betaFeedbackCrashSubmissions/{id}/crashLog`). The app was in the background and iOS was terminating it
+  (`workspaceShouldExit` → `UIApplicationWillTerminateNotification`). On that notification RN's `RCTSurfacePresenter`
+  suspends and frees the scheduler, and `MLNMapView` destroys its core objects; meanwhile the JS thread ran a queued
+  view command whose lambda holds a raw pointer to the freed `SchedulerDelegate` (`Scheduler.cpp:336`): SIGSEGV with a
+  pointer authentication failure. A race inside React Native: any view command queued as iOS terminates the app can
+  hit it.
+- The owner wasn't navigating (the app had been in the background a long time; the report showed on reopening), so
+  which command fired this time is unknown. One sure source is closed: the follow camera sent an `easeTo` for every
+  GPS fix while navigating in the background (background location keeps JS running). `FollowCamera` now sends
+  nothing while `AppState` isn't `active` (nobody sees the map; also saves battery) and catches up with the user on
+  return to the foreground. Not verified on a device yet.
+- Open: find what else sends view commands in the background, or patch React Native so the queued command doesn't
+  use a freed delegate.
+
 ### 2026-11-04 — Content: "Essential" is the onboarding kit; the kit proposes the top Wikipedia articles
 
 - Owner's call: the kit must download everything "Essential", and "Essential" must be essential. The kit took
