@@ -59,7 +59,11 @@ Next steps, in order:
    row** (from 2026-10-30, the earliest production application is ~2026-11-13 if 12 join today).
 3. Then apply for production from the dashboard (Play asks questions about the test) and publish to production.
 4. Open items: the owner's dedicated Gmail to replace the public contact email (`REPORT_EMAIL`, `site/`, Play
-   contact, `play-listing.md`); the IARC question sent on 2026-10-29 is moot unless they answer.
+   contact, `play-listing.md`). **IARC answered on 2026-11-04** (see `play-listing.md`, Content rating): the
+   educational question covers the encyclopedias, but the on-device AI must be disclosed on its own. Our "no" to
+   violence/language/drugs for AI answers is weak (no content limits in the prompt). Proposed, not done (owner:
+   no changes for now): content limits in the assistant's system prompt, measured with the bench, then redo the
+   questionnaire declaring the filtered on-device AI; otherwise "yes" for the AI and a higher rating.
 
 ## 3. Timeline and why things are the way they are
 

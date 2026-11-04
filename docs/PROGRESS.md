@@ -222,7 +222,8 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
    store settings, es-ES and en-US listings with Android screenshots; 1.1.0 (23) on internal testing; **1.1.0 (24)
    on the closed track "Alpha" ("Friends and family", all countries) sent to Google's review with the listings and
    forms (15 changes)**. To do: once approved, 12 testers opt in and keep it 14 days in a row (required for every
-   new app of this personal account), then apply for production (Play asks a short questionnaire about the test). Content rating is PEGI 18 (audience 18+) until IARC answers the owner's question.
+   new app of this personal account), then apply for production (Play asks a short questionnaire about the test). Content rating is PEGI 3 (audience 13+) since 2026-10-29; IARC answered on 2026-11-04 that the on-device AI must be
+   disclosed on its own: pending owner's decision on content limits for the assistant (log 2026-11-04).
 6. Reader: auto-hiding toolbar on scroll (style guide), syllabus for SPA course ZIMs read
    from the rendered DOM.
 7. Assistant: ~~copy / regenerate an answer~~ done 2026-10-28; better small-model citations; check the
@@ -332,6 +333,23 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-11-04 — IARC answered: the on-device AI is rated on its own
+
+- IARC (info@globalratings.com) answered the owner's question of 2026-10-29: "IARC has questions specifically for
+  products that are educational. However, if your on-device AI allows access to pertinent content, it must be
+  disclosed as such apart from the medical guides and encyclopedias." So the educational question (answered "yes")
+  covers the reference content, but what the assistant can generate is judged by itself.
+- Our PEGI 3 answers say "no" to violence, language and drugs for the AI answers too, and that "no" is weak: the
+  Android models (Qwen3.5 0.8B/2B/4B, Gemma 4 E2B) run with a system prompt that sets only the tone
+  (`rag-core.ts`, `SYSTEM`), no content limits; only the models' own tuning and "Report answer" stand in the way.
+- Proposed (not done, owner's decision on 2026-11-04 to change nothing for now): content limits in the shared
+  system prompt (no sexual content, graphic violence, slurs, drug or weapon instructions; a fixed polite reply,
+  like health on Android), measured with `scripts/assistant-bench` on trap questions and the 50 crisis questions
+  (to catch over-refusals, as with the no-health prompt and water); then redo the questionnaire with the same
+  answers, declaring the on-device AI with its filter and report button. The alternative, "yes" for the AI, likely
+  means PEGI 12/16 and revisiting the 13+ audience. Details in `docs/ANDROID_PLAY.md` (open items) and
+  `docs/store/play-listing.md` (Content rating).
 
 ### 2026-11-04 — CarPlay entitlement requested
 

@@ -108,7 +108,27 @@ are out of the Android build.
 
 First submission (2026-10-29, with health features): violence yes (gory, injury photos), language yes
 (discriminatory words quoted in articles), drugs in text: ClassInd L, ESRB 10+, PEGI 18, USK 12, IARC 18+.
-The question to IARC sent that day (globalratings.com/contact-us) is moot now unless they answer otherwise.
+The question to IARC sent that day (globalratings.com/contact-us): how should a reference reader answer, and does
+encyclopedic or medical context count like the "natural or scientific context" exclusion?
+
+IARC's answer (2026-11-04, info@globalratings.com): "IARC has questions specifically for products that are
+educational. However, if your on-device AI allows access to pertinent content, it must be disclosed as such apart
+from the medical guides and encyclopedias." Reading: the educational question (answered "yes") is how reference
+content is accounted for; the assistant is rated on what it can generate itself.
+
+Where that leaves the PEGI 3 answers: the Android assistant (Qwen3.5 0.8B/2B/4B, Gemma 4 E2B via llama.rn) has a
+system prompt with tone only (`src/features/assistant/rag-core.ts`, `SYSTEM`) and no content limits; small models'
+own safety tuning is weak, so "no" to violence and language for AI answers is hard to defend. "Report answer"
+(`report-core.ts`) covers Play's AI-generated content policy, not the rating.
+
+Options (owner's decision 2026-11-04: no changes for now):
+
+1. Recommended: content limits in the shared system prompt, es + en (no sexual content, graphic violence, slurs,
+   drug or weapon instructions; a fixed polite reply, like health on Android), measured with
+   `scripts/assistant-bench` (15–20 trap questions per model plus the 50 crisis questions, to catch over-refusals);
+   then redo the questionnaire with the same answers, declaring the on-device AI with its filter and report button.
+   Keeps PEGI 3. Applies to iOS too (shared prompt).
+2. Answer "yes" for the AI: likely PEGI 12/16 and revisiting the 13+ target audience.
 
 ## Data safety
 
