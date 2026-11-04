@@ -22,11 +22,11 @@ privately by the maintainer, never in git.
 
 Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo prebuild`.
 
-- Marketing version: `expo.version` (currently **2.0.1**; 1.1.0 (23) approved by Apple by 2026-11-03, which closed its train; 2.0.0 (39) live). Keep `package.json`'s
+- Marketing version: `expo.version` (currently **2.1.0**; 2.0.1 (40) in App Review since 2026-11-04; 1.1.0 (23) approved by Apple by 2026-11-03, which closed its train; 2.0.0 (39) live). Keep `package.json`'s
   `version` equal (not used by the build, but it's what people read).
-- iOS build number: `expo.ios.buildNumber` (currently **"40"**) → `CFBundleVersion`. Bump it
+- iOS build number: `expo.ios.buildNumber` (currently **"41"**) → `CFBundleVersion`. Bump it
   for every upload: App Store Connect rejects a build number it has already seen.
-- Android: `expo.android.versionCode` (currently **26**: 23 and 24 went to Play internal testing, 24 to the rejected closed test; 25 is the build without health features, superseded before review; 26 adds the assistant's no-health fixes). Must grow
+- Android: `expo.android.versionCode` (currently **27**, not uploaded: nothing goes to Play while the closed test runs; 23 and 24 went to Play internal testing, 24 to the rejected closed test; 25 is the build without health features, superseded before review; 26 adds the assistant's no-health fixes). Must grow
   with every Play upload.
 - After changing any of them, run `npx expo prebuild` (it can regenerate `ios/` and
   `android/` from scratch: then `cd ios && pod install`).
@@ -72,6 +72,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 1.1.0 | 38 | TestFlight 2026-11-02 (TestFlight only): build 37 plus emergency point names on the map in their category colour, placed around the dot (build 37 already left our emergency kinds out of the basemap's POI icons: `skipOurPois` went into its commit by mistake); no E2E run (owner's call) |
 | 2.0.0 | 39 | TestFlight 2026-11-03 (TestFlight only; first 2.0.0, owner's choice: the 1.1.0 train closed once Apple approved 1.1.0): build 38 plus collections that list every level with what it adds (no tier to select; a level's button downloads only that level), long press on installed rows, and toasts above sheets and modals (kept out of the accessibility tree) |
 | 2.0.1 | 40 | TestFlight 2026-11-04, **submitted to App Review 2026-11-04** (auto-release): 2.0.0 plus the local emergency number where a US source says 911 and Spain's numbers labelled as Spain's, medical notices under health cards and the assistant, corrected emergency numbers, the new privacy policy (nomad-pocket.app), WebRTC off inside archives, checksums for kits' mirrors and AI models, shared routing packs kept when one country is deleted, the update space re-check and the PDF crash guard |
+| 2.1.0 | 41 | TestFlight 2026-11-04 (TestFlight only: not submitted while 2.0.1 is in review, owner's call): 2.0.1 plus "Essential" = the onboarding kit (every collection's essential level, no size caps; Canadian Prepper, CDC, TED gardening out of Essential; Gardenology, Vikidia en, Wikivoyage en new; Computing without one), zimgit post-disaster standing in for the four zimgit archives it carries, and the kit's Wikipedia the top 50 000 articles (1.2 GB) instead of the whole one (13.3 GB) (`docs/ESSENTIAL_CONTENT.md`). What's new: `docs/store/listing-2.1.0.md` |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.

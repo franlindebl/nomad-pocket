@@ -334,6 +334,18 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-04 — 2.1.0 (41) to TestFlight
+
+- Version 2.1.0, iOS build 41 (Android versionCode 27, not uploaded): 2.0.1 plus the essential content and the
+  kit's top Wikipedia (entry below). TestFlight only: 2.0.1 (40) is waiting for review and the owner doesn't want
+  to pull it, and nothing goes to Google Play while the closed test runs. Submit 2.1.0 once 2.0.1 is approved, with
+  "What's new" from `docs/store/listing-2.1.0.md` (the owner reviews it first).
+- E2E on the release commit's code: iOS smoke + full 44/44, iPad tour 1/1 (screenshots looked at), Android 5/5
+  (android-01 failed once because the emulator's Play Store updated Android System WebView mid-run, which kills
+  every app using it; the rerun of all five passed).
+- The local `ios/` pointed at an old checkout (`Proyectos/nomad-app`, gone) for expo-image's prebuilt XCFramework:
+  `pod install` fixed it.
+
 ### 2026-11-04 — Crash on exit while following: no camera eases in the background
 
 - TestFlight crash report from 2.0.1 (40), iPhone 15 Pro, iOS 27.0.1 (fetched with the ASC API:
