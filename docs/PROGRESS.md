@@ -80,6 +80,14 @@ AI. **Assistant quality** (`docs/ASSISTANT_QUALITY_PLAN.md`, measured 2026-10-31
    (EmbeddingGemma, measure on a phone first); (6) a vetted bilingual emergency guide: every variant gave 3–8
    harmful answers out of 50 (CPR, choking, bleach dose, CO); (7) Spanish Ready.gov/MedlinePlus in the kit.
 
+AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched and documented 2026-11-04, approved to implement, not
+   started): official weather warnings (AEMET for Spain, MeteoAlarm for Europe, NWS for the US) and earthquakes
+   (USGS, EMSC) for where the person is, matched on the device, local notifications for orange/red, each warning
+   turned into actions (download the area's map, plan, kit, guide card, 112). Phase 1 without a server of our own
+   (foreground + background checks); push from a server is phase 2. Open owner questions at the end of the plan
+   (onboarding opt-in, thresholds, US position to NWS, GDACS). Blocking for Europe: read MeteoAlarm's extra
+   redistribution terms.
+
 CU. **Content updates, next** (`docs/CONTENT_UPDATES_PLAN.md`): the owner tries build 27 on the iPhone; later an
    optional "update automatically on Wi-Fi" switch. A delete-first update that goes through was checked by hand
    only (it needs a nearly full phone; E2E covers the refusal).
@@ -356,6 +364,18 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   `e2e/subflows/carplay/`). `carplay-sim.sh setup` now raises its simulator's window before choosing CarPlay.
   Passes on 2.2.0 (42)'s code (CAR-01…04: opened from the car, emergency trip with preview/Ir/Terminar, the phone
   adopting the car's app, a phone trip shown and ended on the car).
+
+### 2026-11-04 — Official alerts: research and plan
+
+- Researched public alert services for a notifications feature (owner's idea: earthquakes, tsunamis, severe weather,
+  bomb threats). Plan in `docs/ALERTS_PLAN.md`: what each source offers, read live on 2026-11-04 (AEMET's RSS with a
+  `.tar.gz` of every active CAP file, CAP with es/en and polygons, no API key; MeteoAlarm's per-country Atom, EMMA_ID
+  codes and no polygons, CC BY 4.0 plus redistribution terms still unread; NWS, USGS, EMSC, tsunami.gov, GDACS).
+- Main decisions: the app shows official warnings, it doesn't compete with ES-Alert (cell broadcast, no API); the
+  value is "prepare while you still have a connection"; phase 1 has no server and keeps the location on the device;
+  Time Sensitive notifications, no Critical Alerts; no FCM on Android, so polling there even in phase 2; GitHub
+  Actions ruled out for push (late or skipped schedules). Bomb threats out: no official public feed.
+- Docs only, no code.
 
 ### 2026-11-04 — Git hooks: repair a hooks path that no longer exists
 
