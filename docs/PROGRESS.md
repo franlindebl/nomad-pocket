@@ -149,8 +149,9 @@ C. **CarPlay + voice + background navigation** (`docs/CARPLAY_PLAN.md`), built a
    - Next store build: the App Review note on the background modes (`docs/CARPLAY_PLAN.md`); Android needs the
      Play Console foreground-service declaration first (`docs/ANDROID_PLAY.md`).
    - ~~Owner: request the CarPlay navigation entitlement~~ granted 2026-11-04; ~~`enabled`/`entitlement` on~~ in
-     2.2.0 (42). Next: try it in a real car (or Apple's CarPlay Simulator app with the phone over USB); then the
-     Dashboard and instrument cluster (`docs/CARPLAY_PLAN.md`, "Later").
+     2.2.0 (42). Next: try it in a real car (or Apple's CarPlay Simulator app with the phone over USB); upload the
+     CarPlay screenshot (`docs/store/marketing/<lang>/<iphone|ipad>/09-carplay.png`, made 2026-11-04) with the next
+     version's listing (owner reviews it first); then the Dashboard and instrument cluster (`docs/CARPLAY_PLAN.md`, "Later").
 
 U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNTRY_REGIONS_PLAN.md`):
    done and live. State at 2026-10-27 (resume point for the "rediseño" session, which also owns
@@ -340,6 +341,19 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-11-04 — CarPlay store screenshot
+
+- `09-carplay` for es and en, iPhone and iPad (`docs/store/marketing/`), for the version after 2.2.0 (the owner's call:
+  2.2.0 went to review without it). Frame "D" like the rest; the car screen above, the phone on the same trip below.
+  Captions: "Tu ruta, en la pantalla del coche" / "CarPlay sin conexión, guiado por voz"; "Your route on your car's
+  screen" / "Offline CarPlay with voice guidance". Madrid (Spain's map and pack) and New York (US Northeast), real
+  catalogs, how in `docs/RELEASE.md` (Screenshots). `scripts/store-screenshots.py` composes `NN-carplay.png` with its
+  `NN-carplay.car.png`; the other shots come out pixel-identical after the refactor (checked on three).
+- Tried first and dropped: a moving trip along the Castellana (simulated points off the road rerouted the phone into
+  a detour, and the car and phone showed different wordings of the same fork), the phone over the car's lower edge
+  (it hid the estimates), and a New York trip whose arrival came right after the turn (CarPlay's second row hid under
+  the estimates).
 
 ### 2026-11-04 — 2.2.0 (42): CarPlay on
 

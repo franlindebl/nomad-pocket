@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Compose store marketing screenshots: headline + raw simulator/emulator capture.
 
-Reads docs/store/screenshots/<lang>/<device>/NN-name.png and writes
+Reads docs/store/screenshots/<lang>/<device>/NN-name.png (a CarPlay shot also NN-carplay.car.png, the car
+screen, composed above its phone capture) and writes
 docs/store/marketing/<lang>/<device>/NN-name.png at the exact App Store size (iphone, ipad) or Google Play's phone size (android: 9:16, as Play
 refuses a long side over twice the short one), plus Play's 1024 x 500 feature graphic in
 docs/store/play/.
@@ -45,6 +46,7 @@ CAPTIONS = {
         'plan': ('Tu familia sabe qué hacer', 'Puntos de encuentro, contactos y datos médicos'),
         'library': ('Wikipedia offline, en tu bolsillo', 'Medicina, supervivencia, cursos y más'),
         'kit': ('Listo en un minuto', 'Elige tu país y descarga tu kit'),
+        'carplay': ('Tu ruta, en la pantalla del coche', 'CarPlay sin conexión, guiado por voz'),
     },
     'en': {
         'home': ('Ready for the next blackout', 'Maps, emergency help and guides, offline'),
@@ -56,13 +58,14 @@ CAPTIONS = {
         'plan': ('Your family knows what to do', 'Meeting points, contacts and medical details'),
         'library': ('Wikipedia offline, in your pocket', 'Medicine, survival, courses and more'),
         'kit': ('Ready in a minute', 'Pick your country and download your kit'),
+        'carplay': ("Your route on your car's screen", 'Offline CarPlay with voice guidance'),
     },
 }
 
 
 # Screens that show the map carry the OpenStreetMap credit under the phone: the in-app pill fades
 # after five seconds (MapCredit), and OSMF's guidelines accept the credit next to a map image.
-MAP_SHOTS = ('navigation', 'route', 'emergency')
+MAP_SHOTS = ('navigation', 'route', 'emergency', 'carplay')
 OSM_CREDIT = {'es': 'Mapa © colaboradores de OpenStreetMap', 'en': 'Map © OpenStreetMap contributors'}
 
 
@@ -136,11 +139,11 @@ def chamfer_bar(draw, x0, y0, x1, y1, fill):
     draw.polygon([(x0, y0), (x1 - cut, y0), (x1, y0 + cut), (x1, y1), (x0, y1)], fill=fill)
 
 
-def compose(src: Path, dst: Path, lang: str, device: str):
-    W, H = SIZES[device]
-    canvas = Image.new('RGBA', (W, H), BG + (255,))
+def header(canvas, lang: str, name: str, device: str):
+    """The headline block at the top; returns where the device can start."""
+    W, H = canvas.size
     draw = ImageDraw.Draw(canvas)
-    title, sub = caption_for(lang, src.stem, device)
+    title, sub = caption_for(lang, name, device)
 
     margin = int(W * 0.08)
     top = int(H * 0.05)
@@ -164,7 +167,58 @@ def compose(src: Path, dst: Path, lang: str, device: str):
         y += line_h
     y += gap_sub
     draw.text((W // 2, y), sub, font=sub_font, fill=SECONDARY, anchor='ma')
-    y = top + max(room, block) + int(H * 0.045)
+    return top + max(room, block) + int(H * 0.045)
+
+
+def framed(canvas, shot, x, y, bezel, radius):
+    """A capture inside a plain black device with a soft shadow; returns the frame's box."""
+    W, H = canvas.size
+    frame = (x - bezel, y, x + shot.width + bezel, y + shot.height + 2 * bezel)
+    shadow = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    ImageDraw.Draw(shadow).rounded_rectangle((frame[0], frame[1] + 30, frame[2], frame[3] + 30), radius + bezel, fill=SHADOW)
+    canvas.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(60)))
+    ImageDraw.Draw(canvas).rounded_rectangle(frame, radius + bezel, fill=DEVICE)
+    canvas.alpha_composite(rounded(shot, radius), (x, y + bezel))
+    return frame
+
+
+def map_credit(canvas, lang, y):
+    W, H = canvas.size
+    credit_font = ImageFont.truetype(str(CREDIT_FONT), int(W * 0.02))
+    ImageDraw.Draw(canvas).text((W // 2, y), OSM_CREDIT[lang], font=credit_font, fill=SECONDARY, anchor='mm')
+
+
+def compose_carplay(src: Path, dst: Path, lang: str, device: str):
+    """CarPlay: the car's screen (<name>.car.png, the simulator's external display) as a wide dashboard
+    display, and below it the phone (<name>.png) on the same trip. They don't overlap: the phone hid the
+    car's estimates wherever it went."""
+    W, H = SIZES[device]
+    canvas = Image.new('RGBA', (W, H), BG + (255,))
+    y = header(canvas, lang, src.stem, device)
+    car = Image.open(src.with_name(src.stem + '.car.png')).convert('RGB')
+    bezel = int(W * 0.022)
+    # On the iPad's wider canvas a full-width car would leave the phone tiny (and enlarge the car past its 1600 px).
+    car_w = int(W * 0.70) if device == 'ipad' else W - 2 * int(W * 0.06) - 2 * bezel
+    car = car.resize((car_w, round(car.height * car_w / car.width)), Image.LANCZOS)
+    car_frame = framed(canvas, car, (W - car.width) // 2, y, bezel, int(car.height * 0.06))
+    phone = Image.open(src).convert('RGB')
+    pbezel = int(W * 0.018)
+    top = car_frame[3] + int(H * 0.025)
+    avail_h = H - top - int(H * 0.05) - 2 * pbezel
+    scale = avail_h / phone.height
+    phone = phone.resize((round(phone.width * scale), round(phone.height * scale)), Image.LANCZOS)
+    frame = framed(canvas, phone, (W - phone.width) // 2, top, pbezel, int(phone.width * 0.09))
+    map_credit(canvas, lang, (frame[3] + H) // 2)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    canvas.convert('RGB').save(dst, 'PNG', optimize=True)
+
+
+def compose(src: Path, dst: Path, lang: str, device: str):
+    if 'carplay' in src.stem:
+        return compose_carplay(src, dst, lang, device)
+    W, H = SIZES[device]
+    canvas = Image.new('RGBA', (W, H), BG + (255,))
+    y = header(canvas, lang, src.stem, device)
 
     # The capture inside a plain black phone: a bezel all round, the screen's own corners rounded.
     bezel = int(W * 0.02)
@@ -174,17 +228,9 @@ def compose(src: Path, dst: Path, lang: str, device: str):
     scale = min(avail_w / shot.width, avail_h / shot.height)
     shot = shot.resize((round(shot.width * scale), round(shot.height * scale)), Image.LANCZOS)
     radius = int(shot.width * {'iphone': 0.09, 'android': 0.06}.get(device, 0.035))
-    x = (W - shot.width) // 2
-    frame = (x - bezel, y, x + shot.width + bezel, y + shot.height + 2 * bezel)
-    shadow = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    ImageDraw.Draw(shadow).rounded_rectangle((frame[0], frame[1] + 30, frame[2], frame[3] + 30), radius + bezel, fill=SHADOW)
-    canvas.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(60)))
-    over = ImageDraw.Draw(canvas)
-    over.rounded_rectangle(frame, radius + bezel, fill=DEVICE)
-    canvas.alpha_composite(rounded(shot, radius), (x, y + bezel))
+    frame = framed(canvas, shot, (W - shot.width) // 2, y, bezel, radius)
     if any(key in src.stem for key in MAP_SHOTS):
-        credit_font = ImageFont.truetype(str(CREDIT_FONT), int(W * 0.02))
-        over.text((W // 2, (frame[3] + H) // 2), OSM_CREDIT[lang], font=credit_font, fill=SECONDARY, anchor='mm')
+        map_credit(canvas, lang, (frame[3] + H) // 2)
 
     dst.parent.mkdir(parents=True, exist_ok=True)
     canvas.convert('RGB').save(dst, 'PNG', optimize=True)
@@ -230,7 +276,8 @@ def main():
     devices = sys.argv[1:] or list(SIZES)
     for src in sorted(SRC.glob('*/*/*.png')):
         lang, device = src.parent.parent.name, src.parent.name
-        if lang not in CAPTIONS or device not in devices:
+        # A CarPlay shot's car screen (<name>.car.png) is composed with its phone capture.
+        if lang not in CAPTIONS or device not in devices or src.stem.endswith('.car'):
             continue
         compose(src, OUT / lang / device / src.name, lang, device)
         count += 1

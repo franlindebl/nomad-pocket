@@ -194,6 +194,20 @@ taps and pasted text (`simctl pbcopy` + Cmd-V: `axe type` can't type accents). A
 yellow frame, `python3 scripts/store-screenshots.py android`): the same 8 screens on the `Nomad_Shots` emulator with
 the store APK, without health content (`docs/ANDROID_PLAY.md`, section 8).
 
+CarPlay shot (`09-carplay`, made 2026-11-04 for the next version after 2.2.0; not uploaded yet): the car screen
+above and the phone on the same trip below, no overlap (the phone hid the car's estimates wherever it went). Raw
+inputs per language and device: `09-carplay.png` (phone) and `09-carplay.car.png` (the car screen,
+`xcrun simctl io <udid> screenshot --display=external`, 1600×960). Made on the CarPlay simulator (`NP-carplay-26`,
+`scripts/carplay/carplay-sim.sh setup`) with a Release simulator build without `EXPO_PUBLIC_*_MANIFEST_URL`, the
+country's map and routing pack fetched with curl from the catalogs and copied loose into `Documents/content/{maps,routing}`
+(registered at startup), the trip started on the phone with Maestro (coordinates search, "Iniciar") and the app opened
+on the car: Madrid, Príncipe de Vergara at O'Donnell towards the Gregorio Marañón ("Gire a la derecha hacia Calle de
+Alcalá"); New York, 1st Avenue at E 16th St towards the Flatiron ("Turn left onto East 23rd Street", the device in
+en-US). Pick a trip whose next maneuver is followed by a long stretch: when another maneuver comes close behind,
+CarPlay's second row hides under the estimates at 800×480. `simctl status_bar … override --time` with the real time,
+so the clock and the arrival agree. Only the Xcode 26.5 Simulator may be running: with Xcode 27's open too, the
+External Displays menu can reach the wrong one.
+
 ## Website (landing, privacy, support)
 
 `site/` is a static site deployed to GitHub Pages by `.github/workflows/pages.yml` on every push to `main`
