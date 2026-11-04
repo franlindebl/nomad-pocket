@@ -2,7 +2,7 @@
   "expo": {
     "name": "Nomad Pocket",
     "slug": "nomad-pocket",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "nomadpocket",
@@ -14,7 +14,7 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.fjlinde.nomadpocket",
-      "buildNumber": "41",
+      "buildNumber": "42",
       "supportsTablet": true,
       "infoPlist": {
         "CFBundleDevelopmentRegion": "es",
@@ -195,8 +195,8 @@
       [
         "./plugins/with-carplay",
         {
-          "enabled": false,
-          "entitlement": false
+          "enabled": true,
+          "entitlement": true
         }
       ],
       "./plugins/with-store-build",
