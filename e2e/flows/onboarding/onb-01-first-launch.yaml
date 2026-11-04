@@ -18,7 +18,7 @@ tags: [smoke, onboarding]
     visible: { id: "kit-country" }
     timeout: 10000
 - assertVisible: "Mapa de España.*"
-- assertVisible: "Guías de supervivencia.*"
+- assertVisible: "Guías esenciales.*"
 - takeScreenshot: 03-kit
 - tapOn: { id: "kit-country" }
 - tapOn: { id: "kit-guides" }

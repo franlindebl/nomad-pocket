@@ -162,7 +162,7 @@ export default function OnboardingScreen() {
     const countryBytes = countryWanted && countrySize.status === 'ready' ? countrySize.bytes : 0;
     // What it takes on disk while it installs (a multi-part archive is assembled next to its parts).
     const countryNeeded = countryWanted && countrySize.status === 'ready' ? countrySize.needed : 0;
-    const allGuides = guideResources(s.contentLanguages).filter((r) => !installedIds.has(r.id));
+    const allGuides = guideResources(s.contentLanguages, s.language).filter((r) => !installedIds.has(r.id));
     const guides = allGuides.filter((r) => !pendingIds.has(r.id));
     const guidesDownloading = guides.length < allGuides.length;
     const guidesBytes = sumMB(guides) * 1e6;

@@ -98,7 +98,7 @@ src/
     content/items.ts         installed content registry (items table)
     downloads/               queue (manager.ts), Kiwix mirror picker, DownloadRow
     catalog/                 catalog accessors, downloadResource, OPDS client, DownloadButton, icons
-    onboarding/kit.ts        the onboarding kit: guides, Wikipedia by free space, assistant model
+    onboarding/kit.ts        the onboarding kit: guides, Wikipedia by free space, assistant model (kit-core.ts pure)
     library/                 ZIM facade, registration, history/bookmarks, HTML helpers, reader components
     courses/                 syllabus + progress, CourseCard
     maps/                    countries (one download = map + routing + points), country maps catalog,
@@ -409,11 +409,12 @@ stored URIs are re-anchored with `resolveContentUri()` (anything under `/content
   `discard` runs when the row is dismissed instead.
 
 ### Catalog (`src/features/catalog`, `src/data/catalog.json`)
-- Shape (`types.ts`): `resources` (101: id = Kiwix book name without date, bilingual
+- Shape (`types.ts`): `resources` (104: id = Kiwix book name without date, bilingual
   title/description, `language` es/en/mul, pinned `url`, `sizeMB`, `version`, `category`,
   `isCourse`, `subject`, `medical`), `categories` (6: medicine, survival, education, diy,
   agriculture, computing — each with cumulative tiers essential → standard →
-  comprehensive via `includesTier`), `wikipedia` (size options per language), 
+  comprehensive via `includesTier`; the essential one is `recommended`, the first, and is what the
+  onboarding kit downloads: Computing has none, its first level is "Básico"; `docs/ESSENTIAL_CONTENT.md`), `wikipedia` (size options per language), 
   `courseSubjects` (math, science, programming, health, general), `courses` (14 ids,
   display order). 23 resources in Spanish, 11 multilingual.
 - Accessors: `getResource`, `getCategory`, `tierResources` (cumulative, filtered by the
@@ -457,7 +458,8 @@ explore, ZIM import).
   owner's decisions 2026-11-02):
   - *Editions*: a Kiwix name `<book>_{top,all}_{mini,nopic,maxi}` holds another of the same book when it
     is as wide and as deep (`wikipedia_es_all_nopic` holds `wikipedia_es_top_mini`; Wikibooks maxi holds
-    nopic). A held resource counts as had, its row says "Ya está dentro de «X»" and its button opens X
+    nopic). So does an archive that carries others whole (`CARRIES`: zimgit post-disaster holds the zimgit
+    medicine, water, knots and food libraries, byte for byte). A held resource counts as had, its row says "Ya está dentro de «X»" and its button opens X
     (`useCovering`); packs skip editions another one in the pack holds (`withoutHeld`). When a new archive
     finishes, `library/redundant.ts` offers to delete the installed editions it holds (an alert naming the
     holder and the space freed; deferred to the next foreground when the download ends in background;
@@ -478,10 +480,11 @@ explore, ZIM import).
 Welcome (crisis message, app language; content languages follow it: es → es+en, en → en)
 → country (`CountryList`, preselected from `settings.country`, else the phone's region;
 stored in `settings.country`) → one kit proposal, each piece a switchable row:
-the country download (`useCountrySize`), essential guides (`guideResources`: medicine,
-survival, agriculture essential tiers in the content languages, items ≤ 300/100 MB, plus
-`zimgit-post-disaster_en`), Wikipedia (`pickWikipedia`: all-nopic / all-mini / top-nopic /
-top-mini, the biggest that leaves 60 / 20 / 6 / 0 GB free after the rest), the assistant
+the country download (`useCountrySize`), essential guides (`guideResources` → `kit-core.ts`
+`essentialResources`: every collection's recommended tier in the content languages, without the same work
+in another language and without archives another one in the kit holds; `docs/ESSENTIAL_CONTENT.md`),
+Wikipedia (`pickWikipedia`: top-nopic, or top-mini when fewer than 6 GB would stay free after the rest;
+the whole encyclopedia only from the Library), the assistant
 (`recommendModel(ram)`, also next to Apple Intelligence, which answers far worse:
 `docs/ASSISTANT_QUALITY_PLAN.md`; the system model stays active until the download ends) → done (family plan
 shortcut).

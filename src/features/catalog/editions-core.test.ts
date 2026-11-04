@@ -74,3 +74,13 @@ test('a pack drops the editions another one in it holds', () => {
     ['wikibooks_es_all_maxi', 'ifixit_es_all'],
   );
 });
+
+test('the post-disaster library carries the four smaller zimgit ones', () => {
+  for (const id of ['zimgit-medicine_en', 'zimgit-water_en', 'zimgit-knots_en', 'zimgit-food-preparation_en']) {
+    assert.ok(editionIncludes('zimgit-post-disaster_en', id), id);
+    assert.ok(!editionIncludes(id, 'zimgit-post-disaster_en'), id);
+  }
+  assert.ok(!editionIncludes('zimgit-post-disaster_en', 'zimgit-post-disaster_en'));
+  assert.deepEqual(heldBy('zimgit-post-disaster_en', ['zimgit-water_en', 'scoutwiki.org_es_all_maxi']), ['zimgit-water_en']);
+  assert.deepEqual(withoutHeld([{ id: 'zimgit-water_en' }, { id: 'zimgit-post-disaster_en' }]).map((r) => r.id), ['zimgit-post-disaster_en']);
+});

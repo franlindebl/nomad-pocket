@@ -83,7 +83,9 @@ export function useCollections(): Collection[] {
         const c = catalog.categories.find((x) => x.slug === key);
         if (!c) continue;
         const all = tierResources(c, c.tiers[c.tiers.length - 1], langs);
-        const essential = c.tiers[0] ? withoutHeld(tierResources(c, c.tiers[0], langs).filter((r) => !other.has(r.id))) : [];
+        // Computing has no essential level: no hint.
+        const tier = c.tiers.find((x) => x.recommended);
+        const essential = tier ? withoutHeld(tierResources(c, tier, langs).filter((r) => !other.has(r.id))) : [];
         const hint = essential.length ? t('essentialPack', { size: formatMB(sumMB(essential)) }) : '';
         out.push(make(key, loc(c.name), iconByName(c.icon), c.hue ?? categoryHue(c.slug), all.map((r) => r.id), hint));
       }

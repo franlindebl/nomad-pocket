@@ -54,6 +54,7 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
   const { t, i18n } = useTranslation('home');
   const country = useSettings((s) => s.country);
   const langs = useSettings((s) => s.contentLanguages);
+  const language = useSettings((s) => s.language);
   const zims = useItems('zim');
   const { countries } = useCountries();
   const model = useActiveModel();
@@ -68,7 +69,7 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
     const mine = countries.find((c) => c.regionId === country) ?? (country ? undefined : countries[0]);
     const name = mine?.title ?? (region ? regionName(region, i18n.language) : '');
     const installedIds = new Set(zims.map((z) => z.catalogId ?? z.id));
-    const guides = guideResources(langs);
+    const guides = guideResources(langs, language);
     const guidesHave = guides.filter((r) => installedIds.has(r.id)).length;
     const wikiIds = new Set(Object.values(catalog.wikipedia).flatMap((opts) => opts.map((o) => o.resourceId)));
     const wiki = zims.find((z) => wikiIds.has(z.catalogId ?? ''));
@@ -180,5 +181,5 @@ export function useReadiness(): { items: ReadinessItem[]; done: number } {
       },
     ];
     return { items, done: items.filter((i) => i.done).length };
-  }, [country, countries, zims, langs, model.ready, model.name, summary, records, updates, t, i18n.language]);
+  }, [country, countries, zims, langs, language, model.ready, model.name, summary, records, updates, t, i18n.language]);
 }

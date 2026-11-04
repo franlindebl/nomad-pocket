@@ -32,7 +32,7 @@ can pick up without re-deriving anything.
 | Area | Status |
 |---|---|
 | Foundation (design system, nav, i18n, db, downloads core) | done |
-| Catalog (101 resources, 6 categories, Wikipedia picker, Kiwix OPDS explore, Files import) | done |
+| Catalog (104 resources, 6 categories; "Essential" = the onboarding kit, `docs/ESSENTIAL_CONTENT.md`; Wikipedia picker, Kiwix OPDS explore, Files import) | done |
 | Downloads (queue, pause/resume, iOS background, Wi-Fi-only enforced in the manager, size + sha-256 checks, retry with backoff; segmented multi-mirror engine with throughput-ranked Kiwix mirrors, per-piece sha-1, resume from disk after a kill; adaptive connection budget; screen kept on; CDN files first, stall watchdog, in-process sessions on iOS while open; segmented from 4 MiB; rows whose partial bytes didn't survive a backup restore marked failed) | done — tuned on a real iPhone 14 Pro (build 18), re-timed 2026-10-28 (run 8, 6:47); Android: the tour's downloads pass (2026-10-28), speed not measured |
 | UX redesign: survival kit (`docs/UX_SURVIVAL_PLAN.md`): onboarding country + kit, Home "En una emergencia" + "Tu preparación", 4 tabs, maps by country, bundled world map, simpler settings | done — iOS sim (E2E smoke + full), Android spot check; build 11; country maps CI first run 2026-10-26 |
 | ZIM library + reader (search, TOC, bookmarks, history, find, text size, dark mode) | done — iOS + Android |
@@ -333,6 +333,39 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-11-04 — Content: "Essential" is the onboarding kit; the kit proposes the top Wikipedia articles
+
+- Owner's call: the kit must download everything "Essential", and "Essential" must be essential. The kit took
+  three collections and dropped archives over 300/100 MB (Canadian Prepper and TED gardening were Essential but
+  never came; DIY and Education never did), and added zimgit post-disaster from the Complete level by hand.
+  Now `features/onboarding/kit-core.ts` (pure, tested) takes every collection's recommended tier whole, without
+  other-language duplicates and without archives another one in the kit holds. Curation moved to the catalog
+  (`docs/ESSENTIAL_CONTENT.md` has the table and the reasons): Canadian Prepper ×2 → Complete (English videos),
+  CDC travellers' health → Standard, TED gardening → Standard, Wikiquote and English Wikibooks (3.5 GB) →
+  Standard, zimgit post-disaster → Survival Essential; new Gardenology (112 MB), Vikidia en and Wikivoyage en
+  (for English readers, `sameAs` the Spanish ones). Computing has no Essential level any more: its first level
+  is "Básico" (`computing-essential` → `computing-basic`), not recommended, not in the kit. The validator wants
+  a recommended tier to be the first, at most one, and warns on essential archives over 700 MB.
+- zimgit post-disaster carries the zimgit medicine, water, knots and food libraries byte for byte (47 PDFs,
+  194 MB, checked with libzim): `editions-core.ts` `CARRIES` treats it like a bigger edition (packs and the kit
+  skip them next to it, rows say "Ya está dentro de…", downloading it offers to delete them). Android hides
+  post-disaster (first aid), so the three non-medical ones stay in its kit.
+- Wikipedia: the kit proposes `top-nopic` (1.2 GB; `top-mini` under 6 GB free), no longer the whole one
+  (13.3 GB, from 60 GB free). Assistant bench with only the Wikipedia changed, blind-graded by three graders on
+  the 33 questions no guide card answers: all_nopic 2.07, top_nopic 2.29, all_mini 2.30, none 2.09 (noise
+  ±0.15): the answers come from the guides. top_nopic has 76 % of 121 crisis articles (the medical Wikipedia
+  six more); all_mini keeps a median 12 % of an article's text. The whole one stays in the Library.
+- Kit (guides): Spanish iOS 13 archives 1.7 GB (was 12, 1.36 GB with 217 MB twice); Android 12, 0.94 GB (was 6,
+  0.21 GB). With Wikipedia ~2.9 GB instead of ~14.7 GB. Home's "Guías esenciales" row follows the same list, so
+  existing installs are offered the new essential archives. Strings: "Guías esenciales" (kit and Home),
+  Wikipedia to-do "Sus 50.000 mejores artículos".
+- Bench without a simulator: `scripts/assistant-bench/pdfindex.py` + `mkdb.ts` build the document index from
+  the ZIMs on the host.
+- Checks: tsc, lint, `npm test`, i18n, `check:catalog` (104 URLs reachable). iOS simulator (Release, iOS 27): onb-01
+  (assertion now "Guías esenciales"), lib-01..03 green; the Spain kit reads 13 guides · 1.7 GB, Wikipedia "Artículos
+  populares" 1.2 GB, total 10.5 GB; Computing shows "Nivel 1 · Básico" without the badge. Android not run (catalog and
+  kit logic are shared; the Android kit is covered by `kit-core.test.ts` on the health-less catalog).
 
 ### 2026-11-04 — IARC answered: the on-device AI is rated on its own
 

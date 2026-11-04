@@ -37,6 +37,10 @@ export type CatalogTier = {
   slug: string;
   name: Localized;
   description: Localized;
+  /**
+   * The collection's "Essential" level: shown as recommended and downloaded whole by the onboarding kit
+   * (features/onboarding/kit-core.ts). At most one, the first; a collection may have none (Computing).
+   */
   recommended?: boolean;
   /** Tier slug whose resources are included too (cumulative tiers, like NOMAD). */
   includesTier?: string;

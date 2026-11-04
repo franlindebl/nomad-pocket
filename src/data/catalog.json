@@ -1,5 +1,5 @@
 {
-  "version": "2026-10-24",
+  "version": "2026-11-04",
   "resources": {
     "zimgit-medicine_en": {
       "id": "zimgit-medicine_en",
@@ -773,6 +773,7 @@
         "en": "Collaborative travel guide in Spanish: destinations, transport, lodging and tips."
       },
       "language": "es",
+      "sameAs": "wikivoyage_nopic",
       "url": "https://download.kiwix.org/zim/wikivoyage/wikivoyage_es_all_nopic_2026-09.zim",
       "sizeMB": 43,
       "version": "2026-09",
@@ -790,6 +791,7 @@
         "en": "Spanish encyclopedia written for readers aged 8 to 13."
       },
       "language": "es",
+      "sameAs": "vikidia",
       "url": "https://download.kiwix.org/zim/vikidia/vikidia_es_all_nopic_2026-09.zim",
       "sizeMB": 16,
       "version": "2026-09",
@@ -1785,6 +1787,59 @@
       "sizeMB": 127418,
       "version": "2026-08",
       "category": "reference"
+    },
+    "vikidia_en_all_nopic": {
+      "id": "vikidia_en_all_nopic",
+      "kiwixName": "vikidia_en_all_nopic",
+      "title": {
+        "es": "Vikidia (inglés)",
+        "en": "Vikidia"
+      },
+      "description": {
+        "es": "Enciclopedia en inglés escrita para niños y jóvenes de 8 a 13 años.",
+        "en": "Encyclopedia written for readers aged 8 to 13."
+      },
+      "language": "en",
+      "sameAs": "vikidia",
+      "url": "https://download.kiwix.org/zim/vikidia/vikidia_en_all_nopic_2026-09a.zim",
+      "sizeMB": 11,
+      "version": "2026-09",
+      "category": "education"
+    },
+    "wikivoyage_en_all_nopic": {
+      "id": "wikivoyage_en_all_nopic",
+      "kiwixName": "wikivoyage_en_all_nopic",
+      "title": {
+        "es": "Wikivoyage (inglés)",
+        "en": "Wikivoyage"
+      },
+      "description": {
+        "es": "Guía de viajes colaborativa en inglés: destinos, transporte, alojamiento y consejos.",
+        "en": "Collaborative travel guide: destinations, transport, lodging and tips."
+      },
+      "language": "en",
+      "sameAs": "wikivoyage_nopic",
+      "url": "https://download.kiwix.org/zim/wikivoyage/wikivoyage_en_all_nopic_2026-09.zim",
+      "sizeMB": 272,
+      "version": "2026-09",
+      "category": "education"
+    },
+    "gardenology_en_all": {
+      "id": "gardenology_en_all",
+      "kiwixName": "gardenology_en_all",
+      "title": {
+        "es": "Gardenology",
+        "en": "Gardenology"
+      },
+      "description": {
+        "es": "Enciclopedia de plantas y huerto: cómo cultivar cada una, compost, semillas y plagas.",
+        "en": "Plant and garden encyclopedia: how to grow each plant, compost, seeds and pests."
+      },
+      "language": "en",
+      "url": "https://download.kiwix.org/zim/other/gardenology.org_en_all_2026-09.zim",
+      "sizeMB": 112,
+      "version": "2026-09",
+      "category": "agriculture"
     }
   },
   "categories": [
@@ -1816,8 +1871,7 @@
             "wikipedia_es_medicine_nopic",
             "zimgit-medicine_en",
             "nhs.uk_en_medicines",
-            "irp.fas.org_en_military-medicine",
-            "wwwnc.cdc.gov_en_all"
+            "irp.fas.org_en_military-medicine"
           ]
         },
         {
@@ -1833,7 +1887,8 @@
           "includesTier": "medicine-essential",
           "resources": [
             "medlineplus.gov_es_all",
-            "medlineplus.gov_en_all"
+            "medlineplus.gov_en_all",
+            "wwwnc.cdc.gov_en_all"
           ]
         },
         {
@@ -1876,17 +1931,16 @@
             "en": "Essential"
           },
           "description": {
-            "es": "Agua, comida, nudos y vida al aire libre. Lo básico para una emergencia.",
-            "en": "Water, food, knots and outdoor basics. Start here for emergencies."
+            "es": "Agua, comida, nudos, refugio y qué hacer tras un desastre. Lo básico para una emergencia.",
+            "en": "Water, food, knots, shelter and what to do after a disaster. The basics for an emergency."
           },
           "recommended": true,
           "resources": [
             "scoutwiki.org_es_all_maxi",
+            "zimgit-post-disaster_en",
             "zimgit-water_en",
             "zimgit-food-preparation_en",
-            "zimgit-knots_en",
-            "canadian-prepper_en_winterprepping",
-            "canadian-prepper_en_bugoutroll"
+            "zimgit-knots_en"
           ]
         },
         {
@@ -1916,17 +1970,18 @@
             "en": "Comprehensive"
           },
           "description": {
-            "es": "Biblioteca completa: recuperación tras desastres, alimentos, agua y tecnología apropiada.",
-            "en": "Complete library: post-disaster recovery, food, water and appropriate technology."
+            "es": "Biblioteca completa: vídeos de preparación, alimentos a largo plazo, vida fuera de la red y tecnología apropiada.",
+            "en": "Complete library: preparedness videos, long-term food, off-grid living and appropriate technology."
           },
           "includesTier": "survival-standard",
           "resources": [
             "ted_mul_water",
             "canadian-prepper_en_preppingfood",
-            "zimgit-post-disaster_en",
             "100r.co_en_all",
             "gutenberg_en_lcc-u",
-            "cd3wdproject.org_en_all"
+            "cd3wdproject.org_en_all",
+            "canadian-prepper_en_winterprepping",
+            "canadian-prepper_en_bugoutroll"
           ]
         }
       ]
@@ -1951,16 +2006,16 @@
             "en": "Essential"
           },
           "description": {
-            "es": "Libros de texto y obras de consulta ligeras, solo texto.",
-            "en": "Lightweight, text-only textbooks and reference works."
+            "es": "Libros de texto, una enciclopedia para niños y una guía de viajes, solo texto.",
+            "en": "Textbooks, an encyclopedia for children and a travel guide, text only."
           },
           "recommended": true,
           "resources": [
             "wikibooks_es_all_nopic",
             "wikivoyage_es_all_nopic",
             "vikidia_es_all_nopic",
-            "wikiquote_es_all_nopic",
-            "wikibooks_en_all_nopic"
+            "vikidia_en_all_nopic",
+            "wikivoyage_en_all_nopic"
           ]
         },
         {
@@ -1982,7 +2037,9 @@
             "libretexts.org_en_math",
             "libretexts.org_en_phys",
             "libretexts.org_en_chem",
-            "libretexts.org_en_bio"
+            "libretexts.org_en_bio",
+            "wikiquote_es_all_nopic",
+            "wikibooks_en_all_nopic"
           ]
         },
         {
@@ -2092,12 +2149,12 @@
             "en": "Essential"
           },
           "description": {
-            "es": "Huerto básico, recetas rápidas y cocina sencilla.",
-            "en": "Gardening basics, quick recipes and simple cooking."
+            "es": "Cómo cultivar un huerto, recetas rápidas y cocina sencilla.",
+            "en": "How to grow a vegetable garden, quick recipes and simple cooking."
           },
           "recommended": true,
           "resources": [
-            "ted_mul_gardening",
+            "gardenology_en_all",
             "foss.cooking_en_all",
             "based.cooking_en_all"
           ]
@@ -2114,6 +2171,7 @@
           },
           "includesTier": "agriculture-essential",
           "resources": [
+            "ted_mul_gardening",
             "ted_mul_farming",
             "gardening.stackexchange.com_en_all",
             "cooking.stackexchange.com_en_all",
@@ -2153,16 +2211,15 @@
       },
       "tiers": [
         {
-          "slug": "computing-essential",
+          "slug": "computing-basic",
           "name": {
-            "es": "Esencial",
-            "en": "Essential"
+            "es": "Básico",
+            "en": "Basic"
           },
           "description": {
-            "es": "Aprende a programar con ejercicios interactivos y la documentación esencial.",
+            "es": "Aprende a programar con ejercicios interactivos y la documentación básica.",
             "en": "Learn to code with interactive exercises and core documentation."
           },
-          "recommended": true,
           "resources": [
             "freecodecamp_es_all",
             "wikipedia_es_computer_nopic",
@@ -2183,7 +2240,7 @@
             "es": "Preguntas de programación, Arduino, Raspberry Pi y más documentación.",
             "en": "Programming Q&A, Arduino, Raspberry Pi and more docs."
           },
-          "includesTier": "computing-essential",
+          "includesTier": "computing-basic",
           "resources": [
             "es.stackoverflow.com_mul_all",
             "arduino.stackexchange.com_en_all",

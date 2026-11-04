@@ -135,6 +135,13 @@ English guides now reach 49 of 50 answers (0 before). More material made the 4B 
 harmful advice (A3), fewer and stronger chunks fixed most of that (A4). Four of A4's five harmful answers are
 vital first aid (CPR, choking, viper bite, recovery position): step 6's verbatim cards.
 
+## Which Wikipedia (2026-11-04)
+
+Same bench with the emergency guide (`--guide`), only the Wikipedia changed, blind-graded on the 33 questions no
+card answers: all_nopic (13.3 GB) 2.07, top_nopic (1.2 GB) 2.29, all_mini (4.1 GB) 2.30, none 2.09. The answers
+come from the guides (post-disaster first, then the guide's cards and military medicine); the whole encyclopedia
+adds nothing measurable, so the kit proposes top_nopic (`docs/ESSENTIAL_CONTENT.md`).
+
 ## Plan, in order
 
 1. **Recommend Qwen even with Apple Intelligence** (small). Every Apple Intelligence iPhone has 8 GB, so

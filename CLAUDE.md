@@ -26,6 +26,7 @@ English. User-facing strings are Spanish + English (i18n).
 | `docs/CONTENT_UPDATES_PLAN.md` | Telling the person their content is old and updating it safely (download then swap; delete first only on purpose) |
 | `docs/ASSISTANT_QUALITY_PLAN.md` | Assistant measured on the Spain kit (50 crisis questions, blind-graded): findings and the fix plan; bench in `scripts/assistant-bench` |
 | `docs/EMERGENCY_GUIDE_PLAN.md` | Own bilingual emergency guide (assistant step 6): licences, per-card official sources (`docs/emergency-guide/`), gaps, owner's decisions |
+| `docs/ESSENTIAL_CONTENT.md` | What "Essential" means (= the onboarding kit), each collection's essential archives, and why the kit proposes the top Wikipedia articles (bench + coverage measurements) |
 | `docs/DOWNLOADS_SPEED_PLAN.md` | Analysis + plan for faster downloads (mirror throughput, parallel chunks, resume, keep awake); ready to pick up |
 | `AGENTS.md` | Generic Expo rules (kept for other agents; same rules repeated below) |
 
@@ -135,7 +136,7 @@ docs/               the docs above + screenshots/ + store/
   `sha256`, and its `copyInto` for multi-GB copies instead of `FileHandle.readBytes` loops in JS.
 - **Pure, tested modules** (`src/lib/{pmtiles,mvt}`, `features/assistant/{rag-core,models,markdown,dictation-core,report-core,suggestions}`,
   `features/library/html`, `features/catalog/{opds,health-core,editions-core,search-core}`, `features/downloads/{mirrors,errors,groups,segments-core,budget-core,restore-core}`,
-  `features/maps/{glyphs,geo,extraction-core,places-core,import-core,prepare-core,emergency-core,routing-core,stitch-core,follow-core,country-core,country-at-core,phone,region-terms,tap-core,speed-core}`, `features/prepare/{kit,document,passages}`, `features/downloads/manager-core`, `lib/units`, `features/library/{register-core,medical,collection,documents-core,collections-core}`, `features/content/reconcile-core`, `features/assistant/errors`, `features/credits/credits-core`, `features/updates/updates-core`, `db/{migrate-core,schema}`) use no `@/` aliases and import siblings with `.ts` extensions,
+  `features/maps/{glyphs,geo,extraction-core,places-core,import-core,prepare-core,emergency-core,routing-core,stitch-core,follow-core,country-core,country-at-core,phone,region-terms,tap-core,speed-core}`, `features/prepare/{kit,document,passages}`, `features/onboarding/kit-core`, `features/downloads/manager-core`, `lib/units`, `features/library/{register-core,medical,collection,documents-core,collections-core}`, `features/content/reconcile-core`, `features/assistant/errors`, `features/credits/credits-core`, `features/updates/updates-core`, `db/{migrate-core,schema}`) use no `@/` aliases and import siblings with `.ts` extensions,
   so `node --test --experimental-strip-types` can load them. Keep it that way and add
   `*.test.ts` next to them.
 - **Style of code.** Match the surrounding code: a short header comment per file saying

@@ -13,6 +13,11 @@ are JSONL, one line per question: queries, sources, answer, time. First run: 202
 1. A simulator with the onboarding kit downloaded (Spain: guides + Wikipedia). Copy its document index:
    `cp "$(xcrun simctl get_app_container <udid> com.fjlinde.nomadpocket data)/Documents/content/index/search.db" .`
    (the PDF passages, extracted by the app itself).
+   Without a simulator: download the kit's ZIMs and build the index on the host (needs poppler):
+   `venv/bin/python -I pdfindex.py pdfs.jsonl /tmp id=/path/a.zim …` then
+   `node --experimental-strip-types mkdb.ts pdfs.jsonl search.db`, and serve the ZIMs with
+   `venv/bin/python -I zimserver.py 8899 id=/path/a.zim …` (one Wikipedia per server to compare editions;
+   `docs/ESSENTIAL_CONTENT.md` did it that way).
 2. `python3 -m venv venv && ./venv/bin/pip install libzim`
 3. ZIM server (mirrors `modules/nomad-zim` search / suggest / getContent):
    `./startzim.sh <udid> 8899 <wikipedia_es_all….zim> [extra.zim…]`

@@ -21,6 +21,8 @@ const SIZE_TOLERANCE = 0.05;
 const HUES = new Set(['medicine', 'survival', 'education', 'diy', 'agriculture', 'computing', 'reference', 'maps', 'ai', 'courses', 'neutral']);
 const LANGS = new Set(['es', 'en', 'mul']);
 const WIKIPEDIA_OPTIONS = new Set(['top-mini', 'top-nopic', 'all-mini', 'all-nopic', 'all-maxi']);
+/** An essential archive above this is worth a second look: the onboarding kit downloads every one. */
+const ESSENTIAL_MAX_MB = 700;
 
 const errors = [];
 const warnings = [];
@@ -131,7 +133,14 @@ for (const [ci, c] of categories.entries()) {
       }
     }
   }
-  if (!c.tiers.some((t) => t.recommended)) warn(w, 'no recommended tier');
+  // The recommended tier is "Essential": the onboarding kit downloads all of it (features/onboarding/kit.ts).
+  // A category may have none (Computing); when it has one, it is the first and holds only light archives.
+  const recommended = c.tiers.filter((t) => t.recommended);
+  if (recommended.length > 1) err(w, 'more than one recommended tier');
+  if (recommended.length && c.tiers[0] !== recommended[0]) err(w, 'the recommended tier must be the first');
+  for (const id of recommended[0]?.resources ?? []) {
+    if (resources[id]?.sizeMB > ESSENTIAL_MAX_MB) warn(`${w}.tiers[${recommended[0].slug}]`, `"${id}" is ${resources[id].sizeMB} MB: the kit downloads every essential archive`);
+  }
 }
 for (const r of Object.values(resources)) {
   if (isObj(r) && nonEmpty(r.category) && !categorySlugs.has(r.category) && !['reference'].includes(r.category)) {
