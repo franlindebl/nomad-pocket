@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:cap="urn:oasis:names:tc:emergency:cap:1.2">
+  <link rel="hub" href="https://pubsubhubbub.appspot.com/"/>
+  <link type="application/atom+xml" rel="self" href="https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-spain"/>
+  <link type="text/html" rel="alternate" href="https://meteoalarm.org"/>
+  <rights>Copyright © 2026 MeteoAlarm.Org. Licensed under terms equivalent to CC BY 4.0, with additional requirements for redistributing outlined in our Terms and Conditions.</rights>
+  <generator>MeteoAlarm Producer Server</generator>
+  <logo>https://feeds.meteoalarm.org/images/logo.svg</logo>
+  <author>
+    <name>meteoalarm.org</name>
+    <uri>https://meteoalarm.org</uri>
+    <email>meteoalarm@geosphere.at</email>
+  </author>
+  <id>tag:meteoalarm.org,2021-02-19:ES</id>
+  <title>MeteoAlarm - Alerting Europe for Extreme Weather</title>
+  <updated>2026-11-04T22:35:21.907918Z</updated>
+  <entry>
+    <cap:geocode>
+      <valueName>EMMA_ID</valueName>
+      <value>ES084</value>
+    </cap:geocode>
+    <link title="Costa granadina" href="https://meteoalarm.org?geocode=EMMA_ID:ES084" hreflang="en"/>
+    <cap:areaDesc>Costa granadina</cap:areaDesc>
+    <cap:event>Moderate rain warning</cap:event>
+    <cap:sent>2026-11-04T17:14:08+00:00</cap:sent>
+    <cap:expires>2026-11-05T06:59:59+00:00</cap:expires>
+    <cap:effective>2026-11-04T17:12:24+00:00</cap:effective>
+    <cap:onset>2026-11-04T23:00:00+00:00</cap:onset>
+    <cap:certainty>Likely</cap:certainty>
+    <cap:severity>Moderate</cap:severity>
+    <cap:urgency>Future</cap:urgency>
+    <cap:scope>Public</cap:scope>
+    <cap:message_type>Alert</cap:message_type>
+    <cap:status>Actual</cap:status>
+    <cap:identifier>2.49.0.0.724.0.ES.261104171408.611804PRP1050712448</cap:identifier>
+    <link type="application/cap+xml" href="https://feeds.meteoalarm.org/api/v1/warnings/feeds-spain/dcb30d1a-f186-4eb0-b5b8-ab7e1669ffc4"/>
+    <link title="Spain" rel="related" href="https://meteoalarm.org?region=ES" hreflang="en"/>
+    <author>
+      <name>meteoalarm.org</name>
+      <uri>https://meteoalarm.org</uri>
+    </author>
+    <published>2026-11-04T17:14:08Z</published>
+    <id>https://feeds.meteoalarm.org/api/v1/warnings/feeds-spain/dcb30d1a-f186-4eb0-b5b8-ab7e1669ffc4?index_info=1&amp;index_area=0&amp;index_geocode=0</id>
+    <title>Yellow Rain Warning issued for Spain - Costa granadina</title>
+    <updated>2026-11-04T17:14:08Z</updated>
+  </entry><entry>
+    <cap:geocode>
+      <valueName>EMMA_ID</valueName>
+      <value>ES072</value>
+    </cap:geocode>
+    <link title="Poniente y Almería Capital" href="https://meteoalarm.org?geocode=EMMA_ID:ES072" hreflang="en"/>
+    <cap:areaDesc>Poniente y Almería Capital</cap:areaDesc>
+    <cap:event>Moderate rain warning</cap:event>
+    <cap:sent>2026-11-04T17:14:08+00:00</cap:sent>
+    <cap:expires>2026-11-05T06:59:59+00:00</cap:expires>
+    <cap:effective>2026-11-04T17:12:24+00:00</cap:effective>
+    <cap:onset>2026-11-04T17:00:00+00:00</cap:onset>
+    <cap:certainty>Likely</cap:certainty>
+    <cap:severity>Moderate</cap:severity>
+    <cap:urgency>Immediate</cap:urgency>
+    <cap:scope>Public</cap:scope>
+    <cap:message_type>Update</cap:message_type>
+    <cap:status>Actual</cap:status>
+    <cap:identifier>2.49.0.0.724.0.ES.261104171408.610403PRP1050712448</cap:identifier>
+    <link type="application/cap+xml" href="https://feeds.meteoalarm.org/api/v1/warnings/feeds-spain/44f4a010-4aa2-4292-9720-9e488a73e026"/>
+    <link title="Spain" rel="related" href="https://meteoalarm.org?region=ES" hreflang="en"/>
+    <author>
+      <name>meteoalarm.org</name>
+      <uri>https://meteoalarm.org</uri>
+    </author>
+    <published>2026-11-04T17:14:08Z</published>
+    <id>https://feeds.meteoalarm.org/api/v1/warnings/feeds-spain/44f4a010-4aa2-4292-9720-9e488a73e026?index_info=1&amp;index_area=0&amp;index_geocode=0</id>
+    <title>Yellow Rain Warning issued for Spain - Poniente y Almería Capital</title>
+    <updated>2026-11-04T17:14:08Z</updated>
+  </entry><entry>
+    <cap:geocode>
+      <valueName>EMMA_ID</valueName>
+      <value>ES191</value>
+    </cap:geocode>
+    <link title="Litoral norte de Tarragona" href="https://meteoalarm.org?geocode=EMMA_ID:ES191" hreflang="en"/>
+    <cap:areaDesc>Litoral norte de Tarragona</cap:areaDesc>
+    <cap:event>Moderate rain warning</cap:event>
+    <cap:sent>2026-11-04T16:54:09+00:00</cap:sent>
+    <cap:expires>2026-11-05T20:59:59+00:00</cap:expires>
+    <cap:effective>2026-11-04T16:50:55+00:00</cap:effective>
+    <cap:onset>2026-11-05T05:00:00+00:00</cap:onset>
+    <cap:certainty>Likely</cap:certainty>
+    <cap:severity>Moderate</cap:severity>
+    <cap:urgency>Future</cap:urgency>
+    <cap:scope>Public</cap:scope>
+    <cap:message_type>Alert</cap:message_type>
+    <cap:status>Actual</cap:status>
+    <cap:identifier>2.49.0.0.724.0.ES.261104165409.694303PRP1052111249</cap:identifier>
+    <link type="application/cap+xml" href="https://feeds.meteoalarm.org/api/v1/warnings/feeds-spain/5b169ed7-a2c6-4730-ace4-c3c880995ee2"/>
+    <link title="Spain" rel="related" href="https://meteoalarm.org?region=ES" hreflang="en"/>
+    <author>
+      <name>meteoalarm.org</name>
+      <uri>https://meteoalarm.org</uri>
+    </author>
+    <published>2026-11-04T16:54:09Z</published>
+    <id>https://feeds.meteoalarm.org/api/v1/warnings/feeds-spain/5b169ed7-a2c6-4730-ace4-c3c880995ee2?index_info=1&amp;index_area=0&amp;index_geocode=0</id>
+    <title>Yellow Rain Warning issued for Spain - Litoral norte de Tarragona</title>
+    <updated>2026-11-04T16:54:09Z</updated>
+  </entry><entry>
+    <cap:geocode>
+      <valueName>EMMA_ID</valueName>
+      <value>ES193</value>
+    </cap:geocode>
+    <link title="Prelitoral sur de Tarragona" href="https://meteoalarm.org?geocode=EMMA_ID:ES193" hreflang="en"/>
+    <cap:areaDesc>Prelitoral sur de Tarragona</cap:areaDesc>
+    <cap:event>Moderate rain warning</cap:event>
+    <cap:sent>2026-11-04T16:54:09+00:00</cap:sent>
+    <cap:expires>2026-11-05T20:59:59+00:00</cap:expires>
+    <cap:effective>2026-11-04T16:50:55+00:00</cap:effective>
+    <cap:onset>2026-11-05T05:00:00+00:00</cap:onset>
+    <cap:certainty>Likely</cap:certainty>
+    <cap:severity>Moderate</cap:severity>
+    <cap:urgency>Future</cap:urgency>
+    <cap:scope>Public</cap:scope>
+    <cap:message_type>Alert</cap:message_type>
+    <cap:status>Actual</cap:status>
+    <cap:identifier>2.49.0.0.724.0.ES.261104165409.694305PRP1052111249</cap:identifier>
+    <link type="application/cap+xml" href="https://feeds.meteoalarm.org/api/v1/warnings/feeds-spain/dfe20568-4169-4084-9aa2-544fd21d0dc6"/>
+    <link title="Spain" rel="related" href="https://meteoalarm.org?region=ES" hreflang="en"/>
+    <author>
+      <name>meteoalarm.org</name>
+      <uri>https://meteoalarm.org</uri>
+    </author>
+    <published>2026-11-04T16:54:09Z</published>
+    <id>https://feeds.meteoalarm.org/api/v1/warnings/feeds-spain/dfe20568-4169-4084-9aa2-544fd21d0dc6?index_info=1&amp;index_area=0&amp;index_geocode=0</id>
+    <title>Yellow Rain Warning issued for Spain - Prelitoral sur de Tarragona</title>
+    <updated>2026-11-04T16:54:09Z</updated>
+  </entry><entry>
+    <cap:geocode>
+      <valueName>EMMA_ID</valueName>
+      <value>ES192</value>
+    </cap:geocode>
+    <link title="Litoral sur de Tarragona" href="https://meteoalarm.org?geocode=EMMA_ID:ES192" hreflang="en"/>
+    <cap:areaDesc>Litoral sur de Tarragona</cap:areaDesc>
+    <cap:event>Moderate rain warning</cap:event>
+    <cap:sent>2026-11-04T16:54:09+00:00</cap:sent>
+    <cap:expires>2026-11-05T20:59:59+00:00</cap:expires>
+    <cap:effective>2026-11-04T16:50:55+00:00</cap:effective>
+    <cap:onset>2026-11-05T05:00:00+00:00</cap:onset>
+    <cap:certainty>Likely</cap:certainty>
+    <cap:severity>Moderate</cap:severity>
+    <cap:urgency>Future</cap:urgency>
+    <cap:scope>Public</cap:scope>
+    <cap:message_type>Alert</cap:message_type>
+    <cap:status>Actual</cap:status>
+    <cap:identifier>2.49.0.0.724.0.ES.261104165409.694304PRP1052111249</cap:identifier>
+    <link type="application/cap+xml" href="https://feeds.meteoalarm.org/api/v1/warnings/feeds-spain/dbd229dc-b5a6-4356-9583-487a6556d6f8"/>
+    <link title="Spain" rel="related" href="https://meteoalarm.org?region=ES" hreflang="en"/>
+    <author>
+      <name>meteoalarm.org</name>
+      <uri>https://meteoalarm.org</uri>
+    </author>
+    <published>2026-11-04T16:54:09Z</published>
+    <id>https://feeds.meteoalarm.org/api/v1/warnings/feeds-spain/dbd229dc-b5a6-4356-9583-487a6556d6f8?index_info=1&amp;index_area=0&amp;index_geocode=0</id>
+    <title>Yellow Rain Warning issued for Spain - Litoral sur de Tarragona</title>
+    <updated>2026-11-04T16:54:09Z</updated>
+  </entry><entry>
+    <cap:geocode>
+      <valueName>EMMA_ID</valueName>
+      <value>ES243</value>
+    </cap:geocode>
+    <link title="Litoral norte de Castellón" href="https://meteoalarm.org?geocode=EMMA_ID:ES243" hreflang="en"/>
+    <cap:areaDesc>Litoral norte de Castellón</cap:areaDesc>
+    <cap:event>Moderate rain warning</cap:event>
+    <cap:sent>2026-11-04T16:44:08+00:00</cap:sent>
+    <cap:expires>2026-11-05T20:59:59+00:00</cap:expires>
+    <cap:effective>2026-11-04T16:42:07+00:00</cap:effective>
+    <cap:onset>2026-11-05T05:00:00+00:00</cap:onset>
+    <cap:certainty>Likely</cap:certainty>
+    <cap:severity>Moderate</cap:severity>
+    <cap:urgency>Future</cap:urgency>
+    <cap:scope>Public</cap:scope>
+    <cap:message_type>Alert</cap:message_type>
+    <cap:status>Actual</cap:status>
+    <cap:identifier>2.49.0.0.724.0.ES.261104164408.771202PRP1052110648</cap:identifier>
+    <link type="application/cap+xml" href="https://feeds.meteoalarm.org/api/v1/warnings/feeds-spain/5a5f5688-5f03-400e-a98f-f84cd11c8e25"/>
+    <link title="Spain" rel="related" href="https://meteoalarm.org?region=ES" hreflang="en"/>
+    <author>
+      <name>meteoalarm.org</name>
+      <uri>https://meteoalarm.org</uri>
+    </author>
+    <published>2026-11-04T16:44:08Z</published>
+    <id>https://feeds.meteoalarm.org/api/v1/warnings/feeds-spain/5a5f5688-5f03-400e-a98f-f84cd11c8e25?index_info=1&amp;index_area=0&amp;index_geocode=0</id>
+    <title>Yellow Rain Warning issued for Spain - Litoral norte de Castellón</title>
+    <updated>2026-11-04T16:44:08Z</updated>
+  </entry><entry>
+    <cap:geocode>
+      <valueName>EMMA_ID</valueName>
+      <value>ES084</value>
+    </cap:geocode>
+    <link title="Costa granadina" href="https://meteoalarm.org?geocode=EMMA_ID:ES084" hreflang="en"/>
+    <cap:areaDesc>Costa granadina</cap:areaDesc>
+    <cap:event>Moderate rain warning</cap:event>
+    <cap:sent>2026-11-04T11:46:08+00:00</cap:sent>
+    <cap:expires>2026-11-04T19:59:59+00:00</cap:expires>
+    <cap:effective>2026-11-04T11:42:37+00:00</cap:effective>
+    <cap:onset>2026-11-04T11:00:00+00:00</cap:onset>
+    <cap:certainty>Observed</cap:certainty>
+    <cap:severity>Moderate</cap:severity>
+    <cap:urgency>Immediate</cap:urgency>
+    <cap:scope>Public</cap:scope>
+    <cap:message_type>Update</cap:message_type>
+    <cap:status>Actual</cap:status>
+    <cap:identifier>2.49.0.0.724.0.ES.261104114608.611804PRP1042092768</cap:identifier>
+    <link type="application/cap+xml" href="https://feeds.meteoalarm.org/api/v1/warnings/feeds-spain/511b3e63-c504-4281-a825-87990b76fbf9"/>
+    <link title="Spain" rel="related" href="https://meteoalarm.org?region=ES" hreflang="en"/>
+    <author>
+      <name>meteoalarm.org</name>
+      <uri>https://meteoalarm.org</uri>
+    </author>
+    <published>2026-11-04T11:46:08Z</published>
+    <id>https://feeds.meteoalarm.org/api/v1/warnings/feeds-spain/511b3e63-c504-4281-a825-87990b76fbf9?index_info=1&amp;index_area=0&amp;index_geocode=0</id>
+    <title>Yellow Rain Warning issued for Spain - Costa granadina</title>
+    <updated>2026-11-04T11:46:08Z</updated>
+  </entry><entry>
+    <cap:geocode>
+      <valueName>EMMA_ID</valueName>
+      <value>ES095</value>
+    </cap:geocode>
+    <link title="Axarquía" href="https://meteoalarm.org?geocode=EMMA_ID:ES095" hreflang="en"/>
+    <cap:areaDesc>Axarquía</cap:areaDesc>
+    <cap:event>Moderate rain warning</cap:event>
+    <cap:sent>2026-11-04T11:46:08+00:00</cap:sent>
+    <cap:expires>2026-11-04T19:59:59+00:00</cap:expires>
+    <cap:effective>2026-11-04T11:42:37+00:00</cap:effective>
+    <cap:onset>2026-11-04T11:00:00+00:00</cap:onset>
+    <cap:certainty>Observed</cap:certainty>
+    <cap:severity>Moderate</cap:severity>
+    <cap:urgency>Immediate</cap:urgency>
+    <cap:scope>Public</cap:scope>
+    <cap:message_type>Update</cap:message_type>
+    <cap:status>Actual</cap:status>
+    <cap:identifier>2.49.0.0.724.0.ES.261104114608.612904PRP1042092768</cap:identifier>
+    <link type="application/cap+xml" href="https://feeds.meteoalarm.org/api/v1/warnings/feeds-spain/271ae888-706d-4e06-be22-e9fb490b27b7"/>
+    <link title="Spain" rel="related" href="https://meteoalarm.org?region=ES" hreflang="en"/>
+    <author>
+      <name>meteoalarm.org</name>
+      <uri>https://meteoalarm.org</uri>
+    </author>
+    <published>2026-11-04T11:46:08Z</published>
+    <id>https://feeds.meteoalarm.org/api/v1/warnings/feeds-spain/271ae888-706d-4e06-be22-e9fb490b27b7?index_info=1&amp;index_area=0&amp;index_geocode=0</id>
+    <title>Yellow Rain Warning issued for Spain - Axarquía</title>
+    <updated>2026-11-04T11:46:08Z</updated>
+  </entry></feed>

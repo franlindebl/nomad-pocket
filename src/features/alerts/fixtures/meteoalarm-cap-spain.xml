@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+  <identifier>2.49.0.0.724.0.ES.261104171408.611804PRP1050712448</identifier>
+  <sender>http://www.aemet.es</sender>
+  <sent>2026-11-04T17:14:08+00:00</sent>
+  <status>Actual</status>
+  <msgType>Alert</msgType>
+  <scope>Public</scope>
+  <info>
+    <language>es-ES</language>
+    <category>Met</category>
+    <event>Aviso de lluvias de nivel amarillo</event>
+    <responseType>Monitor</responseType>
+    <urgency>Future</urgency>
+    <severity>Moderate</severity>
+    <certainty>Likely</certainty>
+    <effective>2026-11-04T18:12:24+01:00</effective>
+    <onset>2026-11-05T00:00:00+01:00</onset>
+    <expires>2026-11-05T07:59:59+01:00</expires>
+    <senderName>AEMET. Agencia Estatal de Meteorología</senderName>
+    <headline>Aviso de lluvias de nivel amarillo. Costa granadina</headline>
+    <description>Precipitación acumulada en una hora: 15 mm.</description>
+    <instruction>Esté atento. Manténgase informado de la predicción meteorológica más actualizada. Se pueden producir daños moderados a personas y bienes, especialmente a aquellos vulnerables o en zonas expuestas al fenómeno.</instruction>
+    <web>https://www.aemet.es/es/eltiempo/prediccion/avisos</web>
+    <contact>AEMET</contact>
+    <parameter>
+      <valueName>awareness_level</valueName>
+      <value>2; yellow; Moderate</value>
+    </parameter>
+    <parameter>
+      <valueName>awareness_type</valueName>
+      <value>10; Rain</value>
+    </parameter>
+    <area>
+      <areaDesc>Costa granadina</areaDesc>
+      <geocode>
+        <valueName>EMMA_ID</valueName>
+        <value>ES084</value>
+      </geocode>
+    </area>
+  </info>
+  <info>
+    <language>en-GB</language>
+    <category>Met</category>
+    <event>Moderate rain warning</event>
+    <responseType>Monitor</responseType>
+    <urgency>Future</urgency>
+    <severity>Moderate</severity>
+    <certainty>Likely</certainty>
+    <effective>2026-11-04T18:12:24+01:00</effective>
+    <onset>2026-11-05T00:00:00+01:00</onset>
+    <expires>2026-11-05T07:59:59+01:00</expires>
+    <senderName>AEMET. State Meteorological Agency</senderName>
+    <headline>Moderate rain warning. Costa granadina</headline>
+    <description>One-hour accumulated precipitation: 15 mm.</description>
+    <instruction>Be aware, keep up to date with the latest weather forecast. Moderate damages to people and properties may occur, especially to those vulnerable or in exposed areas.</instruction>
+    <web>https://www.aemet.es/en/eltiempo/prediccion/avisos</web>
+    <contact>AEMET</contact>
+    <parameter>
+      <valueName>awareness_level</valueName>
+      <value>2; yellow; Moderate</value>
+    </parameter>
+    <parameter>
+      <valueName>awareness_type</valueName>
+      <value>10; Rain</value>
+    </parameter>
+    <area>
+      <areaDesc>Costa granadina</areaDesc>
+      <geocode>
+        <valueName>EMMA_ID</valueName>
+        <value>ES084</value>
+      </geocode>
+    </area>
+  </info>
+</alert>

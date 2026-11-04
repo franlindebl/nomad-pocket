@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>AEMET - Avisos de fenómenos meteorológicos adversos - Canarias</title>
+    <link>https://www.aemet.es/es/eltiempo/prediccion/avisos?k=coo</link>
+    <description>Avisos de fenómenos meteorológicos adversos según el Plan Meteoalerta de la Agencia Estatal de Meteorología (AEMET) para Canarias.</description>
+    <language>es</language>
+    <copyright>https://www.aemet.es/es/nota_legal</copyright>
+    <pubDate>2026-11-04T22:50:01+00:00</pubDate>
+    <lastBuildDate>2026-11-04T22:50:01+00:00</lastBuildDate>
+    <image>
+      <url>https://www.aemet.es/imagenes/gif/logo_AEMET_web.gif</url>
+    </image>
+    <item>
+      <title>Estado completo de avisos para Canarias</title>
+      <description>Fichero tar.gz que contiene todos los avisos para Canarias de 22:50 04-11-2026 WET (UTC) a 23:59 07-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104225001_AFAC65.tar.gz</link>
+      <guid>Z_CAP_C_LEMM_20261104225001_AFAC65.tar.gz</guid>
+      <pubDate>2026-11-04T22:50:01+00:00</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Cumbres de La Palma</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 04:00 06-11-2026 WET (UTC) a 14:59 06-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104103049_AFAZ659302PRP10615.xml</link>
+      <guid>Z_CAP_C_LEMM_20261104103049_AFAZ659302PRP10615.xml</guid>
+      <pubDate>2026-11-04T10:30:49+00:00</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Este de La Palma</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 04:00 06-11-2026 WET (UTC) a 14:59 06-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104103049_AFAZ659303PRP10615.xml</link>
+      <guid>Z_CAP_C_LEMM_20261104103049_AFAZ659303PRP10615.xml</guid>
+      <pubDate>2026-11-04T10:30:49+00:00</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Oeste de La Palma</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 04:00 06-11-2026 WET (UTC) a 14:59 06-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104103049_AFAZ659304PRP10615.xml</link>
+      <guid>Z_CAP_C_LEMM_20261104103049_AFAZ659304PRP10615.xml</guid>
+      <pubDate>2026-11-04T10:30:49+00:00</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Norte de Gran Canaria</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659001PRP10420.xml</link>
+      <guid>Z_CAP_C_LEMM_20261103102759_AFAZ659001PRP10420.xml</guid>
+      <pubDate>2026-11-03T10:27:59+00:00</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Cumbres de Gran Canaria</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659003PRP10420.xml</link>
+      <guid>Z_CAP_C_LEMM_20261103102759_AFAZ659003PRP10420.xml</guid>
+      <pubDate>2026-11-03T10:27:59+00:00</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Este, sur y oeste de Gran Canaria</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659004PRP10420.xml</link>
+      <guid>Z_CAP_C_LEMM_20261103102759_AFAZ659004PRP10420.xml</guid>
+      <pubDate>2026-11-03T10:27:59+00:00</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Lanzarote</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659101PRP10420.xml</link>
+      <guid>Z_CAP_C_LEMM_20261103102759_AFAZ659101PRP10420.xml</guid>
+      <pubDate>2026-11-03T10:27:59+00:00</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Fuerteventura</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659201PRP10420.xml</link>
+      <guid>Z_CAP_C_LEMM_20261103102759_AFAZ659201PRP10420.xml</guid>
+      <pubDate>2026-11-03T10:27:59+00:00</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Cumbres de La Palma</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659302PRP10420.xml</link>
+      <guid>Z_CAP_C_LEMM_20261103102759_AFAZ659302PRP10420.xml</guid>
+      <pubDate>2026-11-03T10:27:59+00:00</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Este de La Palma</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659303PRP10420.xml</link>
+      <guid>Z_CAP_C_LEMM_20261103102759_AFAZ659303PRP10420.xml</guid>
+      <pubDate>2026-11-03T10:27:59+00:00</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Oeste de La Palma</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659304PRP10420.xml</link>
+      <guid>Z_CAP_C_LEMM_20261103102759_AFAZ659304PRP10420.xml</guid>
+      <pubDate>2026-11-03T10:27:59+00:00</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. La Gomera</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659401PRP10420.xml</link>
+      <guid>Z_CAP_C_LEMM_20261103102759_AFAZ659401PRP10420.xml</guid>
+      <pubDate>2026-11-03T10:27:59+00:00</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. El Hierro</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659501PRP10420.xml</link>
+      <guid>Z_CAP_C_LEMM_20261103102759_AFAZ659501PRP10420.xml</guid>
+      <pubDate>2026-11-03T10:27:59+00:00</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Norte de Tenerife</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659601PRP10420.xml</link>
+      <guid>Z_CAP_C_LEMM_20261103102759_AFAZ659601PRP10420.xml</guid>
+      <pubDate>2026-11-03T10:27:59+00:00</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Área metropolitana de Tenerife</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659602PRP10420.xml</link>
+      <guid>Z_CAP_C_LEMM_20261103102759_AFAZ659602PRP10420.xml</guid>
+      <pubDate>2026-11-03T10:27:59+00:00</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Este, sur y oeste de Tenerife</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659603PRP10420.xml</link>
+      <guid>Z_CAP_C_LEMM_20261103102759_AFAZ659603PRP10420.xml</guid>
+      <pubDate>2026-11-03T10:27:59+00:00</pubDate>
+    </item>
+  </channel>
+</rss>

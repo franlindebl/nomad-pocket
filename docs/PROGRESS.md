@@ -80,13 +80,15 @@ AI. **Assistant quality** (`docs/ASSISTANT_QUALITY_PLAN.md`, measured 2026-10-31
    (EmbeddingGemma, measure on a phone first); (6) a vetted bilingual emergency guide: every variant gave 3–8
    harmful answers out of 50 (CPR, choking, bleach dose, CO); (7) Spanish Ready.gov/MedlinePlus in the kit.
 
-AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched and documented 2026-11-04, approved to implement, not
-   started): official weather warnings (AEMET for Spain, MeteoAlarm for Europe, NWS for the US) and earthquakes
-   (USGS, EMSC) for where the person is, matched on the device, local notifications for orange/red, each warning
-   turned into actions (download the area's map, plan, kit, guide card, 112). Phase 1 without a server of our own
-   (foreground + background checks); push from a server is phase 2. Open owner questions at the end of the plan
-   (onboarding opt-in, thresholds, US position to NWS, GDACS). Blocking for Europe: read MeteoAlarm's extra
-   redistribution terms.
+AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's decisions the same day, not started):
+   official weather warnings (AEMET for Spain, NWS for the US, MeteoAlarm for Europe, GDACS elsewhere) and
+   earthquakes (USGS, EMSC) for where the person is, each warning turned into actions (the area's map, plan, kit,
+   guide card, 112). **Phase 1, next**: no server; the app reads the feeds, matches on the device and notifies
+   locally (foreground + background task); offered at the end of onboarding and once to existing installs. Start
+   at "Phase 1 — tasks" step 1 (pure cores against the fixtures already in `src/features/alerts/fixtures/`).
+   **Phase 2, right after**: iOS push from a free server (Deno Deploy, `server/alerts/`); needs a Deno Deploy
+   account and an APNs key from the owner. Blocking for Europe: MeteoAlarm's extra redistribution terms and an
+   API token for its region geometries (email `meteoalarm@geosphere.at`).
 
 CU. **Content updates, next** (`docs/CONTENT_UPDATES_PLAN.md`): the owner tries build 27 on the iPhone; later an
    optional "update automatically on Wi-Fi" switch. A delete-first update that goes through was checked by hand
@@ -382,14 +384,18 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 ### 2026-11-04 — Official alerts: research and plan
 
 - Researched public alert services for a notifications feature (owner's idea: earthquakes, tsunamis, severe weather,
-  bomb threats). Plan in `docs/ALERTS_PLAN.md`: what each source offers, read live on 2026-11-04 (AEMET's RSS with a
-  `.tar.gz` of every active CAP file, CAP with es/en and polygons, no API key; MeteoAlarm's per-country Atom, EMMA_ID
-  codes and no polygons, CC BY 4.0 plus redistribution terms still unread; NWS, USGS, EMSC, tsunami.gov, GDACS).
-- Main decisions: the app shows official warnings, it doesn't compete with ES-Alert (cell broadcast, no API); the
-  value is "prepare while you still have a connection"; phase 1 has no server and keeps the location on the device;
-  Time Sensitive notifications, no Critical Alerts; no FCM on Android, so polling there even in phase 2; GitHub
-  Actions ruled out for push (late or skipped schedules). Bomb threats out: no official public feed.
-- Docs only, no code.
+  bomb threats). Plan in `docs/ALERTS_PLAN.md`, every source read or downloaded on 2026-11-04: AEMET's public RSS
+  (24 KB) whose first item is a `.tar.gz` of every active CAP file (115 KB, 219 files, es/en, polygons, no API key);
+  MeteoAlarm's per-country Atom (EMMA_ID codes, no polygons; geometries only through a token; CC BY 4.0 plus
+  redistribution terms still unread); NWS (only 37 of 506 active alerts carry a geometry, so `?point=`); USGS, EMSC,
+  GDACS, tsunami.gov. Real samples saved in `src/features/alerts/fixtures/` for the tests.
+- Owner's decisions: two phases (1: no server, local notifications; 2: iOS push from a free server, wanted right
+  after); opt-in at the end of onboarding and once for existing installs; orange/red weather and the quake rule;
+  US by approximate position in phase 1 and counties on the server in phase 2; GDACS yes. Free hosting compared:
+  Deno Deploy for phase 2 (Cloudflare Workers free: 10 ms CPU and 50 subrequests per run; GitHub Actions: late or
+  skipped schedules). Android never gets push (no FCM): it checks in the background in both phases. Time Sensitive
+  notifications, no Critical Alerts. Bomb threats out: no official feed.
+- Docs and fixtures only, no code.
 
 ### 2026-11-04 — Git hooks: repair a hooks path that no longer exists
 

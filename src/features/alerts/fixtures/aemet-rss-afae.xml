@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>AEMET - Avisos de fenómenos meteorológicos adversos - España</title>
+    <link>https://www.aemet.es/es/eltiempo/prediccion/avisos</link>
+    <description>Avisos de fenómenos meteorológicos adversos según el Plan Meteoalerta de la Agencia Estatal de Meteorología (AEMET) para España.</description>
+    <language>es</language>
+    <copyright>https://www.aemet.es/es/nota_legal</copyright>
+    <pubDate>Wed,  4 Nov 2026 22:50:01 +0000</pubDate>
+    <lastBuildDate>Wed,  4 Nov 2026 22:50:01 +0000</lastBuildDate>
+    <image>
+      <title>AEMET - Avisos de fenómenos meteorológicos adversos - España</title>
+      <link>https://www.aemet.es/es/eltiempo/prediccion/avisos</link>
+      <url>https://www.aemet.es/imagenes/gif/logo_AEMET_web.gif</url>
+    </image>
+    <item>
+      <title>Estado completo de avisos para España</title>
+      <description>Fichero tar.gz que contiene todos los avisos para Península, Illes Balears, Ceuta y Melilla de 23:50 04-11-2026 CET (UTC+1) a 23:59 07-11-2026 CET (UTC+1), y para Canarias de 22:50 04-11-2026 WET (UTC) a 23:59 07-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104225001_AFAE.tar.gz</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104225001_AFAE.tar.gz</guid>
+      <pubDate>Wed,  4 Nov 2026 22:50:01 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Poniente y Almería Capital</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 18:00 04-11-2026 CET (UTC+1) a 07:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104171224_AFAZ610403PRP10507.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104171224_AFAZ610403PRP10507.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 17:12:24 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Costa granadina</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 00:00 05-11-2026 CET (UTC+1) a 07:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104171224_AFAZ611804PRP10507.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104171224_AFAZ611804PRP10507.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 17:12:24 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Litoral norte de Tarragona</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 06:00 05-11-2026 CET (UTC+1) a 21:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104165055_AFAZ694303PRP10521.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104165055_AFAZ694303PRP10521.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 16:50:55 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Litoral sur de Tarragona</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 06:00 05-11-2026 CET (UTC+1) a 21:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104165055_AFAZ694304PRP10521.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104165055_AFAZ694304PRP10521.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 16:50:55 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Prelitoral sur de Tarragona</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 06:00 05-11-2026 CET (UTC+1) a 21:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104165055_AFAZ694305PRP10521.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104165055_AFAZ694305PRP10521.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 16:50:55 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Litoral norte de Castellón</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 06:00 05-11-2026 CET (UTC+1) a 21:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104164207_AFAZ771202PRP10521.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104164207_AFAZ771202PRP10521.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 16:42:07 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Costa granadina</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 18:00 04-11-2026 CET (UTC+1) a 20:59 04-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104114237_AFAZ611804PRP10420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104114237_AFAZ611804PRP10420.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 11:42:37 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Axarquía</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 18:00 04-11-2026 CET (UTC+1) a 20:59 04-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104114237_AFAZ612904PRP10420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104114237_AFAZ612904PRP10420.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 11:42:37 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Cumbres de La Palma</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 04:00 06-11-2026 WET (UTC) a 14:59 06-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104103049_AFAZ659302PRP10615.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104103049_AFAZ659302PRP10615.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 10:30:49 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Este de La Palma</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 04:00 06-11-2026 WET (UTC) a 14:59 06-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104103049_AFAZ659303PRP10615.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104103049_AFAZ659303PRP10615.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 10:30:49 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Oeste de La Palma</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 04:00 06-11-2026 WET (UTC) a 14:59 06-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104103049_AFAZ659304PRP10615.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104103049_AFAZ659304PRP10615.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 10:30:49 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Litoral sur de Alicante</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 21:00 04-11-2026 CET (UTC+1) a 05:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104102224_AFAZ770303PRP10505.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104102224_AFAZ770303PRP10505.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 10:22:24 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Ibiza y Formentera</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 00:00 05-11-2026 CET (UTC+1) a 14:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104100029_AFAZ645301PRP10514.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104100029_AFAZ645301PRP10514.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 10:00:29 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Sierra Tramontana</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 04:00 05-11-2026 CET (UTC+1) a 19:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104100029_AFAZ645401PRP10519.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104100029_AFAZ645401PRP10519.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 10:00:29 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Norte y nordeste de Mallorca</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 04:00 05-11-2026 CET (UTC+1) a 19:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104100029_AFAZ645402PRP10519.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104100029_AFAZ645402PRP10519.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 10:00:29 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Interior de Mallorca</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 04:00 05-11-2026 CET (UTC+1) a 19:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104100029_AFAZ645403PRP10519.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104100029_AFAZ645403PRP10519.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 10:00:29 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Sur de Mallorca</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 04:00 05-11-2026 CET (UTC+1) a 19:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104100029_AFAZ645404PRP10519.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104100029_AFAZ645404PRP10519.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 10:00:29 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Levante mallorquín</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 04:00 05-11-2026 CET (UTC+1) a 19:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104100029_AFAZ645405PRP10519.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104100029_AFAZ645405PRP10519.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 10:00:29 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel naranja. Lluvias. Valle del Guadalentín, Lorca y Águilas</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel naranja de 19:00 04-11-2026 CET (UTC+1) a 02:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104094648_AFAZ733004PRP10502.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104094648_AFAZ733004PRP10502.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 09:46:48 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel naranja. Lluvias. Campo de Cartagena y Mazarrón</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel naranja de 19:00 04-11-2026 CET (UTC+1) a 05:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104094648_AFAZ733005PRP10505.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104094648_AFAZ733005PRP10505.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 09:46:48 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Valle del Guadalentín, Lorca y Águilas</title>
+      <description>Aviso de precipitación acumulada en 12 horas de nivel amarillo de 16:00 04-11-2026 CET (UTC+1) a 02:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104094648_AFAZ733004PRP20502.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104094648_AFAZ733004PRP20502.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 09:46:48 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Campo de Cartagena y Mazarrón</title>
+      <description>Aviso de precipitación acumulada en 12 horas de nivel amarillo de 16:00 04-11-2026 CET (UTC+1) a 05:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104094648_AFAZ733005PRP20505.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104094648_AFAZ733005PRP20505.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 09:46:48 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Nieblas. Centro de Lugo</title>
+      <description>Aviso de visibilidad de nivel amarillo de 22:00 04-11-2026 CET (UTC+1) a 09:59 05-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104093823_AFAZ712702NINI0509.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104093823_AFAZ712702NINI0509.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 09:38:23 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Melilla</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 18:00 04-11-2026 CET (UTC+1) a 20:59 04-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104075046_AFAZ795201PRP10420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104075046_AFAZ795201PRP10420.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 07:50:46 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Tormentas. Melilla</title>
+      <description>Aviso de tormentas de nivel amarillo de 18:00 04-11-2026 CET (UTC+1) a 20:59 04-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261104075046_AFAZ795201TOTO0420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261104075046_AFAZ795201TOTO0420.xml</guid>
+      <pubDate>Wed,  4 Nov 2026 07:50:46 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel naranja. Lluvias. Levante almeriense</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel naranja de 18:00 04-11-2026 CET (UTC+1) a 23:59 04-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103180342_AFAZ610404PRP10423.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103180342_AFAZ610404PRP10423.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 18:03:42 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Valle del Guadalentín, Lorca y Águilas</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 16:00 04-11-2026 CET (UTC+1) a 18:59 04-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103103341_AFAZ733004PRP10418.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103103341_AFAZ733004PRP10418.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 10:33:41 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Campo de Cartagena y Mazarrón</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 16:00 04-11-2026 CET (UTC+1) a 18:59 04-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103103341_AFAZ733005PRP10418.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103103341_AFAZ733005PRP10418.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 10:33:41 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Levante almeriense</title>
+      <description>Aviso de precipitación acumulada en 12 horas de nivel amarillo de 18:00 04-11-2026 CET (UTC+1) a 23:59 04-11-2026 CET (UTC+1).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103103321_AFAZ610404PRP20423.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103103321_AFAZ610404PRP20423.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 10:33:21 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Norte de Gran Canaria</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659001PRP10420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103102759_AFAZ659001PRP10420.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 10:27:59 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Cumbres de Gran Canaria</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659003PRP10420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103102759_AFAZ659003PRP10420.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 10:27:59 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Este, sur y oeste de Gran Canaria</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659004PRP10420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103102759_AFAZ659004PRP10420.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 10:27:59 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Lanzarote</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659101PRP10420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103102759_AFAZ659101PRP10420.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 10:27:59 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Fuerteventura</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659201PRP10420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103102759_AFAZ659201PRP10420.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 10:27:59 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Cumbres de La Palma</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659302PRP10420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103102759_AFAZ659302PRP10420.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 10:27:59 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Este de La Palma</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659303PRP10420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103102759_AFAZ659303PRP10420.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 10:27:59 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Oeste de La Palma</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659304PRP10420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103102759_AFAZ659304PRP10420.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 10:27:59 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. La Gomera</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659401PRP10420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103102759_AFAZ659401PRP10420.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 10:27:59 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. El Hierro</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659501PRP10420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103102759_AFAZ659501PRP10420.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 10:27:59 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Norte de Tenerife</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659601PRP10420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103102759_AFAZ659601PRP10420.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 10:27:59 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Área metropolitana de Tenerife</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659602PRP10420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103102759_AFAZ659602PRP10420.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 10:27:59 +0000</pubDate>
+    </item>
+    <item>
+      <title>Aviso. Nivel amarillo. Lluvias. Este, sur y oeste de Tenerife</title>
+      <description>Aviso de precipitación acumulada en una hora de nivel amarillo de 11:00 04-11-2026 WET (UTC) a 19:59 04-11-2026 WET (UTC).</description>
+      <link>https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/cap/Z_CAP_C_LEMM_20261103102759_AFAZ659603PRP10420.xml</link>
+      <guid isPermaLink="false">Z_CAP_C_LEMM_20261103102759_AFAZ659603PRP10420.xml</guid>
+      <pubDate>Tue,  3 Nov 2026 10:27:59 +0000</pubDate>
+    </item>
+  </channel>
+</rss>

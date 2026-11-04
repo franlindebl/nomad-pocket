@@ -1,230 +1,286 @@
-# Official alerts: weather warnings and earthquakes from public services — plan
+# Official alerts: weather warnings and earthquakes from public services — plan (2 phases)
 
-Owner request (2026-11-04): notify the person when an official service warns about something serious
-where they are (earthquake, tsunami, severe weather such as a DANA or a tornado), maybe with Apple's
-"emergency" notifications. Researched the same day (sources at the end, each one read on 2026-11-04);
-the owner approved documenting it to implement next. Not built yet.
+Owner request (2026-11-04): notify the person when an official service warns about something serious where
+they are (earthquake, tsunami, severe weather such as a DANA or a tornado). Researched the same day (every
+source below was read or downloaded on 2026-11-04). Owner's decisions, same day:
+
+- **Two phases.** Phase 1 without a server of our own: the app reads the official feeds itself, matches them to
+  where the person is on the device, and shows local notifications. Phase 2: a free server of our own that
+  sends real push notifications to iPhones. Phase 2 is wanted (the owner sees push as the point of the
+  feature), so it follows phase 1 directly; phase 1 is its base and its fallback.
+- Offer it at the **end of onboarding** and **once** to existing installs; always in Settings.
+- Default thresholds below (orange/red weather; the earthquake rule).
+- US: county shapes if they don't cost much, else an approximate position (phase 1: approximate position;
+  phase 2: counties on the server, where they cost the app nothing).
+- GDACS: yes, for countries without a national source.
+
+Approved to implement; nothing built yet. **To resume: read "Phase 1 — tasks" and start at task 1.**
 
 ## The idea in one paragraph
 
-Nomad Pocket does not issue alerts and does not compete with the government's own channel. Spain's
-ES-Alert (and EU-Alert elsewhere in Europe, WEA in the US) reaches every phone by cell broadcast:
-no app, no internet, top priority, sent only by Protección Civil. That is the channel for "leave
-now". What no official channel does is say **"prepare while you still have a connection"**: AEMET
-issues its warnings up to 72 h ahead, so an orange warning for tomorrow is the moment to download
-the area's map, check the kit and the family plan. So the feature is: **show the official warnings
-that cover where you are, notify the serious ones, and turn each one into two or three concrete
-actions inside the app.** Phase 1 needs no server of our own; push from a server is phase 2, only
-if phase 1 proves the feature is used.
+Nomad Pocket does not issue alerts and does not compete with the government's own channel. Spain's ES-Alert
+(EU-Alert elsewhere in Europe, WEA in the US) reaches every phone by cell broadcast: no app, no internet, top
+priority, sent only by Protección Civil. That is the channel for "leave now". What no official channel does is
+say **"prepare while you still have a connection"**: AEMET issues its warnings up to 72 h ahead, so an orange
+warning for tomorrow is the moment to download the area's map, check the kit and the family plan. So the
+feature is: **show the official warnings that cover where the person is, notify the serious ones, and turn
+each one into two or three concrete actions inside the app.**
 
-## What there is today (code as of 18a36db)
+## What there is today (code as of 47175a8)
 
-- `expo-notifications` ~58.1.6 is installed with `enableRemoteNotifications: false` (`app.json`):
-  local notifications only, no push entitlement. Used by the kit's expiry reminders
-  (`src/features/prepare/reminders.ts`, channel `reminders`, a notification handler set there).
-- `plugins/with-android-no-firebase.js` keeps Firebase and Play services out of the APK. This stays:
-  no FCM on Android, ever (`docs/ANDROID_PLAY.md`).
+- `expo-notifications` ~58.1.6 with `enableRemoteNotifications: false` (`app.json`): local notifications only,
+  no `aps-environment` entitlement. Used by the kit's expiry reminders (`src/features/prepare/reminders.ts`,
+  channel `reminders`; **the notification handler is set there**, so alerts must share one handler, not set
+  a second one).
+- `plugins/with-android-no-firebase.js` keeps Firebase and Play services out of the APK and removes
+  expo-notifications' `FirebaseMessagingService`. This stays: **no FCM on Android, ever** (`docs/ANDROID_PLAY.md`).
+  Android never gets push, in either phase: it checks the sources in the background.
 - No background task module (`expo-background-task` / `expo-task-manager` are not dependencies).
   `UIBackgroundModes` is `location` + `audio` (navigation).
-- Atom/XML is parsed with a small regex parser (`src/features/catalog/opds.ts`, no DOMParser in RN);
-  `fflate` is a dependency (gunzip). Point-in-polygon over bundled shapes exists for countries
-  (`src/features/maps/country-at-core.ts` + `country-shapes.json`, 213 KB).
-- The person's country (`settings.country`, a `regions.json` id) is chosen in onboarding. Location is
-  asked when Maps opens, through `src/lib/location.ts` only.
-- E2E already serves fake feeds from the Mac: `scripts/e2e-updates-feed.py` +
-  `EXPO_PUBLIC_UPDATES_OPDS_URL`, plain http to localhost allowed by `plugins/with-e2e-local-network`.
-- The privacy policy (`site/privacy.html`) says the app has **no server of its own** and lists every
-  third party it connects to.
+- Atom/XML is parsed with a small regex parser (`src/features/catalog/opds.ts`; RN has no DOMParser). `fflate`
+  is a dependency (gunzip). Point-in-polygon over bundled shapes exists (`src/features/maps/country-at-core.ts`
+  + `country-shapes.json`, which also tells the country of a position).
+- The person's country (`settings.country`, a `regions.json` id) is chosen in onboarding. Location is asked when
+  Maps opens, only through `src/lib/location.ts`.
+- E2E serves fake feeds from the Mac: `scripts/e2e-updates-feed.py` + `EXPO_PUBLIC_UPDATES_OPDS_URL`, plain http
+  to localhost allowed by `plugins/with-e2e-local-network`.
+- The privacy policy (`site/privacy.html`) says the app has no server of its own and lists every third party it
+  connects to. Phase 1 adds third parties; phase 2 adds our own server.
+- **Fixtures already saved**: `src/features/alerts/fixtures/` (real samples of every feed below, 2026-11-04;
+  its README says what each file is and which ones are trimmed).
 
 ## Sources (verified 2026-11-04)
 
 | Source | Covers | How to read it | Licence / conditions |
 |---|---|---|---|
-| **AEMET** (Spain) | Weather warnings (rain, wind, storms, snow, heat/cold, coastal, dust, fog…), per zone, up to D+2/D+3 | Public RSS/Atom, **no API key**: national `https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/rss/CAP_AFAE_RSS.xml` (Península, Baleares, Ceuta, Melilla) and Canarias `…/CAP_AFAC65_RSS.xml`; per comunidad `CAP_AFAC{61–79}`, province `CAP_AFAP{code}`, zone `CAP_AFAZ{code}`. The **first item of every feed is a `.tar.gz` with all active CAP files** for that area (`…/avisos/cap/Z_CAP_C_LEMM_<stamp>_AFAE.tar.gz`). Each CAP 1.2 file has two `<info>` blocks (`<language>es-ES` and `en-GB`), `severity`, `onset`/`expires`, `headline`, `description`, `instruction`, parameter `AEMET-Meteoalerta nivel` (amarillo/naranja/rojo), and an `<area>` with a **`<polygon>`** and geocode `AEMET-Meteoalerta zona`. Updated whenever the warning state changes; regular issue windows 07:30–09:00, 10:30–11:30 (D+1, D+2), 17:00–19:00, 23:50 (D+3) | `© AEMET` or "Información elaborada por la Agencia Estatal de Meteorología"; commercial and non-commercial reuse allowed; **must not "desnaturalizar el sentido"** of the information; show the update date; never imply AEMET takes part in or endorses the reuse (`aemet.es/es/nota_legal`) |
-| **MeteoAlarm** (EUMETNET, ~38 European countries, Spain included via AEMET) | Weather warnings | One Atom feed per country: `https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-{country}` (e.g. `-spain`, `-germany`), WebSub available. Each `<entry>` = one area × one warning with `cap:event`, `cap:severity`, `cap:urgency`, `cap:onset`, `cap:expires`, `cap:areaDesc`, `cap:geocode` **EMMA_ID** (e.g. `ES084`, `DE329`), `cap:message_type`, `cap:identifier`, and a link to the full CAP (`https://feeds.meteoalarm.org/api/v1/warnings/feeds-{country}/<uuid>`, one per warning, shared by its areas). Full CAP: national language + `en-GB` blocks, `parameter awareness_level` ("2; yellow; Moderate", 3 orange, 4 red). **No polygons** in the feed or the CAP files seen: matching a location needs EMMA_ID region geometries. Feed ~195 KB (Spain) / ~275 KB (Germany) | Feed `<rights>`: "Licensed under terms equivalent to CC BY 4.0, **with additional requirements for redistributing outlined in our Terms and Conditions**". That page could not be read (SPA): **read it or ask `meteoalarm@geosphere.at` before shipping Europe**. A Metadata API (`api.meteoalarm.org/metadata/v1`) lists "Region geometries" (not checked); direct APIs need approval |
-| **NWS** (USA) | All US alerts (tornado, flood, hurricane, winter, fire weather…) | `https://api.weather.gov/alerts/active?point=lat,lon` (or `?area=XX` by state, `?zone=`). GeoJSON (or CAP with `Accept: application/cap+xml`). Requires a `User-Agent` identifying the app; ask at most every 30 s; rate limit not public | US public domain |
-| **USGS** (world) | Earthquakes | `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/{4.5_day,significant_day,…}.geojson`, updated every minute; properties `mag`, `time`, `place`, `alert` (PAGER colour), `tsunami`, `sig`. Note: `tsunami: 1` only means a large event in an oceanic region, **not** that a tsunami exists | US public domain |
-| **EMSC** (Euro-Mediterranean) | Earthquakes, faster and smaller ones than USGS around Europe (includes IGN's) | FDSN event query on seismicportal.eu (`format=json`, `minmagnitude`, `starttime`, box or `latitude`/`longitude`/`maxradius` in degrees; exact path in `https://www.seismicportal.eu/fdsnws/event/1/openapi.json`, check it). Also a WebSocket `ws://www.seismicportal.eu/standing_order/websocket` (only useful to a server). Solutions are preliminary and get revised | Free; cite EMSC |
-| **IGN** (Spain) | Earthquakes in Spain and around | GeoRSS (`ign.es` RssTools, ~5 min). EMSC already carries them: not needed in phase 1 | Cite IGN |
-| **NOAA tsunami.gov** (US, Pacific) | Tsunami warnings | Atom `https://www.tsunami.gov/events/xml/PAAQAtom.xml` (NTWC) and `PHEBAtom.xml` (PTWC); CAP `PAAQCAP.xml`, `PHEBCAP.xml` | US public domain |
-| **GDACS** (UN + EU) | Disasters with humanitarian impact worldwide (EQ, TC cyclones, FL floods, VO, WF, DR), Green/Orange/Red | RSS `https://www.gdacs.org/xml/rss.xml` (~700 KB) and lighter per-type feeds (`xml/rss_24h.xml`, `rss_tc_7d.xml`, `rss_fl_7d.xml`…), refreshed every 6 min; `gdacs:alertlevel`, `gdacs:eventtype` | Cite GDACS. Phase 1b at most: coverage for countries outside Europe/US, Orange/Red only |
+| **AEMET** (Spain) | Weather warnings (rain, wind, storms, snow, heat/cold, coastal, dust, fog…), per zone, up to D+2/D+3 | Public RSS, **no API key**: `https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/rss/CAP_AFAE_RSS.xml` (Península, Baleares, Ceuta, Melilla; 24 KB, 43 items) and Canarias `…/CAP_AFAC65_RSS.xml` (9 KB); also per comunidad `CAP_AFAC{61–79}`, province `CAP_AFAP{code}`, zone `CAP_AFAZ{code}`. Headers: `Last-Modified`, `Cache-Control: max-age=60`. **The first item is a `.tar.gz` with all active CAP files** (`…/avisos/cap/Z_CAP_C_LEMM_<stamp>_AFAE.tar.gz`: 115 KB, 219 files, 3.5 MB unpacked); its URL changes with each new state. Each CAP 1.2 file: two `<info>` blocks (`<language>es-ES` / `en-GB`), `severity`, `onset`/`expires`, `headline`, `description`, `instruction`, parameter `AEMET-Meteoalerta nivel` (amarillo/naranja/rojo), `<area>` with a **`<polygon>`** and geocode `AEMET-Meteoalerta zona` (e.g. `610403`). Issue windows 07:30–09:00, 10:30–11:30 (D+1, D+2), 17:00–19:00, 23:50 (D+3), plus any time the forecast changes. Zone shapes: "Delimitación de las zonas" zip on the help page | `© AEMET` or "Información elaborada por la Agencia Estatal de Meteorología"; commercial and non-commercial reuse allowed; **must not "desnaturalizar el sentido"**; show the update date; never imply AEMET takes part in or endorses the reuse (`aemet.es/es/nota_legal`) |
+| **MeteoAlarm** (EUMETNET, ~38 European countries) | Weather warnings | One Atom feed per country: `https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-{country}` (Spain 195 KB, 125 entries; Germany ~275 KB), `Cache-Control: max-age=0, must-revalidate`, WebSub. Each `<entry>` = one area × one warning: `cap:event`, `cap:severity`, `cap:urgency`, `cap:onset`, `cap:expires`, `cap:areaDesc`, `cap:geocode` **EMMA_ID** (`ES084`, `DE329`), `cap:message_type`, `cap:identifier`, link to the full CAP (`…/api/v1/warnings/feeds-{country}/<uuid>`, ~3 KB, national language + `en-GB`, `parameter awareness_level` "2; yellow" / 3 orange / 4 red). **No polygons.** Geometries: the Metadata API (`https://api.meteoalarm.org/metadata/v1`, OpenAPI at `/metadata/v1/docs/openapi.yaml`) has `/geocodes` → each geocode's GeoJSON `feature_url`, but **needs a token** (Bearer; "Request API Access" on api.meteoalarm.org) | Feed `<rights>`: "terms equivalent to CC BY 4.0, **with additional requirements for redistributing outlined in our Terms and Conditions**". That page didn't render: **read it or ask `meteoalarm@geosphere.at` before shipping Europe** (ask for the API token in the same email) |
+| **NWS** (USA) | All US alerts, tsunami warnings for US coasts included | `https://api.weather.gov/alerts/active?point=lat,lon` (6 KB for one alert); the whole country is ~2 MB. Each alert has `geocode.UGC` (zones `TXZ211`, counties `TXC453`) and `geocode.SAME` (county FIPS); **only 37 of 506 active alerts had a geometry**, so matching on the device needs `?point=`. Requires a `User-Agent` naming the app; at most every 30 s | US public domain |
+| **USGS** (world) | Earthquakes | `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson` (3 KB), every minute; `mag`, `time`, `place`, `alert` (PAGER), `tsunami`, `sig`. `tsunami: 1` only means a large event in an oceanic region, **not** that a tsunami exists | US public domain |
+| **EMSC** (Euro-Mediterranean + world) | Earthquakes, often faster than USGS around Europe (carries IGN's) | `https://www.seismicportal.eu/fdsnws/event/1/query?format=json&minmag=4.5&start=<ISO>&limit=50` (2 KB): `mag`, `lat`, `lon`, `time`, `flynn_region`, `lastupdate`, `unid`. Solutions are preliminary and get revised. A WebSocket exists (`ws://www.seismicportal.eu/standing_order/websocket`): phase 2 only | Free; cite EMSC |
+| **GDACS** (UN + EU JRC) | Disasters with humanitarian impact worldwide (EQ, TC, FL, VO, WF, DR), Green/Orange/Red | `https://www.gdacs.org/xml/rss_24h.xml` (350 KB, 114 items) and per-type feeds (`rss_tc_7d.xml`, `rss_fl_7d.xml`…), every 6 min; `gdacs:alertlevel`, `gdacs:eventtype`, `gdacs:country`/`iso3` | Cite GDACS. Orange/Red only, countries without a national source |
+| **NOAA tsunami.gov** (PTWC/NTWC) | Tsunami threat messages, Pacific and US | Atom `https://www.tsunami.gov/events/xml/PHEBAtom.xml`, `PAAQAtom.xml` (2 KB) | US public domain. US coasts already come through NWS; PTWC's international messages are later (phase 2) |
+| **IGN** (Spain) | Earthquakes | GeoRSS (~5 min). EMSC already carries them: not used | Cite IGN |
 
 Out, on purpose:
-- **Bomb threats, attacks, police incidents**: no official public feed exists, and relaying anything
-  else would be dangerous. Never.
+- **Bomb threats, attacks, police incidents**: no official public feed; relaying anything else would be
+  dangerous. Never.
 - **ES-Alert / EU-Alert content**: cell broadcast only, no public API. The phone shows it anyway.
-- **Tsunami warnings for the Mediterranean/Atlantic Europe** (NEAM: IGN, IPMA, INGV, KOERI…): no public
-  feed found. Covered by cell broadcast; the app's guide already has tsunami advice ("strong quake at the
-  coast: go up, don't wait for a warning").
-- AEMET OpenData (needs an API key): the public RSS/CAP files are enough. Historical data is not needed.
+- **Tsunami warnings for the Mediterranean/Atlantic Europe** (NEAM centres): no public feed found. Covered by
+  cell broadcast; the guide's tsunami card says "strong quake at the coast: go up, don't wait for a warning".
+- AEMET OpenData (needs an API key): the public RSS/CAP files are enough.
 
-## Decisions (proposed; the owner confirms the ones marked ❓)
+## Decisions for both phases
 
-1. **Phase 1 has no server of our own.** The app downloads public feeds itself and decides on the
-   device what applies to the person. The location never leaves the phone: feeds are downloaded by
-   country (Spain: the national file; Europe: the country's MeteoAlarm feed; quakes: global/regional
-   lists), so a server learns at most the country, like it already does from the IP. One exception ❓:
-   the US (NWS), see 6.
-2. **Opt-in.** Nothing is fetched until the person turns "Avisos oficiales" on. Offered once on Home
-   (a card under "En una emergencia") and always in Settings; turning it on asks for notification
-   permission right then. ❓ Also offer it at the end of onboarding.
-3. **What gets a notification (defaults, tunable in Settings):**
-   - Weather: **orange and red** in a watched place (yellow only shows in the list). A notification when
-     a warning is new, or raises its level; not for plain updates; a cancel removes it from the list.
-   - Earthquakes: M ≥ 4.5 within 100 km, or M ≥ 6 within 500 km, of a watched place (informative: it has
-     already happened; the card links to the guide's earthquake/aftershock cards).
-   - Tsunami (tsunami.gov, US/Pacific only): any warning or advisory whose area covers a watched place.
-4. **Watched places**: the last known position of the phone (saved, rounded to ~100 m, on the device
-   only, whenever the app gets a fix: opening Maps, navigating), and the country chosen in onboarding
-   (its warnings show in the list, notified only if no position is known). Later: saved places / the
-   family plan's meeting points. No background location: the app never asks for "Always" for this.
-5. **Matching a place to a warning**: AEMET → point in the CAP `<polygon>`. MeteoAlarm → EMMA_ID region
-   geometries bundled as an asset generated by a script (like `country-shapes.json`), source to be
-   chosen (Metadata API "Region geometries" first); if no usable geometry, the person picks their
-   region from the country's EMMA list instead of matching by position. Quakes → distance.
-6. ❓ **USA**: NWS geometry is often null (zone-based alerts), so the reliable query is
-   `?point=lat,lon`, which sends a position to NWS. Proposal: round it to 0.05° (~5 km) and say so in
-   the privacy policy; the alternative (`?area=` state + county shapes bundled) costs an asset and a
-   script. Phase 1 starts with Spain + Europe; the US comes right after this is decided.
-7. **How often**: on launch and on coming to the foreground (at most every 15 min), and a background
-   task (`expo-background-task`: WorkManager on Android, min 15 min, we ask 30; BGTaskScheduler on iOS,
-   which decides when, "short intervals are often ignored"). AEMET's issue windows (above) mean a few
-   checks a day already catch most warnings hours ahead; quakes in the background are best effort and
-   said so. If iOS runs Expo's task too rarely on a real phone (it uses the `processing` mode), add a
-   `BGAppRefreshTask` in a local module (`modules/nomad-alerts`) and measure again.
-8. **Notification levels**: Android channel `alerts` (importance HIGH; created once: after that only its
-   name and description can change), separate from `reminders`. iOS: red/tsunami/strong quake as
-   `interruptionLevel: 'timeSensitive'` (breaks through Focus; needs the "Time Sensitive Notifications"
-   capability → `com.apple.developer.usernotifications.time-sensitive` in `app.json` `ios.entitlements`,
-   check it lands in the prebuilt entitlements), orange as `active`. **No Critical Alerts** (the
-   "emergency" permission that sounds in silent mode): Apple grants it by hand for medical, home
-   security and public safety, and refuses it when Time Sensitive is enough; for warnings issued hours
-   ahead it is. Revisit only if phase 2 ships and the owner wants to apply. No Android DND bypass either.
-9. **Official words, our frame.** The card and the notification show the source's own `headline`,
-   `description` and `instruction` in the app's language when the CAP has it (es/en), else English,
-   else the original. The app only adds the frame: level, phenomenon, place, from–until, "Fuente: AEMET ·
-   emitido 18:12" and the actions. Never rewritten, summarised by the AI or translated by us (AEMET:
-   "no desnaturalizar"). Each source credited where shown and in Credits.
-10. **Actions per warning** (what makes it Nomad Pocket's): download or update the map of that area
-    (if missing or old), open the family plan, check the kit, open the relevant guide card (flood,
-    heat, storm, earthquake, tsunami), and "Llamar al 112" (the local number, `emergency-numbers.json`).
-11. **Honest disclaimer**, on the alerts screen and in the opt-in: "Nomad Pocket no emite avisos: muestra
-    los publicados por AEMET, MeteoAlarm… y puede retrasarse o no llegar. Los avisos de Protección Civil
-    (ES-Alert) y el 112 son los que valen." (and the English equivalent).
-12. **Offline**: the last fetched list stays visible with "actualizado hace X"; warnings past `expires`
-    disappear on their own. Nothing to do offline beyond that.
-13. **Android**: no health gate needed (weather and quakes are not health features), but no first-aid
-    content is attached to a warning on Android (`HEALTH_FEATURES`, `docs/ANDROID_PLAY.md` section 4):
-    heat warnings link to the guide only where the guide is shown.
+1. **Opt-in, offered three ways**: the last step of onboarding; **once** to existing installs after the update
+   (a sheet on Home, never again after "Ahora no", flag `alerts.offered`); always in Settings ("Avisos oficiales").
+   Turning it on asks for notification permission, then for location "while using" if the app doesn't have it.
+   Nothing is fetched while it is off.
+2. **Which sources apply**: by the country of the person's position (`country-at-core`), else `settings.country`:
+   Spain → AEMET; USA → NWS; other MeteoAlarm countries → MeteoAlarm (once its terms and geometries are sorted;
+   until then, GDACS); everywhere else → GDACS. Earthquakes (USGS + EMSC) everywhere.
+3. **What notifies (defaults, tunable in Settings):**
+   - Weather: **orange and red** covering the position; yellow only in the list. Notify when a warning is new or
+     raises its level; never for plain updates; a cancel removes it from the list.
+   - Earthquakes: M ≥ 4.5 within 100 km, or M ≥ 6 within 500 km (informative: it already happened; the card links
+     to the guide's earthquake/aftershock cards). The same event from USGS and EMSC is one (time ±60 s, distance
+     < 100 km, keep the higher magnitude, update instead of notifying again).
+   - Tsunami: NWS tsunami warnings/advisories (US) like any red warning.
+   - GDACS: Orange/Red events in the person's country.
+4. **Notification levels**: Android channel `alerts` (importance HIGH; once created only its name/description
+   can change), separate from `reminders`. iOS: red, tsunami and M ≥ 6 as `interruptionLevel: 'timeSensitive'`
+   (breaks through Focus; needs the Time Sensitive Notifications capability:
+   `com.apple.developer.usernotifications.time-sensitive` in `app.json` `ios.entitlements`; check that it lands
+   in the prebuilt entitlements and that signing picks it up), orange as `active`. **No Critical Alerts** (Apple
+   grants them by hand and refuses them when Time Sensitive is enough; for warnings issued hours ahead it is).
+   No Android DND bypass.
+5. **Official words, our frame.** Show the source's own `headline`, `description` and `instruction` in the app's
+   language when the CAP has it (es/en), else English, else the original. We only add the frame: level,
+   phenomenon, place, from–until, "Fuente: AEMET · emitido 18:12", actions. Never rewritten, summarised by the AI
+   or translated by us (AEMET: "no desnaturalizar").
+6. **Actions per warning**: download or update the map of that area (if missing or old), open the family plan,
+   check the kit, open the relevant guide card (flood, heat, storm, earthquake, tsunami), call the local
+   emergency number (`emergency-numbers.json`). On Android no first-aid content is attached
+   (`HEALTH_FEATURES`, `docs/ANDROID_PLAY.md` section 4); weather and quakes are not health features.
+7. **Honest disclaimer** in the opt-in and on the alerts screen: "Nomad Pocket no emite avisos: muestra los
+   publicados por AEMET, MeteoAlarm… y puede retrasarse o no llegar. Los avisos de Protección Civil (ES-Alert) y el
+   112 son los que valen." (and the English equivalent, with the local number).
+8. **Offline**: the last list stays visible with "actualizado hace X"; warnings past `expires` disappear.
+9. **Credits**: AEMET, MeteoAlarm/EUMETNET (CC BY 4.0), USGS, EMSC, NOAA/NWS, GDACS (`features/credits`).
 
-## Design
+## Phase 1 — no server of our own
 
-```
-src/features/alerts/
-  cap-core.ts          CAP 1.2 parser (regex, like opds.ts): alert, info per language, area polygons/geocodes
-  tar-core.ts          minimal ustar reader over fflate's gunzip (AEMET's .tar.gz)
-  alerts-core.ts       normalised Alert type, level mapping (CAP severity / AEMET nivel / MeteoAlarm
-                       awareness_level → yellow|orange|red), match to watched places (point in polygon,
-                       EMMA region, distance), notify policy (new, raised, cancelled, dedup by identifier
-                       and CAP references), expiry
-  sources/aemet.ts     RSS → first item's tar.gz → CAP files (national + Canarias)
-  sources/meteoalarm.ts  country Atom → entries by EMMA_ID → full CAP for the ones that match
-  sources/nws.ts       (after decision 6)   sources/quakes.ts  USGS + EMSC   sources/tsunami.ts
-  fetch.ts             runs the sources for the watched places, merges, persists, notifies
-  notify.ts            channel `alerts`, interruption level, tap → /alerts/[id]
-  background.ts        expo-background-task + TaskManager.defineTask at module scope
-  register.ts          registerInit: define/register the task, foreground check
-  *.test.ts + fixtures/ (real CAP/RSS/tar.gz/Atom/GeoJSON samples saved on 2026-11-xx)
-src/app/alerts/index.tsx  list   src/app/alerts/[id].tsx  detail (official text + actions)
-```
+### How it works
 
-- Pure modules (`*-core.ts`) follow the repo rule: no `@/` aliases, siblings imported with `.ts`, so
-  `node --test --experimental-strip-types` loads them; add them to the list in `CLAUDE.md`.
-- State in kv (`@/db/kv`): `alerts.enabled`, `alerts.places` (rounded last position), `alerts.cache`
-  (normalised alerts per source + fetch time + ETag/Last-Modified), `alerts.notified` (identifier →
-  level). Small, derived; no SQLite table needed.
-- Requests send `If-Modified-Since`/ETag where the server supports it and a `User-Agent` naming the app
-  and its public repo (NWS requires one; no personal email in it).
-- The background task runs headless: `background.ts` imports nothing from React or the UI; i18n is
-  initialised before building notification text. The task is defined at module scope and imported from
-  the entry so it exists when the OS launches the app in the background.
-- New dependencies (`npx expo install expo-background-task expo-task-manager`): check that neither pulls
-  `com.google.android.gms` into the APK (`./gradlew :app:dependencies`), then `node scripts/licenses.mjs`.
-- E2E overrides like the updates feed: `EXPO_PUBLIC_ALERTS_AEMET_URL`, `…_METEOALARM_URL`,
-  `…_QUAKES_URL`, served by a `scripts/e2e-alerts-feed.py` from fixtures with a warning over the
-  simulator's set location.
+- **Where the person is**: the last known position, saved **on the device only** (kv `alerts.position`, rounded
+  to ~100 m) whenever the app gets a fix (opening Maps, navigating, opening the alerts screen). No background
+  location: the app never asks for "Always" for this. Without any fix, the list shows the country's warnings
+  (no notifications).
+- **When it checks**: on launch and on coming to the foreground (at most every 10 min), and in the background with
+  `expo-background-task` (+ `expo-task-manager`): WorkManager on Android (minimum 15 min; we ask 30), BGTaskScheduler
+  on iOS, which decides when ("short intervals are often ignored"; not available on the simulator; stops if the
+  person swipes the app away). AEMET's issue windows mean even a few checks a day catch most warnings hours
+  ahead; quakes in the background are best effort.
+- **What one check downloads** (measured 2026-11-04): AEMET RSS 24 KB (`If-Modified-Since`; 304 when unchanged),
+  the tar.gz 115 KB only when its URL changed (or Canarias' 9 KB RSS + its tar when the position is there); USGS
+  3 KB + EMSC 2 KB; NWS 6 KB per point; GDACS 350 KB only where it applies (prefer the per-type feeds if smaller).
+- **Matching on the device**: AEMET → point in the CAP `<polygon>`; NWS → `?point=` with the position **rounded to
+  0.05°** (~5 km; the only time a position, approximate, leaves the phone; said in the privacy policy); GDACS →
+  country; MeteoAlarm → EMMA_ID geometries (below); quakes → distance.
+- **MeteoAlarm (Europe minus Spain), when unblocked**: ask MeteoAlarm for the terms and an API token; a script
+  (`scripts/alerts/build-emma.mjs`, the token only in the developer's environment, never in the app) downloads the
+  `/geocodes` GeoJSON features, simplifies them and writes an asset like `country-shapes.json` (encoded polylines).
+  Measure the size: bundled if small (< ~1 MB), else downloaded with the country. If no token, the person picks
+  their region from the country's EMMA list instead.
+- **Dedup**: kv `alerts.notified` (identifier → level notified), so restarts and the two triggers (foreground,
+  background) never notify twice; CAP `references` link updates/cancels to the original.
 
-## Privacy, store and legal
+### Phase 1 — tasks (in order)
 
-- **Privacy policy** (`site/privacy.html`, es + en): add each new connection (aemet.es,
-  feeds.meteoalarm.org, earthquake.usgs.gov, seismicportal.eu, tsunami.gov, api.weather.gov if 6 goes
-  ahead), only when "Avisos oficiales" is on, what they receive (IP, which country's feed; for NWS the
-  rounded position), and that the position used for matching stays on the device. Still no server of
-  our own in phase 1. The App Store privacy labels don't change (nothing is collected by us).
-- **Store texts**: "What's new" and the description mention official warnings with the disclaimer (the
-  owner reviews them, `docs/RELEASE.md`). Never call it an "emergency alert system" or use the look of
-  the system's emergency alerts.
-- **Credits**: AEMET, MeteoAlarm/EUMETNET (CC BY 4.0), USGS, EMSC, NOAA/NWS, GDACS (`features/credits`).
-- **MeteoAlarm's extra redistribution terms**: unread (see Sources). Blocking for the Europe source,
-  not for Spain (AEMET direct).
+1. **Pure cores + tests** in `src/features/alerts/` against the fixtures (no `@/` aliases, siblings imported with
+   `.ts`; add them to the "Pure, tested modules" list in `CLAUDE.md`):
+   - `cap-core.ts`: CAP 1.2 → `{identifier, sent, msgType, references, infos: [{language, event, severity, urgency,
+     certainty, onset, expires, headline, description, instruction, parameters, areas: [{desc, polygons, geocodes}]}]}`.
+   - `tar-core.ts`: ustar reader over fflate's `gunzipSync` (the fixture has 219 files).
+   - `feeds-core.ts`: AEMET RSS (first item = tar URL), MeteoAlarm Atom entries, NWS GeoJSON, USGS GeoJSON, EMSC JSON,
+     GDACS RSS → one normalised `Alert {id, source, kind: 'weather'|'quake'|'tsunami'|'disaster', level:
+     'yellow'|'orange'|'red', event, area, onset, expires, texts: {es?, en?, original}, polygons?, point?, mag?}`.
+   - `alerts-core.ts`: levels (CAP severity / AEMET nivel / MeteoAlarm awareness_level / GDACS alertlevel), point in
+     polygon, distance rule for quakes, USGS/EMSC dedup, the notify policy (new / raised / update / cancel), expiry,
+     which sources apply to a country.
+2. **Fetch + state**: `sources.ts` (fetch with timeouts, `User-Agent: NomadPocket/<version>
+   (github.com/franlindebl/nomad-pocket)`, `If-Modified-Since`; base URLs overridable with `EXPO_PUBLIC_ALERTS_*`
+   for E2E), `check.ts` (one check: sources → normalised → matched → persisted → notifications), kv keys
+   `alerts.enabled`, `alerts.offered`, `alerts.position`, `alerts.cache` (list + fetch time + Last-Modified per
+   source), `alerts.notified`, `alerts.runs` (last 50 check times and triggers, for measuring).
+3. **Notifications**: `notify.ts` (channel `alerts`, levels, the shared handler with `reminders.ts`, tap →
+   `/alerts/[id]`), the time-sensitive entitlement in `app.json`.
+4. **UI**: `src/app/alerts/index.tsx` (list, disclaimer, "actualizado hace X") and `src/app/alerts/[id].tsx`
+   (official text + actions); a Home card while an orange/red warning is active; the opt-in (onboarding last
+   step, the once-only Home sheet, Settings section with thresholds); es + en strings; `testID`s for E2E. Warning
+   colours as theme tokens (yellow/orange/red next to the signal yellow, contrast-checked; `docs/STYLE_GUIDE.md`).
+5. **Background**: `npx expo install expo-background-task expo-task-manager`; `background.ts` defines the task at
+   module scope, imported from the entry, headless (nothing from React; i18n initialised before building text);
+   `register.ts` (`registerInit`: register the task when enabled, foreground check). Check that the APK still has
+   no `com.google.android.gms`/Firebase (`./gradlew :app:dependencies`), then `node scripts/licenses.mjs`.
+6. **Privacy + store**: `site/privacy.html` (es + en): the new connections, only when "Avisos oficiales" is on,
+   what each receives (IP and which feed; NWS the rounded position), the position used for matching stays on the
+   device; still no server of our own. App Store labels unchanged (nothing collected by us). Store texts mention
+   it with the disclaimer, never "emergency alert system" (the owner reviews).
+7. **Docs**: `docs/ARCHITECTURE.md` (alerts section), `docs/E2E.md` (flows, testIDs), `docs/PROGRESS.md`.
+8. **Verify**: unit tests; E2E on the iOS simulator and the Android emulator with a `scripts/e2e-alerts-feed.py`
+   serving the fixtures (a warning over the simulator's location: list, detail, Home card, local notification);
+   the background task on real phones (`triggerTaskWorkerForTestingAsync` in a debug build; Android
+   `adb shell cmd jobscheduler run -f com.fjlinde.nomadpocket <id>`); then **measure** `alerts.runs` on the owner's
+   iPhone and an Android phone for a few days. That measurement is phase 2's baseline.
+9. Europe (MeteoAlarm) as soon as its terms and token arrive; it can ship after the rest.
 
-## Phase 2 (only if phase 1 is used): push from a small server
+## Phase 2 — push from a free server of our own
 
-- Why: background checks on iOS are irregular; a server can watch feeds every minute (EMSC's WebSocket,
-  MeteoAlarm's WebSub) and push within a minute or two.
-- Shape: a Cloudflare Worker with a cron every minute + D1 (free tier is enough), diffing the feeds and
-  sending APNs (HTTP/2, `.p8` key; `@fivesheepco/cloudflare-apns2` is a Workers-compatible fork with very
-  few users: test it, or a ~4 €/month VPS instead). Devices register a token + the zones they watch
-  (EMMA/AEMET zone codes, not coordinates).
-- Costs: the first server of the app (privacy policy and possibly the App Store labels change: device
-  token + zone is data we hold), `enableRemoteNotifications: true` on iOS only, monitoring and on-call
-  for a channel people may rely on.
-- Android: still no push (no FCM; UnifiedPush needs another app like ntfy installed). It keeps polling.
-- **GitHub Actions is not an option** for this: scheduled runs come 15–30+ min late or not at all under
-  load, are disabled after 60 days without activity, and there is nowhere safe to keep device tokens.
+Starts when phase 1 is on TestFlight and its background runs have been measured. Phase 1 stays as is: the app
+keeps reading the sources itself for its list, Android keeps checking in the background (no FCM), and iOS gains
+real push on top. So the server only does what the phone can't: watch the feeds every minute and wake iPhones.
 
-## Order of work
+### Where: Deno Deploy, free plan
 
-1. Fixtures (save real AEMET RSS + tar.gz + CAP, MeteoAlarm Atom + CAP, USGS/EMSC JSON) and the pure
-   cores with tests: CAP parser, tar reader, levels, matching, notify policy. Measure the AEMET tar.gz size.
-2. AEMET source + fetch/persist + the `/alerts` list and detail; Home card; Settings switch and opt-in.
-3. Local notifications (channel, levels, tap), dedup across restarts.
-4. Background task; measure how often it really runs on the owner's iPhone and on Android over a few
-   days (log the runs in kv, shown in a debug row); decide on the native `BGAppRefreshTask`.
-5. Earthquakes (USGS + EMSC). Then MeteoAlarm with EMMA geometries (after reading its terms). Then the US
-   (after decision 6) and tsunami.gov. GDACS last, if at all.
-6. Privacy policy, credits, i18n (es + en), `docs/ARCHITECTURE.md` (alerts section), `docs/E2E.md`
-   (new flows, testIDs), `docs/STYLE_GUIDE.md` if the warning colours need tokens (yellow/orange/red
-   levels next to the signal yellow: pick them with contrast checks).
-7. Verify: unit tests, E2E on the iOS simulator and Android emulator with the fixture server, the
-   background task on real phones (`triggerTaskWorkerForTestingAsync` in a debug build;
-   `adb shell cmd jobscheduler run -f com.fjlinde.nomadpocket <id>` on Android; the simulator can't run
-   background tasks).
+Verified 2026-11-04: 1 M requests/month, 10 h of active CPU/month, `Deno.cron` every minute (up to 10 per revision,
+no overlapping runs), Deno KV (1 GiB, 1 M read and 500 k write units/month), deploys from the GitHub repo. "Deploy
+Classic" shut down on 2026-07-20: use the new platform (console.deno.com; 2 regions; KV queues not supported there,
+not needed). Budget: the cron is ~43 k requests/month; iOS registrations a few per device per month; Android never
+calls the server, so the free plan isn't spent on polling.
 
-## Open questions for the owner
+Not chosen:
+- **Cloudflare Workers free**: 10 ms CPU per invocation (cron included) and 50 subrequests per invocation, so parsing
+  a changed 200–700 KB feed may not fit and a push to more than ~45 phones must be split through Queues (10 k
+  operations/day ≈ 3.3 k messages). HTTP/2 to APNs from its `fetch` isn't documented (a Workers fork of `apns2`
+  exists with few users). First fallback.
+- **Google Cloud e2-micro** (always free: 1 VM in us-west1/us-central1/us-east1, 30 GB disk, 1 GB egress/month;
+  needs a billing account): a VM to keep patched. Second fallback; the code runs there unchanged (Deno + SQLite).
+- **GitHub Actions**: scheduled runs come 15–30+ min late or not at all under load, are disabled after 60 days
+  without activity, and there is nowhere to keep device tokens. GitHub hosts the code and deploys it; a daily job
+  can watch `/health` (its delays don't matter there).
 
-- ❓ Opt-in also at the end of onboarding, or only Home + Settings?
-- ❓ Default thresholds (orange+ for weather; the quake rule above)?
-- ❓ US: send a rounded position to NWS, or bundle county shapes?
-- ❓ GDACS for the rest of the world, or leave countries without a national source uncovered at first?
-- ❓ Phase 2 and Critical Alerts: confirm they wait until phase 1 has been used for a while.
+### Design
+
+- **What the phone sends**: its APNs token, `env` (`production` for TestFlight/App Store, `sandbox` for dev builds),
+  its **0.1° cell** (~11 × 8 km in Spain; never coordinates), language and thresholds. On enable, when the cell
+  changes (a new fix), and when the token changes. Disabling deletes the row.
+- **Geometry on the server**: AEMET polygons come in the CAP; a table *zone code → cells* built by
+  `scripts/alerts/build-zones.mjs` covers MeteoAlarm EMMA_IDs (the phase-1 asset), NWS public zones and **US
+  counties** (Census cartographic boundaries) for the alerts without geometry. Quakes → cells within the radius.
+  A cell on a border gets both zones' warnings: acceptable.
+- **Layout** (`server/alerts/`, Deno + TypeScript, GPL like the app; it imports the app's pure cores directly, so
+  both parse the same way and share the tests):
+  ```
+  main.ts       HTTP API + Deno.cron("poll", "* * * * *")
+  poll.ts       sources with ETag/If-Modified-Since → normalised (the app's cores) → diff vs KV state
+  cells.ts      polygon / radius / zone code → cells (data/zones.json.gz)
+  apns.ts       JWT (ES256, the .p8 key) + POST https://api.push.apple.com/3/device/<token> over HTTP/2;
+                410/400 BadDeviceToken → delete the registration
+  store.ts      KV: ['reg', tokenHash] → {token, env, cell, lang, prefs, updatedAt}; ['cell', cell, tokenHash];
+                ['state', source] → Last-Modified/ETag + active alerts
+  ```
+- **API**: `POST /v1/register`, `DELETE /v1/register/{token}`, `GET /health` (last successful poll per source),
+  `POST /v1/test-push` guarded by a secret (owner only). No public way to send a push. Rate-limit by IP, cap body
+  sizes, never echo tokens; fake tokens die at the first 410.
+- **Push payload**: the same frame and official texts as phase 1, in the registered language;
+  `interruption-level` as in decision 4; `thread-id` per warning; the app's phase-1 dedup (`alerts.notified`) also
+  marks pushed warnings so a background check doesn't notify them again.
+- **The app**: `enableRemoteNotifications: true` (iOS `aps-environment`; re-check that the Android build still has
+  no Firebase/Play services pieces), `getDevicePushTokenAsync` on iOS, `registration.ts`. Android unchanged.
+- **Secrets** in Deno Deploy's environment: the APNs `.p8` key, Key ID, Team ID, the test-push secret. The owner
+  creates the APNs key (Apple Developer › Keys › Apple Push Notifications service) and the Deno Deploy account
+  (GitHub login).
+- **Monitoring**: a free uptime monitor (e.g. UptimeRobot) or a daily GitHub Actions job on `/health` that fails,
+  and emails the owner, when a source hasn't been polled for 15 min. When the server is down, iPhones fall back
+  to phase 1's checks.
+- **Optional later**: PTWC/NTWC international tsunami messages; EMSC's WebSocket for faster quakes; Critical
+  Alerts (apply only if the owner wants to, with the server's record); replacing the NWS point query with the
+  server's county match.
+
+### Phase 2 — privacy, store, legal
+
+- Privacy policy: the app now has **one server of its own, only for iPhones with "Avisos oficiales" on**: what it
+  stores (push token, 0.1° cell, language, thresholds), what it doesn't (coordinates, account, IP beyond request
+  logs), retention (deleted on opt-out, when Apple reports the token dead, or after 90 days without a refresh),
+  who runs it (the owner, on Deno Deploy). GDPR: the owner is the controller of that table; the policy is the notice.
+- App Store privacy labels: "Coarse Location — App Functionality — not linked to you — no tracking" (the cell is
+  derived from location and kept on our server). Google Play's Data safety doesn't change (Android doesn't talk
+  to the server).
+
+### Phase 2 — tasks (in order)
+
+0. **Spike**: a Deno Deploy app that sends one APNs push (HTTP/2 + JWT) to a dev build on the owner's iPhone and
+   runs a 1-minute cron with KV. If Deno's `fetch` can't do APNs, try `node:http2`; if Deno is out, Cloudflare,
+   then the VM.
+1. `scripts/alerts/build-zones.mjs` + `data/zones.json.gz` (measure; Spain first, then EMMA, then NWS zones + counties).
+2. Server: poll + diff (AEMET, quakes, then the rest), register/unregister, APNs sending, health, test push.
+3. App: registration, push tap → detail, dedup with phase 1, opt-in copy for iPhone ("al momento") vs Android
+   ("cada media hora aprox.").
+4. Privacy policy, store labels, `docs/ARCHITECTURE.md` (server section), `docs/RELEASE.md` (deploying the server),
+   `docs/DEVELOPMENT.md` (running it locally).
+5. Verify: pushes on the owner's iPhone over a few days (`/v1/test-push`, then real warnings), the monitor firing when
+   the cron is stopped, a disabled phone getting nothing.
 
 ## Sources read (2026-11-04)
 
-- AEMET feeds and format: https://www.aemet.es/es/rss_info/avisos/esp, https://www.aemet.es/es/eltiempo/prediccion/avisos/ayuda,
-  a live CAP file and the national RSS; reuse terms https://www.aemet.es/es/nota_legal
-- MeteoAlarm: https://feeds.meteoalarm.org (feed list, CC BY 4.0), live Spain/Germany feeds and a CAP file,
-  https://api.meteoalarm.org (portal; Metadata API "Region geometries")
-- NWS: https://www.weather.gov/documentation/services-web-api, https://www.weather.gov/documentation/services-web-alerts
+- AEMET: https://www.aemet.es/es/rss_info/avisos/esp, https://www.aemet.es/es/eltiempo/prediccion/avisos/ayuda, the national and
+  Canarias RSS and the tar.gz (saved as fixtures); reuse terms https://www.aemet.es/es/nota_legal
+- MeteoAlarm: https://feeds.meteoalarm.org (feed list, CC BY 4.0), the Spain/Germany feeds and a CAP file, https://api.meteoalarm.org,
+  https://api.meteoalarm.org/metadata/v1/docs/openapi.yaml (`/geocodes`, Bearer token)
+- NWS: https://www.weather.gov/documentation/services-web-api, https://www.weather.gov/documentation/services-web-alerts, `/alerts/active`
 - USGS: https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php
-- EMSC: https://www.seismicportal.eu/webservices.html, https://www.seismicportal.eu/fdsn-wsevent.html
-- NOAA tsunami feeds: https://www.tsunami.gov/events/xml/PHEBAtom.xml (and PAAQ)
-- GDACS: https://www.gdacs.org/feed_reference.aspx, https://www.gdacs.org/xml/rss.xml, https://www.gdacs.org/xml/gdacs_cap.xml
+- EMSC: https://www.seismicportal.eu/webservices.html, https://www.seismicportal.eu/fdsn-wsevent.html, `/fdsnws/event/1/openapi.json`
+- NOAA tsunami: https://www.tsunami.gov/events/xml/PHEBAtom.xml (and PAAQ)
+- GDACS: https://www.gdacs.org/feed_reference.aspx, https://www.gdacs.org/xml/rss_24h.xml, https://www.gdacs.org/xml/gdacs_cap.xml
 - ES-Alert / EU-Alert: https://www.xatakamovil.com/movil-y-sociedad/no-alarmas-aemet-madrid-lluvias-otras-no-vulneran-ley-proteccion-datos,
   https://en.wikipedia.org/wiki/EU-Alert
 - Expo 58: https://docs.expo.dev/versions/v58.0.0/sdk/background-task/, https://docs.expo.dev/versions/v58.0.0/sdk/notifications/
-- iOS interruption levels: https://onesignal.com/blog/ios-notification-changes-updates-from-apples-wwdc-21/; Critical Alerts
-  criteria from Apple's rejection quoted at https://developer.apple.com/forums/thread/114385 (Apple's own page didn't render)
+- iOS interruption levels: https://onesignal.com/blog/ios-notification-changes-updates-from-apples-wwdc-21/; Critical Alerts criteria from
+  Apple's rejection quoted at https://developer.apple.com/forums/thread/114385 (Apple's own page didn't render)
+- Hosting: https://developers.cloudflare.com/workers/platform/limits/, https://developers.cloudflare.com/workers/platform/pricing/,
+  https://developers.cloudflare.com/queues/platform/pricing/, https://deno.com/deploy/pricing, https://docs.deno.com/deploy/reference/cron/,
+  https://docs.deno.com/deploy/migration_guide/, https://docs.cloud.google.com/free/docs/free-cloud-features,
+  https://npmjs.com/package/@fivesheepco/cloudflare-apns2
 - GitHub Actions schedule delays: https://github.com/orgs/community/discussions/210925
 - Android without FCM: https://nextcloud.com/blog/unifiedpush-android-nextcloud-talk/
-- APNs from Workers: https://npmjs.com/package/@fivesheepco/cloudflare-apns2
