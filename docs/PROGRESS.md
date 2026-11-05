@@ -358,6 +358,30 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-05 — UI polish: Library rows and margins, clearing recent reading
+
+- **Catalog rows** (`ResourceRow`: categories, Wikipedia editions, search, Preparedness guides): the title shared its
+  line with the language tag and the button and fit two words ("Tratamiento del a…"). Now the title runs to the end
+  of the row (two lines), the button shares the description's line (absolutely placed beside the row's pressable, so
+  VoiceOver still reaches both; the description leaves room for its measured width) and the language is a tag on the
+  icon (after the title in rows without one). Inside a category the rows have no icon (it was the category's, the same on
+  every row); search and Preparedness keep it (categories mix there). Rows stay about as tall as before. A first try with the button on a line
+  of its own was too tall (owner).
+- **Top gap on category and course screens** (iOS, ~120 pt): their transparent header was cleared by hand with
+  `insets.top + 56`, but in native tabs iOS already starts the screen below the header. New `Screen` prop
+  `transparentHeader`: iOS leaves it to the automatic content inset, Android keeps the manual status bar + 56 dp. On
+  Android the Cursos list's title was hidden under its transparent header; it uses the prop too now.
+- **"Limpiar"** (grey, `SectionHeader`'s new `quietAction`) on Library's "Seguir leyendo" and Home's "Continuar": asks,
+  then clears the reading history (the same as Ajustes' "Borrar historial de lectura"; bookmarks stay). LIB-08 (full).
+- **Ajustes' storage bar** filled the phone's whole used share ((total − free) / total, every app and the system)
+  under "Usado por Nomad", so its numbers never added up (32,8 GB "used" over a half-full bar). Now a bar of the whole
+  phone in three parts (`StackedBar`): Nomad (yellow), the rest of the phone (grey) and free (the track), with a
+  legend whose sizes add up. SET-03 checks the legend.
+- `docs/E2E.md` suite counts were stale: 24 smoke, 49 full, 66 all.
+- Not changed: a PDF opened at the top says "3 de 76". That pill is WebKit's own PDF viewer (iOS reader); it names
+  the page in the middle of the screen, and that PDF's small pages fit four to a screen. Only a native PDFKit viewer
+  would change it; not worth it for now.
+
 ### 2026-11-05 — Assistant: New chat hidden on a fresh chat
 
 - People pressed New chat on an empty chat and didn't know what it did. It was disabled there, but iOS 26 still

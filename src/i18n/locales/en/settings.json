@@ -9,7 +9,8 @@
   "wifiOnlyBody": "Avoid using cellular data for large downloads",
   "storage": "Storage",
   "storageUsed": "Used by Nomad",
-  "storageFree": "Free on device",
+  "storageOther": "Rest of the phone",
+  "storageFreeShort": "Free",
   "kind": {
     "zim": "Library and courses",
     "map": "Map",

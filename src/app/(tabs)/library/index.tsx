@@ -15,7 +15,7 @@ import { catalogHasLanguages, collectionOfItem, openCollection, useCollections }
 import { CollectionRow } from '@/features/library/components/CollectionRow';
 import { SearchHero } from '@/features/library/components/SearchHero';
 import { indexDocuments } from '@/features/library/documents';
-import { recentHistory, type HistoryEntry } from '@/features/library/history';
+import { confirmClearHistory, recentHistory, type HistoryEntry } from '@/features/library/history';
 import { suggestedSearches } from '@/features/library/recent-searches';
 import { AlreadyInstalledError, registerZimFile } from '@/features/library/register';
 import { useUpdates } from '@/features/updates/updates';
@@ -120,7 +120,13 @@ export default function LibraryScreen() {
 
       {last && lastItem ? (
         <>
-          <SectionHeader title={t('continueReading')} />
+          <SectionHeader
+            title={t('continueReading')}
+            action={t('clearRecent.action')}
+            onAction={() => confirmClearHistory(() => setHistory([]))}
+            quietAction
+            actionTestID="continue-reading-clear"
+          />
           <ListGroup>
             <ListRow
               testID="continue-reading"

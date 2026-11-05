@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { ArrowDown, Check, Pause, Play, WifiOff } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { PressableScale, ProgressRing, Text } from '@/components/ui';
 import { useContent } from '@/features/content/items';
@@ -135,10 +135,10 @@ export function DownloadButton({ resource, onOpen }: { resource: CatalogResource
   );
 }
 
-export function LanguageTag({ language }: { language: string }) {
+export function LanguageTag({ language, style }: { language: string; style?: StyleProp<ViewStyle> }) {
   const { colors } = useTheme();
   return (
-    <View style={[styles.lang, { borderColor: colors.border }]}>
+    <View style={[styles.lang, { borderColor: colors.border }, style]}>
       <Text variant="caption" weight="700" color="textSecondary">
         {language.toUpperCase()}
       </Text>

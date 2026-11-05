@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { IconBadge, PressableScale, Row, Text } from '@/components/ui';
-import { space, type Hue } from '@/theme';
+import { space, useTheme, type Hue } from '@/theme';
 
 import { categoryHue, categoryIcon } from './icons';
 import { DownloadButton, LanguageTag } from './DownloadButton';
@@ -27,14 +28,18 @@ export function ResourceRow({
   onLongPress?: () => void;
 }) {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const [buttonWidth, setButtonWidth] = useState(96);
   const Icon = categoryIcon(resource.category);
   // A bigger edition on the phone already holds this one: say which instead of what it is.
   const covering = useCovering(resource.id);
   const about = covering ? t('included.in', { name: covering.name }) : loc(resource.description);
   const description = outdated ? `${t('updates:available')} · ${about}` : about;
-  // The download button sits beside the row's button, not inside it, so VoiceOver can reach it.
+  // The title runs to the end of the row (two lines: "Tratamiento del a…" said nothing). The download button shares
+  // the description's line: it sits over the row, beside its button rather than inside it so VoiceOver can reach it,
+  // and the description leaves room for it (measured: "↓ 1,2 GB", "Abrir" and "Incluida" differ in width).
   return (
-    <View style={styles.row}>
+    <View>
       <PressableScale
         testID={`resource-${resource.id}`}
         pressedScale={0.99}
@@ -42,25 +47,42 @@ export function ResourceRow({
         onLongPress={onLongPress}
         style={styles.body}
         accessibilityRole="button">
-        {showIcon ? <IconBadge icon={Icon} hue={hue ?? categoryHue(resource.category)} size={40} /> : null}
+        {showIcon ? (
+          <View style={styles.icon}>
+            <IconBadge icon={Icon} hue={hue ?? categoryHue(resource.category)} size={ICON} />
+            <LanguageTag language={resource.language} style={[styles.iconTag, { backgroundColor: colors.surface }]} />
+          </View>
+        ) : null}
         <View style={{ flex: 1, gap: 3 }}>
-          <Row gap={6}>
-            <Text variant="headline" numberOfLines={1} style={{ flexShrink: 1 }}>
+          <Row gap={6} style={{ alignItems: 'flex-start' }}>
+            <Text variant="headline" numberOfLines={2} style={{ flexShrink: 1 }}>
               {loc(resource.title)}
             </Text>
-            <LanguageTag language={resource.language} />
+            {showIcon ? null : <LanguageTag language={resource.language} style={{ marginTop: 2 }} />}
           </Row>
-          <Text variant="footnote" color="textSecondary" numberOfLines={2}>
-            {description}
-          </Text>
+          <View style={[styles.about, { paddingRight: buttonWidth + space.md }]}>
+            <Text variant="footnote" color="textSecondary" numberOfLines={2}>
+              {description}
+            </Text>
+          </View>
         </View>
       </PressableScale>
-      <DownloadButton resource={resource} />
+      <View style={styles.button} onLayout={(e) => setButtonWidth(Math.ceil(e.nativeEvent.layout.width))}>
+        <DownloadButton resource={resource} />
+      </View>
     </View>
   );
 }
 
+const ICON = 40;
+// The tallest button (the download pill): the description's line is at least this tall so the button never reaches
+// the title above it.
+const BUTTON = 32;
+
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingRight: space.lg },
-  body: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space.md, paddingLeft: space.lg, paddingVertical: space.md },
+  body: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md, paddingHorizontal: space.lg, paddingVertical: space.md },
+  icon: { alignItems: 'center' },
+  iconTag: { marginTop: -9 },
+  about: { minHeight: BUTTON, justifyContent: 'center' },
+  button: { position: 'absolute', right: space.lg, bottom: space.md, height: BUTTON, justifyContent: 'center' },
 });

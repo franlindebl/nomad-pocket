@@ -53,6 +53,19 @@ export function ProgressBar({ value, height, color, trackColor, segments, gap, s
   );
 }
 
+/**
+ * Flat bar split into parts of one whole (e.g. the phone's storage: Nomad, the rest, free as the track). Each part is a
+ * share 0..1; a part above 0 keeps a sliver so a small one still shows.
+ */
+export function StackedBar({ parts, height = 6, trackColor, style }: { parts: { value: number; color: string }[]; height?: number; trackColor?: string; style?: StyleProp<ViewStyle> }) {
+  const { colors } = useTheme();
+  return (
+    <View style={[{ height, flexDirection: 'row', backgroundColor: trackColor ?? colors.surfacePressed }, styles.track, style]}>
+      {parts.map((p, i) => (p.value > 0 ? <View key={i} style={{ width: `${clamp(p.value) * 100}%`, minWidth: 2, backgroundColor: p.color }} /> : null))}
+    </View>
+  );
+}
+
 type RingProps = {
   value: number;
   size?: number;

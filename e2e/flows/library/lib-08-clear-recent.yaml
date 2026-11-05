@@ -1,0 +1,27 @@
+# LIB-08 — "Limpiar" on Library's "Seguir leyendo" and on Home's "Continuar" clears the reading history after asking;
+# both sections then disappear.
+appId: com.fjlinde.nomadpocket
+tags: [full, library, home, seeded]
+---
+- runFlow: ../../subflows/launch.yaml
+- runFlow: ../../subflows/open-wikipedia.yaml
+- tapOn: { id: "BackButton" }   # reader → Wikipedia
+- tapOn: { id: "BackButton" }   # Wikipedia → Library
+- assertVisible: { id: "continue-reading" }
+- takeScreenshot: 01-library-continue
+- tapOn: { id: "continue-reading-clear" }
+- assertVisible: "¿Borrar las lecturas recientes\\?"
+- tapOn: "Cancelar"
+- assertVisible: { id: "continue-reading" }
+- tapOn: { id: "continue-reading-clear" }
+- tapOn: "Borrar"
+- assertNotVisible: { id: "continue-reading" }
+- runFlow: ../../subflows/open-wikipedia.yaml
+- tapOn: { id: "BackButton" }
+- tapOn: { id: "house" }
+- scrollUntilVisible:
+    element: { id: "home-continue-clear" }
+- takeScreenshot: 02-home-continue
+- tapOn: { id: "home-continue-clear" }
+- tapOn: "Borrar"
+- assertNotVisible: { id: "home-continue-clear" }

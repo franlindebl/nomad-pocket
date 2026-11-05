@@ -8,7 +8,6 @@ import { Check } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Badge, Button, Card, IconBadge, ListGroup, Row, Screen, SectionHeader, Text } from '@/components/ui';
 import {
@@ -42,7 +41,6 @@ import { space, useTheme } from '@/theme';
 export default function CategoryScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const category = getCategory(slug);
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation('library');
   const { hue } = useTheme();
   const langs = useSettings((s) => s.contentLanguages);
@@ -69,7 +67,7 @@ export default function CategoryScreen() {
       <ResourceRow
         key={r.id}
         resource={r}
-        hue={category.hue}
+        showIcon={false}
         outdated={outdated.has(r.id)}
         onLongPress={item ? () => showArchiveActions(item) : undefined}
       />
@@ -77,7 +75,7 @@ export default function CategoryScreen() {
   };
 
   return (
-    <Screen contentStyle={{ paddingTop: insets.top + 56 }} contentInsetAdjustmentBehavior="never">
+    <Screen transparentHeader>
       <View style={styles.hero}>
         <IconBadge icon={iconByName(category.icon)} color={h.fg} size={64} />
         <Text variant="display">{loc(category.name)}</Text>

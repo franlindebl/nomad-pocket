@@ -44,6 +44,11 @@
     "fever": "Fiebre"
   },
   "continueReading": "Seguir leyendo",
+  "clearRecent": {
+    "action": "Limpiar",
+    "title": "¿Borrar las lecturas recientes?",
+    "body": "Se borra tu historial de lectura. Tus marcadores y lo descargado se quedan."
+  },
   "outsideCatalog": "Fuera del catálogo",
   "imported": "{{title}} está en {{collection}}",
   "other": "Otros archivos",

@@ -12,7 +12,22 @@ import { PressableScale } from './Pressable';
 import { Text } from './Text';
 
 /** Mono label followed by a hairline that runs to the edge (and an optional action at the end). */
-export function SectionHeader({ title, action, onAction, style }: { title: string; action?: string; onAction?: () => void; style?: StyleProp<ViewStyle> }) {
+export function SectionHeader({
+  title,
+  action,
+  onAction,
+  quietAction,
+  actionTestID,
+  style,
+}: {
+  title: string;
+  action?: string;
+  onAction?: () => void;
+  /** Grey instead of signal yellow: for a housekeeping action (clearing a list), not one the section leads to. */
+  quietAction?: boolean;
+  actionTestID?: string;
+  style?: StyleProp<ViewStyle>;
+}) {
   const { colors } = useTheme();
   return (
     <View style={[styles.sectionHeader, style]}>
@@ -21,8 +36,8 @@ export function SectionHeader({ title, action, onAction, style }: { title: strin
       </Text>
       <View style={[styles.sectionRule, { backgroundColor: colors.border }]} />
       {action && onAction ? (
-        <Pressable onPress={onAction} hitSlop={10} accessibilityRole="button">
-          <Text variant="footnote" color="accent" weight="600">
+        <Pressable testID={actionTestID} onPress={onAction} hitSlop={10} accessibilityRole="button">
+          <Text variant="footnote" color={quietAction ? 'textTertiary' : 'accent'} weight="600">
             {action}
           </Text>
         </Pressable>

@@ -1,5 +1,8 @@
 // Reading history and bookmarks for ZIM content (shared by reader, home and courses).
+import { Alert } from 'react-native';
+
 import { db } from '@/db';
+import i18n from '@/i18n';
 
 export type HistoryEntry = { id: number; itemId: string; path: string; title: string; visitedAt: number };
 export type Bookmark = { id: number; itemId: string; path: string; title: string; createdAt: number };
@@ -27,6 +30,23 @@ export function recentHistory(limit = 20, itemId?: string): HistoryEntry[] {
 
 export function clearHistory() {
   db().runSync('DELETE FROM history');
+}
+
+/** "Clear" on Library's Continue reading and Home's Continue: asks first, then clears and calls `onCleared`. */
+export function confirmClearHistory(onCleared: () => void) {
+  const t = i18n.getFixedT(null, 'library');
+  const tc = i18n.getFixedT(null, 'common');
+  Alert.alert(t('clearRecent.title'), t('clearRecent.body'), [
+    { text: tc('actions.cancel'), style: 'cancel' },
+    {
+      text: tc('actions.clear'),
+      style: 'destructive',
+      onPress: () => {
+        clearHistory();
+        onCleared();
+      },
+    },
+  ]);
 }
 
 export function isBookmarked(itemId: string, path: string): boolean {

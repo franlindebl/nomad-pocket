@@ -13,6 +13,10 @@ tags: [full, settings, seeded]
     element: { id: "open-settings" }
     direction: UP
 - tapOn: { id: "open-settings" }
+# The storage bar's legend: Nomad, the rest of the phone and what's free add up to the phone.
+- assertVisible: "Nomad · .*"
+- assertVisible: "Resto del teléfono · .*"
+- takeScreenshot: 00-storage
 - scrollUntilVisible:
     element: "Documentación de Node.js.*"
 - tapOn: "Documentación de Node.js.*"

@@ -6,7 +6,7 @@ import { ScrollView, StyleSheet } from 'react-native';
 
 import { Card, IconBadge, SectionHeader, Text } from '@/components/ui';
 import { getItem } from '@/features/content/items';
-import { recentHistory, type HistoryEntry } from '@/features/library/history';
+import { confirmClearHistory, recentHistory, type HistoryEntry } from '@/features/library/history';
 import { pageTitle } from '@/features/library/titles';
 import { formatRelativeDate } from '@/lib/format';
 import { space } from '@/theme';
@@ -14,6 +14,7 @@ import { space } from '@/theme';
 /** "Continue" row on Home: the last pages read across all archives. */
 export function ContinueCarousel() {
   const { t } = useTranslation('home');
+  const { t: tl } = useTranslation('library');
   const [entries, setEntries] = useState<(HistoryEntry & { source: string })[]>([]);
 
   useFocusEffect(
@@ -38,7 +39,13 @@ export function ContinueCarousel() {
   if (!entries.length) return null;
   return (
     <>
-      <SectionHeader title={t('continue')} />
+      <SectionHeader
+        title={t('continue')}
+        action={tl('clearRecent.action')}
+        onAction={() => confirmClearHistory(() => setEntries([]))}
+        quietAction
+        actionTestID="home-continue-clear"
+      />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row} style={styles.scroller}>
         {entries.map((e) => (
           <Card

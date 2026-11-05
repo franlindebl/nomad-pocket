@@ -44,6 +44,11 @@
     "fever": "Fever"
   },
   "continueReading": "Continue reading",
+  "clearRecent": {
+    "action": "Clear",
+    "title": "Clear recent reading?",
+    "body": "Your reading history is cleared. Your bookmarks and downloads stay."
+  },
   "outsideCatalog": "Outside the catalog",
   "imported": "{{title}} is in {{collection}}",
   "other": "Other files",

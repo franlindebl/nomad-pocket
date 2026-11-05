@@ -41,7 +41,7 @@ export default function CoursesScreen() {
   );
 
   return (
-    <Screen title={t('common:tabs.courses')}>
+    <Screen title={t('common:tabs.courses')} transparentHeader>
       {collection ? <CollectionCount collection={collection} /> : null}
       <SectionHeader title={t('myCourses')} />
       {installed.length ? (

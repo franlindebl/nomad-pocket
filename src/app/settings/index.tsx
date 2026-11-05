@@ -5,7 +5,7 @@ import { Database, GraduationCap, Map, Scale, ShieldCheck, MessageSquareText, Tr
 import { Alert, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { Chip, IconBadge, ListGroup, ListRow, ProgressBar, Row, Screen, SectionHeader, Segmented, Switch, Text } from '@/components/ui';
+import { Chip, IconBadge, ListGroup, ListRow, Row, Screen, SectionHeader, Segmented, StackedBar, Switch, Text } from '@/components/ui';
 import { searchIndexBytes } from '@/db';
 import { useAlertsState } from '@/features/alerts/state';
 import { removeItem, useItems, type InstalledItem } from '@/features/content/items';
@@ -33,6 +33,8 @@ export default function SettingsScreen() {
   const used = items.reduce((sum, i) => sum + i.sizeBytes, 0) + searchIndexBytes();
   const free = freeBytes();
   const total = totalBytes();
+  // Everything else on the phone (other apps, the system): never below 0 if the sizes disagree a little.
+  const other = Math.max(0, total - free - used);
   const region = s.country ? getRegion(s.country) : undefined;
   const zims = items.filter((i) => i.kind === 'zim');
   const models = items.filter((i) => i.kind === 'model');
@@ -96,10 +98,19 @@ export default function SettingsScreen() {
               {formatBytes(used, undefined, lang)}
             </Text>
           </Row>
-          <ProgressBar value={total ? (total - free) / total : 0} />
-          <Text variant="footnote" color="textSecondary" tabular>
-            {t('storageFree')}: {formatBytes(free, undefined, lang)}
-          </Text>
+          {/* The whole phone: Nomad, everything else on it, and what's free (the track). It used to fill the phone's
+              whole used share under "Used by Nomad", so its numbers never added up. */}
+          <StackedBar
+            parts={[
+              { value: total ? used / total : 0, color: colors.accent },
+              { value: total ? other / total : 0, color: colors.textTertiary },
+            ]}
+          />
+          <Row style={{ flexWrap: 'wrap', columnGap: space.lg, rowGap: space.xs }}>
+            <Legend color={colors.accent} label={`Nomad · ${formatBytes(used, undefined, lang)}`} />
+            <Legend color={colors.textTertiary} label={`${t('storageOther')} · ${formatBytes(other, undefined, lang)}`} />
+            <Legend color={colors.surfacePressed} label={`${t('storageFreeShort')} · ${formatBytes(free, undefined, lang)}`} />
+          </Row>
         </View>
         {countries.map((c) => (
           <ListRow
@@ -180,5 +191,17 @@ export default function SettingsScreen() {
         </View>
       </ListGroup>
     </Screen>
+  );
+}
+
+/** A swatch and its label under the storage bar. */
+function Legend({ color, label }: { color: string; label: string }) {
+  return (
+    <Row gap={6}>
+      <View style={{ width: 8, height: 8, backgroundColor: color }} />
+      <Text variant="footnote" color="textSecondary" tabular>
+        {label}
+      </Text>
+    </Row>
   );
 }

@@ -3,7 +3,6 @@ import { BookOpen, Check, Circle } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Badge, Button, Card, IconBadge, ListGroup, PressableScale, ProgressBar, ProgressRing, Row, Screen, SectionHeader, Text } from '@/components/ui';
 import { getResource, loc } from '@/features/catalog';
@@ -20,7 +19,6 @@ export default function CourseScreen() {
   const { t } = useTranslation('courses');
   const { t: tc } = useTranslation();
   const { colors, hue } = useTheme();
-  const insets = useSafeAreaInsets();
   const resource = getResource(id);
   const { installed, download } = useResourceState(id);
   const itemId = installed?.id;
@@ -69,7 +67,7 @@ export default function CourseScreen() {
   const active = download && ['queued', 'running', 'paused', 'processing'].includes(download.status);
 
   return (
-    <Screen contentStyle={{ paddingTop: insets.top + 56 }} contentInsetAdjustmentBehavior="never">
+    <Screen transparentHeader>
       <View style={{ gap: space.md }}>
         <Row style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <IconBadge icon={iconByName(subject?.icon)} color={h.fg} size={64} />

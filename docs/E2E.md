@@ -40,9 +40,9 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 
 | Command | Flows | Time | Covers | Needs |
 |---|---|---|---|---|
-| `npm run e2e` | 21 | ~14 min | P0: every screen's main path (incl. map search, Emergencias, road routing and Preparedness) | nothing (offline) |
-| `npm run e2e:full` | 44 | ~30 min | + P1: secondary features (markers, find in page, courses, reminders, PDF…) | nothing (offline) |
-| `npm run e2e:all` | 57 | ~41 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
+| `npm run e2e` | 24 | ~14 min | P0: every screen's main path (incl. map search, Emergencias, road routing and Preparedness) | nothing (offline) |
+| `npm run e2e:full` | 49 | ~30 min | + P1: secondary features (markers, find in page, courses, reminders, PDF…) | nothing (offline) |
+| `npm run e2e:all` | 66 | ~41 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
 | `PLANET_PORT=8766 scripts/e2e.sh --build --tags planet` | 2 | ~12 min | extraction resumed after a kill (`map-22`) and retried after a network failure (`map-23`) (tag `planet`, their own build: rebuild without `PLANET_PORT` before other suites) | nothing (local stand-in planet) |
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape | nothing (offline) |
 | `npm run e2e:android` | 8 | ~22 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack, content updates, official alerts, the assistant's map answers | internet, Android emulator |
@@ -254,6 +254,7 @@ By hand:
 | library | `lib-04-wikipedia` | LIB-04 | full | — |
 | library | `lib-06-explore` | LIB-06 | nightly | network |
 | library | `lib-07-download` | LIB-07 | nightly | network |
+| library | `lib-08-clear-recent` | LIB-08 | full | seeded ("Limpiar" on Library's "Seguir leyendo" and Home's "Continuar": asks, Cancelar keeps it, Borrar clears the reading history) |
 | search | `srch-01-no-archives` | SRCH-01 | smoke | — |
 | search | `srch-02-titles` | SRCH-02 | smoke | seeded |
 | search | `srch-03-fulltext` | SRCH-03, SRCH-04 | smoke | seeded |
@@ -541,6 +542,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `download-preparing` | Downloads sheet: a downloaded country still being prepared (search, emergency points), with its progress |
   | `kit-country`, `kit-guides`, `kit-wikipedia`, `kit-assistant` | setup wizard kit rows (the whole row toggles) |
   | `library-search`, `continue-reading` | Library: the big search block (opens `/search`), the "Seguir leyendo" row |
+  | `continue-reading-clear`, `home-continue-clear` | "Limpiar" on Library's "Seguir leyendo" and on Home's "Continuar" (clears the reading history after asking) |
   | `collection-<key>` | Library: a collection row (`medicine`, `survival`, `wikipedia`, `agriculture`, `diy`, `education`, `computing`, `courses`, `other`); archives are opened inside their collection |
   | `search-kiwix` | search screen: "Buscar «…» en Kiwix" (online only) |
   | `settings-country`, `settings-credits` | Settings: your country, Credits & licenses |
