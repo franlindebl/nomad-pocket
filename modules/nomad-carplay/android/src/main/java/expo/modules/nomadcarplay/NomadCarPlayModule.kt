@@ -9,6 +9,8 @@ import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
 class NomadCarPlayModule : Module() {
+  private val main = android.os.Handler(android.os.Looper.getMainLooper())
+
   internal fun emit(name: String, body: Map<String, Any?>) {
     sendEvent(name, body)
   }
@@ -19,7 +21,18 @@ class NomadCarPlayModule : Module() {
 
     OnCreate { CarHub.module = this@NomadCarPlayModule }
 
-    OnDestroy { if (CarHub.module === this@NomadCarPlayModule) CarHub.module = null }
+    OnDestroy {
+      if (CarHub.module === this@NomadCarPlayModule) {
+        CarHub.module = null
+        CarHub.observing = false
+      }
+    }
+
+    // src/features/carplay subscribes once at startup: what the car queued meanwhile goes now.
+    // CarHub is main-thread only; these come on JS's thread.
+    OnStartObserving { main.post { CarHub.observing = true } }
+
+    OnStopObserving { main.post { CarHub.observing = false } }
 
     Function("isConnected") { CarHub.connected }
 

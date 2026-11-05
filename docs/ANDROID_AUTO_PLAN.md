@@ -50,10 +50,28 @@ library's allowlist (Android Auto, Android Automotive).
    - Two templates close together make the host delay the second ("too many refreshes in a short span of time");
      the search has no loading state (it answers in tens of ms) and refreshes once more after 1.5 s.
    - While navigating the host hides the action strip after a few seconds; the first tap only shows it again.
-2. **Trip**: preview with time and distance, maneuver icons, estimates, reroute, arrival, "Terminar" both ways,
-   the phone and the car in step (as CarPlay's checks in `docs/CARPLAY_PLAN.md`).
-3. **Opened from the car with the app closed** (React Native without an activity), day/night, the car's own
-   "stop navigation", `geo:` / `NAVIGATE` intents from the car's assistant (optional).
+2. **Trip** (2026-11-05, **done**):
+   - Preview: `PreviewScreen`, a `RoutePreviewNavigationTemplate` pushed on top of the map (destination, "12 min ·
+     7,1 km" formatted by the host, "Por la CG-2" or "en línea recta", Ir; back cancels). Its own screen because
+     the host throws `BackFlowViolationException` ("Template types differ") when a screen the driver comes back to
+     changes its template's type, and the app crashed when the map screen did.
+   - Maneuver icons per routing-core `ManeuverIcon` (`CarManeuvers.kt`, Lucide; the roundabout anticlockwise, as
+     where traffic keeps right); the straight-line arrow turned toward the target.
+   - Reroute (spinner, then the new route), arrival ("Has llegado" + the destination, Terminar), Terminar both
+     ways; the trip goes to the car's cluster/HUD (`NavigationManager.updateTrip`).
+   - The map frames the whole route beside the preview and keeps it framed when the host recreates the surface
+     (it did on a new intent); when the trip ends it follows the driver again.
+3. **Opened from the car with the app closed** (2026-11-05, **done**):
+   - `CarJs`: the session starts the React host if needed and a headless JS task "NomadCar"
+     (`src/features/carplay/headless.ts`, registered in `index.ts`) that runs the app's `bootstrap()` without UI
+     and lasts while the car is connected (it also keeps JS timers running with the phone's activity paused). The
+     phone's activity opened later reuses the same JS (same process; checked).
+   - The driver's choices made before JS listens (a pick, Ir, Terminar) wait in `CarHub` until its first listener
+     (`OnStartObserving`).
+   - `geo:` destinations (`androidx.car.app.action.NAVIGATE`, from the car's assistant or another app):
+     coordinates start the trip like a pick (with the name in `(…)`), text opens the search with it.
+   - Day/night follows the car (`CarContext.isDarkMode`; on the Automotive emulator
+     `adb shell cmd car_service day-night-mode night`). The car's own "stop navigation" ends the trip in JS.
 4. **Switch and tests**: `with-android-auto.js` (off by default), an `e2e:androidauto` script on the Desktop
    Head Unit if its console commands allow it (taps, screenshots), docs (E2E.md, ARCHITECTURE.md).
 5. **Release**: only once the app is in production on Play. Play Console › Advanced settings › Form factors ›

@@ -15,6 +15,8 @@ android {
 }
 
 dependencies {
+  // The car starts the app's JS without an activity (CarJs: React host, headless task).
+  implementation 'com.facebook.react:react-android'
   // Android Auto's Car App Library (AndroidX, Apache-2.0: no Google Play services).
   implementation "androidx.car.app:app:1.7.0"
   // The car's map: the same MapLibre Native maplibre-react-native ships (its gradle.properties, nativeVersion).

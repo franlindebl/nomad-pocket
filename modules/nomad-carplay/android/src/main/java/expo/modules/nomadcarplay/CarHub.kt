@@ -155,8 +155,34 @@ object CarHub {
   private var nextRequest = 0
   private val pending = mutableMapOf<Int, (List<CarItem>) -> Unit>()
 
+  /** JS listens (its first listener came): events go straight to it. */
+  var observing = false
+    set(value) {
+      field = value
+      if (value) flush()
+    }
+
+  /** What the driver did before JS listened (the car opened the app; a destination from another app). */
+  private val queued = mutableListOf<Pair<String, Map<String, Any?>>>()
+
   fun emit(name: String, body: Map<String, Any?> = emptyMap()) {
-    module?.emit(name, body)
+    val m = module
+    if (m != null && observing) {
+      m.emit(name, body)
+      return
+    }
+    // Lists time out on their own and JS asks isConnected() when it starts: only the driver's choices wait.
+    if (name == "onPick" || name == "onStart" || name == "onEnd") {
+      if (name == "onPick") queued.removeAll { it.first == "onPick" }
+      queued.add(name to body)
+    }
+  }
+
+  private fun flush() {
+    val m = module ?: return
+    val events = queued.toList()
+    queued.clear()
+    events.forEach { (name, body) -> m.emit(name, body) }
   }
 
   fun setStrings(json: String) {

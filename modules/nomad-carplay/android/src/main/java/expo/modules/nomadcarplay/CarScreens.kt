@@ -6,6 +6,9 @@
 
 package expo.modules.nomadcarplay
 
+import android.text.SpannableString
+import android.text.Spanned
+import androidx.activity.OnBackPressedCallback
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.constraints.ConstraintManager
@@ -14,17 +17,18 @@ import androidx.car.app.model.ActionStrip
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.DateTimeWithZone
 import androidx.car.app.model.Distance
+import androidx.car.app.model.DistanceSpan
+import androidx.car.app.model.DurationSpan
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.MessageTemplate
 import androidx.car.app.model.Row
 import androidx.car.app.model.SearchTemplate
 import androidx.car.app.model.Template
-import androidx.car.app.navigation.model.Maneuver
 import androidx.car.app.navigation.model.MessageInfo
 import androidx.car.app.navigation.model.NavigationTemplate
+import androidx.car.app.navigation.model.RoutePreviewNavigationTemplate
 import androidx.car.app.navigation.model.RoutingInfo
-import androidx.car.app.navigation.model.Step
 import androidx.car.app.navigation.model.TravelEstimate
 import androidx.core.graphics.drawable.IconCompat
 import java.util.TimeZone
@@ -52,18 +56,39 @@ internal fun travelEstimate(e: CarEstimate): TravelEstimate =
 internal fun listLimit(car: CarContext): Int =
   if (car.carAppApiLevel >= 2) car.getCarService(ConstraintManager::class.java).getContentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_LIST) else 6
 
-class MapScreen(car: CarContext, private val map: CarMap) : Screen(car) {
-  private var guidance: CarGuidance? = null
+class MapScreen(car: CarContext, internal val map: CarMap) : Screen(car) {
+  internal var guidance: CarGuidance? = null
+    private set
   private var shownRoute = -1
+  private var shownKey: String? = null
+
+  /**
+   * The trip preview is its own screen on top of this one: the host refuses a screen whose template changes type
+   * when the driver comes back to it ("BackFlowViolationException: Template types differ"), and the preview goes
+   * back to the map every time.
+   */
+  private var preview: PreviewScreen? = null
+  /** The target whose preview the driver closed: not shown again while JS ends that trip. */
+  private var dismissed: CarTarget? = null
+
+  private fun previewing(g: CarGuidance?) = g?.target != null && !g.navigating && !g.arrived && g.target != dismissed
 
   fun show(g: CarGuidance) {
-    // A new route before the trip starts: the whole of it above the card, as a preview.
+    // A new route before the trip starts: the whole of it beside the preview card.
     if (g.target != null && !g.navigating && g.routing == "ready" && g.routeId != shownRoute) {
       shownRoute = g.routeId
       map.showOverview(g.target)
     }
     if (g.target == null) shownRoute = -1
+    if (g.target != dismissed) dismissed = null
     guidance = g
+    val open = preview
+    if (previewing(g)) {
+      if (open == null) PreviewScreen(carContext, this).also { preview = it; screenManager.push(it) } else open.update()
+    } else if (open != null) {
+      preview = null
+      if (screenManager.top === open) screenManager.pop() else screenManager.remove(open)
+    }
     // Only when what the template shows changed: every new template replaces the host's buttons,
     // and a tap that lands while they are replaced is lost (JS sends guidance on every fix).
     val key = shown(g)
@@ -73,27 +98,36 @@ class MapScreen(car: CarContext, private val map: CarMap) : Screen(car) {
     }
   }
 
-  private var shownKey: String? = null
-
   private fun shown(g: CarGuidance): String {
     val est = { e: CarEstimate? -> e?.let { "${it.distance.value}${it.distance.unit}/${(it.seconds / 60).toInt()}" } }
-    val step = { s: CarStep? -> s?.let { "${it.index}:${it.instruction}:${est(it.estimate)}" } }
-    return listOf(g.target, g.navigating, g.routing, g.arrived, step(g.step), step(g.nextStep), est(g.remaining ?: g.summary)).joinToString("|")
+    val step = { s: CarStep? -> s?.let { "${it.index}:${it.icon}:${it.instruction}:${est(it.estimate)}" } }
+    return listOf(g.target, g.navigating, g.routing, g.arrived, g.note, step(g.step), step(g.nextStep), est(g.remaining ?: g.summary)).joinToString("|")
   }
 
-  private fun step(s: CarStep): Step =
-    Step.Builder(s.instruction)
-      .setManeuver(Maneuver.Builder(Maneuver.TYPE_STRAIGHT).setIcon(icon(carContext, R.drawable.car_maneuver)).build())
-      .also { b -> s.street?.let { b.setRoad(it) } }
-      .build()
+  /** Back or Cancel on the preview: the trip ends (JS) and the map shows again at once. */
+  internal fun previewClosed(screen: PreviewScreen) {
+    if (preview !== screen) return
+    preview = null
+    dismissed = guidance?.target
+    CarHub.emit("onEnd")
+  }
 
-  override fun onGetTemplate(): Template {
-    val s = CarHub.strings
-    val g = guidance
+  internal fun mapActions(): ActionStrip {
+    val b =
+      ActionStrip.Builder()
+        .addAction(Action.PAN)
+        .addAction(Action.Builder().setIcon(icon(carContext, R.drawable.car_zoom_in)).setOnClickListener { map.zoom(1.0) }.build())
+        .addAction(Action.Builder().setIcon(icon(carContext, R.drawable.car_zoom_out)).setOnClickListener { map.zoom(-1.0) }.build())
+    if (!map.following) b.addAction(Action.Builder().setIcon(icon(carContext, R.drawable.car_recenter)).setOnClickListener { map.recentre() }.build())
+    return b.build()
+  }
+
+  override fun onGetTemplate(): Template = navigation(CarHub.strings, guidance)
+
+  private fun navigation(s: CarStrings?, g: CarGuidance?): Template {
     val actions = ActionStrip.Builder()
     if (g?.target != null && s != null) {
-      if (!g.navigating) actions.addAction(Action.Builder().setTitle(s.go).setOnClickListener { CarHub.emit("onStart") }.build())
-      actions.addAction(Action.Builder().setTitle(if (g.navigating) s.end else s.cancel).setOnClickListener { CarHub.emit("onEnd") }.build())
+      actions.addAction(Action.Builder().setTitle(s.end).setOnClickListener { CarHub.emit("onEnd") }.build())
     } else {
       actions.addAction(
         Action.Builder()
@@ -103,28 +137,72 @@ class MapScreen(car: CarContext, private val map: CarMap) : Screen(car) {
           .build(),
       )
     }
-    val mapActions =
-      ActionStrip.Builder()
-        .addAction(Action.PAN)
-        .addAction(Action.Builder().setIcon(icon(carContext, R.drawable.car_zoom_in)).setOnClickListener { map.zoom(1.0) }.build())
-        .addAction(Action.Builder().setIcon(icon(carContext, R.drawable.car_zoom_out)).setOnClickListener { map.zoom(-1.0) }.build())
-    if (!map.following) mapActions.addAction(Action.Builder().setIcon(icon(carContext, R.drawable.car_recenter)).setOnClickListener { map.recentre() }.build())
-
-    val template = NavigationTemplate.Builder().setActionStrip(actions.build()).setMapActionStrip(mapActions.build())
+    val template = NavigationTemplate.Builder().setActionStrip(actions.build()).setMapActionStrip(mapActions())
     if (g?.target != null) {
       val step = g.step
       when {
-        g.arrived && s != null -> template.setNavigationInfo(MessageInfo.Builder(s.arrived).build())
+        g.arrived && s != null -> template.setNavigationInfo(MessageInfo.Builder(s.arrived).setText(g.target.name).build())
         g.routing == "loading" -> template.setNavigationInfo(RoutingInfo.Builder().setLoading(true).build())
         step != null -> {
-          val info = RoutingInfo.Builder().setCurrentStep(step(step), distance(step.estimate.distance))
-          g.nextStep?.let { info.setNextStep(step(it)) }
+          val info = RoutingInfo.Builder().setCurrentStep(carStep(carContext, step), distance(step.estimate.distance))
+          g.nextStep?.let { info.setNextStep(carStep(carContext, it)) }
           template.setNavigationInfo(info.build())
         }
       }
-      (g.remaining ?: g.summary)?.let { template.setDestinationTravelEstimate(travelEstimate(it)) }
+      if (!g.arrived) (g.remaining ?: g.summary)?.let { template.setDestinationTravelEstimate(travelEstimate(it)) }
     }
     return template.build()
+  }
+}
+
+/** Before "Ir": the destination, the trip's time and length and what it goes by, the route framed beside it. */
+class PreviewScreen(car: CarContext, private val owner: MapScreen) : Screen(car) {
+  private var shownKey: String? = null
+
+  init {
+    car.onBackPressedDispatcher.addCallback(
+      this,
+      object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+          owner.previewClosed(this@PreviewScreen)
+          screenManager.pop()
+        }
+      },
+    )
+  }
+
+  private fun key(g: CarGuidance?) = listOf(g?.target, g?.routing, g?.note, g?.summary?.distance, g?.summary?.seconds?.let { (it / 60).toInt() }).joinToString("|")
+
+  fun update() {
+    val k = key(owner.guidance)
+    if (k != shownKey) {
+      shownKey = k
+      invalidate()
+    }
+  }
+
+  override fun onGetTemplate(): Template {
+    val s = CarHub.strings
+    val g = owner.guidance
+    shownKey = key(g)
+    val b =
+      RoutePreviewNavigationTemplate.Builder()
+        .setTitle(g?.target?.name ?: "")
+        .setHeaderAction(Action.BACK)
+        .setMapActionStrip(owner.mapActions())
+    s?.let { b.setNavigateAction(Action.Builder().setTitle(it.go).setOnClickListener { CarHub.emit("onStart") }.build()) }
+    val summary = g?.summary
+    if (s == null || g == null || g.routing == "loading" || summary == null) return b.setLoading(true).build()
+    // "12 min · 7,1 km", formatted by the host in the car's language and units.
+    val title = SpannableString("  ·  ")
+    title.setSpan(DurationSpan.create(summary.seconds.toLong()), 0, 1, Spanned.SPAN_INCLUSIVE_INCLUSIVE)
+    title.setSpan(DistanceSpan.create(distance(summary.distance)), 4, 5, Spanned.SPAN_INCLUSIVE_INCLUSIVE)
+    val row = Row.Builder().setTitle(title)
+    // No route (no pack, nothing found): as the crow flies, said so.
+    val note = if (g.routing == "ready") g.note else s.straightLine
+    note?.let { row.addText(it) }
+    // The template wants a selectable list, even with one route.
+    return b.setItemList(ItemList.Builder().addItem(row.build()).setOnSelectedListener {}.setSelectedIndex(0).build()).build()
   }
 }
 
@@ -187,33 +265,41 @@ class ItemsScreen(car: CarContext, private val title: String, kind: String, cate
   }
 }
 
-class SearchScreen(car: CarContext) : Screen(car) {
+class SearchScreen(car: CarContext, private val initial: String? = null) : Screen(car) {
   private var items: List<CarItem>? = null
   private var query = 0
   private val main = android.os.Handler(android.os.Looper.getMainLooper())
+
+  init {
+    // A destination given as text (an address from another app): searched right away.
+    initial?.let { submit(it) }
+  }
+
+  private fun submit(searchText: String) {
+    if (searchText.isBlank()) return
+    // No loading state: the offline search answers in tens of milliseconds, and two templates that
+    // close together make the host delay the second one ("too many refreshes"), sometimes for good.
+    val mine = ++query
+    CarHub.request("search", mapOf("query" to searchText)) {
+      if (mine != query) return@request
+      items = it
+      invalidate()
+      // A refresh the host delayed anyway shows once the burst is over.
+      main.postDelayed({ if (mine == query) invalidate() }, 1500)
+    }
+  }
 
   override fun onGetTemplate(): Template {
     val s = CarHub.strings
     val b =
       SearchTemplate.Builder(
         object : SearchTemplate.SearchCallback {
-          override fun onSearchSubmitted(searchText: String) {
-            if (searchText.isBlank()) return
-            // No loading state: the offline search answers in tens of milliseconds, and two templates that
-            // close together make the host delay the second one ("too many refreshes"), sometimes for good.
-            val mine = ++query
-            CarHub.request("search", mapOf("query" to searchText)) {
-              if (mine != query) return@request
-              items = it
-              invalidate()
-              // A refresh the host delayed anyway shows once the burst is over.
-              main.postDelayed({ if (mine == query) invalidate() }, 1500)
-            }
-          }
+          override fun onSearchSubmitted(searchText: String) = submit(searchText)
         },
       )
         .setHeaderAction(Action.BACK)
         .setShowKeyboardByDefault(items == null)
+    initial?.let { b.setInitialSearchText(it) }
     s?.let { b.setSearchHint(it.search) }
     val list = items
     return when {

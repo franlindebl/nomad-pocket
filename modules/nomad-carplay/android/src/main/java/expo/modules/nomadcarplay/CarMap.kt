@@ -61,6 +61,8 @@ class CarMap(private val car: CarContext) : SurfaceCallback {
   private var course = 0.0
   private var navigating = false
   private var visible: Rect? = null
+  /** The trip whose whole route is framed (the preview): framed again when the surface or the style comes back. */
+  private var overview: CarTarget? = null
   private var size = Rect()
 
   /** Where the user is, as the car map last knew it. */
@@ -118,6 +120,7 @@ class CarMap(private val car: CarContext) : SurfaceCallback {
   }
 
   override fun onScroll(distanceX: Float, distanceY: Float) {
+    overview = null
     setFollowing(false)
     map?.scrollBy(-distanceX, -distanceY, 0)
   }
@@ -167,7 +170,7 @@ class CarMap(private val car: CarContext) : SurfaceCallback {
     m.setStyle(Style.Builder().fromJson(json)) {
       // A new style has none of our layers.
       drawLayers()
-      if (following) follow(false)
+      if (following) follow(false) else overview?.let { showOverview(it) }
     }
   }
 
@@ -182,6 +185,8 @@ class CarMap(private val car: CarContext) : SurfaceCallback {
     if (next == destination) return
     destination = next
     drawLayers()
+    // The trip is over (ended, cancelled): back to following the driver.
+    if (next == null) recentre()
   }
 
   fun setNavigating(on: Boolean) {
@@ -194,9 +199,10 @@ class CarMap(private val car: CarContext) : SurfaceCallback {
 
   /** The whole route (or the straight line to the target), above the trip preview. */
   fun showOverview(target: CarTarget) {
+    overview = target
+    setFollowing(false)
     val m = map ?: return
     val points = route.ifEmpty { listOfNotNull(LatLng(target.lat, target.lon), position) }
-    setFollowing(false)
     if (points.size < 2) {
       m.animateCamera(CameraUpdateFactory.newLatLngZoom(points[0], 14.0))
       return
@@ -231,6 +237,7 @@ class CarMap(private val car: CarContext) : SurfaceCallback {
   }
 
   private fun setFollowing(on: Boolean) {
+    if (on) overview = null
     if (on == following) return
     following = on
     onFollowingChange?.invoke(on)

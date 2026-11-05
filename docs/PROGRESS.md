@@ -345,6 +345,18 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-05 — Android Auto: phases 2 and 3 (trip, opened from the car)
+
+- Trip: preview screen (`RoutePreviewNavigationTemplate`: time and distance, "Por la …", Ir, back cancels), maneuver
+  icons per maneuver type, reroute, arrival, the trip on the car's cluster, the route kept framed when the host
+  recreates the surface, following again when a trip ends. The preview is its own screen: changing the map screen's
+  template type crashed the app (the host's `BackFlowViolationException`).
+- Opened from the car with the app not running: a headless JS task (`CarJs.kt`, `src/features/carplay/headless.ts`,
+  registered in `index.ts`) runs the app's startup without UI while the car is connected; the phone opened later
+  reuses it. Choices made before JS listens are queued. `geo:` destinations from the car's assistant or other apps.
+- All seen on the Android Automotive emulator (cold start, geo intent → preview → Ir → maneuvers → reroute →
+  arrival → Terminar; night mode; the phone UI opened afterwards). Details in `docs/ANDROID_AUTO_PLAN.md`, Phases.
+
 ### 2026-11-05 — Official alerts: more E2E (ALR-02, ALR-03) and ALR-01 in smoke
 
 - ALR-02 (full): "Ahora no" on the wizard in Madrid leaves Home without offer or card, also after a relaunch; turned

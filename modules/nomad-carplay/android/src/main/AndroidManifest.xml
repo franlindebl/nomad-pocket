@@ -12,6 +12,12 @@
         <action android:name="androidx.car.app.CarAppService" />
         <category android:name="androidx.car.app.category.NAVIGATION" />
       </intent-filter>
+      <!-- Destinations from the car's assistant or other apps (geo: URIs): NomadCarSession.navigate. -->
+      <intent-filter>
+        <action android:name="androidx.car.app.action.NAVIGATE" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:scheme="geo" />
+      </intent-filter>
     </service>
   </application>
 </manifest>
