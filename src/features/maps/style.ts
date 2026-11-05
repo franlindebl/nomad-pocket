@@ -8,7 +8,8 @@ import type { StyleSpecification } from '@maplibre/maplibre-react-native';
 import type { MapAssets } from './assets';
 import { EMERGENCY_KINDS } from './emergency-core';
 
-export type MapSourceInput = { id: string; fileUri: string };
+/** `version`: changes whenever the file at `fileUri` is replaced (see pmtilesUrl). */
+export type MapSourceInput = { id: string; fileUri: string; version?: string };
 
 const ATTRIBUTION = '© OpenStreetMap contributors · Protomaps';
 
@@ -52,12 +53,27 @@ function skipOurPois(layer: Layer, id: string): Layer {
   return { ...layer, filter: [...filter, ours] } as unknown as Layer;
 }
 
-/** `pmtiles://` + absolute file URL, the scheme MapLibre Native reads locally. */
-export function pmtilesUrl(fileUri: string): string {
-  const uri = fileUri.startsWith('file://') ? fileUri : `file://${fileUri}`;
+/** Per file URL: the version last drawn and how many `./` its URL got (pmtilesUrl). */
+const drawn = new Map<string, { version: string; dots: number }>();
+
+/**
+ * `pmtiles://` + absolute file URL, the scheme MapLibre Native reads locally. MapLibre keeps an archive's header and
+ * directories by URL for as long as the app runs: a map updated in place (same file name, new content) kept the old
+ * file's offsets, every tile failed ("Error parsing PMTiles directory: incorrect header check") and the map showed no
+ * streets until the app restarted. So when a file's `version` changes, its URL gets one more `./` before the name (the
+ * same file to the OS, a new URL to MapLibre). A query string won't do: MapLibre opens the path as given. The count
+ * lives as long as MapLibre's cache does (this run), so URLs stay short.
+ */
+export function pmtilesUrl(fileUri: string, version?: string): string {
+  let uri = fileUri.startsWith('file://') ? fileUri : `file://${fileUri}`;
+  if (version !== undefined) {
+    const last = drawn.get(uri);
+    const dots = !last ? 0 : last.version === version ? last.dots : last.dots + 1;
+    drawn.set(uri, { version, dots });
+    if (dots) uri = uri.replace(/\/([^/]+)$/, `/${'./'.repeat(dots)}$1`);
+  }
   return `pmtiles://${uri}`;
 }
-
 export function buildMapStyle(opts: {
   scheme: 'light' | 'dark';
   lang: string;
@@ -73,7 +89,7 @@ export function buildMapStyle(opts: {
     layers: [{ id: 'background', type: 'background', paint: { 'background-color': flavor.background } }],
   };
   for (const s of opts.sources) {
-    style.sources[s.id] = { type: 'vector', url: pmtilesUrl(s.fileUri), attribution: ATTRIBUTION };
+    style.sources[s.id] = { type: 'vector', url: pmtilesUrl(s.fileUri, s.version), attribution: ATTRIBUTION };
     for (const layer of layers(s.id, flavor, { lang: opts.lang })) {
       if (layer.type === 'background') continue;
       style.layers.push({ ...skipOurPois(tameServiceRoads(layer as Layer, layer.id), layer.id), id: `${s.id}:${layer.id}` } as Layer);

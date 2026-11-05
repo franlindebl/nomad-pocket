@@ -45,7 +45,7 @@ import { SpeedBadge } from '@/features/maps/SpeedBadge';
 import { showPlace, useMapUi } from '@/features/maps/store';
 import { buildMapStyle } from '@/features/maps/style';
 import { nearestStreet, tappedPlace, type TapFeature } from '@/features/maps/tap-core';
-import { useMapItems } from '@/features/maps/useMapSources';
+import { mapFileVersion, useMapItems } from '@/features/maps/useMapSources';
 import { useSettings } from '@/stores/settings';
 import { hues, space, useTheme } from '@/theme';
 
@@ -200,7 +200,7 @@ export default function MapScreen() {
 
   const style = useMemo(
     () =>
-      assets ? buildMapStyle({ scheme, lang: i18n.language, assets, sources: all.map((i) => ({ id: i.id, fileUri: i.fileUri })) }) : null,
+      assets ? buildMapStyle({ scheme, lang: i18n.language, assets, sources: all.map((i) => ({ id: i.id, fileUri: i.fileUri, version: mapFileVersion(i) })) }) : null,
     [assets, scheme, i18n.language, all],
   );
   const tapIds = useMemo(() => (style ? tapLayers(style) : null), [style]);

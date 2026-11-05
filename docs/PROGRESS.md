@@ -358,6 +358,22 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-06 — Maps: an updated map drew no streets until the app restarted
+
+- The owner updated Spain with the map open: after the update the map showed only the emergency dots, no streets or
+  buildings. MapLibre Native keeps a PMTiles archive's header and directories by URL for the whole run; an update
+  replaces `es.pmtiles` under the same name, so it read the new file with the old offsets and every tile failed
+  ("Error parsing PMTiles directory: incorrect header check"; reproduced by swapping the file under an open map).
+  Now `pmtilesUrl` gives a file a new URL when its version changes (`mapFileVersion`: build + installedAt): one more
+  `./` before the name, the same file to the OS. A `?v=` query doesn't work (MapLibre opens the path as given: "path
+  not found"). Checked with a real update on the simulator (Spain marked older, updated with the map open over Madrid):
+  streets stay, no PMTiles errors. Map screen and CarPlay.
+- Not found: the owner saw "Preparando búsqueda y puntos… 99 %" for minutes after updating Spain (and again after
+  removing it and downloading it from scratch); it finished in the end. Timed on the simulator with logs on every
+  prepare task (fresh install, remove + reinstall, update): ~40 s in all (tiles 24 s, points 4, streets 11, places 8,
+  addresses 13; dropping a removed Spain's rows 8 s, on removal), the percentage moving evenly, nothing stuck near the
+  end. Next time: the phone's log (`idevicesyslog`) during an update.
+
 ### 2026-11-05 — UI polish: Library rows and margins, clearing recent reading
 
 - **Catalog rows** (`ResourceRow`: categories, Wikipedia editions, search, Preparedness guides): the title shared its

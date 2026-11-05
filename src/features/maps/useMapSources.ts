@@ -17,6 +17,14 @@ export function resolveMapFile(item: Pick<InstalledItem, 'fileUri'>): string {
   return name ? contentFile('map', name).uri : item.fileUri;
 }
 
+/**
+ * Changes whenever the item's file is replaced: an update keeps the item and the file name but brings a new build
+ * (`version`); removing and downloading it again makes a new item (`installedAt`). See pmtilesUrl.
+ */
+export function mapFileVersion(item: Pick<InstalledItem, 'version' | 'installedAt'>): string {
+  return `${item.version ?? ''}-${item.installedAt}`;
+}
+
 /** Map items with today's file URIs: the world basemap first, then regions by detail (more detail on top). */
 export function sortMapItems(items: MapItem[]): { world: MapItem | undefined; regions: MapItem[]; all: MapItem[] } {
   const resolved = items.map((i) => ({ ...i, fileUri: resolveMapFile(i) }));

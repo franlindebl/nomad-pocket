@@ -15,7 +15,7 @@ import { useMarkers } from '@/features/maps/markers';
 import { searchPlaces } from '@/features/maps/places';
 import type { Route } from '@/features/maps/routing-core';
 import { buildMapStyle } from '@/features/maps/style';
-import { sortMapItems, type MapItem } from '@/features/maps/useMapSources';
+import { mapFileVersion, sortMapItems, type MapItem } from '@/features/maps/useMapSources';
 import i18n from '@/i18n';
 import { formatDistance, measurementSystem } from '@/lib/format';
 import { HEALTH_FEATURES } from '@/lib/health';
@@ -65,7 +65,7 @@ async function pushStyles() {
   try {
     const assets = await ensureMapAssets();
     const { all } = sortMapItems(useContent.getState().items.filter((i) => i.kind === 'map') as MapItem[]);
-    const sources = all.map((i) => ({ id: i.id, fileUri: i.fileUri }));
+    const sources = all.map((i) => ({ id: i.id, fileUri: i.fileUri, version: mapFileVersion(i) }));
     const style = (scheme: 'light' | 'dark') => JSON.stringify(buildMapStyle({ scheme, lang: i18n.language, assets, sources }));
     await NomadCarPlay.setStyles(style('light'), style('dark'));
   } catch (e) {
