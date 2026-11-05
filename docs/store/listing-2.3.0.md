@@ -1,7 +1,7 @@
 # App Store / Google Play listing 2.3.0 — DRAFT (owner to review)
 
 Draft written with official alerts phase 1 (`docs/ALERTS_PLAN.md`), 2026-11-05. **Not reviewed by the owner yet:
-nothing here goes to the stores until he does.** The version in `app.json` is still 2.2.0 (in review); bump it when
+nothing here goes to the stores until the owner does.** The version in `app.json` is still 2.2.0 (in review); bump it when
 this ships. Name, subtitle, keywords and screenshots stay as in `listing-2.0.0.md` / `listing-2.2.0.md`. Rule for
 every text: never "sistema de alertas de emergencia" / "emergency alert system"; always say the warnings are the
 official services' own and that the authorities' cell broadcast (ES-Alert) and 112 are what count.

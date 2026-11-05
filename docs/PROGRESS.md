@@ -345,6 +345,14 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-05 — 2.3.0 (43): official alerts on TestFlight
+
+- 2.2.0 (42) approved, ready for distribution. 2.3.0 (43) = 2.2.0 plus official alerts phase 1, uploaded to TestFlight
+  only: the owner tries it on real phones before any review (and measures the background checks in Settings › Avisos
+  oficiales › Comprobaciones recientes). Store texts still a draft (`docs/store/listing-2.3.0.md`).
+- E2E smoke 21/21 on it; store prebuild (`NOMAD_STORE_BUILD=1`), the Time Sensitive entitlement and the
+  `processing`/`fetch` background modes in the archived app.
+
 ### 2026-11-05 — Official alerts phase 1: the app side (tasks 2–7, iOS verified)
 
 - `src/features/alerts/`: `state.ts` (kv), `sources.ts` (AEMET's RSS, and its bundle only when the RSS points at a

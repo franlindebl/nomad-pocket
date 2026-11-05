@@ -2,7 +2,7 @@
   "expo": {
     "name": "Nomad Pocket",
     "slug": "nomad-pocket",
-    "version": "2.2.0",
+    "version": "2.3.0",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "nomadpocket",
@@ -17,7 +17,7 @@
         "com.apple.developer.usernotifications.time-sensitive": true
       },
       "bundleIdentifier": "com.fjlinde.nomadpocket",
-      "buildNumber": "42",
+      "buildNumber": "43",
       "supportsTablet": true,
       "infoPlist": {
         "CFBundleDevelopmentRegion": "es",
