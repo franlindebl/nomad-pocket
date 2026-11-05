@@ -14,7 +14,7 @@ source below was read or downloaded on 2026-11-04). Owner's decisions, same day:
   phase 2: counties on the server, where they cost the app nothing).
 - GDACS: yes, for countries without a national source.
 
-Approved to implement; nothing built yet. **To resume: read "Phase 1 — tasks" and start at task 1.**
+Approved to implement. **Phase 1 task 1 (pure cores) done 2026-11-05. To resume: start at "Phase 1 — tasks", task 2.**
 
 ## The idea in one paragraph
 
@@ -84,9 +84,10 @@ Out, on purpose:
      raises its level; never for plain updates; a cancel removes it from the list.
    - Earthquakes: M ≥ 4.5 within 100 km, or M ≥ 6 within 500 km (informative: it already happened; the card links
      to the guide's earthquake/aftershock cards). The same event from USGS and EMSC is one (time ±60 s, distance
-     < 100 km, keep the higher magnitude, update instead of notifying again).
+     < 100 km, keep the higher magnitude, update instead of notifying again). Quakes older than 6 h when a check
+     first sees them are listed but not notified (a late background run shouldn't ring for something long over).
    - Tsunami: NWS tsunami warnings/advisories (US) like any red warning.
-   - GDACS: Orange/Red events in the person's country.
+   - GDACS: Orange/Red events in the person's country, earthquakes excluded (USGS + EMSC cover them).
 4. **Notification levels**: Android channel `alerts` (importance HIGH; once created only its name/description
    can change), separate from `reminders`. iOS: red, tsunami and M ≥ 6 as `interruptionLevel: 'timeSensitive'`
    (breaks through Focus; needs the Time Sensitive Notifications capability:
@@ -122,7 +123,7 @@ Out, on purpose:
   person swipes the app away). AEMET's issue windows mean even a few checks a day catch most warnings hours
   ahead; quakes in the background are best effort.
 - **What one check downloads** (measured 2026-11-04): AEMET RSS 24 KB (`If-Modified-Since`; 304 when unchanged),
-  the tar.gz 115 KB only when its URL changed (or Canarias' 9 KB RSS + its tar when the position is there); USGS
+  the tar.gz 115 KB only when its URL changed (it covers Canarias too: one download for all Spain); USGS
   3 KB + EMSC 2 KB; NWS 6 KB per point; GDACS 350 KB only where it applies (prefer the per-type feeds if smaller).
 - **Matching on the device**: AEMET → point in the CAP `<polygon>`; NWS → `?point=` with the position **rounded to
   0.05°** (~5 km; the only time a position, approximate, leaves the phone; said in the privacy policy); GDACS →
@@ -132,13 +133,19 @@ Out, on purpose:
   `/geocodes` GeoJSON features, simplifies them and writes an asset like `country-shapes.json` (encoded polylines).
   Measure the size: bundled if small (< ~1 MB), else downloaded with the country. If no token, the person picks
   their region from the country's EMMA list instead.
-- **Dedup**: kv `alerts.notified` (identifier → level notified), so restarts and the two triggers (foreground,
-  background) never notify twice; CAP `references` link updates/cancels to the original.
+- **Dedup**: kv `alerts.notified` (identifier → level notified, topic, end), so restarts and the two triggers
+  (foreground, background) never notify twice; CAP `references` link updates/cancels to the original, and a
+  **topic** (source + zone + phenomenon + measure for AEMET, zone + hazard for MeteoAlarm, the VTEC event for NWS,
+  the event for GDACS) catches a re-issue whose reference the app never saw while the first one is still in force
+  (`decide` in `alerts-core.ts`).
 
 ### Phase 1 — tasks (in order)
 
-1. **Pure cores + tests** in `src/features/alerts/` against the fixtures (no `@/` aliases, siblings imported with
-   `.ts`; add them to the "Pure, tested modules" list in `CLAUDE.md`):
+1. **Done 2026-11-05.** Pure cores + tests in `src/features/alerts/` against the fixtures (in the "Pure, tested
+   modules" list in `CLAUDE.md`). What was built, and what the real data showed: `docs/PROGRESS.md` log, 2026-11-05.
+   AEMET's bundle has 219 files, 177 green (skipped before parsing), leaving the 42 warnings its RSS lists; the
+   `Alert` type gained `hazard` (picks the guide card), `topic`, `msgType`, `references`, `codes`, `countries`.
+   tsunami.gov is not read in phase 1 (NWS carries US coasts). As planned:
    - `cap-core.ts`: CAP 1.2 → `{identifier, sent, msgType, references, infos: [{language, event, severity, urgency,
      certainty, onset, expires, headline, description, instruction, parameters, areas: [{desc, polygons, geocodes}]}]}`.
    - `tar-core.ts`: ustar reader over fflate's `gunzipSync` (the fixture has 219 files).

@@ -80,12 +80,12 @@ AI. **Assistant quality** (`docs/ASSISTANT_QUALITY_PLAN.md`, measured 2026-10-31
    (EmbeddingGemma, measure on a phone first); (6) a vetted bilingual emergency guide: every variant gave 3–8
    harmful answers out of 50 (CPR, choking, bleach dose, CO); (7) Spanish Ready.gov/MedlinePlus in the kit.
 
-AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's decisions the same day, not started):
+AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's decisions the same day; phase 1 task 1 done 2026-11-05):
    official weather warnings (AEMET for Spain, NWS for the US, MeteoAlarm for Europe, GDACS elsewhere) and
    earthquakes (USGS, EMSC) for where the person is, each warning turned into actions (the area's map, plan, kit,
    guide card, 112). **Phase 1, next**: no server; the app reads the feeds, matches on the device and notifies
-   locally (foreground + background task); offered at the end of onboarding and once to existing installs. Start
-   at "Phase 1 — tasks" step 1 (pure cores against the fixtures already in `src/features/alerts/fixtures/`).
+   locally (foreground + background task); offered at the end of onboarding and once to existing installs. The
+   pure cores are built and tested (`src/features/alerts/*-core.ts`); next is "Phase 1 — tasks" step 2 (fetch + state).
    **Phase 2, right after**: iOS push from a free server (Deno Deploy, `server/alerts/`); needs a Deno Deploy
    account and an APNs key from the owner. Blocking for Europe: MeteoAlarm's extra redistribution terms and an
    API token for its region geometries (email `meteoalarm@geosphere.at`).
@@ -343,6 +343,22 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-11-05 — Official alerts: the pure cores (phase 1, task 1)
+
+- `src/features/alerts/`: `cap-core.ts` (CAP 1.2 with regexes, any namespace prefix, polygons as [lon, lat], RFC 822
+  dates read by hand because Hermes's `Date.parse` is only sure for ISO), `tar-core.ts` (ustar over fflate's gunzip),
+  `feeds-core.ts` (AEMET RSS + bundle, MeteoAlarm Atom + CAP, NWS, USGS, EMSC, GDACS → one `Alert`) and
+  `alerts-core.ts` (levels, hazards, coverage, the quake rule and USGS/EMSC merge, `current`, the notify policy
+  `decide`, `sourcesFor`, ISO3 → ISO2 for GDACS). 36 tests against the fixtures; added to the pure-modules list.
+- Found on the real data: AEMET's bundle covers Canarias too (one download for all Spain); of its 219 files 177
+  are green (no warning) and are skipped before parsing, leaving the same 42 warnings the RSS lists (~10 ms on the
+  Mac); AEMET splits one phenomenon by measure (rain P1 one-hour, P2 twelve-hour), so Cartagena had an orange and a
+  yellow rain warning at once; an AEMET update can reference two earlier messages, and none of them is in the bundle.
+- Decided while building (written into the plan): a warning is also recognised by its **topic** (source + zone +
+  phenomenon, or NWS's VTEC event) so a re-issue whose reference the app missed doesn't ring twice; quakes older
+  than 6 h are listed but not notified (a late background run shouldn't ring for something long over); GDACS
+  earthquakes are skipped (USGS + EMSC cover them); tsunami.gov isn't read in phase 1 (NWS carries US coasts).
 
 ### 2026-11-04 — CarPlay store screenshot
 
