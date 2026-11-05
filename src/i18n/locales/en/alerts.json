@@ -67,7 +67,7 @@
   "notifyMore_one": "{{count}} more official alert",
   "notifyMore_other": "{{count}} more official alerts",
   "notifyMoreBody": "Open them in Nomad Pocket.",
-  "disclaimer": "Nomad Pocket doesn't issue alerts: it shows those published by official services, and they may be late or not arrive. The authorities' alerts on your phone (cell broadcast) and {{number}} are what count.",
+  "disclaimer": "Nomad Pocket doesn't issue alerts: it shows those published by official services, and they may be late or not arrive. In an emergency, always follow the authorities' alerts on your phone (cell broadcast) and call {{number}}.",
   "offer": {
     "badge": "New",
     "title": "Official alerts where you are",

@@ -345,6 +345,18 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-05 — 2.3.1 (44): the alerts question as its own onboarding step
+
+- The owner's first run of 2.3.0 (43) never showed the alerts offer: it was a card under "Tu plan familiar" on the
+  last step, below the fold on an iPhone, and "Ir a Nomad" marked it as offered (so Home didn't offer it either).
+  Now step 3 of 5 is a full screen asking for it ("Activar avisos" / "Ahora no"), skipped when alerts are already on;
+  "Todo listo" is step 4. The `secondary` variant of `AlertsOffer` went with the card.
+- Disclaimer reworded on the owner's note: "son los que valen" read as if our warnings were worthless; now "En una
+  emergencia, sigue siempre las alertas de Protección Civil en el móvil (ES-Alert) y llama al 112" (en: "In an
+  emergency, always follow the authorities' alerts on your phone… and call 112").
+- Flows through the wizard answer the new step (`subflows/finish-onboarding.yaml` says "Ahora no"; ALR-01 and
+  ANDROID-07 turn alerts on there). ALR-01, ONB-01 and ONB-04 pass on iOS.
+
 ### 2026-11-05 — Landing page and READMEs: CarPlay
 
 - With 2.2.0 out, the landing page (both languages) has a CarPlay block after Maps: the car's screen with the phone on

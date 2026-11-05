@@ -1,6 +1,6 @@
 import * as Device from 'expo-device';
 import { router } from 'expo-router';
-import { BookOpen, Check, Compass, Map, ShieldCheck, MessageSquareText, Stethoscope, Tent, Users, X, type LucideIcon } from 'lucide-react-native';
+import { BellRing, BookOpen, Check, Compass, Map, ShieldCheck, MessageSquareText, Stethoscope, Tent, Users, X, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
@@ -27,8 +27,10 @@ import { countryRegionName } from '@/features/maps/country-maps';
 import { CountryList, deviceCountry } from '@/features/maps/CountryList';
 import { RegionList } from '@/features/maps/RegionList';
 import { guideResources, pickModel, pickWikipedia } from '@/features/onboarding/kit';
-import { AlertsOffer } from '@/features/alerts/components';
-import { markAlertsOffered } from '@/features/alerts/enable';
+import { AlertsDisclaimer } from '@/features/alerts/components';
+import { declineAlerts, enableAlerts, markAlertsOffered } from '@/features/alerts/enable';
+import { useAlertsState } from '@/features/alerts/state';
+import { showToast } from '@/components/Toast';
 import { useItems } from '@/features/content/items';
 import type { AppLanguage } from '@/i18n';
 import { formatBytes } from '@/lib/format';
@@ -107,6 +109,9 @@ function KitRow({
 export default function OnboardingScreen() {
   const { t } = useTranslation('home');
   const { t: tc } = useTranslation();
+  const { t: ta } = useTranslation('alerts');
+  const alertsOn = useAlertsState((a) => a.enabled);
+  const [enablingAlerts, setEnablingAlerts] = useState(false);
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const s = useSettings();
@@ -245,7 +250,7 @@ export default function OnboardingScreen() {
         count++;
       }
       setStarted(count);
-      setStep(3);
+      afterKit();
     } catch (e) {
       if (e instanceof NotEnoughStorageError) showDownloadError(e, tc);
       else showDownloadError(e, tc, startKit);
@@ -264,9 +269,27 @@ export default function OnboardingScreen() {
     else router.replace('/');
   };
 
+  // Official alerts get their own question after the kit (a card on the last step went unseen below the fold).
+  const afterKit = () => setStep(alertsOn ? 4 : 3);
+  const answerAlerts = async (on: boolean) => {
+    if (!on) {
+      declineAlerts();
+      setStep(4);
+      return;
+    }
+    setEnablingAlerts(true);
+    try {
+      const r = await enableAlerts();
+      showToast(r.notifications ? ta('offer.enabled') : ta('offer.enabledNoNotifications'));
+    } finally {
+      setEnablingAlerts(false);
+      setStep(4);
+    }
+  };
+
   const finish = (then?: '/prepare/plan') => {
     s.setOnboarded(true);
-    // The alerts offer was on this last step: Home doesn't offer it again.
+    // The alerts question was asked (or they were already on): Home doesn't offer them again.
     markAlertsOffered();
     close();
     if (then) setTimeout(() => router.push(then), 350);
@@ -295,7 +318,7 @@ export default function OnboardingScreen() {
       keyboardVerticalOffset={insets.bottom}
       style={[styles.root, { backgroundColor: colors.bg, paddingTop: insets.top + space.lg }]}>
       <Row style={styles.dots}>
-        {[0, 1, 2, 3].map((i) => (
+        {[0, 1, 2, 3, 4].map((i) => (
           <View key={i} style={[styles.dot, { backgroundColor: i <= step ? colors.accent : colors.surfaceAlt, width: i === step ? 24 : 8 }]} />
         ))}
         {rerun ? (
@@ -515,7 +538,7 @@ export default function OnboardingScreen() {
                   : () => {
                       if (country) s.setCountry(country);
                       if (kit.systemModel) keepSystemModel();
-                      setStep(3);
+                      afterKit();
                     }
               }
             />
@@ -525,6 +548,40 @@ export default function OnboardingScreen() {
 
       {step === 3 ? (
         <Animated.View key="s3" entering={FadeInDown.duration(320)} style={styles.flex}>
+          <ScrollView contentContainerStyle={styles.content}>
+            <IconBadge icon={BellRing} hue="survival" size={64} />
+            <Text variant="display">{ta('offer.title')}</Text>
+            <Text variant="body" color="textSecondary">
+              {ta('offer.body')}
+            </Text>
+            <Text variant="callout" color="textSecondary">
+              {ta('offer.privacy')}
+            </Text>
+            <AlertsDisclaimer />
+          </ScrollView>
+          <Row gap={space.md}>
+            <Button
+              testID="onboarding-alerts-decline"
+              title={ta('offer.notNow')}
+              variant="secondary"
+              size="lg"
+              disabled={enablingAlerts}
+              onPress={() => void answerAlerts(false)}
+            />
+            <Button
+              testID="onboarding-alerts-enable"
+              title={ta('offer.enable')}
+              size="lg"
+              style={{ flex: 1 }}
+              loading={enablingAlerts}
+              onPress={() => void answerAlerts(true)}
+            />
+          </Row>
+        </Animated.View>
+      ) : null}
+
+      {step === 4 ? (
+        <Animated.View key="s4" entering={FadeInDown.duration(320)} style={styles.flex}>
           <ScrollView contentContainerStyle={styles.content}>
             <IconBadge icon={started ? ShieldCheck : Check} hue="agriculture" size={64} />
             <Text variant="display">{started ? t('onboarding.readyTitle') : t('onboarding.readyTitleEmpty')}</Text>
@@ -542,7 +599,6 @@ export default function OnboardingScreen() {
                 </View>
               </Row>
             </Card>
-            <AlertsOffer secondary testID="onboarding-alerts" />
           </ScrollView>
           <Button testID="onboarding-finish" title={t('onboarding.finish')} size="lg" fullWidth onPress={() => finish()} />
         </Animated.View>

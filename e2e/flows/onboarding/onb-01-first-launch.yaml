@@ -28,6 +28,10 @@ tags: [smoke, onboarding]
     visible: "Continuar sin descargar"
     timeout: 10000
 - tapOn: { id: "onboarding-download" }
+- extendedWaitUntil:
+    visible: { id: "onboarding-alerts-decline" }
+    timeout: 10000
+- tapOn: { id: "onboarding-alerts-decline" }
 - assertVisible: "Todo listo"
 - tapOn: { id: "onboarding-finish" }
 - extendedWaitUntil:

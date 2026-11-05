@@ -46,7 +46,7 @@ export async function disableAlerts() {
 /** "Ahora no": the offer is not shown again (Settings still has the switch). */
 export const declineAlerts = saveOffered;
 
-/** The offer was shown (the last onboarding step): Home won't show it again. */
+/** The onboarding asked (its alerts step): Home won't offer them again. */
 export const markAlertsOffered = saveOffered;
 
 /** Asks again for what was refused, or opens the app's system settings when the system won't ask. */

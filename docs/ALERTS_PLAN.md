@@ -107,8 +107,9 @@ Out, on purpose:
    emergency number (`emergency-numbers.json`). On Android no first-aid content is attached
    (`HEALTH_FEATURES`, `docs/ANDROID_PLAY.md` section 4); weather and quakes are not health features.
 7. **Honest disclaimer** in the opt-in and on the alerts screen: "Nomad Pocket no emite avisos: muestra los
-   publicados por AEMET, MeteoAlarm… y puede retrasarse o no llegar. Los avisos de Protección Civil (ES-Alert) y el
-   112 son los que valen." (and the English equivalent, with the local number).
+   publicados por AEMET, MeteoAlarm… y puede retrasarse o no llegar. En una emergencia, sigue siempre las alertas
+   de Protección Civil en el móvil (ES-Alert) y llama al 112." (and the English equivalent, with the local number;
+   reworded 2026-11-05: "son los que valen" read as if the app's own warnings were worthless).
 8. **Offline**: the last list stays visible with "actualizado hace X"; warnings past `expires` disappear.
 9. **Credits**: AEMET, MeteoAlarm/EUMETNET (CC BY 4.0), USGS, EMSC, NOAA/NWS, GDACS (`features/credits`).
 

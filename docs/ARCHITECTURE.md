@@ -1463,7 +1463,7 @@ familiar" action and the plan/kit rows of "Tu preparación" (`features/home/read
 
 Weather warnings and earthquakes published by official services, for where the person is, notified
 locally. Phase 1 of the plan: **no server of our own**, everything decided on the device. Off until
-the person turns it on (onboarding's last step, a once-only Home card for installs that had the app
+the person turns it on (its own onboarding step after the kit, skipped when already on; a once-only Home card for installs that had the app
 before, Settings › Avisos oficiales).
 
 - Pure cores (tested against `fixtures/`, real samples of 2026-11-04): `cap-core.ts` (CAP 1.2 with
@@ -1505,7 +1505,7 @@ before, Settings › Avisos oficiales).
   plan, kit, call the emergency number, the source's page), Settings › Avisos oficiales (switch,
   "notify from", quakes, position used, sources, recent checks), `AlertsHomeCard` (orange/red in force
   where the person is). Level colours are theme tokens (`levelYellow/Orange/Red`, `onLevel`).
-- testIDs: `onboarding-alerts(-enable|-on)`, `home-alert`, `home-alerts-offer(-enable|-decline)`,
+- testIDs: `onboarding-alerts-(enable|decline)`, `home-alert`, `home-alerts-offer(-enable|-decline)`,
   `settings-alerts`, `alerts-settings-switch`, `alerts-settings-open`, `alerts-status`, `alerts-refresh`,
   `alerts-no-position`, `alerts-no-notifications`, `alert-row-<i>`, `alert-title`, `alert-official`,
   `alert-action-(map|guide|plan|kit|call|web)`, `alerts-list-offer`.

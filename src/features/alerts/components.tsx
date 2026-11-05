@@ -154,13 +154,10 @@ export function AlertsDisclaimer() {
  */
 export function AlertsOffer({
   badge,
-  secondary,
   onDone,
   testID = 'alerts-offer',
 }: {
   badge?: boolean;
-  /** Where the screen already has its one primary action (onboarding's "Ir a Nomad"). */
-  secondary?: boolean;
   onDone?: () => void;
   testID?: string;
 }) {
@@ -199,7 +196,6 @@ export function AlertsOffer({
         <Button
           testID={`${testID}-enable`}
           title={t('offer.enable')}
-          variant={secondary ? 'secondary' : 'primary'}
           loading={busy}
           onPress={() => void enable()}
           style={{ flex: 1 }}

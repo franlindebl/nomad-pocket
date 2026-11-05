@@ -67,7 +67,7 @@
   "notifyMore_one": "{{count}} aviso oficial más",
   "notifyMore_other": "{{count}} avisos oficiales más",
   "notifyMoreBody": "Ábrelos en Nomad Pocket.",
-  "disclaimer": "Nomad Pocket no emite avisos: muestra los que publican servicios oficiales y pueden retrasarse o no llegar. Los avisos de Protección Civil en el móvil (ES-Alert) y el {{number}} son los que valen.",
+  "disclaimer": "Nomad Pocket no emite avisos: muestra los que publican servicios oficiales y pueden retrasarse o no llegar. En una emergencia, sigue siempre las alertas de Protección Civil en el móvil (ES-Alert) y llama al {{number}}.",
   "offer": {
     "badge": "Nuevo",
     "title": "Avisos oficiales donde estés",

@@ -27,6 +27,10 @@ tags: [nightly, onboarding, network, routing-server, maps-server]
 - takeScreenshot: 01-kit
 - tapOn: { id: "onboarding-download" }
 - extendedWaitUntil:
+    visible: { id: "onboarding-alerts-decline" }
+    timeout: 20000
+- tapOn: { id: "onboarding-alerts-decline" }
+- extendedWaitUntil:
     visible: "Tu contenido se está descargando"
     timeout: 20000
 - takeScreenshot: 02-ready-downloads

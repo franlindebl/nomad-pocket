@@ -1,0 +1,182 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation "Cabecera de página" [ref=e3]:
+      - link "Logotipo de Google Play" [ref=e4] [cursor=pointer]:
+        - /url: /store/games
+        - generic [aria-hidden] [ref=e12]: google_logo Play
+      - navigation "Principal" [ref=e14]:
+        - tablist [ref=e16]:
+          - generic [ref=e19]:
+            - tab "Juegos" [ref=e20] [cursor=pointer]
+            - tab "Aplicaciones" [selected] [ref=e22] [cursor=pointer]
+            - tab "Libros" [ref=e24] [cursor=pointer]
+            - tab "Niños" [ref=e26] [cursor=pointer]
+      - generic [ref=e28]:
+        - button "Buscar" [ref=e30] [cursor=pointer]:
+          - generic [aria-hidden] [ref=e31]: search
+        - button "Centro de Ayuda" [ref=e33] [cursor=pointer]:
+          - generic [aria-hidden] [ref=e34]: help_outline
+        - button "Abrir el menú de la cuenta" [ref=e39] [cursor=pointer]
+  - generic [ref=e45]:
+    - generic [ref=e48]:
+      - generic [ref=e53]:
+        - generic [ref=e56]:
+          - heading "Theri.App" [level=1] [ref=e58]
+          - link "Fran Linde Blázquez" [ref=e61] [cursor=pointer]:
+            - /url: /store/apps/developer?id=Fran+Linde+Bl%C3%A1zquez
+        - region "Insignias de información" [ref=e63]:
+          - generic [ref=e65]:
+            - generic [ref=e66]: 1 mil+
+            - generic [ref=e67]: Descargas
+      - generic [ref=e68]:
+        - button "Descargar" [ref=e76]
+        - generic [ref=e80]:
+          - button "Compartir" [ref=e84] [cursor=pointer]
+          - button "Añadir a la lista de deseos" [ref=e91] [cursor=pointer]
+    - generic [ref=e96]:
+      - generic [ref=e97]:
+        - generic [ref=e98]:
+          - generic [ref=e101]:
+            - list [ref=e102]:
+              - listitem [ref=e103]:
+                - button "Captura de pantalla" [ref=e105] [cursor=pointer]
+              - listitem [ref=e106]:
+                - button "Captura de pantalla" [ref=e108] [cursor=pointer]
+              - listitem [ref=e109]:
+                - button "Captura de pantalla" [ref=e111] [cursor=pointer]
+              - listitem [ref=e112]:
+                - button "Captura de pantalla" [ref=e114] [cursor=pointer]
+              - listitem [ref=e115]:
+                - button "Captura de pantalla" [ref=e117] [cursor=pointer]
+              - listitem [ref=e118]:
+                - button "Captura de pantalla" [ref=e120] [cursor=pointer]
+              - listitem [ref=e121]:
+                - button "Captura de pantalla" [ref=e123] [cursor=pointer]
+              - listitem [ref=e124]:
+                - button "Captura de pantalla" [ref=e126] [cursor=pointer]
+              - listitem [ref=e127]:
+                - button "Captura de pantalla" [ref=e129] [cursor=pointer]
+              - listitem [ref=e130]:
+                - button "Captura de pantalla" [ref=e132] [cursor=pointer]
+              - listitem [ref=e133]:
+                - button "Captura de pantalla" [ref=e135] [cursor=pointer]
+              - listitem [ref=e136]:
+                - button "Captura de pantalla" [ref=e138] [cursor=pointer]
+              - listitem [ref=e139]:
+                - button "Captura de pantalla" [ref=e141] [cursor=pointer]
+            - button "Siguiente" [ref=e143] [cursor=pointer]:
+              - generic [aria-hidden] [ref=e145]: chevron_right
+          - generic [ref=e148]:
+            - generic [ref=e150]:
+              - heading "Información de la aplicación" [level=2] [ref=e152]
+              - button "Ver más información en Información de la aplicación" [ref=e154] [cursor=pointer]:
+                - generic [aria-hidden] [ref=e155]: arrow_forward
+            - generic [ref=e156]:
+              - generic: "Theri.App es la comunidad para quienes aman a los animales. Descubre tu espíritu animal, enseña a los animales de tu vida y conoce a gente que comparte tu pasión. El nombre viene del griego «therion»: animal salvaje. DESCUBRE TU ESPÍRITU ANIMAL Haz un test de personalidad de 10 preguntas y descubre cuál de más de 100 animales encaja con tu forma de ser. Lobo, zorro, gato, búho, delfín, dragón: cada resultado viene con su propio perfil de personalidad para leer y compartir. TU CARTA ANIMAL Consigue una carta única con tu animal, tu nivel y tu rareza. Compártela con un código QR, descárgala o publícala donde quieras. Según subes de nivel, tu carta evoluciona de Común a Rara, Épica y Legendaria. ENSEÑA A TUS ANIMALES Añade fotos a tu perfil: tu perro, tu gato, los pájaros de tu jardín, tus dibujos. Cuéntanos qué te trae (mascotas, fauna, arte animal) y te sugerimos packs a tu medida. ÚNETE A UN PACK Los packs son chats de grupo sobre un tema: mascotas, fauna, arte animal y muchos más. Crea el tuyo o únete a uno, con su propio chat y acceso a los juegos. Los packs públicos están abiertos a todo el mundo; los privados, solo con invitación. COLECCIÓNALAS TODAS Escanea el código QR de otros miembros para llenar tu álbum. Cada carta guarda el momento en que os conocisteis. 6 JUEGOS PARA JUGAR JUNTOS • Moonlit Hunt: un bosque 3D a la luz de la luna. Recoge orbes, marca árboles ancestrales y caza bajo la luna. Hasta 20 jugadores, o en solitario • Alpha Vote: aparece un «¿quién es más probable que…?» y todo el mundo vota • El Infiltrado Humano: todos comparten un bioma secreto menos un espía. Descubre al impostor • Adivina la Palabra: pistas de una palabra, sin repetidas. Sé creativo • Pack Draw: uno dibuja y el resto corre a adivinar • Pack Puzzle: recompón la imagen desordenada contra el reloj CHAT, LLAMADAS E HISTORIAS Escribe a tus amigos o habla con todo tu pack en tiempo real, y empieza una llamada de grupo desde el propio chat. Las conversaciones nuevas llegan como solicitud, así que tú decides quién puede escribirte. Publica historias con fotos para todo el mundo, para tus packs o solo para amigos; desaparecen a las 48 horas. SUBE DE NIVEL Gana XP coleccionando cartas, jugando y compartiendo historias, y mira en qué puesto quedas en los rankings. TIENDA ANIMAL Explora productos para amantes de los animales que la comunidad encuentra y vota: regalos, accesorios, arte y más. SEGURA DESDE EL DISEÑO Los miembros de 13 a 17 años y los adultos de 18+ tienen espacios separados, y el contenido se modera a todas horas. TAMBIÉN PARA COMUNIDADES Therians, furries y otherpaws también tienen aquí sus propios packs. ¿Ya conoces tu sona? Sáltate el test y elige tu especie directamente."
+              - note "La comunidad para amantes de los animales. Descubre tu espíritu animal." [ref=e157]
+              - generic [ref=e159]:
+                - generic [ref=e160]: Última actualización
+                - generic [ref=e161]: 3 nov 2026
+              - generic [ref=e164]:
+                - generic [aria-hidden] [ref=e166]: Social
+                - link "Social" [ref=e167] [cursor=pointer]:
+                  - /url: /store/apps/category/SOCIAL
+          - generic [ref=e169]:
+            - generic [ref=e171]:
+              - heading "Seguridad de los datos" [level=2] [ref=e173]
+              - generic [ref=e174] [cursor=pointer]:
+                - generic [aria-hidden] [ref=e175]: arrow_forward
+                - link "Ver más información en Seguridad de los datos" [ref=e176]:
+                  - /url: /store/apps/datasafety?id=com.theri.app.android
+            - generic [ref=e177]:
+              - text: La seguridad empieza por entender cómo recogen y comparten tus datos los desarrolladores. Las prácticas de privacidad y seguridad de los datos pueden variar en función de tu uso de la aplicación, el territorio donde la uses y tu edad. El desarrollador ha proporcionado esta información y puede actualizarla con el tiempo.
+              - generic [ref=e178]:
+                - list [ref=e179]:
+                  - listitem [ref=e180]:
+                    - generic [ref=e182]:
+                      - text: No se comparten datos con terceros
+                      - generic [ref=e183]:
+                        - link "Más información" [ref=e184] [cursor=pointer]:
+                          - /url: https://support.google.com/googleplay?p=data-safety&hl=es
+                        - text: sobre cómo los desarrolladores declaran lo que comparten
+                  - listitem [ref=e185]:
+                    - generic [ref=e187]:
+                      - text: Esta aplicación puede recoger estos tipos de datos
+                      - generic [ref=e188]: Información personal, Mensajes y 2 más
+                  - listitem [ref=e189]:
+                    - generic [ref=e191]: Los datos están cifrados durante el tránsito
+                  - listitem [ref=e192]:
+                    - generic [ref=e194]: Puedes solicitar que se eliminen los datos
+                - generic [ref=e197]:
+                  - generic [aria-hidden] [ref=e199]: Ver detalles
+                  - link "Ver más información sobre la Seguridad de los datos" [ref=e200] [cursor=pointer]:
+                    - /url: /store/apps/datasafety?id=com.theri.app.android
+          - generic [ref=e202]:
+            - heading "Novedades" [level=2] [ref=e206]
+            - generic [ref=e207]: "Theri.App crece: ahora es la comunidad para quienes aman a los animales.• Descubre tu espíritu animal con el test, o elígelo tú (con especies furry incluidas).• Nuevo: añade a tu perfil fotos de tus mascotas, de los animales que te rodean o de tu arte.• Los packs ahora tienen tema: mascotas, fauna, arte animal, therian, furry, otherpaw y más.• Therians, furries y otherpaws: para vosotros no cambia nada. Vuestros packs, vuestra carta y vuestro animal siguen donde estaban."
+        - link "Marcar como inadecuado (se abre en una ventana nueva)" [ref=e212] [cursor=pointer]:
+          - /url: https://support.google.com/googleplay/?p=report_content
+          - generic [aria-hidden] [ref=e213]: flag
+          - text: Marcar como inapropiado
+      - generic [ref=e214]:
+        - generic [ref=e215]:
+          - img "Clasificación de contenido" [ref=e216]
+          - generic [ref=e217]:
+            - generic [ref=e218]: Control parental
+            - generic [ref=e219]: Supervisión parental recomendada
+            - generic [ref=e220]: Interacción de usuarios
+            - link "Más información sobre las clasificaciones del contenido (se abre en una ventana nueva)" [ref=e221] [cursor=pointer]:
+              - /url: https://support.google.com/googleplay?p=appgame_ratings
+              - text: Más información
+        - generic [ref=e225]:
+          - heading "Asistencia de la aplicación" [level=2] [ref=e227]
+          - button "Mostrar" [ref=e229] [cursor=pointer]:
+            - generic [aria-hidden] [ref=e230]: expand_more
+  - contentinfo [ref=e232]:
+    - generic [ref=e234]:
+      - generic [ref=e236]:
+        - text: Google Play
+        - link [ref=e238] [cursor=pointer]:
+          - /url: /store/pass/getstarted
+          - paragraph [ref=e239]: Play Pass
+        - link [ref=e241] [cursor=pointer]:
+          - /url: /store/points/enroll
+          - paragraph [ref=e242]: Play Points
+        - link [ref=e244] [cursor=pointer]:
+          - /url: https://play.google.com/about/giftcards
+          - paragraph [ref=e245]: Tarjetas regalo
+        - link [ref=e247] [cursor=pointer]:
+          - /url: /redeem
+          - paragraph [ref=e248]: Canjear
+        - link [ref=e250] [cursor=pointer]:
+          - /url: https://support.google.com/googleplay/answer/134336
+          - paragraph [ref=e251]: Política de reembolsos
+      - generic [ref=e253]:
+        - text: Niños y familia
+        - link [ref=e255] [cursor=pointer]:
+          - /url: https://support.google.com/googleplay?p=pff_parentguide
+          - paragraph [ref=e256]: Guía para padres
+        - link [ref=e258] [cursor=pointer]:
+          - /url: https://support.google.com/googleplay/answer/7007852
+          - paragraph [ref=e259]: Compartir en familia
+    - generic [ref=e260]:
+      - link [ref=e262] [cursor=pointer]:
+        - /url: https://play.google.com/intl/es_es/about/play-terms.html
+        - paragraph [ref=e263]: Términos del Servicio
+      - link [ref=e265] [cursor=pointer]:
+        - /url: https://policies.google.com/privacy
+        - paragraph [ref=e266]: Privacidad
+      - link [ref=e268] [cursor=pointer]:
+        - /url: https://support.google.com/googleplay/contact/withdrawal_form
+        - paragraph [ref=e269]: Desistir de servicios digitales
+      - link [ref=e271] [cursor=pointer]:
+        - /url: https://support.google.com/googleplay/?p=about_play
+        - paragraph [ref=e272]: Acerca de Google Play
+      - link [ref=e274] [cursor=pointer]:
+        - /url: http://developer.android.com/index.html
+        - paragraph [ref=e275]: Desarrolladores
+      - link [ref=e277] [cursor=pointer]:
+        - /url: https://store.google.com/?playredirect=true&utm_source=play&utm_medium=google_oo&utm_campaign=GS106288
+        - paragraph [ref=e278]: Google Store
+      - generic [ref=e279]: Todos los precios incluyen IVA
+      - button "España (Español)" [ref=e281]

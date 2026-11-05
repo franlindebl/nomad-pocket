@@ -289,7 +289,7 @@ By hand:
 | downloads | `dl-02-controls` | DL-02 | nightly | network |
 | updates | `upd-01-archives` | UPD-01, UPD-02, UPD-03 | full | seeded, updates-server (Home's card, Library's badge and link, the sheet; "Actualizar todo" replaces two archives and leaves the course that can't fit; its delete-first is refused with nothing deleted) |
 | updates | `upd-02-country` | UPD-04 | full | seeded-old-country, routing-server, maps-server (Andorra as a January build: Home's card, update from the sheet, "Tus mapas" with October's build) |
-| alerts | `alr-01-official-alerts` | ALR-01 | full | alerts-server (offered on onboarding's last step and turned on in Barcelona: quiet Home card; moved to Madrid: the orange warning drawn over the city and the M 4.8 quake 25 km away are listed and rung; detail with the official text and actions, the guide card, the quake's facts; Home's card; the run log; off again) |
+| alerts | `alr-01-official-alerts` | ALR-01 | full | alerts-server (asked on its own onboarding step and turned on in Barcelona: quiet Home card; moved to Madrid: the orange warning drawn over the city and the M 4.8 quake 25 km away are listed and rung; detail with the official text and actions, the guide card, the quake's facts; Home's card; the run log; off again) |
 | prepare | `prep-01-plan` | PREP-01 | smoke | — |
 | prepare | `prep-02-kit` | PREP-02 | smoke | — |
 | prepare | `prep-03-reminder-export` | PREP-03 | full | taps the system notifications alert |
@@ -498,7 +498,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `adults-plus`/`-minus`/`-value` (also `children-`, `pets-`), `kit-progress`, `kit-<item>`, `kit-<item>-details`, `kit-add` | kit screen |
   | `item-name`, `item-add-expiry`, `expiry-month`, `item-save` | kit item sheet |
   | `house`, `map`, `books.vertical`, `text.bubble` | tabs (SF Symbol ids, set by iOS); Courses is a collection of the Library (`subflows/open-courses.yaml`) |
-  | `onboarding-alerts`, `onboarding-alerts-enable`, `onboarding-alerts-on` | setup wizard's last step: the official alerts offer, its "Activar avisos", the card once on |
+  | `onboarding-alerts-enable`, `onboarding-alerts-decline` | setup wizard's official alerts step (after the kit, before "Todo listo"; skipped when alerts are already on): "Activar avisos", "Ahora no". Every flow through the wizard answers it (`subflows/finish-onboarding.yaml` says "Ahora no") |
   | `home-alert`, `home-alerts-status`, `home-alerts-offer`, `home-alerts-offer-enable`, `home-alerts-offer-decline` | Home: an orange/red warning where the person is; the quiet line while alerts are on and nothing serious applies; the once-only offer (installs from before the feature) and its buttons |
   | `settings-alerts`, `alerts-settings-switch` | Settings: the Avisos oficiales row; the on/off switch in its screen |
   | `alerts-status`, `alerts-refresh`, `alerts-no-position`, `alerts-no-notifications`, `alert-row-<n>`, `alerts-list-offer` | `/alerts`: freshness line, "Comprobar ahora", the no-location and no-notifications cards, rows (0-based), the offer while off |

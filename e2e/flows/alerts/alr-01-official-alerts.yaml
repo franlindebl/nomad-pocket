@@ -34,9 +34,9 @@ tags: [full, alerts, alerts-server]
     visible: "Continuar sin descargar"
     timeout: 10000
 - tapOn: { id: "onboarding-download" }
-- scrollUntilVisible:
-    element: { id: "onboarding-alerts-enable" }
-    direction: DOWN
+- extendedWaitUntil:
+    visible: { id: "onboarding-alerts-enable" }
+    timeout: 10000
 - assertVisible: "Avisos oficiales donde estés"
 - takeScreenshot: alr-01-01-offer
 - tapOn: { id: "onboarding-alerts-enable" }
@@ -45,7 +45,7 @@ tags: [full, alerts, alerts-server]
     text: "Permitir"
     optional: true
 - extendedWaitUntil:
-    visible: { id: "onboarding-alerts-on" }
+    visible: { id: "onboarding-finish" }
     timeout: 10000
 - tapOn: { id: "onboarding-finish" }
 - extendedWaitUntil:
