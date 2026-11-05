@@ -47,6 +47,7 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape | nothing (offline) |
 | `npm run e2e:android` | 5 | ~18 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack, content updates | internet, Android emulator |
 | `npm run e2e:carplay` | 1 + car steps | ~5 min | CarPlay on the simulator's car screen: opened from the car, Destinos › Emergencias cerca › trip preview › Ir › Terminar, the phone adopting the app the car started, a phone trip shown and ended on the car (section CarPlay) | Xcode 26.5's Simulator + iOS 26.5 simulator (`scripts/carplay/carplay-sim.sh setup`), a Release build with CarPlay on, Accessibility permission for the terminal |
+| `npm run e2e:androidauto` | 1 + car steps | ~8 min | Android Auto on the Android Automotive emulator: opened from the car with the app not running, Destinos › Emergencias cerca › preview › Ir › Terminar, Buscar › preview › back, a `geo:` destination › Ir › arrival, the phone UI on the JS the car started (section Android Auto) | The Automotive emulator `NP-auto-34` (created on the first run), Maestro, the Automotive APK (`--build`) |
 
 When to run what: smoke before every TestFlight build or after a risky change; full and the
 iPad tour before an App Store release (then look through the iPad screenshots in
@@ -306,6 +307,7 @@ By hand:
 | android | `android-07-alerts` | ANDROID-07 | android | stand-in alert feeds (official alerts turned on in Madrid from onboarding: Home's card, the list, an alert's official text, the run log) |
 | android | `android-06-updates` | ANDROID-06 | android | network (a 1 MB archive from Kiwix), updates-server (its newer edition from the stand-in catalog, through `adb reverse`) |
 | carplay | `car-00-prepare` | CAR-01…CAR-04 (with `scripts/carplay/e2e-carplay.sh`) | carplay | routing-server, maps-server; the iOS 26.5 CarPlay simulator |
+| androidauto | `auto-00-prepare` | AUTO-01…AUTO-05 (with `scripts/androidauto/e2e-androidauto.sh`) | androidauto | its own local catalogs; the Android Automotive emulator |
 
 ### CarPlay (CAR, `npm run e2e:carplay`)
 
@@ -328,6 +330,40 @@ preview's green "Ir" is too short for the OCR, so it is tapped under the estimat
 Run it after `npm run e2e -- --build` while `app.json` has CarPlay on (the suite's build is the one it installs),
 and not at the same time as another suite: both serve the local catalogs on port 8765. Results in
 `e2e/artifacts/carplay-<timestamp>/` (each car screen as `NN.png` with its text in `NN.txt`).
+
+### Android Auto (AUTO, `npm run e2e:androidauto`)
+
+Play doesn't offer Android Auto to the phone emulator, so the car screens run on the **Android Automotive** emulator
+(AVD `NP-auto-34`, Google Play image), whose templates host draws the same templates (`docs/ANDROID_AUTO_PLAN.md`,
+Testing). `scripts/androidauto/e2e-androidauto.sh` builds the Automotive APK (`ANDROID_AUTOMOTIVE=1`, kept in
+`~/Library/Caches/nomad-androidauto`, out of `android/`'s build folder so the phone suite never installs it), boots
+or creates the emulator, serves Andorra's map and routing pack from its own local catalogs (port 8766, through
+`adb reverse`) and runs `e2e/flows/androidauto/auto-00-prepare.yaml` with Maestro on the app's phone UI there (the
+download, as `car-00`). Car steps are `adb shell input tap` and checks of the main display's text read with Vision
+(`scripts/carplay/ocr.swift`, image pixels = tap coordinates, 1024×768).
+
+Learned on the way (in the script's comments too):
+- The driver is Android user 10: permissions, `pm clear`, the app locale and location (off on a new image) are
+  per user.
+- Android's network check (Google's servers over HTTPS) fails behind a network that intercepts TLS, leaving
+  "partial connectivity", and the app won't download: the script points it at a local server answering 204
+  (`captive_portal_*_url` = `http://10.0.2.2:8767/generate_204`).
+- The host hides the map's buttons a few seconds after the last touch (the first tap only shows them), loses a
+  tap that lands while it swaps a template, and delays results typed in a burst: the script taps the map first,
+  types one key at a time and taps a search result again when its preview doesn't come.
+- The preview's "Ir" is a short link the OCR sometimes misses: then it is tapped under the card's last line.
+- Never stop the app while the car shows it (Google's templates host crashes): the script goes home first.
+
+| Case | What |
+|---|---|
+| AUTO-01 | Opened from the car with the app not running: the offline map and "Destinos" (the app's JS started without UI) |
+| AUTO-02 | Destinos › Emergencias cerca › Seguridad lists the police; picking it shows the preview (min, km, "Por …"); "Ir" starts guidance (maneuver distance, "Terminar"); "Terminar" goes back to the map |
+| AUTO-03 | Buscar with the car's keyboard finds Canillo; its preview's back cancels the trip |
+| AUTO-04 | A `geo:` destination from another app (`androidx.car.app.action.NAVIGATE`) opens its preview; "Ir", then the GPS at the destination: "Has llegado"; "Terminar" |
+| AUTO-05 | The phone UI opened afterwards runs on the JS the car started (its tab bar shows) |
+
+Results in `e2e/artifacts/androidauto-<timestamp>/` (each car screen as `NN.png` with its text in `NN.txt`). It
+leaves `android/` prebuilt for Automotive: the phone suite's `--build` (or its missing APK) prebuilds it again.
 
 ### Official alerts (ALR)
 

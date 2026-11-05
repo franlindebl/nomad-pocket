@@ -101,7 +101,7 @@ class MapScreen(car: CarContext, internal val map: CarMap) : Screen(car) {
   private fun shown(g: CarGuidance): String {
     val est = { e: CarEstimate? -> e?.let { "${it.distance.value}${it.distance.unit}/${(it.seconds / 60).toInt()}" } }
     val step = { s: CarStep? -> s?.let { "${it.index}:${it.icon}:${it.instruction}:${est(it.estimate)}" } }
-    return listOf(g.target, g.navigating, g.routing, g.arrived, g.note, step(g.step), step(g.nextStep), est(g.remaining ?: g.summary)).joinToString("|")
+    return listOf(g.target, dismissed, g.navigating, g.routing, g.arrived, g.note, step(g.step), step(g.nextStep), est(g.remaining ?: g.summary)).joinToString("|")
   }
 
   /** Back or Cancel on the preview: the trip ends (JS) and the map shows again at once. */
@@ -109,6 +109,8 @@ class MapScreen(car: CarContext, internal val map: CarMap) : Screen(car) {
     if (preview !== screen) return
     preview = null
     dismissed = guidance?.target
+    shownKey = null
+    invalidate()
     CarHub.emit("onEnd")
   }
 
@@ -122,7 +124,8 @@ class MapScreen(car: CarContext, internal val map: CarMap) : Screen(car) {
     return b.build()
   }
 
-  override fun onGetTemplate(): Template = navigation(CarHub.strings, guidance)
+  // A trip whose preview the driver just closed is gone for the car, while JS ends it.
+  override fun onGetTemplate(): Template = navigation(CarHub.strings, guidance?.let { g -> if (g.target != null && g.target == dismissed) null else g })
 
   private fun navigation(s: CarStrings?, g: CarGuidance?): Template {
     val actions = ActionStrip.Builder()
@@ -268,7 +271,19 @@ class ItemsScreen(car: CarContext, private val title: String, kind: String, cate
 class SearchScreen(car: CarContext, private val initial: String? = null) : Screen(car) {
   private var items: List<CarItem>? = null
   private var query = 0
+  /** Results the host hasn't asked for yet (its onGetTemplate). */
+  private var untaken = false
   private val main = android.os.Handler(android.os.Looper.getMainLooper())
+
+  private fun retry(mine: Int, left: Int) {
+    if (left == 0) return
+    main.postDelayed({
+      if (mine == query && untaken) {
+        invalidate()
+        retry(mine, left - 1)
+      }
+    }, 1000)
+  }
 
   init {
     // A destination given as text (an address from another app): searched right away.
@@ -277,19 +292,22 @@ class SearchScreen(car: CarContext, private val initial: String? = null) : Scree
 
   private fun submit(searchText: String) {
     if (searchText.isBlank()) return
-    // No loading state: the offline search answers in tens of milliseconds, and two templates that
-    // close together make the host delay the second one ("too many refreshes"), sometimes for good.
+    // No loading state: the offline search answers in tens of milliseconds. The host still delays the results
+    // after the keys typed ("too many refreshes in a short span of time") and sometimes never shows them, so the
+    // screen asks again until the host has taken them; only then: a new template replaces the rows, and a tap
+    // on a result that lands meanwhile is lost.
     val mine = ++query
     CarHub.request("search", mapOf("query" to searchText)) {
       if (mine != query) return@request
       items = it
+      untaken = true
       invalidate()
-      // A refresh the host delayed anyway shows once the burst is over.
-      main.postDelayed({ if (mine == query) invalidate() }, 1500)
+      retry(mine, 6)
     }
   }
 
   override fun onGetTemplate(): Template {
+    untaken = false
     val s = CarHub.strings
     val b =
       SearchTemplate.Builder(

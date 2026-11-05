@@ -72,8 +72,13 @@ library's allowlist (Android Auto, Android Automotive).
      coordinates start the trip like a pick (with the name in `(…)`), text opens the search with it.
    - Day/night follows the car (`CarContext.isDarkMode`; on the Automotive emulator
      `adb shell cmd car_service day-night-mode night`). The car's own "stop navigation" ends the trip in JS.
-4. **Switch and tests**: `with-android-auto.js` (off by default), an `e2e:androidauto` script on the Desktop
-   Head Unit if its console commands allow it (taps, screenshots), docs (E2E.md, ARCHITECTURE.md).
+4. **Switch and tests** (2026-11-05, **done**): `with-android-auto.js` (off by default; `automotive` for the
+   emulator) and `npm run e2e:androidauto` (`scripts/androidauto/e2e-androidauto.sh`, AUTO-01…05 in
+   `docs/E2E.md`) on the Android Automotive emulator: Maestro downloads Andorra on the app's phone UI there, the car
+   steps are adb taps checked with Vision OCR. Passes end to end. Found on the way and fixed in the app: a search
+   result could stay unshown (the host delays it and sometimes never shows it: the screen asks again until the
+   host takes it, and only then, so a tap on a result isn't lost), and a cancelled preview showed its trip on the
+   map for a moment.
 5. **Release**: only once the app is in production on Play. Play Console › Advanced settings › Form factors ›
    Android Auto (opt in), and Google's car app quality review. Store listing text and a car screenshot, reviewed by
    the owner first.

@@ -345,6 +345,18 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-05 — Android Auto: phase 4, the end-to-end check
+
+- `npm run e2e:androidauto` (`scripts/androidauto/e2e-androidauto.sh`, `e2e/flows/androidauto/auto-00-prepare.yaml`,
+  AUTO-01…05 in `docs/E2E.md`) on the Android Automotive emulator (`NP-auto-34`, created on the first run): the
+  Automotive APK (kept out of `android/`'s build folder), Andorra downloaded on the app's phone UI from the
+  script's own local catalogs, then the car: opened cold, Emergencias cerca › preview › Ir › Terminar, Buscar ›
+  preview › back, a `geo:` destination › Ir › arrival › Terminar, the phone UI on the car's JS. **Passes.**
+- Behind a TLS-intercepting network Android's network check never validates the emulator's network ("partial
+  connectivity") and the app won't download: the script points the check at a local 204 server.
+- Fixed in the app: search results the host delayed and never showed (asked again until taken), a cancelled
+  preview's trip shown on the map for a moment.
+
 ### 2026-11-05 — Android Auto: phases 2 and 3 (trip, opened from the car)
 
 - Trip: preview screen (`RoutePreviewNavigationTemplate`: time and distance, "Por la …", Ir, back cancels), maneuver

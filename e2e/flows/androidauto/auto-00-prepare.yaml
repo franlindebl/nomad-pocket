@@ -1,0 +1,51 @@
+# AUTO-00 — the phone side of the Android Auto check (scripts/androidauto/e2e-androidauto.sh, docs/E2E.md
+# "Android Auto"): on the Android Automotive emulator's own screen, the app's phone UI downloads Andorra from the
+# local catalogs (map + routing pack with its emergency points, as car-00 and android-05 do), so the car has a map,
+# routes and "Emergencias cerca" to show. Only tagged `androidauto`: never in the phone suites.
+appId: com.fjlinde.nomadpocket
+tags: [androidauto, routing-server, maps-server]
+---
+- runFlow: ../../subflows/launch.yaml
+# The tab by its label: Android's native tabs have no test id, and this screen isn't a phone's shape.
+- tapOn: "Mapas"
+- extendedWaitUntil:
+    visible: { id: "map-search" }
+    timeout: 20000
+- tapOn: { id: "map-search" }
+# Andorra la Vella, from Sant Julià de Lòria where the runner puts the GPS.
+- inputText: "42.5063, 1.5218"
+- tapOn: { id: "search-coordinates" }
+- extendedWaitUntil:
+    visible: { id: "place-card" }
+    timeout: 10000
+- tapOn: { id: "place-guide" }
+- extendedWaitUntil:
+    visible: { id: "guidance-get-routing" }
+    timeout: 30000
+- tapOn: { id: "guidance-get-routing" }
+- extendedWaitUntil:
+    visible: { id: "country-download" }
+    timeout: 30000
+- tapOn: { id: "country-download" }
+# Off Wi-Fi (the emulator is on mobile data), "Wi-Fi only" asks before the country downloads.
+- extendedWaitUntil:
+    visible: "Descargas solo con Wi.Fi"
+    timeout: 10000
+    optional: true
+- runFlow:
+    when:
+      visible: "(?i)usar datos móviles"
+    commands:
+      - tapOn: { text: "(?i)usar datos móviles" }
+- extendedWaitUntil:
+    visible: { id: "guidance-next" }
+    timeout: 180000
+- assertNotVisible: "En línea recta.*"
+- tapOn: { id: "guidance-stop" }
+# The pack's emergency points reach the index a moment after the download.
+- tapOn: { id: "map-emergency" }
+- tapOn: { id: "emergency-cat-security" }
+- extendedWaitUntil:
+    visible: "(?s).*Duana Andorra.*"   # the nearest police from Sant Julià de Lòria: the customs post
+    timeout: 30000
+- takeScreenshot: 01-ready
