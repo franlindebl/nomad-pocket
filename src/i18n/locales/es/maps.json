@@ -127,7 +127,9 @@
     "close": "Cerrar",
     "emergencyYes": "Urgencias",
     "emergencyNo": "Sin urgencias",
-    "hours": "Horario: {{hours}}"
+    "hours": "Horario: {{hours}}",
+    "openNow": "Abierto ahora",
+    "closedNow": "Cerrado ahora"
   },
   "call": {
     "failedTitle": "No se ha podido llamar",
@@ -309,7 +311,8 @@
     "residential": "Zona residencial",
     "industrial": "Zona industrial",
     "address": "Portal",
-    "address_approx": "Portal aproximado"
+    "address_approx": "Portal aproximado",
+    "marker": "Lugar guardado"
   },
   "route": {
     "costing": {
@@ -472,10 +475,23 @@
     "straightLine": "En línea recta: no sigue las carreteras",
     "lineTo": "Hacia el {{dir}}, en línea recta",
     "noPermission": "Permite el acceso a la ubicación en el móvil para navegar.",
-    "via": "Por {{street}}"
+    "via": "Por {{street}}",
+    "alongAt": "a {{distance}} en la ruta"
   },
   "speed": {
     "now": "Velocidad {{value}} {{unit}}",
     "limit": "límite {{value}} {{unit}}"
+  },
+  "preview": {
+    "title": "De {{from}} a {{to}}",
+    "straight": "{{distance}} en línea recta: no hay paquete de rutas para este viaje.",
+    "fromHereOnly": "La navegación sale siempre de donde estás.",
+    "mode": {
+      "auto": "En coche",
+      "pedestrian": "A pie",
+      "bicycle": "En bici"
+    },
+    "avoiding": "Evitando la zona del aviso.",
+    "avoidFailed": "No encuentro una ruta que evite la zona del aviso en un solo paquete de rutas."
   }
 }

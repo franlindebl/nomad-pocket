@@ -1,0 +1,40 @@
+# AI-13 — the assistant's map answers, phase 3 (docs/ASSISTANT_MAP_PLAN.md), with no model, Andorra seeded and the
+# phone in Andorra la Vella: petrol stations on the way to Encamp and the last one within a range, alerts on the
+# route and getting out of an alert area while alerts are off, and a trip to a country whose map isn't installed.
+appId: com.fjlinde.nomadpocket
+tags: [nightly, assistant, maps, seeded-country]
+---
+- setLocation:
+    latitude: 42.5075
+    longitude: 1.5218
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "text.bubble" }
+- tapOn: "Pregunta .*"
+- inputText: "Gasolineras de camino a Encamp"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: { id: "map-answer-row" }
+    timeout: 60000
+- assertVisible: "(?s).*del inicio.*"
+- takeScreenshot: 01-along
+- tapOn: "Pregunta .*"
+- inputText: "¿Me da la gasolina para llegar a Encamp? Me quedan 3 km"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: { id: "map-answer-range" }
+    timeout: 60000
+- takeScreenshot: 02-range
+- tapOn: "Pregunta .*"
+- inputText: "¿Hay avisos de camino a Encamp?"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: "(?s).*avisos oficiales están desactivados.*"
+    timeout: 60000
+- tapOn: "Pregunta .*"
+- inputText: "Me voy de viaje a Portugal, ¿qué necesito?"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: { id: "map-answer-trip-map" }
+    timeout: 30000
+- assertVisible: { id: "map-answer-download" }
+- takeScreenshot: 03-trip

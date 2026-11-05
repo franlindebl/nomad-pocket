@@ -1,0 +1,86 @@
+# AI-12 — the assistant's map answers, phase 2 (docs/ASSISTANT_MAP_PLAN.md), with no model, Andorra seeded and the
+# phone in Andorra la Vella: save the spot as the car and find it again, today's light, "estoy perdido" (the guide's
+# advice first), a town's coordinates, official alerts while they are off, and a route from elsewhere drawn on the map.
+appId: com.fjlinde.nomadpocket
+tags: [nightly, assistant, maps, seeded-country]
+---
+- setLocation:
+    latitude: 42.5075
+    longitude: 1.5218
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "text.bubble" }
+- tapOn: "Pregunta .*"
+- inputText: "Guarda dónde estoy como el coche"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: { id: "map-answer-save" }
+    timeout: 60000
+- tapOn: { id: "map-answer-save" }
+- extendedWaitUntil:
+    visible: "Guardado"
+    timeout: 10000
+- tapOn: "Pregunta .*"
+- inputText: "¿Dónde he aparcado?"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: { id: "map-answer-coords" }
+    timeout: 30000
+- assertVisible: "(?s).*El coche.*"
+- takeScreenshot: 01-parked
+- tapOn: "Pregunta .*"
+- inputText: "¿A qué hora anochece?"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: { id: "map-answer-sun" }
+    timeout: 30000
+- assertVisible: "(?s).*El sol se pone a las.*"
+- takeScreenshot: 02-sunset
+- tapOn: "Pregunta .*"
+- inputText: "Estoy perdido"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: { id: "map-answer-lost" }
+    timeout: 30000
+# In Andorra la Vella the nearest town is the one you're in: the card says the town once, with the 112 button.
+- assertVisible: { id: "map-answer-locality" }
+- assertVisible: { id: "map-answer-emergency" }
+- takeScreenshot: 03-lost
+# On the mountain between Ràmio and Sant Julià, ~2.5 km from any town: the arrow to the nearest one.
+- setLocation:
+    latitude: 42.4780
+    longitude: 1.5880
+- tapOn: "Pregunta .*"
+- inputText: "Me he perdido en el monte"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: { id: "map-answer-town" }
+    timeout: 30000
+- takeScreenshot: 03b-lost-arrow
+- setLocation:
+    latitude: 42.5075
+    longitude: 1.5218
+- tapOn: "Pregunta .*"
+- inputText: "¿Qué coordenadas tiene Encamp?"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: "(?s).*UTM 31T.*"
+    timeout: 30000
+- takeScreenshot: 04-coordinates
+- tapOn: "Pregunta .*"
+- inputText: "¿Hay avisos oficiales?"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: "(?s).*avisos oficiales están desactivados.*"
+    timeout: 30000
+- takeScreenshot: 05-alerts-off
+- tapOn: "Pregunta .*"
+- inputText: "¿Cómo voy de Sant Julià de Lòria a Encamp?"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: "Ver la ruta en el mapa"
+    timeout: 60000
+- tapOn: "Ver la ruta en el mapa"
+- extendedWaitUntil:
+    visible: { id: "route-preview-travel" }
+    timeout: 30000
+- takeScreenshot: 06-route-preview

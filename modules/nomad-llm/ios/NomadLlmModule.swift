@@ -24,6 +24,18 @@ struct SearchDecision {
   var search: Bool
   @Guide(description: "If search is true: self-contained search keywords in the user's language, including the conversation topic when the message omits it (e.g. \"tratamiento hipotermia\"). Otherwise empty.")
   var query: String
+  // The map (docs/ASSISTANT_MAP_PLAN.md, phase 1b): JS only reads these when maps are installed and the
+  // instructions say what they mean (MAP_ROUTER_RULES); the card is built from the map data, not from these words.
+  @Guide(description: "true only if the message asks to find a kind of place near somewhere, directions or travel time to a place, or where the user is; otherwise false")
+  var map: Bool
+  @Guide(description: "If map is true: nearby, go_nearest, route or where_am_i. Otherwise empty.")
+  var mapAction: String
+  @Guide(description: "If map is true and a kind of place is asked: that kind in the user's words (e.g. \"farmacia\"). Otherwise empty.")
+  var mapCategory: String
+  @Guide(description: "If map is true: the town, address or landmark named as the place or the origin of a route; empty for the user's own position.")
+  var mapPlace: String
+  @Guide(description: "If map is true and mapAction is route: the destination. Otherwise empty.")
+  var mapDestination: String
 }
 #endif
 
@@ -164,7 +176,11 @@ public final class NomadLlmModule: Module {
         do {
           let session = LanguageModelSession(model: SystemLanguageModel.default, instructions: instructions)
           let response = try await session.respond(to: prompt, generating: SearchDecision.self, options: GenerationOptions(samplingMode: .greedy))
-          promise.resolve(["search": response.content.search, "query": response.content.query])
+          let d = response.content
+          promise.resolve([
+            "search": d.search, "query": d.query, "map": d.map, "mapAction": d.mapAction,
+            "mapCategory": d.mapCategory, "mapPlace": d.mapPlace, "mapDestination": d.mapDestination,
+          ])
         } catch {
           let (code, message) = Self.describe(error)
           promise.reject(code, message)

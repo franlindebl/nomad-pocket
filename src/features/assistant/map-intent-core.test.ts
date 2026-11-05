@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { categoryOf, normalizeQuestion, parseMapIntent, type MapIntent } from './map-intent-core.ts';
+import { categoryOf, intentFromModel, mapToolSpec, normalizeQuestion, parseMapIntent, parseMapToolArgs, placeCandidates, type MapIntent } from './map-intent-core.ts';
 
 type Expect = Partial<Record<string, unknown>> & { kind: MapIntent['kind'] };
 
@@ -76,6 +76,10 @@ const POSITIVE: [string, Expect][] = [
   ['how long does it take to walk to Getafe', { kind: 'route', to: { text: 'getafe' }, askOnly: true, costing: 'pedestrian' }],
   ['how far is Toledo', { kind: 'route', to: { text: 'toledo' }, askOnly: true }],
 
+  ['¿Qué tan lejos queda Toledo desde Madrid?', { kind: 'route', from: { text: 'madrid' }, to: { text: 'toledo' }, askOnly: true }],
+  ['Dime cómo llegar a Valdemoro desde aquí', { kind: 'route', from: { here: true }, to: { text: 'valdemoro' } }],
+  ['Estoy en Aranjuez, ¿dónde queda la comisaría?', { kind: 'nearby', kinds: ['police'], near: { text: 'aranjuez' } }],
+
   // whereAmI
   ['¿Dónde estoy?', { kind: 'whereAmI', forCall: false }],
   ['dime mi ubicación', { kind: 'whereAmI', forCall: false }],
@@ -104,6 +108,52 @@ const POSITIVE: [string, Expect][] = [
   ['call an ambulance', { kind: 'callEmergency' }],
   ['¿Cuál es el número de emergencias?', { kind: 'callEmergency' }],
   ['emergency number', { kind: 'callEmergency' }],
+
+  // phase 2
+  ['Guarda dónde estoy como el coche', { kind: 'saveHere', name: 'el coche' }],
+  ['save this place as camp', { kind: 'saveHere', name: 'camp' }],
+  ['¿Dónde he aparcado?', { kind: 'saved' }],
+  ['where did I park', { kind: 'saved' }],
+  ['¿Dónde quedamos si nos separamos?', { kind: 'meetingPoint', go: false }],
+  ['¿Cuál es nuestro punto de encuentro?', { kind: 'meetingPoint', go: false }],
+  ['Llévame al punto de encuentro', { kind: 'meetingPoint', go: true }],
+  ['Where do we meet if we get separated?', { kind: 'meetingPoint' }],
+  ['Estoy perdido', { kind: 'lost' }],
+  ['Creo que me he perdido en el monte', { kind: 'lost' }],
+  ['¿Hacia dónde está el pueblo más cercano?', { kind: 'lost' }],
+  ["I'm lost", { kind: 'lost' }],
+  ['¿A qué hora anochece?', { kind: 'sun' }],
+  ['¿Cuánta luz me queda?', { kind: 'sun' }],
+  ['¿Llego andando a Cercedilla antes de que anochezca?', { kind: 'sun', to: { text: 'cercedilla' }, costing: 'pedestrian' }],
+  ['¿Me da tiempo a llegar a Navacerrada antes de que se haga de noche?', { kind: 'sun', to: { text: 'navacerrada' } }],
+  ['Can I make it to Cercedilla before dark?', { kind: 'sun', to: { text: 'cercedilla' } }],
+  ['¿Hay alertas cerca?', { kind: 'alerts', quakes: false, place: { here: true } }],
+  ['¿Hay avisos oficiales?', { kind: 'alerts' }],
+  ['¿Qué avisos hay en Valencia?', { kind: 'alerts', place: { text: 'valencia' } }],
+  ['¿Ha habido terremotos por aquí?', { kind: 'alerts', quakes: true }],
+  ['any alerts near me', { kind: 'alerts' }],
+  ['¿Qué coordenadas tiene Móstoles?', { kind: 'whereIs', coords: true, place: { text: 'mostoles' } }],
+  ['Pásame mis coordenadas a UTM', { kind: 'whereAmI' }],
+  ['Llévame a 30T 430500 4466200', { kind: 'route' }],
+
+  // phase 3
+  ['Gasolineras de camino a Valencia', { kind: 'alongRoute', kinds: ['fuel'], to: { text: 'valencia' } }],
+  ['¿Hay agua potable en el camino a Cercedilla?', { kind: 'alongRoute', kinds: ['drinking_water'], to: { text: 'cercedilla' } }],
+  ['farmacias en la ruta', { kind: 'alongRoute', kinds: ['pharmacy'] }],
+  ['¿Me da la gasolina para llegar a Valencia? Me quedan 80 km', { kind: 'alongRoute', kinds: ['fuel'], to: { text: 'valencia' }, rangeKm: 80 }],
+  ['Tengo 60 km de autonomía, ¿dónde reposto?', { kind: 'alongRoute', kinds: ['fuel'], rangeKm: 60 }],
+  ['petrol stations on the way to Toledo', { kind: 'alongRoute', kinds: ['fuel'], to: { text: 'toledo' } }],
+  ['¿El aviso rojo afecta a mi ruta?', { kind: 'routeAlerts' }],
+  ['¿Hay avisos de camino a Valencia?', { kind: 'routeAlerts', to: { text: 'valencia' } }],
+  ['Tengo que salir de la zona del aviso', { kind: 'evacuate' }],
+  ['¿Cómo salgo de la zona inundada?', { kind: 'evacuate' }],
+  ['Me voy de viaje a Marruecos, ¿qué necesito?', { kind: 'trip', place: 'marruecos' }],
+  ['Viajo a Portugal la semana que viene', { kind: 'trip', place: 'portugal' }],
+  ["I'm travelling to France next week", { kind: 'trip', place: 'france' }],
+  ['Me voy a Qatar', { kind: 'trip', place: 'qatar' }],
+  ['¿Qué es este pueblo?', { kind: 'aboutHere' }],
+  ['Háblame de este sitio', { kind: 'aboutHere' }],
+  ['what is this town', { kind: 'aboutHere' }],
 
   // whereIs (weak)
   ['¿Dónde está Móstoles?', { kind: 'whereIs', place: { text: 'mostoles' }, strong: false }],
@@ -143,11 +193,21 @@ const NEGATIVE: string[] = [
   'llama a mamá',
   '¿Cuánto es 2 + 2?',
   'busca información sobre la peste negra en Europa',
-  'gasolineras de camino a Valencia',
   '¿Cómo llego?',
   'llévame ahí',
   '¿Cuál es el número de emergencias en Japón?',
   'necesito agua potable, ¿cómo la consigo?',
+  '¿Qué es una alerta roja?',
+  '¿Qué hago si me pierdo en el monte?',
+  'Se ha perdido mi hijo en la playa',
+  '¿Por qué anochece antes en invierno?',
+  '¿Qué es un terremoto?',
+  'guarda la conversación',
+  '¿Qué es un punto de encuentro?',
+  'me voy a dormir',
+  '¿Qué es el camino de Santiago?',
+  'historia de la ruta de la seda',
+  '¿Cuántos kilómetros tiene una maratón?',
 ];
 
 function subset(actual: unknown, expected: Record<string, unknown>): boolean {
@@ -195,4 +255,66 @@ test('categoryOf names a whole category only', () => {
   assert.deepEqual(categoryOf('una gasolinera'), ['fuel']);
   assert.equal(categoryOf('la calle doctor esquerdo'), null);
   assert.equal(categoryOf('casa'), null);
+});
+
+test('a model map call becomes an intent only when it names something the map knows', () => {
+  // A town the model wrote is weak: if the index doesn't have it, the library answers.
+  assert.deepEqual(intentFromModel({ action: 'nearby', category: 'gasolinera', place: 'Ávila' }), {
+    kind: 'nearby',
+    kinds: ['fuel'],
+    near: { text: 'avila' },
+    strong: false,
+  });
+  assert.deepEqual(intentFromModel({ action: 'nearby', category: 'drinking_water', place: '' }), { kind: 'nearby', kinds: ['drinking_water'], near: { here: true }, strong: true });
+  assert.ok(subset(intentFromModel({ action: 'nearby', category: 'petrol station', place: 'my location' }), { kinds: ['fuel'], near: { here: true } }));
+  assert.ok(subset(intentFromModel({ action: 'go_nearest', category: 'centro de salud', place: 'Leganés', mode: 'walk' }), { kind: 'goNearest', kinds: ['clinic'], costing: 'pedestrian' }));
+  assert.ok(subset(intentFromModel({ action: 'route', place: 'Madrid', destination: 'Toledo', mode: 'car' }), { kind: 'route', from: { text: 'madrid' }, to: { text: 'toledo' }, costing: 'auto' }));
+  assert.ok(subset(intentFromModel({ action: 'route', destination: 'el hospital más cercano' }), { kind: 'goNearest', kinds: ['hospital'] }));
+  assert.deepEqual(intentFromModel({ action: 'where_am_i' }), { kind: 'whereAmI', forCall: false, strong: true });
+  // Kinds the map doesn't hold, or a route with nowhere to go: not a map answer.
+  assert.equal(intentFromModel({ action: 'nearby', category: 'panadería', place: 'Ávila' }), null);
+  assert.equal(intentFromModel({ action: 'route', place: 'Madrid' }), null);
+  assert.equal(intentFromModel({ action: 'translate' }), null);
+  // A model's misspelling, a kind near a place as a destination.
+  assert.ok(subset(intentFromModel({ action: 'nearby', category: 'embasía', place: 'Lisboa' }), { kinds: ['embassy'] }));
+  assert.ok(subset(intentFromModel({ action: 'nearby', category: 'pilas y linterna', place: 'Parla' }), { kinds: ['hardware', 'supermarket'] }));
+  assert.ok(subset(intentFromModel({ action: 'route', destination: 'ayuntamiento de Getafe' }), { kind: 'nearby', kinds: ['townhall'], near: { text: 'getafe' } }));
+});
+
+test('a model map call needs the question to name what is wanted', () => {
+  // Apple's router on the bench: a town from its instructions' examples, the wrong kind, no place asked for.
+  assert.equal(intentFromModel({ action: 'nearby', category: 'centro de salud', place: 'Leganés' }, 'Me ha dado un calambrazo al tocar el cuadro eléctrico, ¿tengo que ir al médico?'), null);
+  assert.equal(intentFromModel({ action: 'nearby', category: 'refugio' }, 'Vivo en un bajo y está entrando el agua por la puerta, ¿qué hago ya?'), null);
+  assert.equal(intentFromModel({ action: 'where_am_i' }, 'Están sonando las sirenas, ¿qué hago ahora mismo?'), null);
+  // "Comarcal" is in the question: weak, so a town that doesn't exist sends it to the library.
+  assert.ok(subset(intentFromModel({ action: 'nearby', category: 'gasolinera', place: 'comarcal' }, 'Me he quedado sin gasolina en una carretera comarcal y no hay cobertura, ¿qué hago?'), { strong: false }));
+  // Crisis questions the model sent to the map on the bench: the guide answers them.
+  assert.equal(intentFromModel({ action: 'nearby', category: 'refugio' }, 'Huele a humo en la escalera, ¿salgo o me quedo en casa?'), null);
+  assert.equal(intentFromModel({ action: 'nearby', category: 'policía' }, 'Un hombre me sigue por la calle de noche, tengo miedo'), null);
+  assert.equal(intentFromModel({ action: 'nearby', category: 'policía', place: 'playa' }, 'Mi hijo se ha perdido en la playa, ayuda'), null);
+  // Places the maps don't know: a weak route, the library answers instead.
+  assert.ok(subset(intentFromModel({ action: 'route', place: 'trabajo', destination: 'casa' }, 'Se ha ido la luz y estoy en el trabajo. ¿Cómo vuelvo a casa sin metro?'), { kind: 'route', strong: false }));
+  // Named by what it is for.
+  assert.ok(subset(intentFromModel({ action: 'nearby', category: 'farmacia', place: 'Pinto' }, 'Mi hija tiene fiebre y no tengo paracetamol, ¿hay algún sitio abierto en Pinto?'), { kinds: ['pharmacy'] }));
+  assert.ok(subset(intentFromModel({ action: 'nearby', category: 'policía', place: 'Fuenlabrada' }, 'Me han robado la cartera en Fuenlabrada, ¿dónde denuncio?'), { kinds: ['police'] }));
+  assert.ok(subset(intentFromModel({ action: 'nearby', category: 'gasolinera', place: 'Ávila' }, 'Se me está acabando la gasolina y estoy cerca de Ávila'), { kinds: ['fuel'] }));
+});
+
+test('search_map arguments are read leniently', () => {
+  assert.deepEqual(parseMapToolArgs('{"action":"nearby","category":"farmacia","place":"Getafe"}'), {
+    action: 'nearby',
+    category: 'farmacia',
+    place: 'Getafe',
+    destination: undefined,
+    mode: undefined,
+  });
+  assert.deepEqual(parseMapToolArgs('not json'), {});
+  assert.equal(mapToolSpec('es').function.name, 'search_map');
+});
+
+test('place-like names in an answer, for map chips', () => {
+  assert.deepEqual(placeCandidates('Móstoles es un municipio al suroeste de Madrid, cerca de Alcorcón. Móstoles tiene hospital [1].'), ['Móstoles', 'Madrid', 'Alcorcón']);
+  assert.deepEqual(placeCandidates('San Lorenzo de El Escorial está en la sierra. En Alcalá de Henares nació Cervantes.').slice(0, 2), ['San Lorenzo de El Escorial', 'Alcalá de Henares']);
+  assert.deepEqual(placeCandidates('**Importante:** llama al 112. Según la Cruz Roja, el lunes...'), []);
+  assert.deepEqual(placeCandidates('La Coruña y Las Rozas'), ['La Coruña', 'Las Rozas']);
 });

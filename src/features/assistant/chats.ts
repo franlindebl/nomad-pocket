@@ -8,6 +8,8 @@ import i18n from '@/i18n';
 import { guideIndex } from '@/features/guide/guide';
 import { GUIDE_SOURCE, cardAnswer, vitalCard } from '@/features/guide/guide-core';
 import { emergencyNumber } from '@/features/maps/emergency';
+import { hasSearchIndex } from '@/features/maps/places';
+import { speak } from '@/features/maps/voice';
 import { uid } from '@/lib/format';
 import { HEALTH_FEATURES } from '@/lib/health';
 import { kvStorage } from '@/lib/kv';
@@ -15,8 +17,8 @@ import { useSettings } from '@/stores/settings';
 
 import { EngineUnavailableError, stopGeneration, withEngine, type SearchTool } from './engine';
 import { errorFor } from './errors';
-import { mapCardText, previousOf, runMapIntent, withChoice, type MapCard } from './map-answer';
-import { parseMapIntent } from './map-intent-core';
+import { aboutHereQuestion, mapCardSpeech, mapCardText, placeChips, previousOf, runMapIntent, withChoice, type MapCard } from './map-answer';
+import { intentFromModel, MAP_ROUTER_RULES, MAP_TOOL_NAME, MAP_TOOL_RULE, mapToolSpec, parseMapIntent, parseMapToolArgs, type MapModelArgs } from './map-intent-core';
 import { hasLibrary, retrieve } from './rag';
 import {
   buildRouterPrompt,
@@ -27,6 +29,8 @@ import {
   guessIntent,
   isHealthQuestion,
   languageEvidence,
+  parseToolArgs,
+  SEARCH_TOOL_NAME,
   NO_LIBRARY_ANSWER,
   NO_MODEL_ANSWER,
   noHealthAnswer,
@@ -230,6 +234,8 @@ const UI_THROTTLE_MS = 60;
 // What declaring search_library costs in the prompt: the JSON schema (with query_en for Spanish)
 // plus the template's own tool instructions (~250 tokens in Qwen's).
 const TOOL_PROMPT_TOKENS = 420;
+// What declaring search_map adds: its schema and the system prompt's line about it.
+const MAP_TOOL_TOKENS = 280;
 
 /** Language of the message; short ones ("ok", "gracias") follow the conversation. */
 function languageFor(question: string, history: Turn[]): Lang {
@@ -246,7 +252,8 @@ function patchStreaming(patch: Partial<Streaming>) {
   if (s) useChat.setState({ streaming: { ...s, ...patch } });
 }
 
-export async function sendMessage(question: string) {
+/** `spoken`: dictated; a map answer is then read aloud too (hands busy: driving, walking). */
+export async function sendMessage(question: string, opts: { spoken?: boolean } = {}) {
   const text = question.trim();
   const st = useChat.getState();
   if (!text || st.streaming) return;
@@ -260,7 +267,7 @@ export async function sendMessage(question: string) {
   const userMsg: ChatMessage = { id: uid(), sessionId, role: 'user', content: text, sources: [], createdAt: Date.now() };
   insertMessage(userMsg);
   useChat.setState({ activeSessionId: sessionId, messages: [...earlier, userMsg], error: null, sessions: listSessions() });
-  await answer(sessionId, text, toTurns(earlier), false);
+  await answer(sessionId, text, toTurns(earlier), false, undefined, opts.spoken);
 }
 
 /**
@@ -313,7 +320,7 @@ function toTurns(messages: ChatMessage[]): Turn[] {
  * `replaces` is an earlier answer to the same question: deleted once this one is
  * stored, shown again if this one ends up empty (stopped early, or failed).
  */
-async function answer(sessionId: string, text: string, history: Turn[], forceSearch: boolean, replaces?: ChatMessage) {
+async function answer(sessionId: string, text: string, history: Turn[], forceSearch: boolean, replaces?: ChatMessage, spoken = false) {
   const st = useChat.getState();
   const modelId = useSettings.getState().aiModelId;
   const library = st.useLibrary && hasLibrary();
@@ -335,6 +342,15 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
   let mapCard: MapCard | null = null;
   const previousCard = forceSearch ? null : lastMapCard(sessionId);
   const mapIntent = forceSearch ? null : parseMapIntent(text, previousOf(previousCard));
+  // "¿Qué es este sitio?": the library is asked about the town you're in, in this same answer.
+  if (mapIntent?.kind === 'aboutHere') {
+    patchStreaming({ phase: 'searchingMap' });
+    const about = await aboutHereQuestion(lang).catch(() => null);
+    if (about && !cancelled()) {
+      useChat.setState({ streaming: null });
+      return answer(sessionId, about, history, true, replaces, spoken);
+    }
+  }
   if (mapIntent) {
     patchStreaming({ phase: 'searchingMap' });
     try {
@@ -385,7 +401,29 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
       await engine.load((p) => patchStreaming({ loadProgress: p }));
       if (cancelled()) return;
 
-      // Decide whether to search.
+      // Decide whether to search. With maps installed the model may also send a map question the parser missed to
+      // the map (search_map, or the router's map fields): only alongside the library search, which already makes it
+      // decide (no extra pass for the rest).
+      const canMap = !forceSearch && hasSearchIndex();
+      /** Answers with a map card from what the model said; false when that isn't something the map can answer. */
+      const answerFromMap = async (said: MapModelArgs): Promise<boolean> => {
+        // The question must name what it wants (a kind of place, or what it is for): see intentFromModel.
+        const intent = intentFromModel(said, text);
+        if (!intent) return false;
+        patchStreaming({ phase: 'searchingMap', text: '' });
+        let card: MapCard | null = null;
+        try {
+          card = await runMapIntent(intent, previousCard);
+        } catch (e) {
+          console.warn('[assistant] map answer failed', e);
+        }
+        if (!card || cancelled()) return false;
+        mapCard = card;
+        answerText = mapCardText(card);
+        searched = card.type !== 'place';
+        patchStreaming({ phase: 'generating', text: answerText, map: card });
+        return true;
+      };
       let mode: 'chat' | 'search' | 'tools' = 'chat';
       let query: string | undefined;
       let queryEn: string | undefined;
@@ -396,8 +434,14 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
         else if (engine.decides === 'router' && engine.route) {
           patchStreaming({ phase: 'thinking' });
           try {
-            const d = await engine.route(ROUTER_INSTRUCTIONS, buildRouterPrompt(text, history));
-            mode = d.search ? 'search' : 'chat';
+            const d = await engine.route(canMap ? `${ROUTER_INSTRUCTIONS}\n\n${MAP_ROUTER_RULES}` : ROUTER_INSTRUCTIONS, buildRouterPrompt(text, history));
+            if (canMap && d.map) {
+              const said = { action: d.mapAction, category: d.mapCategory, place: d.mapPlace, destination: d.mapDestination };
+              if (await answerFromMap(said)) return;
+              if (cancelled()) return;
+            }
+            // A map question the map couldn't take (an unknown kind of place) is looked up, never answered from memory.
+            mode = d.search || (canMap && d.map) ? 'search' : 'chat';
             query = d.query.trim() || undefined;
             // Apple's router often writes English keywords for a Spanish question (21 of 47): useless for the
             // Spanish archives, just right for the English guides.
@@ -413,7 +457,9 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
       // Token budget: system + history + sources + answer must fit the window.
       const answerTokens = engine.kind === 'system' ? SYSTEM_ANSWER_TOKENS : MAX_ANSWER_TOKENS;
       let sys = systemPrompt(lang, mode === 'tools' ? 'tools' : mode === 'search' ? 'sources' : 'chat', { health, library, noHealth: !HEALTH_FEATURES });
-      const toolTokens = mode === 'tools' ? TOOL_PROMPT_TOKENS : 0;
+      const offerMap = mode === 'tools' && canMap;
+      if (offerMap) sys = `${sys}\n${MAP_TOOL_RULE[lang]}`;
+      const toolTokens = mode === 'tools' ? TOOL_PROMPT_TOKENS + (offerMap ? MAP_TOOL_TOKENS : 0) : 0;
       // With sources in the user turn the question goes in twice (once if long), with labels.
       const questionTokens = estimateTokens(mode === 'search' ? ragMessageFrame(text, lang) : text);
       const free = engine.contextTokens - answerTokens - estimateTokens(sys) - questionTokens - toolTokens - 120;
@@ -445,20 +491,33 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
       }
       if (cancelled()) return;
 
-      const tool: SearchTool | undefined =
-        mode === 'tools'
-          ? {
-              spec: searchToolSpec(lang),
-              run: async ({ query: q, queryEn: en }) => {
-                patchStreaming({ phase: 'searching', text: '' });
-                const r = await retrieve(text, lang, contextBudget, { history, query: q || undefined, queryEn: en });
-                keep(r);
-                patchStreaming({ phase: 'generating' });
-                if (!r.sources.length && !r.overflow) return { final: NOT_FOUND_ANSWER[lang] };
-                return buildToolResult(r.sources, lang);
-              },
-            }
-          : undefined;
+      const searchLibrary = async (q?: string, en?: string): Promise<string | { final: string }> => {
+        patchStreaming({ phase: 'searching', text: '' });
+        const r = await retrieve(text, lang, contextBudget, { history, query: q || undefined, queryEn: en });
+        keep(r);
+        patchStreaming({ phase: 'generating' });
+        if (!r.sources.length && !r.overflow) return { final: NOT_FOUND_ANSWER[lang] };
+        return buildToolResult(r.sources, lang);
+      };
+      const tools: SearchTool[] = [];
+      if (mode === 'tools') {
+        tools.push({
+          name: SEARCH_TOOL_NAME,
+          spec: searchToolSpec(lang),
+          run: async (args) => {
+            const { query: q, queryEn: en } = parseToolArgs(args);
+            return searchLibrary(q, en);
+          },
+        });
+        if (offerMap) {
+          tools.push({
+            name: MAP_TOOL_NAME,
+            spec: mapToolSpec(lang),
+            // The card is the answer (no second pass); a call the map can't take searches the library instead.
+            run: async (args) => ((await answerFromMap(parseMapToolArgs(args))) ? { final: answerText } : searchLibrary()),
+          });
+        }
+      }
       patchStreaming({ phase: mode === 'tools' ? 'thinking' : 'generating' });
 
       let last = 0;
@@ -467,7 +526,7 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
         messages: [...turns, { role: 'user', content: userTurn }],
         maxTokens: answerTokens,
         temperature: 0.5,
-        tool,
+        tools,
         onText: (raw) => {
           // An answer that only says "not found" and goes on from memory is cut there.
           const t = guardNotFound(raw, lang);
@@ -503,6 +562,15 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
   else if (!finalText && !failed && !stopped) failed = 'empty';
   // The conversation may have been deleted while answering.
   const sessionAlive = !!db().getFirstSync('SELECT 1 FROM chat_sessions WHERE id = ?', sessionId);
+  // A library answer that names towns the maps have gets "see it on the map" chips (not a vital card, nor an error).
+  if (!mapCard && !vital && finalText && sessionAlive && !wasCancelled) {
+    try {
+      const places = await placeChips(`${text}\n${finalText}`);
+      if (places.length) mapCard = { type: 'chips', places };
+    } catch (e) {
+      console.warn('[assistant] place chips', e);
+    }
+  }
   if (finalText && sessionAlive) {
     const msg: ChatMessage = {
       id: streaming.messageId,
@@ -516,12 +584,14 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
     };
     insertMessage(msg);
     if (replaces) db().runSync('DELETE FROM chat_messages WHERE id = ?', replaces.id);
+    const say = spoken && mapCard ? mapCardSpeech(mapCard) : null;
+    if (say) speak(say);
     useChat.setState({
       streaming: null,
       // The conversation may have been reopened meanwhile, reloading the old answer.
       messages: cur.activeSessionId === sessionId ? [...cur.messages.filter((m) => m.id !== replaces?.id), msg] : cur.messages,
       error: cur.activeSessionId === sessionId ? failed : cur.error,
-      reveal: (vital || mapCard) && cur.activeSessionId === sessionId ? msg.id : cur.reveal,
+      reveal: (vital || (mapCard && mapCard.type !== 'chips')) && cur.activeSessionId === sessionId ? msg.id : cur.reveal,
       sessions: listSessions(),
     });
   } else {

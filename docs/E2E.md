@@ -45,7 +45,7 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 | `npm run e2e:all` | 57 | ~41 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
 | `PLANET_PORT=8766 scripts/e2e.sh --build --tags planet` | 2 | ~12 min | extraction resumed after a kill (`map-22`) and retried after a network failure (`map-23`) (tag `planet`, their own build: rebuild without `PLANET_PORT` before other suites) | nothing (local stand-in planet) |
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape | nothing (offline) |
-| `npm run e2e:android` | 5 | ~18 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack, content updates | internet, Android emulator |
+| `npm run e2e:android` | 8 | ~22 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack, content updates, official alerts, the assistant's map answers | internet, Android emulator |
 | `npm run e2e:carplay` | 1 + car steps | ~5 min | CarPlay on the simulator's car screen: opened from the car, Destinos › Emergencias cerca › trip preview › Ir › Terminar, the phone adopting the app the car started, a phone trip shown and ended on the car (section CarPlay) | Xcode 26.5's Simulator + iOS 26.5 simulator (`scripts/carplay/carplay-sim.sh setup`), a Release build with CarPlay on, Accessibility permission for the terminal |
 | `npm run e2e:androidauto` | 1 + car steps | ~8 min | Android Auto on the Android Automotive emulator: opened from the car with the app not running, Destinos › Emergencias cerca › preview › Ir › Terminar, Buscar › preview › back, a `geo:` destination › Ir › arrival, the phone UI on the JS the car started (section Android Auto) | The Automotive emulator `NP-auto-34` (created on the first run), Maestro, the Automotive APK (`--build`) |
 
@@ -61,8 +61,9 @@ runs the fast checks instead: typecheck, lint, unit tests and i18n keys (~5–10
 The iPhone flows don't run on iPad: there the tabs are a text bar at the top instead of
 icons. The iPad tour taps them by name (`tapOn: { text: "Mapas", index: 0 }`).
 
-Android has its own tour (`e2e/flows/android/`, `scripts/e2e-android.sh`): it installs the
-release APK on the `Pixel_API_36` emulator (`--build` rebuilds it), gives the app Spanish as
+Android has its own tour (`e2e/flows/android/`, `scripts/e2e-android.sh`; `ONLY=<flow name>` runs one flow,
+`ANDROID_SERIAL=emulator-5554` picks the emulator when another one runs, e.g. the Android Auto session's Automotive
+emulator): it installs the release APK on the `Pixel_API_36` emulator (`--build` rebuilds it), gives the app Spanish as
 its per-app language (`cmd locale set-app-locales`) and location, and runs the flows tagged
 `android`. A release build can't be seeded (no `run-as`), so the tour downloads a 1 MB and
 a 12 MB archive; the runner turns the emulator's Wi-Fi off (`svc wifi disable`), so it is on mobile data and
@@ -292,6 +293,9 @@ By hand:
 | assistant | `ai-08-dictation` | AI-08 | nightly | — (microphone shown; not tapped: the simulator's audio input aborts the app) |
 | assistant | `ai-09-copy-regenerate` | AI-09 | nightly | seeded (system model: Copy shows "Copiado"; Regenerate answers the last question again) |
 | assistant | `ai-10-map-answers` | AI-10 | smoke | seeded-country (map answers with no model: pharmacies near a town, where am I with the 112 button, the nearest hospital opens the trip preview) |
+| assistant | `ai-11-map-model` | AI-11 | nightly | seeded, seeded-country, Apple Intelligence (a map question the parser misses goes to the map through the router: petrol stations near Sant Julià de Lòria; a library answer naming a town gets its map chip; "¿qué es este pueblo?" asks the library about the town you're in) |
+| assistant | `ai-12-map-phase2` | AI-12 | nightly | seeded-country (save the spot as the car and find it again, today's light, "estoy perdido" with the guide's advice first and, out of town, the arrow to the nearest one, a town's coordinates and UTM, official alerts while off, a route from elsewhere drawn on the map) |
+| assistant | `ai-13-map-phase3` | AI-13 | nightly | seeded-country (petrol stations on the way to Encamp and the last within a range, alerts on the route while alerts are off, a trip to a country without its map) |
 | downloads | `dl-02-controls` | DL-02 | nightly | network |
 | updates | `upd-01-archives` | UPD-01, UPD-02, UPD-03 | full | seeded, updates-server (Home's card, Library's badge and link, the sheet; "Actualizar todo" replaces two archives and leaves the course that can't fit; its delete-first is refused with nothing deleted) |
 | updates | `upd-02-country` | UPD-04 | full | seeded-old-country, routing-server, maps-server (Andorra as a January build: Home's card, update from the sheet, "Tus mapas" with October's build) |
@@ -308,6 +312,7 @@ By hand:
 | android | `android-04-prepare` | ANDROID-04 | android | — (offline) |
 | android | `android-05-routing` | ANDROID-05 | android | network (published catalog + Andorra pack from GitHub) |
 | android | `android-07-alerts` | ANDROID-07 | android | stand-in alert feeds (official alerts turned on in Madrid from onboarding: Home's card, the list, an alert's official text, the run log) |
+| android | `android-08-map-answers` | ANDROID-08 | android | network (Andorra from the published catalog; the assistant's map answers with no model: pharmacies near a town, no health gate on Android, where am I, the nearest hospital's trip preview) |
 | android | `android-06-updates` | ANDROID-06 | android | network (a 1 MB archive from Kiwix), updates-server (its newer edition from the stand-in catalog, through `adb reverse`) |
 | carplay | `car-00-prepare` | CAR-01…CAR-04 (with `scripts/carplay/e2e-carplay.sh`) | carplay | routing-server, maps-server; the iOS 26.5 CarPlay simulator |
 | androidauto | `auto-00-prepare` | AUTO-01…AUTO-05 (with `scripts/androidauto/e2e-androidauto.sh`) | androidauto | its own local catalogs; the Android Automotive emulator |
@@ -495,6 +500,9 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `map-answer`, `map-answer-row`, `map-answer-locality` | assistant map answer: the card, a place row (opens it on the map), the town of "¿dónde estoy?" |
   | `map-answer-go`, `map-answer-go-first`, `map-answer-call` | map answer actions: a row's "Llévame", the main "Llévame a …" / "Cómo llegar", a row's call button |
   | `map-answer-emergency`, `map-answer-share`, `map-answer-sms`, `map-answer-open`, `map-answer-option`, `map-answer-maps` | call the emergency number, share / SMS the position, see on the map, a "which one?" option, download maps |
+  | `map-answer-save`, `map-answer-coords`, `map-answer-sun`, `map-answer-lost`, `map-answer-town`, `map-answer-arrival`, `map-answer-no-alerts` | phase 2 cards: save the spot, a place's coordinates, today's light, the lost card's advice and nearest town, the arrival before dark, no alerts |
+  | `map-answer-range`, `map-answer-avoid`, `map-answer-trip-map`, `map-answer-download`, `map-answer-chips`, `map-answer-chip` | phase 3: the last stop within a range, the route avoiding an alert area, a trip's map state and download, place chips under a library answer |
+  | `route-preview`, `route-preview-travel`, `route-preview-close` | a route from elsewhere drawn on the map (from the assistant): its card, time and distance, close |
   | `assistant-copy`, `assistant-regenerate`, `assistant-report` | icon buttons under a finished answer: copy it as plain text; answer the last question again (last answer only); report it by email (opens the mail app; Android only) |
   | `assistant-suggestion-<n>` | assistant empty screen: suggested question in card n (0–3; the questions rotate) |
   | `assistant-model-banner` | assistant with no model ready: the banner recommending one (download / built-in model) |

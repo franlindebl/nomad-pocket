@@ -67,13 +67,18 @@ Roughly by value. Items A, U and 0 are in progress; 3, 4 and 7 are partly done (
 started. (Preparedness was added
 on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
 
-AM. **Assistant × maps** (`docs/ASSISTANT_MAP_PLAN.md`, approved 2026-11-05; **phase 1 built the same day** except
-   1b, the model fallback, and the measuring: see the plan's "Phase 1 — status"): the assistant
+AM. **Assistant × maps** (`docs/ASSISTANT_MAP_PLAN.md`, approved 2026-11-05; **phase 1 and 1b built the same day**,
+   checked on iOS and Android: see the plan's "Phase 1 — status" and "1b"): the assistant
    answers map questions with a map card built from the index (nearest X near a place, take me to the nearest X by
    time, A→B, where am I / what to tell 112, share location by SMS, saved places, meeting point, lost, before dark,
    open now, UTM, alerts near / on the route, evacuation, along the route, place ↔ library, trip prep, voice).
-   Owner: all 24 use cases, three phases; no Android health gate for map questions. Next: 1b (`search_map` tool /
-   router fields + a map bench), the Android emulator check, then phase 2.
+   Owner: all 24 use cases, three phases; no Android health gate for map questions. 1b (the model's say: `search_map`
+   for GGUF, map fields in Apple's router) built and measured the same day; phase 2 too (open now, saved places,
+   meeting point, lost, before dark, alerts near, UTM, spoken answers) and the route preview from elsewhere. Next:
+   phase 3 too (along the route, alerts on the route and avoiding them, out of an alert area, place chips under
+   library answers, trip prep, spoken car search), and the lost card's live arrow and "¿qué es este pueblo?". Next,
+   on a phone / car: nearest-by-time latency, spoken answers, the car search. Decided not to build (reasons in the
+   plan): the nearest road, the embassy `country` tag, the nearest landmark, a trip country's alerts.
 
 AI. **Assistant quality** (`docs/ASSISTANT_QUALITY_PLAN.md`, measured 2026-10-31 on the Spain kit with 50 crisis
    questions, blind-graded): Apple FM scores 0.42/3 and Qwen3.5 4B 1.30/3 as the app is; retrieval v2 + Spanish
@@ -386,6 +391,47 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   settings store as onboarded before the first launch (`scripts/e2e.sh`); Home's once-only offer, turned on from it,
   gives way to the warning card and doesn't come back after a relaunch.
 - ALR-01 moved to smoke: the run before every TestFlight build covers alerts now. All three pass on iOS.
+
+### 2026-11-05 — Assistant × maps: phase 3
+
+- `maps/along-core.ts` (pure, tested): points along a route within a corridor, where a route enters an alert's
+  drawn area, the last stop within a range. Intents along the route (with a range: "me quedan 80 km"), alerts on
+  the route (+ "Ruta evitando la zona": `computeRouteAvoiding`, Valhalla `exclude_polygons`, one pack), out of an
+  alert area (the official instruction first), trip prep (map / pack state, the country's number, the embassy).
+- Place chips under library answers (`placeCandidates` + exact place-layer hits, at most 3). CarPlay / Android Auto's
+  search goes through the parser first (a small change in `src/features/carplay/carplay.ts`, the Android Auto
+  session told).
+- E2E `ai-13-map-phase3` passes; `ai-11` (with the chip step) passes.
+- Then: the lost card's arrow to the nearest town (`maps/TowardArrow.tsx`, compass; over 1.5 km from it) and the
+  emergency number in its notes; "¿qué es este pueblo?" asks the library about the town you're in. AI-11 and AI-12
+  extended and passing; Android Auto's end-to-end check passes with the car search change.
+
+### 2026-11-05 — Assistant × maps: phase 2, and the rest of phase 1
+
+- Phase 1 leftovers: a route from elsewhere drawn on the map (`maps/route-preview.ts`, `RoutePreviewCard`); embassies
+  matched by any country's es/en names (the OSM `country` tag left out: it needs a column in the packs' point files
+  and every pack rebuilt).
+- Phase 2: `maps/hours-core.ts` (open now; the place card's badge too), `maps/sun-core.ts` (sunset, civil dusk),
+  intents for saving the spot and finding the car, the meeting point, lost, before dark, official alerts near, a
+  place's coordinates and UTM; a dictated question's map answer is read aloud. The lost card follows the guide's
+  `lost-at-nightfall` (stay put, call) instead of offering a walk to the nearest town.
+- No crisis question of the 376 is taken by the new intents. E2E `ai-12-map-phase2` passes; `ai-10` still passes.
+
+### 2026-11-05 — Assistant × maps: 1b, the model sends missed map questions to the map
+
+- GGUF: `search_map` next to `search_library` (engine.ts takes a list of tools). Apple: map fields in the router's
+  `SearchDecision` (nomad-llm, native change) and `MAP_ROUTER_RULES`. Only when the parser misses, maps are indexed
+  and the library is on.
+- Guard `intentFromModel(args, question)`, written after the first bench run sent crisis questions to the map (Qwen
+  7 of 375, Apple 9 of 376, some with towns copied from the router's examples): the question must ask where, name the
+  kind or its purpose, and contain the model's place; a model's town is weak.
+- `scripts/assistant-bench/map-bench.ts` + `gold-map.json` (42) + `gold-map-test.json` (16 held out): parser 26/42
+  and 10/16; with Qwen3.5 4B 42/42 and 13/16 → 16/16 after the vocabulary gaps the held-out set showed; with Apple's
+  router 37/42 and 12/16 → 14/16; crisis questions given a map card: Qwen 1 (a fair one), Apple 0. E2E
+  `ai-11-map-model` (router path, iOS 27 simulator) passes.
+- Android: E2E `android-08-map-answers` (Andorra from the published catalog, no model) passes on the emulator
+  (`scripts/e2e-android.sh` gained `ONLY=<flow>` and `ANDROID_SERIAL`). The no-model banner and fixed answer now say
+  map questions are answered too. iOS regressions `ai-03`, `ai-06`, `ai-10` pass on the same build.
 
 ### 2026-11-05 — Assistant × maps: phase 1 (map answers in the chat)
 

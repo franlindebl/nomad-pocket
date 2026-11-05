@@ -830,6 +830,11 @@ async function matchPlaces(text: string, near: LatLon | null, limit: number, lay
 const LOCALITY_RADII = [2_000, 15_000];
 
 async function localityNear(p: LatLon): Promise<string | null> {
+  return (await nearestLocalityPoint(p))?.name ?? null;
+}
+
+/** The nearest town or neighbourhood with its position (the lost card's "Navalcarnero, 7 km SO"), within 15 km. */
+export async function nearestLocalityPoint(p: LatLon): Promise<(LatLon & { name: string }) | null> {
   // Nearest first in SQL: a city's 15 km box holds over a thousand localities (Madrid ~1,000), and
   // a plain LIMIT kept the first ones along the lat index, the box's southern edge ("Nudo Sur" for Calle de Alcalá).
   const lonScale = Math.cos((p.lat * Math.PI) / 180) ** 2;
@@ -847,7 +852,7 @@ async function localityNear(p: LatLon): Promise<string | null> {
     );
     // A box's corners lie beyond its radius: only a hit within it is surely the nearest.
     const hit = nearestLocality(p, nearest, radius);
-    if (hit) return hit.name;
+    if (hit) return { name: hit.name, lat: hit.lat, lon: hit.lon };
   }
   return null;
 }

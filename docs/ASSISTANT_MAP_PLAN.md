@@ -14,8 +14,8 @@ Analysed the same day against the code as of 8b59e9d. Owner's decisions, same da
   a name, an address, a phone, a distance or a time. The answer is a card built from the index (same reason the
   vital cards are quoted word for word: the 4B model's paraphrases were dangerous).
 
-Approved to implement. **Phase 1 built 2026-11-05, except task 8 (1b, the model fallback) and the measuring**: see
-"Phase 1 — status" below.
+Approved to implement. **Phase 1 built 2026-11-05, 1b (the model fallback) included and measured**: see "Phase 1 —
+status" and "1b — measured" below. Left: latency on a real phone, `previewRoute`, the embassy tag.
 
 ## The idea in one paragraph
 
@@ -299,18 +299,119 @@ Built and verified (unit tests; E2E `ai-10-map-answers` on the iOS 27 simulator 
 - Extra: saved markers ("casa", "el coche") and the plan's meeting point resolve by name (part of #10, #11); an
   answer waits up to 20 s for maps still being indexed or imported, then says so ("preparing") instead of "not found".
 
-Left in phase 1: task 8 (1b: `search_map` tool and router fields, measured on a `gold-map.json` bench); the
-Android emulator check; latency of nearest-by-time on a real phone; `previewRoute` from another origin; the
-embassy `country` tag.
+Android checked 2026-11-05 on the emulator (E2E `android-08-map-answers`: Andorra downloaded from the catalog, no
+model: pharmacies, where am I, the nearest hospital's preview). Without a model the assistant's banner and fixed
+answer now say it also answers map questions.
+
+Then (same day): `previewRoute` built (`maps/route-preview.ts` + `RoutePreviewCard`: a trip from elsewhere drawn on
+the map with time and distance, no GPS; starting guidance clears it; the route card's "Ver la ruta en el mapa").
+The embassy `country` tag was **not** added: the country packs' point files (`scripts/routing/emergency-points.py`,
+`build-country.sh`, the workflow) would need a new column and every pack a rebuild, for one kind of place. Instead
+the name filter takes any country's Spanish and English names from `regions.json` plus other languages for common
+ones (`COUNTRY_ALIASES`). Left: latency of nearest-by-time on a real phone (needs the owner's iPhone).
+
+### 1b — built and measured (2026-11-05)
+
+- GGUF: `search_map` (`mapToolSpec`) offered next to `search_library` in the same first pass (engine.ts takes a list
+  of tools now; a misspelt tool name goes to the one its arguments fit). The card is the answer (`{ final }`, no
+  second pass); a call the map can't take searches the library instead.
+- Apple: the router's `SearchDecision` has `map`, `mapAction`, `mapCategory`, `mapPlace`, `mapDestination`
+  (nomad-llm, iOS); `MAP_ROUTER_RULES` are appended to its instructions when maps are installed. A map question the
+  map can't take is searched in the library, never answered from memory.
+- Only when the parser returned null, maps are installed (`hasSearchIndex`) and the library is on: the model
+  already decides there, so no extra pass for anyone else. Without a library, only the parser answers.
+- `intentFromModel(args, question)` is the guard. Both models sent crisis questions to the map on the first run
+  (Qwen 7 of 375: "huele a humo" → shelters, "un hombre me sigue" → police; Apple 9 of 376, with towns taken from
+  its instructions' examples: "¿tengo que ir al médico?" → health centres in Leganés). So the question itself must
+  ask where / how to get somewhere (`ASKS_WHERE`), name the kind or what it is for (`namedKinds`: "insulina" →
+  pharmacy, "denuncio" → police; the model's kind must be one of them), and contain the place the model wrote; a
+  town the model wrote is a weak intent (not in the index → the library answers). Misspelt kinds ("parke de
+  bomberos", "embasía") resolve by stem.
+- Bench: `scripts/assistant-bench/map-bench.ts` (README). `gold-map.json` (42, tuned on) and `gold-map-test.json`
+  (16, held out); crisis sets `questions*.json` (376) for false positives. Qwen3.5 4B (llama-server, the app's
+  settings) and Apple FM (`fmbench route`, `mkroute.ts --map`):
+
+  | | design set (42) | held-out (16), before → after the vocabulary fixes it showed | crisis questions taken as map answers |
+  |---|---|---|---|
+  | parser alone | 26 | 10 | 0 of 376 |
+  | + Qwen3.5 4B | 42 | 13 → 16 | 1 of 375 strong (a fair one: "¿cómo encuentro una farmacia abierta por la noche?"), 1 weak route that falls back |
+  | + Apple FM router | 37 | 12 → 14 | 0 strong, 1 weak that falls back |
+
+  The held-out "after" figures are after fixing what it showed ("combustible", "busco", "how do I walk from"):
+  generic vocabulary gaps, but no longer a clean test; write a fresh held-out set before trusting the next change.
+  Latency: the decision pass is the one the library already pays (Qwen 4B ~3–9 s on a Mac M-series GPU, Apple ~4–6 s
+  on the Mac); the map lookup adds well under a second, nearest-by-time up to 6 s.
+- E2E `ai-11-map-model` (nightly; seeded library + Andorra, Apple Intelligence on the iOS 27 simulator): "se me está
+  acabando la gasolina y estoy cerca de Sant Julià de Lòria" → the router → petrol stations there. The GGUF path is
+  covered by the bench, not E2E (the E2E fixture model is Qwen3.5 0.8B).
 
 ### Phase 2 — everyday and outdoors (5, 9, 10, 11, 14, 15, 16, 17, 24 voice)
 
 `hours-core.ts` (+ the place card badge), UTM input, markers save/go, meeting points, UTM output, lost card with
 live arrow and nearest road, `sun-core.ts`, alerts near, spoken summary.
 
+**Status (2026-11-05): built**, verified by unit tests and E2E `ai-12-map-phase2` (iOS 27 simulator, Andorra):
+
+- #5 open now: `features/maps/hours-core.ts` (pure, a subset of OSM `opening_hours`; anything else is unknown,
+  never "open"). Map answers carry `openNow`; "farmacia abierta" / "de guardia" fetch more candidates and put the
+  open ones first, unknown next, closed last. The map's place card shows "Abierto ahora" / "Cerrado ahora".
+- #9 coordinates as a destination: decimal, DMS and UTM ("llévame a 30T 430500 4466200") through `parseCoordinates`.
+- #10 saved places: "guarda dónde estoy como el coche" (a card whose "Guardar" makes the pin: never silently),
+  "¿dónde he aparcado?" (markers named coche / car / parking; none → says so and lists what is saved), "llévame a
+  casa" (markers by name, from phase 1).
+- #11 meeting point: "¿dónde quedamos si nos separamos?", "llévame al punto de encuentro": the plan's points, with
+  "Llévame" when pinned; a point without a pin opens the plan's meeting screen; none set → "Definir punto de encuentro".
+- #14 UTM: "pásame mis coordenadas a UTM" (the where-am-I card has it), "¿qué coordenadas tiene Encamp?" (the place
+  card shows coordinates and UTM).
+- #15 lost: **changed from the plan** after reading the guide's card `lost-at-nightfall` (Guardia Civil, NPS: "stop
+  and stay where you are"): no "walk to the town" button. The card leads with that advice and the emergency number,
+  links the guide card, then where you are (coordinates, UTM, landmark), the nearest town with distance and
+  direction as a fact (hidden when it's the town you're in), and today's sunset and civil dusk. Not built: the live
+  compass arrow (built afterwards: `maps/TowardArrow.tsx`, shown when you're over 1.5 km from the nearest town; without
+  a compass it is drawn against north and says so). Not built: the nearest road: the tile decoder keeps one
+  representative point per feature, not its line, so "the nearest road" could be a kilometre off its real stretch;
+  it needs the decoder to keep geometries (shared, performance-sensitive code) — not worth it for this.
+- #16 before dark: `features/maps/sun-core.ts` (NOAA; tests against almanac values, polar day and night). "¿A qué
+  hora anochece?", "¿cuánta luz me queda?", "¿llego andando a X antes de que anochezca?" (walking route time vs
+  sunset and dusk: before dark / after sunset / after dark; no arrival time without a route).
+- #17 alerts near: "¿hay avisos?", "¿qué avisos hay en Valencia?", "¿ha habido terremotos por aquí?" from the
+  official alerts already fetched (`visible()` of alerts-core); alerts off → says so with "Activar avisos".
+- #24 voice: a dictated question's map answer is also read aloud in one sentence (`mapCardSpeech`, `maps/voice.ts`
+  `speak`). Not testable on the simulator (its audio input aborts the app): check on a phone.
+
 ### Phase 3 — crossing features (18, 19, 20, 21, 22, 23, 24 car)
 
 Route vs alert polygons and avoid, evacuation, along-route search, place ↔ library, trip prep, car voice search.
+
+**Status (2026-11-05): built**, verified by unit tests (`maps/along-core.test.ts`, the intent table) and E2E
+`ai-13-map-phase3` + `ai-11-map-model` (place chips) on the iOS 27 simulator:
+
+- #20 along the route: `maps/along-core.ts` (pure: points within a corridor of the line, 2 km by car / 600 m by
+  bike / 300 m on foot, with the distance along it; the last stop within a range). "Gasolineras de camino a
+  Valencia" routes from here; "farmacias en la ruta" uses the route on the map (guidance or a preview). "¿Me da la
+  gasolina? Me quedan 80 km" says the last petrol station within the range and flags those beyond.
+- #18 alerts on the route: an alert's drawn area entered by the route (`routeEntersRings`, checked every ~200 m), at
+  which kilometre; "Ruta evitando la zona" previews a route with Valhalla's `exclude_polygons`
+  (`routing.ts` `computeRouteAvoiding`, one pack only: stitched routes don't take exclusions). Alerts without a
+  drawn area (MeteoAlarm zones) are counted, not checked: the card says so.
+- #19 out of the alert area: the official instruction of each alert covering you first ("sometimes the safest is to
+  stay inside"), then the nearest shelters / assembly points outside every covering area (or the nearest town).
+  Routes to them don't exclude the area you're in (Valhalla can't start inside an excluded polygon).
+- #21/#22 places in library answers: not a map intent. After a library answer, the towns and cities it (or its
+  question) names that the index knows by that exact name get "Ver … en el mapa" chips (at most 3; a chip
+  `MapCard` stored with the message; "¿cómo llego?" then goes to the first one). "¿Qué es este pueblo / sitio?"
+  asks the library about the town you're in ("¿Qué es Andorra la Vella?", with its chip). "¿Qué es esto que tengo
+  delante?" (the nearest landmark) was not built: the points with details are emergency kinds, and the index's other
+  POIs have no spatial index (a scan of a country's FTS table on the phone).
+- #23 trip prep: "me voy de viaje a Marruecos": the country (es/en name, `regions.json`), whether its map and routing
+  pack are installed or downloading, its emergency number (`emergency.ts` `numberFor`), the embassy of the person's
+  country there when the map is in, and "Descargar el mapa de …" (the existing download screen). Alerts there are
+  not shown, on purpose: the app fetches the sources of the country you're in and switches when you arrive, and
+  today's alerts for a trip days away will have changed by then.
+- #24 car: CarPlay / Android Auto's search (spoken in the car) goes through `parseMapIntent` first: "gasolinera más
+  cercana", "busca una farmacia" list the nearest of that kind, "gasolineras en la ruta" the ones along the trip;
+  without health features the car keeps leaving health places out, like its Emergencias list. Not run on a car
+  screen yet.
 
 ## Measuring
 

@@ -5,8 +5,10 @@
 // read the app's own data: saved places, the emergency points index and the offline search.
 import { useContent } from '@/features/content/items';
 import { ensureMapAssets } from '@/features/maps/assets';
-import { nearestEmergencyPlaces } from '@/features/maps/emergency';
-import { EMERGENCY_CATEGORIES, type EmergencyCategory } from '@/features/maps/emergency-core';
+import { parseMapIntent } from '@/features/assistant/map-intent-core';
+import { alongRoute, CORRIDOR_M, corridorBox } from '@/features/maps/along-core';
+import { nearestEmergencyPlaces, nearestPlacesOfKinds, placesOfKindsIn } from '@/features/maps/emergency';
+import { EMERGENCY_CATEGORIES, EMERGENCY_KINDS, type EmergencyCategory } from '@/features/maps/emergency-core';
 import { distanceMeters, type LatLon } from '@/features/maps/geo';
 import { startGuidance, useGuidance } from '@/features/maps/guidance';
 import { useMarkers } from '@/features/maps/markers';
@@ -140,10 +142,39 @@ async function items(kind: string, category?: string, query?: string, car: Parti
     });
   }
   if (kind === 'search' && query) {
+    // A spoken request ("gasolinera más cercana", "busca una farmacia", "gasolineras en la ruta"): the assistant's
+    // parser, so the car answers like the chat (docs/ASSISTANT_MAP_PLAN.md, #24). Anything else: the place search.
+    const asked = await askedOfMap(query, from);
+    if (asked) return asked;
     const results = await searchPlaces(query, from, LIST_LIMIT);
     return results.map((r) => ({ title: r.name, detail: [r.context, away(from, r)].filter(Boolean).join(' · ') || null, lat: r.lat, lon: r.lon }));
   }
   return [];
+}
+
+/** Places a spoken car search asks for, nearest first (or in route order along the trip); null: a plain search. */
+async function askedOfMap(query: string, from: LatLon | null): Promise<CarItem[] | null> {
+  const parsed = parseMapIntent(query);
+  if (!parsed) return null;
+  // The car lists keep their rule: without health features (Android) no health places (Emergencias cerca does the same).
+  const intent =
+    'kinds' in parsed && !HEALTH_FEATURES ? { ...parsed, kinds: parsed.kinds.filter((k) => !(k in EMERGENCY_KINDS) || EMERGENCY_KINDS[k as keyof typeof EMERGENCY_KINDS] !== 'health') } : parsed;
+  if ('kinds' in intent && !intent.kinds.length) return [];
+  const item = (p: { name: string | null; kind: string; lat: number; lon: number }, detail: string | null): CarItem => {
+    const label = t(`maps:kind.${p.kind}`);
+    return { title: p.name || label, detail: [p.name ? label : null, detail].filter(Boolean).join(' · ') || null, lat: p.lat, lon: p.lon };
+  };
+  if ((intent.kind === 'nearby' || intent.kind === 'goNearest') && from && ('here' in (intent.kind === 'nearby' ? intent.near : intent.from))) {
+    const places = await nearestPlacesOfKinds(intent.kinds, from, LIST_LIMIT);
+    return places.map((p) => item(p, p.distance === null ? null : formatDistance(p.distance)));
+  }
+  const route = useGuidance.getState().route;
+  if (intent.kind === 'alongRoute' && !intent.to && route) {
+    const corridor = CORRIDOR_M[route.costing];
+    const along = alongRoute(await placesOfKindsIn(intent.kinds, corridorBox(route.shape, corridor)), route.shape, corridor);
+    return along.slice(0, LIST_LIMIT).map((p) => item(p, t('maps:carplay.alongAt', { distance: formatDistance(p.alongM) })));
+  }
+  return null;
 }
 
 /** Started once by the feature init; nothing on Android or without the native module. */

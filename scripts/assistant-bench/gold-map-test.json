@@ -1,0 +1,18 @@
+[
+  {"id": "t01", "q": "Se nos ha pinchado una rueda y vamos justos de combustible, estamos por Talavera", "expect": {"kind": "nearby", "kinds": ["fuel"], "place": "talavera"}},
+  {"id": "t02", "q": "¿Dónde puedo coger agua para beber en Rascafría?", "expect": {"kind": "nearby", "kinds": ["drinking_water"], "place": "rascafria"}},
+  {"id": "t03", "q": "Mi madre necesita ir a urgencias, ¿cuál nos pilla más cerca de Coslada?", "expect": {"kind": "nearby", "kinds": ["hospital"], "place": "coslada"}},
+  {"id": "t04", "q": "¿Cuánto se tarda en coche de Guadalajara a Alcalá?", "expect": {"kind": "route", "place": "alcala"}},
+  {"id": "t05", "q": "Estamos en San Lorenzo de El Escorial y necesitamos un sitio para dormir esta noche", "expect": {"kind": "nearby", "kinds": ["shelter"], "place": "escorial"}},
+  {"id": "t06", "q": "Se me han acabado las pastillas de la tensión, ¿dónde hay una farmacia de guardia por Móstoles?", "expect": {"kind": "nearby", "kinds": ["pharmacy"], "place": "mostoles"}},
+  {"id": "t07", "q": "¿Dónde hay un cuartel de bomberos en Alcobendas?", "expect": {"kind": "nearby", "kinds": ["fire_station"], "place": "alcobendas"}},
+  {"id": "t08", "q": "Nos han entrado a robar en casa, estamos en Rivas, ¿dónde está la policía?", "expect": {"kind": "nearby", "kinds": ["police"], "place": "rivas"}},
+  {"id": "t09", "q": "Is there a supermarket open near Toledo?", "expect": {"kind": "nearby", "kinds": ["supermarket"], "place": "toledo"}},
+  {"id": "t10", "q": "How do I walk from Atocha to the Prado?", "expect": {"kind": "route", "place": "prado"}},
+  {"id": "t11", "q": "I'm near Ávila and need a hospital", "expect": {"kind": "nearby", "kinds": ["hospital"], "place": "avila"}},
+  {"id": "t12", "q": "¿Hay algún desfibrilador en la estación de Chamartín?", "expect": {"kind": "nearby", "kinds": ["defibrillator"], "place": "chamartin"}},
+  {"id": "t13", "q": "¿A cuánto queda Segovia de aquí andando?", "expect": {"kind": "route", "place": "segovia"}},
+  {"id": "t14", "q": "Busco una ferretería para comprar cinta americana en Alcorcón", "expect": {"kind": "nearby", "kinds": ["hardware"], "place": "alcorcon"}},
+  {"id": "t15", "q": "Llévame andando al centro de salud más cercano", "expect": {"kind": "goNearest", "kinds": ["clinic"]}},
+  {"id": "t16", "q": "¿Dónde está el consulado de Colombia en Madrid?", "expect": {"kind": "nearby", "kinds": ["embassy"], "place": "madrid"}}
+]

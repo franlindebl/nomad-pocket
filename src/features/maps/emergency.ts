@@ -86,6 +86,12 @@ export function emergencyNumber(): EmergencyNumber {
   return { number: '112', for: 'all', country: null };
 }
 
+/** A country's emergency number (regions.json id), for a trip there; null when the table doesn't have it. */
+export function numberFor(countryId: string): EmergencyNumber | null {
+  const e = NUMBERS[countryId];
+  return e ? { number: e.n, for: e.for ?? 'all', country: countryId } : null;
+}
+
 /** emergencyNumber(), re-rendering when the position's country or the person's country changes. */
 export function useEmergencyNumber(): EmergencyNumber {
   useHereCountry((s) => s.id);
@@ -415,6 +421,21 @@ export async function nearestPlacesOfKinds(
     if (out.length >= limit) break;
   }
   return out;
+}
+
+/** Points of some kinds inside a bbox, off the JS thread (along a route: along-core.ts filters them to the corridor). */
+export async function placesOfKindsIn(kinds: readonly string[], bbox: [number, number, number, number], limit = 2000): Promise<EmergencyPlace[]> {
+  const [w, s, e, n] = bbox;
+  const lon = lonSql('lon', w, e);
+  const rows = await indexDbAsync().getAllAsync<PoiRow>(
+    `SELECT ${POI_COLUMNS} FROM map_pois WHERE kind IN (${kinds.map(() => '?').join(',')}) AND lat BETWEEN ? AND ? AND ${lon.sql}
+     GROUP BY osm_id LIMIT ${limit}`,
+    ...kinds,
+    s,
+    n,
+    ...lon.params,
+  );
+  return rows.map((r) => fromRow(r, null));
 }
 
 /** The nearest named point within `maxMeters`: a landmark for "dónde estoy" ("a 120 m de la Farmacia Sol"). */

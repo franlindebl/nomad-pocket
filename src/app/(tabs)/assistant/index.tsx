@@ -147,7 +147,7 @@ export default function AssistantScreen() {
           blocked={!!streaming}
           useLibrary={useLibrary}
           onToggleLibrary={setUseLibrary}
-          onSend={(q) => sendMessage(q)}
+          onSend={(q, spoken) => sendMessage(q, { spoken })}
           onStop={() => stopAnswer()}
         />
         {/* The empty chat shows it above; in a conversation it stays under the box, one line. */}

@@ -426,8 +426,8 @@ export const NO_LIBRARY_ANSWER: Record<Lang, string> = {
  * without one (chats.ts), everything else needs a model, recommended in the banner over the composer.
  */
 export const NO_MODEL_ANSWER: Record<Lang, string> = {
-  es: 'Para responder a esto necesito un modelo de IA en tu dispositivo, y ahora mismo no hay ninguno listo. Sin modelo solo respondo a las emergencias vitales, con las fichas de la guía de emergencias. Descarga el modelo recomendado en el aviso de abajo; después funciona sin conexión.',
-  en: "To answer this I need an AI model on your device, and none is ready right now. Without a model I only answer vital emergencies, with the emergency guide's cards. Download the recommended model from the notice below; after that it works offline.",
+  es: 'Para responder a esto necesito un modelo de IA en tu dispositivo, y ahora mismo no hay ninguno listo. Sin modelo solo respondo a las emergencias vitales, con las fichas de la guía de emergencias, y a las preguntas del mapa (farmacias, rutas, dónde estás). Descarga el modelo recomendado en el aviso de abajo; después funciona sin conexión.',
+  en: "To answer this I need an AI model on your device, and none is ready right now. Without a model I only answer vital emergencies, with the emergency guide's cards, and map questions (pharmacies, routes, where you are). Download the recommended model from the notice below; after that it works offline.",
 };
 
 /**

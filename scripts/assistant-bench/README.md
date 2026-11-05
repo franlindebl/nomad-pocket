@@ -73,3 +73,21 @@ cards answer each one (labelled by agents against the 202 cards of 2026-11-01; r
 node --experimental-strip-types evalmatch.ts questions-test.json gold-test.json      # V=1 lists misses
 node --experimental-strip-types coverage.ts questions-test.json /tmp/cov.json         # what search finds per question
 ```
+
+## Map questions (`map-bench.ts`; `docs/ASSISTANT_MAP_PLAN.md`, 1b)
+
+`gold-map.json` (42 map questions, the design set: the parser and `intentFromModel` were tuned on it) and
+`gold-map-test.json` (16, held out). The crisis sets above are the false-positive check: none of them should get a
+map card. The model stage asks only what the parser left, as the app does.
+
+```bash
+node --experimental-strip-types map-bench.ts                                   # parser (V=1 lists misses)
+node --experimental-strip-types map-bench.ts --llm=http://localhost:8080 --out=map.jsonl   # + Qwen (llama-server as above)
+node --experimental-strip-types map-bench.ts --rescore=map.jsonl               # a model run scored again after a change
+node --experimental-strip-types mkroute.ts --map gold-map.json questions.json questions-design.json questions-test.json route-in.jsonl
+fm/.build/release/fmbench route route-in.jsonl routes.jsonl
+node --experimental-strip-types map-bench.ts --routes=routes.jsonl             # + Apple's router
+```
+
+`--gold=gold-map-test.json` uses the held-out set; `--no-crisis` skips the crisis questions (a quick model run).
+

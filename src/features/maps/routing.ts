@@ -372,6 +372,17 @@ export function computeRoute(from: LatLon, to: LatLon, costing: Costing, heading
   });
 }
 
+/**
+ * A route that stays out of some areas (official alerts' drawn areas: "ruta evitando la zona"), on one pack: the
+ * stitched routes across packs don't take exclusions. Valhalla needs both ends outside the areas.
+ */
+export function computeRouteAvoiding(from: LatLon, to: LatLon, costing: Costing, avoid: [number, number][][]): Promise<Route> {
+  if (!isNomadRouteAvailable()) return Promise.reject(new RoutingError('unavailable', 'nomad-route is not in this build'));
+  const pack = packFor(from, to);
+  if (!pack) return Promise.reject(new RoutingError('noPack', 'no single routing pack covers both points'));
+  return serialized(() => routeIn(pack, { from, to, costing, avoid }));
+}
+
 /** Releases the open pack (before deleting its file). */
 export function closeRouter(): Promise<void> {
   lastStitch = null;

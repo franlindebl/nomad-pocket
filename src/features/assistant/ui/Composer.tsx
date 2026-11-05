@@ -17,7 +17,8 @@ type Props = {
   blocked?: boolean;
   useLibrary: boolean;
   onToggleLibrary: (v: boolean) => void;
-  onSend: (text: string) => void;
+  /** `spoken`: the text came from dictation (a map answer is then also read aloud). */
+  onSend: (text: string, spoken: boolean) => void;
   onStop: () => void;
 };
 
@@ -28,12 +29,18 @@ export function Composer({ busy, disabled, blocked, useLibrary, onToggleLibrary,
   const canSend = !!text.trim() && !busy && !blocked && !disabled;
   // What was typed when dictation started: the spoken text goes after it.
   const typed = useRef('');
-  const dictation = useDictation((spoken) => setText(joinDictation(typed.current, spoken)));
+  // Dictated since the last send (typing after it keeps the flag: the question was still spoken).
+  const dictated = useRef(false);
+  const dictation = useDictation((spoken) => {
+    dictated.current = true;
+    setText(joinDictation(typed.current, spoken));
+  });
 
   const send = () => {
     if (!canSend) return;
     dictation.cancel();
-    onSend(text.trim());
+    onSend(text.trim(), dictated.current);
+    dictated.current = false;
     setText('');
   };
 

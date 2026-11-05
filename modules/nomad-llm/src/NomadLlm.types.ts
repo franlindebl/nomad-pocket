@@ -24,8 +24,19 @@ export type GenerateOptions = {
   maxTokens?: number;
 };
 
-/** The model's call on whether a chat message needs a library search, and with what keywords. */
-export type RouteDecision = { search: boolean; query: string };
+/**
+ * The model's call on whether a chat message needs a library search, and with what keywords; and whether it is a map
+ * question (a kind of place near somewhere, a route, where am I), with what it names (src/features/assistant/map-intent-core.ts).
+ */
+export type RouteDecision = {
+  search: boolean;
+  query: string;
+  map: boolean;
+  mapAction: string;
+  mapCategory: string;
+  mapPlace: string;
+  mapDestination: string;
+};
 
 export type DeltaEvent = {
   requestId: string;

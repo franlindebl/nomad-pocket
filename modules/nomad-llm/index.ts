@@ -56,11 +56,20 @@ export function generate(requestId: string, options: GenerateOptions, onDelta: (
   });
 }
 
-/** Apple Foundation Models only: whether a message needs a library search (guided generation). */
+/** Apple Foundation Models only: whether a message needs a library search or the map (guided generation). */
 export async function route(prompt: string, instructions: string): Promise<RouteDecision> {
   if (!NomadLlm) throw new Error('System model not available');
   const r = await NomadLlm.route(prompt, instructions);
-  return { search: !!r.search, query: String(r.query ?? '') };
+  const str = (v: unknown) => String(v ?? '');
+  return {
+    search: !!r.search,
+    query: str(r.query),
+    map: !!r.map,
+    mapAction: str(r.mapAction),
+    mapCategory: str(r.mapCategory),
+    mapPlace: str(r.mapPlace),
+    mapDestination: str(r.mapDestination),
+  };
 }
 
 /** iOS only: whether dictation in `locale` stays on the device (false where the module isn't linked). */

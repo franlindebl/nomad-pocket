@@ -14,17 +14,19 @@ import { contentFile, toNativePath } from '@/lib/storage';
 
 import * as SystemLLM from '../../../modules/nomad-llm';
 import { getModel, SYSTEM_MODEL_ID } from './models';
-import { parseToolArgs, SEARCH_TOOL_NAME, stripThinking, stripToolCalls, type ToolQuery, type Turn } from './rag-core';
+import { stripThinking, stripToolCalls, type Turn } from './rag-core';
 
-/** The library search offered to a model that calls tools. */
+/** A tool offered to a model that calls tools: the library search (search_library) or the map (search_map). */
 export type SearchTool = {
-  /** OpenAI-style function definition (`searchToolSpec`). */
+  /** The function name in `spec`. */
+  name: string;
+  /** OpenAI-style function definition (`searchToolSpec`, `mapToolSpec`). */
   spec: object;
   /**
-   * Runs the search and returns the text handed back to the model, or `{ final }`: the answer
-   * itself, without a second pass (nothing found: the model would answer from memory).
+   * Runs the call (its raw JSON arguments) and returns the text handed back to the model, or `{ final }`:
+   * the answer itself, without a second pass (nothing found in the library; a map card).
    */
-  run: (query: ToolQuery) => Promise<string | { final: string }>;
+  run: (args: string | undefined) => Promise<string | { final: string }>;
 };
 
 export type GenerateRequest = {
@@ -33,8 +35,8 @@ export type GenerateRequest = {
   messages: Turn[];
   temperature?: number;
   maxTokens?: number;
-  /** Lets the model search the library itself (engines with `decides === 'tools'`). */
-  tool?: SearchTool;
+  /** Lets the model search the library or the map itself (engines with `decides === 'tools'`). */
+  tools?: SearchTool[];
   /** Called with the whole answer so far (already cleaned) on every update. */
   onText: (text: string) => void;
 };
@@ -42,11 +44,20 @@ export type GenerateRequest = {
 export type GenerateResult = {
   text: string;
   stopped: boolean;
-  /** The query of the library search the model made, if it made one. */
-  toolQuery?: string;
+  /** The tool the model called, if it called one. */
+  toolName?: string;
 };
 
-export type RouteDecision = { search: boolean; query: string };
+/** The router's call: search the library (with what keywords), and/or a map question (nomad-llm SearchDecision). */
+export type RouteDecision = {
+  search: boolean;
+  query: string;
+  map?: boolean;
+  mapAction?: string;
+  mapCategory?: string;
+  mapPlace?: string;
+  mapDestination?: string;
+};
 
 export interface Engine {
   readonly modelId: string;
@@ -216,43 +227,43 @@ class LlamaEngine implements Engine {
     // Released (app in the background, model switched or deleted) or stopped while loading.
     if (this.released || !this.ctx || this.stopRequested) return { text: '', stopped: true };
     const messages: LlamaMessage[] = [{ role: 'system', content: req.system }, ...req.messages];
-    const tool = this.decides === 'tools' ? req.tool : undefined;
-    if (!tool) return this.complete(req, messages, {});
+    const tools = this.decides === 'tools' ? (req.tools ?? []) : [];
+    if (!tools.length) return this.complete(req, messages, {});
+    const specs = tools.map((t) => t.spec);
 
-    // Pass 1: the model answers directly or calls search_library.
+    // Pass 1: the model answers directly or calls a tool.
     const first = await this.complete(req, messages, {
-      tools: [tool.spec],
+      tools: specs,
       tool_choice: 'auto',
       ...(this.toolThinking ? { enable_thinking: true, thinking_budget_tokens: DECISION_THINKING_TOKENS } : {}),
     });
-    // search_library is the only tool offered: a small model that misspells its name
-    // still meant it (and streaming stops at the call, so there is no text to fall back on).
-    const call = first.toolCalls?.find((c) => c.function?.name === SEARCH_TOOL_NAME) ?? first.toolCalls?.[0];
+    const call = first.toolCalls?.find((c) => tools.some((t) => t.name === c.function?.name)) ?? first.toolCalls?.[0];
     if (!call || first.stopped) return { text: first.text, stopped: first.stopped };
+    // A small model that misspells a tool's name still meant one (and streaming stops at the call, so there is
+    // no text to fall back on): the only one offered, else the one its arguments fit (search_library takes a query).
+    const tool = tools.find((t) => t.name === call.function?.name) ?? (tools.length === 1 ? tools[0] : pickByArgs(tools, call.function?.arguments));
 
-    // Pass 2: answer from the search results. Tools stay declared so the chat template
-    // renders the call the same way; tool_choice "none" keeps the model from searching again.
+    // Pass 2: answer from the tool's result. Tools stay declared so the chat template
+    // renders the call the same way; tool_choice "none" keeps the model from calling again.
     req.onText('');
-    const args = parseToolArgs(call.function?.arguments);
-    const query = args.query;
-    const result = await tool.run(args);
-    if (this.stopRequested) return { text: '', stopped: true, toolQuery: query };
+    const result = await tool.run(call.function?.arguments);
+    if (this.stopRequested) return { text: '', stopped: true, toolName: tool.name };
     if (typeof result !== 'string') {
       req.onText(result.final);
-      return { text: result.final, stopped: false, toolQuery: query };
+      return { text: result.final, stopped: false, toolName: tool.name };
     }
     const id = call.id || 'call_0';
-    const fn = call.function?.name === SEARCH_TOOL_NAME ? call.function : { name: SEARCH_TOOL_NAME, arguments: JSON.stringify({ query }) };
+    const fn = { name: tool.name, arguments: call.function?.arguments ?? '{}' };
     const second = await this.complete(
       req,
       [
         ...messages,
         { role: 'assistant', content: '', tool_calls: [{ id, type: 'function', function: fn }] },
-        { role: 'tool', tool_call_id: id, name: SEARCH_TOOL_NAME, content: result },
+        { role: 'tool', tool_call_id: id, name: tool.name, content: result },
       ],
-      { tools: [tool.spec], tool_choice: 'none' },
+      { tools: specs, tool_choice: 'none' },
     );
-    return { text: second.text, stopped: second.stopped, toolQuery: query };
+    return { text: second.text, stopped: second.stopped, toolName: tool.name };
   }
 
   /** One streamed completion; text updates go to `req.onText` until a tool call shows up. */
@@ -328,6 +339,19 @@ class LlamaEngine implements Engine {
     await quietly(() => ctx.stopCompletion());
     await quietly(() => ctx.release());
   }
+}
+
+/** The tool a call with an unknown name meant: search_library's calls carry a query, search_map's an action. */
+function pickByArgs(tools: SearchTool[], args: string | undefined): SearchTool {
+  let keys: string[] = [];
+  try {
+    const v: unknown = args ? JSON.parse(args) : null;
+    if (v && typeof v === 'object') keys = Object.keys(v);
+  } catch {
+    // not JSON
+  }
+  const wantsMap = keys.includes('action') || keys.includes('category') || keys.includes('destination');
+  return tools.find((t) => (t.name === 'search_map') === wantsMap) ?? tools[0];
 }
 
 // ---------------------------------------------------------------------------

@@ -3,10 +3,12 @@
 #
 #   scripts/e2e-android.sh            # flows tagged `android`
 #   scripts/e2e-android.sh --build    # rebuild the release APK first (after code changes)
+#   ONLY=android-08-map-answers scripts/e2e-android.sh   # one flow
 #
 # A release build can't be seeded with fixtures (no run-as), so the flows download what
 # they need. The app gets Spanish as its per-app language and location permission.
-# Env: AVD (default Pixel_API_36), ANDROID_HOME, MAESTRO.
+# Env: AVD (default Pixel_API_36), ANDROID_HOME, MAESTRO, ONLY (a flow name), ANDROID_SERIAL (which emulator,
+# when several run: e.g. the Android Auto session's Automotive one must not be picked).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -49,7 +51,7 @@ if ! "$ADB" devices | grep -q "emulator-.*device$"; then
   "$ADB" wait-for-device
   until [[ "$("$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == 1 ]]; do sleep 2; done
 fi
-SERIAL="$("$ADB" devices | awk '/^emulator-.*device$/ {print $1; exit}')"
+SERIAL="${ANDROID_SERIAL:-$("$ADB" devices | awk '/^emulator-.*device$/ {print $1; exit}')}"
 "$ADB" -s "$SERIAL" reverse "tcp:$UPDATES_PORT" "tcp:$UPDATES_PORT" >/dev/null
 # Mobile data only, so "Wi-Fi only" (on by default) always asks before a download and the
 # flows can require that question ("Usar datos móviles"). Some images connect to AndroidWifi.
@@ -78,6 +80,7 @@ ln -sfn "$OUT" "$ROOT/e2e/artifacts/latest-android"
 passed=0; failed=()
 for flow in $(grep -lE '^tags:.*[[ ,]android[],]' "$ROOT"/e2e/flows/**/*.yaml "$ROOT"/e2e/flows/*/*.yaml 2>/dev/null | sort -u); do
   name="$(basename "$flow" .yaml)"
+  [[ -n "${ONLY:-}" && "$name" != "$ONLY" ]] && continue
   echo "▶ $name"
   "$ADB" -s "$SERIAL" install -r "$APK" >/dev/null
   "$ADB" -s "$SERIAL" shell pm clear "$PKG" >/dev/null

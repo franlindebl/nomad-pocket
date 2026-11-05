@@ -14,6 +14,7 @@ import { space } from '@/theme';
 
 import { callNumber } from './call';
 import { findEmergencyPlace, getEmergencyPlace } from './emergency';
+import { openState } from './hours-core';
 import { policeForce } from './emergency-core';
 import { distanceMeters, formatLatLon, formatUtm, isFreshFix, toUtm, type LatLon } from './geo';
 import { startGuidance } from './guidance';
@@ -43,6 +44,9 @@ export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: num
     [place],
   );
   const phones = useMemo(() => parsePhones(poi?.phone), [poi]);
+  // When the card opened: "open now" from the OSM hours (hours-core.ts; unknown forms show nothing).
+  const [openedAt] = useState(() => new Date());
+  const open = useMemo(() => openState(poi?.openingHours, openedAt), [poi, openedAt]);
   const [address, setAddress] = useState<string | null>(null);
 
   // A place tapped on the map: "Calle Mayor, 12 · Sol" from its street and the offline index.
@@ -123,6 +127,8 @@ export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: num
           <Row gap={space.sm} style={{ flexWrap: 'wrap' }}>
             {poi.emergency === 1 ? <Badge label={t('place.emergencyYes')} tone="danger" /> : null}
             {poi.emergency === 0 ? <Badge label={t('place.emergencyNo')} /> : null}
+            {open === 'open' ? <Badge label={t('place.openNow')} tone="success" /> : null}
+            {open === 'closed' ? <Badge label={t('place.closedNow')} tone="warning" /> : null}
             {poi.openingHours ? <Badge label={t('place.hours', { hours: poi.openingHours })} /> : null}
           </Row>
         ) : null}

@@ -175,11 +175,12 @@ export const AssistantMessage = memo(function AssistantMessage({
               {status}
             </Text>
           </View>
-        ) : map ? (
+        ) : map && map.type !== 'chips' ? (
           <MapAnswerCard card={map} messageId={messageId} />
         ) : (
           <Markdown text={text} onCite={onCite} citable={citable} caret={streaming} />
         )}
+        {!waiting && map?.type === 'chips' ? <MapAnswerCard card={map} messageId={messageId} /> : null}
         {!waiting && sources.length ? <SourceChips sources={sources} /> : null}
         {copyable && !streaming && text ? (
           <View style={styles.actions}>

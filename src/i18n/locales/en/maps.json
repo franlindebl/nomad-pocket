@@ -127,7 +127,9 @@
     "close": "Close",
     "emergencyYes": "Emergency room",
     "emergencyNo": "No emergency room",
-    "hours": "Hours: {{hours}}"
+    "hours": "Hours: {{hours}}",
+    "openNow": "Open now",
+    "closedNow": "Closed now"
   },
   "call": {
     "failedTitle": "Couldn’t start the call",
@@ -309,7 +311,8 @@
     "residential": "Residential area",
     "industrial": "Industrial area",
     "address": "Address",
-    "address_approx": "Approximate address"
+    "address_approx": "Approximate address",
+    "marker": "Saved place"
   },
   "route": {
     "costing": {
@@ -472,10 +475,23 @@
     "straightLine": "As the crow flies: it doesn't follow roads",
     "lineTo": "Head {{dir}}, as the crow flies",
     "noPermission": "Allow location access on the phone to navigate.",
-    "via": "Via {{street}}"
+    "via": "Via {{street}}",
+    "alongAt": "{{distance}} along the route"
   },
   "speed": {
     "now": "Speed {{value}} {{unit}}",
     "limit": "limit {{value}} {{unit}}"
+  },
+  "preview": {
+    "title": "From {{from}} to {{to}}",
+    "straight": "{{distance}} in a straight line: no routing pack covers this trip.",
+    "fromHereOnly": "Navigation always starts from where you are.",
+    "mode": {
+      "auto": "By car",
+      "pedestrian": "On foot",
+      "bicycle": "By bike"
+    },
+    "avoiding": "Avoiding the alert area.",
+    "avoidFailed": "I can't find a route around the alert area within one routing pack."
   }
 }

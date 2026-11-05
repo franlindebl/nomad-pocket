@@ -10,6 +10,17 @@ struct SearchDecision {
   var search: Bool
   @Guide(description: "If search is true: self-contained search keywords in the user's language, including the conversation topic when the message omits it (e.g. \"tratamiento hipotermia\"). Otherwise empty.")
   var query: String
+  // Same as the app's (modules/nomad-llm SearchDecision): the map fields of phase 1b.
+  @Guide(description: "true only if the message asks to find a kind of place near somewhere, directions or travel time to a place, or where the user is; otherwise false")
+  var map: Bool
+  @Guide(description: "If map is true: nearby, go_nearest, route or where_am_i. Otherwise empty.")
+  var mapAction: String
+  @Guide(description: "If map is true and a kind of place is asked: that kind in the user's words (e.g. \"farmacia\"). Otherwise empty.")
+  var mapCategory: String
+  @Guide(description: "If map is true: the town, address or landmark named as the place or the origin of a route; empty for the user's own position.")
+  var mapPlace: String
+  @Guide(description: "If map is true and mapAction is route: the destination. Otherwise empty.")
+  var mapDestination: String
 }
 
 let args = CommandLine.arguments
@@ -49,7 +60,11 @@ for line in lines {
     do {
       let session = LanguageModelSession(model: SystemLanguageModel.default, instructions: item["instructions"] as! String)
       let r = try await session.respond(to: item["prompt"] as! String, generating: SearchDecision.self, options: GenerationOptions(samplingMode: .greedy))
-      write(["id": id, "search": r.content.search, "query": r.content.query])
+      let d = r.content
+      write([
+        "id": id, "search": d.search, "query": d.query, "map": d.map, "mapAction": d.mapAction, "mapCategory": d.mapCategory,
+        "mapPlace": d.mapPlace, "mapDestination": d.mapDestination, "ms": Int(Date().timeIntervalSince(started) * 1000),
+      ])
     } catch {
       write(["id": id, "error": describe(error)])
     }

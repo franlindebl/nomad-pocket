@@ -1,0 +1,39 @@
+# AI-11 — a map question the parser doesn't take, sent to the map by the model (docs/ASSISTANT_MAP_PLAN.md, 1b):
+# with a library installed, Apple Intelligence's router (iOS 27 simulator) reads "se me está acabando la gasolina y
+# estoy cerca de Sant Julià de Lòria" as petrol stations near that town, and the answer is the map card (Andorra seeded).
+# A library question naming a town the maps have gets a "Ver … en el mapa" chip under its answer.
+appId: com.fjlinde.nomadpocket
+tags: [nightly, assistant, maps, seeded, seeded-country]
+---
+- setLocation:
+    latitude: 42.5075
+    longitude: 1.5218
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "text.bubble" }
+- tapOn:   # the most capable model is already chosen since build 20: the button may not show
+    text: "Usar modelo integrado"
+    optional: true
+- tapOn: "Pregunta .*"
+- inputText: "Se me está acabando la gasolina y estoy cerca de Sant Julià de Lòria"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: { id: "map-answer-row" }
+    timeout: 90000
+- assertVisible: "(?s).*cerca de Sant Julià de Lòria.*"
+- takeScreenshot: 01-fuel-from-router
+- tapOn: "Pregunta .*"
+- inputText: "¿Qué es Andorra la Vella?"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: { id: "map-answer-chip" }
+    timeout: 120000
+- takeScreenshot: 02-place-chip
+# "¿Qué es este pueblo?": the library is asked about the town you're in (Andorra la Vella), with its chip.
+- tapOn: "Pregunta .*"
+- inputText: "¿Qué es este pueblo?"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: "Enviar"
+    timeout: 120000
+- assertVisible: "(?s).*Ver Andorra la Vella en el mapa.*"
+- takeScreenshot: 03-about-here

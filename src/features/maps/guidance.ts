@@ -16,6 +16,7 @@ import { hasArrived, hasMoved, isWrongWay, movingBearing, pushFix, travelBearing
 import { distanceMeters, isFreshFix, type LatLon } from './geo';
 import { watchScreenHeading } from './heading';
 import { canRoute, computeRoute, RoutingError } from './routing';
+import { clearRoutePreview } from './route-preview';
 import { cumulativeDistances, isOffRoute, routeProgress, type Costing, type Route, type RouteProgress } from './routing-core';
 
 export type GuidanceTarget = LatLon & { name: string };
@@ -280,6 +281,8 @@ export const useGuidance = create<GuidanceState>((set, get) => {
       let perm = await Location.getForegroundPermissionsAsync();
       if (!perm.granted && perm.canAskAgain) perm = await Location.requestForegroundPermissionsAsync();
       if (!perm.granted) return false;
+      // A trip from here replaces a preview from elsewhere.
+      clearRoutePreview();
       unsubscribe();
       const mine = ++session;
       request++;

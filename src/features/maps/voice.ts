@@ -31,6 +31,11 @@ const CHIME_MS = 400;
 
 const voiceLanguage = () => (i18n.language === 'es' ? 'es-ES' : 'en-US');
 
+/** One sentence spoken now (the assistant's map answer to a dictated question). Silent without a voice for the language. */
+export function speak(text: string) {
+  NomadVoice.speak(text, voiceLanguage()).catch((e) => console.warn('[maps] voice', e));
+}
+
 function say(text: string) {
   const wait = chimedAt + CHIME_MS - Date.now();
   if (wait > 0) {

@@ -1297,7 +1297,7 @@ started on the phone shows in the car and the other way round.
 - `engine.ts`: one `Engine` interface over `SystemEngine` (~4k-token window) and
   `LlamaEngine` (llama.rn, chat template from the GGUF via `jinja`, thinking disabled,
   GPU layers on real iOS devices, CPU elsewhere). `engine.decides` says how the model
-  chooses to search: `tools` (GGUF: pass 1 offers search_library — Qwen with thinking
+  chooses to search: `tools` (GGUF: pass 1 offers search_library, and search_map when maps are indexed — Qwen with thinking
   on, budget 256 tokens — and either answers or calls it; pass 2 answers from the tool
   result with `tool_choice: 'none'`; a tool call it writes as text anyway is stripped, `stripToolCalls`), `router` (Apple FM: `route()`), or null (an engine that can't decide: heuristics). `withEngine(modelId, fn)`,
   `stopGeneration()`, `releaseEngine()`, `releaseIfModel()`. One engine alive at a time;
@@ -1402,6 +1402,29 @@ started on the phone shows in the car and the other way round.
   data; no model writes them. Every action is a tap: `startGuidance` (preview; "Iniciar" stays the person's),
   `showPlace` on the Maps tab, `callPhones`, `shareLocation`/`smsLocation` (`features/maps/share-location.ts`, shared
   with Emergencias).
+- The model's say (1b), only when the parser returned null, maps are indexed and the library is on (the model
+  already decides there): GGUF engines get `search_map` (`mapToolSpec`) next to `search_library` in the same first
+  pass (`GenerateRequest.tools`, a list; its `{ final }` is the card's text, no second pass); Apple's router fills
+  `map*` fields of `SearchDecision` (nomad-llm) with `MAP_ROUTER_RULES` appended. Either goes through
+  `intentFromModel(args, question)`: the question must ask where / how to get somewhere, name the kind (or what it is
+  for) and contain the place the model wrote; a town from the model is a weak intent. What the map can't take is
+  searched in the library. Bench: `scripts/assistant-bench/map-bench.ts`.
+- Phase 2 intents: `saveHere` (a card whose "Guardar" calls `addMarker`), `saved` ("¿dónde he aparcado?"),
+  `meetingPoint` (the plan's points), `lost` (a `here` card with `lost`: the guide's advice first, nearest town via
+  `places.ts` `nearestLocalityPoint`, `sun-core.ts` times), `sun` (sunset, civil dusk, and the arrival before dark),
+  `alerts` (alerts-core `visible()` over the cached sources), `whereIs` with `coords`. Results carry `openNow`
+  (`maps/hours-core.ts`). A dictated question's card is read aloud (`mapCardSpeech` → `maps/voice.ts` `speak`;
+  `Composer` passes `spoken`).
+- Phase 3 intents: `alongRoute` (`maps/along-core.ts` corridor search over `emergency.ts` `placesOfKindsIn`, on a route
+  computed to `to` or the one on the map), `routeAlerts` (alerts-core `current()` alerts whose drawn area the route
+  enters; "Ruta evitando la zona" → `previewRoute(…, avoid)` → `routing.ts` `computeRouteAvoiding`, one pack),
+  `evacuate` (the covering alerts' instructions, then shelters / assembly points outside them), `trip`
+  (`countries.ts` `currentCountries()`, `numberFor`). After a library answer, `placeChips` turns the towns it names
+  (`placeCandidates`, exact place-layer hits) into a `chips` card shown under the text. CarPlay / Android Auto's
+  search runs `parseMapIntent` first (`carplay.ts` `askedOfMap`).
+- A route from elsewhere is drawn without guidance: `maps/route-preview.ts` (`useRoutePreview`, `previewRoute`,
+  `clearRoutePreview`) and `RoutePreviewCard` on the Maps tab, which draws it on the route layer while no guidance
+  runs; starting guidance clears it.
 
 ### Emergency guide (`src/features/guide`, `src/app/guide`, `src/data/guide/`; `docs/EMERGENCY_GUIDE_PLAN.md`)
 

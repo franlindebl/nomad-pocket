@@ -37,6 +37,8 @@ import { CREDIT_MS, MapCredit } from '@/features/maps/MapCredit';
 import { MapFab } from '@/features/maps/MapFab';
 import { markersGeoJSON, useMarkers } from '@/features/maps/markers';
 import { PlaceCard } from '@/features/maps/PlaceCard';
+import { useRoutePreview } from '@/features/maps/route-preview';
+import { RoutePreviewCard } from '@/features/maps/RoutePreviewCard';
 import { PointsGlyph } from '@/features/maps/PointDot';
 import { getRegion, regionName, type Region } from '@/features/maps/regions';
 import { SpeedBadge } from '@/features/maps/SpeedBadge';
@@ -116,7 +118,10 @@ export default function MapScreen() {
   const poiVersion = usePoiSync((s) => s.version);
   const target = useGuidance((s) => s.target);
   const position = useGuidance((s) => s.position);
-  const route = useGuidance((s) => s.route);
+  const guidanceRoute = useGuidance((s) => s.route);
+  // A route that doesn't start here (from the assistant) is drawn the same way while no guidance runs.
+  const preview = useRoutePreview((s) => s.preview);
+  const route = guidanceRoute ?? (!target ? (preview?.route ?? null) : null);
   const progress = useGuidance((s) => s.progress);
   const navigating = useGuidance((s) => s.navigating);
   const northUp = useSettings((st) => st.navNorthUp);
@@ -365,7 +370,7 @@ export default function MapScreen() {
   // Every bottom card sits low, like the banner sits high (owner's call); the map's (i) credit button,
   // which it would cut in half, hides while one is up.
   const cardBottom = insets.bottom + space.sm;
-  const bottomCard = !!target || !!selected || (!!style && !regions.length);
+  const bottomCard = !!target || !!selected || !!preview || (!!style && !regions.length);
   // Following: the user three quarters down the map between the search bar and the
   // panel, so most of the screen shows the road ahead. The camera's padding centres
   // the user there; the arrow is drawn at the same point.
@@ -389,6 +394,23 @@ export default function MapScreen() {
     // Only when a route arrives, not when the padding changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route, target]);
+
+  // A route preview: framed when it arrives (both ends while it is computed, or when there is no route).
+  const framedPreview = useRef<typeof preview>(null);
+  useEffect(() => {
+    if (!preview || target || framedPreview.current === preview) return;
+    framedPreview.current = preview;
+    const { from, to } = preview;
+    const bbox: [number, number, number, number] = preview.route?.bbox ?? [
+      Math.min(from.lon, to.lon),
+      Math.min(from.lat, to.lat),
+      Math.max(from.lon, to.lon),
+      Math.max(from.lat, to.lat),
+    ];
+    cameraRef.current?.fitBounds(bbox, { padding: tripPadding, duration: 900 });
+    // Only when the preview changes, not when the padding does.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preview, target]);
 
   // Frame start and target once when guidance starts.
   const framedFor = useRef<typeof target>(null);
@@ -841,9 +863,11 @@ export default function MapScreen() {
         <GuidancePanel bottom={cardBottom} top={top} mapBearing={bearing} onHeight={setPanelHeight} onBannerHeight={setBannerHeight} />
       ) : selected ? (
         <PlaceCard key={`${selected.lat},${selected.lon}`} place={selected} bottom={cardBottom} />
+      ) : preview ? (
+        <RoutePreviewCard preview={preview} bottom={cardBottom} />
       ) : null}
 
-      {style && !regions.length && !target && !selected ? (
+      {style && !regions.length && !target && !selected && !preview ? (
         <View style={[styles.bottom, { bottom: cardBottom }]} pointerEvents="box-none">
           <EmptyCard home={home} />
         </View>
