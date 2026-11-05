@@ -1,0 +1,22 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'expo.modules.nomadcarplay'
+version = '0.1.0'
+
+android {
+  namespace "expo.modules.nomadcarplay"
+  defaultConfig {
+    versionCode 1
+    versionName "0.1.0"
+  }
+}
+
+dependencies {
+  // Android Auto's Car App Library (AndroidX, Apache-2.0: no Google Play services).
+  implementation "androidx.car.app:app:1.7.0"
+  // The car's map: the same MapLibre Native maplibre-react-native ships (its gradle.properties, nativeVersion).
+  implementation "org.maplibre.gl:android-sdk-opengl:13.6.1"
+}

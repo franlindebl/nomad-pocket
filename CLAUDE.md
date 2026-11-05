@@ -28,6 +28,7 @@ English. User-facing strings are Spanish + English (i18n).
 | `docs/EMERGENCY_GUIDE_PLAN.md` | Own bilingual emergency guide (assistant step 6): licences, per-card official sources (`docs/emergency-guide/`), gaps, owner's decisions |
 | `docs/ESSENTIAL_CONTENT.md` | What "Essential" means (= the onboarding kit), each collection's essential archives, and why the kit proposes the top Wikipedia articles (bench + coverage measurements) |
 | `docs/DOWNLOADS_SPEED_PLAN.md` | Analysis + plan for faster downloads (mirror throughput, parallel chunks, resume, keep awake); ready to pick up |
+| `docs/ANDROID_AUTO_PLAN.md` | Android Auto navigation (CarPlay's twin on Android): design, phases, Desktop Head Unit testing, Play's car review. Spike in `modules/nomad-carplay/android`, off by default (`plugins/with-android-auto.js`) |
 | `docs/ALERTS_PLAN.md` | Official alerts (AEMET, MeteoAlarm, USGS/EMSC quakes, NWS, GDACS) in two phases: 1) the app reads the feeds and notifies locally, no server; 2) iOS push from a free server (Deno Deploy, `server/alerts/`). Verified sources and sizes, owner's decisions, task lists; fixtures in `src/features/alerts/fixtures/` |
 | `AGENTS.md` | Generic Expo rules (kept for other agents; same rules repeated below) |
 

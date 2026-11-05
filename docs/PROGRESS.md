@@ -345,6 +345,19 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-05 — Android Auto: plan and spike (off)
+
+- Plan: `docs/ANDROID_AUTO_PLAN.md` (same product as CarPlay; phases; testing on the Desktop Head Unit; release only
+  once the app is in production on Play, with Google's car app review).
+- Spike, **off by default** (`./plugins/with-android-auto` `enabled: false`; `ANDROID_AUTO=1` at prebuild turns it on):
+  `modules/nomad-carplay/android` implements the same `NomadCarPlay` module as iOS, so `src/features/carplay` drives
+  it unchanged. `NomadCarAppService` (navigation category) and its session; `CarMap` draws MapLibre on the host's
+  surface through a `VirtualDisplay` + `Presentation` (offline style from JS, route, destination, user, follow,
+  pan and zoom); screens: map (`NavigationTemplate`: Destinos, or Ir / Terminar; maneuver and arrival while
+  navigating), Destinos, Emergencias cerca, results, search. Off, the plugin leaves the module out of Android
+  autolinking (no service, permissions or Car App Library in the APK; checked with `gradlew projects` both ways).
+- Release APK with it on builds and installs; the service is registered. Not yet seen on a car screen: the
+  emulator's Android Auto is a stub, the owner is signing in to Play to install the real one for the DHU.
 ### 2026-11-05 — 2.3.1 (44): the alerts question as its own onboarding step
 
 - The owner's first run of 2.3.0 (43) never showed the alerts offer: it was a card under "Tu plan familiar" on the

@@ -203,6 +203,12 @@
           "entitlement": true
         }
       ],
+      [
+        "./plugins/with-android-auto",
+        {
+          "enabled": false
+        }
+      ],
       "./plugins/with-store-build",
       "./plugins/with-e2e-local-network",
       [
