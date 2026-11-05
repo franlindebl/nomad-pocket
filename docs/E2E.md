@@ -292,7 +292,7 @@ By hand:
 | assistant | `ai-07-gguf-tools` | AI-07 | nightly | seeded, seeded-model |
 | assistant | `ai-08-dictation` | AI-08 | nightly | — (microphone shown; not tapped: the simulator's audio input aborts the app) |
 | assistant | `ai-09-copy-regenerate` | AI-09 | nightly | seeded (system model: Copy shows "Copiado"; Regenerate answers the last question again) |
-| assistant | `ai-10-map-answers` | AI-10 | smoke | seeded-country (map answers with no model: pharmacies near a town, where am I with the 112 button, the nearest hospital opens the trip preview) |
+| assistant | `ai-10-map-answers` | AI-10 | smoke | seeded-country (map answers with no model: pharmacies near a town, New chat hidden until there is a chat, where am I with the 112 button, the nearest hospital opens the trip preview) |
 | assistant | `ai-11-map-model` | AI-11 | nightly | seeded, seeded-country, Apple Intelligence (a map question the parser misses goes to the map through the router: petrol stations near Sant Julià de Lòria; a library answer naming a town gets its map chip; "¿qué es este pueblo?" asks the library about the town you're in) |
 | assistant | `ai-12-map-phase2` | AI-12 | nightly | seeded-country (save the spot as the car and find it again, today's light, "estoy perdido" with the guide's advice first and, out of town, the arrow to the nearest one, a town's coordinates and UTM, official alerts while off, a route from elsewhere drawn on the map) |
 | assistant | `ai-13-map-phase3` | AI-13 | nightly | seeded-country (petrol stations on the way to Encamp and the last within a range, alerts on the route while alerts are off, a trip to a country without its map) |
@@ -497,6 +497,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `marker-name`, `marker-note` | fields of the place sheet |
   | `marker-delete`, `region-delete`, `conversation-delete` | delete buttons in lists |
   | `composer-mic` | assistant composer: dictate / stop listening |
+  | `assistant-new-chat` | assistant header: New chat (hidden on a fresh, empty chat) |
   | `map-answer`, `map-answer-row`, `map-answer-locality` | assistant map answer: the card, a place row (opens it on the map), the town of "¿dónde estoy?" |
   | `map-answer-go`, `map-answer-go-first`, `map-answer-call` | map answer actions: a row's "Llévame", the main "Llévame a …" / "Cómo llegar", a row's call button |
   | `map-answer-emergency`, `map-answer-share`, `map-answer-sms`, `map-answer-open`, `map-answer-option`, `map-answer-maps` | call the emergency number, share / SMS the position, see on the map, a "which one?" option, download maps |

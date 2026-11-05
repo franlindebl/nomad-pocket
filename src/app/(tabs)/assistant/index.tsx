@@ -100,9 +100,13 @@ export default function AssistantScreen() {
           headerLeft: () => (
             <IconButton icon={History} variant="plain" size={36} accessibilityLabel={t('history')} onPress={() => router.push('/assistant/conversations')} />
           ),
-          headerRight: () => (
-            <IconButton icon={SquarePen} variant="plain" size={36} accessibilityLabel={t('newChat')} onPress={newChat} disabled={empty && !activeSessionId} />
-          ),
+          // Hidden (not disabled) on a fresh chat: there is nothing to start, and iOS 26 animates the native glass bar
+          // button on a press even when the view inside is disabled, so people thought it should do something. It must
+          // be undefined, not a component rendering null, or iOS leaves an empty glass bubble in the bar.
+          headerRight:
+            empty && !activeSessionId
+              ? undefined
+              : () => <IconButton icon={SquarePen} variant="plain" size={36} accessibilityLabel={t('newChat')} onPress={newChat} testID="assistant-new-chat" />,
         }}
       />
 

@@ -358,6 +358,19 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-05 — Assistant: New chat hidden on a fresh chat
+
+- People pressed New chat on an empty chat and didn't know what it did. It was disabled there, but iOS 26 still
+  animates the native glass bar button on a press (the RN view's `disabled` doesn't reach it), so it looked broken.
+  Now `headerRight` is `undefined` on a fresh chat (not a component rendering null: that leaves an empty glass
+  bubble) and the button shows once there is a chat. `testID` `assistant-new-chat`; AI-10 and ANDROID-08 check it
+  is hidden, shows after the first answer and hides again after a tap. Both pass (iOS Release, Android release APK).
+- Looked into a composer that stayed one line tall while its text wrapped to two (seen once, after autocorrect): our
+  code sets no height (multiline `TextInput` grows on its own). The likely cause is in React Native: Yoga measures the
+  native text with TextKit 1 (`RCTTextLayoutManager`) while the `UITextView` lays it out with TextKit 2, which can
+  break a line that only just fits differently. Not reproduced; left alone (it would mean patching RN). Typing or
+  deleting a character re-measures it.
+
 ### 2026-11-05 — 2.4.0 (45): map answers in the assistant on TestFlight
 
 - 2.4.0 (45) = 2.3.1 (44) plus the assistant's map answers (all phases of `docs/ASSISTANT_MAP_PLAN.md`), uploaded to

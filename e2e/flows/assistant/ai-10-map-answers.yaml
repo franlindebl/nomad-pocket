@@ -1,7 +1,8 @@
 # AI-10 — map questions in the assistant (docs/ASSISTANT_MAP_PLAN.md), answered from the map data with no model
 # writing them: Andorra's map, routing pack and points seeded, the phone in Andorra la Vella. "Farmacia cerca de
 # Sant Julià de Lòria" lists pharmacies there (a card with "Llévame" per row), "¿Dónde estoy?" says the town with
-# the 112 button, and "Llévame al hospital más cercano" opens the trip preview on the map.
+# the 112 button, and "Llévame al hospital más cercano" opens the trip preview on the map. The New chat button is
+# hidden on a fresh chat and shows once there is one.
 appId: com.fjlinde.nomadpocket
 tags: [smoke, assistant, maps, seeded-country]
 ---
@@ -10,6 +11,7 @@ tags: [smoke, assistant, maps, seeded-country]
     longitude: 1.5218
 - runFlow: ../../subflows/launch.yaml
 - tapOn: { id: "text.bubble" }
+- assertNotVisible: { id: "assistant-new-chat" }   # a fresh chat has nothing to start: no New chat button
 - tapOn: "Pregunta .*"
 - inputText: "Búscame una farmacia cerca de Sant Julià de Lòria"
 - tapOn: "Enviar"
@@ -19,6 +21,9 @@ tags: [smoke, assistant, maps, seeded-country]
 - assertVisible: "(?s).*cerca de Sant Julià de Lòria.*"
 - assertVisible: { id: "map-answer-go" }
 - takeScreenshot: 01-pharmacies
+- tapOn: { id: "assistant-new-chat" }   # shows once there is a chat, empties it and hides again
+- assertVisible: "¿En qué te ayudo\\?|Elige un modelo para empezar"
+- assertNotVisible: { id: "assistant-new-chat" }
 - tapOn: "Pregunta .*"
 - inputText: "¿Dónde estoy?"
 - tapOn: "Enviar"

@@ -1,7 +1,8 @@
 # ANDROID-08 — the assistant's map answers on Android (docs/ASSISTANT_MAP_PLAN.md), with no model: Andorra downloaded
 # from the published catalog (as ANDROID-05), the phone in Andorra la Vella. A pharmacy near Sant Julià de Lòria is a
 # map card (no health gate on Android: places on the map are general utility), "¿Dónde estoy?" says the town with the
-# emergency button, and the nearest hospital opens the trip preview.
+# emergency button, and the nearest hospital opens the trip preview. The New chat button is hidden on a fresh chat and
+# shows once there is one.
 appId: com.fjlinde.nomadpocket
 tags: [android, network]
 ---
@@ -36,6 +37,7 @@ tags: [android, network]
     timeout: 300000
 - tapOn: { id: "guidance-stop" }
 - tapOn: { point: "88%,93%" }   # Asistente
+- assertNotVisible: { id: "assistant-new-chat" }   # a fresh chat has nothing to start: no New chat button
 - tapOn: "Pregunta .*"
 - inputText: "Búscame una farmacia cerca de Sant Julià de Lòria"
 - tapOn: "Enviar"
@@ -44,6 +46,9 @@ tags: [android, network]
     timeout: 60000
 - assertVisible: "(?s).*cerca de Sant Julià de Lòria.*"
 - takeScreenshot: 01-pharmacies
+- tapOn: { id: "assistant-new-chat" }   # shows once there is a chat, empties it and hides again
+- assertVisible: "¿En qué te ayudo\\?|Elige un modelo para empezar"
+- assertNotVisible: { id: "assistant-new-chat" }
 - tapOn: "Pregunta .*"
 - inputText: "¿Dónde estoy?"
 - tapOn: "Enviar"
