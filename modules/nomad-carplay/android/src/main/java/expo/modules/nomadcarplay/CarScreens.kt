@@ -64,7 +64,21 @@ class MapScreen(car: CarContext, private val map: CarMap) : Screen(car) {
     }
     if (g.target == null) shownRoute = -1
     guidance = g
-    invalidate()
+    // Only when what the template shows changed: every new template replaces the host's buttons,
+    // and a tap that lands while they are replaced is lost (JS sends guidance on every fix).
+    val key = shown(g)
+    if (key != shownKey) {
+      shownKey = key
+      invalidate()
+    }
+  }
+
+  private var shownKey: String? = null
+
+  private fun shown(g: CarGuidance): String {
+    val est = { e: CarEstimate? -> e?.let { "${it.distance.value}${it.distance.unit}/${(it.seconds / 60).toInt()}" } }
+    val step = { s: CarStep? -> s?.let { "${it.index}:${it.instruction}:${est(it.estimate)}" } }
+    return listOf(g.target, g.navigating, g.routing, g.arrived, step(g.step), step(g.nextStep), est(g.remaining ?: g.summary)).joinToString("|")
   }
 
   private fun step(s: CarStep): Step =
@@ -175,8 +189,8 @@ class ItemsScreen(car: CarContext, private val title: String, kind: String, cate
 
 class SearchScreen(car: CarContext) : Screen(car) {
   private var items: List<CarItem>? = null
-  private var loading = false
   private var query = 0
+  private val main = android.os.Handler(android.os.Looper.getMainLooper())
 
   override fun onGetTemplate(): Template {
     val s = CarHub.strings
@@ -185,14 +199,15 @@ class SearchScreen(car: CarContext) : Screen(car) {
         object : SearchTemplate.SearchCallback {
           override fun onSearchSubmitted(searchText: String) {
             if (searchText.isBlank()) return
+            // No loading state: the offline search answers in tens of milliseconds, and two templates that
+            // close together make the host delay the second one ("too many refreshes"), sometimes for good.
             val mine = ++query
-            loading = true
-            invalidate()
             CarHub.request("search", mapOf("query" to searchText)) {
               if (mine != query) return@request
               items = it
-              loading = false
               invalidate()
+              // A refresh the host delayed anyway shows once the burst is over.
+              main.postDelayed({ if (mine == query) invalidate() }, 1500)
             }
           }
         },
@@ -202,7 +217,6 @@ class SearchScreen(car: CarContext) : Screen(car) {
     s?.let { b.setSearchHint(it.search) }
     val list = items
     return when {
-      loading -> b.setLoading(true).build()
       list == null -> b.setItemList(ItemList.Builder().build()).build()
       list.isEmpty() -> b.setItemList(ItemList.Builder().setNoItemsMessage(s?.searchEmpty ?: "").build()).build()
       else -> b.setItemList(pickRows(this, list, listLimit(carContext))).build()

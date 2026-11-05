@@ -366,8 +366,13 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   pan and zoom); screens: map (`NavigationTemplate`: Destinos, or Ir / Terminar; maneuver and arrival while
   navigating), Destinos, Emergencias cerca, results, search. Off, the plugin leaves the module out of Android
   autolinking (no service, permissions or Car App Library in the APK; checked with `gradlew projects` both ways).
-- Release APK with it on builds and installs; the service is registered. Not yet seen on a car screen: the
-  emulator's Android Auto is a stub, the owner is signing in to Play to install the real one for the DHU.
+- Release APK with it on builds and installs; the service is registered.
+- **Seen working on the Android Automotive emulator** (Play refuses Android Auto on the phone emulator): the offline
+  map on the car's surface with the host's templates on top, Destinos › Emergencias cerca › list, Buscar › result ›
+  route framed with Go / Cancel and the estimates › Go (maneuver card, next step, arrival) › End. Fixed on the way:
+  the map screen invalidated on every fix (taps on its buttons got lost), the search's loading state made the host
+  delay its results. `with-android-auto.js` gained `automotive` (`ANDROID_AUTOMOTIVE=1`) for that emulator; how to
+  test there (user 10, location off by default, seeding, screenshots): `docs/ANDROID_AUTO_PLAN.md`, Testing.
 ### 2026-11-05 — 2.3.1 (44): the alerts question as its own onboarding step
 
 - The owner's first run of 2.3.0 (43) never showed the alerts offer: it was a card under "Tu plan familiar" on the

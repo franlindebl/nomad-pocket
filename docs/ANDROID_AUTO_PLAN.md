@@ -31,16 +31,25 @@ separate product and is left for later.
 | `CPTrip` preview | First: `NavigationTemplate` with the route framed and "Ir". Then `RoutePreviewNavigationTemplate` (route choice with time and distance) |
 | SF Symbols for maneuvers | Own icons per maneuver (Lucide, as the app), mapped from routing-core's `ManeuverIcon` to `Maneuver.TYPE_*` |
 | `CarPlayBoot` (React Native started from the car) | Opened from the car with the app closed, only the process starts: start React Native's host from the session (no activity) so JS answers |
-| `plugins/with-carplay.js` | `plugins/with-android-auto.js`: the service, permissions (`NAVIGATION_TEMPLATES`, `ACCESS_SURFACE`) and `automotive_app_desc` only when enabled, off by default like CarPlay was |
+| `plugins/with-carplay.js` | `plugins/with-android-auto.js`: off by default like CarPlay was (the module out of Android autolinking, so no service, permissions or Car App Library); `automotive` adds what Android Automotive needs |
 
 Host validation: debug builds accept any host (the Desktop Head Unit); release builds only the hosts in the
 library's allowlist (Android Auto, Android Automotive).
 
 ## Phases
 
-1. **Spike: the map on the car's surface** (2026-11-05). Service, session, `CarMap`, the map screen and the
-   Destinos lists, the module bridge. Risk being checked: MapLibre in a `Presentation` on a `VirtualDisplay`
-   (SurfaceView vs. texture mode, the offline style's `file://` and `pmtiles://` URLs, frame rate).
+1. **Spike: the map on the car's surface** (2026-11-05, **done**, on the Android Automotive emulator). MapLibre in
+   a `Presentation` on a `VirtualDisplay` draws the offline style JS builds (SurfaceView, no texture mode needed;
+   `file://` and `pmtiles://` URLs work) and the host's templates go on top. Checked: map at street level following
+   the user, Destinos › Emergencias cerca (no Salud on Android) › list, Buscar with the car keyboard › result ›
+   route computed by JS (Valhalla, offline) and framed with Go / Cancel, arrival, minutes and distance › Go: the
+   maneuver card, the next step, the estimate, the camera low on the screen › End: back to the map.
+   Learned there (in the code's comments too):
+   - Every template replaces the host's buttons, and a tap that lands meanwhile is lost: the map screen
+     invalidates only when what it shows changed (JS sends guidance on every fix).
+   - Two templates close together make the host delay the second ("too many refreshes in a short span of time");
+     the search has no loading state (it answers in tens of ms) and refreshes once more after 1.5 s.
+   - While navigating the host hides the action strip after a few seconds; the first tap only shows it again.
 2. **Trip**: preview with time and distance, maneuver icons, estimates, reroute, arrival, "Terminar" both ways,
    the phone and the car in step (as CarPlay's checks in `docs/CARPLAY_PLAN.md`).
 3. **Opened from the car with the app closed** (React Native without an activity), day/night, the car's own
@@ -53,13 +62,29 @@ library's allowlist (Android Auto, Android Automotive).
 
 ## Testing
 
-- **Desktop Head Unit (DHU)**: `extras;google;auto` in the SDK (`~/Library/Android/sdk/extras/google/auto/desktop-head-unit`).
-  It needs the real **Android Auto app** on the emulator or phone: the `Pixel_API_36` image only has a stub
-  (`1.2.551000-stub`) that downloads it from Play, so someone signs in to Play on the emulator once and updates it
-  (the owner: an agent never enters credentials). Then in Android Auto: tap the version ten times (developer mode),
-  ⋮ › Start head unit server, and "Unknown sources" so an app not installed from Play shows;
-  `adb forward tcp:5277 tcp:5277` and run the DHU.
-- A physical Android phone with Android Auto over USB works the same way.
+- **Android Automotive emulator (what is used, all local).** Play says Android Auto "isn't compatible" with the
+  phone emulator (`Pixel_API_36` only has the stub `1.2.551000-stub`), so the Desktop Head Unit has nothing to talk
+  to there. The Automotive image with Google Play carries Google's templates host, which draws the same templates:
+  - AVD `NP-auto-34`: `system-images;android-34-ext9;android-automotive-playstore;arm64-v8a`, device
+    `automotive_1024p_landscape`, `hw.keyboard=yes`.
+  - Build: `ANDROID_AUTOMOTIVE=1 npx expo prebuild --platform android` (`with-android-auto.js`: the
+    `app-automotive` artifact, `CarAppActivity` as a launcher entry, minSdk override), then the release APK. For
+    `run-as` (to seed fixtures) mark the generated release build type `debuggable true` locally (never committed).
+  - The driver is Android **user 10**: `pm grant --user 10 com.fjlinde.nomadpocket android.permission.ACCESS_FINE_LOCATION`,
+    `cmd location set-location-enabled true --user 10` (off on a new image), `run-as com.fjlinde.nomadpocket --user 10 …`.
+  - Seeding Andorra: copy `e2e/fixtures/maps/ad.pmtiles` to `files/content/maps/` and the routing fixtures to
+    `files/content/routing/`. Loose files register the map and pack, but the pack's emergency points and places
+    are not imported (only a download does that), so the emergency lists come out empty and search finds only the
+    tiles' towns; the phone suite downloads from the local catalogs for that reason (`car-00-prepare`).
+  - Open `MainActivity` first (React Native starts; opening from the car with the app closed is phase 3), then
+    `am start -n com.fjlinde.nomadpocket/androidx.car.app.activity.CarAppActivity`. GPS: `adb emu geo fix <lon> <lat>`.
+    Screenshots: `adb exec-out screencap -p -d <id>` with the main display's id (`dumpsys SurfaceFlinger --display-id`);
+    taps with `adb shell input tap` in that display's pixels (1024×768).
+  - Don't `force-stop` the app while the car shows it: Google's templates host crashes ("Accessed the car host
+    after it became invalidated") and the next start recovers.
+- **Android Auto proper** (projected from a phone) still needs a real phone: Android Auto from Play, developer mode
+  (tap its version ten times), ⋮ › Start head unit server, "Unknown sources", `adb forward tcp:5277 tcp:5277` and the
+  Desktop Head Unit (`extras;google;auto`, installed). Before release, once.
 - Unit tests: `androidx.car.app:app-testing` (TestCarContext, ScreenController) if the screens grow logic.
 
 ## Not decided yet

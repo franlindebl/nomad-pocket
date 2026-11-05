@@ -100,6 +100,8 @@ class CarMap(private val car: CarContext) : SurfaceCallback {
       // MapLibre's default style is a demo map from the internet: never. A plain background until JS
       // sends the offline style.
       applyStyle(force = true)
+      // Street level from the start (the camera follows the user at whatever zoom it has).
+      m.moveCamera(CameraUpdateFactory.zoomTo(15.0))
       here?.let { m.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), 15.0)) }
     }
     startLocation()
