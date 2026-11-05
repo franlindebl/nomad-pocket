@@ -22,11 +22,11 @@ privately by the maintainer, never in git.
 
 Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo prebuild`.
 
-- Marketing version: `expo.version` (currently **2.3.1**, official alerts, TestFlight only until the owner has tried it (2.3.0 (43) the first upload); 2.2.0 (42), the first with CarPlay, approved and ready for distribution on 2026-11-05; 2.0.1 (40) live since 2026-11-04; 2.1.0 (41) TestFlight only, never submitted). Keep `package.json`'s
+- Marketing version: `expo.version` (currently **2.4.0**, the assistant's map answers, TestFlight only until the owner has tried it; 2.3.1 (44) and 2.3.0 (43), official alerts, TestFlight only; 2.2.0 (42), the first with CarPlay, approved and ready for distribution on 2026-11-05; 2.0.1 (40) live since 2026-11-04; 2.1.0 (41) TestFlight only, never submitted). Keep `package.json`'s
   `version` equal (not used by the build, but it's what people read).
-- iOS build number: `expo.ios.buildNumber` (currently **"44"**) → `CFBundleVersion`. Bump it
+- iOS build number: `expo.ios.buildNumber` (currently **"45"**) → `CFBundleVersion`. Bump it
   for every upload: App Store Connect rejects a build number it has already seen.
-- Android: `expo.android.versionCode` (currently **27**, not uploaded: nothing goes to Play while the closed test runs; 23 and 24 went to Play internal testing, 24 to the rejected closed test; 25 is the build without health features, superseded before review; 26 adds the assistant's no-health fixes). Must grow
+- Android: `expo.android.versionCode` (currently **28**, not uploaded: nothing goes to Play while the closed test runs; 23 and 24 went to Play internal testing, 24 to the rejected closed test; 25 is the build without health features, superseded before review; 26 adds the assistant's no-health fixes). Must grow
   with every Play upload.
 - After changing any of them, run `npx expo prebuild` (it can regenerate `ios/` and
   `android/` from scratch: then `cd ios && pod install`).
@@ -76,6 +76,7 @@ Everything lives in `app.json`; `ios/` and `android/` get it from `npx expo preb
 | 2.2.0 | 42 | TestFlight 2026-11-04, **submitted to App Review 2026-11-04** (auto-release), approved: ready for distribution 2026-11-05: 2.1.0 (41) plus CarPlay on (`com.apple.developer.carplay-maps`, navigation entitlement granted 2026-11-04, Case-ID 23304795; capability enabled on the App ID). E2E on it: smoke 21/21, full 42/44 then 44/44 (map-10 and map-12 failed while the archive loaded the Mac, passed alone), iPad 1/1; CarPlay simulator screen checked by hand (map, Destinos › Emergencias cerca › Salud, preview, Ir, maneuvers, Terminar). What's new: `docs/store/listing-2.2.0.md` |
 | 2.3.0 | 43 | TestFlight 2026-11-05 (TestFlight only: the owner tries it before any review): 2.2.0 (42) plus official alerts phase 1 (`docs/ALERTS_PLAN.md`: AEMET, NWS, GDACS and USGS/EMSC quakes read by the app, matched on the phone, local notifications, background check with expo-background-task, Time Sensitive for red warnings and tsunamis). E2E on it: smoke 21/21; ALR-01 passed on the same code before the version bump. Draft texts: `docs/store/listing-2.3.0.md` (not reviewed) |
 | 2.3.1 | 44 | TestFlight 2026-11-05 (TestFlight only): 2.3.0 (43) plus the alerts question as its own onboarding step after the kit ("Activar avisos" / "Ahora no"; on 43 it was a card below the fold of the last step, and "Ir a Nomad" counted it as offered) and the disclaimer reworded ("En una emergencia, sigue siempre las alertas de Protección Civil… y llama al 112" instead of "son los que valen"). E2E: ALR-01, ONB-01, ONB-04 and smoke 21/21 |
+| 2.4.0 | 45 | TestFlight 2026-11-05 (TestFlight only: the owner tries it before any review): 2.3.1 (44) plus the assistant's map answers (`docs/ASSISTANT_MAP_PLAN.md`, phases 1, 1b, 2 and 3: nearest X near a place, routes drawn on the map or started, where am I / share / emergency call, saved places and meeting point, lost, before dark, alerts on the route, trip prep; answers from the map data as cards, never written by the model; the model sends missed map questions through the `search_map` tool or Apple's router) and the Android Auto commits on `main` (off on iOS builds). E2E: smoke 24/24 (map-12 on a second run, alone); AI-10…13 passed on the same code before the version bump |
 
 Check App Store Connect for the current state before assuming the table is still true,
 and update it here after each upload or review result.

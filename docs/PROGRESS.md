@@ -358,6 +358,14 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-05 — 2.4.0 (45): map answers in the assistant on TestFlight
+
+- 2.4.0 (45) = 2.3.1 (44) plus the assistant's map answers (all phases of `docs/ASSISTANT_MAP_PLAN.md`), uploaded to
+  TestFlight only: the owner tries it on the phone (nearest-by-time latency, spoken answers when dictating) and in the
+  car before any review. A new marketing version because it's a new feature; no store texts yet.
+- E2E smoke 24/24 (map-12 failed in the suite while the Mac was loaded, passed alone, as on 2.2.0); store prebuild
+  (`NOMAD_STORE_BUILD=1 --clean`), no dev-client keys in the archived `Info.plist`.
+
 ### 2026-11-05 — Android Auto: phase 4, the end-to-end check
 
 - `npm run e2e:androidauto` (`scripts/androidauto/e2e-androidauto.sh`, `e2e/flows/androidauto/auto-00-prepare.yaml`,
