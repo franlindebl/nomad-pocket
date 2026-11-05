@@ -11,6 +11,7 @@ import {
   Flame,
   Haze,
   Mountain,
+  ShieldCheck,
   MountainSnow,
   Snowflake,
   Sun,
@@ -151,7 +152,18 @@ export function AlertsDisclaimer() {
  * The opt-in (decision 1): at the end of onboarding, once on Home for installs that had the app before, and the same
  * words as Settings' switch. "Ahora no" hides it for good.
  */
-export function AlertsOffer({ badge, onDone, testID = 'alerts-offer' }: { badge?: boolean; onDone?: () => void; testID?: string }) {
+export function AlertsOffer({
+  badge,
+  secondary,
+  onDone,
+  testID = 'alerts-offer',
+}: {
+  badge?: boolean;
+  /** Where the screen already has its one primary action (onboarding's "Ir a Nomad"). */
+  secondary?: boolean;
+  onDone?: () => void;
+  testID?: string;
+}) {
   const { t } = useTranslation('alerts');
   const [busy, setBusy] = useState(false);
   const enabled = useAlertsState((s) => s.enabled);
@@ -184,7 +196,14 @@ export function AlertsOffer({ badge, onDone, testID = 'alerts-offer' }: { badge?
       </Text>
       <AlertsDisclaimer />
       <Row gap={space.sm}>
-        <Button testID={`${testID}-enable`} title={t('offer.enable')} loading={busy} onPress={() => void enable()} style={{ flex: 1 }} />
+        <Button
+          testID={`${testID}-enable`}
+          title={t('offer.enable')}
+          variant={secondary ? 'secondary' : 'primary'}
+          loading={busy}
+          onPress={() => void enable()}
+          style={{ flex: 1 }}
+        />
         {badge ? (
           <Button
             testID={`${testID}-decline`}
@@ -219,7 +238,25 @@ export function AlertsHomeCard({ style }: { style?: StyleProp<ViewStyle> }) {
   }
   const serious = nearby ? alerts.filter((a) => levelRank(a.level) >= levelRank('orange')) : [];
   const top = serious[0];
-  if (!top) return null;
+  if (!top) {
+    // Nothing serious: a quiet line with the state, the way into the list (yellow warnings, quakes further away).
+    const yellow = nearby ? alerts.length : 0;
+    const line = !pos ? t('home.noPosition') : yellow ? t('home.yellow', { count: yellow }) : t('home.none');
+    return (
+      <Card onPress={() => router.push('/alerts')} testID="home-alerts-status" style={style} accessibilityLabel={`${t('title')}. ${line}`}>
+        <Row gap={space.md}>
+          <ShieldCheck size={20} color={colors.textSecondary} />
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text variant="headline">{t('title')}</Text>
+            <Text variant="footnote" color="textSecondary">
+              {line}
+            </Text>
+          </View>
+          <ChevronRight size={18} color={colors.textTertiary} />
+        </Row>
+      </Card>
+    );
+  }
   const open = () =>
     serious.length === 1 ? router.push({ pathname: '/alerts/[id]', params: { id: alertKey(top) } }) : router.push('/alerts');
   return (
@@ -227,7 +264,13 @@ export function AlertsHomeCard({ style }: { style?: StyleProp<ViewStyle> }) {
       onPress={open}
       testID="home-alert"
       style={[{ borderColor: levelColor(top.level, colors) }, style]}
-      accessibilityLabel={alertTitle(top)}>
+      accessibilityLabel={[
+        alertTitle(top),
+        alertSubtitle(top, pos),
+        serious.length > 1 ? t('home.more', { count: serious.length - 1 }) : '',
+      ]
+        .filter(Boolean)
+        .join('. ')}>
       <Row gap={space.md} align="flex-start">
         <AlertMark alert={top} />
         <View style={{ flex: 1, gap: 2 }}>

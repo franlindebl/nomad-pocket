@@ -1,0 +1,67 @@
+# ANDROID-07 — official alerts on Android against the stand-in feeds (scripts/e2e-alerts-feed.py): turned on from
+# onboarding's last step in Madrid (where the runner puts the emulator), they list the orange warning drawn over
+# the city and the M 4.8 quake 25 km away (not rung: turning on records what is in force); Home's card; an alert's
+# official text and actions; the run log in Settings.
+appId: com.fjlinde.nomadpocket
+tags: [android]
+---
+# The flows before this one leave the emulator's last fix in Andorra: Madrid, where the stand-in warning is drawn.
+- setLocation:
+    latitude: 40.4168
+    longitude: -3.7038
+- launchApp
+- extendedWaitUntil:
+    visible: { id: "onboarding-start" }
+    timeout: 30000
+- tapOn: { id: "onboarding-start" }
+- tapOn: { id: "onboarding-next" }
+- extendedWaitUntil:
+    visible: { id: "kit-country" }
+    timeout: 15000
+- tapOn: { id: "kit-country" }
+- tapOn: { id: "kit-guides" }
+- tapOn: { id: "kit-wikipedia" }
+- tapOn: { id: "kit-assistant" }
+- extendedWaitUntil:
+    visible: "Continuar sin descargar"
+    timeout: 10000
+- tapOn: { id: "onboarding-download" }
+- scrollUntilVisible:
+    element: { id: "onboarding-alerts-enable" }
+    direction: DOWN
+- tapOn: { id: "onboarding-alerts-enable" }
+# Android 13+ asks for notifications (the channel exists first); location was granted by the runner.
+- tapOn:
+    text: "(?i)permitir|allow"
+    optional: true
+- extendedWaitUntil:
+    visible: { id: "onboarding-alerts-on" }
+    timeout: 15000
+- tapOn: { id: "onboarding-finish" }
+- extendedWaitUntil:
+    visible: { id: "home-alert" }
+    timeout: 30000
+- assertVisible: "Aviso naranja · Lluvias.*y 1 aviso más.*"
+- takeScreenshot: 01-home-card
+- tapOn: { id: "home-alert" }
+- extendedWaitUntil:
+    visible: "Terremoto M 4,8.*"
+    timeout: 10000
+- takeScreenshot: 02-list
+- tapOn: "Aviso naranja · Lluvias.*"
+- extendedWaitUntil:
+    visible: { id: "alert-official" }
+    timeout: 10000
+- assertVisible: "Esté preparado.*"
+- scrollUntilVisible:
+    element: { id: "alert-action-guide" }
+    direction: DOWN
+- takeScreenshot: 03-detail
+- back
+- back
+- tapOn: { id: "open-settings" }
+- tapOn: { id: "settings-alerts" }
+- scrollUntilVisible:
+    element: "Al activar.*"
+    direction: DOWN
+- takeScreenshot: 04-settings

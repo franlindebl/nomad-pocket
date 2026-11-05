@@ -462,6 +462,51 @@
       "copyright": ["Copyright © 2017 IBM Corp. with Reserved Font Name \"Plex\""],
       "url": "https://github.com/IBM/plex",
       "text": "texts/ibm-plex-OFL.txt"
+    },
+    {
+      "id": "aemet",
+      "name": "AEMET (Agencia Estatal de Meteorología)",
+      "license": "AEMET reuse terms",
+      "copyright": ["© AEMET"],
+      "url": "https://www.aemet.es/es/nota_legal",
+      "note": "Official weather warnings for Spain (Meteoalerta CAP files), shown as published when Official alerts are on. Information produced by AEMET; AEMET doesn't take part in or endorse this app.",
+      "text": null
+    },
+    {
+      "id": "nws",
+      "name": "NOAA / National Weather Service",
+      "license": "Public domain",
+      "copyright": [],
+      "url": "https://www.weather.gov/disclaimer",
+      "note": "Official alerts for the United States (api.weather.gov), when Official alerts are on.",
+      "text": null
+    },
+    {
+      "id": "usgs",
+      "name": "USGS Earthquake Hazards Program",
+      "license": "Public domain",
+      "copyright": [],
+      "url": "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits",
+      "note": "Earthquakes worldwide (earthquake.usgs.gov), when Official alerts are on.",
+      "text": null
+    },
+    {
+      "id": "emsc",
+      "name": "EMSC-CSEM",
+      "license": "Free use with credit",
+      "copyright": ["© EMSC-CSEM"],
+      "url": "https://www.emsc-csem.org",
+      "note": "Earthquakes from the European-Mediterranean Seismological Centre (seismicportal.eu), when Official alerts are on.",
+      "text": null
+    },
+    {
+      "id": "gdacs",
+      "name": "GDACS (European Commission JRC, UN OCHA)",
+      "license": "CC-BY-4.0",
+      "copyright": ["© European Union, GDACS"],
+      "url": "https://www.gdacs.org",
+      "note": "Orange and red disaster alerts for countries without a national source, when Official alerts are on.",
+      "text": null
     }
   ],
   "jsTexts": {

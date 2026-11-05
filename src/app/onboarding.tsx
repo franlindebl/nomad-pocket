@@ -542,7 +542,7 @@ export default function OnboardingScreen() {
                 </View>
               </Row>
             </Card>
-            <AlertsOffer testID="onboarding-alerts" />
+            <AlertsOffer secondary testID="onboarding-alerts" />
           </ScrollView>
           <Button testID="onboarding-finish" title={t('onboarding.finish')} size="lg" fullWidth onPress={() => finish()} />
         </Animated.View>

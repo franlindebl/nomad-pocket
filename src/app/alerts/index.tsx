@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { getPermissionsAsync } from 'expo-notifications';
 import { BellOff, LocateFixed, RefreshCw, ShieldCheck } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
@@ -152,13 +151,6 @@ export default function AlertsScreen() {
         <Text variant="caption" color="textTertiary">
           {t('list.credits')}
         </Text>
-        <Button
-          title={t('settings.row')}
-          variant="ghost"
-          size="sm"
-          onPress={() => router.push('/settings/alerts')}
-          style={{ alignSelf: 'flex-start' }}
-        />
       </View>
     </Screen>
   );

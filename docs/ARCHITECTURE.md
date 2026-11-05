@@ -148,9 +148,14 @@ assets/                      fonts, icons, splash, maps/basemap-assets.zip, maps
      (`maps/catalog-fetch.ts`); the onboarding kit step tries again on arrival if it still failed.
    - assistant: engine lifecycle (release on background), system-model status watcher,
      chat sessions, forget a selected model whose file is gone.
-   - prepare: notification handler (foreground banners) and tap → `/prepare/kit` (also from a
-     cold start: the response waits for the navigator); expiry reminders are reconciled with the
-     plan (startup, foreground, household or language change) through one queue.
+   - prepare: how its notifications show (quiet banners, `lib/notifications.ts`) and tap →
+     `/prepare/kit` (also from a cold start: the response waits for the navigator); expiry reminders
+     are reconciled with the plan (startup, foreground, household or language change) through one queue.
+   - alerts (only while Official alerts are on): background check registered, a check 5 s after
+     launch and on every foreground (skipped within 10 min unless the person moved 5 km); its
+     notifications show with sound, a tap opens `/alerts/[id]`.
+0. Before all of this, the entry point `index.ts` imports `features/alerts/background.ts` (the
+   background task must be defined before React, so a headless start finds it), then `expo-router/entry`.
 4. The splash hides. Settings were hydrated when their store was created (synchronous
    kv-store read, `src/lib/kv.ts`); if `onboarded` is false the root pushes `/onboarding`,
    waiting until the navigator is ready (an early push is dropped).
@@ -1454,6 +1459,57 @@ familiar" action and the plan/kit rows of "Tu preparación" (`features/home/read
 - The hub also lists offline guides from the catalog (Ready.gov es/en, post-disaster,
   medicine, water, food preparation) filtered by content languages, with download buttons.
 
+### Official alerts (`src/features/alerts`, `src/app/alerts`, `src/app/settings/alerts.tsx`; `docs/ALERTS_PLAN.md`)
+
+Weather warnings and earthquakes published by official services, for where the person is, notified
+locally. Phase 1 of the plan: **no server of our own**, everything decided on the device. Off until
+the person turns it on (onboarding's last step, a once-only Home card for installs that had the app
+before, Settings › Avisos oficiales).
+
+- Pure cores (tested against `fixtures/`, real samples of 2026-11-04): `cap-core.ts` (CAP 1.2 with
+  regexes, RFC 822 dates by hand), `tar-core.ts` (AEMET's `.tar.gz`), `feeds-core.ts` (AEMET RSS +
+  bundle, MeteoAlarm Atom + CAP, NWS, USGS, EMSC, GDACS → one `Alert`), `alerts-core.ts` (levels,
+  hazards, `covers`, the quake rule M ≥ 4.5 within 100 km or M ≥ 6 within 500 km, USGS/EMSC merge,
+  `current`, `visible`, the notify policy `decide`, `sourcesFor`). Phase 2's server will reuse them.
+- Sources by the country of the position (`maps/emergency.ts useHereCountry`, else
+  `settings.country`): Spain → AEMET (one bundle covers Canarias too), US → NWS (`?point=` snapped
+  to 0.05°), elsewhere → GDACS (Orange/Red, earthquakes excluded); USGS + EMSC everywhere.
+  MeteoAlarm is parsed but not used until its terms and geometries are sorted (plan, task 9).
+- `sources.ts`: timeouts (20 s), `User-Agent: NomadPocket/<version> (github.com/franlindebl/nomad-pocket)`,
+  `If-Modified-Since`; AEMET's bundle (~115 KB) is downloaded only when the RSS points at a new one.
+  `EXPO_PUBLIC_ALERTS_URL` points every source at a local stand-in (E2E).
+- `check.ts runAlertsCheck(trigger)`: in the foreground, the last system fix (`getLastKnownPositionAsync`,
+  30 min; a manual check may take one coarse fix) snapped to 0.001° and kept in kv `alerts.position`;
+  never a location request in the background (the kept position serves). Then the sources' answers
+  (kept per source in `alerts.cache`; a failing source keeps its last answer), `visible()` (what
+  covers the person; without a position the country's orange and red, never notified), `decide()`
+  against `alerts.notified` (by id, references, or a topic while the earlier one is in force) and
+  `notify.ts`. The check that turns the feature on records what is in force without ringing (the list
+  shows it at once). Every run is logged in `alerts.runs` (last 50, shown in Settings) to measure how
+  often background runs happen.
+- `notify.ts`: Android channel `alerts` (importance HIGH), iOS `timeSensitive` for red and tsunamis
+  (entitlement `com.apple.developer.usernotifications.time-sensitive` in `app.json`), `active` for the
+  rest; one notification per alert topic (a raise replaces it); more than 4 at once → 3 + a summary.
+  Never Critical Alerts or a DND bypass. The app has **one** notification handler
+  (`lib/notifications.ts`): each feature registers how its `data.kind` shows.
+- `background.ts`: `expo-background-task` (WorkManager on Android, every 30 min at best; BGTaskScheduler
+  on iOS, `processing` mode, when the system decides) + `expo-task-manager`. Defined at module scope
+  from `index.ts`; the check is imported lazily inside the task. Registered while the feature is on.
+- State (`state.ts`, kv, sync reads): `alerts.enabled`, `alerts.offered`, `alerts.position`,
+  `alerts.cache`, `alerts.notified`, `alerts.runs`, `alerts.prefs` (lowest level that notifies,
+  default orange; quakes on/off). Turning it off unregisters the task and deletes position, cache,
+  notified and runs. Re-read from kv on every foreground (an Android background run may have written).
+- UI: `/alerts` (status, sources, no-position and no-notification cards, rows, disclaimer, credits),
+  `/alerts/[id]` (frame + the source's own headline/description/instruction in the app's language,
+  else English, else as published; actions: show the area on the map, the guide card for the hazard,
+  plan, kit, call the emergency number, the source's page), Settings › Avisos oficiales (switch,
+  "notify from", quakes, position used, sources, recent checks), `AlertsHomeCard` (orange/red in force
+  where the person is). Level colours are theme tokens (`levelYellow/Orange/Red`, `onLevel`).
+- testIDs: `onboarding-alerts(-enable|-on)`, `home-alert`, `home-alerts-offer(-enable|-decline)`,
+  `settings-alerts`, `alerts-settings-switch`, `alerts-settings-open`, `alerts-status`, `alerts-refresh`,
+  `alerts-no-position`, `alerts-no-notifications`, `alert-row-<i>`, `alert-title`, `alert-official`,
+  `alert-action-(map|guide|plan|kit|call|web)`, `alerts-list-offer`.
+
 ### Credits (`src/features/credits`, `src/app/settings/{credits,packages,license}.tsx`)
 
 Settings › Credits & licenses lists what the app bundles: the app's own GPL text and source link,
@@ -1473,7 +1529,9 @@ committed file is stale). `credits-core.ts` (pure, tested) groups and filters. t
 `locales/{es,en}.json`, so the location prompt is in the user's language), `expo-location` with its
 permission flags off (no background or always prompt; on Android it only adds the two location
 permissions, its module is left out of autolinking in `package.json`), `expo-notifications` with
-`enableRemoteNotifications: false`, and `plugins/with-android-backup-rules.js` (backup rules, see
+`enableRemoteNotifications: false` (local notifications only; the Time Sensitive entitlement in
+`ios.entitlements` is for official alerts), `expo-background-task` (adds the `processing` background
+mode and its task identifier; expo-task-manager adds `fetch`), and `plugins/with-android-backup-rules.js` (backup rules, see
 Storage layout). `ios/` and `android/` are generated from it.
 
 ## External services (all optional at runtime, none receive user data)
@@ -1486,6 +1544,7 @@ Storage layout). `ios/` and `android/` are generated from it.
 | `build-metadata.protomaps.dev/builds.json`, `build.protomaps.com` | daily planet build, HTTP Range extraction: fallback for a country without a prebuilt map |
 | `huggingface.co` | GGUF models |
 | `overpass-api.de`, `overpass.private.coffee`, `overpass.kumi.systems` (European operators only) | emergency points for a map without bundled points (only the region bbox is sent; public servers, best effort) |
+| `www.aemet.es`, `api.weather.gov`, `earthquake.usgs.gov`, `www.seismicportal.eu`, `www.gdacs.org` | **only while Official alerts are on**: the warnings and earthquakes (Official alerts). The same request for everyone except NWS, which gets the position snapped to 0.05° (~5 km) |
 | `nomad-pocket.app` | privacy policy / support page (`site/`), opened in the browser from Settings |
 
 Archive pages in the reader cannot reach the network at all (Library section).

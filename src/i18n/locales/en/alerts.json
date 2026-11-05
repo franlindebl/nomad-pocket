@@ -80,7 +80,11 @@
   },
   "home": {
     "more_one": "and {{count}} more",
-    "more_other": "and {{count}} more"
+    "more_other": "and {{count}} more",
+    "none": "No orange or red warnings where you are",
+    "yellow_one": "{{count}} warning in force where you are, none orange or red",
+    "yellow_other": "{{count}} warnings in force where you are, none orange or red",
+    "noPosition": "No location: tap to see the country's"
   },
   "list": {
     "updated": "Updated {{ago}}",
@@ -155,7 +159,6 @@
     "runFailed": "{{names}} failed",
     "runOffline": "offline",
     "runNotified_one": "{{count}} notification",
-    "runNotified_other": "{{count}} notifications",
-    "openList": "See the alerts"
+    "runNotified_other": "{{count}} notifications"
   }
 }

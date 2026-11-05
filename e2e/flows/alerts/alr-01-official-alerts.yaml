@@ -1,0 +1,130 @@
+# ALR-01 — official alerts (docs/ALERTS_PLAN.md) against the stand-in feeds of scripts/e2e-alerts-feed.py: offered on
+# onboarding's last step; turned on in Barcelona, where nothing orange or red applies (no Home card, nothing rung);
+# moved to Madrid, a manual check finds the orange warning drawn over the city and the M 4.8 quake 25 km away and
+# notifies both (the run log says so); the list, an alert's official text and actions, the quake's facts; Home's
+# card; off again in Settings, the card goes.
+appId: com.fjlinde.nomadpocket
+tags: [full, alerts, alerts-server]
+---
+- setLocation:
+    latitude: 41.3874
+    longitude: 2.1686
+- launchApp:
+    stopApp: true
+    permissions:
+      notifications: allow
+      location: inuse
+# A notification prompt left open by an earlier failed run outlives the reinstall: clear it.
+- tapOn:
+    text: "Permitir"
+    optional: true
+- extendedWaitUntil:
+    visible: { id: "onboarding-start" }
+    timeout: 20000
+- tapOn: { id: "onboarding-start" }
+- tapOn: { id: "onboarding-next" }
+- extendedWaitUntil:
+    visible: { id: "kit-country" }
+    timeout: 10000
+- tapOn: { id: "kit-country" }
+- tapOn: { id: "kit-guides" }
+- tapOn: { id: "kit-wikipedia" }
+- tapOn: { id: "kit-assistant" }
+- extendedWaitUntil:
+    visible: "Continuar sin descargar"
+    timeout: 10000
+- tapOn: { id: "onboarding-download" }
+- scrollUntilVisible:
+    element: { id: "onboarding-alerts-enable" }
+    direction: DOWN
+- assertVisible: "Avisos oficiales donde estés"
+- takeScreenshot: alr-01-01-offer
+- tapOn: { id: "onboarding-alerts-enable" }
+# Maestro's launch permissions don't cover iOS's notification prompt: answer it if it shows.
+- tapOn:
+    text: "Permitir"
+    optional: true
+- extendedWaitUntil:
+    visible: { id: "onboarding-alerts-on" }
+    timeout: 10000
+- tapOn: { id: "onboarding-finish" }
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 10000
+# Barcelona: AEMET's yellow warnings at most, so only the quiet status card; the offer isn't shown again.
+- extendedWaitUntil:
+    visible: { id: "home-alerts-status" }
+    timeout: 20000
+- assertNotVisible: { id: "home-alert" }
+- assertNotVisible: { id: "home-alerts-offer" }
+- takeScreenshot: alr-01-02-home-quiet
+
+- setLocation:
+    latitude: 40.4168
+    longitude: -3.7038
+- tapOn: { id: "home-alerts-status" }
+- extendedWaitUntil:
+    visible: { id: "alerts-refresh" }
+    timeout: 10000
+- tapOn: { id: "alerts-refresh" }
+- extendedWaitUntil:
+    visible: "Aviso naranja · Lluvias.*"
+    timeout: 30000
+- assertVisible: "Terremoto M 4,8.*"
+- assertVisible: ".*Madrid \\(E2E\\).*"
+- takeScreenshot: alr-01-03-list
+# The check rang both: their banners cover the top of the screen (the back button) for a few seconds and are the
+# system's, not in the app's hierarchy, so wait a fixed while before tapping near the top.
+- extendedWaitUntil:
+    visible: "banners-gone-never-shown"
+    timeout: 10000
+    optional: true
+- tapOn: "Aviso naranja · Lluvias.*"
+- extendedWaitUntil:
+    visible: { id: "alert-official" }
+    timeout: 10000
+- assertVisible: "Esté preparado.*"
+- assertVisible: "Fuente: AEMET.*"
+- scrollUntilVisible:
+    element: { id: "alert-action-guide" }
+    direction: DOWN
+- assertVisible: "Guía: Inundación"
+- takeScreenshot: alr-01-04-detail
+- tapOn: { id: "alert-action-guide" }
+- extendedWaitUntil:
+    visible: "Aviso de inundación"
+    timeout: 10000
+- waitForAnimationToEnd
+- tapOn: { id: "BackButton" }
+- waitForAnimationToEnd
+- tapOn: { id: "BackButton" }
+- tapOn: "Terremoto M 4,8.*"
+- extendedWaitUntil:
+    visible: "Magnitud"
+    timeout: 10000
+- assertVisible: "El terremoto ya ha ocurrido.*"
+- takeScreenshot: alr-01-05-quake
+- waitForAnimationToEnd
+- tapOn: { id: "BackButton" }
+- waitForAnimationToEnd
+- tapOn: { id: "BackButton" }
+# Home: two orange alerts in force here now.
+- extendedWaitUntil:
+    visible: { id: "home-alert" }
+    timeout: 10000
+- assertVisible: "Aviso naranja · Lluvias.*y 1 aviso más.*"
+- takeScreenshot: alr-01-06-home-card
+# Both were rung by the manual check: the run log in Settings counts them.
+- tapOn: { id: "open-settings" }
+- tapOn: { id: "settings-alerts" }
+- scrollUntilVisible:
+    element: ".*2 notificaciones.*"
+    direction: DOWN
+- takeScreenshot: alr-01-07-settings
+- scrollUntilVisible:
+    element: { id: "alerts-settings-switch" }
+    direction: UP
+- tapOn: { id: "alerts-settings-switch" }
+- extendedWaitUntil:
+    notVisible: "Notificar desde"
+    timeout: 10000

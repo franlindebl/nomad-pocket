@@ -14,7 +14,10 @@ source below was read or downloaded on 2026-11-04). Owner's decisions, same day:
   phase 2: counties on the server, where they cost the app nothing).
 - GDACS: yes, for countries without a national source.
 
-Approved to implement. **Phase 1 task 1 (pure cores) done 2026-11-05. To resume: start at "Phase 1 — tasks", task 2.**
+Approved to implement. **Phase 1 built 2026-11-05 (tasks 1–7; task 8 partly: unit tests, the iOS simulator and the
+Android emulator E2E pass and the Android background task ran headless; the background runs on real phones are still
+to be measured; task 9 waits for MeteoAlarm).** What's left
+before phase 2: "Phase 1 — status" below.
 
 ## The idea in one paragraph
 
@@ -138,6 +141,33 @@ Out, on purpose:
   **topic** (source + zone + phenomenon + measure for AEMET, zone + hazard for MeteoAlarm, the VTEC event for NWS,
   the event for GDACS) catches a re-issue whose reference the app never saw while the first one is still in force
   (`decide` in `alerts-core.ts`).
+
+### Phase 1 — status (2026-11-05)
+
+Built as planned, with these changes (each written into ARCHITECTURE.md, "Official alerts"):
+- The once-only offer for existing installs is a dismissable card on Home (not a sheet): same "Ahora no" forever.
+  While alerts are on, Home always has a line for them (orange/red card, or the quiet "no orange or red here"
+  line), which is also the way into the list; Settings › Avisos oficiales holds the switch and the preferences.
+- The position is the system's last fix read on each foreground check (`getLastKnownPositionAsync`, 30 min), not
+  hooks in every screen that gets one; a manual check may take one coarse fix.
+- The check that turns alerts on records what is in force without ringing it (the list shows it at once).
+- Settings shows the last checks (`alerts.runs`), so the background measurement needs no debug build.
+- Credits list AEMET, NWS, USGS, EMSC and GDACS (`scripts/licenses/native.json`, data).
+- expo-task-manager's config plugin also adds the `fetch` background mode on iOS (unused by us; App Review notes
+  in `docs/store/listing-2.3.0.md` explain both modes).
+
+Still to do in phase 1:
+- ~~Android~~ **done 2026-11-05**: no `com.google.android.gms` / Firebase in `releaseRuntimeClasspath`
+  (expo-background-task brings `androidx.work` and Room only), `scripts/licenses/android.json` regenerated, R8 keep
+  rule for WorkManager's Room database (the release APK crashed at startup without it), ANDROID-07 passes, and the
+  background task ran headless on the emulator (`cmd jobscheduler run -f -n androidx.work.systemjobscheduler
+  com.fjlinde.nomadpocket 0`; the run log said "En segundo plano · 3 fuentes").
+- **Measure** the background runs on the owner's iPhone and an Android phone for a few days: Settings › Avisos
+  oficiales › Comprobaciones recientes. That is phase 2's baseline.
+- **Owner**: review the store texts (`docs/store/listing-2.3.0.md`), the privacy policy changes (`site/privacy.html`,
+  not published until pushed), and check on a real iPhone that signing picks up the Time Sensitive entitlement
+  (automatic signing should add the capability to the App ID).
+- Not verified by hand yet: a raise (orange → red) ringing again, and Time Sensitive breaking through a Focus.
 
 ### Phase 1 — tasks (in order)
 

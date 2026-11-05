@@ -80,12 +80,13 @@ AI. **Assistant quality** (`docs/ASSISTANT_QUALITY_PLAN.md`, measured 2026-10-31
    (EmbeddingGemma, measure on a phone first); (6) a vetted bilingual emergency guide: every variant gave 3–8
    harmful answers out of 50 (CPR, choking, bleach dose, CO); (7) Spanish Ready.gov/MedlinePlus in the kit.
 
-AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's decisions the same day; phase 1 task 1 done 2026-11-05):
-   official weather warnings (AEMET for Spain, NWS for the US, MeteoAlarm for Europe, GDACS elsewhere) and
-   earthquakes (USGS, EMSC) for where the person is, each warning turned into actions (the area's map, plan, kit,
-   guide card, 112). **Phase 1, next**: no server; the app reads the feeds, matches on the device and notifies
-   locally (foreground + background task); offered at the end of onboarding and once to existing installs. The
-   pure cores are built and tested (`src/features/alerts/*-core.ts`); next is "Phase 1 — tasks" step 2 (fetch + state).
+AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's decisions the same day; **phase 1 built
+   2026-11-05**): official weather warnings (AEMET for Spain, NWS for the US, GDACS elsewhere; MeteoAlarm for Europe
+   once unblocked) and earthquakes (USGS, EMSC) for where the person is, each warning turned into actions (the area's
+   map, plan, kit, guide card, 112), notified locally, checked in the foreground and by a background task. Left in
+   phase 1 (the plan's "Phase 1 — status"): measuring background
+   runs on real phones for a few days (Settings › Avisos oficiales › Comprobaciones recientes), the owner's review of
+   `docs/store/listing-2.3.0.md` and the privacy policy changes, a signing check of the Time Sensitive entitlement.
    **Phase 2, right after**: iOS push from a free server (Deno Deploy, `server/alerts/`); needs a Deno Deploy
    account and an APNs key from the owner. Blocking for Europe: MeteoAlarm's extra redistribution terms and an
    API token for its region geometries (email `meteoalarm@geosphere.at`).
@@ -343,6 +344,40 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-11-05 — Official alerts phase 1: the app side (tasks 2–7, iOS verified)
+
+- `src/features/alerts/`: `state.ts` (kv), `sources.ts` (AEMET's RSS, and its bundle only when the RSS points at a
+  new one; NWS by point snapped to 0.05°; USGS, EMSC, GDACS; User-Agent, If-Modified-Since, 20 s timeouts;
+  `EXPO_PUBLIC_ALERTS_URL` for E2E), `check.ts` (last system fix in the foreground, sources for the country,
+  cache, `visible`, `decide`, notify; every run logged), `notify.ts` (channel `alerts`; Time Sensitive for red and
+  tsunamis), `background.ts` (expo-background-task + expo-task-manager, defined from a new entry point `index.ts`),
+  `enable.ts`, `present.ts`, `components.tsx`, `register.ts`. Screens `/alerts`, `/alerts/[id]`,
+  `/settings/alerts`; Home card (orange/red here, else a quiet line; the once-only offer for old installs); the
+  offer on onboarding's last step. One notification handler for the app (`lib/notifications.ts`), shared with the
+  kit's reminders. Level colour tokens. Time Sensitive entitlement. Credits for the five sources. Privacy policy
+  (es + en) and a draft listing (`docs/store/listing-2.3.0.md`) for the owner to review.
+- E2E: `scripts/e2e-alerts-feed.py` serves the fixtures moved to now plus an orange warning over Madrid and a quake
+  near it; **ALR-01 passes on the iOS simulator** (offer → on in Barcelona → moved to Madrid: both rung as real
+  banners, list, detail, guide card, quake, Home card, run log, off). Smoke suite re-run on the same build: see below.
+- Paid for: Maestro `back` is a no-op on iOS; the alerts' banners cover the back button and aren't in the app's
+  hierarchy (fixed wait); Maestro's launch permissions don't answer iOS's notification prompt; a list opened from
+  inside the Settings modal pushed the guide into the modal without a back button, so the way into the list is
+  Home's card, not Settings.
+- **Android**: the first release APK with expo-background-task **crashed at startup** (R8 stripped the constructor of
+  WorkManager's Room database, `WorkDatabase_Impl`): keep rule in `app.json` `expo-build-properties`
+  `extraProguardRules`. No Play services / Firebase in the dependencies; `scripts/licenses/android.json` regenerated.
+  ANDROID-07 (new) passes; the background task ran **headless** on the emulator (`adb shell cmd jobscheduler run -f -n
+  androidx.work.systemjobscheduler com.fjlinde.nomadpocket 0` after `am kill`: the first forced run only reschedules,
+  the second runs it) and the run log showed "En segundo plano · 3 fuentes". The Android suite: 4/6, android-01 and
+  android-06 fail on a Kiwix ZIM download with "Trust anchor for certification path not found": this Mac's network
+  goes through a TLS-intercepting corporate proxy for the Kiwix mirrors whose root the emulator doesn't trust (GitHub
+  isn't intercepted: android-05 passes). Environment, not the app; re-run them on another network.
+- iOS: smoke 21/21 + ALR-01 on the final build, and PREP-03 (the kit reminder, which shares the notification
+  handler now).
+- Commits: e646564 (cores), 29ee555 (app side, before verification). The hooks stop commits at 04:00, so everything
+  after 29ee555 (the verification fixes: Home's status line, onboarding's secondary button, the R8 rule, the E2E
+  flows and feed server, docs, privacy policy, store draft, credits) is **uncommitted** for the owner.
 
 ### 2026-11-05 — Official alerts: the pure cores (phase 1, task 1)
 

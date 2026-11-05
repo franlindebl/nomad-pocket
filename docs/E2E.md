@@ -289,6 +289,7 @@ By hand:
 | downloads | `dl-02-controls` | DL-02 | nightly | network |
 | updates | `upd-01-archives` | UPD-01, UPD-02, UPD-03 | full | seeded, updates-server (Home's card, Library's badge and link, the sheet; "Actualizar todo" replaces two archives and leaves the course that can't fit; its delete-first is refused with nothing deleted) |
 | updates | `upd-02-country` | UPD-04 | full | seeded-old-country, routing-server, maps-server (Andorra as a January build: Home's card, update from the sheet, "Tus mapas" with October's build) |
+| alerts | `alr-01-official-alerts` | ALR-01 | full | alerts-server (offered on onboarding's last step and turned on in Barcelona: quiet Home card; moved to Madrid: the orange warning drawn over the city and the M 4.8 quake 25 km away are listed and rung; detail with the official text and actions, the guide card, the quake's facts; Home's card; the run log; off again) |
 | prepare | `prep-01-plan` | PREP-01 | smoke | — |
 | prepare | `prep-02-kit` | PREP-02 | smoke | — |
 | prepare | `prep-03-reminder-export` | PREP-03 | full | taps the system notifications alert |
@@ -298,6 +299,7 @@ By hand:
 | android | `android-03-search-emergency` | ANDROID-03 | android | network (Andorra country download) |
 | android | `android-04-prepare` | ANDROID-04 | android | — (offline) |
 | android | `android-05-routing` | ANDROID-05 | android | network (published catalog + Andorra pack from GitHub) |
+| android | `android-07-alerts` | ANDROID-07 | android | stand-in alert feeds (official alerts turned on in Madrid from onboarding: Home's card, the list, an alert's official text, the run log) |
 | android | `android-06-updates` | ANDROID-06 | android | network (a 1 MB archive from Kiwix), updates-server (its newer edition from the stand-in catalog, through `adb reverse`) |
 | carplay | `car-00-prepare` | CAR-01…CAR-04 (with `scripts/carplay/e2e-carplay.sh`) | carplay | routing-server, maps-server; the iOS 26.5 CarPlay simulator |
 
@@ -322,6 +324,27 @@ preview's green "Ir" is too short for the OCR, so it is tapped under the estimat
 Run it after `npm run e2e -- --build` while `app.json` has CarPlay on (the suite's build is the one it installs),
 and not at the same time as another suite: both serve the local catalogs on port 8765. Results in
 `e2e/artifacts/carplay-<timestamp>/` (each car screen as `NN.png` with its text in `NN.txt`).
+
+### Official alerts (ALR)
+
+`scripts/e2e.sh` and `scripts/e2e-android.sh` bake `EXPO_PUBLIC_ALERTS_URL=http://localhost:<port>/alerts` in, and
+`scripts/e2e-alerts-feed.py` writes the feeds every source reads from there (on iOS for `alerts-server` flows; on
+Android always): the real samples of `src/features/alerts/fixtures/` with every time moved so their moment
+(2026-11-04 23:00 UTC) is now, an orange rain warning drawn over Madrid (a copy of AEMET's Cartagena warning with a
+box around the city) and an M 4.8 quake 25 km from Madrid ten minutes ago. The suite puts the simulator in Madrid;
+ALR-01 starts in Barcelona (`setLocation`) so turning alerts on records nothing serious, then moves to Madrid.
+
+Gotchas paid for: iOS's notification prompt isn't covered by Maestro's launch permissions (the flow taps
+"Permitir", and a prompt left open by a failed run outlives the reinstall); the alerts' banners are the system's (not
+in the app's hierarchy) and cover the back button for a few seconds, so the flow waits a fixed 10 s after the check
+that rings them; Maestro's `back` does nothing on iOS (tap `BackButton` after `waitForAnimationToEnd`). On Android the flows before
+ANDROID-07 leave the emulator's last fix in Andorra, so it sets Madrid itself (`setLocation`).
+
+Cases: **ALR-01** above; **ANDROID-07** turns alerts on in Madrid from onboarding and checks Home's card, the
+list, the detail and the run log on the emulator (served always on Android). Not automated: the background task (BGTaskScheduler doesn't run on the simulator; on a
+device, a debug build's `triggerTaskWorkerForTestingAsync`, or on Android
+`adb shell cmd jobscheduler run -f com.fjlinde.nomadpocket <job id>`), a raise (orange → red) notifying again, and the
+Time Sensitive level breaking through a Focus (checked by hand on a phone).
 
 ### Content updates (UPD, ANDROID-06)
 
@@ -475,6 +498,11 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `adults-plus`/`-minus`/`-value` (also `children-`, `pets-`), `kit-progress`, `kit-<item>`, `kit-<item>-details`, `kit-add` | kit screen |
   | `item-name`, `item-add-expiry`, `expiry-month`, `item-save` | kit item sheet |
   | `house`, `map`, `books.vertical`, `text.bubble` | tabs (SF Symbol ids, set by iOS); Courses is a collection of the Library (`subflows/open-courses.yaml`) |
+  | `onboarding-alerts`, `onboarding-alerts-enable`, `onboarding-alerts-on` | setup wizard's last step: the official alerts offer, its "Activar avisos", the card once on |
+  | `home-alert`, `home-alerts-status`, `home-alerts-offer`, `home-alerts-offer-enable`, `home-alerts-offer-decline` | Home: an orange/red warning where the person is; the quiet line while alerts are on and nothing serious applies; the once-only offer (installs from before the feature) and its buttons |
+  | `settings-alerts`, `alerts-settings-switch` | Settings: the Avisos oficiales row; the on/off switch in its screen |
+  | `alerts-status`, `alerts-refresh`, `alerts-no-position`, `alerts-no-notifications`, `alert-row-<n>`, `alerts-list-offer` | `/alerts`: freshness line, "Comprobar ahora", the no-location and no-notifications cards, rows (0-based), the offer while off |
+  | `alert-title`, `alert-official`, `alert-action-<map\|guide\|plan\|kit\|call\|web>` | `/alerts/[id]`: title, the official text, the action rows |
   | `BackButton` | the native header's back button |
 
 - A control inside another button is invisible to VoiceOver and to Maestro (iOS merges it

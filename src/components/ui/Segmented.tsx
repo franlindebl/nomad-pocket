@@ -44,10 +44,21 @@ export function Segmented<T extends string>({
   );
 }
 
-export function Switch({ value, onValueChange, accessibilityLabel }: { value: boolean; onValueChange: (v: boolean) => void; accessibilityLabel?: string }) {
+export function Switch({
+  value,
+  onValueChange,
+  accessibilityLabel,
+  testID,
+}: {
+  value: boolean;
+  onValueChange: (v: boolean) => void;
+  accessibilityLabel?: string;
+  testID?: string;
+}) {
   const { colors } = useTheme();
   return (
     <RNSwitch
+      testID={testID}
       value={value}
       onValueChange={onValueChange}
       accessibilityLabel={accessibilityLabel}

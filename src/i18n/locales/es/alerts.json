@@ -80,7 +80,11 @@
   },
   "home": {
     "more_one": "y {{count}} aviso más",
-    "more_other": "y {{count}} avisos más"
+    "more_other": "y {{count}} avisos más",
+    "none": "Ningún aviso naranja ni rojo donde estás",
+    "yellow_one": "{{count}} aviso en vigor donde estás, sin naranja ni rojo",
+    "yellow_other": "{{count}} avisos en vigor donde estás, sin naranja ni rojo",
+    "noPosition": "Sin tu ubicación: toca para ver los del país"
   },
   "list": {
     "updated": "Actualizado {{ago}}",
@@ -155,7 +159,6 @@
     "runFailed": "falló {{names}}",
     "runOffline": "sin conexión",
     "runNotified_one": "{{count}} notificación",
-    "runNotified_other": "{{count}} notificaciones",
-    "openList": "Ver los avisos"
+    "runNotified_other": "{{count}} notificaciones"
   }
 }

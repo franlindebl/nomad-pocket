@@ -154,6 +154,10 @@ docs/               the docs above + screenshots/ + store/
 
 - iOS 26: native large title blank in native tabs → in-content titles (above).
 - Android R8 strips libkiwix JNI fields → `modules/nomad-zim/android/consumer-rules.pro`.
+- Android R8 strips the constructor of WorkManager's Room database (`WorkDatabase_Impl`, built by reflection; WorkManager
+  comes with expo-background-task for official alerts): the release APK crashed at startup → keep rule in `app.json`
+  (`expo-build-properties` `android.extraProguardRules`). Any new library on Room needs nothing more; check a release
+  APK launches after adding one that uses reflection.
 - MapLibre Native won't draw a tile while a glyph range fails to load → placeholder
   ranges (`features/maps/glyphs.ts`); bump `VERSION` in `features/maps/assets.ts` when
   `assets/maps/basemap-assets.zip` changes.

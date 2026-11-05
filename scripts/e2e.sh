@@ -67,6 +67,9 @@ export EXPO_PUBLIC_MAPS_MANIFEST_URL="http://localhost:$ROUTING_PORT/maps-manife
 # The content updates check asks a stand-in catalog (scripts/e2e-updates-feed.py), served for
 # `updates-server` flows only; downloads and Explore keep Kiwix's.
 export EXPO_PUBLIC_UPDATES_OPDS_URL="http://localhost:$ROUTING_PORT/opds"
+# Official alerts read every source from stand-in feeds (scripts/e2e-alerts-feed.py), served for
+# `alerts-server` flows: the real samples moved to now, an orange warning over Madrid and a quake near it.
+export EXPO_PUBLIC_ALERTS_URL="http://localhost:$ROUTING_PORT/alerts"
 
 # Set PLANET_PORT to build an app whose on-device map extraction reads the stand-in planet build
 # (scripts/dev-planet-server.ts, started below for `planet-server` flows) instead of Protomaps.
@@ -95,9 +98,10 @@ xcrun simctl location "$UDID" set 40.4168,-3.7038
 # The country maps catalog (maps-manifest.json) always lists Andorra: the fixture map in
 # e2e/fixtures/maps/ split in two parts, so a country download exercises reassembly.
 SERVER_PID=""
-if printf '%s\n' "${FLOWS[@]}" | xargs grep -lE '^tags:.*[[ ,](routing-server|routing-live|maps-server|updates-server)[],]' >/dev/null 2>&1; then
+if printf '%s\n' "${FLOWS[@]}" | xargs grep -lE '^tags:.*[[ ,](routing-server|routing-live|maps-server|updates-server|alerts-server)[],]' >/dev/null 2>&1; then
   SERVE="$(mktemp -d)"
   python3 -I "$ROOT/scripts/e2e-updates-feed.py" "$SERVE" "http://localhost:$ROUTING_PORT" >/dev/null
+  python3 -I "$ROOT/scripts/e2e-alerts-feed.py" "$SERVE" "http://localhost:$ROUTING_PORT" >/dev/null
   if printf '%s\n' "${FLOWS[@]}" | xargs grep -lE '^tags:.*[[ ,]routing-live[],]' >/dev/null 2>&1; then
     curl -fsSL -o "$SERVE/live.json" "https://github.com/franlindebl/nomad-pocket/releases/download/routing-index/routing-manifest.json"
   fi

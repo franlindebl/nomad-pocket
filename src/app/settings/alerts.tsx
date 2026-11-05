@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -45,18 +44,18 @@ export default function AlertsSettingsScreen() {
           subtitle={t('settings.enabledBody')}
           subtitleLines={4}
           trailing={
-            <Switch value={state.enabled} onValueChange={(v) => !busy && void toggle(v)} accessibilityLabel={t('settings.enabled')} />
+            <Switch
+              value={state.enabled}
+              onValueChange={(v) => !busy && void toggle(v)}
+              accessibilityLabel={t('settings.enabled')}
+              testID="alerts-settings-switch"
+            />
           }
-          testID="alerts-settings-switch"
         />
       </ListGroup>
 
       {state.enabled ? (
         <>
-          <ListGroup style={{ marginTop: space.lg }}>
-            <ListRow title={t('settings.openList')} chevron onPress={() => router.push('/alerts')} testID="alerts-settings-open" />
-          </ListGroup>
-
           <SectionHeader title={t('settings.level')} />
           <ListGroup>
             <View style={{ padding: space.lg, gap: space.md }}>

@@ -21,12 +21,12 @@
 
   <section id="es" lang="es">
     <h1>Política de privacidad</h1>
-    <p class="muted">Última actualización: 3 de noviembre de 2026</p>
+    <p class="muted">Última actualización: 5 de noviembre de 2026</p>
 
     <div class="card">
       <strong>En resumen:</strong> Nomad Pocket no recoge, no vende y no comparte ningún dato personal, y no tiene servidor propio.
       No hay cuentas, ni publicidad, ni analítica, ni rastreo. Lo que haces en la app se queda en tu dispositivo. La app solo se conecta
-      a internet para descargar contenido y catálogos de servicios públicos de terceros, que ven tu dirección IP como en cualquier
+      a internet para descargar contenido y catálogos (y, si los activas, avisos oficiales) de servicios públicos de terceros, que ven tu dirección IP como en cualquier
       conexión (abajo explicamos cuáles y cuándo).
     </div>
 
@@ -47,6 +47,7 @@
       <li>Tu historial de lectura, marcadores, progreso de cursos, lugares guardados en el mapa y ajustes.</li>
       <li>Las conversaciones con el asistente.</li>
       <li>Tu plan de emergencia y tu kit (contactos, puntos de encuentro, números importantes, datos de salud y notas). Solo salen del dispositivo si tú exportas el PDF y lo compartes, o dentro de las copias de seguridad del sistema si las tienes activadas (más abajo). Los recordatorios de caducidad son notificaciones locales: no usamos notificaciones push.</li>
+      <li>Si activas «Avisos oficiales»: los últimos avisos descargados, tu última posición aproximada (más abajo) y un registro de las últimas comprobaciones. Se borran al desactivarlos. Los avisos también se muestran como notificaciones locales.</li>
     </ul>
     <p>Estos datos nunca se envían a nosotros.</p>
     <p><strong>Dónde se guardan.</strong> En iPhone y iPad, tus datos (ajustes, historial, marcadores, conversaciones, lugares, plan y kit)
@@ -70,6 +71,10 @@
       una notificación mientras tanto). La ubicación se procesa en el dispositivo y solo sale de él
       si tú la compartes con el botón «Compartir mi posición», a quien tú elijas. Las indicaciones habladas las lee una voz instalada en el
       dispositivo, sin conexión.</p>
+    <p><strong>Avisos oficiales</strong> (desactivados salvo que los actives): la app guarda en el dispositivo la última posición que obtuvo
+      mientras la usabas, redondeada a unos 100 m, y comprueba en el propio teléfono qué avisos la cubren. Para esto no pide la ubicación
+      «siempre» ni la consulta en segundo plano: usa esa última posición guardada. No sale del dispositivo, con una excepción: en Estados Unidos,
+      para pedir los avisos de tu zona, la app envía al Servicio Meteorológico Nacional (NWS) esa posición redondeada a unos 5 km.</p>
 
     <h2>Asistente de IA</h2>
     <p>El asistente funciona íntegramente en tu dispositivo. En iPhone y iPad usa el modelo integrado del sistema (Apple Intelligence,
@@ -108,6 +113,13 @@
         solo para obtener puntos de emergencia de OpenStreetMap de un mapa que no los trae incluidos, al instalarlo o al abrir Emergencias con conexión.
         La petición incluye solo los límites de la región, no tu ubicación.</li>
       <li><a href="https://huggingface.co">Hugging Face</a>: los modelos de IA descargables.</li>
+      <li><strong>Solo si activas «Avisos oficiales»</strong>: al abrir la app y, cuando el sistema lo permite, en segundo plano (en Android
+        más o menos cada media hora; en iPhone, cuando decide el sistema), la app descarga los avisos publicados por
+        <a href="https://www.aemet.es">AEMET</a> (<code>www.aemet.es</code>, en España), el <a href="https://www.weather.gov">NWS</a>
+        (<code>api.weather.gov</code>, en Estados Unidos: recibe tu posición redondeada a unos 5 km), <a href="https://www.gdacs.org">GDACS</a>
+        (<code>www.gdacs.org</code>, en el resto de países) y, para los terremotos, <a href="https://earthquake.usgs.gov">USGS</a>
+        (<code>earthquake.usgs.gov</code>) y <a href="https://www.emsc-csem.org">EMSC</a> (<code>www.seismicportal.eu</code>). Salvo al NWS,
+        la petición es la misma para todo el mundo y no incluye tu ubicación: qué avisos te afectan se decide en el teléfono.</li>
     </ul>
     <p>Como en cualquier conexión a internet, esos servidores reciben tu dirección IP y la petición, y se rigen por sus propias
       políticas de privacidad. La app no les envía ningún identificador tuyo ni datos personales. Si la opción «Solo con Wi‑Fi» está
@@ -141,12 +153,12 @@
 
   <section id="en" lang="en">
     <h1>Privacy policy</h1>
-    <p class="muted">Last updated: November 3, 2026</p>
+    <p class="muted">Last updated: November 5, 2026</p>
 
     <div class="card">
       <strong>In short:</strong> Nomad Pocket does not collect, sell or share any personal data, and has no server of its own.
       There are no accounts, ads, analytics or tracking. What you do in the app stays on your device. The app only goes online to download
-      content and catalogs from public third-party services, which see your IP address as with any internet connection
+      content and catalogs (and, if you turn them on, official alerts) from public third-party services, which see your IP address as with any internet connection
       (we explain which ones and when below).
     </div>
 
@@ -167,6 +179,7 @@
       <li>Your reading history, bookmarks, course progress, saved map places and settings.</li>
       <li>Your conversations with the assistant.</li>
       <li>Your emergency plan and kit (contacts, meeting points, important numbers, health details and notes). They only leave the device if you export the PDF and share it, or inside your system backups if you have them turned on (see below). Expiry reminders are local notifications: we don't use push notifications.</li>
+      <li>If you turn on “Official alerts”: the last alerts downloaded, your last approximate position (see below) and a log of the latest checks. They are deleted when you turn alerts off. Alerts are also shown as local notifications.</li>
     </ul>
     <p>This data is never sent to us.</p>
     <p><strong>Where it lives.</strong> On iPhone and iPad, your data (settings, history, bookmarks, conversations, places, plan and kit)
@@ -188,6 +201,10 @@
       screen locked or in the background until the trip ends, to give you directions (on Android a notification shows meanwhile).
       Location is processed on the device and only leaves it if you share it with the “Share my position” button, with whoever you choose.
       Spoken directions are read by a voice installed on the device, offline.</p>
+    <p><strong>Official alerts</strong> (off unless you turn them on): the app keeps on the device the last position it got while you were
+      using it, rounded to about 100 m, and checks on the phone itself which alerts cover it. For this it never asks for your location
+      “always” nor reads it in the background: it uses that last saved position. It doesn't leave the device, with one exception: in the
+      United States, to ask for the alerts for your area, the app sends that position rounded to about 5 km to the National Weather Service (NWS).</p>
 
     <h2>AI assistant</h2>
     <p>The assistant runs entirely on your device. On iPhone and iPad it uses the system's built-in model (Apple Intelligence, when available)
@@ -225,6 +242,13 @@
         only to get OpenStreetMap emergency places for a map that doesn't bring them, when you install it or open Emergencias online.
         The request contains only the region's bounds, not your location.</li>
       <li><a href="https://huggingface.co">Hugging Face</a>: downloadable AI models.</li>
+      <li><strong>Only if you turn on “Official alerts”</strong>: when the app opens and, when the system allows it, in the background (on
+        Android roughly every half hour; on iPhone, when the system decides), the app downloads the alerts published by
+        <a href="https://www.aemet.es">AEMET</a> (<code>www.aemet.es</code>, in Spain), the <a href="https://www.weather.gov">NWS</a>
+        (<code>api.weather.gov</code>, in the United States: it receives your position rounded to about 5 km), <a href="https://www.gdacs.org">GDACS</a>
+        (<code>www.gdacs.org</code>, in other countries) and, for earthquakes, <a href="https://earthquake.usgs.gov">USGS</a>
+        (<code>earthquake.usgs.gov</code>) and <a href="https://www.emsc-csem.org">EMSC</a> (<code>www.seismicportal.eu</code>). Except for the NWS,
+        the request is the same for everyone and contains no location: which alerts affect you is worked out on the phone.</li>
     </ul>
     <p>As with any internet connection, those servers receive your IP address and the request, and are governed by their own
       privacy policies. The app sends them no identifiers or personal data about you. If “Wi‑Fi only” is on, content downloads wait for a

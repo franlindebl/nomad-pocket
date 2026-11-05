@@ -54,6 +54,7 @@ Very dark grey (not pure black: OLED smears pure black while scrolling), light i
 | `success` / `successSoft` | `#3DD68C` / `#0E2A1D` | Installed, done |
 | `warning` / `warningSoft` | `#FF9F0A` / `#33220A` | Low storage, metered network (orange, so it never reads as the brand yellow) |
 | `danger` / `dangerSoft` | `#FF453A` / `#3A1513` | Delete, errors |
+| `levelYellow`, `levelOrange`, `levelRed` (+ `…Soft`) / `onLevel` | `#FFD60A`, `#FF9F0A`, `#FF453A` (soft `#2B2507`, `#33220A`, `#3A1513`) / `#0C0C0C` | Official warning levels (alerts): the meteorological colours. The level chip (`LevelChip`) is filled with the colour and always says the level in words (the colour never alone); an alert's mark is the hazard icon in the colour on the soft tint with a 3 px bar; Home's warning card takes the colour as its outline. Yellow is the signal yellow on purpose (it is the yellow of the warnings) |
 | `location` | `#4C8DF6` | The user's position on the map: the puck (map `tintColor`) and the compass beam (baked into `assets/maps/beam/*.png` by `scripts/maps/make-beam.py`: rerun it after changing this) |
 | `signFace`, `signRing`, `signText` | `#FFFFFF`, `#D93D42`, `#18171B` | The speed limit sign while navigating (`SpeedBadge`): a real sign's colours |
 | `overlay` | `rgba(0,0,0,.6)` | Scrims behind popovers |
