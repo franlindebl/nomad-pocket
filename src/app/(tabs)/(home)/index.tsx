@@ -40,6 +40,7 @@ import {
   Text,
 } from '@/components/ui';
 import { searchIndexBytes } from '@/db';
+import { AlertsHomeCard } from '@/features/alerts/components';
 import { useItems } from '@/features/content/items';
 import { groupDownloads } from '@/features/downloads/groups';
 import { useActiveDownloads } from '@/features/downloads/manager';
@@ -156,6 +157,8 @@ export default function HomeScreen() {
           <IconButton testID="open-settings" icon={Settings} accessibilityLabel={tc('settings:title')} onPress={() => router.push('/settings')} />
         </Row>
       </Row>
+
+      <AlertsHomeCard style={{ marginTop: space.xl }} />
 
       <SectionHeader title={t('crisis.title')} style={{ marginTop: space.xl }} />
       <CallBlock

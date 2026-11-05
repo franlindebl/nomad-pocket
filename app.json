@@ -13,6 +13,9 @@
     },
     "ios": {
       "icon": "./assets/expo.icon",
+      "entitlements": {
+        "com.apple.developer.usernotifications.time-sensitive": true
+      },
       "bundleIdentifier": "com.fjlinde.nomadpocket",
       "buildNumber": "42",
       "supportsTablet": true,
@@ -207,7 +210,8 @@
           "microphonePermission": "Nomad Pocket usa el micrófono solo cuando tocas el botón de dictar en el asistente, para escribir tu pregunta con la voz. El audio se procesa en tu dispositivo y no se guarda ni se envía.",
           "speechRecognitionPermission": "Nomad Pocket convierte tu voz en texto en tu dispositivo, sin conexión, cuando dictas una pregunta al asistente."
         }
-      ]
+      ],
+      "expo-background-task"
     ],
     "experiments": {
       "typedRoutes": true,

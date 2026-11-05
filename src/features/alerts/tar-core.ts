@@ -33,9 +33,13 @@ export function untar(tar: Uint8Array): TarEntry[] {
   return out;
 }
 
-/** The text of every `.xml` file in a .tar.gz, in archive order. */
+/**
+ * The text of every `.xml` file in a .tar.gz, in archive order. A body that isn't gzip (no 1f 8b magic) is read as a
+ * plain tar: an HTTP stack that honours a `Content-Encoding: gzip` header hands the tar over already unpacked.
+ */
 export function xmlFilesOfTarGz(gz: Uint8Array): { name: string; xml: string }[] {
-  return untar(gunzipSync(gz))
+  const gzipped = gz[0] === 0x1f && gz[1] === 0x8b;
+  return untar(gzipped ? gunzipSync(gz) : gz)
     .filter((e) => e.name.toLowerCase().endsWith('.xml'))
     .map((e) => ({ name: e.name.slice(e.name.lastIndexOf('/') + 1), xml: strFromU8(e.data) }));
 }

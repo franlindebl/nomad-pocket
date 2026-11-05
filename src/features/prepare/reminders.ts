@@ -13,7 +13,6 @@ import {
   scheduleNotificationAsync,
   SchedulableTriggerInputTypes,
   setNotificationChannelAsync,
-  setNotificationHandler,
   type NotificationResponse,
 } from 'expo-notifications';
 import { router } from 'expo-router';
@@ -21,6 +20,7 @@ import { AppState, Platform } from 'react-native';
 
 import { whenNavigatorReady } from '@/components/navigation';
 import i18n from '@/i18n';
+import { setNotificationBehaviour } from '@/lib/notifications';
 
 import { formatMonth, kitFor, planReminders, reminderDate, type ScheduledReminder } from './kit';
 import { deletePlanPdfs } from './share';
@@ -34,9 +34,7 @@ let initialised = false;
 export function initReminders() {
   if (initialised) return;
   initialised = true;
-  setNotificationHandler({
-    handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: false, shouldSetBadge: false }),
-  });
+  setNotificationBehaviour(KIND);
   addNotificationResponseReceivedListener(openKit);
   // A tap that launched the app was delivered before this listener existed: it waits here.
   const launch = getLastNotificationResponse();

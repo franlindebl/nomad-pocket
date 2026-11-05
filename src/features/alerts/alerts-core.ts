@@ -322,6 +322,25 @@ export function covers(a: Alert, place: Place, rule: QuakeRule = QUAKE_RULE): bo
   return false;
 }
 
+const isQuake = (a: Alert) => a.kind === 'quake' && a.source !== 'gdacs';
+
+/**
+ * What the alerts list shows: the current alerts that cover the person (USGS/EMSC quakes merged), most serious
+ * first. Without any position: the orange and red warnings of the national source and GDACS for the country
+ * (`nearby: false`; these are never notified, since nothing says they are where the person is).
+ */
+export function visible(all: Alert[], place: Place, now: number, rule: QuakeRule = QUAKE_RULE): { alerts: Alert[]; nearby: boolean } {
+  const live = current(all, now);
+  if (!place.pos) {
+    const country = live.filter(
+      (a) => !isQuake(a) && levelRank(a.level) >= RANK.orange && (a.source !== 'gdacs' || covers(a, place, rule)),
+    );
+    return { alerts: country.sort(byUrgency), nearby: false };
+  }
+  const merged = [...live.filter((a) => !isQuake(a)), ...mergeQuakes(live.filter(isQuake))];
+  return { alerts: merged.filter((a) => covers(a, place, rule)).sort(byUrgency), nearby: true };
+}
+
 /** Most serious first, then the soonest to start. */
 export function byUrgency(a: Alert, b: Alert): number {
   return levelRank(b.level) - levelRank(a.level) || (a.onset ?? a.sent ?? 0) - (b.onset ?? b.sent ?? 0);

@@ -35,6 +35,15 @@ export const palette = {
     warningSoft: '#33220A',
     danger: '#FF453A',
     dangerSoft: '#3A1513',
+    /** Official warning levels (alerts): the meteorological yellow / orange / red. Fill a level mark or chip with the
+     *  colour and write on it in `onLevel`; the soft ones tint a row. Yellow is the signal yellow on purpose. */
+    levelYellow: '#FFD60A',
+    levelYellowSoft: '#2B2507',
+    levelOrange: '#FF9F0A',
+    levelOrangeSoft: '#33220A',
+    levelRed: '#FF453A',
+    levelRedSoft: '#3A1513',
+    onLevel: '#0C0C0C',
     /** The user's position on the map (puck + compass beam: scripts/maps/make-beam.py). */
     location: '#4C8DF6',
     /** The reader's optional paper page (dark text on cream); the same cream is in ZimWebView's paper CSS. */

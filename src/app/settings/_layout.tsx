@@ -9,6 +9,7 @@ export default function Layout() {
     <Stack screenOptions={useStackOptions()}>
       <Stack.Screen name="index" options={{ title: t('title') }} />
       <Stack.Screen name="country" options={{ title: t('country') }} />
+      <Stack.Screen name="alerts" options={{ title: t('alerts:settings.row') }} />
       <Stack.Screen name="credits" options={{ title: t('credits') }} />
       <Stack.Screen name="packages" options={{ title: t('creditsJs') }} />
       <Stack.Screen name="license" options={{ title: '' }} />

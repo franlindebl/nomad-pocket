@@ -70,3 +70,8 @@ test('xmlFilesOfTarGz ignores files that are not XML', () => {
   const gz = gzipSync(concat(entry('readme.txt', 'hi'), entry('x/one.XML', '<alert/>'), new Uint8Array(1024)));
   assert.deepEqual(xmlFilesOfTarGz(gz), [{ name: 'one.XML', xml: '<alert/>' }]);
 });
+
+test('xmlFilesOfTarGz also reads a tar that arrives already ungzipped', () => {
+  const tar = concat(entry('a.xml', '<alert/>'), new Uint8Array(1024));
+  assert.deepEqual(xmlFilesOfTarGz(tar), [{ name: 'a.xml', xml: '<alert/>' }]);
+});

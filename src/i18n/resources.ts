@@ -1,4 +1,5 @@
 // Register every namespace here, for both languages.
+import enAlerts from './locales/en/alerts.json';
 import enAssistant from './locales/en/assistant.json';
 import enCommon from './locales/en/common.json';
 import enCourses from './locales/en/courses.json';
@@ -10,6 +11,7 @@ import enPrepare from './locales/en/prepare.json';
 import enReader from './locales/en/reader.json';
 import enSettings from './locales/en/settings.json';
 import enUpdates from './locales/en/updates.json';
+import esAlerts from './locales/es/alerts.json';
 import esAssistant from './locales/es/assistant.json';
 import esCommon from './locales/es/common.json';
 import esCourses from './locales/es/courses.json';
@@ -35,6 +37,7 @@ export const resources = {
     prepare: esPrepare,
     updates: esUpdates,
     guide: esGuide,
+    alerts: esAlerts,
   },
   en: {
     common: enCommon,
@@ -48,6 +51,7 @@ export const resources = {
     prepare: enPrepare,
     updates: enUpdates,
     guide: enGuide,
+    alerts: enAlerts,
   },
 } as const;
 

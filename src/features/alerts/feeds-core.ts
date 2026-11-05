@@ -233,7 +233,7 @@ export function parseNws(json: unknown): Alert[] {
       original: language,
       ...(rings.length ? { polygons: rings } : {}),
       ...(ugc.length ? { codes: ugc } : {}),
-      ...(str(p['@id']) ? { url: str(p['@id']) } : {}),
+      // No `url`: `@id` is the API's JSON, not a page for people.
     });
   }
   return out;
@@ -265,7 +265,8 @@ function quake(
     topic: '',
     sent: time,
     onset: time,
-    expires: null,
+    // Listed for a day (the feeds' own window), so a list cached offline doesn't keep old quakes forever.
+    expires: time + 24 * 3600_000,
     area: place,
     texts: { en: { event: 'Earthquake', headline: title, description: '', instruction: '' } },
     original: 'en',

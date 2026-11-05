@@ -7,3 +7,4 @@ import './assistant/register';
 import './prepare/register';
 import './carplay/register';
 import './updates/register';
+import './alerts/register';

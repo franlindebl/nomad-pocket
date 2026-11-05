@@ -176,7 +176,7 @@ test('USGS and EMSC: the same four days of quakes, merged into one list', () => 
     topic: '',
     sent: 1793827465643,
     onset: 1793827465643,
-    expires: null,
+    expires: 1793827465643 + 24 * 3600_000,
     area: 'south of the Fiji Islands',
     texts: { en: { event: 'Earthquake', headline: 'M 5.0 - south of the Fiji Islands', description: '', instruction: '' } },
     original: 'en',

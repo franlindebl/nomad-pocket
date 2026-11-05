@@ -85,6 +85,8 @@ export default function RootLayout() {
           <Stack.Screen name="search" options={{ title: t('reader:globalSearch') }} />
           <Stack.Screen name="guide/index" options={{ title: t('guide:title') }} />
           <Stack.Screen name="guide/[id]" options={{ title: '' }} />
+          <Stack.Screen name="alerts/index" options={{ title: t('alerts:title') }} />
+          <Stack.Screen name="alerts/[id]" options={{ title: '' }} />
         </Stack>
         <ToastHost />
         <StatusBar style="light" />

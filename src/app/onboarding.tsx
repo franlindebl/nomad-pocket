@@ -27,6 +27,8 @@ import { countryRegionName } from '@/features/maps/country-maps';
 import { CountryList, deviceCountry } from '@/features/maps/CountryList';
 import { RegionList } from '@/features/maps/RegionList';
 import { guideResources, pickModel, pickWikipedia } from '@/features/onboarding/kit';
+import { AlertsOffer } from '@/features/alerts/components';
+import { markAlertsOffered } from '@/features/alerts/enable';
 import { useItems } from '@/features/content/items';
 import type { AppLanguage } from '@/i18n';
 import { formatBytes } from '@/lib/format';
@@ -264,6 +266,8 @@ export default function OnboardingScreen() {
 
   const finish = (then?: '/prepare/plan') => {
     s.setOnboarded(true);
+    // The alerts offer was on this last step: Home doesn't offer it again.
+    markAlertsOffered();
     close();
     if (then) setTimeout(() => router.push(then), 350);
   };
@@ -538,6 +542,7 @@ export default function OnboardingScreen() {
                 </View>
               </Row>
             </Card>
+            <AlertsOffer testID="onboarding-alerts" />
           </ScrollView>
           <Button testID="onboarding-finish" title={t('onboarding.finish')} size="lg" fullWidth onPress={() => finish()} />
         </Animated.View>

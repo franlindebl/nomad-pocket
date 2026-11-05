@@ -1,12 +1,13 @@
 {
   "name": "nomad-pocket",
   "version": "2.2.0",
-  "main": "expo-router/entry",
+  "main": "index.ts",
   "dependencies": {
     "@maplibre/maplibre-react-native": "^11.5.0",
     "@protomaps/basemaps": "^5.7.2",
     "expo": "~58.0.17",
     "expo-asset": "~58.0.18",
+    "expo-background-task": "~58.0.12",
     "expo-build-properties": "~58.0.11",
     "expo-clipboard": "~58.0.4",
     "expo-constants": "~58.0.13",
@@ -34,6 +35,7 @@
     "expo-status-bar": "~58.0.4",
     "expo-symbols": "~58.0.4",
     "expo-system-ui": "~58.0.6",
+    "expo-task-manager": "~58.0.13",
     "expo-web-browser": "~58.0.6",
     "fflate": "^0.8.3",
     "i18next": "^26.5.7",

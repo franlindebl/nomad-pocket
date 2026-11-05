@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Chip, IconBadge, ListGroup, ListRow, ProgressBar, Row, Screen, SectionHeader, Segmented, Switch, Text } from '@/components/ui';
 import { searchIndexBytes } from '@/db';
+import { useAlertsState } from '@/features/alerts/state';
 import { removeItem, useItems, type InstalledItem } from '@/features/content/items';
 import { clearHistory } from '@/features/library/history';
 import { removeCountry, useCountries, type CountryState } from '@/features/maps/countries';
@@ -24,6 +25,7 @@ export default function SettingsScreen() {
   const { t: tc } = useTranslation();
   const { colors } = useTheme();
   const s = useSettings();
+  const alertsOn = useAlertsState((st) => st.enabled);
   const lang = i18n.language;
   const items = useItems();
   const { countries, otherMaps } = useCountries();
@@ -70,6 +72,13 @@ export default function SettingsScreen() {
           subtitle={region ? regionName(region, i18n.language) : t('countryNone')}
           chevron
           onPress={() => router.push('/settings/country')}
+        />
+        <ListRow
+          testID="settings-alerts"
+          title={tc('alerts:settings.row')}
+          subtitle={alertsOn ? tc('alerts:settings.on') : tc('alerts:settings.off')}
+          chevron
+          onPress={() => router.push('/settings/alerts')}
         />
         <ListRow
           title={t('wifiOnly')}

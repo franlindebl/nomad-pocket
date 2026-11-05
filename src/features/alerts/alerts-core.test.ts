@@ -21,6 +21,7 @@ import {
   snap,
   sourcesFor,
   textFor,
+  visible,
   timeSensitive,
   type Alert,
   type Notified,
@@ -241,6 +242,32 @@ test('decide: records are pruned two days after their end; notifications come mo
   );
   const sooner = alert({ id: 'S', onset: NOW });
   assert.ok(byUrgency(sooner, alert({ id: 'L', onset: NOW + H })) < 0);
+});
+
+test("visible: covering alerts with quakes merged; without a position, the country's orange and red only", () => {
+  const ring = [-1.1, 37.5, -0.8, 37.5, -0.8, 37.8, -1.1, 37.8, -1.1, 37.5];
+  const here = { lat: 37.62, lon: -0.99 };
+  const all = [
+    alert({ id: 'Y', level: 'yellow', topic: 'y', polygons: [ring] }),
+    alert({ id: 'O', topic: 'o', polygons: [ring] }),
+    alert({ id: 'FAR', topic: 'f', level: 'red', polygons: [[10, 10, 11, 10, 11, 11, 10, 10]] }),
+    alert({ id: 'OLD', topic: 'old', polygons: [ring], expires: NOW - 1 }),
+    quake('E1', 'emsc', 5.0, 37.7, -1.0),
+    quake('U1', 'usgs', 5.1, 37.7, -1.0, NOW - H + 5000),
+    alert({ id: 'G', source: 'gdacs', kind: 'disaster', hazard: 'flood', topic: 'g', countries: ['es'] }),
+  ];
+  const near = visible(all, { pos: here, country: 'es' }, NOW);
+  assert.equal(near.nearby, true);
+  assert.deepEqual(
+    near.alerts.map((a) => a.id),
+    ['U1', 'O', 'G', 'Y'],
+  );
+  const country = visible(all, { pos: null, country: 'es' }, NOW);
+  assert.equal(country.nearby, false);
+  assert.deepEqual(
+    country.alerts.map((a) => a.id),
+    ['FAR', 'O', 'G'],
+  );
 });
 
 test('timeSensitive: red and tsunamis', () => {
