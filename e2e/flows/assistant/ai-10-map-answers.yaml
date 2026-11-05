@@ -1,0 +1,42 @@
+# AI-10 — map questions in the assistant (docs/ASSISTANT_MAP_PLAN.md), answered from the map data with no model
+# writing them: Andorra's map, routing pack and points seeded, the phone in Andorra la Vella. "Farmacia cerca de
+# Sant Julià de Lòria" lists pharmacies there (a card with "Llévame" per row), "¿Dónde estoy?" says the town with
+# the 112 button, and "Llévame al hospital más cercano" opens the trip preview on the map.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, assistant, maps, seeded-country]
+---
+- setLocation:
+    latitude: 42.5075
+    longitude: 1.5218
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "text.bubble" }
+- tapOn: "Pregunta .*"
+- inputText: "Búscame una farmacia cerca de Sant Julià de Lòria"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: { id: "map-answer-row" }
+    timeout: 30000
+- assertVisible: "(?s).*cerca de Sant Julià de Lòria.*"
+- assertVisible: { id: "map-answer-go" }
+- takeScreenshot: 01-pharmacies
+- tapOn: "Pregunta .*"
+- inputText: "¿Dónde estoy?"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: { id: "map-answer-locality" }
+    timeout: 30000
+- assertVisible: "Andorra la Vella"
+- assertVisible: { id: "map-answer-emergency" }
+- takeScreenshot: 02-where-am-i
+- tapOn: "Pregunta .*"
+- inputText: "Llévame al hospital más cercano"
+- tapOn: "Enviar"
+- extendedWaitUntil:
+    visible: { id: "map-answer-go-first" }
+    timeout: 30000
+- takeScreenshot: 03-nearest-hospital
+- tapOn: { id: "map-answer-go-first" }
+- extendedWaitUntil:
+    visible: { id: "guidance-panel" }
+    timeout: 30000
+- takeScreenshot: 04-trip-preview

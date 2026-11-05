@@ -67,6 +67,14 @@ Roughly by value. Items A, U and 0 are in progress; 3, 4 and 7 are partly done (
 started. (Preparedness was added
 on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
 
+AM. **Assistant × maps** (`docs/ASSISTANT_MAP_PLAN.md`, approved 2026-11-05; **phase 1 built the same day** except
+   1b, the model fallback, and the measuring: see the plan's "Phase 1 — status"): the assistant
+   answers map questions with a map card built from the index (nearest X near a place, take me to the nearest X by
+   time, A→B, where am I / what to tell 112, share location by SMS, saved places, meeting point, lost, before dark,
+   open now, UTM, alerts near / on the route, evacuation, along the route, place ↔ library, trip prep, voice).
+   Owner: all 24 use cases, three phases; no Android health gate for map questions. Next: 1b (`search_map` tool /
+   router fields + a map bench), the Android emulator check, then phase 2.
+
 AI. **Assistant quality** (`docs/ASSISTANT_QUALITY_PLAN.md`, measured 2026-10-31 on the Spain kit with 50 crisis
    questions, blind-graded): Apple FM scores 0.42/3 and Qwen3.5 4B 1.30/3 as the app is; retrieval v2 + Spanish
    content 1.94/3. In order: ~~(1) propose Qwen even with Apple Intelligence; (2) retrieval bugs: only the first 8
@@ -378,6 +386,30 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   settings store as onboarded before the first launch (`scripts/e2e.sh`); Home's once-only offer, turned on from it,
   gives way to the warning card and doesn't come back after a relaunch.
 - ALR-01 moved to smoke: the run before every TestFlight build covers alerts now. All three pass on iOS.
+
+### 2026-11-05 — Assistant × maps: phase 1 (map answers in the chat)
+
+- `features/assistant/map-intent-core.ts` (pure; ~130 phrases in its tests, negatives included): nearby, nearest
+  by travel time, A→B / how long, where am I / what to tell 112, share my location, call the nearest X, the
+  emergency number, where is X (weak), follow-ups. `map-answer.ts` runs them on the device's data and returns a
+  card; `ui/MapAnswerCard.tsx` shows it (every action a tap: preview, map, call, share, SMS). `chats.ts` tries the
+  map before the health gate, the vital cards and the engine; works with no model. Card JSON in
+  `chat_messages.map` (user migration v5; `migrate-core.test.ts` no longer pins the ladder at the split version).
+- `emergency.ts`: `nearestPlacesOfKinds`, `nearestNamedPlace`, `pointsFetchedAt` (first version read `pois_at` from
+  `index_sources`, a table without it: caught by the E2E run). `maps/share-location.ts`: the position message, share
+  sheet and prefilled SMS, now shared with Emergencias.
+- An answer right after a map lands waits up to 20 s for its index and points (`whenPrepared`), else says it's
+  still preparing. E2E `ai-10-map-answers` (new tag `seeded-country`: Andorra's map, pack and side files, imported
+  at startup) passes on the iOS 27 simulator; `ai-01`, `ai-03`, `map-10`, `map-12` still pass. Android not run.
+
+### 2026-11-05 — Assistant × maps: analysis and plan
+
+- Plan: `docs/ASSISTANT_MAP_PLAN.md`. The data the assistant needs is already on the device and queryable with SQL
+  (place index, emergency points with phone and hours, house numbers, routing packs, markers, meeting points, alert
+  polygons): no vectors needed. A map intent parser runs before the health gate and answers with a card whose
+  buttons open the existing map features; the model only helps understand phrasings (phase 1b), never writes
+  places, phones or times.
+- Owner's decisions: every use case in (24, three phases); map questions are not health features on Android.
 
 ### 2026-11-05 — Android Auto: plan and spike (off)
 

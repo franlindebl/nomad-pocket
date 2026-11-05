@@ -189,6 +189,10 @@ export const MIGRATIONS: string[] = [
   DROP TABLE IF EXISTS map_pois;
   DROP TABLE IF EXISTS map_sources;
   `,
+  // v5: the assistant's map answers (docs/ASSISTANT_MAP_PLAN.md): the card's data as JSON
+  `
+  ALTER TABLE chat_messages ADD COLUMN map TEXT;
+  `,
 ];
 
 /**

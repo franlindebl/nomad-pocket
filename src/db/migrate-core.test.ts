@@ -356,7 +356,9 @@ test('planSplit', () => {
   assert.deepEqual(planSplit({ legacy: false, user: false, ready: true }), ['promote']);
   // A split database is never overwritten, whatever else is there.
   assert.deepEqual(planSplit({ legacy: true, user: true, ready: true }), []);
-  assert.equal(SPLIT_VERSION, MIGRATIONS.length);
+  // The split is the ladder's step 4; later steps (v5: chat_messages.map) run on the split file as usual.
+  assert.equal(SPLIT_VERSION, 4);
+  assert.ok(MIGRATIONS.length >= SPLIT_VERSION);
 });
 
 test('a fresh index file vacuums incrementally', () => {

@@ -14,8 +14,10 @@ import { formatPercent } from '../format';
 import { chamfer, monoFamily, space, useTheme } from '@/theme';
 
 import type { ChatMessage, MessageSource, Phase } from '../chats';
+import type { MapCard } from '../map-answer';
 import { toPlainText } from '../markdown';
 import { clipAnswer, REPORT_EMAIL, reportMailto } from '../report-core';
+import { MapAnswerCard } from './MapAnswerCard';
 import { Markdown } from './Markdown';
 
 export function openSource(s: MessageSource) {
@@ -106,6 +108,10 @@ type AssistantProps = {
   onRegenerate?: () => void;
   /** Show the copy button (finished answers). */
   copyable?: boolean;
+  /** A map answer: its card replaces the text. */
+  map?: MapCard | null;
+  /** The stored message's id (the map card's "which one?" options answer in place). */
+  messageId?: string;
 };
 
 export const AssistantMessage = memo(function AssistantMessage({
@@ -117,6 +123,8 @@ export const AssistantMessage = memo(function AssistantMessage({
   onSearchLibrary,
   onRegenerate,
   copyable,
+  map,
+  messageId,
 }: AssistantProps) {
   const { t } = useTranslation('assistant');
   const { colors } = useTheme();
@@ -167,6 +175,8 @@ export const AssistantMessage = memo(function AssistantMessage({
               {status}
             </Text>
           </View>
+        ) : map ? (
+          <MapAnswerCard card={map} messageId={messageId} />
         ) : (
           <Markdown text={text} onCite={onCite} citable={citable} caret={streaming} />
         )}

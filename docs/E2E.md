@@ -160,6 +160,8 @@ scripts/e2e.sh
      ├─ if tagged `seeded-stitch`: clone e2e/fixtures/routing-stitch/* (two packs + crossings) there too
      ├─ if tagged `seeded-old-country`: Andorra's map and pack into content/{maps,routing} dated
      │   2026-01-01 (a loose file's build date is its modification time): older than the catalog's
+     ├─ if tagged `seeded-country`: Andorra installed offline as a country is: map, routing pack and its
+     │   side files (points, places, streets, house numbers), imported by the app at startup
      ├─ if tagged `seeded-onboarded`: the settings store written as onboarded (Library/Application Support/
      │   SQLite/ExpoSQLiteStorage, key `settings`): an install from before a feature, no wizard
      ├─ if tagged `updates-server`: serve the stand-in catalog of newer editions (below); else 404
@@ -289,6 +291,7 @@ By hand:
 | assistant | `ai-07-gguf-tools` | AI-07 | nightly | seeded, seeded-model |
 | assistant | `ai-08-dictation` | AI-08 | nightly | — (microphone shown; not tapped: the simulator's audio input aborts the app) |
 | assistant | `ai-09-copy-regenerate` | AI-09 | nightly | seeded (system model: Copy shows "Copiado"; Regenerate answers the last question again) |
+| assistant | `ai-10-map-answers` | AI-10 | smoke | seeded-country (map answers with no model: pharmacies near a town, where am I with the 112 button, the nearest hospital opens the trip preview) |
 | downloads | `dl-02-controls` | DL-02 | nightly | network |
 | updates | `upd-01-archives` | UPD-01, UPD-02, UPD-03 | full | seeded, updates-server (Home's card, Library's badge and link, the sheet; "Actualizar todo" replaces two archives and leaves the course that can't fit; its delete-first is refused with nothing deleted) |
 | updates | `upd-02-country` | UPD-04 | full | seeded-old-country, routing-server, maps-server (Andorra as a January build: Home's card, update from the sheet, "Tus mapas" with October's build) |
@@ -461,7 +464,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   ZIM fixtures, `seeded-map` for the map one, `seeded-route` for the routing pack,
   `seeded-stitch` for the two packs to route across,
   `routing-server` if it downloads a routing pack from the local server, `updates-server` for the
-  stand-in catalog of newer archive editions, `seeded-old-country` for Andorra as an old build, `seeded-onboarded` for an install that
+  stand-in catalog of newer archive editions, `seeded-old-country` for Andorra as an old build, `seeded-country` for Andorra installed offline with its points and search files, `seeded-onboarded` for an install that
   finished the wizard before (someone updating), `maps-server` if
   it needs the local country maps catalog (Andorra), `routing-live`
   if it downloads a published one (needs internet and the live catalog), `seeded-model`
@@ -489,6 +492,9 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `marker-name`, `marker-note` | fields of the place sheet |
   | `marker-delete`, `region-delete`, `conversation-delete` | delete buttons in lists |
   | `composer-mic` | assistant composer: dictate / stop listening |
+  | `map-answer`, `map-answer-row`, `map-answer-locality` | assistant map answer: the card, a place row (opens it on the map), the town of "¿dónde estoy?" |
+  | `map-answer-go`, `map-answer-go-first`, `map-answer-call` | map answer actions: a row's "Llévame", the main "Llévame a …" / "Cómo llegar", a row's call button |
+  | `map-answer-emergency`, `map-answer-share`, `map-answer-sms`, `map-answer-open`, `map-answer-option`, `map-answer-maps` | call the emergency number, share / SMS the position, see on the map, a "which one?" option, download maps |
   | `assistant-copy`, `assistant-regenerate`, `assistant-report` | icon buttons under a finished answer: copy it as plain text; answer the last question again (last answer only); report it by email (opens the mail app; Android only) |
   | `assistant-suggestion-<n>` | assistant empty screen: suggested question in card n (0–3; the questions rotate) |
   | `assistant-model-banner` | assistant with no model ready: the banner recommending one (download / built-in model) |

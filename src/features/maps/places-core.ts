@@ -599,7 +599,7 @@ export function nearestLocality<T extends LatLon & { name: string }>(p: LatLon, 
 // Category words ("hospital", "farmacia", "agua potable"): the nearest places of a kind
 
 /** Words (no accents) that name an emergency kind, Spanish and English, singular and plural. */
-const CATEGORY_WORDS: Record<string, string[]> = {
+export const CATEGORY_WORDS: Record<string, string[]> = {
   hospital: ['hospital', 'hospitales', 'urgencias', 'emergency room', 'emergency rooms', 'er'],
   clinic: ['clinica', 'clinicas', 'centro de salud', 'centros de salud', 'centro medico', 'medico', 'medicos', 'doctor', 'doctors', 'clinic', 'clinics', 'health center', 'health centre'],
   pharmacy: ['farmacia', 'farmacias', 'pharmacy', 'pharmacies', 'drugstore', 'chemist'],

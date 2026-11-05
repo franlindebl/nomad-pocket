@@ -58,7 +58,7 @@ export default function AssistantScreen() {
     ({ item }: { item: Row_ }) => {
       if (item.streaming) {
         const s = item.streaming;
-        return <AssistantMessage text={s.text} sources={s.sources} streaming phase={s.phase} loadProgress={s.loadProgress} />;
+        return <AssistantMessage text={s.text} sources={s.sources} streaming phase={s.phase} loadProgress={s.loadProgress} map={s.map} />;
       }
       const m = item.message!;
       if (m.role === 'user') return <UserMessage message={m} />;
@@ -66,6 +66,8 @@ export default function AssistantScreen() {
         <AssistantMessage
           text={m.content}
           sources={m.sources}
+          map={m.map}
+          messageId={m.id}
           copyable
           onSearchLibrary={m.id === searchableId ? () => searchLibraryFor(m.id) : undefined}
           onRegenerate={m.id === regenerableId ? () => void regenerateLast() : undefined}

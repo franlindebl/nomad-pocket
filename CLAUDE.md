@@ -30,6 +30,7 @@ English. User-facing strings are Spanish + English (i18n).
 | `docs/DOWNLOADS_SPEED_PLAN.md` | Analysis + plan for faster downloads (mirror throughput, parallel chunks, resume, keep awake); ready to pick up |
 | `docs/ANDROID_AUTO_PLAN.md` | Android Auto navigation (CarPlay's twin on Android): design, phases, Desktop Head Unit testing, Play's car review. Spike in `modules/nomad-carplay/android`, off by default (`plugins/with-android-auto.js`) |
 | `docs/ALERTS_PLAN.md` | Official alerts (AEMET, MeteoAlarm, USGS/EMSC quakes, NWS, GDACS) in two phases: 1) the app reads the feeds and notifies locally, no server; 2) iOS push from a free server (Deno Deploy, `server/alerts/`). Verified sources and sizes, owner's decisions, task lists; fixtures in `src/features/alerts/fixtures/` |
+| `docs/ASSISTANT_MAP_PLAN.md` | Assistant answers map questions (nearest X near a place, routes, where am I / 112, saved places, lost, before dark, alerts on the route, trip prep): intent layer before the health gate, answers as map cards from the data (never the model), 24 use cases in 3 phases |
 | `AGENTS.md` | Generic Expo rules (kept for other agents; same rules repeated below) |
 
 ## Stack (exact versions matter)
@@ -136,7 +137,7 @@ docs/               the docs above + screenshots/ + store/
   `Intl.RelativeTimeFormat` (see `lib/format.ts`). **Never `File.digest` a big file** (on iOS it
   holds the whole file in memory: a 2 GB map part got the app killed): use `modules/nomad-files`
   `sha256`, and its `copyInto` for multi-GB copies instead of `FileHandle.readBytes` loops in JS.
-- **Pure, tested modules** (`src/lib/{pmtiles,mvt}`, `features/assistant/{rag-core,models,markdown,dictation-core,report-core,suggestions}`,
+- **Pure, tested modules** (`src/lib/{pmtiles,mvt}`, `features/assistant/{rag-core,models,markdown,dictation-core,report-core,suggestions,map-intent-core}`,
   `features/library/html`, `features/catalog/{opds,health-core,editions-core,search-core}`, `features/downloads/{mirrors,errors,groups,segments-core,budget-core,restore-core}`,
   `features/maps/{glyphs,geo,extraction-core,places-core,import-core,prepare-core,emergency-core,routing-core,stitch-core,follow-core,country-core,country-at-core,phone,region-terms,tap-core,speed-core}`, `features/prepare/{kit,document,passages}`, `features/onboarding/kit-core`, `features/downloads/manager-core`, `lib/units`, `features/library/{register-core,medical,collection,documents-core,collections-core}`, `features/content/reconcile-core`, `features/assistant/errors`, `features/credits/credits-core`, `features/updates/updates-core`, `features/alerts/{cap-core,tar-core,feeds-core,alerts-core}`, `db/{migrate-core,schema}`) use no `@/` aliases and import siblings with `.ts` extensions,
   so `node --test --experimental-strip-types` can load them. Keep it that way and add

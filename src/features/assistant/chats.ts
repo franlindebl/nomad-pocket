@@ -15,6 +15,8 @@ import { useSettings } from '@/stores/settings';
 
 import { EngineUnavailableError, stopGeneration, withEngine, type SearchTool } from './engine';
 import { errorFor } from './errors';
+import { mapCardText, previousOf, runMapIntent, withChoice, type MapCard } from './map-answer';
+import { parseMapIntent } from './map-intent-core';
 import { hasLibrary, retrieve } from './rag';
 import {
   buildRouterPrompt,
@@ -55,6 +57,8 @@ export type ChatMessage = {
    * this session (not stored): an answer without it gets a "Search my library" button.
    */
   searched?: boolean;
+  /** A map answer (docs/ASSISTANT_MAP_PLAN.md): the card is shown instead of the text. */
+  map?: MapCard | null;
 };
 
 export type ChatSession = {
@@ -67,7 +71,7 @@ export type ChatSession = {
   preview?: string;
 };
 
-export type Phase = 'loading' | 'thinking' | 'searching' | 'searchingGuide' | 'generating';
+export type Phase = 'loading' | 'thinking' | 'searching' | 'searchingGuide' | 'searchingMap' | 'generating';
 
 export type Streaming = {
   sessionId: string;
@@ -77,13 +81,22 @@ export type Streaming = {
   phase: Phase;
   loadProgress: number;
   sources: MessageSource[];
+  map?: MapCard | null;
 };
 
 // ---------------------------------------------------------------------------
 // Persistence
 
 type SessionRow = { id: string; title: string; model_id: string | null; created_at: number; updated_at: number; preview: string | null };
-type MessageRow = { id: string; session_id: string; role: 'user' | 'assistant'; content: string; sources: string | null; created_at: number };
+type MessageRow = {
+  id: string;
+  session_id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  sources: string | null;
+  map: string | null;
+  created_at: number;
+};
 
 export function listSessions(): ChatSession[] {
   return db()
@@ -107,17 +120,26 @@ function plainPreview(text: string): string {
 export function loadMessages(sessionId: string): ChatMessage[] {
   return db()
     .getAllSync<MessageRow>('SELECT * FROM chat_messages WHERE session_id = ? ORDER BY created_at', sessionId)
-    .map((r) => ({ id: r.id, sessionId: r.session_id, role: r.role, content: r.content, sources: parseJson<MessageSource[]>(r.sources, []), createdAt: r.created_at }));
+    .map((r) => ({
+      id: r.id,
+      sessionId: r.session_id,
+      role: r.role,
+      content: r.content,
+      sources: parseJson<MessageSource[]>(r.sources, []),
+      map: parseJson<MapCard | null>(r.map, null),
+      createdAt: r.created_at,
+    }));
 }
 
 function insertMessage(m: ChatMessage) {
   db().runSync(
-    'INSERT OR REPLACE INTO chat_messages (id, session_id, role, content, sources, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+    'INSERT OR REPLACE INTO chat_messages (id, session_id, role, content, sources, map, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
     m.id,
     m.sessionId,
     m.role,
     m.content,
     m.sources.length ? JSON.stringify(m.sources) : null,
+    m.map ? JSON.stringify(m.map) : null,
     m.createdAt,
   );
   db().runSync('UPDATE chat_sessions SET updated_at = ? WHERE id = ?', m.createdAt, m.sessionId);
@@ -307,10 +329,31 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
   let failed: string | null = null;
   const cancelled = () => cancelledAnswers.has(streaming.messageId);
 
+  // A map question (nearest pharmacy, a route, where am I) is answered from the map data, before anything else:
+  // with or without a model or a library, and never caught by the health gate (places on the map are general
+  // utility, also on Android: docs/ASSISTANT_MAP_PLAN.md). "Search my library" skips it.
+  let mapCard: MapCard | null = null;
+  const previousCard = forceSearch ? null : lastMapCard(sessionId);
+  const mapIntent = forceSearch ? null : parseMapIntent(text, previousOf(previousCard));
+  if (mapIntent) {
+    patchStreaming({ phase: 'searchingMap' });
+    try {
+      mapCard = await runMapIntent(mapIntent, previousCard);
+    } catch (e) {
+      console.warn('[assistant] map answer failed', e);
+    }
+    if (mapCard && !cancelled()) {
+      answerText = mapCardText(mapCard);
+      // A place found by name may still deserve the library's answer ("¿dónde está Toledo?"): offer it.
+      searched = mapCard.type !== 'place';
+      patchStreaming({ phase: 'generating', text: answerText, map: mapCard });
+    }
+  }
+
   // Without health features (src/lib/health.ts) a health question gets a fixed answer, never the model's.
-  const noHealth = !HEALTH_FEATURES && health;
+  const noHealth = !mapCard && !HEALTH_FEATURES && health;
   // A question with "Use my library" on but nothing installed to look in: no answer from memory.
-  const noLibrary = !noHealth && st.useLibrary && !library && guessIntent(text, history) === 'search';
+  const noLibrary = !mapCard && !noHealth && st.useLibrary && !library && guessIntent(text, history) === 'search';
   if (noHealth) {
     answerText = noHealthAnswer(lang, emergencyNumber().number);
     patchStreaming({ phase: 'generating', text: answerText });
@@ -320,7 +363,7 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
   }
   // A vital protocol (CPR, choking, bleeding, bleach doses…) is answered with the guide's card, word for word,
   // with or without a model: the 4B model's paraphrases put CPR on the side and halved the bleach.
-  const vital = !noHealth && !noLibrary && guessIntent(text, history) === 'search' ? vitalCard(guideIndex(lang), text, history) : null;
+  const vital = !mapCard && !noHealth && !noLibrary && guessIntent(text, history) === 'search' ? vitalCard(guideIndex(lang), text, history) : null;
   if (vital) {
     // The card is found at once, but a whole page appearing in an instant reads as a glitch: a short "searching
     // the guide" first, then the card, shown from its top (`reveal`).
@@ -336,7 +379,9 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
   }
 
   try {
-    if (!noLibrary && !noHealth && !vital) await withEngine(modelId, async (engine) => {
+    // Stopped while the map was searched: nothing else runs.
+    const mapStopped = !!mapIntent && cancelled();
+    if (!mapCard && !mapStopped && !noLibrary && !noHealth && !vital) await withEngine(modelId, async (engine) => {
       await engine.load((p) => patchStreaming({ loadProgress: p }));
       if (cancelled()) return;
 
@@ -467,6 +512,7 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
       sources: sourcesToShow(finalText, sources),
       createdAt: Date.now(),
       searched,
+      map: mapCard,
     };
     insertMessage(msg);
     if (replaces) db().runSync('DELETE FROM chat_messages WHERE id = ?', replaces.id);
@@ -475,7 +521,7 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
       // The conversation may have been reopened meanwhile, reloading the old answer.
       messages: cur.activeSessionId === sessionId ? [...cur.messages.filter((m) => m.id !== replaces?.id), msg] : cur.messages,
       error: cur.activeSessionId === sessionId ? failed : cur.error,
-      reveal: vital && cur.activeSessionId === sessionId ? msg.id : cur.reveal,
+      reveal: (vital || mapCard) && cur.activeSessionId === sessionId ? msg.id : cur.reveal,
       sessions: listSessions(),
     });
   } else {
@@ -487,6 +533,43 @@ async function answer(sessionId: string, text: string, history: Turn[], forceSea
       sessions: listSessions(),
     });
   }
+}
+
+/** The map card of the conversation's last answer, for follow-ups ("¿y en Getafe?", "llévame a la segunda"). */
+function lastMapCard(sessionId: string): MapCard | null {
+  const st = useChat.getState();
+  if (st.activeSessionId !== sessionId) return null;
+  const last = [...st.messages].reverse().find((m) => m.role === 'assistant');
+  return last?.map ?? null;
+}
+
+/**
+ * The "which one?" card's option was picked: the same question answered for that place, in the same
+ * message (it replaces the card).
+ */
+export async function chooseMapOption(messageId: string, index: number) {
+  const st = useChat.getState();
+  const msg = st.messages.find((m) => m.id === messageId);
+  if (st.streaming || !msg?.map || msg.map.type !== 'choose') return;
+  const intent = withChoice(msg.map, index);
+  if (!intent) return;
+  const i = st.messages.indexOf(msg);
+  const before = [...st.messages.slice(0, i)].reverse().find((m) => m.role === 'assistant')?.map ?? null;
+  useChat.setState({
+    streaming: { sessionId: msg.sessionId, messageId: msg.id, text: '', phase: 'searchingMap', loadProgress: 0, sources: [] },
+    messages: st.messages.filter((m) => m.id !== messageId),
+  });
+  let card: MapCard | null = null;
+  try {
+    card = await runMapIntent(intent, before);
+  } catch (e) {
+    console.warn('[assistant] map answer failed', e);
+  }
+  const next: ChatMessage = card ? { ...msg, map: card, content: mapCardText(card), searched: true } : msg;
+  if (card) db().runSync('UPDATE chat_messages SET content = ?, map = ? WHERE id = ?', next.content, JSON.stringify(card), msg.id);
+  const cur = useChat.getState();
+  const messages = cur.activeSessionId === msg.sessionId ? [...cur.messages.slice(0, i), next, ...cur.messages.slice(i)] : cur.messages;
+  useChat.setState({ streaming: null, messages, reveal: card && cur.activeSessionId === msg.sessionId ? msg.id : cur.reveal });
 }
 
 /** How long a guide card "searches" before it shows (it's found at once). */

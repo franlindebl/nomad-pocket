@@ -32,7 +32,7 @@ import {
 } from './emergency-core';
 import numbersData from './emergency-numbers.json';
 import type { LatLon } from './geo';
-import { distanceMeters, lonSql } from './geo';
+import { bboxAround, distanceMeters, lonRanges, lonSql, nearOrderSql } from './geo';
 import { exclusive, forgetMapSource, indexEmergencyPoints } from './places';
 import type { PlaceRow } from './places-core';
 import { beginTask, endTask, updateTask } from './prepare';
@@ -368,6 +368,76 @@ export function nearestEmergencyPlaces(category: EmergencyCategory, from: LatLon
     ? kinds.flatMap((kind) => query([kind], PRIORITY_LIMIT)).sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0))
     : [];
   return mergePriority(priority, query(null, limit), limit);
+}
+
+/** Radii (m) tried in turn for the nearest points of some kinds: stop at the first that holds enough. */
+const KIND_RADII = [2_000, 8_000, 30_000, 120_000];
+
+const POI_COLUMNS = 'osm_id, kind, category, name, operator, phone, opening_hours, emergency, lat, lon';
+
+/**
+ * The nearest points of the given kinds, nearest first, off the JS thread (the assistant's map answers).
+ * `accept` filters rows before the limit (an embassy of one country). Tiles and Overpass can both hold
+ * one place: the same kind within 40 m is one.
+ */
+export async function nearestPlacesOfKinds(
+  kinds: readonly string[],
+  from: LatLon,
+  limit: number,
+  accept: (p: EmergencyPlace) => boolean = () => true,
+): Promise<EmergencyPlace[]> {
+  const lonScale = Math.cos((from.lat * Math.PI) / 180) ** 2;
+  const marks = kinds.map(() => '?').join(',');
+  let found: EmergencyPlace[] = [];
+  for (const radius of KIND_RADII) {
+    const [w, s, e, n] = bboxAround(from, radius);
+    const lon = lonSql('lon', w, e);
+    const order = nearOrderSql(from, lonScale, lonRanges(w, e).length > 1);
+    const rows = await indexDbAsync().getAllAsync<PoiRow>(
+      `SELECT ${POI_COLUMNS} FROM map_pois WHERE kind IN (${marks}) AND lat BETWEEN ? AND ? AND ${lon.sql}
+       GROUP BY osm_id ORDER BY ${order.sql} LIMIT ${Math.max(limit * 6, 30)}`,
+      ...kinds,
+      s,
+      n,
+      ...lon.params,
+      ...order.params,
+    );
+    found = rows
+      .map((r) => fromRow(r, from))
+      .filter((p) => (p.distance ?? 0) <= radius && accept(p))
+      .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
+    if (found.length >= limit) break;
+  }
+  const out: EmergencyPlace[] = [];
+  for (const p of found) {
+    if (out.some((o) => o.kind === p.kind && distanceMeters(o, p) < 40)) continue;
+    out.push(p);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+/** The nearest named point within `maxMeters`: a landmark for "dónde estoy" ("a 120 m de la Farmacia Sol"). */
+export async function nearestNamedPlace(from: LatLon, maxMeters: number): Promise<EmergencyPlace | null> {
+  const [w, s, e, n] = bboxAround(from, maxMeters);
+  const lon = lonSql('lon', w, e);
+  const order = nearOrderSql(from, Math.cos((from.lat * Math.PI) / 180) ** 2, lonRanges(w, e).length > 1);
+  const row = await indexDbAsync().getFirstAsync<PoiRow>(
+    `SELECT ${POI_COLUMNS} FROM map_pois WHERE name IS NOT NULL AND name <> '' AND lat BETWEEN ? AND ? AND ${lon.sql}
+     ORDER BY ${order.sql} LIMIT 1`,
+    s,
+    n,
+    ...lon.params,
+    ...order.params,
+  );
+  const p = row ? fromRow(row, from) : null;
+  return p && (p.distance ?? Infinity) <= maxMeters ? p : null;
+}
+
+/** When the newest emergency points near a place were fetched (Overpass), for the "data from" line; null: tiles only. */
+export function pointsFetchedAt(): number | null {
+  const row = indexDb().getFirstSync<{ at: number | null }>('SELECT MAX(pois_at) AS at FROM map_sources');
+  return row?.at ?? null;
 }
 
 /** Points inside a bbox, for the map layer. */

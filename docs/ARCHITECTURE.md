@@ -178,7 +178,7 @@ and `expo-sqlite/kv-store` elsewhere): use `db()`, `indexDb()` and `@/db/kv`.
 | `history`, `bookmarks` | Reader state per (item, path) |
 | `courses`, `course_progress` | Enrolled courses (syllabus JSON, last lesson) and manually completed lessons |
 | `map_markers` | User pins (name, lat/lon, color, note) |
-| `chat_sessions`, `chat_messages` | Assistant conversations, messages with cited `sources` JSON (retargeted when an archive's id changes) |
+| `chat_sessions`, `chat_messages` | Assistant conversations, messages with cited `sources` JSON (retargeted when an archive's id changes) and, for a map answer, its card as `map` JSON (v5) |
 
 **`search.db`** (`Documents/content/index/search.db`)
 
@@ -1381,6 +1381,27 @@ started on the phone shows in the car and the other way round.
   the phone's region (`dictationLocale`, es-MX on a Mexican phone). Non-continuous: ends after a
   pause; the text goes after what was typed (`joinDictation`), live, and is never sent by itself.
   Typing, sending or leaving the app cancels it; results after a cancel are dropped.
+
+#### Map answers (`map-intent-core.ts`, `map-answer.ts`, `ui/MapAnswerCard.tsx`; `docs/ASSISTANT_MAP_PLAN.md`)
+
+- `chats.ts` `answer()` tries the map first, **before** the health gate, the vital cards and the engine:
+  `parseMapIntent(text, previousOf(lastCard))` (pure, Spanish + English, precision first: anything unsure is null
+  and the message goes the normal way). "Search my library" (`forceSearch`) skips it. Map questions are not health
+  features on Android (pharmacies and hospitals on the map are general utility).
+- Intents: `nearby` (kinds near a place: `map_pois` by kind, nearest first, 5 or 3 per kind), `goNearest` (the 5
+  nearest routed one by one with `computeRoute`, 6 s budget, ordered by travel time), `route` (A→B, `askOnly` for
+  "¿cuánto tardo…?"), `whereAmI` (locality, landmark = nearest named point within 400 m, coordinates, UTM, the
+  emergency number of the country you're in), `shareLocation` (share sheet / `sms:` prefilled, a plan contact by
+  name or relation), `call` (nearest of a kind with its phone), `callEmergency`, `whereIs` (weak).
+- `runMapIntent` resolves places: here (`currentFix`: asks for location when it can), coordinates, the previous
+  card's results ("la segunda"), a saved marker or the plan's meeting point by name, else `searchPlaces` (exact name
+  wanted for weak intents; two towns of one name > 20 km apart → a `choose` card whose options re-run the intent in
+  the same message, `chooseMapOption`). A weak intent whose place isn't found returns null (normal answer).
+- The card is stored as JSON in `chat_messages.map` (user migration v5); the message's `content` is its plain-text
+  rendering (`mapCardText`: history, copy, conversation list). Names, distances, times and phones come from the
+  data; no model writes them. Every action is a tap: `startGuidance` (preview; "Iniciar" stays the person's),
+  `showPlace` on the Maps tab, `callPhones`, `shareLocation`/`smsLocation` (`features/maps/share-location.ts`, shared
+  with Emergencias).
 
 ### Emergency guide (`src/features/guide`, `src/app/guide`, `src/data/guide/`; `docs/EMERGENCY_GUIDE_PLAN.md`)
 

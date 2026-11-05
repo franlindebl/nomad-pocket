@@ -203,6 +203,16 @@ reset_app() {
     cp "$ROOT/e2e/fixtures/routing/ad.tar" "$content/routing/ad.tar"
     touch -t 202601010000 "$content/maps/ad.pmtiles" "$content/routing/ad.tar"
   fi
+  # `seeded-country`: Andorra installed as a country is, offline: map, routing pack and its points, places, streets and
+  # house numbers (the app imports side files left next to a pack at startup: routing-packs.ts resumePackImports).
+  if grep -qE '^tags:.*[[ ,]seeded-country[],]' "$1"; then
+    mkdir -p "$content/maps" "$content/routing"
+    cp -c "$ROOT/e2e/fixtures/maps/ad.pmtiles" "$content/maps/ad.pmtiles"
+    cp -c "$ROOT/e2e/fixtures/routing/ad.tar" "$content/routing/ad.tar"
+    for side in pois places streets addresses; do
+      cp -c "$ROOT/e2e/fixtures/routing/ad.$side.tsv" "$content/routing/ad.$side.tsv"
+    done
+  fi
   # `seeded-onboarded`: an install that finished the setup wizard before this version (the settings store says
   # so, nothing else): what someone who updates sees, e.g. the once-only official alerts offer on Home.
   if grep -qE '^tags:.*[[ ,]seeded-onboarded[],]' "$1"; then

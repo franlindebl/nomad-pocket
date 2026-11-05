@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { Navigation, Phone, RefreshCw, Share2 } from 'lucide-react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, ScrollView, Share, View } from 'react-native';
+import { Alert, ScrollView, View } from 'react-native';
 
 import { Button, Card, Chip, IconBadge, IconButton, ListGroup, ListRow, Row, Screen, SectionHeader, Text } from '@/components/ui';
 import { callPhones } from '@/features/maps/call';
@@ -25,6 +25,7 @@ import { startGuidance } from '@/features/maps/guidance';
 import { usePlaceIndex } from '@/features/maps/places';
 import { getRegion, regionName } from '@/features/maps/regions';
 import { CATEGORY_COLORS, CATEGORY_ICONS, distanceWithDirection, kindIcon, kindLabel } from '@/features/maps/labels';
+import { shareLocation } from '@/features/maps/share-location';
 import { showPlace, useMapUi } from '@/features/maps/store';
 import { useMapItems } from '@/features/maps/useMapSources';
 import { formatDistance, formatRelativeDate } from '@/lib/format';
@@ -112,17 +113,7 @@ export default function EmergencySheet() {
 
   const share = () => {
     if (!here || here.fromMap) return;
-    const utm = toUtm(here.lat, here.lon);
-    const time = new Intl.DateTimeFormat(i18n.language, { hour: '2-digit', minute: '2-digit' }).format(Date.now());
-    Share.share({
-      message: t('emergency.shareMessage', {
-        coords: formatLatLon(here.lat, here.lon),
-        utm: utm ? formatUtm(utm) : '—',
-        accuracy: formatDistance(here.accuracy ?? 0, 1),
-        time,
-        url: `https://www.openstreetmap.org/?mlat=${here.lat.toFixed(5)}&mlon=${here.lon.toFixed(5)}#map=17/${here.lat.toFixed(5)}/${here.lon.toFixed(5)}`,
-      }),
-    }).catch(() => {});
+    shareLocation({ lat: here.lat, lon: here.lon, accuracy: here.accuracy, at: Date.now() });
   };
 
   const open = (p: EmergencyPlace) => {
