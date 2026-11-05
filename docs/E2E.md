@@ -159,6 +159,8 @@ scripts/e2e.sh
      ├─ if tagged `seeded-stitch`: clone e2e/fixtures/routing-stitch/* (two packs + crossings) there too
      ├─ if tagged `seeded-old-country`: Andorra's map and pack into content/{maps,routing} dated
      │   2026-01-01 (a loose file's build date is its modification time): older than the catalog's
+     ├─ if tagged `seeded-onboarded`: the settings store written as onboarded (Library/Application Support/
+     │   SQLite/ExpoSQLiteStorage, key `settings`): an install from before a feature, no wizard
      ├─ if tagged `updates-server`: serve the stand-in catalog of newer editions (below); else 404
      ├─ if tagged `seeded-model`: clone e2e/fixtures/models/*.gguf into Documents/content/models/
      │   (the app registers loose files there at startup:
@@ -289,7 +291,9 @@ By hand:
 | downloads | `dl-02-controls` | DL-02 | nightly | network |
 | updates | `upd-01-archives` | UPD-01, UPD-02, UPD-03 | full | seeded, updates-server (Home's card, Library's badge and link, the sheet; "Actualizar todo" replaces two archives and leaves the course that can't fit; its delete-first is refused with nothing deleted) |
 | updates | `upd-02-country` | UPD-04 | full | seeded-old-country, routing-server, maps-server (Andorra as a January build: Home's card, update from the sheet, "Tus mapas" with October's build) |
-| alerts | `alr-01-official-alerts` | ALR-01 | full | alerts-server (asked on its own onboarding step and turned on in Barcelona: quiet Home card; moved to Madrid: the orange warning drawn over the city and the M 4.8 quake 25 km away are listed and rung; detail with the official text and actions, the guide card, the quake's facts; Home's card; the run log; off again) |
+| alerts | `alr-01-official-alerts` | ALR-01 | smoke | alerts-server (asked on its own onboarding step and turned on in Barcelona: quiet Home card; moved to Madrid: the orange warning drawn over the city and the M 4.8 quake 25 km away are listed and rung; detail with the official text and actions, the guide card, the quake's facts; Home's card; the run log; off again) |
+| alerts | `alr-02-later` | ALR-02 | full | alerts-server ("Ahora no" on the wizard in Madrid: no offer or card on Home, also after a relaunch; turned on in Settings: the first check rings nothing already in force, its log line says so; Home shows the orange warning) |
+| alerts | `alr-03-update-offer` | ALR-03 | smoke | alerts-server, seeded-onboarded (an install from before alerts: Home's once-only offer, turned on from it in Madrid: the orange warning card, no offer after a relaunch) |
 | prepare | `prep-01-plan` | PREP-01 | smoke | — |
 | prepare | `prep-02-kit` | PREP-02 | smoke | — |
 | prepare | `prep-03-reminder-export` | PREP-03 | full | taps the system notifications alert |
@@ -340,7 +344,10 @@ in the app's hierarchy) and cover the back button for a few seconds, so the flow
 that rings them; Maestro's `back` does nothing on iOS (tap `BackButton` after `waitForAnimationToEnd`). On Android the flows before
 ANDROID-07 leave the emulator's last fix in Andorra, so it sets Madrid itself (`setLocation`).
 
-Cases: **ALR-01** above; **ANDROID-07** turns alerts on in Madrid from onboarding and checks Home's card, the
+Cases: **ALR-01** above (in smoke, so every run before a TestFlight build has it); **ALR-02**, alerts declined on
+the wizard and turned on later in Settings (the check on turning them on records what is in force without ringing
+it); **ALR-03**, someone updating from a version without alerts (`seeded-onboarded`): Home's offer, turned on
+from it; **ANDROID-07** turns alerts on in Madrid from onboarding and checks Home's card, the
 list, the detail and the run log on the emulator (served always on Android). Not automated: the background task (BGTaskScheduler doesn't run on the simulator; on a
 device, a debug build's `triggerTaskWorkerForTestingAsync`, or on Android
 `adb shell cmd jobscheduler run -f com.fjlinde.nomadpocket <job id>`), a raise (orange → red) notifying again, and the
@@ -418,7 +425,8 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   ZIM fixtures, `seeded-map` for the map one, `seeded-route` for the routing pack,
   `seeded-stitch` for the two packs to route across,
   `routing-server` if it downloads a routing pack from the local server, `updates-server` for the
-  stand-in catalog of newer archive editions, `seeded-old-country` for Andorra as an old build, `maps-server` if
+  stand-in catalog of newer archive editions, `seeded-old-country` for Andorra as an old build, `seeded-onboarded` for an install that
+  finished the wizard before (someone updating), `maps-server` if
   it needs the local country maps catalog (Andorra), `routing-live`
   if it downloads a published one (needs internet and the live catalog), `seeded-model`
   for the GGUF model, and `network` if it downloads from the internet. A map file

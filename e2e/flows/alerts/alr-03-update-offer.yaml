@@ -1,0 +1,45 @@
+# ALR-03 — someone who already had the app updates to the version with official alerts (docs/ALERTS_PLAN.md):
+# the install is seeded as onboarded before alerts existed (`seeded-onboarded`, scripts/e2e.sh), so no wizard and
+# Home offers alerts once ("Nuevo", "Activar avisos" / "Ahora no"). Turned on from that card in Madrid, against the
+# stand-in feeds of scripts/e2e-alerts-feed.py: the card gives way to the orange warning in force, and the offer
+# doesn't come back after a relaunch.
+appId: com.fjlinde.nomadpocket
+tags: [smoke, full, alerts, alerts-server, seeded-onboarded]
+---
+- setLocation:
+    latitude: 40.4168
+    longitude: -3.7038
+- launchApp:
+    stopApp: true
+    permissions:
+      notifications: allow
+      location: inuse
+# A notification prompt left open by an earlier failed run outlives the reinstall: clear it.
+- tapOn:
+    text: "Permitir"
+    optional: true
+- extendedWaitUntil:
+    visible: { id: "home-alerts-offer" }
+    timeout: 20000
+- assertNotVisible: { id: "onboarding-start" }
+- assertVisible: "Nuevo|NUEVO"
+- assertVisible: "Avisos oficiales donde estés|AVISOS OFICIALES DONDE ESTÉS"
+- assertVisible: { id: "home-alerts-offer-decline" }
+- takeScreenshot: alr-03-01-home-offer
+- tapOn: { id: "home-alerts-offer-enable" }
+- tapOn:
+    text: "Permitir"
+    optional: true
+# The first check records the warning and the quake in force (without ringing) and Home shows them.
+- extendedWaitUntil:
+    visible: { id: "home-alert" }
+    timeout: 30000
+- assertNotVisible: { id: "home-alerts-offer" }
+- assertVisible: "Aviso naranja · Lluvias.*y 1 aviso más.*"
+- takeScreenshot: alr-03-02-home-card
+- launchApp:
+    stopApp: true
+- extendedWaitUntil:
+    visible: { id: "home-alert" }
+    timeout: 20000
+- assertNotVisible: { id: "home-alerts-offer" }

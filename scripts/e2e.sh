@@ -203,6 +203,15 @@ reset_app() {
     cp "$ROOT/e2e/fixtures/routing/ad.tar" "$content/routing/ad.tar"
     touch -t 202601010000 "$content/maps/ad.pmtiles" "$content/routing/ad.tar"
   fi
+  # `seeded-onboarded`: an install that finished the setup wizard before this version (the settings store says
+  # so, nothing else): what someone who updates sees, e.g. the once-only official alerts offer on Home.
+  if grep -qE '^tags:.*[[ ,]seeded-onboarded[],]' "$1"; then
+    local sqlite
+    sqlite="$(xcrun simctl get_app_container "$UDID" "$BUNDLE" data)/Library/Application Support/SQLite"
+    mkdir -p "$sqlite"
+    sqlite3 "$sqlite/ExpoSQLiteStorage" "CREATE TABLE IF NOT EXISTS storage (key TEXT PRIMARY KEY NOT NULL, value TEXT); PRAGMA user_version = 1;
+      INSERT INTO storage (key, value) VALUES ('settings', '{\"state\":{\"onboarded\":true,\"language\":\"es\",\"country\":\"es\"},\"version\":0}');"
+  fi
   if [[ -n "$SERVER_PID" ]]; then
     if grep -qE '^tags:.*[[ ,]routing-live[],]' "$1"; then cp "$SERVE/live.json" "$SERVE/routing-manifest.json"
     else cp "$SERVE/fixture.json" "$SERVE/routing-manifest.json"; fi

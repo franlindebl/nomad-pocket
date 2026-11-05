@@ -345,6 +345,16 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-05 — Official alerts: more E2E (ALR-02, ALR-03) and ALR-01 in smoke
+
+- ALR-02 (full): "Ahora no" on the wizard in Madrid leaves Home without offer or card, also after a relaunch; turned
+  on later in Settings, the first check records the orange warning and the quake without ringing them (log line
+  "Al activar · 3 fuentes") and Home shows the warning.
+- ALR-03 (smoke): someone updating from a version without alerts. New runner tag `seeded-onboarded` writes the
+  settings store as onboarded before the first launch (`scripts/e2e.sh`); Home's once-only offer, turned on from it,
+  gives way to the warning card and doesn't come back after a relaunch.
+- ALR-01 moved to smoke: the run before every TestFlight build covers alerts now. All three pass on iOS.
+
 ### 2026-11-05 — Android Auto: plan and spike (off)
 
 - Plan: `docs/ANDROID_AUTO_PLAN.md` (same product as CarPlay; phases; testing on the Desktop Head Unit; release only

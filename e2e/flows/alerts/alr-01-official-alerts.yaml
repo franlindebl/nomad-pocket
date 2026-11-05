@@ -1,10 +1,10 @@
 # ALR-01 — official alerts (docs/ALERTS_PLAN.md) against the stand-in feeds of scripts/e2e-alerts-feed.py: offered on
-# onboarding's last step; turned on in Barcelona, where nothing orange or red applies (no Home card, nothing rung);
+# its own onboarding step; turned on in Barcelona, where nothing orange or red applies (no Home card, nothing rung);
 # moved to Madrid, a manual check finds the orange warning drawn over the city and the M 4.8 quake 25 km away and
 # notifies both (the run log says so); the list, an alert's official text and actions, the quake's facts; Home's
 # card; off again in Settings, the card goes.
 appId: com.fjlinde.nomadpocket
-tags: [full, alerts, alerts-server]
+tags: [smoke, full, alerts, alerts-server]
 ---
 - setLocation:
     latitude: 41.3874

@@ -1,0 +1,86 @@
+# ALR-02 — official alerts declined on the setup wizard, turned on later from Settings (docs/ALERTS_PLAN.md), against
+# the stand-in feeds of scripts/e2e-alerts-feed.py, in Madrid (an orange warning and an M 4.8 quake in force): "Ahora
+# no" leaves Home without the offer or any alerts card, also after a relaunch; Settings › Avisos oficiales turns them
+# on; that first check records what is already in force without ringing it (the run log has no notification) and
+# Home shows the orange warning.
+appId: com.fjlinde.nomadpocket
+tags: [full, alerts, alerts-server]
+---
+- setLocation:
+    latitude: 40.4168
+    longitude: -3.7038
+- launchApp:
+    stopApp: true
+    permissions:
+      notifications: allow
+      location: inuse
+# A notification prompt left open by an earlier failed run outlives the reinstall: clear it.
+- tapOn:
+    text: "Permitir"
+    optional: true
+- extendedWaitUntil:
+    visible: { id: "onboarding-start" }
+    timeout: 20000
+- tapOn: { id: "onboarding-start" }
+- tapOn: { id: "onboarding-next" }
+- extendedWaitUntil:
+    visible: { id: "kit-country" }
+    timeout: 10000
+- tapOn: { id: "kit-country" }
+- tapOn: { id: "kit-guides" }
+- tapOn: { id: "kit-wikipedia" }
+- tapOn: { id: "kit-assistant" }
+- extendedWaitUntil:
+    visible: "Continuar sin descargar"
+    timeout: 10000
+- tapOn: { id: "onboarding-download" }
+- extendedWaitUntil:
+    visible: { id: "onboarding-alerts-decline" }
+    timeout: 10000
+- tapOn: { id: "onboarding-alerts-decline" }
+- extendedWaitUntil:
+    visible: { id: "onboarding-finish" }
+    timeout: 10000
+- tapOn: { id: "onboarding-finish" }
+- extendedWaitUntil:
+    visible: "En una emergencia|EN UNA EMERGENCIA"
+    timeout: 10000
+# Declined: no offer on Home, and alerts stay off (no card, nothing fetched).
+- assertNotVisible: { id: "home-alerts-offer" }
+- assertNotVisible: { id: "home-alert" }
+- assertNotVisible: { id: "home-alerts-status" }
+- takeScreenshot: alr-02-01-home-declined
+- launchApp:
+    stopApp: true
+- extendedWaitUntil:
+    visible: "En una emergencia|EN UNA EMERGENCIA"
+    timeout: 20000
+- assertNotVisible: { id: "home-alerts-offer" }
+- assertNotVisible: { id: "home-alert" }
+
+# Later, from Settings.
+- tapOn: { id: "open-settings" }
+- tapOn: { id: "settings-alerts" }
+- extendedWaitUntil:
+    visible: { id: "alerts-settings-switch" }
+    timeout: 10000
+- tapOn: { id: "alerts-settings-switch" }
+- tapOn:
+    text: "Permitir"
+    optional: true
+- extendedWaitUntil:
+    visible: "Notificar desde"
+    timeout: 10000
+# The first check finds the warning and the quake in force and rings neither: its log line ends at the sources.
+- scrollUntilVisible:
+    element: ".*Al activar · 3 fuentes"
+    direction: DOWN
+    timeout: 30000
+- takeScreenshot: alr-02-02-settings-on
+- launchApp:
+    stopApp: true
+- extendedWaitUntil:
+    visible: { id: "home-alert" }
+    timeout: 20000
+- assertVisible: "Aviso naranja · Lluvias.*y 1 aviso más.*"
+- takeScreenshot: alr-02-03-home-card
