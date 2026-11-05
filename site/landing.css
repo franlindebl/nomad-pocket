@@ -271,6 +271,22 @@
 .feature-media .fallback { display: none; position: relative; place-items: center; width: 180px; height: 180px; background: var(--surface); border: 1px solid var(--border); color: var(--hue, var(--accent)); }
 .feature-media .fallback svg { width: 64px; height: 64px; stroke-width: 1.5; }
 .feature-media .phone.missing + .fallback { display: grid; }
+/* CarPlay: the car's screen (5:3) with the phone standing in front of its lower right corner. */
+.car-media { position: relative; width: min(100%, 560px); aspect-ratio: 560 / 440; }
+.car {
+  position: absolute;
+  left: 0;
+  top: 7%;
+  width: 82%;
+  padding: 10px;
+  border-radius: 30px;
+  background: #171717;
+  box-shadow: 0 0 0 1px var(--outline), 0 40px 80px rgba(0, 0, 0, 0.55);
+}
+.car img { display: block; width: 100%; height: auto; aspect-ratio: 800 / 480; border-radius: 21px; background: var(--bg); }
+.feature-media .car-media .phone { position: absolute; right: 0; bottom: 0; width: 26%; padding: 5px; border-radius: 26px; }
+.car-media .phone img { border-radius: 22px; }
+@media (max-width: 480px) { .car { padding: 6px; border-radius: 20px; } .car img { border-radius: 15px; } .feature-media .car-media .phone { padding: 4px; border-radius: 18px; } .car-media .phone img { border-radius: 15px; } }
 .feature h3 { font: 700 clamp(28px, 3.6vw, 42px)/1.04 var(--display); text-transform: uppercase; margin: 0 0 16px; text-wrap: balance; }
 .feature p { color: var(--text-2); font-size: 18px; margin: 0 0 22px; max-width: 520px; }
 .checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; max-width: 520px; }

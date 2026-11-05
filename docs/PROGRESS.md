@@ -345,6 +345,18 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-05 — Landing page and READMEs: CarPlay
+
+- With 2.2.0 out, the landing page (both languages) has a CarPlay block after Maps: the car's screen with the phone on
+  the same trip in front of it (`.car-media` in `site/landing.css`), three points (destinations and nearby emergencies
+  from the car, what the driver sees, phone and car in step) and "CarPlay: en iPhone". Also: CarPlay in the meta
+  description and the hero's lead, a FAQ entry (Android Auto not yet), the car screen in the JSON-LD screenshots, and
+  CarPlay in Apple's trademark line. Checked at 1440 and 390 px wide (no horizontal scroll).
+- `scripts/site/images.py` makes `carplay.webp` / `carplay-car.webp` (and the README's `.jpg`s) from the store
+  captures `09-carplay.png` / `09-carplay.car.png`; the other images come out unchanged.
+- READMEs (en, es): a CarPlay badge, a "🚗 CarPlay" section after Maps with both screens, a FAQ entry, Status and the
+  trademark line.
+
 ### 2026-11-05 — 2.3.0 (43): official alerts on TestFlight
 
 - 2.2.0 (42) approved, ready for distribution. 2.3.0 (43) = 2.2.0 plus official alerts phase 1, uploaded to TestFlight

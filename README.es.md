@@ -7,7 +7,7 @@
 <p align="center">
   <b>Navegador GPS y guías de supervivencia en tu móvil, aunque haya un apagón.</b><br>
   Prepáralo hoy mientras tienes conexión; mañana funciona sin internet, sin cobertura y sin luz.<br>
-  Hospitales cercanos, una guía de emergencia, Wikipedia, cursos y una IA que vive en tu teléfono. Gratis y de código abierto.<br>
+  Navegación en CarPlay, hospitales cercanos, una guía de emergencia, Wikipedia, cursos y una IA que vive en tu teléfono. Gratis y de código abierto.<br>
   <sub>Inspirada en <a href="https://github.com/Crosstalk-Solutions/project-nomad">Project N.O.M.A.D.</a> de Crosstalk Solutions.</sub>
 </p>
 
@@ -19,6 +19,7 @@
 <p align="center">
   <img alt="iOS 16.4+" src="https://img.shields.io/badge/iOS-16.4%2B-0c0c0c?logo=apple">
   <img alt="Android 8+" src="https://img.shields.io/badge/Android-8%2B-0c0c0c?logo=android&logoColor=3DDC84">
+  <img alt="CarPlay" src="https://img.shields.io/badge/CarPlay-s%C3%AD-0c0c0c?logo=apple">
   <img alt="Licencia: GPL-3.0 o posterior" src="https://img.shields.io/badge/licencia-GPL--3.0--or--later-0c0c0c">
   <img alt="Funciona sin conexión" src="https://img.shields.io/badge/funciona-100%25%20sin%20conexi%C3%B3n-FFD60A">
   <img alt="Sin rastreo" src="https://img.shields.io/badge/rastreo-ninguno-FFD60A">
@@ -115,6 +116,23 @@ conocimiento sin conexión) al dispositivo que todos llevamos encima.
   </tr>
 </table>
 
+### 🚗 CarPlay
+
+<table>
+  <tr>
+    <td align="center" width="70%"><img src="docs/readme/es/carplay-car.jpg" width="100%" alt="Navegación giro a giro sin conexión en la pantalla de CarPlay"></td>
+    <td align="center" width="30%"><img src="docs/readme/es/carplay.jpg" width="160" alt="La misma ruta en el iPhone"></td>
+  </tr>
+</table>
+
+- **Tu ruta, en la pantalla del coche**: conecta el iPhone y Nomad Pocket aparece en CarPlay con
+  el mapa sin conexión y la navegación giro a giro, con indicaciones por voz. También sin
+  cobertura, en mitad de la carretera.
+- **Desde el coche**: busca un destino, elige un lugar guardado o el hospital, la farmacia o la
+  gasolinera más cercanos, mira la distancia y el tiempo del viaje, y en marcha.
+- **Móvil y coche a la par**: empieza el viaje en cualquiera de los dos; al terminarlo en uno,
+  termina en los dos.
+
 ### 📚 Biblioteca y ✨ asistente sin conexión
 
 - **Wikipedia**, a la medida de tu espacio: desde sus artículos esenciales (~250 MB) hasta la
@@ -191,6 +209,14 @@ desactivar cada pieza. El mapa de un país ocupa desde unas decenas de MB hasta 
 </details>
 
 <details>
+<summary><b>¿Funciona con CarPlay?</b></summary>
+
+Sí. Al conectar el iPhone al coche, Nomad Pocket aparece en CarPlay con el mapa de tu país:
+busca destinos, encuentra emergencias cercanas y te guía por voz, todo sin conexión. Android
+Auto todavía no.
+</details>
+
+<details>
 <summary><b>¿Qué dispositivos son compatibles? ¿Y Android?</b></summary>
 
 iPhone y iPad con iOS 16.4 o posterior, en el App Store. Android 8.0 o posterior llegará a
@@ -244,7 +270,7 @@ compilar desde un clon limpio, las comprobaciones). Problemas de seguridad:
 ## Estado
 
 En el [App Store](https://apps.apple.com/app/nomad-pocket-kit-offline/id6826502392) para iPhone
-y iPad; Android llegará muy pronto a Google Play. Avance, pendientes y limitaciones conocidas:
+y iPad, con CarPlay desde la 2.2; Android llegará muy pronto a Google Play. Avance, pendientes y limitaciones conocidas:
 [docs/PROGRESS.md](docs/PROGRESS.md).
 
 ## Para desarrolladores
@@ -290,6 +316,6 @@ copyright y texto de licencia, está en la app, en **Ajustes › Créditos y lic
 con `node scripts/licenses.mjs`). Datos de mapas © colaboradores de OpenStreetMap (ODbL); los
 archivos de `e2e/fixtures` son datos de prueba de terceros, ver
 [e2e/fixtures/README.md](e2e/fixtures/README.md).
-Apple, el logotipo de Apple, iPhone y iPad son marcas comerciales de Apple Inc., registradas en
+Apple, el logotipo de Apple, iPhone, iPad y CarPlay son marcas comerciales de Apple Inc., registradas en
 EE. UU. y en otros países. App Store es una marca de servicio de Apple Inc. Google Play es una
 marca comercial de Google LLC.

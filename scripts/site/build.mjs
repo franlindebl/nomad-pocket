@@ -49,6 +49,7 @@ const ICONS = {
     '<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/>',
   mail: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
   navigation: '<polygon points="3 11 22 2 13 21 11 13 3 11"/>',
+  car: '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
 };
 const icon = (name, extra = '') =>
   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"${extra}>${ICONS[name]}</svg>`;
@@ -61,7 +62,7 @@ const COPY = {
     path: '/',
     title: 'Nomad Pocket: la app de emergencia que funciona en un apagón y sin internet',
     description:
-      'Navegador GPS, guías de supervivencia, hospitales cercanos, Wikipedia, cursos e IA en tu móvil, aunque haya un apagón o se caiga internet. Gratis y de código abierto.',
+      'Navegador GPS con CarPlay, guías de supervivencia, hospitales cercanos, Wikipedia, cursos e IA en tu móvil, aunque haya un apagón o se caiga internet. Gratis y de código abierto.',
     ogLocale: 'es_ES',
     ogAlt: 'Nomad Pocket: navegador GPS y guías de supervivencia en tu móvil, aunque haya un apagón.',
     skip: 'Saltar al contenido',
@@ -76,7 +77,7 @@ const COPY = {
     hero: {
       status: ['Sin conexión', 'todo funciona'],
       h1: 'Navegador GPS y guías de supervivencia en tu móvil, <em>aunque haya un apagón.</em>',
-      lead: '<strong>Lo preparas hoy con conexión y mañana funciona sin internet, sin cobertura y sin luz.</strong> Con hospitales cercanos, Wikipedia, cursos y una IA que vive en tu teléfono. Gratis y de código abierto.',
+      lead: '<strong>Lo preparas hoy con conexión y mañana funciona sin internet, sin cobertura y sin luz.</strong> Con navegación en CarPlay, hospitales cercanos, Wikipedia, cursos y una IA que vive en tu teléfono. Gratis y de código abierto.',
       facts: ['100 % gratis', 'Código abierto', 'Sin cuentas', 'Sin anuncios'],
       tag1: 'Sin red · todo funciona',
       tag2: 'Ruta sin internet',
@@ -127,6 +128,15 @@ const COPY = {
         p: 'Tu país entero en el móvil: cada calle, camino y edificio. Calcula rutas en coche, a pie o en bici sin red, con indicaciones por voz que siguen guiándote con la pantalla bloqueada.',
         checks: ['Busca cualquier calle o número de portal sin internet', 'Aviso del límite de velocidad de cada vía', 'Brújula, coordenadas y UTM, lugares guardados', 'Casi todos los países del mundo, y un mapa mundial incluido'],
         alt: 'Navegación por voz sin conexión en Madrid',
+      },
+      {
+        screen: 'carplay', car: 'carplay-car', icon: 'car', hue: HUE.maps, over: 'CarPlay',
+        h3: 'Tu ruta, en la pantalla del coche',
+        p: 'Conecta el iPhone y Nomad Pocket aparece en CarPlay: el mapa sin conexión y la navegación giro a giro en la pantalla del coche, con indicaciones por voz. También sin cobertura, en mitad de la carretera.',
+        checks: ['Busca un destino, elige un lugar guardado o el hospital, la farmacia o la gasolinera más cercanos', 'Maniobras, distancia y hora de llegada a la vista del conductor', 'Empieza el viaje en el móvil o en el coche: los dos van a la par'],
+        note: 'CarPlay: en iPhone.',
+        alt: 'La misma ruta en el iPhone',
+        carAlt: 'Navegación giro a giro de Nomad Pocket en la pantalla de CarPlay',
       },
       {
         screen: 'emergency', icon: 'siren', hue: HUE.medicine, over: 'Emergencias',
@@ -193,6 +203,7 @@ const COPY = {
       ['¿De verdad funciona sin internet?', 'Sí. Solo necesitas conexión para descargar el contenido (mejor con wifi) y para buscar actualizaciones. Después, mapas, rutas, búsqueda de calles, puntos de emergencia, guía, biblioteca y asistente funcionan en modo avión.'],
       ['¿El GPS funciona sin datos?', 'Sí. El GPS recibe la señal de los satélites, no de internet, así que el mapa te sitúa aunque no haya cobertura. La primera posición puede tardar algo más que con datos.'],
       ['¿Cuánto espacio ocupa?', 'Tú eliges. El asistente de bienvenida propone un kit para tu país y tu espacio libre (mapa y navegación, guías esenciales, Wikipedia y asistente) y puedes desactivar cada pieza. Un país ocupa desde unas decenas de MB hasta varios GB.'],
+      ['¿Funciona con CarPlay?', 'Sí. Al conectar el iPhone al coche, Nomad Pocket aparece en CarPlay con el mapa de tu país: busca destinos, encuentra emergencias cercanas y te guía por voz, todo sin conexión. Android Auto todavía no.'],
       ['¿Funciona en mi país?', 'Hay mapas, rutas y puntos de emergencia de casi todos los países del mundo, y un mapa mundial viene incluido desde el primer segundo. La app está en español e inglés, y la biblioteca tiene contenido en muchos idiomas.'],
       ['¿Es gratis? ¿Dónde está el truco?', 'No hay truco: es gratis, sin anuncios, sin compras y sin suscripciones. Es un proyecto de código abierto sin servidor propio, así que no hay nada que cobrar ni datos que vender.'],
       ['¿Qué dispositivos son compatibles?', 'iPhone y iPad con iOS 16.4 o posterior. Android 8.0 o posterior, muy pronto en Google Play. El asistente usa Apple Intelligence donde está disponible; si no, descargas un modelo desde la app (desde unos 500 MB; los más grandes necesitan más memoria).'],
@@ -209,7 +220,7 @@ const COPY = {
       legal: [
         '© 2026 Fran Linde Blázquez y colaboradores · Software libre bajo licencia GPL‑3.0 o posterior.',
         'La IA puede equivocarse y la información médica no sustituye a un profesional. En una emergencia, llama siempre a los servicios de emergencia si puedes.',
-        'Apple, el logotipo de Apple, iPhone y iPad son marcas comerciales de Apple Inc., registradas en EE. UU. y otros países. App Store es una marca de servicio de Apple Inc. Google Play es una marca de Google LLC.',
+        'Apple, el logotipo de Apple, iPhone, iPad y CarPlay son marcas comerciales de Apple Inc., registradas en EE. UU. y otros países. App Store es una marca de servicio de Apple Inc. Google Play es una marca de Google LLC.',
       ],
     },
     privacyHref: 'privacy.html',
@@ -219,7 +230,7 @@ const COPY = {
     path: '/en/',
     title: 'Nomad Pocket: the emergency app that works in a blackout, offline',
     description:
-      'GPS navigation, survival guides, nearby hospitals, Wikipedia, courses and AI on your phone, even in a blackout or an internet outage. Free and open source.',
+      'GPS navigation with CarPlay, survival guides, nearby hospitals, Wikipedia, courses and AI on your phone, even in a blackout or an internet outage. Free and open source.',
     ogLocale: 'en_US',
     ogAlt: 'Nomad Pocket: GPS navigation and survival guides on your phone, even in a blackout.',
     skip: 'Skip to content',
@@ -234,7 +245,7 @@ const COPY = {
     hero: {
       status: ['Offline', 'everything works'],
       h1: 'GPS navigation and survival guides on your phone, <em>even in a blackout.</em>',
-      lead: '<strong>Set it up today while you’re online; tomorrow it works with no internet, no signal and no power.</strong> With nearby hospitals, Wikipedia, courses and an AI that lives on your phone. Free and open source.',
+      lead: '<strong>Set it up today while you’re online; tomorrow it works with no internet, no signal and no power.</strong> With CarPlay navigation, nearby hospitals, Wikipedia, courses and an AI that lives on your phone. Free and open source.',
       facts: ['100% free', 'Open source', 'No accounts', 'No ads'],
       tag1: 'No network · all works',
       tag2: 'Route with no internet',
@@ -285,6 +296,15 @@ const COPY = {
         p: 'Your whole country on your phone: every street, path and building. Get routes by car, on foot or by bike with no network, with spoken directions that keep guiding you with the screen locked.',
         checks: ['Search any street or house number with no internet', 'Speed warning with each road’s limit', 'Compass, coordinates and UTM, saved places', 'Almost every country in the world, plus a built-in world map'],
         alt: 'Offline voice navigation',
+      },
+      {
+        screen: 'carplay', car: 'carplay-car', icon: 'car', hue: HUE.maps, over: 'CarPlay',
+        h3: 'Your route on your car’s screen',
+        p: 'Connect your iPhone and Nomad Pocket shows up in CarPlay: the offline map and turn-by-turn navigation on your car’s screen, with spoken directions. Even with no signal, out on the open road.',
+        checks: ['Search for a destination, pick a saved place or the nearest hospital, pharmacy or fuel station', 'Maneuvers, distance and arrival time in the driver’s view', 'Start the trip on the phone or in the car: both stay in step'],
+        note: 'CarPlay: on iPhone.',
+        alt: 'The same route on the iPhone',
+        carAlt: 'Nomad Pocket turn-by-turn navigation on the CarPlay screen',
       },
       {
         screen: 'emergency', icon: 'siren', hue: HUE.medicine, over: 'Emergency',
@@ -351,6 +371,7 @@ const COPY = {
       ['Does it really work without internet?', 'Yes. You only need a connection to download the content (Wi‑Fi is best) and to check for updates. After that, maps, routes, street search, emergency points, the guide, the library and the assistant all work in airplane mode.'],
       ['Does GPS work without data?', 'Yes. GPS receives signals from satellites, not from the internet, so the map finds you even with no signal. The first fix may take a little longer than with data.'],
       ['How much space does it take?', 'You decide. The welcome wizard suggests a kit for your country and free space (map and navigation, essential guides, Wikipedia and the assistant) and you can switch off each piece. A country takes from a few tens of MB to several GB.'],
+      ['Does it work with CarPlay?', 'Yes. Connect your iPhone to the car and Nomad Pocket shows up in CarPlay with your country’s map: search for destinations, find emergency services nearby and get spoken directions, all offline. Not on Android Auto yet.'],
       ['Does it work in my country?', 'There are maps, routes and emergency points for almost every country in the world, and a world map is built in from the first second. The app is in English and Spanish, and the library has content in many languages.'],
       ['Is it free? What’s the catch?', 'No catch: it’s free, with no ads, no purchases and no subscriptions. It’s an open source project with no server of its own, so there’s nothing to charge for and no data to sell.'],
       ['Which devices are supported?', 'iPhone and iPad with iOS 16.4 or later. Android 8.0 or later, coming soon to Google Play. The assistant uses Apple Intelligence where available; otherwise you download a model in the app (from about 500 MB; larger ones need more memory).'],
@@ -367,7 +388,7 @@ const COPY = {
       legal: [
         '© 2026 Fran Linde Blázquez and contributors · Free software under the GPL‑3.0-or-later licence.',
         'The AI can make mistakes and medical information is no substitute for a professional. In an emergency, always call the emergency services if you can.',
-        'Apple, the Apple logo, iPhone and iPad are trademarks of Apple Inc., registered in the U.S. and other countries. App Store is a service mark of Apple Inc. Google Play is a trademark of Google LLC.',
+        'Apple, the Apple logo, iPhone, iPad and CarPlay are trademarks of Apple Inc., registered in the U.S. and other countries. App Store is a service mark of Apple Inc. Google Play is a trademark of Google LLC.',
       ],
     },
     privacyHref: '../privacy.html#en',
@@ -390,6 +411,13 @@ function page(lang) {
       ? `<div class="phone${cls}"><img src="${base}${screenPath(key)}" width="600" height="1304" alt="${attr(alt)}"${eager ? ' fetchpriority="high"' : ' loading="lazy"'} decoding="async"></div>`
       : `<div class="phone missing"></div>`;
 
+  // A feature's picture: its phone screen, or (CarPlay) the car's screen with the phone in front of it.
+  const media = (f) => {
+    const plate = `<div class="fallback ticks" style="--hue:${f.hue}" aria-hidden="true">${icon(f.icon)}</div>`;
+    if (!f.car || !hasScreen(f.car)) return phone(f.screen, f.alt) + plate;
+    return `<div class="car-media"><div class="car"><img src="${base}${screenPath(f.car)}" width="800" height="480" alt="${attr(f.carAlt)}" loading="lazy" decoding="async"></div>${phone(f.screen, f.alt)}</div>`;
+  };
+
   const stores = (where) => {
     const ios = `<a class="badge-ios" href="${APP_STORE}" data-where="${where}"><img src="${base}img/badge-app-store-${lang}.svg" width="162" height="54" alt="${attr(t.appStoreAlt)}"></a>`;
     const android = GOOGLE_PLAY
@@ -406,7 +434,7 @@ function page(lang) {
     .concat(`<link rel="alternate" hreflang="x-default" href="${ORIGIN}/">`)
     .join('\n  ');
 
-  const screenshots = ['home', 'navigation', 'emergency', 'firstaid', 'assistant', 'library', 'plan', 'kit']
+  const screenshots = ['home', 'navigation', 'carplay-car', 'emergency', 'firstaid', 'assistant', 'library', 'plan', 'kit']
     .filter(hasScreen)
     .map((k) => `${ORIGIN}/${screenPath(k)}`);
   const jsonLd = {
@@ -567,7 +595,7 @@ function page(lang) {
           <ul class="checks">${f.checks.map((c) => `<li>${icon('check')}<span>${c}</span></li>`).join('')}</ul>${f.note ? `\n          <p class="note">${f.note}</p>` : ''}
         </div>
         <div class="feature-media reveal">
-          ${phone(f.screen, f.alt)}<div class="fallback ticks" style="--hue:${f.hue}" aria-hidden="true">${icon(f.icon)}</div>
+          ${media(f)}
         </div>
       </article>`,
         )

@@ -4,9 +4,11 @@
 Reads docs/store/screenshots/<lang>/iphone/NN-name.png (the same simulator captures
 scripts/store-screenshots.py frames for the stores) and writes:
   site/img/screens/<lang>/<key>.webp   phone screens, 600 px wide (shown at ~300 pt, 2x)
+  site/img/screens/<lang>/carplay-car.webp  the CarPlay screen (NN-carplay.car.png, 800 x 480 as captured)
   site/img/og-<lang>.jpg               1200 x 630 social card (Open Graph / X)
   site/img/apple-touch-icon.png        180 px, site/img/icon-512.png (manifest, JSON-LD)
   docs/readme/<lang>/<key>.jpg         README screens, 480 px wide (shown at 240 px, 2x), 1 px panel border
+  docs/readme/<lang>/carplay-car.jpg   README CarPlay screen, 800 px wide, same border
   docs/readme/hero-<lang>.jpg          README banner: five phones on the app's black, grid and corner ticks
 A screen missing in one language falls back to the other one, so the page never shows a hole;
 rerun after a new round of captures. Extra source folders (laid out like docs/store/screenshots)
@@ -36,7 +38,10 @@ SCREENS = {
     'library': ('library',),
     'plan': ('plan',),
     'kit': ('kit',),
+    'carplay': ('carplay',),
 }
+# The car's screen of a CarPlay capture: NN-carplay.car.png next to the phone's NN-carplay.png.
+CAR = ('carplay',)
 
 # The app's "Precisión" palette (src/theme/tokens.ts).
 BG = (12, 12, 12)
@@ -55,7 +60,7 @@ OG_TEXT = {
 }
 
 
-def find_capture(lang: str, words, roots):
+def find_capture(lang: str, words, roots, car=False):
     order = [lang] + [l for l in LANGS if l != lang]
     for l in order:
         for root in roots:
@@ -63,7 +68,7 @@ def find_capture(lang: str, words, roots):
             if not folder.is_dir():
                 continue
             for word in words:
-                hits = sorted(p for p in folder.glob('*.png') if word in p.stem)
+                hits = sorted(p for p in folder.glob('*.png') if word in p.stem and p.stem.endswith('.car') == car)
                 if hits:
                     return hits[0]
     return None
@@ -133,11 +138,11 @@ def og_card(lang: str, screen: Path | None, dst: Path):
 HERO = ('kit', 'home', 'navigation', 'emergency', 'assistant')
 
 
-def readme_screen(src: Path, dst: Path):
+def readme_screen(src: Path, dst: Path, width=480):
     # JPEG has no transparency and GitHub's page is white or near black, so the screen gets
     # square corners and a thin border, like the app's panels, instead of a rounded phone.
     img = Image.open(src).convert('RGB')
-    img = img.resize((480, round(480 * img.height / img.width)), Image.LANCZOS)
+    img = img.resize((width, round(width * img.height / img.width)), Image.LANCZOS)
     ImageDraw.Draw(img).rectangle((0, 0, img.width - 1, img.height - 1), outline=BORDER, width=2)
     img.save(dst, quality=84, optimize=True, progressive=True)
 
@@ -187,6 +192,12 @@ def main(argv):
             img = img.resize((600, round(600 * img.height / img.width)), Image.LANCZOS)
             img.save(folder / f'{key}.webp', quality=82, method=6)
             print(f'  {lang}/{key}: {src.relative_to(src.parents[2])}')
+        car = find_capture(lang, CAR, roots, car=True)
+        if car:
+            Image.open(car).convert('RGB').resize((800, 480), Image.LANCZOS).save(folder / 'carplay-car.webp', quality=84, method=6)
+            print(f'  {lang}/carplay-car: {car.relative_to(car.parents[2])}')
+        else:
+            print(f'  {lang}/carplay-car: no capture (the page shows the phone alone)')
         og_card(lang, find_capture(lang, SCREENS['home'], roots), OUT / f'og-{lang}.jpg')
 
         readme = README / lang
@@ -195,6 +206,8 @@ def main(argv):
             src = find_capture(lang, words, roots)
             if src:
                 readme_screen(src, readme / f'{key}.jpg')
+        if car:
+            readme_screen(car, readme / 'carplay-car.jpg', width=800)
         readme_hero([find_capture(lang, SCREENS[k], roots) for k in HERO], README / f'hero-{lang}.jpg')
 
     icon = Image.open(ICON).convert('RGB')

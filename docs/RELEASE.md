@@ -222,7 +222,8 @@ subsets in `site/fonts`, the document pages) and `landing.css`. No analytics and
   `site/en/index.html` or `site/sitemap.xml`.
 - **Images:** `python3 scripts/site/images.py [--extra DIR]` turns the raw store captures
   (`docs/store/screenshots/<lang>/iphone/NN-name.png`, matched by name: home, navigation|route, emergency,
-  firstaid|guide, assistant, library, kit) into `site/img/screens/<lang>/*.webp` and draws the social cards
+  firstaid|guide, assistant, library, kit, carplay; the car's screen from `NN-carplay.car.png` as `carplay-car`) into
+  `site/img/screens/<lang>/*.webp` and draws the social cards
   `site/img/og-<lang>.jpg`, plus the README's screens (`docs/readme/<lang>/*.jpg`) and banner
   (`docs/readme/hero-<lang>.jpg`). A screen missing in one language falls back to the other; missing in both, the page
   shows the feature's icon instead of a phone. Rerun `build.mjs` after it.
