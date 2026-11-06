@@ -358,6 +358,18 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-07 — 2.4.1 (47) on TestFlight
+
+- 2.4.0 (46) plus the two CarPlay entries below (the phone's look and camera on the car screen; the shorter card, the
+  speed and the limit). TestFlight only. Meant as 2.4.0 (47), but App Store Connect refused it: 2.4.0 (46) has been
+  approved and its train is closed, so this is 2.4.1.
+- E2E: CarPlay 5/5. Smoke 21/24: map-12 and ai-10 pass alone (ai-10 once the CarPlay simulator was shut down: two
+  simulators loading the Mac, taps lost); prep-01 keeps failing because the e2e simulator (NP-e2e, iOS 27) now shows
+  its on-screen keyboard and the flow's tap on "NOTAS DE CASA" no longer ends editing (it relies on no software
+  keyboard). The plan screen and the flow are unchanged since 2026-10-28; a reboot didn't bring the hardware keyboard
+  back. Likely left by Xcode 26.5's Simulator.app, which had shown that device too (`CARPLAY_PLAN.md` setup). To fix
+  in the environment (I/O › Keyboard › Connect Hardware Keyboard) or make the flow keyboard-proof.
+
 ### 2026-11-06 — CarPlay: a shorter maneuver card, the speed and the limit
 
 - Owner, comparing with Waze on the car screen: the maneuver card takes too much room, and the road's speed limit
