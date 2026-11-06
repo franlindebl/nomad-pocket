@@ -392,6 +392,15 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   car screen (`simctl io recordVideo --display=external`): frame-to-frame change never drops to zero (no stop at
   each fix). Pending: a real drive; the phone's navigation E2E (map-14/17) after the `FollowCamera` refactor.
 
+### 2026-11-06 — 2.4.0 (46) submitted to App Review
+
+- The owner asked to submit it. Nothing else was in review (2.2.0 live), so the 2.4.0 version record was created in App
+  Store Connect with build 46 and auto-release, and submitted (state Waiting for Review). First store release with
+  official alerts and the assistant's map answers. Texts (reviewed by the owner before submitting) in
+  `docs/store/listing-2.4.0.md`: What's new, two description lines, and the privacy sentence now says the NWS gets an
+  approximate area in the US with alerts on; App Review notes explain alerts (background modes `fetch`/`processing`,
+  Time Sensitive) and map answers, trimmed to the field's 4000 characters.
+
 ### 2026-11-06 — 2.4.0 (46) on TestFlight
 
 - 2.4.0 (45) plus this session's fixes (the three entries below): New chat hidden on a fresh chat, the catalog rows,
