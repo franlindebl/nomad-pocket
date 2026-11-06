@@ -9,6 +9,7 @@ import { parseMapIntent } from '@/features/assistant/map-intent-core';
 import { alongRoute, CORRIDOR_M, corridorBox } from '@/features/maps/along-core';
 import { nearestEmergencyPlaces, nearestPlacesOfKinds, placesOfKindsIn } from '@/features/maps/emergency';
 import { EMERGENCY_CATEGORIES, EMERGENCY_KINDS, type EmergencyCategory } from '@/features/maps/emergency-core';
+import { createFollower } from '@/features/maps/follow-core';
 import { distanceMeters, type LatLon } from '@/features/maps/geo';
 import { startGuidance, useGuidance } from '@/features/maps/guidance';
 import { useMarkers } from '@/features/maps/markers';
@@ -22,7 +23,7 @@ import { HEALTH_FEATURES } from '@/lib/health';
 import * as Location from '@/lib/location';
 
 import NomadCarPlay from '../../../modules/nomad-carplay';
-import { carGuidance, type CarItem, type CarStrings } from './carplay-core';
+import { carCamera, carGuidance, type CarCamera, type CarItem, type CarStrings } from './carplay-core';
 
 /** Rows per list: CarPlay shows a dozen or so while driving. */
 const LIST_LIMIT = 12;
@@ -31,6 +32,9 @@ let started = false;
 let routeId = 0;
 let lastRoute: Route | null = null;
 let lastShape: Route['shape'] | null = null;
+/** The car's navigation camera: the phone's (follow-core), with its own rhythm and bearing. */
+const follower = createFollower();
+let framed: unknown = null;
 
 const t = (key: string, options?: Record<string, unknown>) => i18n.t(key, options);
 
@@ -66,16 +70,31 @@ async function pushStyles() {
     const assets = await ensureMapAssets();
     const { all } = sortMapItems(useContent.getState().items.filter((i) => i.kind === 'map') as MapItem[]);
     const sources = all.map((i) => ({ id: i.id, fileUri: i.fileUri, version: mapFileVersion(i) }));
-    const style = (scheme: 'light' | 'dark') => JSON.stringify(buildMapStyle({ scheme, lang: i18n.language, assets, sources }));
-    await NomadCarPlay.setStyles(style('light'), style('dark'));
+    // The app is dark only (src/theme/tokens.ts), and so is the car: the same map as the phone, day or night.
+    const dark = JSON.stringify(buildMapStyle({ scheme: 'dark', lang: i18n.language, assets, sources }));
+    await NomadCarPlay.setStyles(dark, dark);
   } catch (e) {
     console.warn('[carplay] styles', e);
   }
 }
 
+/** Navigating, the camera's move for a new fix (null otherwise: the car keeps its glide going). */
+function cameraFor(s: ReturnType<typeof useGuidance.getState>): CarCamera | null {
+  if (!s.navigating) {
+    if (framed) follower.reset();
+    framed = null;
+    return null;
+  }
+  if (!s.position || s.position === framed) return null;
+  framed = s.position;
+  const frame = follower.next(s, Date.now());
+  return frame ? carCamera(frame) : null;
+}
+
 function pushGuidance() {
   if (!NomadCarPlay) return;
   const s = useGuidance.getState();
+  const camera = cameraFor(s);
   if (s.route !== lastRoute) {
     lastRoute = s.route;
     if (s.route) routeId++;
@@ -104,13 +123,16 @@ function pushGuidance() {
       via: (street) => t('maps:carplay.via', { street }),
     },
   );
-  NomadCarPlay.update(JSON.stringify(payload)).catch((e) => console.warn('[carplay] update', e));
+  NomadCarPlay.update(JSON.stringify({ ...payload, camera })).catch((e) => console.warn('[carplay] update', e));
 }
 
 function pushAll() {
   pushStrings();
   void pushStyles();
   lastShape = null;
+  // A car (re)connected mid-trip: its camera starts with one settling move.
+  follower.reset();
+  framed = null;
   pushGuidance();
 }
 

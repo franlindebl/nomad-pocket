@@ -358,6 +358,25 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-06 — CarPlay: the phone's map look and its smooth navigation camera
+
+- Owner, after the first drive with CarPlay: the car's map looked nothing like the phone's (blue route, blue dot,
+  red destination, a navy maneuver panel) and moved in jerks, where the phone glided. Cause of the jerks: the car
+  ran its own camera, each fix eased to the raw fix in 0.8 s and turned to the raw GPS course, so at a fix a second
+  the map stopped and started again, one fix behind.
+- The camera is now the phone's: the follow logic of `FollowCamera.tsx` moved into `createFollower()`
+  (`follow-core.ts`, tested), the phone uses it as before and `carplay.ts` keeps one for the car, sending each move
+  with guidance (`camera`, plus `cut` where the route is cut off). `CarMapViewController.swift` plays it as one
+  `setCamera` (zoom as altitude) with the template's safe area as padding; without a trip it glides the same way
+  north up. While following, the user is a view at the camera's centre (the phone's blue Navigation2 arrow, grey
+  with a weak fix; a blue dot without a trip), no longer a layer that jumped at each fix.
+- The look: dark style always (the app is dark only), route yellow on a dark casing, destination a yellow dot in a
+  yellow ring, maneuver panel the app's dark surface with yellow symbols (`CarColors`). Android Auto gets the dark
+  style too (same JS); its map ignores the new fields.
+- Checked: `npm run e2e:carplay` 5/5 (Release build, CarPlay simulator); a simulated 12 m/s drive recorded off the
+  car screen (`simctl io recordVideo --display=external`): frame-to-frame change never drops to zero (no stop at
+  each fix). Pending: a real drive; the phone's navigation E2E (map-14/17) after the `FollowCamera` refactor.
+
 ### 2026-11-06 — 2.4.0 (46) on TestFlight
 
 - 2.4.0 (45) plus this session's fixes (the three entries below): New chat hidden on a fresh chat, the catalog rows,

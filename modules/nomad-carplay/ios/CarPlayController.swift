@@ -34,7 +34,8 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
     super.init()
     window.rootViewController = map
     mapTemplate.mapDelegate = self
-    mapTemplate.guidanceBackgroundColor = UIColor(red: 0.07, green: 0.2, blue: 0.4, alpha: 1)
+    // The phone's maneuver banner: the app's dark panel (CarPlay writes on it in white).
+    mapTemplate.guidanceBackgroundColor = CarColors.surface
     mapTemplate.tripEstimateStyle = .dark
     // The bar and the map buttons stay: "Terminar" one tap away while driving (with the bar
     // hiding by itself it took two, and in the simulator a tap on it while it showed only hid it).
@@ -73,6 +74,9 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
     guidance = g
     map.setDestination(g.target)
     map.setNavigating(g.navigating)
+    map.setCut(g.cut)
+    // Last: a session started below recentres first, and this move then takes over.
+    defer { if let camera = g.camera { map.apply(camera: camera) } }
 
     guard let target = g.target else {
       if hasTrip { endTrip(arrived: previous?.arrived ?? false) }
@@ -386,8 +390,8 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
     CPTravelEstimates(distanceRemaining: e.distance.measurement, timeRemaining: e.seconds)
   }
 
-  /// routing-core's ManeuverIcon as an SF Symbol, white on the panel; the straight-line arrow turned
-  /// toward the target.
+  /// routing-core's ManeuverIcon as an SF Symbol, signal yellow on the dark panel like the phone's
+  /// banner; the straight-line arrow turned toward the target.
   private func symbol(for icon: String, rotation: Double = 0) -> UIImage? {
     let names: [String: String] = [
       "start": "location.north.line.fill",
@@ -407,16 +411,16 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
     ]
     let config = UIImage.SymbolConfiguration(pointSize: 48, weight: .semibold)
     let image = UIImage(systemName: names[icon] ?? "arrow.up", withConfiguration: config) ?? UIImage(systemName: "arrow.up", withConfiguration: config)
-    guard let white = image?.withTintColor(.white, renderingMode: .alwaysOriginal) else { return nil }
-    // Always drawn into a bitmap: CarPlay tinted some symbol images blue and left others white.
+    guard let tinted = image?.withTintColor(CarColors.accent, renderingMode: .alwaysOriginal) else { return nil }
+    // Always drawn into a bitmap: CarPlay tinted some symbol images blue and left others as they were.
     // Turned inside a square canvas, so a diagonal arrow isn't clipped.
-    let side = max(white.size.width, white.size.height)
+    let side = max(tinted.size.width, tinted.size.height)
     let format = UIGraphicsImageRendererFormat()
     format.scale = 3
     return UIGraphicsImageRenderer(size: CGSize(width: side, height: side), format: format).image { ctx in
       ctx.cgContext.translateBy(x: side / 2, y: side / 2)
       ctx.cgContext.rotate(by: rotation * .pi / 180)
-      white.draw(in: CGRect(x: -white.size.width / 2, y: -white.size.height / 2, width: white.size.width, height: white.size.height))
+      tinted.draw(in: CGRect(x: -tinted.size.width / 2, y: -tinted.size.height / 2, width: tinted.size.width, height: tinted.size.height))
     }
   }
 

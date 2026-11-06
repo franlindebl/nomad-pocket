@@ -1236,15 +1236,25 @@ started on the phone shows in the car and the other way round.
   controller later.
 - **Map** (`CarMapViewController.swift`): MapLibre Native (`MLNMapView`, the same SPM package and
   version maplibre-react-native links, via `spm_dependency` in the podspec) with the style JSON
-  `buildMapStyle` makes for light and dark (the car's appearance picks), the route line, the
-  destination as style layers (MapLibre's default style, a demo map from the internet, never loads:
-  a plain local one until JS sends ours). The position and the following are ours
-  (`CarLocationManager`, a background-capable `CLLocationManager`): MapLibre's user tracking never
-  started there, its map view counts as dormant while the phone app isn't in front. Following: course
-  up, tilted, user low in the free part of the screen while navigating, north up otherwise; the safe
-  area (maneuver panel, preview card) goes in as each camera move's `edgePadding` (as `contentInset`
-  the camera ignored it). The route behind the user is not drawn while navigating. Map buttons:
-  recentre (only after a pan), zoom ±, pan mode; the bar ("Destinos" / "Terminar") never hides.
+  `buildMapStyle` makes, **dark like the app** (JS sends the dark style for both appearances), and the phone's
+  look (`CarColors`, kept in step with `src/theme/tokens.ts` and the Maps tab's layers): the route yellow on a dark
+  casing (9 / 5.5 pt), the destination a yellow dot in a yellow ring, the user the blue location colour, the
+  maneuver panel the app's dark surface with yellow symbols. (MapLibre's default style, a demo map from the
+  internet, never loads: a plain local one until JS sends ours.) The position is ours (`CarLocationManager`, a
+  background-capable `CLLocationManager`): MapLibre's user tracking never started there, its map view counts as
+  dormant while the phone app isn't in front.
+  **Camera = the phone's**: navigating, JS runs its own `createFollower()` (`follow-core.ts`, the same one
+  `FollowCamera.tsx` uses: snapped to the route, the road's bearing turned at a bounded rate, each glide 1.3× the
+  fix rhythm aimed at where the user will be) and sends each move with guidance (`camera`, only with a new fix;
+  `cut` = where the route is cut off); the car plays it as one `setCamera` (zoom as altitude, so zoom, pitch and
+  bearing animate together) with the template's safe area as `edgePadding`, the user low in the free part. The
+  first move settles (1 s ease) and moves meanwhile wait. Without a trip the car glides itself the same way,
+  north up. (Before 2026-11-06 each fix went to the raw fix in 0.8 s with the raw GPS course: a stop-start jerk
+  at every fix in a real car.) While following, the user is a view at the camera's centre (the phone's
+  `FollowArrow`: lucide's Navigation2, blue, grey with a weak fix; without a trip a blue dot), so it doesn't jump
+  at each fix; looking around, it's a dot layer at the fix. Zoom buttons while following change the zoom on top of
+  follow-core's. Map buttons: recentre (only after a pan), zoom ±, pan mode; the bar ("Destinos" / "Terminar")
+  never hides.
 - **Templates** (`CarPlayController.swift`): `CPMapTemplate` with "Destinos" → list (Buscar →
   `CPSearchTemplate` over `searchPlaces`; Guardados = markers by distance; Emergencias cerca: one row
   per category → nearest points, health only with `HEALTH_FEATURES`). A pick → `onPick` → JS

@@ -17,25 +17,9 @@ import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from '
 
 import { useTheme } from '@/theme';
 
-import { followBearing, followCenter, followPitch, followZoom, isWeakFix, movingBearing, smoothTurn } from './follow-core';
+import { createFollower, isWeakFix, SETTLE_MS } from './follow-core';
 import { useGuidance } from './guidance';
 
-/** Shortest and longest glide between two fixes, ms. */
-const GLIDE_MIN = 400;
-const GLIDE_MAX = 2500;
-/**
- * Each glide is planned this much longer than the expected gap (and aims as far ahead): a fix
- * that comes late finds the map still moving at the user's pace instead of stopped, and the next
- * one takes over mid-glide.
- */
-const GLIDE_OVERRUN = 1.3;
-/**
- * The move that starts following ("Iniciar", "Recentrar"): one ease straight to the user, and fixes
- * that come meanwhile wait for it. Each used to start another ease from wherever the first had got
- * to, with another bearing and zoom: the map wandered on the way, the arrow already drawn at the
- * centre over places the user wasn't.
- */
-const SETTLE_MS = 1000;
 const ARROW = 44;
 /** The compass beam's image (scripts/maps/make-beam.py), its apex at the bottom centre. */
 const BEAM = { width: 80, height: 88 };
@@ -69,43 +53,29 @@ export function useFollowCamera(
   useEffect(() => {
     // Stopping (the cleanup below) sets settled back to false.
     if (!active) return;
-    let bearing: number | null = null;
+    const follower = createFollower();
     /** Until when the first move runs; fixes before then wait for it. */
     let settling = 0;
     let wait: ReturnType<typeof setTimeout> | null = null;
-    let fixAt = 0;
-    /** Expected time between fixes, smoothed (iOS gives ~1 s driving, a fix every few metres walking). */
-    let gap = 1000;
-    let first = true;
     const move = () => {
-      const s = useGuidance.getState();
-      const p = s.position;
-      if (!p) return;
       const now = Date.now();
-      // The end of the first move takes the latest fix.
+      // The end of the first move takes the latest fix (one ease straight to the user: each fix used to
+      // start another from wherever the first had got to, and the map wandered on the way).
       if (now < settling) return;
       if (AppState.currentState !== 'active') return;
-      const since = now - fixAt;
-      if (!first) gap = 0.7 * gap + 0.3 * Math.min(GLIDE_MAX, Math.max(GLIDE_MIN, since));
-      const progress = s.route ? s.progress : null;
-      const moving = movingBearing(s.costing, p.course ?? null, p.travel ?? null);
-      // Standing off the route keeps the map; the compass only sets the very first bearing on foot.
-      const next = followBearing({ moving, progress, accuracy: p.accuracy }) ?? (bearing === null && s.costing !== 'auto' ? s.heading : null);
-      if (next !== null) bearing = bearing === null ? next : smoothTurn(bearing, next, first ? 0 : since, s.costing);
-      const duration = first ? SETTLE_MS : gap * GLIDE_OVERRUN;
-      fixAt = now;
-      const center = followCenter({ position: p, route: s.route, cumulative: s.routeCumulative, progress, moving, gapMs: duration });
+      const frame = follower.next(useGuidance.getState(), now);
+      if (!frame) return;
       camera.current?.easeTo({
-        center: [center.lon, center.lat],
-        zoom: followZoom(s.costing, p.speed ?? null, progress?.toNextM ?? null),
-        pitch: followPitch(s.costing),
-        ...(northUp ? { bearing: 0 } : bearing !== null ? { bearing } : {}),
+        center: [frame.center.lon, frame.center.lat],
+        zoom: frame.zoom,
+        pitch: frame.pitch,
+        ...(northUp ? { bearing: 0 } : frame.bearing !== null ? { bearing: frame.bearing } : {}),
         padding: { ...padding.current, left: 0, right: 0 },
-        duration,
-        easing: first ? 'ease' : 'linear',
+        duration: frame.duration,
+        easing: frame.first ? 'ease' : 'linear',
       });
-      report.current(bearing);
-      if (first) {
+      report.current(frame.bearing);
+      if (frame.first) {
         settling = now + SETTLE_MS;
         wait = setTimeout(() => {
           wait = null;
@@ -113,7 +83,6 @@ export function useFollowCamera(
           move();
         }, SETTLE_MS);
       }
-      first = false;
     };
     move();
     const unsubscribe = useGuidance.subscribe((s, prev) => {

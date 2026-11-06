@@ -58,6 +58,30 @@ struct CarGuidance: Decodable {
   let nextStep: CarStep?
   /// The trip's preview line under the route ("Por la A-6 · Peajes").
   let note: String?
+  /// Navigating on a route: where the user is on it (the travelled part is cut off there).
+  let cut: CarCut?
+  /// Navigating: the camera's next move (follow-core), only with a new fix.
+  let camera: CarCamera?
+}
+
+struct CarCut: Decodable, Equatable {
+  /// Into the route's shape: the user is between shape[segment] and shape[segment + 1].
+  let segment: Int
+  let lat: Double
+  let lon: Double
+}
+
+/// follow-core's FollowFrame: ease to lat/lon over `duration` ms.
+struct CarCamera: Decodable {
+  let lat: Double
+  let lon: Double
+  let zoom: Double
+  let pitch: Double
+  /// nil: keep the map's bearing.
+  let bearing: Double?
+  let duration: Double
+  /// The move that starts following.
+  let first: Bool
 }
 
 struct CarItem: Decodable {

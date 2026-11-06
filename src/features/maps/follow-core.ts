@@ -186,3 +186,85 @@ const WEAK_MOVING_SPEED = 1;
 export function isWeakFix(at: number, accuracy: number | null, speed: number | null, now: number): boolean {
   return (accuracy ?? 0) > WEAK_ACCURACY_M || (now - at > WEAK_FIX_MS && (speed ?? 0) > WEAK_MOVING_SPEED);
 }
+
+/** Shortest and longest glide between two fixes, ms. */
+const GLIDE_MIN = 400;
+const GLIDE_MAX = 2500;
+/**
+ * Each glide is planned this much longer than the expected gap (and aims as far ahead): a fix
+ * that comes late finds the map still moving at the user's pace instead of stopped, and the next
+ * one takes over mid-glide.
+ */
+const GLIDE_OVERRUN = 1.3;
+/**
+ * The move that starts following ("Iniciar", "Recentrar"): one ease straight to the user. The
+ * phone's camera holds the fixes that come meanwhile (FollowCamera.tsx).
+ */
+export const SETTLE_MS = 1000;
+
+export type FollowState = {
+  position: (LatLon & { accuracy: number | null; course?: number | null; travel?: number | null; speed?: number | null }) | null;
+  costing: Costing;
+  route: Pick<Route, 'shape'> | null;
+  routeCumulative: number[];
+  progress: RouteProgress | null;
+  /** The compass: only the very first bearing on foot or by bike, before any movement. */
+  heading: number | null;
+};
+
+/** One camera move: ease to `center` over `duration` ms (`first`: the move that starts following). */
+export type FollowFrame = {
+  center: LatLon;
+  zoom: number;
+  pitch: number;
+  /** null: keep the map's bearing (standing off the route, no direction yet). */
+  bearing: number | null;
+  duration: number;
+  first: boolean;
+};
+
+/**
+ * The navigation camera for one map, fix after fix: the bearing it turned to so far, the rhythm of
+ * the fixes and the glide that rides on it. The phone's map and the car's each keep one, so both
+ * move the same way.
+ */
+export function createFollower() {
+  let bearing: number | null = null;
+  let fixAt = 0;
+  /** Expected time between fixes, smoothed (iOS gives ~1 s driving, a fix every few metres walking). */
+  let gap = 1000;
+  let first = true;
+  return {
+    /** The move for the latest fix (null without a position). `now`: ms. */
+    next(s: FollowState, now: number): FollowFrame | null {
+      const p = s.position;
+      if (!p) return null;
+      const since = now - fixAt;
+      if (!first) gap = 0.7 * gap + 0.3 * Math.min(GLIDE_MAX, Math.max(GLIDE_MIN, since));
+      const progress = s.route ? s.progress : null;
+      const moving = movingBearing(s.costing, p.course ?? null, p.travel ?? null);
+      // Standing off the route keeps the map; the compass only sets the very first bearing on foot.
+      const want = followBearing({ moving, progress, accuracy: p.accuracy }) ?? (bearing === null && s.costing !== 'auto' ? s.heading : null);
+      if (want !== null) bearing = bearing === null ? want : smoothTurn(bearing, want, first ? 0 : since, s.costing);
+      const duration = first ? SETTLE_MS : gap * GLIDE_OVERRUN;
+      fixAt = now;
+      const frame: FollowFrame = {
+        center: followCenter({ position: p, route: s.route, cumulative: s.routeCumulative, progress, moving, gapMs: duration }),
+        zoom: followZoom(s.costing, p.speed ?? null, progress?.toNextM ?? null),
+        pitch: followPitch(s.costing),
+        bearing,
+        duration,
+        first,
+      };
+      first = false;
+      return frame;
+    },
+    /** Following stopped: the next move starts over (one settling ease, the bearing and the rhythm learnt again). */
+    reset() {
+      bearing = null;
+      first = true;
+      gap = 1000;
+      fixAt = 0;
+    },
+  };
+}

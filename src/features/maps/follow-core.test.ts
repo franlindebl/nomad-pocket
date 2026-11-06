@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import {
+  createFollower,
   followBearing,
   followCenter,
   followPitch,
@@ -13,6 +14,7 @@ import {
   movingBearing,
   offsetMeters,
   pushFix,
+  SETTLE_MS,
   smoothTurn,
   travelBearing,
   turnBetween,
@@ -158,4 +160,31 @@ test('hasMoved: beyond jitter and the fix error', () => {
   assert.equal(hasMoved(40, 5), true);
   assert.equal(hasMoved(40, 60), false, 'a poor fix wanders further');
   assert.equal(hasMoved(40, null), true);
+});
+
+test('createFollower: one settling move, then glides a little longer than the fix rhythm, turning at a bounded rate', () => {
+  const f = createFollower();
+  const state = (lat: number, course: number) => ({
+    position: { lat, lon: -3.7, accuracy: 5, course, speed: 10 },
+    costing: 'auto' as const,
+    route: null,
+    routeCumulative: [],
+    progress: null,
+    heading: null,
+  });
+  assert.equal(f.next({ ...state(40, 0), position: null }, 0), null);
+  const first = f.next(state(40, 90), 1000)!;
+  assert.equal(first.first, true);
+  assert.equal(first.duration, SETTLE_MS);
+  assert.equal(first.bearing, 90, 'the first bearing is taken as it is');
+  assert.equal(first.pitch, 45);
+  const second = f.next(state(40.0001, 270), 2000)!;
+  assert.equal(second.first, false);
+  near(second.duration, 1300, 1, 'a 1 s rhythm glides 1.3 s');
+  near(second.bearing!, 0, 0.001, 'at most 90°/s: from 90 towards 270 the short way, 90° in 1 s');
+  assert.ok(second.center.lon < -3.7, 'aims ahead of the fix, the way it goes (west)');
+  f.reset();
+  const again = f.next(state(40.0002, 180), 3000)!;
+  assert.equal(again.first, true);
+  assert.equal(again.bearing, 180, 'after a reset the bearing starts over');
 });

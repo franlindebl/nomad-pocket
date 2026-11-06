@@ -1,7 +1,7 @@
 // What the car's screen shows, from guidance's state: the maneuver panel, the trip's estimates and
 // the preview, in the JSON shapes modules/nomad-carplay decodes (CarPlayHub.swift). Texts come in
 // already translated (`text`), so this stays pure TypeScript (no `@/` aliases) for node's tests.
-import { hasArrived } from '../maps/follow-core.ts';
+import { hasArrived, type FollowFrame } from '../maps/follow-core.ts';
 import { bearingDegrees, compassSector, distanceMeters, type LatLon } from '../maps/geo.ts';
 import { maneuverIcon, remainingSeconds, STRAIGHT_LINE_SPEED, type Costing, type Route, type RouteProgress } from '../maps/routing-core.ts';
 import { scaleDistance, type MeasurementSystem } from '../../lib/units.ts';
@@ -23,7 +23,18 @@ export type CarGuidance = {
   step: CarStep | null;
   nextStep: CarStep | null;
   note: string | null;
+  /**
+   * Navigating on a route: where the user is on it (`segment` of the shape, the snapped point), so
+   * the car cuts the travelled part off where the phone does.
+   */
+  cut: CarCut | null;
+  /** Navigating: the camera's next move (follow-core's, the phone's own), only with a new fix. */
+  camera?: CarCamera | null;
 };
+
+export type CarCut = { segment: number; lat: number; lon: number };
+/** follow-core's FollowFrame, flat. bearing null: keep the map's. duration: ms. */
+export type CarCamera = { lat: number; lon: number; zoom: number; pitch: number; bearing: number | null; duration: number; first: boolean };
 
 export type CarItem = { title: string; detail: string | null; lat: number; lon: number };
 
@@ -109,8 +120,10 @@ export function carGuidance(input: GuidanceInput, system: MeasurementSystem, tex
     step: null,
     nextStep: null,
     note: null,
+    cut: null,
   };
   if (!target) return base;
+  if (input.navigating && route && progress?.snapped) base.cut = { segment: progress.segment, lat: progress.snapped.lat, lon: progress.snapped.lon };
   const distance = position ? distanceMeters(position, target) : null;
   base.arrived = distance !== null && hasArrived(distance, position?.accuracy ?? null);
   const following = input.routing === 'ready' && route && progress && !(progress.remainingM < 15 && progress.offRouteM < 30);
@@ -168,4 +181,17 @@ export function carGuidance(input: GuidanceInput, system: MeasurementSystem, tex
     };
   }
   return base;
+}
+
+/** A follow-core frame in the car's JSON shape. */
+export function carCamera(frame: FollowFrame): CarCamera {
+  return {
+    lat: frame.center.lat,
+    lon: frame.center.lon,
+    zoom: frame.zoom,
+    pitch: frame.pitch,
+    bearing: frame.bearing,
+    duration: Math.round(frame.duration),
+    first: frame.first,
+  };
 }
