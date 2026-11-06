@@ -476,6 +476,7 @@
     "lineTo": "Hacia el {{dir}}, en línea recta",
     "noPermission": "Permite el acceso a la ubicación en el móvil para navegar.",
     "via": "Por {{street}}",
+    "exit": "{{n}}.ª salida",
     "alongAt": "a {{distance}} en la ruta"
   },
   "speed": {

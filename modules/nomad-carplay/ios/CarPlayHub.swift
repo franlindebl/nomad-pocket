@@ -34,6 +34,10 @@ struct CarStep: Decodable {
   let estimate: CarEstimate
   /// The straight-line arrow's angle, degrees clockwise from the car's way ahead.
   let rotation: Double?
+  /// The card's text, most preferred first, shorter fallbacks after (carplay-core's cardVariants).
+  let variants: [String]?
+  /// CPManeuverType's raw value (iOS 17.4+).
+  let maneuverType: Int?
 }
 
 struct CarTarget: Decodable, Equatable {
@@ -62,6 +66,18 @@ struct CarGuidance: Decodable {
   let cut: CarCut?
   /// Navigating: the camera's next move (follow-core), only with a new fix.
   let camera: CarCamera?
+  /// Navigating: the speed badge (nil on foot or without a speed).
+  let speed: CarSpeed?
+}
+
+/// carplay-core's CarSpeed: the GPS speed and the posted limit, in the region's units.
+struct CarSpeed: Decodable {
+  let value: Int
+  /// km/h or mph
+  let unit: String
+  let limit: Int?
+  /// Past the limit: the panel turns red.
+  let over: Bool
 }
 
 struct CarCut: Decodable, Equatable {

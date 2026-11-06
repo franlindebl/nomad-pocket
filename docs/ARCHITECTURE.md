@@ -1254,7 +1254,10 @@ started on the phone shows in the car and the other way round.
   `FollowArrow`: lucide's Navigation2, blue, grey with a weak fix; without a trip a blue dot), so it doesn't jump
   at each fix; looking around, it's a dot layer at the fix. Zoom buttons while following change the zoom on top of
   follow-core's. Map buttons: recentre (only after a pan), zoom ±, pan mode; the bar ("Destinos" / "Terminar")
-  never hides.
+  never hides. **Speed** (`CarSpeedView.swift`): the phone's SpeedBadge at the top left of the safe area (at the
+  bottom it sat next to the arrow on a car's short screen): the posted limit as a round sign over the GPS speed,
+  red past the limit; numbers from `carSpeed` (carplay-core, guidance's `speed`). Purely visual and not touchable,
+  which Apple DTS calls standard practice over a navigation app's map (developer forums, thread 852888).
 - **Templates** (`CarPlayController.swift`): `CPMapTemplate` with "Destinos" → list (Buscar →
   `CPSearchTemplate` over `searchPlaces`; Guardados = markers by distance; Emergencias cerca: one row
   per category → nearest points, health only with `HEALTH_FEATURES`). A pick → `onPick` → JS
@@ -1263,7 +1266,12 @@ started on the phone shows in the car and the other way round.
   next two maneuvers), estimates every fix, paused "Recalculando" while a reroute loads, finished on
   arrival ("Has llegado" navigation alert with "Terminar"). "Terminar" / "Cancelar" (`onEnd`) stops
   guidance. The maneuver after the next shows only within 200 m of it (a second row pushes the
-  arrival time off a car screen). Every template call passes a completion handler: CarPlay raises
+  arrival time off a car screen). The card's text is short like Apple Maps' and Waze's (`cardVariants`): the
+  street, a roundabout's exit ("2.ª salida · CG-2", then "2.ª salida"), the sentence only when arriving or with no
+  street; CarPlay shows the first variant that fits and **nothing** when none does, so the shortest comes last.
+  Each maneuver also carries `maneuverType` (iOS 17.4). The symbol always gets its own row above the distance:
+  tried in the simulator, neither a smaller, a tight, a wide image, `maneuverType` nor no image moves it beside the
+  distance as Waze's card has it. Every template call passes a completion handler: CarPlay raises
   an exception when one fails without it (a pop with nothing to pop killed the app). Straight-line guidance shows as a
   maneuver "Hacia el NE, en línea recta".
 - **JS** (`carplay.ts`, pure `carplay-core.ts`): on connect it pushes the texts, the styles and the

@@ -75,6 +75,7 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
     map.setDestination(g.target)
     map.setNavigating(g.navigating)
     map.setCut(g.cut)
+    map.setSpeed(g.navigating ? g.speed : nil)
     // Last: a session started below recentres first, and this move then takes over.
     defer { if let camera = g.camera { map.apply(camera: camera) } }
 
@@ -210,9 +211,12 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
 
   private func makeManeuver(_ step: CarStep) -> CPManeuver {
     let m = CPManeuver()
-    var variants = [step.instruction]
-    if let street = step.street, !street.isEmpty, street != step.instruction { variants.append(street) }
-    m.instructionVariants = variants
+    // Short like Apple Maps' and Waze's (the street, a roundabout's exit): JS's cardVariants. CarPlay
+    // shows the first variant that fits, and nothing when none does.
+    m.instructionVariants = step.variants.flatMap { $0.isEmpty ? nil : $0 } ?? [step.instruction]
+    if #available(iOS 17.4, *), let raw = step.maneuverType, let type = CPManeuverType(rawValue: UInt(raw)) {
+      m.maneuverType = type
+    }
     m.symbolImage = symbol(for: step.icon, rotation: step.rotation ?? 0)
     m.initialTravelEstimates = estimates(step.estimate)
     return m
@@ -409,16 +413,16 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
       "ferry": "ferry",
       "straight-line": "location.north.fill",
     ]
-    let config = UIImage.SymbolConfiguration(pointSize: 48, weight: .semibold)
+    let config = UIImage.SymbolConfiguration(pointSize: 34, weight: .semibold)
     let image = UIImage(systemName: names[icon] ?? "arrow.up", withConfiguration: config) ?? UIImage(systemName: "arrow.up", withConfiguration: config)
     guard let tinted = image?.withTintColor(CarColors.accent, renderingMode: .alwaysOriginal) else { return nil }
     // Always drawn into a bitmap: CarPlay tinted some symbol images blue and left others as they were.
-    // Turned inside a square canvas, so a diagonal arrow isn't clipped.
-    let side = max(tinted.size.width, tinted.size.height)
+    // Tight round the symbol when it isn't turned; turned inside a square, so a diagonal isn't clipped.
+    let size = rotation == 0 ? tinted.size : CGSize(width: max(tinted.size.width, tinted.size.height), height: max(tinted.size.width, tinted.size.height))
     let format = UIGraphicsImageRendererFormat()
     format.scale = 3
-    return UIGraphicsImageRenderer(size: CGSize(width: side, height: side), format: format).image { ctx in
-      ctx.cgContext.translateBy(x: side / 2, y: side / 2)
+    return UIGraphicsImageRenderer(size: size, format: format).image { ctx in
+      ctx.cgContext.translateBy(x: size.width / 2, y: size.height / 2)
       ctx.cgContext.rotate(by: rotation * .pi / 180)
       tinted.draw(in: CGRect(x: -tinted.size.width / 2, y: -tinted.size.height / 2, width: tinted.size.width, height: tinted.size.height))
     }

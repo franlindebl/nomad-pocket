@@ -358,6 +358,21 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-06 — CarPlay: a shorter maneuver card, the speed and the limit
+
+- Owner, comparing with Waze on the car screen: the maneuver card takes too much room, and the road's speed limit
+  and the current speed are missing.
+- Card: the text is now the street (the arrow says which way), a roundabout's exit ("2.ª salida · CG-2"), the
+  sentence only arriving or without a street (`cardVariants` in carplay-core, tested; `maps:carplay.exit`). A
+  two-line card where it was three to five lines. CarPlay shows nothing when no variant fits, so the shortest goes
+  last. Waze's symbol beside the distance could not be reproduced: a smaller, tight or wide image, `maneuverType`
+  (now sent, iOS 17.4) and no image all leave the symbol in its own row (simulator, iOS 26.5).
+- Speed: `CarSpeedView.swift`, the phone's badge at the top left of the map's safe area (limit sign over the GPS
+  speed, red past the limit), from `carSpeed` (carplay-core, tested). Apple DTS on the developer forums says a
+  speed indicator and limit sign over the map are fine if purely visual and inside the safe area.
+- Checked: `npm run e2e:carplay` 5/5; simulated drives in Andorra: street-only cards, roundabout exits, the 50 sign
+  and the speed turning red at 90 km/h.
+
 ### 2026-11-06 — CarPlay: the phone's map look and its smooth navigation camera
 
 - Owner, after the first drive with CarPlay: the car's map looked nothing like the phone's (blue route, blue dot,

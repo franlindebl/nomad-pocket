@@ -3,14 +3,14 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
 import { cumulativeDistances, parseRoute, routeProgress } from '../maps/routing-core.ts';
-import { carDistance, carGuidance, mainRoad, type GuidanceInput } from './carplay-core.ts';
+import { cardVariants, carDistance, carGuidance, carSpeed, cpManeuverType, mainRoad, type GuidanceInput } from './carplay-core.ts';
 
 const route = parseRoute(readFileSync(new URL('../maps/fixtures/route-madrid-auto.json', import.meta.url), 'utf8'), 'auto');
 const cumulative = cumulativeDistances(route.shape);
 const start = { lat: route.shape[0][1], lon: route.shape[0][0], accuracy: 5 };
 const end = route.shape[route.shape.length - 1];
 const target = { name: 'Plaza de Castilla', lat: end[1], lon: end[0] };
-const text = { lineTo: (s: number) => `line ${s}`, toll: 'Peajes', ferry: 'Ferri', via: (r: string) => `Por ${r}` };
+const text = { lineTo: (s: number) => `line ${s}`, toll: 'Peajes', ferry: 'Ferri', via: (r: string) => `Por ${r}`, exit: (n: number) => `${n}.ª salida` };
 
 const input = (over: Partial<GuidanceInput> = {}): GuidanceInput => ({
   target,
@@ -90,4 +90,37 @@ test('distances in the region units', () => {
   assert.deepEqual(carDistance(1234, 'metric'), { value: 1.2, unit: 'km' });
   assert.deepEqual(carDistance(234, 'metric'), { value: 230, unit: 'm' });
   assert.deepEqual(carDistance(3000, 'us'), { value: 1.9, unit: 'mi' });
+});
+
+test('carSpeed: the GPS speed and the limit where the user is, red past it; nothing on foot or without a speed', () => {
+  const limited = { ...route, limits: [{ from: 0, to: route.shape.length - 1, kmh: 50 }] };
+  const progress = routeProgress(limited, cumulative, start);
+  const at = (speed: number | null, costing: GuidanceInput['costing'] = 'auto') =>
+    carSpeed({ position: { ...start, speed }, costing, route: limited, progress }, 'metric');
+  assert.deepEqual(at(10), { value: 36, unit: 'km/h', limit: 50, over: false });
+  assert.deepEqual(at(15), { value: 54, unit: 'km/h', limit: 50, over: true });
+  assert.equal(at(-1), null);
+  assert.equal(at(null), null);
+  assert.equal(at(1.4, 'pedestrian'), null);
+  assert.equal(at(5, 'bicycle')?.limit, null, 'the limit is for cars');
+  assert.equal(carSpeed({ position: { ...start, speed: 15 }, costing: 'auto', route: limited, progress }, 'us')?.unit, 'mph');
+});
+
+test('cardVariants: the street, a roundabout exit, the sentence where it says more', () => {
+  const m = (type: number, instruction: string, streets: string[] = [], exit: number | null = null) => ({ type, instruction, streets, exit });
+  assert.deepEqual(cardVariants(m(15, 'Gire a la izquierda hacia Calle Cruz del Sur.', ['Calle Cruz del Sur']), text), ['Calle Cruz del Sur']);
+  assert.deepEqual(cardVariants(m(26, 'Haga la rotonda y tome la salida 2.ª hacia CG-2.', ['CG-2'], 2), text), ['2.ª salida · CG-2', '2.ª salida']);
+  assert.deepEqual(cardVariants(m(26, 'Entre en la rotonda.', [], 4), text), ['4.ª salida']);
+  assert.deepEqual(cardVariants(m(6, 'Su destino está a la izquierda.'), text), ['Su destino está a la izquierda.']);
+  assert.deepEqual(cardVariants(m(10, 'Gire a la derecha.'), text), ['Gire a la derecha.']);
+});
+
+test('cpManeuverType: turns, roundabout exits, arrivals', () => {
+  assert.equal(cpManeuverType(15, null), 1);
+  assert.equal(cpManeuverType(10, null), 2);
+  assert.equal(cpManeuverType(26, 4), 31);
+  assert.equal(cpManeuverType(26, null), 6);
+  assert.equal(cpManeuverType(26, 25), 6);
+  assert.equal(cpManeuverType(6, null), 24);
+  assert.equal(cpManeuverType(99, null), 3);
 });

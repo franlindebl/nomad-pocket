@@ -76,6 +76,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate {
   private let arrow = CarArrowView(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
   private let dot = CarDotView(frame: CGRect(x: 0, y: 0, width: 36, height: 36))
   private var weakTimer: Timer?
+  private let speed = CarSpeedView(frame: .zero)
 
   override func loadView() {
     let map = MLNMapView(frame: .zero)
@@ -95,6 +96,14 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate {
       map.addSubview(v)
     }
     view = map
+    // Top left of the free part of the map (the system keeps its panels and buttons out of the safe
+    // area): at the bottom, as on the phone, it sat next to the arrow on a car's short screen.
+    speed.translatesAutoresizingMaskIntoConstraints = false
+    map.addSubview(speed)
+    NSLayoutConstraint.activate([
+      speed.leadingAnchor.constraint(equalTo: map.safeAreaLayoutGuide.leadingAnchor, constant: 10),
+      speed.topAnchor.constraint(equalTo: map.safeAreaLayoutGuide.topAnchor, constant: 10),
+    ])
   }
 
   override func viewDidLoad() {
@@ -153,6 +162,10 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate {
     guard next != cut else { return }
     cut = next
     drawLayers()
+  }
+
+  func setSpeed(_ value: CarSpeed?) {
+    speed.show(value)
   }
 
   func setDestination(_ target: CarTarget?) {

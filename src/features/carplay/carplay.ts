@@ -121,6 +121,7 @@ function pushGuidance() {
       toll: t('maps:route.toll'),
       ferry: t('maps:route.ferry'),
       via: (street) => t('maps:carplay.via', { street }),
+      exit: (n) => t('maps:carplay.exit', { n }),
     },
   );
   NomadCarPlay.update(JSON.stringify({ ...payload, camera })).catch((e) => console.warn('[carplay] update', e));
