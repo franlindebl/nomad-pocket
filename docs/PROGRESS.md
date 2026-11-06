@@ -358,6 +358,13 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-06 — 2.4.0 (46) on TestFlight
+
+- 2.4.0 (45) plus this session's fixes (the three entries below): New chat hidden on a fresh chat, the catalog rows,
+  "Limpiar" on recent reading, the category/course top gap, the storage bar, and updated maps drawn without a restart.
+  TestFlight only, same marketing version (fixes on a build the owner is trying).
+- E2E smoke 23/24 with `--build`; map-12 failed in the suite and passed alone (as on 2.2.0 and 2.4.0 (45)).
+
 ### 2026-11-06 — Maps: an updated map drew no streets until the app restarted
 
 - The owner updated Spain with the map open: after the update the map showed only the emergency dots, no streets or
