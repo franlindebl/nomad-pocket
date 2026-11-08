@@ -358,6 +358,14 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-09 — 2.4.1 (47) submitted to App Review
+
+- The owner asked to submit it. Nothing else was in review (2.4.0 live), so the 2.4.1 version record was created in App
+  Store Connect through the API with build 47 and auto-release, and submitted (state Waiting for Review). Description,
+  keywords, screenshots and App Review notes carried over from 2.4.0; only "What's new" is new (CarPlay like the phone,
+  the shorter maneuver card, the speed and the limit), reviewed by the owner before submitting:
+  `docs/store/listing-2.4.1.md`.
+
 ### 2026-11-07 — 2.4.1 (47) on TestFlight
 
 - 2.4.0 (46) plus the two CarPlay entries below (the phone's look and camera on the car screen; the shorter card, the
