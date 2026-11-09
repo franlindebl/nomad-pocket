@@ -14,6 +14,17 @@ export function beginTask(state: Preparing, itemId: string, key: string, weight:
   return { ...state, [itemId]: { ...state[itemId], [key]: { weight: Math.max(1, weight), done: 0 } } };
 }
 
+/**
+ * A task's weight once it is known: a side file whose import was queued before its download
+ * landed (weighted 1, nothing to measure yet). Unchanged state when the task is gone or weighs that.
+ */
+export function weighTask(state: Preparing, itemId: string, key: string, weight: number): Preparing {
+  const task = state[itemId]?.[key];
+  const value = Math.max(1, weight);
+  if (!task || task.weight === value) return state;
+  return { ...state, [itemId]: { ...state[itemId], [key]: { ...task, weight: value } } };
+}
+
 /** `done`: 0..1. Unchanged state (same object) when the task is gone or moved less than 1 %. */
 export function updateTask(state: Preparing, itemId: string, key: string, done: number): Preparing {
   const task = state[itemId]?.[key];

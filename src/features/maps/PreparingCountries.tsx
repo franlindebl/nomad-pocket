@@ -19,9 +19,16 @@ export function PreparingCountries({ countries, style }: { countries: CountrySta
             {c.title}
           </Text>
           <ProgressBar value={c.preparing ?? 0} />
-          <Text variant="caption" color="textSecondary" tabular>
-            {t('downloads.preparing', { pct: Math.floor((c.preparing ?? 0) * 100) })}
-          </Text>
+          {/* The percentage on a line of its own, like a download's time left: sharing the phrase's line it
+              wrapped as "99 / %" on a phone, and the row grew or shrank as the digits changed width. */}
+          <View>
+            <Text variant="caption" color="textSecondary" numberOfLines={2}>
+              {t('downloads.preparing')}
+            </Text>
+            <Text variant="caption" color="textSecondary" numberOfLines={1} tabular>
+              {t('downloads.percent', { pct: Math.floor((c.preparing ?? 0) * 100) })}
+            </Text>
+          </View>
         </View>
       ))}
     </ListGroup>

@@ -358,6 +358,26 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-10 — Maps: "Preparando… 99 %" for minutes after downloading a country (found)
+
+- A friend's iPhone sat at "Preparando la búsqueda y los puntos de emergencia · 99 %" for ~2 min after downloading
+  Spain, as the owner's had (2026-11-06, not found then). Cause: a country's preparing share is weighted by file size
+  (`prepare.ts`), and a side file's import is weighed when it is queued. Downloads from GitHub run two files at a
+  time in queue order (map parts, pack parts, then the pack's search files), so the pack's 2 GB part often finishes,
+  and the pack is assembled and installed, while places (56 MB) and addresses (100 MB) are still downloading. The
+  install queues every side import: those with no file yet weighed 1. When they landed, their imports were still
+  queued behind the map's index and the first imports, and landing on a queued import did nothing, so they ran their
+  full import weighing 1 in ~280 M: "99 %" through both imports (8 + 13 s on the simulator, minutes on a phone). The
+  simulator timing on 2026-11-06 downloaded fast enough that the files were on disk before the pack was installed.
+- Fix: `side-files.ts` weighs a queued import by its file when the file lands and again when the import starts
+  (`weighTask` in `prepare-core.ts`, tested with Spain's numbers). The landing happens while the download is still
+  in the sheet, so the share doesn't visibly go back.
+- Downloads sheet: the percentage of a preparing country wrapped as "99 / %". It is now on a line of its own under the
+  phrase (like a download's time left: no jumps in height as the digits change). Every Spanish "{{pct}} %" has a
+  no-break space before the sign.
+- Not checked on a device or the simulator (no build at hand): the fix is in the import queue and the row is two
+  captions. Check both on the next TestFlight build by downloading Spain on a phone.
+
 ### 2026-11-09 — 2.4.1 (47) submitted to App Review
 
 - The owner asked to submit it. Nothing else was in review (2.4.0 live), so the 2.4.1 version record was created in App
@@ -438,7 +458,7 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   `./` before the name, the same file to the OS. A `?v=` query doesn't work (MapLibre opens the path as given: "path
   not found"). Checked with a real update on the simulator (Spain marked older, updated with the map open over Madrid):
   streets stay, no PMTiles errors. Map screen and CarPlay.
-- Not found: the owner saw "Preparando búsqueda y puntos… 99 %" for minutes after updating Spain (and again after
+- Not found then (found 2026-11-10, entry above): the owner saw "Preparando búsqueda y puntos… 99 %" for minutes after updating Spain (and again after
   removing it and downloading it from scratch); it finished in the end. Timed on the simulator with logs on every
   prepare task (fresh install, remove + reinstall, update): ~40 s in all (tiles 24 s, points 4, streets 11, places 8,
   addresses 13; dropping a removed Spain's rows 8 s, on removal), the percentage moving evenly, nothing stuck near the

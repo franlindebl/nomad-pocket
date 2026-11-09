@@ -13,7 +13,7 @@ import Storage from '@/db/kv';
 import { getItem } from '@/features/content/items';
 import { contentFile, deleteFile } from '@/lib/storage';
 
-import { beginTask, endTask, updateTask } from './prepare';
+import { beginTask, endTask, updateTask, weighTask } from './prepare';
 
 export type SideKind = 'map' | 'route';
 
@@ -97,13 +97,21 @@ export function isImporting(kind: SideKind, name: string): boolean {
  */
 export function importSideFile(kind: SideKind, name: string, item: string, run: ImportRun, landed = false): Promise<void> {
   const key = keyOf(kind, name);
+  const task = `side:${key}`;
+  // Weighed by its file once there. A pack installed while its last search files were still
+  // downloading queued their imports weighing 1 (no file yet); landing meanwhile changed nothing,
+  // so Spain's places and addresses (150 MB, minutes on a phone) ran with the country at "99 %".
+  const weigh = () => {
+    const file = contentFile(kind, name);
+    if (file.exists) weighTask(item, task, Number(file.size ?? 0));
+  };
   if (busy.has(key)) {
     if (running === key && landed) again.add(key);
+    else weigh();
     return chain;
   }
   busy.add(key);
   // Part of getting the item ready (prepare.ts) from the moment it is queued.
-  const task = `side:${key}`;
   const file = contentFile(kind, name);
   beginTask(item, task, file.exists ? Number(file.size ?? 0) : 0);
   chain = chain
@@ -111,6 +119,7 @@ export function importSideFile(kind: SideKind, name: string, item: string, run: 
       running = key;
       do {
         again.delete(key);
+        weigh();
         await importOnce(kind, name, item, (file) => run(file, (done) => updateTask(item, task, done)));
       } while (again.has(key));
     })

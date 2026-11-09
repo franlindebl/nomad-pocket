@@ -16,6 +16,7 @@ const apply = (fn: (s: core.Preparing) => core.Preparing) =>
 
 /** `weight`: bytes (a file), or what the work is worth next to them. */
 export const beginTask = (itemId: string, key: string, weight: number) => apply((s) => core.beginTask(s, itemId, key, weight));
+export const weighTask = (itemId: string, key: string, weight: number) => apply((s) => core.weighTask(s, itemId, key, weight));
 export const updateTask = (itemId: string, key: string, done: number) => apply((s) => core.updateTask(s, itemId, key, done));
 export const endTask = (itemId: string, key: string) => apply((s) => core.endTask(s, itemId, key));
 

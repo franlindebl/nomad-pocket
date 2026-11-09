@@ -14,7 +14,7 @@
   "rowNoDate": "Versión nueva · {{size}}",
   "kindCountry": "Mapa y navegación",
   "kindCourse": "Curso",
-  "updating": "Actualizando {{pct}} %",
+  "updating": "Actualizando {{pct}}\u00a0%",
   "failed": "La descarga ha fallado: reinténtala desde Descargas",
   "broken": "Las rutas no funcionan con la versión que tienes",
   "noRoom": "No caben las dos versiones a la vez",
