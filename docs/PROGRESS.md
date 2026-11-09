@@ -358,6 +358,12 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-10 — 2.4.2 (48) on TestFlight
+
+- 2.4.1 (47) is live, so its train is closed: 2.4.2 (48), TestFlight only, with the "Preparando… 99 %" fix and the
+  preparing percentage on its own line (entry below). Android `versionCode` 30 (not uploaded).
+- E2E smoke 23/24 with `--build`; map-12 failed in the suite and passed alone (as on every build since 2.2.0).
+
 ### 2026-11-10 — Maps: "Preparando… 99 %" for minutes after downloading a country (found)
 
 - A friend's iPhone sat at "Preparando la búsqueda y los puntos de emergencia · 99 %" for ~2 min after downloading
