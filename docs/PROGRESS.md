@@ -393,8 +393,16 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   (`RECENTER_MS`; any pan, drag or zoom while looking around restarts the count).
 - `e2e-carplay.sh`: navigation is recognised by the estimates without a bar, and the ✕ is tapped at its place
   (755, 432 on the 800×480 car screen; not run yet).
-- Checked: Release simulator build compiles; tsc, lint, unit tests, i18n. Pending: `npm run e2e:carplay` and a drive
-  (the bar hidden, the ✕ ending the trip, a phone trip getting the arrow by itself).
+- Checked: tsc, lint, unit tests, i18n; on the CarPlay simulator (Release build of `477040c`, a simulated 12 m/s
+  drive in Andorra, the phone driven with `axe`): navigating, no bar and the ✕ at (755, 432), which ends the trip
+  on both sides and brings back "Destinos" and the pan button; the arrow and the tilted following camera from the
+  start in every case tried: "Iniciar" on the phone with the car on the preview's overview, the car on another app
+  (Ajustes) while the phone starts the trip, the phone app in the background and "Ir" in the car, and the car
+  connecting mid-trip (CarPlay display off and on). The owner's case didn't reproduce, so what stopped following in
+  the car is still unknown; the 12 s recentre wasn't exercised (nothing stops following while navigating there:
+  touch drags can't be scripted). If the CarPlay screen stays black: the Simulator had other devices open; quitting
+  it (which shuts its simulators down) and `carplay-sim.sh setup` again fixed it. Pending: the full
+  `npm run e2e:carplay` and a drive.
 
 ### 2026-11-10 — 2.4.2 (48) on TestFlight
 
