@@ -17,7 +17,7 @@
         "com.apple.developer.usernotifications.time-sensitive": true
       },
       "bundleIdentifier": "com.fjlinde.nomadpocket",
-      "buildNumber": "48",
+      "buildNumber": "49",
       "supportsTablet": true,
       "infoPlist": {
         "CFBundleDevelopmentRegion": "es",
@@ -37,7 +37,7 @@
     },
     "android": {
       "package": "com.fjlinde.nomadpocket",
-      "versionCode": 30,
+      "versionCode": 31,
       "blockedPermissions": [
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.READ_EXTERNAL_STORAGE",

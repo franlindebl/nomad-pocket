@@ -358,6 +358,14 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-10 — 2.4.2 (49) on TestFlight
+
+- 2.4.2 (48) plus map search that weighs the match and the distance, distances from the person and "Recientes"
+  (entry below), and CarPlay's "Terminar" as a map button with the trip always getting the navigation camera.
+  TestFlight only; Android `versionCode` 31 (not uploaded).
+- E2E: smoke 23/24 with `--build`, then map-12 and map-24 alone pass; CarPlay 5/5 (`npm run e2e:carplay`, its first
+  run on the ✕ map button).
+
 ### 2026-11-10 — Map search: results weigh the match and the distance; recent places
 
 - Owner: a street, restaurant or church very near should come among the first results, not after every better
