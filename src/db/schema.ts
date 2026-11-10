@@ -193,6 +193,21 @@ export const MIGRATIONS: string[] = [
   `
   ALTER TABLE chat_messages ADD COLUMN map TEXT;
   `,
+  // v6: places picked in the map's search, offered again when the search opens (features/maps/search-history.ts)
+  `
+  CREATE TABLE IF NOT EXISTS map_search_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    native_name TEXT,
+    kind TEXT,
+    layer TEXT,
+    context TEXT,
+    lat REAL NOT NULL,
+    lon REAL NOT NULL,
+    chosen_at INTEGER NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS map_search_history_chosen ON map_search_history(chosen_at DESC);
+  `,
 ];
 
 /**

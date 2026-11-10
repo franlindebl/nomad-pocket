@@ -12,14 +12,16 @@ import { useMarkers } from '@/features/maps/markers';
 import { localizedName, normalizeName } from '@/features/maps/places-core';
 import { usePreparingCountries } from '@/features/maps/countries';
 import { hasSearchIndex, indexDetailAroundView, searchPlaces, usePlaceIndex, type SearchResult } from '@/features/maps/places';
+import { confirmClearSearchHistory, recentSearches, recordSearchChoice } from '@/features/maps/search-history';
 import { showPlace, useMapUi, type SelectedPlace } from '@/features/maps/store';
+import * as Location from '@/lib/location';
 import { space, useTheme } from '@/theme';
 
 /** Typing pause before searching: each search reads a country-sized index. */
 const SEARCH_DELAY = 200;
 
 // A plain scroll view (Screen) like the region picker: a virtualized list gets
-// no height inside a formSheet. Results are capped at 40.
+// no height inside a formSheet. Results are capped at 40, recent places at 100.
 export default function SearchSheet() {
   const { t, i18n } = useTranslation('maps');
   const { colors } = useTheme();
@@ -29,11 +31,30 @@ export default function SearchSheet() {
   const maps = useItems('map');
   const progress = usePlaceIndex((s) => s.progress);
   const indexVersion = usePlaceIndex((s) => s.version);
-  // Rank by closeness to what the map shows, which is usually where the user is looking.
-  const near = useMemo<LatLon | null>(() => {
-    const c = useMapUi.getState().viewport?.center;
-    return c ? { lon: c[0], lat: c[1] } : null;
+  // Where the person is (the last fix, no prompt: the map asks for the permission).
+  const [here, setHere] = useState<LatLon | null>(null);
+  useEffect(() => {
+    let live = true;
+    Location.getForegroundPermissionsAsync()
+      .then((p) => (p.granted ? Location.getLastKnownPositionAsync({ maxAge: 10 * 60_000 }) : null))
+      .then((pos) => {
+        if (live && pos) setHere({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
   }, []);
+  // Results are ranked by closeness (places-core hitScore): to the person, unless the map shows somewhere else
+  // (they moved it to look there), then to what it shows.
+  const near = useMemo<LatLon | null>(() => {
+    const v = useMapUi.getState().viewport;
+    if (here && (!v || inBounds(here, v.bounds))) return here;
+    return v ? { lon: v.center[0], lat: v.center[1] } : here;
+  }, [here]);
+  // Distances are said from the person when known ("2 km NE" from where they stand).
+  const from = here ?? near;
+  const [recent, setRecent] = useState(recentSearches);
   // Big maps are indexed coarsely: add the detail (schools, shops…) of the area shown (not for a
   // country whose search files are in: places.ts).
   useEffect(() => indexDetailAroundView(), []);
@@ -75,10 +96,11 @@ export default function SearchSheet() {
   };
 
   const go = (p: SelectedPlace) => {
+    recordSearchChoice(p);
     showPlace(p);
     router.back();
   };
-  const away = (p: LatLon) => (near ? distanceWithDirection(t, near, p, distanceMeters(near, p)) : null);
+  const away = (p: LatLon) => (from ? distanceWithDirection(t, from, p, distanceMeters(from, p)) : null);
   // A country still being prepared after its download (all of its search), else a map's tiles being indexed.
   const preparing = usePreparingCountries().at(0);
   const indexing = preparing
@@ -160,7 +182,31 @@ export default function SearchSheet() {
         </View>
       ) : null}
 
-      {!results.length && !coords && !savedHits.length ? (
+      {deferred.length < 2 && recent.length ? (
+        <>
+          <SectionHeader
+            title={t('search.recent.title')}
+            action={t('search.recent.clear')}
+            onAction={() => confirmClearSearchHistory(() => setRecent([]))}
+            quietAction
+            actionTestID="search-recent-clear"
+          />
+          <ListGroup>
+            {recent.map((r) => (
+              <ListRow
+                key={r.id}
+                testID="search-recent"
+                leading={<IconBadge icon={kindIcon(r.kind, r.layer ?? undefined)} color={kindColor(r.kind)} />}
+                title={r.name}
+                subtitle={[r.kind ? kindLabel(t, r.kind) : null, r.context, away(r)].filter(Boolean).join(' · ')}
+                onPress={() => go({ name: r.name, nativeName: r.nativeName, lat: r.lat, lon: r.lon, kind: r.kind, layer: r.layer, context: r.context })}
+              />
+            ))}
+          </ListGroup>
+        </>
+      ) : null}
+
+      {!results.length && !coords && !savedHits.length && !(deferred.length < 2 && recent.length) ? (
         <Text variant="callout" color="textSecondary" align="center" style={{ marginTop: space.xxl, paddingHorizontal: space.lg }}>
           {!maps.length && !hasSearchIndex()
             ? t('search.noMaps')
@@ -173,4 +219,10 @@ export default function SearchSheet() {
       ) : null}
     </Screen>
   );
+}
+
+/** Whether a point is inside the map's visible box (west, south, east, north; across the antimeridian too). */
+function inBounds(p: LatLon, [w, s, e, n]: [number, number, number, number]): boolean {
+  if (p.lat < s || p.lat > n) return false;
+  return w <= e ? p.lon >= w && p.lon <= e : p.lon >= w || p.lon <= e;
 }

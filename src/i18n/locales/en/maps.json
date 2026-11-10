@@ -117,7 +117,13 @@
     "noMaps": "Download a map to search offline. Meanwhile you can paste coordinates.",
     "indexing": "Preparing search in {{name}}… {{percent}}%",
     "noResults": "Nothing matches “{{query}}” in your maps",
-    "coordinates": "Go to these coordinates"
+    "coordinates": "Go to these coordinates",
+    "recent": {
+      "title": "Recent",
+      "clear": "Clear",
+      "clearTitle": "Clear recent searches?",
+      "clearBody": "The places you picked in search are cleared. Your saved places stay."
+    }
   },
   "place": {
     "takeMeThere": "Take me there",

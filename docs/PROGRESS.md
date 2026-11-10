@@ -358,6 +358,24 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-10 — Map search: results weigh the match and the distance; recent places
+
+- Owner: a street, restaurant or church very near should come among the first results, not after every better
+  name match across the country. Before, the text tier (exact / starts with / word) counted 10 per step and the
+  distance at most ~7 (log scale), so a match next door never passed a worse-named one far away ("prado" in Madrid:
+  the Prado museum after every village and street called Prado).
+- `hitScore` (`places-core.ts`): text in steps of 3 plus how little of the name the query covers, layer, importance,
+  and log10(1 + km) × a weight that grows with the rank (city 1 → streets and shops 5). A city stays first for its
+  own name from anywhere; for streets and shops a text step is worth ~4× the distance. Calibrated on cases from
+  Madrid (Barcelona, Toledo, Prado, San Juan, Mercadona, Calle Mayor) in `places-core.test.ts`.
+- Distance from the person (last fix, no prompt) unless the map shows somewhere else, then from the map centre;
+  the rows now say distances from the person (they were from the map centre).
+- "Recientes": with nothing typed, the search lists every place picked from it (result, coordinates, saved place),
+  newest first, up to 100, scrolling; the same place again moves to the top; "Limpiar" asks first. Stored in
+  nomad.db (`map_search_history`, migration v6), on the phone only.
+- E2E: new MAP-24 (full); map-02, map-06, map-10, map-24 pass on a Release simulator build. On the simulator the
+  recent row said "10 m O" (no recent fix, so the distance fell back to the map centre, which was on the place).
+
 ### 2026-11-10 — CarPlay: "Terminar" as a map button; the trip always gets the navigation camera
 
 - Owner, driving with CarPlay: 1) the white bar across the top with "Terminar" took a lot of the screen and looked

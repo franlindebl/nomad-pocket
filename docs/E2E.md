@@ -41,8 +41,8 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 | Command | Flows | Time | Covers | Needs |
 |---|---|---|---|---|
 | `npm run e2e` | 24 | ~14 min | P0: every screen's main path (incl. map search, Emergencias, road routing and Preparedness) | nothing (offline) |
-| `npm run e2e:full` | 49 | ~30 min | + P1: secondary features (markers, find in page, courses, reminders, PDF…) | nothing (offline) |
-| `npm run e2e:all` | 66 | ~41 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
+| `npm run e2e:full` | 50 | ~30 min | + P1: secondary features (markers, find in page, courses, reminders, PDF…) | nothing (offline) |
+| `npm run e2e:all` | 67 | ~41 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
 | `PLANET_PORT=8766 scripts/e2e.sh --build --tags planet` | 2 | ~12 min | extraction resumed after a kill (`map-22`) and retried after a network failure (`map-23`) (tag `planet`, their own build: rebuild without `PLANET_PORT` before other suites) | nothing (local stand-in planet) |
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape | nothing (offline) |
 | `npm run e2e:android` | 8 | ~22 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack, content updates, official alerts, the assistant's map answers | internet, Android emulator |
@@ -284,6 +284,7 @@ By hand:
 | maps | `map-21-regions-national-pack` | MAP-21 | full | routing-server, maps-server (regions for the map only + a national pack, as Canada/Russia: region ticked from the location, pack with the first region only, deleting the last region removes the pack) |
 | maps | `map-22-extract-resume` | MAP-22 | planet (by hand) | maps-server, planet-server (an on-device extraction killed mid-way continues from its saved progress). Its own build: `PLANET_PORT=8766 scripts/e2e.sh --build e2e/flows/maps/map-22-extract-resume.yaml` bakes `EXPO_PUBLIC_PLANET_BUILD_URL` and serves `scripts/dev-planet-server.ts`; that app no longer reaches Protomaps, so rebuild without `PLANET_PORT` before other suites |
 | maps | `map-23-extract-retry` | MAP-23 | planet (by hand) | maps-server, planet-server (an extraction failing on the network shows Retry in Downloads; Retry continues it to an installed map). The same build as `map-22`; the flow turns the stand-in planet off and on through its `/__outage?ms=` endpoint (`e2e/scripts/planet-outage.js`, `PLANET_PORT` passed to Maestro by `scripts/e2e.sh`) |
+| maps | `map-24-search-recent` | MAP-24 | full | seeded map (a place picked in search shows under "Recientes" when the search opens again; picking it there opens its card; "Limpiar" asks, then empties the list) |
 | courses | `crs-01-empty` | CRS-01 | smoke | — |
 | courses | `crs-02-course` | CRS-02, CRS-03, CRS-04 | full | seeded |
 | assistant | `ai-01-no-model` | AI-01, AI-02 | smoke | — |
@@ -512,6 +513,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `map-search`, `map-emergency` | map search pill and the red "SOS" (Emergencias) button |
   | `map-points`, `points-show`, `points-<category>` | Puntos (legend) map button, its show-on-map row and one row per category |
   | `search-input`, `search-result`, `search-coordinates` | search sheet field, result rows, "go to coordinates" row |
+  | `search-recent`, `search-recent-clear` | search sheet with nothing typed: recent places picked in search, and their "Limpiar" |
   | `place-card`, `place-guide`, `place-save`, `place-close` | selected place card and its actions |
   | `place-address` | the card's "street, number · locality" line, for a place tapped on the map |
   | `nav-speed`, `nav-speed-limit` | while navigating by car or bike: the speed badge, and by car the posted limit sign above it (needs fixes with a speed: `simctl location start`, not Maestro's `travel`) |

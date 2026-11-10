@@ -507,17 +507,23 @@ function variantsOf(h: Pick<PlaceRow, 'name' | 'names'>): string[] {
   return [h.name, ...v].filter(Boolean);
 }
 
-/** 0 exact, 1 starts with, 2 a word match; 0.5 a city found by a whole run of words of an alternative name. */
-function textRank(h: Pick<PlaceRow, 'name' | 'names' | 'layer'>, q: string): number {
-  let best = 2;
+/**
+ * How well a hit's name matches the query (rankKey'd): `text` 0 exact, 1 starts with, 2 a word match; 0.5 a city
+ * found by a whole run of words of an alternative name. `cover`: how much of that name the query is (0..1), so
+ * "Iglesia de San Juan" goes before "Iglesia Parroquial de San Juan Bautista" for "san juan".
+ */
+function textMatch(h: Pick<PlaceRow, 'name' | 'names' | 'layer'>, q: string): { text: number; cover: number } {
+  let text = 2;
+  let cover = 0;
   for (const v of variantsOf(h)) {
     const n = rankKey(v);
-    if (n === q) return 0;
-    if (n.startsWith(q)) best = Math.min(best, 1);
+    if (n === q) return { text: 0, cover: 1 };
+    const share = n.includes(q) ? Math.min(1, q.length / n.length) : 0;
     // A pack row's alternative names are one string ("Tiflis Tbilisi"): a city found by any of them is the city.
-    else if (h.layer === 'place' && ` ${n} `.includes(` ${q} `)) best = Math.min(best, 0.5);
+    const t = n.startsWith(q) ? 1 : h.layer === 'place' && ` ${n} `.includes(` ${q} `) ? 0.5 : 2;
+    if (t < text || (t === text && share > cover)) [text, cover] = [t, share];
   }
-  return best;
+  return { text, cover };
 }
 
 /** The name in the app language and the native one (null when they are the same or there is no other). */
@@ -559,20 +565,35 @@ export function dedupeHits(hits: Hit[], limit = Infinity): Hit[] {
   return out;
 }
 
+/** What one step of text match costs (exact → starts with → a word of the name), next to the distance below. */
+const TEXT_STEP = 3;
+
 /**
- * Orders hits: exact name, then name starting with the query, then word matches
- * ("de", "la"… left out); within each, more important features and nearer ones first. Streets of the same
- * name less than 1.5 km apart are one street (one row per tile in the index).
+ * How much distance counts, by importance (`rank`, a Protomaps-like min_zoom: city 4, town 7, village 10, street
+ * 14, shop 16): little for a city, looked up from anywhere, most for a street or a shop, wanted near.
+ */
+const distanceWeight = (rank: number) => Math.min(5, Math.max(1, 1 + (rank - 4) * 0.6));
+
+/**
+ * A hit's score, lower first: how well its name matches, how important it is, and how far it is from `near`. The
+ * distance counts on a log scale (1 km vs 10 km is one step, 10 vs 100 another), so a match a few streets away
+ * comes up among the first even when its name matches less well than one across the country: for a street or
+ * a shop a step of text match is worth ~4× the distance. A city stays first for its own name from anywhere
+ * ("Barcelona" from Madrid), the street named after it comes next.
+ */
+export function hitScore(h: Hit, q: string, near: LatLon | null): number {
+  const { text, cover } = textMatch(h, q);
+  const km = near ? distanceMeters(near, h) / 1000 : 0;
+  return text * TEXT_STEP + (1 - cover) + LAYER_WEIGHT[h.layer] + h.rank * 0.3 + distanceWeight(h.rank) * Math.log10(1 + km);
+}
+
+/**
+ * Orders hits by hitScore (names compared without "de", "la"…, accents or apostrophes). Streets of the same name
+ * less than 1.5 km apart are one street (one row per tile in the index).
  */
 export function rankHits(hits: Hit[], query: string, near: LatLon | null, limit = 40): Hit[] {
   const q = rankKey(query);
-  const scored = hits.map((h) => {
-    const text = textRank(h, q);
-    const km = near ? distanceMeters(near, h) / 1000 : 0;
-    // Distance matters on a log scale: 1 km vs 10 km is one step, 10 vs 100 another.
-    const score = text * 10 + LAYER_WEIGHT[h.layer] * 2 + h.rank * 0.3 + Math.log10(1 + km) * 2.5;
-    return { h, score };
-  });
+  const scored = hits.map((h) => ({ h, score: hitScore(h, q, near) }));
   scored.sort((a, b) => a.score - b.score);
   return dedupeHits(
     scored.map((x) => x.h),

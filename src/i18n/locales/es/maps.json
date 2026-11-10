@@ -117,7 +117,13 @@
     "noMaps": "Descarga un mapa para buscar sin conexión. Mientras tanto puedes pegar coordenadas.",
     "indexing": "Preparando la búsqueda en {{name}}… {{percent}}\u00a0%",
     "noResults": "Nada coincide con «{{query}}» en tus mapas",
-    "coordinates": "Ir a estas coordenadas"
+    "coordinates": "Ir a estas coordenadas",
+    "recent": {
+      "title": "Recientes",
+      "clear": "Limpiar",
+      "clearTitle": "¿Borrar las búsquedas recientes?",
+      "clearBody": "Se borran los sitios que elegiste en la búsqueda. Tus lugares guardados se quedan."
+    }
   },
   "place": {
     "takeMeThere": "Llévame",

@@ -1,0 +1,44 @@
+# MAP-24 — a place picked in search comes back under "Recientes" when the search opens again with nothing
+# typed; picking it there opens its card; "Limpiar" asks, then empties the list.
+appId: com.fjlinde.nomadpocket
+tags: [full, maps, seeded-map]
+---
+- runFlow: ../../subflows/launch.yaml
+- tapOn: { id: "map" }
+- extendedWaitUntil:
+    visible: { id: "map-search" }
+    timeout: 20000
+- tapOn: { id: "map-search" }
+# Nothing picked yet: the hint, no recent places.
+- assertNotVisible: { id: "search-recent" }
+- inputText: "Rostrogordo"
+- extendedWaitUntil:
+    visible: { id: "search-result" }
+    timeout: 40000
+- tapOn: { id: "search-result", index: 0 }
+- extendedWaitUntil:
+    visible: { id: "place-card" }
+    timeout: 10000
+- tapOn: { id: "place-close" }
+- tapOn: { id: "map-search" }
+- extendedWaitUntil:
+    visible: { id: "search-recent" }
+    timeout: 5000
+- assertVisible: "Recientes"
+# Title and subtitle are one accessibility element on iOS.
+- assertVisible: "(?s).*Rostrogordo.*Localidad.*"
+- takeScreenshot: 01-recent
+- tapOn: { id: "search-recent", index: 0 }
+- extendedWaitUntil:
+    visible: { id: "place-card" }
+    timeout: 10000
+- assertVisible: "Rostrogordo"
+- tapOn: { id: "place-close" }
+- tapOn: { id: "map-search" }
+- tapOn: { id: "search-recent-clear" }
+- assertVisible: "¿Borrar las búsquedas recientes\\?"
+- tapOn: "Cancelar"
+- assertVisible: { id: "search-recent" }
+- tapOn: { id: "search-recent-clear" }
+- tapOn: "Borrar"
+- assertNotVisible: { id: "search-recent" }

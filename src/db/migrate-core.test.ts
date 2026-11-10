@@ -332,7 +332,8 @@ test('split: a database from before map search (v1) and a fresh install', () => 
   fs.mkdirSync(path.dirname(p.user), { recursive: true });
   const user = new DatabaseSync(p.user);
   applyLadder(wrap(user), MIGRATIONS);
-  assert.deepEqual(tableNames(user).sort(), [...USER_TABLES, 'sqlite_sequence'].sort());
+  // The split's tables, and those added after it (never in a legacy file).
+  assert.deepEqual(tableNames(user).sort(), [...USER_TABLES, 'map_search_history', 'sqlite_sequence'].sort());
   user.close();
   fs.mkdirSync(path.dirname(p.index), { recursive: true });
   ({ d, cleaned } = openIndex(p));

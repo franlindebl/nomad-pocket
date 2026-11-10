@@ -857,9 +857,15 @@ indexed as overlapping character pairs and matched as a phrase, so a name is fou
 it; rows indexed before that change only match from their first character until the map is
 re-indexed (`INDEX_VERSION` was not bumped). The match = FTS prefix match (`"word"*` per word, ANDed; address
 abbreviations also match their word: `("avda"* OR "avenida"*)`, `ABBREVIATIONS`) →
-`rankHits` (exact > prefix > word match with "de/la/…" left out, against every name variant of the row,
-so a city typed in English or Spanish ranks as exact; place > POI > street, importance, log-distance from
-the map centre; ranked by `rankKey`, `nameKey` without apostrophes, and deduplicated by it with
+`rankHits`, ordered by `hitScore` (lower first): text match in steps of 3 (exact 0, prefix 1, word match 2,
+with "de/la/…" left out, against every name variant of the row, so a city typed in English or Spanish ranks
+as exact) plus how little of the name the query covers (0–1), place 0 / POI 1 / street 1.5, importance
+(0.3 × the min_zoom rank) and log10(1 + km) × a distance weight that grows with the rank (city 1, town 2.8,
+village 4.6, streets and shops 5). A step of text match is worth ~4× the distance for a street or a shop, so
+a match a few streets away comes among the first even when its name matches less well than one across the
+country, while a city stays first for its own name from anywhere (cases in `places-core.test.ts`). The
+distance is from the person (last fix) unless the map shows somewhere else, then from the map centre; the
+rows say distances from the person. Ranked by `rankKey`, `nameKey` without apostrophes, and deduplicated by it with
 `dedupeHits`, which stops at the limit: pairwise keys over thousands of rows froze "farmacia") → nearest
 locality as context. A word ending in s also matches its possessive ("mcdonalds" → McDonald's, which FTS
 holds as `mcdonald` + `s`). Tile rows keep their name variants in slots of `names` separated by `NAME_SEP`
@@ -883,7 +889,9 @@ prefecture and city) as the street "台東2丁目" + number "5-1" that places.py
 `japaneseDoorHits` looks the door up by that key directly (else any door of the block,
 approximate). The search sheet
 also matches saved places and parses coordinates (`geo.ts`: decimal, DMS with N/S/E/W/O,
-UTM with band letter). House numbers come only from a pack (Protomaps tiles carry none).
+UTM with band letter). With nothing typed it lists "Recientes": every place picked from it (a result,
+coordinates or a saved place), newest first, up to 100 (`search-history.ts`, `map_search_history` in
+nomad.db; the same place within ~50 m moves to the top; "Limpiar" asks, then clears). House numbers come only from a pack (Protomaps tiles carry none).
 
 **Boxes across the antimeridian.** A `[west, south, east, north]` box with west > east (Fiji,
 Chukotka, the Aleutians), or with a longitude past ±180 (a box around a point near 180°), is

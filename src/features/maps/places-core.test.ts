@@ -202,7 +202,7 @@ test('rankHits leaves out "de", "la"… when comparing names', () => {
   );
 });
 
-test('rankHits: exact before prefix, near before far, one row per street', () => {
+test('rankHits: exact before prefix, near before far, one row per street, a weaker match next door before one far away', () => {
   const base = { names: '', rank: 12 };
   const hits: Hit[] = [
     { id: 1, layer: 'road', kind: 'street', name: 'Calle Mayor', lat: 41.0, lon: -2.0, ...base },
@@ -213,11 +213,11 @@ test('rankHits: exact before prefix, near before far, one row per street', () =>
   ];
   const near = { lat: 41.0, lon: -2.0 };
   const ranked = rankHits(hits, 'calle mayor', near);
+  // The bar where you are before the Calle Mayor 140 km away.
   assert.deepEqual(
     ranked.map((h) => h.id),
-    [1, 3, 4, 5],
+    [1, 4, 3, 5],
   );
-  assert.equal(rankHits(hits, 'mayorga', near)[0].id, 5);
 });
 
 test('nearestLocality', () => {
@@ -429,3 +429,59 @@ test('tileRows keeps name variants in slots', () => {
   const rows = tileRows(layers as never, 0, 0, 0);
   assert.equal(rows[0].names, `თბილისი${NAME_SEP}Tiflis${NAME_SEP}Tbilisi`);
 });
+
+test('rankHits weighs the match and the distance (searching from Madrid)', () => {
+  const madrid = { lat: 40.4168, lon: -3.7038 };
+  const hit = (id: number, layer: Hit['layer'], kind: string, name: string, rank: number, lat: number, lon: number): Hit => ({
+    id,
+    layer,
+    kind,
+    name,
+    names: name,
+    rank,
+    lat,
+    lon,
+  });
+  const ids = (hits: Hit[], q: string) => rankHits(hits, q, madrid).map((h) => h.id);
+  // A city first for its own name from anywhere; the street named after it next.
+  const barcelona = [
+    hit(1, 'road', 'street', 'Calle de Barcelona', 14, 40.417, -3.701),
+    hit(2, 'poi', 'hotel', 'Hotel Barcelona', 16, 40.418, -3.705),
+    hit(3, 'place', 'city', 'Barcelona', 4, 41.3874, 2.1686),
+  ];
+  assert.equal(ids(barcelona, 'barcelona')[0], 3);
+  const toledo = [hit(1, 'road', 'street', 'Calle de Toledo', 14, 40.41, -3.708), hit(2, 'place', 'town', 'Toledo', 7, 39.8628, -4.0273)];
+  assert.deepEqual(ids(toledo, 'toledo'), [2, 1]);
+  // The Prado museum, a kilometre away, before the villages called Prado across Spain.
+  const prado = [
+    hit(1, 'place', 'village', 'Prado', 10, 41.95, -5.43),
+    hit(2, 'place', 'village', 'Prado', 10, 42.6, -7.6),
+    hit(3, 'poi', 'museum', 'Museo del Prado', 13, 40.4138, -3.6921),
+    hit(4, 'road', 'street', 'Calle Prado Viejo', 14, 42.46, -2.45),
+    hit(5, 'place', 'suburb', 'Prado del Rey', 11, 40.418, -3.79),
+  ];
+  const p = ids(prado, 'prado');
+  assert.ok(p.indexOf(3) < p.indexOf(1) && p.indexOf(3) < p.indexOf(4), `museum near the top: ${p}`);
+  assert.equal(p[0], 5);
+  // The church round the corner among the first, ahead of the village called San Juan 430 km away.
+  const sanJuan = [
+    hit(1, 'place', 'village', 'San Juan', 10, 42.5, -6.5),
+    hit(2, 'place', 'town', 'San Juan de Alicante', 7, 38.4, -0.43),
+    hit(3, 'poi', 'place_of_worship', 'Iglesia de San Juan', 16, 40.419, -3.705),
+    hit(4, 'poi', 'place_of_worship', 'Iglesia Parroquial de San Juan Bautista', 16, 40.419, -3.706),
+  ];
+  const sj = ids(sanJuan, 'san juan');
+  assert.ok(sj.indexOf(3) < 2, `church among the first: ${sj}`);
+  assert.ok(sj.indexOf(3) < sj.indexOf(1));
+  assert.ok(sj.indexOf(3) < sj.indexOf(4), 'the shorter name first');
+  // Same name everywhere: nearest first.
+  const shops = [hit(1, 'poi', 'supermarket', 'Mercadona', 16, 40.5, -3.7), hit(2, 'poi', 'supermarket', 'Mercadona', 16, 40.42, -3.7)];
+  assert.deepEqual(ids(shops, 'mercadona'), [2, 1]);
+  // An exact match close by stays ahead of a closer one that only starts with the query.
+  const mayor = [
+    hit(1, 'road', 'street', 'Calle Mayor de Alcalá', 14, 40.416, -3.704),
+    hit(2, 'road', 'street', 'Calle Mayor', 14, 40.4155, -3.71),
+  ];
+  assert.deepEqual(ids(mayor, 'calle mayor'), [2, 1]);
+});
+
