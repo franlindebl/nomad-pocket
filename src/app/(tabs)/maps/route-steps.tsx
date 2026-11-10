@@ -5,12 +5,13 @@ import { Badge, EmptyState, IconBadge, ListGroup, ListRow, Row, Screen, Text } f
 import { MANEUVER_ICONS } from '@/features/maps/GuidancePanel';
 import { useGuidance } from '@/features/maps/guidance';
 import { maneuverIcon } from '@/features/maps/routing-core';
-import { formatDistance, formatDuration } from '@/lib/format';
+import { formatDistance, formatDuration, useMeasurementSystem } from '@/lib/format';
 import { space, useTheme } from '@/theme';
 
 /** The current route's maneuvers, the next one highlighted. */
 export default function RouteStepsSheet() {
   const { t } = useTranslation('maps');
+  const system = useMeasurementSystem();
   const { colors } = useTheme();
   const route = useGuidance((s) => s.route);
   const next = useGuidance((s) => s.progress?.next ?? 0);
@@ -27,7 +28,7 @@ export default function RouteStepsSheet() {
     <Screen contentStyle={{ paddingTop: space.lg, gap: space.md }}>
       <Row gap={space.sm} style={{ paddingHorizontal: space.xs, flexWrap: 'wrap' }}>
         <Text variant="headline" testID="route-summary">
-          {t('route.summary', { distance: formatDistance(route.distanceM), time: formatDuration(route.durationS) })}
+          {t('route.summary', { distance: formatDistance(route.distanceM, undefined, system), time: formatDuration(route.durationS) })}
         </Text>
         {route.hasToll ? <Badge label={t('route.toll')} tone="warning" /> : null}
         {route.hasFerry ? <Badge label={t('route.ferry')} tone="neutral" /> : null}
@@ -40,7 +41,7 @@ export default function RouteStepsSheet() {
             leading={<IconBadge icon={MANEUVER_ICONS[maneuverIcon(m.type)]} color={i === next ? colors.accent : colors.textSecondary} />}
             title={m.instruction}
             titleLines={3}
-            subtitle={m.distanceM > 0 ? formatDistance(m.distanceM) : undefined}
+            subtitle={m.distanceM > 0 ? formatDistance(m.distanceM, undefined, system) : undefined}
           />
         ))}
       </ListGroup>

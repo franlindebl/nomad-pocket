@@ -16,6 +16,7 @@ import { confirmClearSearchHistory, recentSearches, recordSearchChoice } from '@
 import { showPlace, useMapUi, type SelectedPlace } from '@/features/maps/store';
 import * as Location from '@/lib/location';
 import { space, useTheme } from '@/theme';
+import { useMeasurementSystem } from '@/lib/format';
 
 /** Typing pause before searching: each search reads a country-sized index. */
 const SEARCH_DELAY = 200;
@@ -24,6 +25,7 @@ const SEARCH_DELAY = 200;
 // no height inside a formSheet. Results are capped at 40, recent places at 100.
 export default function SearchSheet() {
   const { t, i18n } = useTranslation('maps');
+  const system = useMeasurementSystem();
   const { colors } = useTheme();
   const [query, setQuery] = useState('');
   const deferred = useDeferredValue(query.trim());
@@ -100,7 +102,7 @@ export default function SearchSheet() {
     showPlace(p);
     router.back();
   };
-  const away = (p: LatLon) => (from ? distanceWithDirection(t, from, p, distanceMeters(from, p)) : null);
+  const away = (p: LatLon) => (from ? distanceWithDirection(t, from, p, distanceMeters(from, p), system) : null);
   // A country still being prepared after its download (all of its search), else a map's tiles being indexed.
   const preparing = usePreparingCountries().at(0);
   const indexing = preparing

@@ -358,6 +358,23 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-11 — Units follow the country picked in the app, and a Units setting
+
+- A friend in Portugal with an iPhone in English saw the kit's water in gallons (and would have seen miles and mph
+  on the map): the units followed the device region, almost surely set to the US. Now (`lib/units.ts`
+  `resolveMeasurementSystem`, pure, tested): the choice in Settings > General > Unidades (Automático / Métrico /
+  EE. UU., `units` in the settings store), else the country picked in onboarding or Settings (US, its territories
+  but Puerto Rico, which signs km, and Liberia → gallons, miles, mph; the UK and the Crown dependencies → litres with miles and mph; the rest
+  metric), else the device region as before. The owner chose the picked country over the downloaded maps (one
+  value the person chose; a Spaniard with a US map for a trip keeps litres at home). A footnote under the control
+  says what is in use ("Según tu país: litros, kilómetros y km/h").
+- `measurementSystem()` reads the setting at call time (voice, CarPlay, alert notifications); components pass
+  `useMeasurementSystem()` to `formatDistance`/`formatWater` so memoised screens re-format when it changes (kit and
+  its rows, map search, place card, Emergencias, route preview and steps, guidance panel, speed badge, assistant map
+  cards). Checks: tsc, lint, tests, i18n. iOS simulator (iOS 27, Release, app launched as en_US): onboarding with
+  Portugal → the kit says 24 L and Settings "From your country: litres, kilometres and km/h"; US → "Always: gallons,
+  miles and mph" at once and the kit 6.3 gal. Not run on Android (JS only, no native change).
+
 ### 2026-11-10 — 2.4.2 (49) on TestFlight
 
 - 2.4.2 (48) plus map search that weighs the match and the distance, distances from the person and "Recientes"

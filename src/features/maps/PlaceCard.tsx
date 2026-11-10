@@ -23,6 +23,7 @@ import { addMarker } from './markers';
 import { addressNear } from './places';
 import { parsePhones } from './phone';
 import { useMapUi, type SelectedPlace } from './store';
+import { useMeasurementSystem } from '@/lib/format';
 
 /**
  * Distances only from a fix this recent. A last-known position can be days old and in
@@ -32,6 +33,7 @@ const FRESH_FIX_MS = 5 * 60_000;
 
 export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: number }) {
   const { t } = useTranslation('maps');
+  const system = useMeasurementSystem();
   const [here, setHere] = useState<LatLon | null>(null);
   const [saved, setSaved] = useState(false);
   const poi = useMemo(
@@ -91,7 +93,7 @@ export function PlaceCard({ place, bottom }: { place: SelectedPlace; bottom: num
     force ? null : poi?.operator && poi.operator !== place.name ? poi.operator : null,
     place.nativeName && place.nativeName !== place.name ? place.nativeName : null,
     place.context,
-    here ? distanceWithDirection(t, here, place, distanceMeters(here, place)) : null,
+    here ? distanceWithDirection(t, here, place, distanceMeters(here, place), system) : null,
   ]
     .filter(Boolean)
     .join(' · ');

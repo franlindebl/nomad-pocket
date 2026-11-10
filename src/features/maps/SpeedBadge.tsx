@@ -9,7 +9,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 
 import { Text } from '@/components/ui';
-import { measurementSystem } from '@/lib/format';
+import { useMeasurementSystem } from '@/lib/format';
 import { scaleSpeed, scaleSpeedLimit } from '@/lib/units';
 import { radius, space, useTheme } from '@/theme';
 
@@ -35,9 +35,9 @@ export function SpeedBadge({ bottom }: { bottom: number }) {
     opacity.value = withRepeat(withSequence(withTiming(0.2, { duration: BLINK_MS }), withTiming(1, { duration: BLINK_MS })), BLINKS);
   }, [warnedAt, opacity]);
   const blinking = useAnimatedStyle(() => ({ opacity: opacity.value }));
+  const system = useMeasurementSystem();
   // iOS reports -1 without a speed (a stale or rough fix).
   if (costing === 'pedestrian' || speed === null || speed < 0) return null;
-  const system = measurementSystem();
   const now = scaleSpeed(speed, system);
   const limit = costing === 'auto' && limitKmh !== null ? scaleSpeedLimit(limitKmh, system) : null;
   const over = limit !== null && now.value > limit;

@@ -2,6 +2,18 @@
   "title": "Ajustes",
   "general": "General",
   "language": "Idioma de la app",
+  "units": "Unidades",
+  "unitsAuto": "Automático",
+  "unitsMetric": "Métrico",
+  "unitsUS": "EE. UU.",
+  "unitsByCountry": "Según tu país: {{units}}",
+  "unitsByDevice": "Según la región del dispositivo: {{units}}",
+  "unitsFixed": "Siempre: {{units}}",
+  "unitsSystem": {
+    "metric": "litros, kilómetros y km/h",
+    "us": "galones, millas y mph",
+    "uk": "litros, millas y mph"
+  },
   "contentLanguages": "Idiomas del contenido",
   "contentLanguagesBody": "Qué idiomas mostrar en el catálogo",
   "downloads": "Descargas",

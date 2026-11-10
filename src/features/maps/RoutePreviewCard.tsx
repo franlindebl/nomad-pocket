@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { Card, IconButton, Row, Text } from '@/components/ui';
-import { formatDistance, formatDuration } from '@/lib/format';
+import { formatDistance, formatDuration, useMeasurementSystem } from '@/lib/format';
 import { space, useTheme } from '@/theme';
 
 import { distanceMeters } from './geo';
@@ -13,6 +13,7 @@ import { clearRoutePreview, type RoutePreview } from './route-preview';
 
 export function RoutePreviewCard({ preview, bottom }: { preview: RoutePreview; bottom: number }) {
   const { t } = useTranslation('maps');
+  const system = useMeasurementSystem();
   const { colors } = useTheme();
   const { from, to, route, status } = preview;
   return (
@@ -28,11 +29,11 @@ export function RoutePreviewCard({ preview, bottom }: { preview: RoutePreview; b
           <ActivityIndicator color={colors.textSecondary} />
         ) : route ? (
           <Text variant="title3" testID="route-preview-travel">
-            {`${formatDuration(route.durationS)} · ${formatDistance(route.distanceM)} · ${t(`preview.mode.${preview.costing}`)}`}
+            {`${formatDuration(route.durationS)} · ${formatDistance(route.distanceM, undefined, system)} · ${t(`preview.mode.${preview.costing}`)}`}
           </Text>
         ) : (
           <Text variant="callout" color="textSecondary">
-            {t('preview.straight', { distance: formatDistance(distanceMeters(from, to)) })}
+            {t('preview.straight', { distance: formatDistance(distanceMeters(from, to), undefined, system) })}
           </Text>
         )}
         {preview.avoiding ? (

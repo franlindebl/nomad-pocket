@@ -13,7 +13,8 @@ import { clearHistory } from '@/features/library/history';
 import { removeCountry, useCountries, type CountryState } from '@/features/maps/countries';
 import { getRegion, regionName } from '@/features/maps/regions';
 import type { AppLanguage } from '@/i18n';
-import { formatBytes } from '@/lib/format';
+import { formatBytes, useMeasurementSystem } from '@/lib/format';
+import type { UnitsPreference } from '@/lib/units';
 import { freeBytes, totalBytes } from '@/lib/storage';
 import { useSettings } from '@/stores/settings';
 import { space, useTheme } from '@/theme';
@@ -36,6 +37,8 @@ export default function SettingsScreen() {
   // Everything else on the phone (other apps, the system): never below 0 if the sizes disagree a little.
   const other = Math.max(0, total - free - used);
   const region = s.country ? getRegion(s.country) : undefined;
+  const system = useMeasurementSystem();
+  const unitsNote = s.units !== 'auto' ? 'unitsFixed' : s.country ? 'unitsByCountry' : 'unitsByDevice';
   const zims = items.filter((i) => i.kind === 'zim');
   const models = items.filter((i) => i.kind === 'model');
 
@@ -67,6 +70,21 @@ export default function SettingsScreen() {
               { value: 'en', label: 'English' },
             ]}
           />
+        </View>
+        <View style={{ padding: space.lg, gap: space.md }}>
+          <Text variant="headline">{t('units')}</Text>
+          <Segmented<UnitsPreference>
+            value={s.units}
+            onChange={s.setUnits}
+            options={[
+              { value: 'auto', label: t('unitsAuto') },
+              { value: 'metric', label: t('unitsMetric') },
+              { value: 'us', label: t('unitsUS') },
+            ]}
+          />
+          <Text variant="footnote" color="textSecondary">
+            {t(unitsNote, { units: t(`unitsSystem.${system}`) })}
+          </Text>
         </View>
         <ListRow
           testID="settings-country"

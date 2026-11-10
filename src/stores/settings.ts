@@ -5,6 +5,7 @@ import { persist } from 'zustand/middleware';
 
 import { deviceLanguage, setLanguage, type AppLanguage } from '@/i18n';
 import { kvStorage } from '@/lib/kv';
+import type { UnitsPreference } from '@/lib/units';
 
 type SettingsState = {
   language: AppLanguage;
@@ -19,6 +20,8 @@ type SettingsState = {
   aiModelId: string | null;
   /** The user's country (regions.json id), chosen in onboarding: its map, emergency number. */
   country: string | null;
+  /** Units for distances, speeds and water: 'auto' follows the country above (lib/units.ts). */
+  units: UnitsPreference;
   /** Emergency points drawn on the map (the Puntos sheet), and the categories hidden from it. */
   mapPoints: boolean;
   hiddenPointCategories: string[];
@@ -34,6 +37,7 @@ type SettingsState = {
   setOnboarded: (v: boolean) => void;
   setAiModelId: (id: string | null) => void;
   setCountry: (id: string | null) => void;
+  setUnits: (units: UnitsPreference) => void;
   setMapPoints: (v: boolean) => void;
   setPointCategoryHidden: (category: string, hidden: boolean) => void;
   setNavNorthUp: (v: boolean) => void;
@@ -51,6 +55,7 @@ export const useSettings = create<SettingsState>()(
       onboarded: false,
       aiModelId: null,
       country: null,
+      units: 'auto',
       mapPoints: true,
       hiddenPointCategories: [],
       navNorthUp: false,
@@ -66,6 +71,7 @@ export const useSettings = create<SettingsState>()(
       setOnboarded: (onboarded) => set({ onboarded }),
       setAiModelId: (aiModelId) => set({ aiModelId }),
       setCountry: (country) => set({ country }),
+      setUnits: (units) => set({ units }),
       setMapPoints: (mapPoints) => set({ mapPoints }),
       setPointCategoryHidden: (category, hidden) =>
         set((st) => ({
@@ -88,6 +94,7 @@ export const useSettings = create<SettingsState>()(
         onboarded,
         aiModelId,
         country,
+        units,
         mapPoints,
         hiddenPointCategories,
         navNorthUp,
@@ -101,6 +108,7 @@ export const useSettings = create<SettingsState>()(
         onboarded,
         aiModelId,
         country,
+        units,
         mapPoints,
         hiddenPointCategories,
         navNorthUp,

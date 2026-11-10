@@ -28,13 +28,14 @@ import { CATEGORY_COLORS, CATEGORY_ICONS, distanceWithDirection, kindIcon, kindL
 import { shareLocation } from '@/features/maps/share-location';
 import { showPlace, useMapUi } from '@/features/maps/store';
 import { useMapItems } from '@/features/maps/useMapSources';
-import { formatDistance, formatRelativeDate } from '@/lib/format';
+import { formatDistance, formatRelativeDate, useMeasurementSystem } from '@/lib/format';
 import { space, useTheme } from '@/theme';
 
 type Here = LatLon & { accuracy: number | null; fromMap: boolean };
 
 export default function EmergencySheet() {
   const { t, i18n } = useTranslation('maps');
+  const system = useMeasurementSystem();
   const { colors } = useTheme();
   const { regions } = useMapItems();
   const syncStates = usePoiSync((s) => s.states);
@@ -136,7 +137,7 @@ export default function EmergencySheet() {
       p.emergency === 1 ? t('place.emergencyYes') : null,
       !force && p.operator && p.operator !== p.name ? p.operator : null,
     ].filter(Boolean);
-    const distance = here && p.distance !== null ? distanceWithDirection(t, here, p, p.distance) : null;
+    const distance = here && p.distance !== null ? distanceWithDirection(t, here, p, p.distance, system) : null;
     return distance ? `${parts.join(' · ')}\n${distance}` : parts.join(' · ');
   };
 
@@ -207,7 +208,7 @@ export default function EmergencySheet() {
             </Text>
             <Text variant="footnote" color="textSecondary" tabular selectable>
               {utm ? `UTM ${formatUtm(utm)}` : ''}
-              {here.accuracy ? `${utm ? '  ·  ' : ''}± ${formatDistance(here.accuracy, 1)}` : ''}
+              {here.accuracy ? `${utm ? '  ·  ' : ''}± ${formatDistance(here.accuracy, 1, system)}` : ''}
             </Text>
           </>
         ) : (

@@ -34,6 +34,34 @@ export function formatDuration(seconds: number): string {
 /** The region's measurement system, as the OS reports it (expo-localization). */
 export type MeasurementSystem = 'metric' | 'us' | 'uk';
 
+/** What the person chose in Settings: follow their country ('auto') or a fixed system. */
+export type UnitsPreference = 'auto' | 'metric' | 'us';
+
+// Where road signs and shops use US customary units (miles, mph, gallons): the US, its territories and
+// Liberia. Not Puerto Rico: its road distances are in km and fuel in litres (owner, 2026-11-11). The UK and
+// the Crown dependencies keep miles and mph on the road but sell litres.
+const US_UNITS = new Set(['us', 'vi', 'gu', 'as', 'mp', 'lr']);
+const UK_UNITS = new Set(['gb', 'im', 'je', 'gg']);
+
+/** The units of a country (regions.json id; a subregion like "us-wa" counts as its country). */
+export function countryMeasurementSystem(countryId: string): MeasurementSystem {
+  const country = countryId.toLowerCase().split('-')[0];
+  return US_UNITS.has(country) ? 'us' : UK_UNITS.has(country) ? 'uk' : 'metric';
+}
+
+/**
+ * The units the app shows: the person's choice in Settings, else the country they picked in the app
+ * (an iPhone set to the US region in Portugal still reads litres and km there), else the device region.
+ */
+export function resolveMeasurementSystem(
+  preference: UnitsPreference,
+  country: string | null,
+  device: MeasurementSystem,
+): MeasurementSystem {
+  if (preference !== 'auto') return preference;
+  return country ? countryMeasurementSystem(country) : device;
+}
+
 const FEET_PER_METER = 3.28084;
 const YARDS_PER_METER = 1.09361;
 const METERS_PER_MILE = 1609.344;

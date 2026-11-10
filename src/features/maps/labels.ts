@@ -47,6 +47,7 @@ import {
 } from 'lucide-react-native';
 
 import { formatDistance } from '@/lib/format';
+import type { MeasurementSystem } from '@/lib/units';
 import { hues } from '@/theme';
 
 import { EMERGENCY_KINDS, type EmergencyCategory, type EmergencyKind } from './emergency-core';
@@ -158,6 +159,6 @@ export function kindLabel(t: TFunction, kind: string | null | undefined): string
 }
 
 /** "1,2 km NE": distance plus the compass direction from `from`. */
-export function distanceWithDirection(t: TFunction, from: LatLon, to: LatLon, meters: number): string {
-  return `${formatDistance(meters)} ${t(`maps:dir.${compassSector(bearingDegrees(from, to))}`)}`;
+export function distanceWithDirection(t: TFunction, from: LatLon, to: LatLon, meters: number, system?: MeasurementSystem): string {
+  return `${formatDistance(meters, undefined, system)} ${t(`maps:dir.${compassSector(bearingDegrees(from, to))}`)}`;
 }

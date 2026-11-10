@@ -3,7 +3,8 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { formatNumber, formatWater } from '@/lib/format';
+import { formatNumber, formatWater, measurementSystem, useMeasurementSystem } from '@/lib/format';
+import type { MeasurementSystem } from '@/lib/units';
 
 import { expiryStatus, KIT_CATEGORIES, kitFor, supplies, type ExpiryStatus, type KitCategory, type KitItemDef } from './kit';
 import { EMPTY_KIT_ENTRY, usePrepare } from './store';
@@ -21,11 +22,16 @@ export type KitRow = {
 
 export type KitGroup = { category: KitCategory | 'custom'; title: string; rows: KitRow[] };
 
-function quantity(def: KitItemDef, data: PrepareData, t: (k: string, options?: Record<string, unknown>) => string): string {
+function quantity(
+  def: KitItemDef,
+  data: PrepareData,
+  t: (k: string, options?: Record<string, unknown>) => string,
+  system: MeasurementSystem,
+): string {
   const s = supplies(data.household);
   switch (def.quantity) {
     case 'water':
-      return formatWater(s.waterLiters);
+      return formatWater(s.waterLiters, system);
     case 'food':
       return t('prepare:kit.quantity.food', { days: data.household.days, kcal: formatNumber(s.foodKcal) });
     case 'medication':
@@ -35,7 +41,12 @@ function quantity(def: KitItemDef, data: PrepareData, t: (k: string, options?: R
   }
 }
 
-export function kitGroups(data: PrepareData, t: (k: string, options?: Record<string, unknown>) => string, now = new Date()): KitGroup[] {
+export function kitGroups(
+  data: PrepareData,
+  t: (k: string, options?: Record<string, unknown>) => string,
+  now = new Date(),
+  system: MeasurementSystem = measurementSystem(),
+): KitGroup[] {
   const row = (id: string, title: string, detail: string, def: KitItemDef | null): KitRow => {
     const entry = data.kit[id] ?? EMPTY_KIT_ENTRY;
     return { id, title, detail, entry, def, status: entry.expires ? expiryStatus(entry.expires, now) : null };
@@ -44,7 +55,9 @@ export function kitGroups(data: PrepareData, t: (k: string, options?: Record<str
   const groups: KitGroup[] = KIT_CATEGORIES.map((category) => ({
     category,
     title: t(`prepare:kit.categories.${category}`),
-    rows: items.filter((d) => d.category === category).map((d) => row(d.id, t(`prepare:kit.items.${d.id}.title`), quantity(d, data, t), d)),
+    rows: items
+      .filter((d) => d.category === category)
+      .map((d) => row(d.id, t(`prepare:kit.items.${d.id}.title`), quantity(d, data, t, system), d)),
   }));
   groups.push({ category: 'custom', title: t('prepare:kit.categories.custom'), rows: data.custom.map((c) => row(c.id, c.name, '', null)) });
   return groups.filter((g) => g.rows.length);
@@ -82,11 +95,12 @@ export function summarize(data: PrepareData, groups: KitGroup[]): PrepareSummary
 
 /** Subscribes to the whole plan: fine, it is small and only these screens use it. */
 export function useKitGroups(): { data: PrepareData; groups: KitGroup[]; summary: PrepareSummary } {
-  // `t` changes with the language, which also re-formats the quantities.
+  // `t` changes with the language and `system` with the units setting: both re-format the quantities.
   const { t } = useTranslation('prepare');
+  const system = useMeasurementSystem();
   const data = usePrepare();
   return useMemo(() => {
-    const groups = kitGroups(data, t);
+    const groups = kitGroups(data, t, undefined, system);
     return { data, groups, summary: summarize(data, groups) };
-  }, [data, t]);
+  }, [data, t, system]);
 }

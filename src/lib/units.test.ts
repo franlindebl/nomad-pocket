@@ -1,7 +1,17 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { formatDuration, type MeasurementSystem, scaleBytes, scaleDistance, scaleSpeed, scaleSpeedLimit, scaleWater } from './units.ts';
+import {
+  countryMeasurementSystem,
+  formatDuration,
+  type MeasurementSystem,
+  resolveMeasurementSystem,
+  scaleBytes,
+  scaleDistance,
+  scaleSpeed,
+  scaleSpeedLimit,
+  scaleWater,
+} from './units.ts';
 
 const shown = (bytes: number, digits?: number) => {
   const { value, unit, fractionDigits } = scaleBytes(bytes, digits);
@@ -89,4 +99,26 @@ test('scaleSpeedLimit: mph signs come back to their step of 5', () => {
   assert.equal(scaleSpeedLimit(40, 'us'), 25); // 25 mph stored as 40 km/h
   assert.equal(scaleSpeedLimit(105, 'us'), 65);
   assert.equal(scaleSpeedLimit(113, 'uk'), 70);
+});
+
+test('countryMeasurementSystem: US customary in the US and Liberia, miles with litres in the UK', () => {
+  assert.equal(countryMeasurementSystem('us'), 'us');
+  assert.equal(countryMeasurementSystem('us-wa'), 'us');
+  assert.equal(countryMeasurementSystem('pr'), 'metric');
+  assert.equal(countryMeasurementSystem('lr'), 'us');
+  assert.equal(countryMeasurementSystem('gb'), 'uk');
+  assert.equal(countryMeasurementSystem('je'), 'uk');
+  assert.equal(countryMeasurementSystem('pt'), 'metric');
+  assert.equal(countryMeasurementSystem('ie'), 'metric');
+  assert.equal(countryMeasurementSystem('ES'), 'metric');
+});
+
+test('resolveMeasurementSystem: the choice, else the country picked in the app, else the device', () => {
+  // An iPhone set to the US region, used in Portugal.
+  assert.equal(resolveMeasurementSystem('auto', 'pt', 'us'), 'metric');
+  assert.equal(resolveMeasurementSystem('auto', 'us', 'metric'), 'us');
+  assert.equal(resolveMeasurementSystem('auto', null, 'us'), 'us');
+  assert.equal(resolveMeasurementSystem('auto', null, 'uk'), 'uk');
+  assert.equal(resolveMeasurementSystem('us', 'pt', 'metric'), 'us');
+  assert.equal(resolveMeasurementSystem('metric', 'us', 'us'), 'metric');
 });

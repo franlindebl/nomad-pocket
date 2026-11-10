@@ -21,7 +21,7 @@ import { ringPairs } from '@/features/maps/along-core';
 import { previewRoute } from '@/features/maps/route-preview';
 import { shareLocation, smsLocation } from '@/features/maps/share-location';
 import { useMapUi, type SelectedPlace } from '@/features/maps/store';
-import { formatDistance, formatDuration, formatRelativeDate } from '@/lib/format';
+import { formatDistance, formatDuration, formatRelativeDate, useMeasurementSystem } from '@/lib/format';
 import { space, useTheme } from '@/theme';
 
 import { chooseMapOption } from '../chats';
@@ -96,13 +96,14 @@ function Footnote({ children }: { children: string }) {
 
 function ResultRow({ r, anchor, call, costing, testID }: { r: MapResult; anchor: MapAnchor; call?: boolean; costing?: Costing; testID: string }) {
   const { t } = useTranslation('assistant');
+  const system = useMeasurementSystem();
   const { colors } = useTheme();
   const name = r.name || kindLabel(t, r.kind);
-  const away = r.distance != null ? (anchor.here ? distanceWithDirection(t, anchor, r, r.distance) : formatDistance(r.distance)) : null;
+  const away = r.distance != null ? (anchor.here ? distanceWithDirection(t, anchor, r, r.distance, system) : formatDistance(r.distance, undefined, system)) : null;
   // An unnamed point already shows its kind as the title.
   const lines = [
     [r.name ? kindLabel(t, r.kind) : null, r.context].filter(Boolean).join(' · '),
-    r.travel ? `${formatDuration(r.travel.seconds)} · ${formatDistance(r.travel.meters)} · ${t(`map.mode.${r.travel.costing}`)}` : away,
+    r.travel ? `${formatDuration(r.travel.seconds)} · ${formatDistance(r.travel.meters, undefined, system)} · ${t(`map.mode.${r.travel.costing}`)}` : away,
     r.emergency === 1 ? t('maps:place.emergencyYes') : null,
     r.openNow === 'open' ? t('map.openNow') : r.openNow === 'closed' ? t('map.closedNow') : null,
     r.hours ? t('maps:place.hours', { hours: r.hours }) : null,
@@ -137,6 +138,7 @@ function kindsLabel(t: TFunction, kinds: string[]) {
 
 export function MapAnswerCard({ card, messageId }: { card: MapCard; messageId?: string }) {
   const { t } = useTranslation('assistant');
+  const system = useMeasurementSystem();
   const kinds = (ks: string[]) => kindsLabel(t, ks);
 
   switch (card.type) {
@@ -185,11 +187,11 @@ export function MapAnswerCard({ card, messageId }: { card: MapCard; messageId?: 
           {card.to.context ? <Footnote>{card.to.context}</Footnote> : null}
           {card.travel ? (
             <Text variant="title2" testID="map-answer-travel">
-              {`${formatDuration(card.travel.seconds)} · ${formatDistance(card.travel.meters)}`}
+              {`${formatDuration(card.travel.seconds)} · ${formatDistance(card.travel.meters, undefined, system)}`}
             </Text>
           ) : (
             <>
-              <Text variant="title2">{formatDistance(card.straight)}</Text>
+              <Text variant="title2">{formatDistance(card.straight, undefined, system)}</Text>
               <Footnote>{t('map.straightOnly')}</Footnote>
             </>
           )}
@@ -259,7 +261,7 @@ export function MapAnswerCard({ card, messageId }: { card: MapCard; messageId?: 
               {card.locality}
             </Text>
           ) : null}
-          {card.landmark ? <Text variant="callout">{t('map.landmark', { distance: formatDistance(card.landmark.distance ?? 0), name: card.landmark.name })}</Text> : null}
+          {card.landmark ? <Text variant="callout">{t('map.landmark', { distance: formatDistance(card.landmark.distance ?? 0, undefined, system), name: card.landmark.name })}</Text> : null}
           <Text variant="callout" selectable tabular>
             {formatLatLon(card.fix.lat, card.fix.lon)}
           </Text>
@@ -269,7 +271,7 @@ export function MapAnswerCard({ card, messageId }: { card: MapCard; messageId?: 
             </Text>
           ) : null}
           <Footnote>
-            {[card.fix.accuracy ? t('map.accuracy', { distance: formatDistance(card.fix.accuracy, 1) }) : null, card.stale ? t('map.fixAge', { age: formatRelativeDate(card.fix.at) }) : null]
+            {[card.fix.accuracy ? t('map.accuracy', { distance: formatDistance(card.fix.accuracy, 1, system) }) : null, card.stale ? t('map.fixAge', { age: formatRelativeDate(card.fix.at) }) : null]
               .filter(Boolean)
               .join(' · ')}
           </Footnote>
@@ -284,7 +286,7 @@ export function MapAnswerCard({ card, messageId }: { card: MapCard; messageId?: 
               bearing={card.lost.town.bearing}
               label={t('map.nearestTown', {
                 name: card.lost.town.name,
-                distance: formatDistance(card.lost.town.distance ?? 0),
+                distance: formatDistance(card.lost.town.distance ?? 0, undefined, system),
                 dir: t(`maps:dir.${compassSector(card.lost.town.bearing)}`),
               })}
             />
@@ -312,7 +314,7 @@ export function MapAnswerCard({ card, messageId }: { card: MapCard; messageId?: 
                   testID="map-answer-row"
                   leading={<IconBadge icon={MapPin} hue="survival" />}
                   title={p.place || t(`prepare:meeting.${p.slot}`)}
-                  subtitle={[t(`prepare:meeting.${p.slot}`), p.details, p.distance != null ? formatDistance(p.distance) : null].filter(Boolean).join('\n')}
+                  subtitle={[t(`prepare:meeting.${p.slot}`), p.details, p.distance != null ? formatDistance(p.distance, undefined, system) : null].filter(Boolean).join('\n')}
                   subtitleLines={4}
                   onPress={located ? () => openOnMap(at) : () => router.push({ pathname: '/prepare/meeting', params: { slot: p.slot } })}
                   trailingAction={
@@ -346,7 +348,7 @@ export function MapAnswerCard({ card, messageId }: { card: MapCard; messageId?: 
               icon={Sunset}
             />
           ) : null}
-          {card.to && !card.travel ? <Footnote>{t('map.noRouteForArrival', { distance: formatDistance(card.to.distance ?? 0) })}</Footnote> : null}
+          {card.to && !card.travel ? <Footnote>{t('map.noRouteForArrival', { distance: formatDistance(card.to.distance ?? 0, undefined, system) })}</Footnote> : null}
           <SunLines sun={card.sun} />
           {!card.anchor.here ? <Footnote>{t('map.sunAtMapCentre')}</Footnote> : null}
           {card.to && card.travel ? (
@@ -368,7 +370,7 @@ export function MapAnswerCard({ card, messageId }: { card: MapCard; messageId?: 
                 ? t('map.rangeLast', {
                     km: card.range.km,
                     name: card.results.find((r) => r.osmId === card.range!.lastId)?.name || kindLabel(t, card.kinds[0]),
-                    distance: formatDistance(card.results.find((r) => r.osmId === card.range!.lastId)?.alongM ?? 0),
+                    distance: formatDistance(card.results.find((r) => r.osmId === card.range!.lastId)?.alongM ?? 0, undefined, system),
                   })
                 : t('map.rangeNone', { km: card.range.km })}
             </Text>
@@ -382,8 +384,8 @@ export function MapAnswerCard({ card, messageId }: { card: MapCard; messageId?: 
                   leading={<IconBadge icon={kindIcon(r.kind, 'poi')} color={kindColor(r.kind)} />}
                   title={r.name || kindLabel(t, r.kind)}
                   subtitle={[
-                    t('map.alongAt', { distance: formatDistance(r.alongM) }),
-                    t('map.alongOff', { distance: formatDistance(r.offM) }),
+                    t('map.alongAt', { distance: formatDistance(r.alongM, undefined, system) }),
+                    t('map.alongOff', { distance: formatDistance(r.offM, undefined, system) }),
                     card.range && r.alongM > card.range.km * 1000 ? t('map.beyondRange') : null,
                     r.context,
                     r.hours ? t('maps:place.hours', { hours: r.hours }) : null,
@@ -398,7 +400,7 @@ export function MapAnswerCard({ card, messageId }: { card: MapCard; messageId?: 
           ) : (
             <Text variant="callout">{t('map.alongNone', { kinds: kinds(card.kinds) })}</Text>
           )}
-          <Footnote>{t('map.alongTotal', { distance: formatDistance(card.routeM) })}</Footnote>
+          <Footnote>{t('map.alongTotal', { distance: formatDistance(card.routeM, undefined, system) })}</Footnote>
         </View>
       );
 
@@ -416,7 +418,7 @@ export function MapAnswerCard({ card, messageId }: { card: MapCard; messageId?: 
                   testID="map-answer-row"
                   leading={<IconBadge icon={ShieldAlert} hue="survival" />}
                   title={a.title}
-                  subtitle={`${t('map.alongAt', { distance: formatDistance(a.atM) })}\n${a.subtitle}`}
+                  subtitle={`${t('map.alongAt', { distance: formatDistance(a.atM, undefined, system) })}\n${a.subtitle}`}
                   subtitleLines={3}
                   onPress={() => router.push({ pathname: '/alerts/[id]', params: { id: a.key } })}
                   chevron
