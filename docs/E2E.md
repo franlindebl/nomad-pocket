@@ -46,7 +46,7 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 | `PLANET_PORT=8766 scripts/e2e.sh --build --tags planet` | 2 | ~12 min | extraction resumed after a kill (`map-22`) and retried after a network failure (`map-23`) (tag `planet`, their own build: rebuild without `PLANET_PORT` before other suites) | nothing (local stand-in planet) |
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape | nothing (offline) |
 | `npm run e2e:android` | 8 | ~22 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack, content updates, official alerts, the assistant's map answers | internet, Android emulator |
-| `npm run e2e:carplay` | 1 + car steps | ~5 min | CarPlay on the simulator's car screen: opened from the car, Destinos › Emergencias cerca › trip preview › Ir › Terminar, the phone adopting the app the car started, a phone trip shown and ended on the car (section CarPlay) | Xcode 26.5's Simulator + iOS 26.5 simulator (`scripts/carplay/carplay-sim.sh setup`), a Release build with CarPlay on, Accessibility permission for the terminal |
+| `npm run e2e:carplay` | 1 + car steps | ~5 min | CarPlay on the simulator's car screen: opened from the car, Destinos › Emergencias cerca › trip preview › Ir › ✕ (map button), the phone adopting the app the car started, a phone trip shown and ended on the car (section CarPlay) | Xcode 26.5's Simulator + iOS 26.5 simulator (`scripts/carplay/carplay-sim.sh setup`), a Release build with CarPlay on, Accessibility permission for the terminal |
 | `npm run e2e:androidauto` | 1 + car steps | ~8 min | Android Auto on the Android Automotive emulator: opened from the car with the app not running, Destinos › Emergencias cerca › preview › Ir › Terminar, Buscar › preview › back, a `geo:` destination › Ir › arrival, the phone UI on the JS the car started (section Android Auto) | The Automotive emulator `NP-auto-34` (created on the first run), Maestro, the Automotive APK (`--build`) |
 
 When to run what: smoke before every TestFlight build or after a risky change; full and the
@@ -332,9 +332,9 @@ preview's green "Ir" is too short for the OCR, so it is tapped under the estimat
 | Case | What |
 |---|---|
 | CAR-01 | Opened from the car with the phone app closed: the car's map with "Destinos" (React Native started by the car) |
-| CAR-02 | Destinos › Emergencias cerca › Salud lists the hospital; picking it shows the trip preview (llegada, Cancelar); "Ir" starts turn-by-turn (maneuver distance, "Terminar"); "Terminar" goes back to the map |
+| CAR-02 | Destinos › Emergencias cerca › Salud lists the hospital; picking it shows the trip preview (llegada, Cancelar); "Ir" starts turn-by-turn (maneuver distance, no bar); the ✕ map button (bottom right, where the pan button is without a trip) goes back to the map |
 | CAR-03 | The phone opened afterwards adopts the app the car started (its tab bar shows, not a blank window) |
-| CAR-04 | A trip started on the phone ("Iniciar") shows on the car with its estimates; "Terminar" on the car ends it on the phone |
+| CAR-04 | A trip started on the phone ("Iniciar") shows on the car with its estimates; the ✕ on the car ends it on the phone |
 
 Run it after `npm run e2e -- --build` while `app.json` has CarPlay on (the suite's build is the one it installs),
 and not at the same time as another suite: both serve the local catalogs on port 8765. Results in

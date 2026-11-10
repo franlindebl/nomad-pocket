@@ -27,6 +27,16 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
   private var finished: CarTarget?
 
   private lazy var recentreButton = mapButton("location.fill") { [weak self] in self?.map.recentre() }
+  private lazy var zoomInButton = mapButton("plus.magnifyingglass") { [weak self] in self?.map.zoom(by: 1) }
+  private lazy var zoomOutButton = mapButton("minus.magnifyingglass") { [weak self] in self?.map.zoom(by: -1) }
+  private lazy var panButton = mapButton("arrow.up.and.down.and.arrow.left.and.right") { [weak self] in
+    self?.mapTemplate.showPanningInterface(animated: true)
+  }
+  /// Ends the trip while navigating, a round map button like the zoom ones: in the bar, "Terminar"
+  /// kept a white strip across the top of the car's screen for the whole trip (owner, first drive).
+  private lazy var endButton = mapButton("xmark") { CarPlayHub.shared.emit("onEnd") }
+  /// Which set of map buttons is on the template (CarPlay shows at most four).
+  private var navButtons: Bool?
 
   init(interface: CPInterfaceController, window: CPWindow) {
     self.interface = interface
@@ -37,22 +47,22 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
     // The phone's maneuver banner: the app's dark panel (CarPlay writes on it in white).
     mapTemplate.guidanceBackgroundColor = CarColors.surface
     mapTemplate.tripEstimateStyle = .dark
-    // The bar and the map buttons stay: "Terminar" one tap away while driving (with the bar
-    // hiding by itself it took two, and in the simulator a tap on it while it showed only hid it).
+    // The map buttons stay when the bar hides (updateBarButtons hides it while navigating).
     mapTemplate.hidesButtonsWithNavigationBar = false
     mapTemplate.automaticallyHidesNavigationBar = false
     map.onFollowingChange = { [weak self] following in self?.recentreButton.isHidden = following }
-    mapTemplate.mapButtons = [
-      recentreButton,
-      mapButton("plus.magnifyingglass") { [weak self] in self?.map.zoom(by: 1) },
-      mapButton("minus.magnifyingglass") { [weak self] in self?.map.zoom(by: -1) },
-      mapButton("arrow.up.and.down.and.arrow.left.and.right") { [weak self] in
-        self?.mapTemplate.showPanningInterface(animated: true)
-      },
-    ]
+    updateMapButtons(navigating: false)
+    interface.setRootTemplate(mapTemplate, animated: false, completion: Self.logged)
+  }
+
+  /// Navigating, "Terminar" takes the pan button's place (no panning around while driving); else
+  /// the pan mode. Recentre first: it only shows after a pan or an overview.
+  private func updateMapButtons(navigating: Bool) {
+    guard navButtons != navigating else { return }
+    navButtons = navigating
+    mapTemplate.mapButtons = [recentreButton, zoomInButton, zoomOutButton, navigating ? endButton : panButton]
     // After the buttons are on the template: set before, CarPlay showed it anyway.
     recentreButton.isHidden = map.following
-    interface.setRootTemplate(mapTemplate, animated: false, completion: Self.logged)
   }
 
   func disconnect() {
@@ -135,15 +145,24 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
     mapTemplate.showTripPreviews([trip], textConfiguration: text)
     if let summary = g.summary { mapTemplate.update(estimates(summary), for: trip, with: .default) }
     previewing = true
-    // Once the preview card is up: the map's safe area then leaves it out.
+    overviewToken += 1
+    let token = overviewToken
+    // Once the preview card is up: the map's safe area then leaves it out. Only for this preview and
+    // never once navigating: an overview stops following, and the trip would then show the dot on a
+    // still map until "recentre".
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-      if self?.previewing == true { self?.map.showOverview(of: target) }
+      guard let self, self.previewing, self.overviewToken == token, self.guidance?.navigating != true else { return }
+      self.map.showOverview(of: target)
     }
   }
+
+  /// Bumped with every preview shown or hidden: a pending overview of an older one is dropped.
+  private var overviewToken = 0
 
   private func hidePreview() {
     mapTemplate.hideTripPreviews()
     previewing = false
+    overviewToken += 1
   }
 
   // MARK: Navigation session
@@ -234,14 +253,20 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
     let state = (navigating: guidance?.navigating == true, target: guidance?.target != nil)
     if let bars, bars == state { return }
     bars = state
-    let destinations = CPBarButton(title: strings.destinations) { [weak self] _ in self?.showDestinations() }
-    mapTemplate.leadingNavigationBarButtons = guidance?.navigating == true ? [] : [destinations]
-    if guidance?.target != nil {
-      let title = guidance?.navigating == true ? strings.end : strings.cancel
-      mapTemplate.trailingNavigationBarButtons = [CPBarButton(title: title) { _ in CarPlayHub.shared.emit("onEnd") }]
-    } else {
+    updateMapButtons(navigating: state.navigating)
+    if state.navigating {
+      // Nothing in the bar while navigating ("Terminar" is a map button): CarPlay hides it, and
+      // the map gets the top of the screen.
+      mapTemplate.leadingNavigationBarButtons = []
       mapTemplate.trailingNavigationBarButtons = []
+      mapTemplate.automaticallyHidesNavigationBar = true
+      return
     }
+    // "Destinos" and the preview's "Cancelar" stay one tap away.
+    mapTemplate.automaticallyHidesNavigationBar = false
+    let destinations = CPBarButton(title: strings.destinations) { [weak self] _ in self?.showDestinations() }
+    mapTemplate.leadingNavigationBarButtons = [destinations]
+    mapTemplate.trailingNavigationBarButtons = state.target ? [CPBarButton(title: strings.cancel) { _ in CarPlayHub.shared.emit("onEnd") }] : []
   }
 
   private func showDestinations() {
@@ -336,6 +361,7 @@ final class CarPlayController: NSObject, CPMapTemplateDelegate, CPSearchTemplate
   func mapTemplateDidShowPanningInterface(_ mapTemplate: CPMapTemplate) {
     guard let strings else { return }
     panning = true
+    mapTemplate.automaticallyHidesNavigationBar = false
     mapTemplate.leadingNavigationBarButtons = []
     mapTemplate.trailingNavigationBarButtons = [CPBarButton(title: strings.done) { [weak self] _ in
       self?.mapTemplate.dismissPanningInterface(animated: true)

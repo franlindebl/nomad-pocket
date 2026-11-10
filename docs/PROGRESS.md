@@ -358,6 +358,26 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-10 — CarPlay: "Terminar" as a map button; the trip always gets the navigation camera
+
+- Owner, driving with CarPlay: 1) the white bar across the top with "Terminar" took a lot of the screen and looked
+  out of place; 2) a destination set on the phone showed the dot moving over a still map, not the arrow and the
+  tilted navigation camera, until the recentre button.
+- 1: navigating, "Terminar" is a round map button (✕, `endButton`) in the pan button's place, styled like zoom ±;
+  the bar is empty and hides itself (`automaticallyHidesNavigationBar` only while navigating; "Destinos" and the
+  preview's "Cancelar" stay as they were).
+- 2: the recentre button was showing, so the car map had stopped following during the trip. The code has three
+  ways to stop it: the preview's overview (0.5 s after the preview), a pan and a touch drag. No sequence of
+  guidance updates in the code leaves it stopped after "Iniciar" (starting navigation turns following back on),
+  and the CarPlay simulator's screen stayed black this session, so the exact cause wasn't reproduced. Two
+  safeguards: a pending overview is dropped once its preview is gone or navigation has started
+  (`overviewToken`), and navigating, the car map goes back to following after 12 s untouched, like the phone
+  (`RECENTER_MS`; any pan, drag or zoom while looking around restarts the count).
+- `e2e-carplay.sh`: navigation is recognised by the estimates without a bar, and the ✕ is tapped at its place
+  (755, 432 on the 800×480 car screen; not run yet).
+- Checked: Release simulator build compiles; tsc, lint, unit tests, i18n. Pending: `npm run e2e:carplay` and a drive
+  (the bar hidden, the ✕ ending the trip, a phone trip getting the arrow by itself).
+
 ### 2026-11-10 — 2.4.2 (48) on TestFlight
 
 - 2.4.1 (47) is live, so its train is closed: 2.4.2 (48), TestFlight only, with the "Preparando… 99 %" fix and the

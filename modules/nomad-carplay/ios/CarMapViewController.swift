@@ -9,7 +9,7 @@
 // side only plays it with the padding of the car's screen. Each move used to go to the raw fix in
 // 0.8 s and turn to the raw GPS course: at a fix a second the map stopped and started again, the
 // jerks the owner saw in a car. Without a trip it glides here the same way, north up. A pan from
-// the car's buttons stops following until "recentre" (a zoom doesn't).
+// the car's buttons stops following until "recentre" (a zoom doesn't) or, navigating, 12 s untouched.
 //
 // While following, the user is a view at the camera's centre (the phone's FollowArrow): it stays
 // put while the map glides under it, where a style layer moved to each fix would jump. Otherwise
@@ -178,6 +178,8 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate {
   func setNavigating(_ on: Bool) {
     guard on != navigating else { return }
     navigating = on
+    recentreTimer?.invalidate()
+    recentreTimer = nil
     lastFrame = nil
     pendingFrame = nil
     zoomOffset = 0
@@ -242,6 +244,7 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate {
   func zoom(by delta: Double) {
     // A zoom keeps following, like Apple Maps: only the distance changes, from where the camera is now.
     guard following else {
+      touched()
       mapView.setZoomLevel(min(19, max(3, mapView.zoomLevel + delta)), animated: true)
       return
     }
@@ -283,15 +286,36 @@ final class CarMapViewController: UIViewController, MLNMapViewDelegate {
   }
 
   private func setFollowing(_ on: Bool) {
+    if !on { touched() }
     guard on != following else { return }
     following = on
-    if !on {
+    if on {
+      recentreTimer?.invalidate()
+      recentreTimer = nil
+    } else {
       settleToken += 1
       settleUntil = nil
       pendingFrame = nil
       setSettled(false)
     }
     onFollowingChange?(on)
+  }
+
+  /// Navigating, the camera goes back to the user after a while untouched (the phone's RECENTER_MS):
+  /// a look around, a stray touch on the car's screen or anything else that stopped following
+  /// doesn't leave the trip on a still map with the dot until "recentre" (owner, first drive).
+  private static let recentreAfter: TimeInterval = 12
+  private var recentreTimer: Timer?
+
+  /// The person moved the map: the countdown to recentring starts again.
+  private func touched() {
+    recentreTimer?.invalidate()
+    recentreTimer = nil
+    guard navigating else { return }
+    recentreTimer = Timer.scheduledTimer(withTimeInterval: Self.recentreAfter, repeats: false) { [weak self] _ in
+      guard let self, self.navigating, !self.following else { return }
+      self.recentre()
+    }
   }
 
   private func setSettled(_ on: Bool) {

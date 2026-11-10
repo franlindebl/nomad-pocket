@@ -122,7 +122,7 @@ Destinos → Guardados / Emergencias cerca (empty state) / Buscar with the car k
 phone and one picked in the car: preview (route framed beside the card, time, distance, "Ir"),
 "Cancelar"; navigation: maneuver panel, estimates, the route behind consumed, course up and tilted,
 reroute after leaving the route, arrival ("Has llegado" with "Terminar"), guidance ending by itself a
-minute later; "Terminar" in the bar ends it on the phone too.
+minute later; the ✕ map button ("Terminar", since 2026-11-10; it was in the bar) ends it on the phone too.
 
 ## Later (not built)
 

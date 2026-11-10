@@ -10,9 +10,9 @@
 # What it checks, on a fresh install with Andorra downloaded by the phone (e2e/flows/carplay/car-00):
 #   1. opened from the car with the phone app closed: the car's map, "Destinos"
 #   2. Destinos › Emergencias cerca › Salud lists the hospital; picking it shows the trip preview
-#      (arrival, min, km); "Ir" starts turn-by-turn (maneuver distance, "Terminar"); "Terminar" ends it
+#      (arrival, min, km); "Ir" starts turn-by-turn (maneuver distance, no bar); the ✕ map button ends it
 #   3. the phone opened afterwards adopts the app the car started (its tab bar shows, not a blank screen)
-#   4. a trip started on the phone shows on the car; "Terminar" on the car ends it on the phone too
+#   4. a trip started on the phone shows on the car; the ✕ on the car ends it on the phone too
 # Results: e2e/artifacts/carplay-<timestamp>/ (car screenshots + their text, Maestro output).
 set -euo pipefail
 
@@ -72,6 +72,20 @@ wait_car() {
 }
 
 tap_car() { "$SIM" tap "$1" "$2" --still; }
+
+# Navigating: the estimates show and the bar is gone ("Terminar" is the ✕ map button, the bottom one,
+# where the pan button is without a trip).
+wait_nav() {
+  local timeout="${1:-20}" start=$SECONDS txt
+  while :; do
+    txt="$(read_car)"
+    if grep -qE $'\t''llegada$' "$txt" && ! grep -qE $'\t''(Destinos|Cancelar)$' "$txt"; then return 0; fi
+    (( SECONDS - start < timeout )) || fail "car screen: not navigating after ${timeout}s"
+    sleep 1.5
+  done
+}
+END_X=755
+END_Y=432
 tap_text() { local xy; xy="$(wait_car "$1" "${2:-20}")" || exit 1; tap_car $xy; }
 
 phone() {
@@ -99,7 +113,7 @@ read -r ix iy <<< "$xy"
 wait_car "^Destinos$" 30 >/dev/null
 echo "  ✓"
 
-echo "▶ car: Destinos › Emergencias cerca › Salud › preview › Ir › Terminar"
+echo "▶ car: Destinos › Emergencias cerca › Salud › preview › Ir › ✕"
 tap_text "^Destinos$"
 wait_car "^Emergencias cerca$" >/dev/null
 tap_text "^Salud$"
@@ -113,10 +127,10 @@ sleep 1
 xy="$(wait_car "^llegada$" 5)" || exit 1
 read -r _ ly <<< "$xy"
 tap_car 285 $((ly + 56))
-wait_car "^Terminar$" 15 >/dev/null
+wait_nav 15
 txt="$(last_txt)"
 grep -qE $'\t''[0-9]+([,.][0-9]+)? ?(m|km)$' "$txt" || fail "navigation without the maneuver distance"
-tap_text "^Terminar$"
+tap_car $END_X $END_Y
 wait_car "^Destinos$" 15 >/dev/null
 echo "  ✓"
 
@@ -129,12 +143,10 @@ xcrun simctl io "$UDID" screenshot "$phone_png" >/dev/null 2>&1
 grep -qE $'\t''(Mapas|Inicio|Biblioteca)' "${phone_png%.png}.txt" || fail "the phone shows no tab bar after the car started the app ($phone_png)"
 echo "  ✓"
 
-echo "▶ phone trip shows on the car; Terminar on the car ends it on the phone"
+echo "▶ phone trip shows on the car; the ✕ on the car ends it on the phone"
 phone "$ROOT/e2e/subflows/carplay/phone-trip.yaml"
-wait_car "^Terminar$" 20 >/dev/null
-txt="$(last_txt)"
-grep -qE $'\t''llegada$' "$txt" || fail "the car's navigation without estimates"
-tap_text "^Terminar$"
+wait_nav 20
+tap_car $END_X $END_Y
 wait_car "^Destinos$" 15 >/dev/null
 phone "$ROOT/e2e/subflows/carplay/phone-trip-ended.yaml"
 echo "  ✓"

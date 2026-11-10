@@ -1253,8 +1253,11 @@ started on the phone shows in the car and the other way round.
   at every fix in a real car.) While following, the user is a view at the camera's centre (the phone's
   `FollowArrow`: lucide's Navigation2, blue, grey with a weak fix; without a trip a blue dot), so it doesn't jump
   at each fix; looking around, it's a dot layer at the fix. Zoom buttons while following change the zoom on top of
-  follow-core's. Map buttons: recentre (only after a pan), zoom ±, pan mode; the bar ("Destinos" / "Terminar")
-  never hides. **Speed** (`CarSpeedView.swift`): the phone's SpeedBadge at the top left of the safe area (at the
+  follow-core's. Navigating, the camera goes back to the user by itself after 12 s untouched (the phone's
+  `RECENTER_MS`), and a trip preview's overview never fires once navigation has started (`overviewToken`). Map
+  buttons: recentre (only after a pan or an overview), zoom ±, then pan mode, or "Terminar" (✕) while navigating
+  (CarPlay shows four at most). The bar holds "Destinos" / the preview's "Cancelar" and never hides; navigating it
+  is empty and hides itself, so the map gets the top of the screen (in a real car the bar was a white strip). **Speed** (`CarSpeedView.swift`): the phone's SpeedBadge at the top left of the safe area (at the
   bottom it sat next to the arrow on a car's short screen): the posted limit as a round sign over the GPS speed,
   red past the limit; numbers from `carSpeed` (carplay-core, guidance's `speed`). Purely visual and not touchable,
   which Apple DTS calls standard practice over a navigation app's map (developer forums, thread 852888).
@@ -1264,7 +1267,7 @@ started on the phone shows in the car and the other way round.
   `startGuidance` by car → trip preview (`CPTrip`, estimates, note with tolls / ferry, "Ir") → `onStart`
   → `startNavigation` and a `CPNavigationSession`: maneuver panel (SF Symbols per `maneuverIcon`, the
   next two maneuvers), estimates every fix, paused "Recalculando" while a reroute loads, finished on
-  arrival ("Has llegado" navigation alert with "Terminar"). "Terminar" / "Cancelar" (`onEnd`) stops
+  arrival ("Has llegado" navigation alert with "Terminar"). The ✕ map button / "Cancelar" (`onEnd`) stops
   guidance. The maneuver after the next shows only within 200 m of it (a second row pushes the
   arrival time off a car screen). The card's text is short like Apple Maps' and Waze's (`cardVariants`): the
   street, a roundabout's exit ("2.ª salida · CG-2", then "2.ª salida"), the sentence only when arriving or with no
