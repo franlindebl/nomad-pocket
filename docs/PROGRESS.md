@@ -67,6 +67,17 @@ Roughly by value. Items A, U and 0 are in progress; 3, 4 and 7 are partly done (
 started. (Preparedness was added
 on 2026-10-25 from an "internet goes down" checklist; follow-ups are at the end.)
 
+OP. **Official points: complete OSM with official registers, country by country** (`docs/OFFICIAL_POINTS.md`;
+   owner, 2026-11-11: "a futuro me gustaría ir completando el resto de países"). **Spain built 2026-11-11**:
+   pharmacies, botiquines, hospitals, health centres and consultorios from the regional registers and the
+   Ministry's REGCESS (addresses placed with CartoCiudad), merged monthly into `es.pois.tsv` where OSM lacks them.
+   Next for Spain: the first CI run of `official-points.yml` (do Spanish servers and CartoCiudad answer GitHub's
+   runners?), then the next monthly packs; check the Sierra de San Vicente on a phone; the improvements listed in
+   the doc. **Then every other country**, one at a time: find its open registers (pharmacies, hospitals, health
+   centres), measure OSM against them as for Castilla-La Mancha, add a `scripts/official/<cc>.py` writing
+   `<cc>.official.tsv` (merge and app need nothing new). Likely first: Portugal, France, Italy, Germany, the UK, the
+   USA (national registers that publish open lists).
+
 AM. **Assistant × maps** (`docs/ASSISTANT_MAP_PLAN.md`, approved 2026-11-05; **phase 1 and 1b built the same day**,
    checked on iOS and Android: see the plan's "Phase 1 — status" and "1b"): the assistant
    answers map questions with a map card built from the index (nearest X near a place, take me to the nearest X by
@@ -357,6 +368,28 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-11-11 — Official points: Spain's pharmacies, hospitals and health centres where OSM lacks them
+
+- A tester (by email) found most village pharmacies missing around El Real de San Vicente (Toledo). Measured against
+  the Junta's register, OSM lacked 433 of Castilla-La Mancha's 1,276 pharmacies (12 of the Sierra de San Vicente's
+  15). Owner: use official sources for every region, and hospitals, health centres and clinics too; later, every
+  country (backlog OP).
+- Built (`docs/OFFICIAL_POINTS.md`): `scripts/official/es.py` (10 regional pharmacy registers with coordinates +
+  the Ministry's REGCESS monthly listing for the other regions, botiquines, hospitals C11/C12, health centres C231
+  and consultorios C232, addresses placed with CartoCiudad and checked against the register's municipality);
+  `official-points.yml` (monthly on the 3rd → `official-points` release, last month's rows kept for a source that
+  fails, geocoder cache); `scripts/official/merge.py` in `build-country.sh` step 6a (official rows OSM lacks →
+  `es.pois.tsv`, type `official`); the app reads them as `o…` ids (`parseOverpassTsv`, test). Credits entry.
+- Measured locally on the published `es.pois.tsv` (2026-11-03, 154,100 OSM points): 35,713 official points, of
+  which **6,755 pharmacies/botiquines, 133 hospitals and 7,756 health centres/consultorios added** (OSM had 18,316
+  pharmacies, 1,211 hospitals, 10,691 clinics). Registers' points sit 5–8 m from OSM's where both have a pharmacy
+  (no shift); REGCESS placed 21,210 of 22,483 (94%); geocoded pharmacies vs the Junta's: median 14 m.
+  Tuned after looking at the results: one OSM hospital absorbs a campus's registered hospitals, clinics match at
+  150 m, centres named only after their town are placed only on a health place.
+- Not verified yet: the first CI run (Spanish servers and CartoCiudad from GitHub's US runners), a pack built with
+  them, the points on a phone. Old app versions skip `official` rows: the points need both a new app build and
+  rebuilt packs.
 
 ### 2026-11-11 — Units follow the country picked in the app, and a Units setting
 

@@ -11,7 +11,7 @@
 # Needs curl, python3 with pyosmium and shapely, osmium-tool, and the Valhalla tools: run inside
 # ghcr.io/valhalla/valhalla (CI does: apt-get install osmium-tool python3-pyosmium python3-shapely), or
 # on a host with docker, which then runs each Valhalla tool in that image.
-# Output: <work dir>/out/<pack>.tar[.partNN], <pack>.pois.tsv, <pack>.streets.tsv,
+# Output: <work dir>/out/<pack>.tar[.partNN], <pack>.pois.tsv (plus official points: step 6a), <pack>.streets.tsv,
 # <pack>.places.tsv, <pack>.addresses.tsv, <pack>.crossings.tsv, <country>.packs.json
 set -euo pipefail
 
@@ -166,6 +166,20 @@ osmium tags-filter --overwrite "$PBF" \
   nwr/military=barracks,base nwr/natural=spring nwr/shop=supermarket,hardware,doityourself nwr/office=diplomatic \
   -o "$WORK/src/pois.osm.pbf"
 python3 -I "$HERE/emergency-points.py" "$WORK/src/pois.osm.pbf" "$OUT/$COUNTRY.pois.tsv"
+# 6a. Points from official registers that OSM lacks (docs/OFFICIAL_POINTS.md: Spain's pharmacies,
+#     hospitals and health centres), from
+#     OFFICIAL_CACHE: CI's official-points release (official-points.yml, monthly), or a local
+#     directory. Only countries with a <country>.official.tsv there. Never fatal: the pack then has OSM's.
+if [[ -n "${OFFICIAL_CACHE:-}" ]]; then
+  if [[ -d "$OFFICIAL_CACHE" ]]; then
+    cp "$OFFICIAL_CACHE/$COUNTRY.official.tsv" "$WORK/src/official.tsv" 2>/dev/null || true
+  else
+    curl -fsSL --retry 3 -A "$UA" -o "$WORK/src/official.tsv" "$OFFICIAL_CACHE/$COUNTRY.official.tsv" 2>/dev/null || rm -f "$WORK/src/official.tsv"
+  fi
+  if [[ -s "$WORK/src/official.tsv" ]]; then
+    python3 -I "$HERE/../official/merge.py" "$OUT/$COUNTRY.pois.tsv" "$WORK/src/official.tsv" || log "official points failed: OSM's only"
+  fi
+fi
 
 # 7. Street and locality names for the app's search.
 osmium tags-filter --overwrite "$PBF" w/highway n/place -o "$WORK/src/streets.osm.pbf"

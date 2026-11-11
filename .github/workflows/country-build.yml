@@ -94,8 +94,9 @@ jobs:
       - name: Build the routing pack
         if: steps.what.outputs.routing == 'true'
         run: |
-          # Admin boundaries from the routing-admins release (admin-boundaries.yml keeps it fresh).
-          docker run --rm -e CONC=4 -e ADMINS_CACHE="https://github.com/$GITHUB_REPOSITORY/releases/download/routing-admins" \
+          # Admin boundaries from the routing-admins release (admin-boundaries.yml keeps it fresh), official
+          # points from official-points (official-points.yml).
+          docker run --rm -e CONC=4 -e ADMINS_CACHE="https://github.com/$GITHUB_REPOSITORY/releases/download/routing-admins" -e OFFICIAL_CACHE="https://github.com/$GITHUB_REPOSITORY/releases/download/official-points" \
             -v "$PWD:/repo:ro" -v "$WORK:/work" "$VALHALLA_IMAGE" bash -c \
             "apt-get update -qq && apt-get install -y -qq osmium-tool python3-pyosmium python3-shapely >/dev/null && bash /repo/scripts/routing/build-country.sh $COUNTRY /work/routing && chown -R $(id -u):$(id -g) /work"
           ls -la "$WORK/routing/out"

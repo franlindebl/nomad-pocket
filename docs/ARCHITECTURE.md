@@ -913,6 +913,10 @@ connection). TSV output (`[out:csv]`) keeps it small. Rows replace the region's
 indexing, emergency-kind POIs found in the tiles (named or not, e.g. drinking water) are
 stored as `t…` rows unless the region already has Overpass points — at z15 that is most
 of them, at z12/14 only the important ones (Protomaps gives most POIs min_zoom 15–17).
+Official points (`docs/OFFICIAL_POINTS.md`): a country pack's points file may carry rows of type `official`
+(pharmacies, hospitals, health centres from official registers that OSM lacks; Spain today), merged at build time
+by `scripts/official/merge.py`; `parseOverpassTsv` gives them `o<source>:<code>` ids and they behave like any point
+(app versions before that skip the type).
 Queries: `nearestEmergencyPlaces(category, from)` (equirectangular ORDER BY, GROUP BY
 osm_id across overlapping regions; the nearest 3 of each `PRIORITY_KINDS` kind lead the list,
 hospitals in Health, police and fire stations in Security, so 40 closer pharmacies can't hide the

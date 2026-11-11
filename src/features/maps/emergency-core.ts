@@ -105,7 +105,10 @@ export function overpassQuery(bbox: [number, number, number, number], timeoutSec
 }
 
 export type EmergencyPoi = {
-  /** 'n123', 'w456' or 'r789'. */
+  /**
+   * 'n123', 'w456' or 'r789'; 'o<source>:<code>' for a point from an official register that OSM lacks
+   * (scripts/official: Spain's pharmacies, in the country pack's points file).
+   */
   osmId: string;
   kind: EmergencyKind;
   name: string | null;
@@ -118,7 +121,8 @@ export type EmergencyPoi = {
   lon: number;
 };
 
-const TYPE_PREFIX: Record<string, string> = { node: 'n', way: 'w', relation: 'r' };
+// `official` rows come in pack points files only (scripts/official/merge.py); app versions before them skip the type.
+const TYPE_PREFIX: Record<string, string> = { node: 'n', way: 'w', relation: 'r', official: 'o' };
 
 /** Overpass CSV quotes values that contain quotes: "Acuartelamiento ""Capitán…""". */
 function unquote(v: string): string {

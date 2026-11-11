@@ -1,0 +1,65 @@
+name: Official points
+
+# Points from official registers that OpenStreetMap lacks, refreshed monthly into the official-points
+# release two days before country-packages.yml adds them to the country packs' emergency points
+# (scripts/routing/build-country.sh, step 6a; scripts/official/merge.py; docs/OFFICIAL_POINTS.md).
+# Today: Spain (scripts/official/es.py) → es.official.tsv: pharmacies and botiquines from the regional
+# registers and the Ministry's REGCESS, hospitals, health centres and consultorios from REGCESS, REGCESS
+# addresses placed with CartoCiudad. A source that doesn't answer keeps last month's rows, read back from the
+# release (the job then ends in a warning); geocoder answers are kept there too (es.geocache.tsv), so a month
+# only asks for new addresses (the first run asks ~25k: about an hour and a half).
+
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: 'Source ids from scripts/official/es.py (es-cm es-regcess …), space separated (empty: all)'
+        required: false
+        default: ''
+  schedule:
+    - cron: '0 3 3 * *' # monthly, two days before country-packages.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: official-points
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ONLY: ${{ github.event.inputs.only }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: The release
+        run: |
+          source scripts/gh-releases.sh
+          has_release official-points || gh release create official-points --prerelease --title "Official points" \
+            --notes "Points from official registers that OpenStreetMap lacks, added to the country packs by the monthly build: not read by the app. es.official.tsv: Spain's pharmacies, hospitals and health centres (sources and licences in es.official.report.json and docs/OFFICIAL_POINTS.md)."
+          mkdir -p previous out
+          gh release download official-points --pattern 'es.official.tsv' --pattern 'es.geocache.tsv' --dir previous || true
+          [[ -f previous/es.geocache.tsv ]] && cp previous/es.geocache.tsv out/es.geocache.tsv || true
+      - name: Ask the registers
+        id: fetch
+        run: |
+          args=(--geocache out/es.geocache.tsv)
+          [[ -f previous/es.official.tsv ]] && args+=(--previous previous/es.official.tsv)
+          [[ -n "$ONLY" ]] && args+=(--only $ONLY)
+          status=0
+          python3 -I scripts/official/es.py out/es.official.tsv "${args[@]}" || status=$?
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          cat out/es.official.report.json
+      - name: Keep them
+        run: |
+          [[ -s out/es.official.tsv ]] || { echo "::error::no output"; exit 1; }
+          gh release upload official-points out/es.official.tsv out/es.official.report.json out/es.geocache.tsv --clobber
+          if [[ "${{ steps.fetch.outputs.status }}" != "0" ]]; then
+            echo "::warning::some registers didn't answer: last month's rows kept (es.official.report.json)"
+            exit 1
+          fi

@@ -55,6 +55,16 @@ test('parseOverpassTsv keeps emergency kinds with their details', () => {
   assert.equal(pois.find((p) => p.kind === 'drinking_water')!.name, null);
 });
 
+test('parseOverpassTsv reads official register rows a pack adds', () => {
+  const row = 'official\tes-cm:TO-097-F\t40.130000\t-4.690000\tpharmacy\tpharmacy\t\t\t\t\t\tFarmacia Ana López\t\t925000000\t\t\t';
+  const [p] = parseOverpassTsv(row);
+  assert.equal(p.osmId, 'oes-cm:TO-097-F');
+  assert.equal(p.kind, 'pharmacy');
+  assert.equal(p.name, 'Farmacia Ana López');
+  assert.equal(p.phone, '925000000');
+  assert.equal(p.lon, -4.69);
+});
+
 test('emergencyKind and categories', () => {
   assert.equal(emergencyKind({ healthcare: 'hospital' }), 'hospital');
   assert.equal(emergencyKind({ amenity: 'doctors' }), 'clinic');
