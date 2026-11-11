@@ -1,6 +1,6 @@
 {
   "name": "nomad-pocket",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "main": "index.ts",
   "dependencies": {
     "@maplibre/maplibre-react-native": "^11.5.0",

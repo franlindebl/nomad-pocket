@@ -369,6 +369,13 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-11 — 2.4.3 (50) submitted to App Review
+
+- 2.4.2 (49) was approved; the owner asked to ship 2.4.3 once the E2E passed: 2.4.2 plus Spain's official health
+  points (entry below; Spain's routing pack already republished with them, run 43016421128) and the Units setting.
+  "What's new" approved by the owner (`docs/store/listing-2.4.3.md`). E2E smoke 23/24 with `--build`, map-12 alone
+  passes (as in the last releases). Android `versionCode` 32 (not uploaded).
+
 ### 2026-11-11 — Official points: Spain's pharmacies, hospitals and health centres where OSM lacks them
 
 - A tester (by email) found most village pharmacies missing around El Real de San Vicente (Toledo). Measured against

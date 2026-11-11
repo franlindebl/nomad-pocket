@@ -2,7 +2,7 @@
   "expo": {
     "name": "Nomad Pocket",
     "slug": "nomad-pocket",
-    "version": "2.4.2",
+    "version": "2.4.3",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "nomadpocket",
@@ -17,7 +17,7 @@
         "com.apple.developer.usernotifications.time-sensitive": true
       },
       "bundleIdentifier": "com.fjlinde.nomadpocket",
-      "buildNumber": "49",
+      "buildNumber": "50",
       "supportsTablet": true,
       "infoPlist": {
         "CFBundleDevelopmentRegion": "es",
@@ -37,7 +37,7 @@
     },
     "android": {
       "package": "com.fjlinde.nomadpocket",
-      "versionCode": 31,
+      "versionCode": 32,
       "blockedPermissions": [
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.READ_EXTERNAL_STORAGE",
