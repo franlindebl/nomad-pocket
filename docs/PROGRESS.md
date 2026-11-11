@@ -387,8 +387,10 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   (no shift); REGCESS placed 21,210 of 22,483 (94%); geocoded pharmacies vs the Junta's: median 14 m.
   Tuned after looking at the results: one OSM hospital absorbs a campus's registered hospitals, clinics match at
   150 m, centres named only after their town are placed only on a health place.
-- Not verified yet: the first CI run (Spanish servers and CartoCiudad from GitHub's US runners), a pack built with
-  them, the points on a phone. Old app versions skip `official` rows: the points need both a new app build and
+- First CI run (43011308899, geocoder cache seeded from the local run): every source answered GitHub's runners
+  but Asturias (`sig.asturias.es`, connection timeout), whose pharmacies REGCESS filled (441 of 476); Asturias
+  moved to REGCESS for good. Release `official-points`: 35,678 rows. Spain's routing pack rebuilt with them
+  (country-packages run 43016421128). Not verified yet: the points on a phone. Old app versions skip `official` rows: the points need both a new app build and
   rebuilt packs.
 
 ### 2026-11-11 — Units follow the country picked in the app, and a Units setting

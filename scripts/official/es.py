@@ -11,7 +11,8 @@ Where the points come from:
   Health's national register, REGCESS, whose monthly listing has every pharmacy and botiquín with its address
   but no coordinates: placed with CartoCiudad (IGN's geocoder) and checked against the register's municipality.
   Galicia (CC BY-SA) and Cantabria (non-commercial) publish lists with coordinates under licences that don't
-  fit a file mixed with OSM's: REGCESS for them too.
+  fit a file mixed with OSM's, and Asturias's server (sig.asturias.es) doesn't answer GitHub's runners: REGCESS
+  for them too.
 - Hospitals (general and specialised), health centres and consultorios: REGCESS, placed the same way (a
   centre's name is often a place in CartoCiudad: tried first).
 A source that doesn't answer, or answers with far fewer rows than last month, keeps last month's rows
@@ -540,16 +541,6 @@ def madrid():
     return out
 
 
-def asturias():
-    base = "https://sig.asturias.es/servicios/rest/services/Sanidad/Farmacias_Botiquines/MapServer"
-    out = [rec("es-as", f"F{p.get('id_far')}", lat, lon, p.get("titular"), p.get("tfno"), p.get("calle"), p.get("concejo"))
-           for p, lon, lat in arcgis_features(f"{base}/1")]
-    out += [rec("es-as", f"B{p.get('id_bt')}", lat, lon, p.get("poblacion"), p.get("telefon"), p.get("direccion"),
-                p.get("concejo"), "botiquin")
-            for p, lon, lat in arcgis_features(f"{base}/0")]
-    return out
-
-
 def euskadi():
     base = "https://opendata.euskadi.eus/contenidos/ds_localizaciones/farmacias_y_botiquines_euskadi/opendata"
     out = [rec("es-pv", p.get("idif"), lat, lon, p.get("titular1"), p.get("telefono"), p.get("direccion"), p.get("municipio"))
@@ -581,7 +572,7 @@ def la_rioja():
 
 # community INE code, lists botiquines (else REGCESS's are added)
 REGIONAL = {
-    "es-an": ("01", False), "es-ar": ("02", True), "es-as": ("03", True), "es-ib": ("04", True), "es-cm": ("08", False),
+    "es-an": ("01", False), "es-ar": ("02", True), "es-ib": ("04", True), "es-cm": ("08", False),
     "es-ct": ("09", True), "es-md": ("13", True), "es-nc": ("15", False), "es-pv": ("16", True), "es-ri": ("17", False),
 }
 # Regional lists known to lack recent pharmacies (Navarra's points date from 2021): REGCESS's pharmacies there are
@@ -718,8 +709,6 @@ SOURCES = {
               "licence": "CC BY 4.0", "url": "https://www.juntadeandalucia.es/institutodeestadisticaycartografia/dega/"},
     "es-md": {"fetch": madrid, "name": "Oficinas de farmacia", "publisher": "Comunidad de Madrid. Consejería de Sanidad",
               "licence": "CC BY 4.0", "url": "https://datos.comunidad.madrid/dataset/oficinas_farmacia"},
-    "es-as": {"fetch": asturias, "name": "Farmacias y botiquines (SITPA-IDEAS)", "publisher": "Principado de Asturias",
-              "licence": "CC BY 4.0", "url": "https://sig.asturias.es/"},
     "es-pv": {"fetch": euskadi, "name": "Farmacias y botiquines de Euskadi", "publisher": "Gobierno Vasco. Departamento de Salud",
               "licence": "CC BY 4.0", "url": "https://opendata.euskadi.eus/catalogo/-/farmacias-y-botiquines-de-euskadi/"},
     "es-ri": {"fetch": la_rioja, "name": "Registro de centros, servicios y establecimientos sanitarios", "publisher": "Gobierno de La Rioja",
