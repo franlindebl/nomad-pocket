@@ -410,6 +410,15 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   Portugal → the kit says 24 L and Settings "From your country: litres, kilometres and km/h"; US → "Always: gallons,
   miles and mph" at once and the kit 6.3 gal. Not run on Android (JS only, no native change).
 
+### 2026-11-10 — 2.4.2 (49) submitted to App Review
+
+- The owner tried 2.4.2 (49) ("funciona guay") and asked to submit it. A first screenshot that looked wrong ("Casa
+  Hernández": the restaurant 360 m away after matches 500–1800 km away) was build 48, the old ranking; the same hits
+  through 49's `hitScore` put the restaurant first. Version record created through the App Store
+  Connect API with build 49 and auto-release; everything inherited from 2.4.1 but "What's new"
+  (`docs/store/listing-2.4.2.md`: the full list, with the owner's line "Mejoras de visualización en Apple Car Play
+  para el Konita" word for word). Waiting for review.
+
 ### 2026-11-10 — 2.4.2 (49) on TestFlight
 
 - 2.4.2 (48) plus map search that weighs the match and the distance, distances from the person and "Recientes"
