@@ -135,7 +135,9 @@ AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's d
    drafted in `docs/store/listing-next.md`. **State at the end of 2026-11-12:**
    - Live: server `poll` + `api` (europe-west1), `/health` watched by `.github/workflows/alerts-health.yml`. One row
      in Firestore: the owner's iPhone (dev build, sandbox, Madrid cell). The Mi 9 is back on the Play build.
-   - Android end to end (server → FCM → our receiver) not seen yet: the Pixel_API_36 emulator (Play image, es-ES,
+   - **Android end to end seen the same evening** with the VPN off (the emulator had to be restarted with
+     `-dns-server 8.8.8.8,1.1.1.1`: it kept the VPN's DNS): IPC handshake → FCM token → registration → `/v1/test-push`
+     → our receiver, 0.9 s. Before that: the Pixel_API_36 emulator (Play image, es-ES,
      Madrid via test location providers, alerts on, APK with `fcm-env.mjs`) gets `SERVICE_NOT_AVAILABLE` from Play
      services because the Mac's corporate VPN/TLS proxy intercepts Google. **Next: retry with the VPN off** (check a
      cert issuer from the Mac first, then the alerts refresh → a row with `platform: android` → `/v1/test-push` with
@@ -150,8 +152,8 @@ AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's d
      detail. Unit tests + a live run against the real feeds (NWS Alabama by zone; Germany, France by EMMA; Norway,
      Slovenia by polygon). Deploy: `cd server && npx firebase-tools deploy --only functions --project nomad-pocket`,
      then `curl …/api/health` and the checks in the log entry.
-   - **Next steps**: (1) deploy v2 and check it (log entry); (2) the Android check above; (3) the owner reviews
-     `docs/store/listing-next.md`; (4) release the push version: TestFlight, then App Store (App Privacy: Coarse
+   - **Next steps**: (1) ~~deploy v2~~ done and checked; (2) ~~the Android check~~ done; (3) ~~the owner reviews
+     `docs/store/listing-next.md`~~ approved; (4) release the push version (2.5.0 (52) archiving 2026-11-12): TestFlight, then App Store (App Privacy: Coarse
      Location) and Play (Data safety), Android built after `eval "$(node scripts/alerts/fcm-env.mjs)"`; (5) the owner
      reinstalls TestFlight on the iPhone (it re-registers as production). Later: PTWC tsunami messages, EMSC's
      WebSocket.

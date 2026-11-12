@@ -460,8 +460,10 @@ Not chosen:
    changed, instead of every row on every source change), `/health` reads one document.
 3. App: registration, push tap → detail, dedup with phase 1, opt-in copy for iPhone ("al momento") vs Android
    ("cada media hora aprox."). **Done 2026-11-12** (`push-register.ts`, `modules/nomad-push` tap handling, Settings ›
-   "Avisos al momento"); the owner's iPhone registered itself (Madrid cell, sandbox). Android end to end still to
-   see on a build from the Play internal track (a debug APK can't replace the Play install). The opt-in copy is the
+   "Avisos al momento"); the owner's iPhone registered itself (Madrid cell, sandbox). Android end to end **seen
+   2026-11-12** on the Pixel_API_36 emulator (Play image) with the corporate VPN off: the IPC handshake gave an FCM
+   token, the app registered (`platform: android`, Madrid cell), and `/v1/test-push` reached our receiver through FCM
+   on the `alerts` channel in 0.9 s. The opt-in copy is the
    same on both platforms now that Android has push too.
 4. Privacy policy, store labels, `docs/ARCHITECTURE.md` (server section), `docs/RELEASE.md` (deploying the server),
    `docs/DEVELOPMENT.md` (running it locally).
