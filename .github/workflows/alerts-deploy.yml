@@ -87,11 +87,11 @@ jobs:
         if: vars.GCP_WIF_PROVIDER != '' && vars.GCP_DEPLOY_SA != ''
         working-directory: server
         run: |
-          echo "DEPLOY_STARTED_MS=$(date +%s%3N)" >> "$GITHUB_ENV"
           npx -y "$FIREBASE_TOOLS" deploy --only functions --project nomad-pocket --force --non-interactive
+          echo "DEPLOYED_MS=$(date +%s%3N)" >> "$GITHUB_ENV"
 
-      # The scheduler runs the poll every minute: one that started after the deploy began and answers ok means the
-      # new code is polling. /health caches its answer for 20 s.
+      # The scheduler runs the poll every minute: one that ran after the deploy finished and answers ok means the new
+      # code is polling (a poll during the rollout may still be the old one). /health caches its answer for 20 s.
       - name: Wait for a poll after the deploy
         if: vars.GCP_WIF_PROVIDER != '' && vars.GCP_DEPLOY_SA != ''
         run: |
@@ -99,9 +99,9 @@ jobs:
           for i in $(seq 1 16); do
             body=$(curl -sS --max-time 20 "$HEALTH_URL" || true)
             at=$(printf '%s' "$body" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const j=JSON.parse(s);console.log(j.ok?j.poll.at:0)}catch{console.log(0)}})')
-            if [ "$at" -gt "$DEPLOY_STARTED_MS" ]; then printf '%s\n' "$body" | head -c 2000; echo; exit 0; fi
+            if [ "$at" -gt "$DEPLOYED_MS" ]; then printf '%s\n' "$body" | head -c 2000; echo; exit 0; fi
             sleep 20
           done
           printf '%s\n' "$body" | head -c 2000; echo
-          echo "::error::no healthy poll since the deploy started"
+          echo "::error::no healthy poll since the deploy finished"
           exit 1

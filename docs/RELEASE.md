@@ -285,7 +285,7 @@ server deploy › Run workflow, `main` only). One deploy at a time (`concurrency
 in `server/alerts` (a `node_modules` link at the repo root lets the cores under `src/` find `fflate` without the app's
 Expo install), the geocodes download cached by file name, `npm run check`, sign-in by Workload Identity Federation,
 `firebase-tools@15.36.0 deploy --only functions --force --non-interactive`, then `/health` polled until a poll that
-started after the deploy answers ok (about 1–2 min; the job fails after ~5). A failure emails the owner. Pushes happen
+ran after the deploy finished answers ok (about 1–2 min; the job fails after ~5). A failure emails the owner. Pushes happen
 22:00–08:00 (commit-hours hooks), so deploys do too. Firestore rules still go by hand (`--only firestore:rules`).
 - **Google Cloud, set up once** with `scripts/alerts/setup-github-deploy.sh` (run in Cloud Shell by the owner; safe to
   run again): service account `github-deploy@nomad-pocket.iam.gserviceaccount.com` with only what a functions deploy

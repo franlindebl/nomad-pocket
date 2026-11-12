@@ -159,7 +159,7 @@ AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's d
      19:20 on 2026-11-12, probably that). Server deploys from GitHub Actions on pushes to `main`: **built**
      (`.github/workflows/alerts-deploy.yml`), Google Cloud and the repo variables set up 2026-11-12; the first run
      (21:01 push) passed the checks and signed in, then firebase-tools refused: it wants actAs on
-     `nomad-pocket@appspot.gserviceaccount.com` too. Waiting for that one binding (owner), then re-run (`docs/RELEASE.md`, "Alerts server"). Still to verify
+     `nomad-pocket@appspot.gserviceaccount.com` too. Binding added (owner's go), re-run **deployed** at 21:31 (api and poll updated, healthy poll after) (`docs/RELEASE.md`, "Alerts server"). Still to verify
      (plan task 5): real pushes on the iPhone over days, the health workflow failing when the poll stops, a phone with
      alerts off getting nothing; phase 1's background runs on real phones. Later: PTWC tsunami messages, EMSC's
      WebSocket.
@@ -437,7 +437,9 @@ with `gh`. First run (run 43296058753, the 21:01 push; the commit window starts 
 that evening): install, checks and the Workload Identity sign-in passed; the deploy stopped before uploading
 anything: firebase-tools checks `iam.serviceAccounts.actAs` on the App Engine default account
 (`nomad-pocket@appspot.gserviceaccount.com`) before any functions deploy, even 2nd gen. Added to the setup script
-(serviceAccountUser on that account only); the live server was untouched.
+(serviceAccountUser on that account only); the live server was untouched. With that binding (added in Cloud Shell on the owner's go) the re-run deployed
+both functions in ~1 min and /health answered ok. Its wait had taken a poll from mid-rollout (20:30:04, `poll` updated at
+20:31:04), so the job now waits for a poll after the deploy finished.
 
 ### 2026-11-12 — Alerts: MeteoAlarm hazards from the CAP, E2E off the real push server
 
