@@ -115,6 +115,8 @@ packs of 2026-11-05:
 | Mexico | `mx.py`: CLUES (DGIS), monthly, public institutions only | free use (DGIS) | 1,000 hospitals, 36 m; 349 centres, 11 m | **431 hospitals, 9,375 centros de salud, UMF and rural units** |
 | Sierra Leone | `sl.py`: MoHS + CIESIN/GRID3 National Health Facilities Dataset v01 (2023) | CC BY 4.0 | 172 centres, 16 m | **25 hospitals, 1,289 CHC, CHP and MCHP** (OSM has 265 clinics) |
 | Chad | `td.py`: Ministry of Public Health's list via OCHA on HDX (2020) | CC BY | 57 centres, 24 m | **97 hospitals, 1,475 health centres** (OSM has 179 clinics) |
+| DR Congo | `cd.py`: GRID3 COD Health Facilities v9.0 (CIESIN/GRID3 with the Ministry) | CC BY 4.0 | 315 hospitals, 58 m; 495 centres, 20 m | **1,231 hospitals, 12,389 health centres and posts** (OSM: 2,956 clinics) |
+| Mozambique | `mz.py`: Ministry's (SIS-MA) master facility list on HDX (2017) | CC0 | 616 centres, 18 m | **31 hospitals, 777 health centres and posts** |
 | Argentina | `ar.py`: IGN's "Edificio de salud" layer (WFS; mostly the Ministry's SISA register) | IGN terms (attribution, shared freely) | 968 hospitals, 20 m; 1,959 centres, 14 m | **91 hospitals, 4,713 centres, posts and dispensaries** |
 
 - **Japan.** Clinics are the register's 診療所 offering internal medicine, paediatrics, surgery, general practice or
@@ -197,6 +199,12 @@ packs of 2026-11-05:
   43% within 50 m of OSM's, private ones 12% (median 755 m), so the 3,562 private "hospitals" (many day-surgery
   clinics under a company's name) are left out, with labs, dental and support units and points typed to two decimals.
   OSM has few clinics there (6.5k), so the 9.4k centres can hardly be checked; those that match are 11 m away.
+- **DR Congo.** GRID3's v9.0 passes the test Nigeria's v4.0 failed: hospitals sharing a name with OSM's are 54 m away
+  at the median, 3% over 2 km. Health centres and posts placed before 2024 are much further (177 m, 15% over 2 km)
+  than those of 2024 on (26 m, 5.6%), so only those are taken (`CLINICS_SINCE`). "Operational" data, not fully
+  validated by the government; volunteer community care sites left out. The HDX dataset id carries the version.
+- **Mozambique.** The Ministry's list of 2017 (the newest open one), coordinates written without their decimal point
+  (the script puts it back). No status column: every unit counts as open. Psychiatric units left out.
 - **Taiwan (not yet).** The NHI's contracted facilities (OGDL, 7.6k pharmacies against OSM's 2.3k) have addresses
   only; it waits for a Taiwanese geocoder (NLSC/TGOS) checked the way CartoCiudad was.
 - **Nigeria (not added).** GRID3 NGA v4.0 (CIESIN with the federal registry and NPHCDA, CC BY 4.0) has 48k usable
@@ -250,6 +258,8 @@ as an indemnity. A source whose terms don't fit stays out until its publisher gi
 | Argentina (`ar`) | hospitals, public health centres, posts (no pharmacies) | Instituto Geográfico Nacional, "Edificio de salud" WFS layer (from the Ministry of Health's SISA) | IGN terms: attribution, shared freely | unstated ("periodically") |
 | Sierra Leone (`sl`) | hospitals, community health centres and posts | Ministry of Health and Sanitation with CIESIN/GRID3, National Health Facilities Dataset v01 | CC BY 4.0 | snapshot 2023 |
 | Chad (`td`) | hospitals, health centres | Ministère de la Santé Publique, list of health centres and districts, via OCHA on HDX | CC BY | snapshot 2020 |
+| DR Congo (`cd`) | hospitals, health centres and posts (placed 2024 on) | CIESIN and GRID3 with the Ministère de la Santé Publique, GRID3 COD Health Facilities v9.0 (HDX) | CC BY 4.0 | per GRID3 version |
+| Mozambique (`mz`) | hospitals, health centres and posts | Ministério da Saúde (SIS-MA), Master Health Facility List, via OCHA on HDX | CC0 | snapshot 2017 |
 | Mexico (`mx`) | public hospitals, public primary care | Secretaría de Salud, DGIS, CLUES | free use ("no existen restricciones") | monthly |
 
 ### Not covered, and why
@@ -257,14 +267,14 @@ as an indemnity. A source whose terms don't fit stays out until its publisher gi
 | Country | Why not | What would unblock it |
 |---|---|---|
 | Taiwan | The NHI's register of contracted facilities (data.gov.tw 168341, OGDL v1.0, 7,656 pharmacies, ~450 hospitals, ~11k clinics) has no coordinates, and the government geocoders need registration: TGOS asks for an APPID and key, NLSC's house-number service is for government bodies only (2026-11-12) | The owner registers a TGOS app key (a GitHub secret), checking its terms allow batch use and keeping results |
-| Brazil | CNES (DATASUS) has coordinates for ~512k establishments, but the portal says CC BY-ND, which can't be mixed with OSM | DATASUS confirms an open licence (an email) |
+| Brazil | CNES (DATASUS) has coordinates for ~512k establishments, but the portal says CC BY-ND, which can't be mixed with OSM | DATASUS confirms an open licence: the owner asked on 2026-11-12 (datasus@saude.gov.br), waiting for the answer; then build `br.py` from the CNES API |
 | Colombia, Mauritius | Registers under CC BY-SA, which can't share a file with ODbL data | A CC BY / ODbL licence from the publisher |
 | Belgium | AFMPS's pharmacy list states no licence | AFMPS states one |
 | New Zealand | Medsafe's pharmacy list is non-commercial with no redistribution | Medsafe licenses it CC BY |
 | Estonia | Ravimiamet's pharmacy map (apteegid.json) states no licence (only the register it comes from is CC0 on andmed.eesti.ee) and adds 28 pharmacies; the health-centre lists are CC BY-NC-SA and CC BY-SA. Script parked, not in the repo | An explicit licence for the map file; health centres under an open licence |
 | Bahrain | data.gov.bh's clinics and hospitals: points sit 50–100 m from OSM's with no close peak, few to add, and the Bahrain Open Government Data License v1.1 binds sub-licensees to its terms (3.3d) and lets the government demand removal (3.3e). Script parked | A plain open licence, and better points |
-| Hong Kong | DATA.GOV.HK's terms allow redistribution with attribution but make the user indemnify the Government against any claim (owner, 2026-11-12: out). Only ~250 pharmacies would be added (geocoded with ALS, median 55 m); HA hospitals and clinics are all in OSM already. Script parked | Terms without the indemnity |
-| Singapore | Singapore Open Data Licence v1.0: indemnity, and "does not grant any rights to Downstream Sub-Licensees", which an open pack can't honour; CHAS clinics frozen at 2024-06, no hospital list with points (owner, 2026-11-12: out). Script parked | MOH publishes a current list under a plain open licence |
+| Hong Kong | DATA.GOV.HK's terms allow redistribution with attribution but make the user indemnify the Government against any claim (owner, 2026-11-12: out). Only ~250 pharmacies would be added (geocoded with ALS, median 55 m); HA hospitals and clinics are all in OSM already. Script parked | Terms without the indemnity: the owner asked DATA.GOV.HK on 2026-11-12, waiting |
+| Singapore | Singapore Open Data Licence v1.0: indemnity, and "does not grant any rights to Downstream Sub-Licensees", which an open pack can't honour; CHAS clinics frozen at 2024-06, no hospital list with points (owner, 2026-11-12: out). Script parked | Permission for open packs, or a plain open licence, and a current CHAS list: the owner asked data.gov.sg on 2026-11-12, waiting |
 | Guinea | HDX copy of the Ministry's list uploaded by the American Red Cross (2018, licence only an HDX tag), rows filed under the wrong prefecture, same-named facilities often far from OSM's. Script parked | A Ministry-published, current list |
 | Italy | The Ministry's pharmacy register (IODL 2.0) has points, but they fail against OSM (median 377 m, thousands stacked) | Its addresses placed with ANNCSU |
 | Nigeria | GRID3 NGA v4.0 (CC BY 4.0) is "non-validated": a quarter of same-named hospitals over 2 km from OSM's | Only field-surveyed points, or a later release |
@@ -274,7 +284,11 @@ as an indemnity. A source whose terms don't fit stays out until its publisher gi
 | Morocco | data.gov.ma's hospitals (2025) and primary-care centres (2024), ODbL, are located by commune only; no pharmacy list | Lists with addresses or points |
 | Norway | No official list with points; the business register (NLOD) geocoded with Geonorge works, but OSM already has more pharmacies than DMP counts and no health-centre or legevakt list exists | Helsedirektoratet publishes legevakt / fastlege locations |
 | Argentina, pharmacies | REFAR (15k pharmacies) has addresses only and no licence; Georef placed too few well (see above) | A licence for REFAR and a better geocoding match, or a pharmacy list with points |
-| DR Congo, Haiti | Only GRID3 (as Nigeria's) and a PAHO/WHO list via OCHA, of doubtful quality | Validated releases |
+| Haiti | PAHO/WHO list via OCHA (2021–23, CC BY): only 480 of 730 rows have points, many stacked on section centres, at least one hospital 100 km off (HUEH, a typo), few hospitals to add and clinics unverifiable | An MSPP list with checked points |
+| Kenya | KMHFL's open copy on HDX (2017) has no coordinates; the live KMHFL API timed out from the office | Try KMHFL's API from CI, and read its terms |
+| Tanzania | HFR (14.5k facilities) only via a request form, no licence stated | The Ministry publishes an export with a licence |
+| Uganda, Rwanda, Madagascar, Zambia | No open Ministry list found (Uganda's only a 2011 regional one; Zambia's MFL host broken) | A Ministry list on HDX or a national portal |
+| New Brunswick (Canada) | Its two hospital networks' CSVs (gnb.socrata.com, OGL-NB) fail TLS behind the office proxy; ODHF already gives its 26 hospitals (35% within 25 m of OSM's) | Not worth it now |
 | Germany, Austria, Switzerland, Netherlands, Luxembourg, Monaco, Andorra, Denmark, Sweden, Finland, Portugal, Poland | Not worth it: OSM is near the official totals, or only cities publish | — |
 | ~135 others | No official open source found: most of the Caribbean, Central America, Central Asia and the Caucasus, South-East Asia, the Pacific, West Africa, Russia and Belarus, China, the western Balkans (`docs/OFFICIAL_POINTS_WORLD.md`) | A source turning up; a fallback could be the CC0 Maina 2019 compilation for sub-Saharan Africa (stale) |
 

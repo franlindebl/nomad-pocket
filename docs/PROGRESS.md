@@ -83,7 +83,9 @@ OP. **Official points: complete OSM with official registers, country by country*
    Italy and Nigeria tried and left out (coordinates fail against OSM; Italy needs ANNCSU geocoding). Second batch
    built: Latvia, Iceland, Dominican Republic, Malawi, New Caledonia, Argentina (IGN layer), Mexico (CLUES, public
    institutions only: private hospitals' points fail). Then Sierra Leone, Chad and Canada's other provinces (Québec, Manitoba, NS, PEI, NL, Yukon; StatCan's
-   ODHF hospitals for the rest). Left out: Hong Kong and Singapore (indemnity terms; owner), Guinea. Blocked: Taiwan (TGOS key: the owner's to register), Brazil (DATASUS licence). The status of
+   ODHF hospitals for the rest). Then DR Congo (GRID3 v9, clinics placed
+   2024 on) and Mozambique (2017). Left out: Hong Kong and Singapore (indemnity terms; owner asked them, and
+   DATASUS for Brazil, 2026-11-12), Guinea, Haiti, Kenya, Tanzania, Uganda, Rwanda, Madagascar, Zambia. Blocked: Taiwan (TGOS key: the owner's to register), Brazil (DATASUS licence). The status of
    every country and why: "Coverage by country" in `docs/OFFICIAL_POINTS.md` (keep it up to date).
 
 AM. **Assistant × maps** (`docs/ASSISTANT_MAP_PLAN.md`, approved 2026-11-05; **phase 1 and 1b built the same day**,
@@ -454,6 +456,9 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   Hong Kong and Singapore left out (their terms make us indemnify the government; Singapore's also gives downstream
   users no rights), Guinea too (Red Cross upload of a 2018 list). Owner asked whether a merged list could go out as our
   own without credits: no (`docs/OFFICIAL_POINTS.md`, the rule above "Covered").
+- Fourth round: DR Congo (`cd.py`, GRID3 v9: 1.2k hospitals, 12.4k centres placed since 2024; older points fail),
+  Mozambique (`mz.py`, Ministry 2017: 808). Haiti, Kenya, Tanzania, Uganda, Rwanda, Madagascar, Zambia: nothing usable.
+  The owner wrote to DATASUS, DATA.GOV.HK and data.gov.sg about their licences.
 - Mexico's first CI run kept last month's wider file (the 80% guard); its assets were deleted from the release and
   it re-ran with 10.6k rows. Documented: narrowing a filter needs the release's file deleted first.
 

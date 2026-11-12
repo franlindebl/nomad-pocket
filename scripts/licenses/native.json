@@ -645,6 +645,28 @@
       "text": null
     },
     {
+      "id": "official-health-points-cd",
+      "name": "DR Congo: GRID3 COD Health Facilities v9.0",
+      "license": "CC-BY-4.0",
+      "copyright": [
+        "CIESIN (Columbia University) and GRID3, with the Ministère de la Santé Publique, Hygiène et Prévention de la RDC"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Hospitals, health centres and posts in DR Congo that OpenStreetMap lacks, added to the country's emergency points (operational data, not fully validated by the government).",
+      "text": null
+    },
+    {
+      "id": "official-health-points-mz",
+      "name": "Mozambique: Master Health Facility List",
+      "license": "CC0-1.0",
+      "copyright": [
+        "Ministério da Saúde de Moçambique (SIS-MA); published by OCHA Mozambique on the Humanitarian Data Exchange"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Hospitals, health centres and posts in Mozambique that OpenStreetMap lacks, added to the country's emergency points (list of 2017).",
+      "text": null
+    },
+    {
       "id": "wikipedia-kiwix",
       "name": "Wikipedia and Kiwix content",
       "license": "CC-BY-SA-4.0",
