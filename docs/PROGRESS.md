@@ -84,7 +84,7 @@ OP. **Official points: complete OSM with official registers, country by country*
    built: Latvia, Iceland, Dominican Republic, Malawi, New Caledonia, Argentina (IGN layer), Mexico (CLUES, public
    institutions only: private hospitals' points fail). Then Sierra Leone, Chad and Canada's other provinces (Québec, Manitoba, NS, PEI, NL, Yukon; StatCan's
    ODHF hospitals for the rest). Then DR Congo (GRID3 v9, clinics placed
-   2024 on) and Mozambique (2017), South Korea (HIRA: 21k pharmacies). Left out: Hong Kong and Singapore (indemnity terms; owner asked them, and
+   2024 on) and Mozambique (2017), South Korea (HIRA: 21k pharmacies), Niger, Jamaica. Left out: Hong Kong and Singapore (indemnity terms; owner asked them, and
    DATASUS for Brazil, 2026-11-12), Guinea, Haiti, Kenya, Tanzania, Uganda, Rwanda, Madagascar, Zambia. Blocked: Taiwan (TGOS key: the owner's to register), Brazil (DATASUS licence). The status of
    every country and why: "Coverage by country" in `docs/OFFICIAL_POINTS.md` (keep it up to date).
 
@@ -481,6 +481,10 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   The owner wrote to DATASUS, DATA.GOV.HK and data.gov.sg about their licences.
 - South Korea (`kr.py`, HIRA's quarterly file on data.go.kr, KOGL Type 1): 21k pharmacies, 609 hospitals, 10.4k clinics
   and health centres where OSM has 3k pharmacies; the biggest gain after Japan.
+- Fifth round over South Asia, South-East Asia, the rest of Latin America, the Middle East and West Africa (four agents):
+  only Niger (`ne.py`, carte sanitaire 2023: 2.7k centres) and Jamaica (`jm.py`, 2016: 291 centres) pass. India's data.gov.in,
+  Bangladesh's DGHS and several Gulf and Central American portals don't answer the office network: `probe-urls.yml` asks
+  them from a runner. Philippines and Thailand block scripts (Cloudflare); Colombia stays CC BY-SA.
 - Mexico's first CI run kept last month's wider file (the 80% guard); its assets were deleted from the release and
   it re-ran with 10.6k rows. Documented: narrowing a filter needs the release's file deleted first.
 

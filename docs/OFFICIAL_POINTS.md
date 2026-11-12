@@ -120,6 +120,8 @@ packs of 2026-11-05:
 | DR Congo | `cd.py`: GRID3 COD Health Facilities v9.0 (CIESIN/GRID3 with the Ministry) | CC BY 4.0 | 315 hospitals, 58 m; 495 centres, 20 m | **1,231 hospitals, 12,389 health centres and posts** (OSM: 2,956 clinics) |
 | Mozambique | `mz.py`: Ministry's (SIS-MA) master facility list on HDX (2017) | CC0 | 616 centres, 18 m | **31 hospitals, 777 health centres and posts** |
 | South Korea | `kr.py`: HIRA's national hospitals and pharmacies (data.go.kr 15051059), quarterly | KOGL Type 1 (attribution) | 2,813 pharmacies (91% of OSM's), 40 m | **20,992 pharmacies, 609 hospitals, 10,365 clinics and health centres** (OSM: 3,075 pharmacies) |
+| Niger | `ne.py`: Ministry of Health's carte sanitaire via OCHA on HDX (2023) | CC BY | 98 pharmacies, 16 m | **52 pharmacies, 2,738 health centres** (OSM has 292 clinics) |
+| Jamaica | `jm.py`: Ministry of Health facilities, data.gov.jm (2016) | ODC-By | 20 hospitals, 46 m | **4 hospitals, 291 health centres** |
 | Argentina | `ar.py`: IGN's "Edificio de salud" layer (WFS; mostly the Ministry's SISA register) | IGN terms (attribution, shared freely) | 968 hospitals, 20 m; 1,959 centres, 14 m | **91 hospitals, 4,713 centres, posts and dispensaries** |
 
 - **Japan.** Clinics are the register's 診療所 offering internal medicine, paediatrics, surgery, general practice or
@@ -217,6 +219,11 @@ packs of 2026-11-05:
   dental, oriental, long-term care and psychiatric hospitals left out. A building's many clinics share one point
   (one per kind within 15 m); stacked points are real buildings, not dropped. Phones get their area code from the
   province. LOCALDATA (localdata.go.kr, pharmacies with EPSG:5174 points) didn't answer from the office: a fallback.
+- **Niger.** The Ministry's carte sanitaire (2023): a third of its rows have no point, and hospitals have none of their
+  own (only their services, without points), so no hospital kind. Coordinates are "[lon, lat]" though tagged latlon;
+  closed units, army and prison infirmaries, labs, dental and eye units left out; points stacked 3+ (Dosso) dropped.
+- **Jamaica.** The Ministry's list of 2016 (static): 150 GPS points and 192 digitised by hand (expect 100–400 m off;
+  precision `digitised`). No ids: the code is a slug of name and parish.
 - **Taiwan (not yet).** The NHI's contracted facilities (OGDL, 7.6k pharmacies against OSM's 2.3k) have addresses
   only; it waits for a Taiwanese geocoder (NLSC/TGOS) checked the way CartoCiudad was.
 - **Nigeria (not added).** GRID3 NGA v4.0 (CIESIN with the federal registry and NPHCDA, CC BY 4.0) has 48k usable
@@ -236,8 +243,8 @@ Numbers, filters and quality per country are in "Other countries" above; what ev
 (`official-health-points-<cc>` in `scripts/licenses/native.json`) and a line in the routing release notes
 (`.github/workflows/country-packages.yml`). "In packs since" is the first pack build with them.
 
-In numbers (2026-11-12): official points in 30 of the 232 countries and territories with a pack (24 countries and 6
-territories), about 1.39 billion people, 17% of the world; with the countries where OSM is already near the official
+In numbers (2026-11-12): official points in 32 of the 232 countries and territories with a pack (26 countries and 6
+territories), about 1.42 billion people, 17% of the world; with the countries where OSM is already near the official
 totals (Germany, the Nordics…, ~200 million), about a fifth. The big gaps: India, China, Indonesia, Pakistan,
 Nigeria, Brazil (licence asked), Bangladesh, Russia, the Philippines, Egypt.
 
@@ -278,6 +285,8 @@ as an indemnity. A source whose terms don't fit stays out until its publisher gi
 | DR Congo (`cd`) | hospitals, health centres and posts (placed 2024 on) | CIESIN and GRID3 with the Ministère de la Santé Publique, GRID3 COD Health Facilities v9.0 (HDX) | CC BY 4.0 | per GRID3 version |
 | South Korea (`kr`) | pharmacies, hospitals, health centres, primary-care clinics | 건강보험심사평가원 (HIRA), 전국 병의원 및 약국 현황 (data.go.kr) | KOGL Type 1 | quarterly |
 | Mozambique (`mz`) | hospitals, health centres and posts | Ministério da Saúde (SIS-MA), Master Health Facility List, via OCHA on HDX | CC0 | snapshot 2017 |
+| Niger (`ne`) | pharmacies, health centres | Ministère de la Santé Publique, carte sanitaire, via OCHA on HDX | CC BY | snapshot 2023 |
+| Jamaica (`jm`) | hospitals, health centres | Ministry of Health and Wellness, Health Facilities (data.gov.jm) | ODC-By | snapshot 2016 |
 | Mexico (`mx`) | public hospitals, public primary care | Secretaría de Salud, DGIS, CLUES | free use ("no existen restricciones") | monthly |
 
 ### Not covered, and why
@@ -307,6 +316,21 @@ as an indemnity. A source whose terms don't fit stays out until its publisher gi
 | Tanzania | HFR (14.5k facilities) only via a request form, no licence stated | The Ministry publishes an export with a licence |
 | Uganda, Rwanda, Madagascar, Zambia | No open Ministry list found (Uganda's only a 2011 regional one; Zambia's MFL host broken) | A Ministry list on HDX or a national portal |
 | New Brunswick (Canada) | Its two hospital networks' CSVs (gnb.socrata.com, OGL-NB) fail TLS behind the office proxy; ODHF already gives its 26 hospitals (35% within 25 m of OSM's) | Not worth it now |
+| India | The National Health Portal's facilities with geo codes on data.gov.in (GODL-India) look usable, but data.gov.in and the HFR hosts don't answer the office network | Probe from CI (`probe-urls.yml`), then read the licence and the file |
+| Bangladesh | DGHS's facility registry API answers 503 and states no licence; data.gov.bd unreachable; HDX only a 2017 LGED list | The registry reachable from CI and a written licence |
+| Pakistan, Nepal, Sri Lanka | Only old or partial lists (2012–2018) or OSM-derived copies; Nepal's NHFR unreachable | A Ministry list with points |
+| Philippines | DOH's National Health Facility Registry sits behind a Cloudflare challenge (403 to scripts, so to CI too) | A plain download or API from DOH |
+| Indonesia | Only OCHA's 2018 hospital list (1,616); no current Kemenkes list with points; no `id` pack points to compare | A current Kemenkes / SATUSEHAT list |
+| Thailand | MOPH and data.go.th block scripts (Cloudflare, 403); the one reachable copy is a third party's, CC BY-SA | MOPH's hcode list from a host that serves scripts, under an open licence |
+| Malaysia, Vietnam, Cambodia, Laos, Myanmar | No facility list published (Malaysia: only statistics), or nothing reachable | A Ministry list with points |
+| Colombia | Every health dataset on datos.gov.co, REPS included, is CC BY-SA; REPS has addresses only | MinSalud relicenses REPS or publishes points |
+| Ecuador | datosabiertos.gob.ec blocks scripts with a WAF; GeoSalud has no export | An MSP file or API |
+| Panama | Only the CSS's 77 units (2020, CC BY): too few | MINSA's list |
+| Paraguay, Costa Rica, Honduras, Guatemala, El Salvador, Bolivia, Nicaragua, Venezuela, Cuba, Trinidad and Tobago | No open list with points found, or portals down or unreachable (several only from the office: worth a probe from CI) | A Ministry list with points |
+| Mali | HeRAMS 2023 (CC BY) has points but no facility names or types | A Ministry list with names and types |
+| Israel, Qatar | Only special lists (cannabis pharmacies, psychiatric hospitals) or statistics | A national register |
+| Turkey, Egypt, Saudi Arabia, Jordan, Iraq, UAE, Kuwait, Oman, Algeria, Tunisia | Portals time out from the office or have no facility list; HDX only OSM copies | Probe from CI; a Ministry file |
+| Ghana, Senegal, Cameroon, Benin, Togo, Burkina Faso, Côte d'Ivoire | Only OSM-derived copies, aggregate counts or a 2012 list | A Ministry list with points |
 | Germany, Austria, Switzerland, Netherlands, Luxembourg, Monaco, Andorra, Denmark, Sweden, Finland, Portugal, Poland | Not worth it: OSM is near the official totals, or only cities publish | — |
 | ~135 others | No official open source found: most of the Caribbean, Central America, Central Asia and the Caucasus, South-East Asia, the Pacific, West Africa, Russia and Belarus, China, the western Balkans (`docs/OFFICIAL_POINTS_WORLD.md`) | A source turning up; a fallback could be the CC0 Maina 2019 compilation for sub-Saharan Africa (stale) |
 

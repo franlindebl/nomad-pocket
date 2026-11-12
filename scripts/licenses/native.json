@@ -678,6 +678,28 @@
       "text": null
     },
     {
+      "id": "official-health-points-ne",
+      "name": "Niger: carte sanitaire of the Ministry of Health",
+      "license": "CC-BY-4.0",
+      "copyright": [
+        "Ministère de la Santé Publique du Niger; published by OCHA Niger on the Humanitarian Data Exchange"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Pharmacies and health centres in Niger that OpenStreetMap lacks, added to the country's emergency points (2023).",
+      "text": null
+    },
+    {
+      "id": "official-health-points-jm",
+      "name": "Jamaica: health facilities of the Ministry of Health",
+      "license": "ODC-By-1.0",
+      "copyright": [
+        "Ministry of Health and Wellness, Jamaica Open Data Portal (data.gov.jm)"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Hospitals and health centres in Jamaica that OpenStreetMap lacks, added to the country's emergency points (list of 2016).",
+      "text": null
+    },
+    {
       "id": "wikipedia-kiwix",
       "name": "Wikipedia and Kiwix content",
       "license": "CC-BY-SA-4.0",
