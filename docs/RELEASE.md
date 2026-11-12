@@ -291,7 +291,8 @@ started after the deploy answers ok (about 1–2 min; the job fails after ~5). A
   run again): service account `github-deploy@nomad-pocket.iam.gserviceaccount.com` with only what a functions deploy
   needs (cloudfunctions.developer, run.admin, cloudbuild.builds.editor, artifactregistry.writer, cloudscheduler.admin,
   secretmanager.viewer: the deploy checks that `APNS` and `TEST_PUSH_SECRET` exist and never reads them,
-  firebase.viewer, serviceusage consumer + viewer, and serviceAccountUser on the functions' runtime account only);
+  firebase.viewer, serviceusage consumer + viewer, and serviceAccountUser on the functions' runtime account and on
+  `nomad-pocket@appspot.gserviceaccount.com`, which firebase-tools checks before any functions deploy);
   Workload Identity pool `github`, OIDC provider `github-actions` with the condition `assertion.repository ==
   'franlindebl/nomad-pocket' && assertion.ref == 'refs/heads/main'`, and workloadIdentityUser for that repo on the
   service account. No key file anywhere. A 403 naming a permission in a run's log means a missing role: add it to the

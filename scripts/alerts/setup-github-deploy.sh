@@ -45,6 +45,11 @@ RUNTIME=${RUNTIME:-"$NUM-compute@developer.gserviceaccount.com"}
 gcloud iam service-accounts add-iam-policy-binding "$RUNTIME" \
   --member="serviceAccount:$SA" --role=roles/iam.serviceAccountUser --condition=None --quiet >/dev/null
 echo "granted roles/iam.serviceAccountUser on $RUNTIME"
+# firebase-tools also checks actAs on the App Engine default account before any functions deploy (even 2nd gen,
+# which doesn't run as it): the first CI run failed with "iam.serviceAccounts.ActAs on nomad-pocket@appspot…".
+gcloud iam service-accounts add-iam-policy-binding "$PROJECT@appspot.gserviceaccount.com" \
+  --member="serviceAccount:$SA" --role=roles/iam.serviceAccountUser --condition=None --quiet >/dev/null
+echo "granted roles/iam.serviceAccountUser on $PROJECT@appspot.gserviceaccount.com"
 
 gcloud iam workload-identity-pools describe "$POOL" --location=global >/dev/null 2>&1 ||
   gcloud iam workload-identity-pools create "$POOL" --location=global --display-name="GitHub Actions"

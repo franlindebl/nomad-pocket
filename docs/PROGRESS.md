@@ -157,8 +157,9 @@ AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's d
      Location) and Play (Data safety), Android built after `eval "$(node scripts/alerts/fcm-env.mjs)"`; (5) the owner
      reinstalls TestFlight on the iPhone (it re-registers as production; a production iOS row in Madrid appeared at
      19:20 on 2026-11-12, probably that). Server deploys from GitHub Actions on pushes to `main`: **built**
-     (`.github/workflows/alerts-deploy.yml`), Google Cloud and the repo variables set up 2026-11-12; the first run (the
-     22:00 push) still to check (`docs/RELEASE.md`, "Alerts server"). Still to verify
+     (`.github/workflows/alerts-deploy.yml`), Google Cloud and the repo variables set up 2026-11-12; the first run
+     (21:01 push) passed the checks and signed in, then firebase-tools refused: it wants actAs on
+     `nomad-pocket@appspot.gserviceaccount.com` too. Waiting for that one binding (owner), then re-run (`docs/RELEASE.md`, "Alerts server"). Still to verify
      (plan task 5): real pushes on the iPhone over days, the health workflow failing when the poll stops, a phone with
      alerts off getting nothing; phase 1's background runs on real phones. Later: PTWC tsunami messages, EMSC's
      WebSocket.
@@ -432,7 +433,11 @@ done the same evening with those commands in Cloud Shell (the owner's account, t
 go): `github-deploy` with the nine roles and serviceAccountUser on the runtime account
 `774680549863-compute@developer.gserviceaccount.com`, pool `github`, provider `github-actions` (ACTIVE, condition on
 repo + `refs/heads/main`), workloadIdentityUser for the repo. Repo variables `GCP_WIF_PROVIDER` and `GCP_DEPLOY_SA` set
-with `gh`. The first run comes with the 22:00 push; a missing role would show as a 403 in its log.
+with `gh`. First run (run 43296058753, the 21:01 push; the commit window starts at 21:00 since
+that evening): install, checks and the Workload Identity sign-in passed; the deploy stopped before uploading
+anything: firebase-tools checks `iam.serviceAccounts.actAs` on the App Engine default account
+(`nomad-pocket@appspot.gserviceaccount.com`) before any functions deploy, even 2nd gen. Added to the setup script
+(serviceAccountUser on that account only); the live server was untouched.
 
 ### 2026-11-12 — Alerts: MeteoAlarm hazards from the CAP, E2E off the real push server
 
