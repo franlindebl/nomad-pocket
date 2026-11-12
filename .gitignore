@@ -77,3 +77,6 @@ e2e/artifacts/
 
 # Python bytecode (scripts/)
 __pycache__/
+
+# Playwright MCP browser snapshots and downloads
+.playwright-mcp/
