@@ -334,7 +334,7 @@ as an indemnity. A source whose terms don't fit stays out until its publisher gi
 
 | Country | Why not | What would unblock it |
 |---|---|---|
-| Taiwan | The NHI's register of contracted facilities (data.gov.tw 168341, OGDL v1.0, 7,656 pharmacies, ~450 hospitals, ~11k clinics) has no coordinates, and the government geocoders need registration: TGOS asks for an APPID and key, NLSC's house-number service is for government bodies only (2026-11-12) | The owner registers a TGOS app key (a GitHub secret), checking its terms allow batch use and keeping results |
+| Taiwan | The NHI's register of contracted facilities (data.gov.tw 168341, OGDL v1.0, 7,656 pharmacies, ~450 hospitals, ~11k clinics) has no coordinates, and the government geocoders need registration: TGOS asks for an APPID and key, NLSC's house-number service is for government bodies only (2026-11-12) | **Pending (owner, 2026-11-12):** register a TGOS app key (kept as a GitHub secret), checking its terms allow batch use and keeping results; then `tw.py` with fr.py's geocoder pattern |
 | Brazil | CNES (DATASUS) has coordinates for ~512k establishments, but the portal says CC BY-ND, which can't be mixed with OSM | DATASUS confirms an open licence: the owner asked on 2026-11-12 (datasus@saude.gov.br), waiting for the answer; then build `br.py` from the CNES API |
 | Colombia, Mauritius | Registers under CC BY-SA, which can't share a file with ODbL data | A CC BY / ODbL licence from the publisher |
 | Belgium | AFMPS's pharmacy list states no licence | AFMPS states one |
