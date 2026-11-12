@@ -332,6 +332,13 @@ as an indemnity. A source whose terms don't fit stays out until its publisher gi
 
 ### Not covered, and why
 
+Probed again on 2026-11-12, without the office VPN and from a GitHub runner (`probe-urls.yml`): India's data.gov.in,
+Kenya's KMHFL, Asturias's SITPA layers, Chile's Farmanet, and the portals of Saudi Arabia, Jordan, Turkey, Egypt,
+Honduras, El Salvador, Bolivia, Panama, Nepal, Sri Lanka, Ghana, Trinidad and Tobago, Costa Rica and Korea's LOCALDATA
+answer neither (no connection; Bangladesh's 504): down, or closed to foreign and datacenter addresses. Not a network
+problem of ours.
+
+
 | Country | Why not | What would unblock it |
 |---|---|---|
 | Taiwan | The NHI's register of contracted facilities (data.gov.tw 168341, OGDL v1.0, 7,656 pharmacies, ~450 hospitals, ~11k clinics) has no coordinates, and the government geocoders need registration: TGOS asks for an APPID and key, NLSC's house-number service is for government bodies only (2026-11-12) | **Pending (owner, 2026-11-12):** register a TGOS app key (kept as a GitHub secret), checking its terms allow batch use and keeping results; then `tw.py` with fr.py's geocoder pattern |
