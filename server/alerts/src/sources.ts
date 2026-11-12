@@ -135,7 +135,7 @@ export function keysFor(country: string | null): string[] {
 // ---------------------------------------------------------------------------
 // MeteoAlarm details
 
-type Details = Pick<Alert, 'texts' | 'original' | 'issuer'> & { url?: string };
+type Details = Pick<Alert, 'texts' | 'original' | 'issuer'> & { url?: string; hazard?: Alert['hazard'] };
 const details = new Map<string, Details>();
 
 export const hasDetails = (id: string): boolean => details.has(id);
@@ -152,7 +152,14 @@ export async function withDetails(a: Alert & { capUrl?: string | null }): Promis
       const cap = parseCap(await (await get(a.capUrl)).text());
       const full = cap && alertOfCap(cap, 'meteoalarm');
       if (!full) return a;
-      d = { texts: full.texts, original: full.original, ...(full.issuer ? { issuer: full.issuer } : {}), ...(full.url ? { url: full.url } : {}) };
+      // The CAP's awareness_type names the hazard exactly; the Atom only has an English event name to guess from.
+      d = {
+        texts: full.texts,
+        original: full.original,
+        ...(full.issuer ? { issuer: full.issuer } : {}),
+        ...(full.url ? { url: full.url } : {}),
+        ...(full.hazard !== 'other' ? { hazard: full.hazard } : {}),
+      };
       if (details.size > 5000) details.clear();
       details.set(a.id, d);
     } catch {

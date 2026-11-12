@@ -413,6 +413,16 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-12 — Alerts: MeteoAlarm hazards from the CAP, E2E off the real push server
+
+- DWD's English event names were misread by `hazardOfEvent`: "icy surfaces" matched `surf` (coastal) and
+  "gale-force gusts" matched `gale` (coastal). Now `\bsurf\b`, gusts are wind, icy is snow; and the server takes the
+  hazard from the CAP's `awareness_type` when it fetches a warning's details (exact). Server-side for MeteoAlarm
+  (deploy needed); the app's own copy only reads NWS names, unaffected.
+- E2E builds pointed at the real push server: off the corporate VPN a simulator gets an APNs token and would register
+  in production (and ALR-01 would stop ringing locally). `scripts/e2e.sh` and `e2e-android.sh` now set
+  `EXPO_PUBLIC_ALERTS_API` to a path the stand-in doesn't serve.
+
 ### 2026-11-12 — 2.5.0 (52): official alerts push, submitted to App Review
 
 Owner's request: get a version to Apple's review. Nothing was in review (2.4.3 live). Version 2.5.0, build 51

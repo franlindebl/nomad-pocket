@@ -99,6 +99,13 @@ test('hazards from AEMET, MeteoAlarm and English event names', () => {
   assert.equal(hazardOfEvent('High Wind Warning'), 'wind');
   assert.equal(hazardOfEvent('Moderate rain warning'), 'rain');
   assert.equal(hazardOfEvent('Child Abduction Emergency'), 'other');
+  // MeteoAlarm's English event names (DWD's feed, 2026-11-12): "surfaces" isn't surf, gusts are wind.
+  assert.equal(hazardOfEvent('icy surfaces'), 'snow');
+  assert.equal(hazardOfEvent('gale-force gusts'), 'wind');
+  assert.equal(hazardOfEvent('wind gusts'), 'wind');
+  assert.equal(hazardOfEvent('heavy thunderstorms with gale- or storm-force gusts'), 'storm');
+  assert.equal(hazardOfEvent('Gale Warning'), 'coastal');
+  assert.equal(hazardOfEvent('High Surf Advisory'), 'coastal');
 });
 
 test('geometry: point in rings, distance, snapping', () => {

@@ -70,6 +70,9 @@ export EXPO_PUBLIC_UPDATES_OPDS_URL="http://localhost:$ROUTING_PORT/opds"
 # Official alerts read every source from stand-in feeds (scripts/e2e-alerts-feed.py), served for
 # `alerts-server` flows: the real samples moved to now, an orange warning over Madrid and a quake near it.
 export EXPO_PUBLIC_ALERTS_URL="http://localhost:$ROUTING_PORT/alerts"
+# The push server too, at a path the stand-in doesn't serve: an E2E build never registers with the real alerts server
+# (a simulator gets an APNs token off the corporate VPN), and its checks keep notifying by themselves as the flows expect.
+export EXPO_PUBLIC_ALERTS_API="http://localhost:$ROUTING_PORT/no-alerts-server"
 
 # Set PLANET_PORT to build an app whose on-device map extraction reads the stand-in planet build
 # (scripts/dev-planet-server.ts, started below for `planet-server` flows) instead of Protomaps.

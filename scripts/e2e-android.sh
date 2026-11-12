@@ -25,6 +25,9 @@ UPDATES_PORT="${UPDATES_PORT:-8785}"
 export EXPO_PUBLIC_UPDATES_OPDS_URL="http://localhost:$UPDATES_PORT/opds"
 # Official alerts read stand-in feeds from the same server (scripts/e2e-alerts-feed.py).
 export EXPO_PUBLIC_ALERTS_URL="http://localhost:$UPDATES_PORT/alerts"
+# The push server too, at a path the stand-in doesn't serve: an E2E build never registers with the real alerts server
+# (a simulator gets an APNs token off the corporate VPN), and its checks keep notifying by themselves as the flows expect.
+export EXPO_PUBLIC_ALERTS_API="http://localhost:$UPDATES_PORT/no-alerts-server"
 
 if [[ "${1:-}" == "--build" || ! -f "$APK" ]]; then
   echo "Building ${APK}…"
