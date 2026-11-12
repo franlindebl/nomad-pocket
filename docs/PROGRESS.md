@@ -153,7 +153,7 @@ AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's d
      Slovenia by polygon). Deploy: `cd server && npx firebase-tools deploy --only functions --project nomad-pocket`,
      then `curl …/api/health` and the checks in the log entry.
    - **Next steps**: (1) ~~deploy v2~~ done and checked; (2) ~~the Android check~~ done; (3) ~~the owner reviews
-     `docs/store/listing-next.md`~~ approved; (4) release the push version (2.5.0 (52) archiving 2026-11-12): TestFlight, then App Store (App Privacy: Coarse
+     `docs/store/listing-next.md`~~ approved; (4) release the push version (2.5.0 (52) **submitted to App Review 2026-11-12**; Play waits for the closed test): TestFlight, then App Store (App Privacy: Coarse
      Location) and Play (Data safety), Android built after `eval "$(node scripts/alerts/fcm-env.mjs)"`; (5) the owner
      reinstalls TestFlight on the iPhone (it re-registers as production). Later: PTWC tsunami messages, EMSC's
      WebSocket.
@@ -413,7 +413,7 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
-### 2026-11-12 — 2.5.0 (52): official alerts push, to TestFlight
+### 2026-11-12 — 2.5.0 (52): official alerts push, submitted to App Review
 
 Owner's request: get a version to Apple's review. Nothing was in review (2.4.3 live). Version 2.5.0, build 51
 (Android versionCode 33, not uploaded: Play's closed test). The owner approved `docs/store/listing-2.5.0.md` ("What's
@@ -427,7 +427,9 @@ from DWD's CAP, "Ver los avisos en meteoalarm.org", the delay notice). It showed
 rows and missing on Home's card, so build 51's archive was cancelled: the issuer now goes first (`present.ts
 alertLine`, also in the assistant's cards and local notifications) and long lists of places are cut to three
 (`present-core shortArea`, shared with the push server). The test registration was deleted afterwards. Archived
-from a clean worktree of the release commit as build 52.
+from a clean worktree of the release commit as build 52, uploaded, attached to version 2.5.0 (created through the API
+with the texts in `docs/store/listing-2.5.0.md`, trimmed to App Store Connect's 4000-character limits) and, on the
+owner's go, **submitted to App Review** (auto-release). Tag `v2.5.0-52` on `dfc6b95`, pushed after the 22:00 push.
 
 ### 2026-11-12 — Alerts server v2: NWS, MeteoAlarm, zones, fewer Firestore reads
 
