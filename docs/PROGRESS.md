@@ -150,14 +150,15 @@ AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's d
      registration (`zones.ts`), and Firestore reads cut (registrations in memory + incremental `changedAt` reads,
      `/health` one document). The app gets MeteoAlarm warnings from the server (`POST /v1/alerts`) for its list and
      detail. Unit tests + a live run against the real feeds (NWS Alabama by zone; Germany, France by EMMA; Norway,
-     Slovenia by polygon). Deploy: `cd server && npx firebase-tools deploy --only functions --project nomad-pocket`,
-     then `curl …/api/health` and the checks in the log entry.
+     Slovenia by polygon). Deploy: GitHub Actions on push to `main` (`alerts-deploy.yml`), or by hand
+     `cd server && npx firebase-tools deploy --only functions --project nomad-pocket`, then `curl …/api/health`.
    - **Next steps**: (1) ~~deploy v2~~ done and checked; (2) ~~the Android check~~ done; (3) ~~the owner reviews
      `docs/store/listing-next.md`~~ approved; (4) release the push version (2.5.0 (52) **submitted to App Review 2026-11-12**; Play waits for the closed test): TestFlight, then App Store (App Privacy: Coarse
      Location) and Play (Data safety), Android built after `eval "$(node scripts/alerts/fcm-env.mjs)"`; (5) the owner
      reinstalls TestFlight on the iPhone (it re-registers as production; a production iOS row in Madrid appeared at
-     19:20 on 2026-11-12, probably that). **Next to build: server deploys from GitHub Actions** on pushes to `main`
-     (plan in `docs/RELEASE.md`, "Alerts server": workflow + Workload Identity Federation, no keys). Still to verify
+     19:20 on 2026-11-12, probably that). Server deploys from GitHub Actions on pushes to `main`: **built**
+     (`.github/workflows/alerts-deploy.yml`), Google Cloud and the repo variables set up 2026-11-12; the first run (the
+     22:00 push) still to check (`docs/RELEASE.md`, "Alerts server"). Still to verify
      (plan task 5): real pushes on the iPhone over days, the health workflow failing when the poll stops, a phone with
      alerts off getting nothing; phase 1's background runs on real phones. Later: PTWC tsunami messages, EMSC's
      WebSocket.
@@ -416,6 +417,22 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-11-12 — Alerts server: deploys from GitHub Actions
+
+Owner's request: the push server should deploy itself on every push to `main`, not from a command on the Mac.
+`.github/workflows/alerts-deploy.yml` runs when the server or what it bundles from the app changes (alerts cores,
+their fixtures, `alerts.json`), or by hand: `npm ci`, `npm run check`, Workload Identity Federation sign-in, `firebase
+deploy --only functions`, then waits for a healthy poll that started after the deploy. Checked on a fresh clone with
+no root `node_modules`: the cores' `fflate` import failed tsc, so the job links the server's `node_modules` at the
+repo root; tests 13/13 and the same bundle as on the Mac. esbuild now takes `server/alerts/tsconfig.json` for every
+file (the root one extends `expo/tsconfig.base`, missing on the runner). The Google Cloud side (service account with
+deploy-only roles, pool `github` trusting only this repo's `main`) is `scripts/alerts/setup-github-deploy.sh`; it was
+done the same evening with those commands in Cloud Shell (the owner's account, through Claude in Chrome, on the owner's
+go): `github-deploy` with the nine roles and serviceAccountUser on the runtime account
+`774680549863-compute@developer.gserviceaccount.com`, pool `github`, provider `github-actions` (ACTIVE, condition on
+repo + `refs/heads/main`), workloadIdentityUser for the repo. Repo variables `GCP_WIF_PROVIDER` and `GCP_DEPLOY_SA` set
+with `gh`. The first run comes with the 22:00 push; a missing role would show as a 403 in its log.
 
 ### 2026-11-12 — Alerts: MeteoAlarm hazards from the CAP, E2E off the real push server
 

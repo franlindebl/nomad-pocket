@@ -1,0 +1,107 @@
+# Deploys the official alerts push server (server/alerts, docs/ALERTS_PLAN.md phase 2) to Firebase on every push to
+# main that changes it: the server itself, or what it bundles from the app (the alerts cores and the alerts texts).
+# Checks first (typecheck, tests, build), deploys, then waits for a poll that ran after the deploy. A failure emails
+# the owner. Signs in to Google Cloud with Workload Identity Federation: no key file anywhere; the provider only
+# trusts this repo's main branch, and the service account can deploy functions and nothing else (docs/RELEASE.md,
+# "Alerts server"). The manual fallback is `cd server && npx firebase-tools deploy --only functions`.
+name: Alerts server deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'server/**'
+      - 'src/features/alerts/alerts-core.ts'
+      - 'src/features/alerts/feeds-core.ts'
+      - 'src/features/alerts/cap-core.ts'
+      - 'src/features/alerts/tar-core.ts'
+      - 'src/features/alerts/present-core.ts'
+      - 'src/features/alerts/fixtures/**'
+      - 'src/i18n/locales/*/alerts.json'
+      - '.github/workflows/alerts-deploy.yml'
+  workflow_dispatch:
+
+# One deploy at a time; a newer push waits for the running one instead of cancelling it halfway.
+concurrency:
+  group: alerts-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  FIREBASE_TOOLS: firebase-tools@15.36.0
+  HEALTH_URL: https://europe-west1-nomad-pocket.cloudfunctions.net/api/health
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: server/alerts
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/alerts/package-lock.json
+
+      # The cores under src/ import fflate; without the app's node_modules at the root (an Expo install, minutes),
+      # they find the server's through this link.
+      - name: Install
+        run: |
+          npm ci --no-audit --no-fund
+          ln -s server/alerts/node_modules "$GITHUB_WORKSPACE/node_modules"
+
+      # The 33 MB MeteoAlarm geocodes build-zones.mjs turns into data/emma.json.gz, kept until GEOCODES changes.
+      - name: Geocodes file name
+        id: geocodes
+        run: echo "name=$(grep -o 'MeteoAlarm_Geocodes_[0-9_]*\.json' scripts/build-zones.mjs)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: server/.zones-cache
+          key: zones-${{ steps.geocodes.outputs.name }}
+
+      - name: Check (typecheck, tests, build)
+        run: npm run check
+
+      # Until the Google Cloud side exists (scripts/alerts/setup-github-deploy.sh, then the two repo variables), the job
+      # checks and stops there.
+      - name: Deploy not set up
+        if: vars.GCP_WIF_PROVIDER == '' || vars.GCP_DEPLOY_SA == ''
+        run: echo "::warning::GCP_WIF_PROVIDER / GCP_DEPLOY_SA not set; checked, not deployed (docs/RELEASE.md, Alerts server)"
+
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        if: vars.GCP_WIF_PROVIDER != '' && vars.GCP_DEPLOY_SA != ''
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+
+      - name: Deploy
+        if: vars.GCP_WIF_PROVIDER != '' && vars.GCP_DEPLOY_SA != ''
+        working-directory: server
+        run: |
+          echo "DEPLOY_STARTED_MS=$(date +%s%3N)" >> "$GITHUB_ENV"
+          npx -y "$FIREBASE_TOOLS" deploy --only functions --project nomad-pocket --force --non-interactive
+
+      # The scheduler runs the poll every minute: one that started after the deploy began and answers ok means the
+      # new code is polling. /health caches its answer for 20 s.
+      - name: Wait for a poll after the deploy
+        if: vars.GCP_WIF_PROVIDER != '' && vars.GCP_DEPLOY_SA != ''
+        run: |
+          set -uo pipefail
+          for i in $(seq 1 16); do
+            body=$(curl -sS --max-time 20 "$HEALTH_URL" || true)
+            at=$(printf '%s' "$body" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const j=JSON.parse(s);console.log(j.ok?j.poll.at:0)}catch{console.log(0)}})')
+            if [ "$at" -gt "$DEPLOY_STARTED_MS" ]; then printf '%s\n' "$body" | head -c 2000; echo; exit 0; fi
+            sleep 20
+          done
+          printf '%s\n' "$body" | head -c 2000; echo
+          echo "::error::no healthy poll since the deploy started"
+          exit 1

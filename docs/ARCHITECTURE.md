@@ -1620,7 +1620,8 @@ meteoalarm.org and shows MeteoAlarm's delay notice (`detail.meteoalarmDelay`), a
 Its own package (Node 22, TypeScript bundled by esbuild into `lib/index.js`, `npm run check` = tsc + tests +
 build; excluded from the app's tsc and ESLint). Firebase project `nomad-pocket` (Blaze, inside the free tier),
 region `europe-west1`, one instance at most. `server/firebase.json` deploys it with `server/firestore.rules`
-(every client denied).
+(every client denied). GitHub Actions deploys the functions on every push to `main` that changes them
+(`.github/workflows/alerts-deploy.yml`, Workload Identity Federation; `docs/RELEASE.md`, "Alerts server").
 - `poll` (every minute): `regs` refreshed first (`store.ts RegCache`: every registration kept in memory, and only the
   rows whose `changedAt` moved since the last poll read again, with 2 min of overlap; a cold instance reads the whole
   table; turning alerts off leaves a tombstone the poll removes once seen). Then `sources.ts` fetches the state keys

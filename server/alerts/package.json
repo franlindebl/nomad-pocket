@@ -8,7 +8,7 @@
     "node": "22"
   },
   "scripts": {
-    "build": "node scripts/build-zones.mjs && esbuild src/index.ts --bundle --platform=node --target=node22 --format=cjs --outfile=lib/index.js --external:firebase-functions --external:firebase-admin --sourcemap --log-level=warning",
+    "build": "node scripts/build-zones.mjs && esbuild src/index.ts --bundle --platform=node --target=node22 --format=cjs --outfile=lib/index.js --tsconfig=tsconfig.json --external:firebase-functions --external:firebase-admin --sourcemap --log-level=warning",
     "typecheck": "tsc -p .",
     "test": "node --test --experimental-strip-types \"src/**/*.test.ts\"",
     "check": "npm run typecheck && npm test && npm run build",
