@@ -21,13 +21,14 @@
 
   <section id="es" lang="es">
     <h1>Política de privacidad</h1>
-    <p class="muted">Última actualización: 5 de noviembre de 2026</p>
+    <p class="muted">Última actualización: 12 de noviembre de 2026</p>
 
     <div class="card">
-      <strong>En resumen:</strong> Nomad Pocket no recoge, no vende y no comparte ningún dato personal, y no tiene servidor propio.
+      <strong>En resumen:</strong> Nomad Pocket no recoge, no vende y no comparte ningún dato personal.
       No hay cuentas, ni publicidad, ni analítica, ni rastreo. Lo que haces en la app se queda en tu dispositivo. La app solo se conecta
       a internet para descargar contenido y catálogos (y, si los activas, avisos oficiales) de servicios públicos de terceros, que ven tu dirección IP como en cualquier
-      conexión (abajo explicamos cuáles y cuándo).
+      conexión, y, solo si activas los avisos oficiales, a nuestro servidor de avisos, que te avisa al momento y solo conoce una cuadrícula de unos 10 km
+      (abajo explicamos cuáles y cuándo).
     </div>
 
     <h2>Quién es el responsable</h2>
@@ -36,8 +37,8 @@
       Esta política cubre la app en iPhone, iPad y Android, y esta web.</p>
 
     <h2>Datos que no recogemos</h2>
-    <p>La app no tiene servidor propio. No recogemos nombre, correo, identificadores del dispositivo, ubicación,
-      historial de uso, diagnósticos ni ningún otro dato. No usamos SDK de analítica, publicidad ni informes de errores de terceros.</p>
+    <p>La app no tiene cuentas. Salvo lo mínimo que necesita el servidor de avisos si los activas (más abajo), no recogemos nombre, correo,
+      identificadores del dispositivo, ubicación, historial de uso, diagnósticos ni ningún otro dato. No usamos SDK de analítica, publicidad ni informes de errores de terceros.</p>
 
     <h2>Datos que se quedan en tu dispositivo</h2>
     <p>Para funcionar, la app guarda localmente en tu dispositivo:</p>
@@ -46,8 +47,8 @@
         búsqueda de tus mapas, que la app construye a partir de ellos.</li>
       <li>Tu historial de lectura, marcadores, progreso de cursos, lugares guardados en el mapa y ajustes.</li>
       <li>Las conversaciones con el asistente.</li>
-      <li>Tu plan de emergencia y tu kit (contactos, puntos de encuentro, números importantes, datos de salud y notas). Solo salen del dispositivo si tú exportas el PDF y lo compartes, o dentro de las copias de seguridad del sistema si las tienes activadas (más abajo). Los recordatorios de caducidad son notificaciones locales: no usamos notificaciones push.</li>
-      <li>Si activas «Avisos oficiales»: los últimos avisos descargados, tu última posición aproximada (más abajo) y un registro de las últimas comprobaciones. Se borran al desactivarlos. Los avisos también se muestran como notificaciones locales.</li>
+      <li>Tu plan de emergencia y tu kit (contactos, puntos de encuentro, números importantes, datos de salud y notas). Solo salen del dispositivo si tú exportas el PDF y lo compartes, o dentro de las copias de seguridad del sistema si las tienes activadas (más abajo). Los recordatorios de caducidad son notificaciones locales.</li>
+      <li>Si activas «Avisos oficiales»: los últimos avisos descargados, tu última posición aproximada (más abajo) y un registro de las últimas comprobaciones. Se borran al desactivarlos. Los avisos también se muestran como notificaciones, locales o push (más abajo).</li>
     </ul>
     <p>Estos datos nunca se envían a nosotros.</p>
     <p><strong>Dónde se guardan.</strong> En iPhone y iPad, tus datos (ajustes, historial, marcadores, conversaciones, lugares, plan y kit)
@@ -75,6 +76,17 @@
       mientras la usabas, redondeada a unos 100 m, y comprueba en el propio teléfono qué avisos la cubren. Para esto no pide la ubicación
       «siempre» ni la consulta en segundo plano: usa esa última posición guardada. No sale del dispositivo, con una excepción: en Estados Unidos,
       para pedir los avisos de tu zona, la app envía al Servicio Meteorológico Nacional (NWS) esa posición redondeada a unos 5 km.</p>
+    <p><strong>Avisos al momento</strong> (solo con los avisos oficiales activados): para que te llegue una notificación en cuanto se publica un
+      aviso, aunque no abras la app, la app se registra en el servidor de avisos de Nomad Pocket. El servidor guarda solo: el identificador de
+      notificaciones que el sistema da a la app (en iPhone, de Apple; en Android, de Firebase Cloud Messaging de Google), la cuadrícula de 0,1°
+      (unos 11 × 8 km en España) en la que está tu última posición, nunca la posición, tu país, el idioma de la app, tu zona horaria, tus
+      preferencias (desde qué nivel avisar y si quieres terremotos) y qué avisos ya te ha enviado. No guarda tu nombre, ninguna cuenta ni tu
+      dirección IP, salvo en los registros técnicos que Google guarda unos días. Se borra al desactivar los avisos, cuando Apple o Google indican
+      que la app ya no está en el dispositivo, o tras 90 días sin que la app lo renueve. El servidor funciona en Firebase (Google Cloud), en la
+      Unión Europea (Bélgica), y lo gestiona el responsable de esta política; la base para tratar estos datos es tu consentimiento al activar
+      los avisos, y puedes retirarlo desactivándolos o pedir que lo borremos escribiendo al contacto de arriba. Para entregar cada notificación,
+      Apple (APNs) o Google (FCM) reciben su texto y el identificador de tu dispositivo, como con cualquier notificación push. Si el servidor no
+      responde, la app vuelve a comprobar los avisos por su cuenta.</p>
 
     <h2>Asistente de IA</h2>
     <p>El asistente funciona íntegramente en tu dispositivo. En iPhone y iPad usa el modelo integrado del sistema (Apple Intelligence,
@@ -95,7 +107,8 @@
       internet. Los enlaces a sitios web solo se abren si los tocas y lo confirmas, en tu navegador; a partir de ahí se aplica la política de ese sitio.</p>
 
     <h2>Conexiones a servicios de terceros</h2>
-    <p>La app no tiene cuentas ni servidor propio. Se conecta directamente a los servidores públicos de quien publica cada cosa:</p>
+    <p>La app no tiene cuentas. Se conecta directamente a los servidores públicos de quien publica cada cosa y, solo con los avisos oficiales
+      activados, al servidor de avisos de Nomad Pocket:</p>
     <ul>
       <li><strong>Al abrirla con conexión</strong>, y al abrir las pantallas de países, la app consulta en <a href="https://github.com/franlindebl/nomad-pocket/releases">GitHub</a>
         (propiedad de Microsoft) los catálogos de mapas y paquetes de navegación de este proyecto: archivos pequeños, sin que la app envíe nada tuyo.
@@ -120,6 +133,10 @@
         (<code>www.gdacs.org</code>, en el resto de países) y, para los terremotos, <a href="https://earthquake.usgs.gov">USGS</a>
         (<code>earthquake.usgs.gov</code>) y <a href="https://www.emsc-csem.org">EMSC</a> (<code>www.seismicportal.eu</code>). Salvo al NWS,
         la petición es la misma para todo el mundo y no incluye tu ubicación: qué avisos te afectan se decide en el teléfono.</li>
+      <li><strong>Solo si activas «Avisos oficiales»</strong>: el servidor de avisos de Nomad Pocket (<code>europe-west1-nomad-pocket.cloudfunctions.net</code>,
+        en Firebase de Google, en la Unión Europea), con los datos que se explican arriba. En Android, para obtener el identificador de
+        notificaciones, la app pregunta a los servicios de Google Play del propio teléfono y a Firebase Installations de Google
+        (<code>firebaseinstallations.googleapis.com</code>); la app no incluye ninguna librería de Google.</li>
     </ul>
     <p>Como en cualquier conexión a internet, esos servidores reciben tu dirección IP y la petición, y se rigen por sus propias
       políticas de privacidad. La app no les envía ningún identificador tuyo ni datos personales. Si la opción «Solo con Wi‑Fi» está
@@ -153,12 +170,13 @@
 
   <section id="en" lang="en">
     <h1>Privacy policy</h1>
-    <p class="muted">Last updated: November 5, 2026</p>
+    <p class="muted">Last updated: November 12, 2026</p>
 
     <div class="card">
-      <strong>In short:</strong> Nomad Pocket does not collect, sell or share any personal data, and has no server of its own.
+      <strong>In short:</strong> Nomad Pocket does not collect, sell or share any personal data.
       There are no accounts, ads, analytics or tracking. What you do in the app stays on your device. The app only goes online to download
-      content and catalogs (and, if you turn them on, official alerts) from public third-party services, which see your IP address as with any internet connection
+      content and catalogs (and, if you turn them on, official alerts) from public third-party services, which see your IP address as with any internet connection,
+      and, only if you turn on official alerts, to our alerts server, which alerts you at once and only knows a grid square of about 10 km
       (we explain which ones and when below).
     </div>
 
@@ -168,8 +186,8 @@
       This policy covers the app on iPhone, iPad and Android, and this website.</p>
 
     <h2>Data we don't collect</h2>
-    <p>The app has no server of its own. We don't collect your name, email, device identifiers, location, usage history,
-      diagnostics or any other data. We use no third-party analytics, advertising or crash-reporting SDKs.</p>
+    <p>The app has no accounts. Apart from the minimum the alerts server needs if you turn alerts on (see below), we don't collect your name,
+      email, device identifiers, location, usage history, diagnostics or any other data. We use no third-party analytics, advertising or crash-reporting SDKs.</p>
 
     <h2>Data that stays on your device</h2>
     <p>To work, the app stores locally on your device:</p>
@@ -178,8 +196,8 @@
         which the app builds from them.</li>
       <li>Your reading history, bookmarks, course progress, saved map places and settings.</li>
       <li>Your conversations with the assistant.</li>
-      <li>Your emergency plan and kit (contacts, meeting points, important numbers, health details and notes). They only leave the device if you export the PDF and share it, or inside your system backups if you have them turned on (see below). Expiry reminders are local notifications: we don't use push notifications.</li>
-      <li>If you turn on “Official alerts”: the last alerts downloaded, your last approximate position (see below) and a log of the latest checks. They are deleted when you turn alerts off. Alerts are also shown as local notifications.</li>
+      <li>Your emergency plan and kit (contacts, meeting points, important numbers, health details and notes). They only leave the device if you export the PDF and share it, or inside your system backups if you have them turned on (see below). Expiry reminders are local notifications.</li>
+      <li>If you turn on “Official alerts”: the last alerts downloaded, your last approximate position (see below) and a log of the latest checks. They are deleted when you turn alerts off. Alerts are also shown as notifications, local or push (see below).</li>
     </ul>
     <p>This data is never sent to us.</p>
     <p><strong>Where it lives.</strong> On iPhone and iPad, your data (settings, history, bookmarks, conversations, places, plan and kit)
@@ -205,6 +223,17 @@
       using it, rounded to about 100 m, and checks on the phone itself which alerts cover it. For this it never asks for your location
       “always” nor reads it in the background: it uses that last saved position. It doesn't leave the device, with one exception: in the
       United States, to ask for the alerts for your area, the app sends that position rounded to about 5 km to the National Weather Service (NWS).</p>
+    <p><strong>Instant alerts</strong> (only with official alerts on): so that a notification reaches you as soon as an alert is published,
+      even if you don't open the app, the app registers with Nomad Pocket's alerts server. The server keeps only: the notification identifier the
+      system gives the app (on iPhone, from Apple; on Android, from Google's Firebase Cloud Messaging), the 0.1° grid square (about 11 × 8 km in
+      Spain) your last position falls in, never the position itself, your country, the app's language, your time zone, your preferences (from
+      which level to notify and whether you want earthquakes) and which alerts it has already sent you. It keeps no name, no account and no IP
+      address, except in the technical logs Google keeps for a few days. It is deleted when you turn alerts off, when Apple or Google report that
+      the app is no longer on the device, or after 90 days without the app renewing it. The server runs on Firebase (Google Cloud) in the
+      European Union (Belgium) and is run by the controller named in this policy; the basis for processing this data is your consent when you
+      turn alerts on, which you can withdraw by turning them off, or ask us to delete it by writing to the contact above. To deliver each
+      notification, Apple (APNs) or Google (FCM) receive its text and your device's identifier, as with any push notification. If the server
+      doesn't answer, the app goes back to checking alerts by itself.</p>
 
     <h2>AI assistant</h2>
     <p>The assistant runs entirely on your device. On iPhone and iPad it uses the system's built-in model (Apple Intelligence, when available)
@@ -224,7 +253,8 @@
       internet. Links to websites open only if you tap them and confirm, in your browser; that site's policy applies from there.</p>
 
     <h2>Connections to third-party services</h2>
-    <p>The app has no accounts and no server of its own. It connects directly to the public servers of whoever publishes each thing:</p>
+    <p>The app has no accounts. It connects directly to the public servers of whoever publishes each thing and, only with official alerts on,
+      to Nomad Pocket's alerts server:</p>
     <ul>
       <li><strong>When it opens online</strong>, and when you open the country screens, the app checks <a href="https://github.com/franlindebl/nomad-pocket/releases">GitHub</a>
         (owned by Microsoft) for this project's map and navigation-pack catalogs: small files, with nothing of yours sent by the app.
@@ -249,6 +279,10 @@
         (<code>www.gdacs.org</code>, in other countries) and, for earthquakes, <a href="https://earthquake.usgs.gov">USGS</a>
         (<code>earthquake.usgs.gov</code>) and <a href="https://www.emsc-csem.org">EMSC</a> (<code>www.seismicportal.eu</code>). Except for the NWS,
         the request is the same for everyone and contains no location: which alerts affect you is worked out on the phone.</li>
+      <li><strong>Only if you turn on “Official alerts”</strong>: Nomad Pocket's alerts server (<code>europe-west1-nomad-pocket.cloudfunctions.net</code>,
+        on Google's Firebase, in the European Union), with the data explained above. On Android, to get the notification identifier, the app asks
+        the phone's own Google Play services and Google's Firebase Installations (<code>firebaseinstallations.googleapis.com</code>); the app
+        includes no Google library.</li>
     </ul>
     <p>As with any internet connection, those servers receive your IP address and the request, and are governed by their own
       privacy policies. The app sends them no identifiers or personal data about you. If “Wi‑Fi only” is on, content downloads wait for a

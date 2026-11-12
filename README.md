@@ -172,12 +172,14 @@ server) to the device everyone already carries.
 ## Private by design
 
 No account. No ads. No analytics. No tracking. Your plan, your contacts, your location and
-your questions to the assistant stay on your phone. The app has no server of its own: it only
-goes online to download the content you choose and to check the list of available country
+your questions to the assistant stay on your phone. Everything works without a server: the app
+only goes online to download the content you choose and to check the list of available country
 packages, from public servers (Kiwix and its mirrors, GitHub Releases, Protomaps, Hugging
 Face, and public Overpass servers, which only see a region's bounds). Pages of the
 books you read can't reach the network. When the app opens online it checks GitHub for the
-catalogs, so GitHub sees your IP address.
+catalogs, so GitHub sees your IP address. The one exception is opt-in: with official alerts on,
+the phone registers its push token and a ~10 km grid square with our small alerts server
+(`server/alerts`, Firebase, EU), so warnings arrive at once.
 [Privacy policy](https://nomad-pocket.app/privacy.html).
 
 ## FAQ

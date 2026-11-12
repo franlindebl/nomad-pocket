@@ -134,6 +134,9 @@ Options (owner's decision 2026-11-04: no changes for now):
 
 Answers, matching `site/privacy.html` (re-read it before filling this in):
 
+**From the first build with alerts push** these change: approximate location and the FCM token are collected
+while official alerts are on (`docs/store/listing-next.md`, "Google Play Data safety").
+
 - **Does your app collect or share any of the required user data types?** No.
   - Location, the family plan, contacts typed into it, questions to the assistant, voice for dictation:
     all processed only on the device, never sent off it, so Play doesn't count them as collected
