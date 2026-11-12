@@ -13,15 +13,19 @@ Spain first (done, below); the others are in the backlog of `docs/PROGRESS.md`, 
 
 ## How it works
 
-1. **Fetch** (`.github/workflows/official-points.yml`, monthly on the 3rd): `scripts/official/es.py` reads the
-   registers and writes `es.official.tsv` (source, code, kind, lat, lon, name, holder, phone, address,
-   municipality, precision) into the `official-points` release, with `es.official.report.json` (rows per
-   source, what failed) and `es.geocache.tsv` (geocoder answers, so a month only asks for new addresses).
-   A source that doesn't answer, or answers with under 80% of last month's rows, keeps last month's rows.
+1. **Fetch** (`.github/workflows/official-points.yml`, monthly on the 3rd, one job per country): each
+   `scripts/official/<cc>.py` reads its country's registers and writes `<cc>.official.tsv` (source, code, kind, lat,
+   lon, name, holder, phone, address, municipality, precision) into the `official-points` release, with
+   `<cc>.official.report.json` (rows per source, what failed) and, where it geocodes, `<cc>.geocache.tsv`
+   (geocoder answers, so a month only asks for new addresses). A source that doesn't answer, or answers with under
+   80% of last month's rows, keeps last month's rows. A new country is a new script: the workflow picks up every
+   two-letter `scripts/official/??.py`, and the merge and the app need nothing.
 2. **Merge** (country packs, monthly on the 5th): `scripts/routing/build-country.sh` step 6a downloads
    `<country>.official.tsv` (`OFFICIAL_CACHE`) and `scripts/official/merge.py` appends to `<pack>.pois.tsv` the
    official points with no OSM point of their group nearby (rows of type `official`, id `<source>:<code>`).
-   Each OSM point absorbs one official point at most (hospitals excepted), a shared name first, then the nearest:
+   Each OSM point absorbs one official point at most (hospitals excepted), a shared name first, then the nearest
+   (name words: Latin and Cyrillic words minus generic ones; Japanese names, which have no spaces, cut at their
+   generic words, so つがやす薬局東２条店 and OSM's つがやす薬局 東2条店 share つがやす and 東2条):
 
    | Group | Official kinds | Same point when within | or, sharing a name word, within |
    |---|---|---|---|
@@ -77,6 +81,43 @@ lists and the colegios de farmacéuticos' finders (not open data) are not used.
 
 Attribution: Settings › Credits (`official-health-points-es` in `scripts/licenses/native.json`) and the
 routing release notes.
+
+## Other countries (2026-11-12)
+
+Chosen from `docs/OFFICIAL_POINTS_WORLD.md`. Before a country goes in, its register is measured against the app's
+OSM points (the published `<cc>.pois.tsv`): where both have a pharmacy, the two points should be a few metres apart
+(Castilla-La Mancha: 85% within 50 m). A register whose points don't pass that adds misplaced duplicates and stays
+out. Each has its Credits entry (`official-health-points-<cc>` in `scripts/licenses/native.json`). Numbers on the
+packs of 2026-11-05:
+
+| Country | Script, source | Licence | Already in OSM, median distance | Added |
+|---|---|---|---|---|
+| Japan | `jp.py`: MHLW 医療情報ネット open data (pharmacies, hospitals, clinics; twice a year) | PDL 1.0 (≈ CC BY 4.0; say it was processed) | 18,425 pharmacies, 9 m | **41,988 pharmacies, 1,187 hospitals, 36,679 clinics** |
+| France | `fr.py`: FINESS - Structures, monthly (ANS) | Licence Ouverte 2.0 | 16,530 pharmacies | **1,996 pharmacies, 331 hospitals, 3,871 centres** |
+| Czechia | `cz.py`: NRPZS places of provision, monthly (ÚZIS) | CC BY 4.0 | 2,231 pharmacies, 9 m | **242 pharmacies, 15 hospitals, 3,876 GP practices** |
+| Ukraine | `ua.py`: NSZU reimbursement pharmacies and primary-care divisions, weekly | CC BY 4.0 | 8,676 pharmacies, 21 m | **8,183 pharmacies, 10,778 primary-care points** (1,600 ФАП) |
+
+- **Japan.** Clinics are the register's 診療所 offering internal medicine, paediatrics, surgery, general practice or
+  emergency care (51k of 80k: no eye, skin or cosmetic practices). 12% of the pharmacies and 6% of the clinics
+  report no coordinates: placed with GSI's address search (国土地理院), keeping an answer down to the block or house
+  number whose numbers begin the address's (measured on 200 pharmacies with coordinates: 79% placed, median 24 m,
+  90% within 190 m); 86% placed. Hospitals: OSM tags many clinics as hospitals (10,399 against the register's
+  7,672), so few are added. Facility ids are stable between publications (58,973 of 60,354 kept).
+- **France.** Pharmacies (620), hospitals (101 CHR/CHU, 355 CH, 106 ex-hôpital local, 365 private multi-specialty),
+  centres de santé (124), maisons de santé (603) and walk-in care (617). ~20% of the establishments have no BAN
+  point: placed with the Géoplateforme geocoder in their commune (house number, else street); 1,404 not placed.
+  Metropolitan France only.
+- **Czechia.** Pharmacies (510), hospitals (101-103), GPs for adults and children (320, 321), polyclinics (301, 302)
+  and health centres (310); a building's several doctors (points of a kind within 15 m) are one point. Points are the
+  address register's (RÚIAN). The register also lists ambulance stations (481), not a kind the merge adds yet.
+- **Ukraine.** Only pharmacies contracted for reimbursed medicines (most, not all); hospitals aren't listed.
+  Points are entered by the providers: those with under four decimals, or stacked three or more on one spot (a
+  town's centre standing in for several), are left out. Cities have a pharmacy every few doors, so an added one is
+  often within 300 m of an OSM one (half of them).
+- **Italy (not added).** The Ministry's daily pharmacy register (IODL 2.0, 20,777 open) has coordinates for 91%, but
+  they fail the test: only 17% are within 50 m of an OSM pharmacy (median 377 m), and 6,680 share their exact point
+  with another pharmacy (Turin's Piazza Vittorio Veneto 10 sits 9 km out of town). It needs the addresses placed
+  first, e.g. with ANNCSU, the Agenzia delle Entrate's open register of house numbers.
 
 ## Improvements not built yet
 

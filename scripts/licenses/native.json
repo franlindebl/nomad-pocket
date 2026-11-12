@@ -417,6 +417,48 @@
       "text": null
     },
     {
+      "id": "official-health-points-jp",
+      "name": "Japan: official register of pharmacies, hospitals and clinics",
+      "license": "PDL-1.0 (Public Data License, compatible with CC-BY-4.0)",
+      "copyright": [
+        "出典：厚生労働省「医療情報ネットのオープンデータ」(Ministry of Health, Labour and Welfare)",
+        "住所検索：国土地理院 (Geospatial Information Authority of Japan)"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Pharmacies, hospitals and primary-care clinics in Japan that OpenStreetMap lacks, added to the country's emergency points every month. Processed by Nomad Pocket (このデータは厚生労働省「医療情報ネットのオープンデータ」を加工して作成): clinics filtered to internal medicine, paediatrics, surgery, general practice and emergency care, points already in OpenStreetMap left out, and addresses without coordinates placed with GSI's address search.",
+      "text": null
+    },
+    {
+      "id": "official-health-points-fr",
+      "name": "France: FINESS register of health establishments",
+      "license": "Licence Ouverte 2.0 (Etalab)",
+      "copyright": [
+        "Ministère de la Santé / Agence du Numérique en Santé (FINESS)",
+        "Base Adresse Nationale, Géoplateforme (IGN)"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Pharmacies, hospitals, health centres, maisons de santé and walk-in care in metropolitan France that OpenStreetMap lacks, added to the country's emergency points every month (FINESS - Structures, data.gouv.fr). Addresses without a point placed with the Géoplateforme geocoder.",
+      "text": null
+    },
+    {
+      "id": "official-health-points-cz",
+      "name": "Czechia: National Register of Health Service Providers",
+      "license": "CC-BY-4.0",
+      "copyright": ["Ústav zdravotnických informací a statistiky ČR (ÚZIS), Ministerstvo zdravotnictví ČR (NRPZS)"],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Pharmacies, hospitals and primary care (general practitioners, polyclinics) in Czechia that OpenStreetMap lacks, added to the country's emergency points every month (NR-01-06, places of provision).",
+      "text": null
+    },
+    {
+      "id": "official-health-points-ua",
+      "name": "Ukraine: National Health Service of Ukraine registers",
+      "license": "CC-BY-4.0",
+      "copyright": ["Національна служба здоров'я України (NSZU), data.gov.ua"],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Pharmacies dispensing reimbursed medicines and primary-care divisions (ambulatories, feldsher-midwife posts) in Ukraine that OpenStreetMap lacks, added to the country's emergency points every month.",
+      "text": null
+    },
+    {
       "id": "wikipedia-kiwix",
       "name": "Wikipedia and Kiwix content",
       "license": "CC-BY-SA-4.0",

@@ -76,9 +76,11 @@ OP. **Official points: complete OSM with official registers, country by country*
    the doc. **Then every other country**, one at a time: find its open registers (pharmacies, hospitals, health
    centres), measure OSM against them as for Castilla-La Mancha, add a `scripts/official/<cc>.py` writing
    `<cc>.official.tsv` (merge and app need nothing new). World research done 2026-11-12
-   (`docs/OFFICIAL_POINTS_WORLD.md`): first Japan (MHLW, ~37k pharmacies and ~55k clinics missing), Ethiopia,
-   Ukraine, Italy, France, Czechia, Chile, Peru, Australia (licence chain to clear), Nigeria; Brazil waits on
-   DATASUS's licence; Germany, Austria, Switzerland, the Nordics, Benelux and Portugal have little to add.
+   (`docs/OFFICIAL_POINTS_WORLD.md`). **Built 2026-11-12**: Japan, France, Czechia, Ukraine (`docs/OFFICIAL_POINTS.md`,
+   "Other countries"); their first CI run, then their packs. Italy tried and left out (the register's coordinates
+   fail against OSM; needs ANNCSU geocoding). Next: Chile, Peru, Ethiopia, Nigeria, Australia (licence chain to
+   clear), Uruguay, Canada (Ontario, BC), the UK (postcodes), the US (HRSA); Brazil waits on DATASUS's licence;
+   Germany, Austria, Switzerland, the Nordics, Benelux and Portugal have little to add.
 
 AM. **Assistant × maps** (`docs/ASSISTANT_MAP_PLAN.md`, approved 2026-11-05; **phase 1 and 1b built the same day**,
    checked on iOS and Android: see the plan's "Phase 1 — status" and "1b"): the assistant
@@ -113,8 +115,10 @@ AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's d
    phase 1 (the plan's "Phase 1 — status"): measuring background
    runs on real phones for a few days (Settings › Avisos oficiales › Comprobaciones recientes), the owner's review of
    `docs/store/listing-2.3.0.md` and the privacy policy changes, a signing check of the Time Sensitive entitlement.
-   **Phase 2, right after**: iOS push from a free server (Deno Deploy, `server/alerts/`); needs a Deno Deploy
-   account and an APNs key from the owner. Blocking for Europe: MeteoAlarm's extra redistribution terms and an
+   **Phase 2, right after**: push from a free server (Deno Deploy, `server/alerts/`): APNs on iOS; on Android, FCM
+   through the phone's Play services over IPC with only free code in the APK, if its spike works (else 15-min
+   checks + battery-optimisation exclusion). Needs from the owner: a Deno Deploy account, an APNs key and a free
+   Firebase project with a service account. Background polling measured 2026-11-12: iOS runs it only at night. Blocking for Europe: MeteoAlarm's extra redistribution terms and an
    API token for its region geometries (email `meteoalarm@geosphere.at`).
 
 CU. **Content updates, next** (`docs/CONTENT_UPDATES_PLAN.md`): the owner tries build 27 on the iPhone; later an
@@ -371,12 +375,37 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-12 — Official alerts: why push, and Android push without Firebase in the APK (analysis)
+
+- The owner's iPhone shows background checks only from 03:19 to 07:23 and none until the app was opened at 12:44:
+  `expo-background-task` uses a `BGProcessingTask`, which iOS runs at night on the charger. With people who never
+  open the app again, polling can't carry alerts on either platform; it stays as the fallback.
+- Owner's decisions: no second app (UnifiedPush out), no Firebase/Play services code in the APK (GPL of libkiwix,
+  libzim, Xapian), APNs push on iOS, and a deep look at FCM through the phone's Play services over IPC.
+- Analysis written into `docs/ALERTS_PLAN.md` (phase 2): the registration extras are in Firebase's Apache-2.0
+  `GmsRpc.java`, the intent transport is reimplemented as free code by microG (`CloudMessagingRpc`, `InstanceIdRpc`),
+  the installation id is a REST call, receiving is a manifest receiver. Licences look clean (only our GPL code in the
+  APK, arm's-length IPC); eight risks listed; a one-day spike on a real phone decides go/no-go.
+
 ### 2026-11-11 — 2.4.3 (50) submitted to App Review
 
 - 2.4.2 (49) was approved; the owner asked to ship 2.4.3 once the E2E passed: 2.4.2 plus Spain's official health
   points (entry below; Spain's routing pack already republished with them, run 43016421128) and the Units setting.
   "What's new" approved by the owner (`docs/store/listing-2.4.3.md`). E2E smoke 23/24 with `--build`, map-12 alone
   passes (as in the last releases). Android `versionCode` 32 (not uploaded).
+
+### 2026-11-12 — Official points: Japan, France, Czechia, Ukraine
+
+- One fetch script per country, each checked against the app's OSM points before going in (where both have a
+  pharmacy the points must be metres apart): `jp.py` (MHLW 医療情報ネット; 12% without coordinates placed with GSI's
+  address search: 86% placed, median 24 m), `fr.py` (FINESS+, the rest placed with the BAN geocoder), `cz.py`
+  (ÚZIS NRPZS), `ua.py` (NSZU). On the packs of 2026-11-05 they add 42k pharmacies, 1.2k hospitals and 37k clinics
+  to Japan; 2k pharmacies, 330 hospitals and 3.9k centres to France; 3.9k GP practices to Czechia; 8.2k pharmacies
+  and 10.8k primary-care points to Ukraine.
+- `official-points.yml` runs one job per `scripts/official/??.py`. `merge.py` matches names in Japanese (cut at
+  generic words) and Cyrillic too. Credits: one entry per country.
+- Italy left out: its register's points are 377 m from OSM's pharmacies at the median, 6,680 share a point.
+
 
 ### 2026-11-12 — Official points: world research
 

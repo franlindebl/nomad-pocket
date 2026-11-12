@@ -3,17 +3,26 @@ name: Official points
 # Points from official registers that OpenStreetMap lacks, refreshed monthly into the official-points
 # release two days before country-packages.yml adds them to the country packs' emergency points
 # (scripts/routing/build-country.sh, step 6a; scripts/official/merge.py; docs/OFFICIAL_POINTS.md).
-# Today: Spain (scripts/official/es.py) → es.official.tsv: pharmacies and botiquines from the regional
-# registers and the Ministry's REGCESS, hospitals, health centres and consultorios from REGCESS, REGCESS
-# addresses placed with CartoCiudad. A source that doesn't answer keeps last month's rows, read back from the
-# release (the job then ends in a warning); geocoder answers are kept there too (es.geocache.tsv), so a month
-# only asks for new addresses (the first run asks ~25k: about an hour and a half).
+# One job per country, each with its script scripts/official/<cc>.py → <cc>.official.tsv (+ .report.json, and
+# <cc>.geocache.tsv with its geocoder's answers, so a month only asks for new addresses):
+# - es: pharmacies and botiquines from the regional registers and the Ministry's REGCESS, hospitals, health
+#   centres and consultorios from REGCESS, REGCESS addresses placed with CartoCiudad.
+# - jp: pharmacies, hospitals and primary-care clinics from MHLW's 医療情報ネット open data, addresses without
+#   coordinates placed with GSI's address search.
+# - fr: pharmacies, hospitals, health centres, maisons de santé and walk-in care from FINESS, the rest placed with the BAN.
+# - cz: pharmacies, hospitals and primary care from ÚZIS's register of providers (NRPZS).
+# - ua: pharmacies and primary-care divisions from the National Health Service of Ukraine (NSZU).
+# A source that doesn't answer keeps last month's rows, read back from the release (the job then ends in a warning).
 
 on:
   workflow_dispatch:
     inputs:
+      countries:
+        description: 'Countries (scripts/official/<cc>.py), space separated (empty: all)'
+        required: false
+        default: ''
       only:
-        description: 'Source ids from scripts/official/es.py (es-cm es-regcess …), space separated (empty: all)'
+        description: 'Spain only: source ids from scripts/official/es.py (es-cm es-regcess …), space separated (empty: all)'
         required: false
         default: ''
   schedule:
@@ -27,39 +36,66 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  fetch:
+  plan:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
+    outputs:
+      countries: ${{ steps.plan.outputs.countries }}
     env:
       GH_TOKEN: ${{ github.token }}
+      INPUT: ${{ github.event.inputs.countries }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - id: plan
+        run: |
+          all=$(cd scripts/official && ls ??.py | sed 's/\.py$//')
+          want=${INPUT:-$all}
+          echo "countries=$(printf '%s\n' $want | python3 -I -c 'import json, sys; print(json.dumps(sys.stdin.read().split()))')" >> "$GITHUB_OUTPUT"
+      - name: The release
+        run: |
+          source scripts/gh-releases.sh
+          has_release official-points || gh release create official-points --prerelease --title "Official points" \
+            --notes "Points from official registers that OpenStreetMap lacks, added to the country packs by the monthly build: not read by the app. <cc>.official.tsv per country (sources and licences in <cc>.official.report.json and docs/OFFICIAL_POINTS.md)."
+
+  fetch:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        country: ${{ fromJSON(needs.plan.outputs.countries) }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CC: ${{ matrix.country }}
       ONLY: ${{ github.event.inputs.only }}
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: The release
+      - name: Last month's
         run: |
-          source scripts/gh-releases.sh
-          has_release official-points || gh release create official-points --prerelease --title "Official points" \
-            --notes "Points from official registers that OpenStreetMap lacks, added to the country packs by the monthly build: not read by the app. es.official.tsv: Spain's pharmacies, hospitals and health centres (sources and licences in es.official.report.json and docs/OFFICIAL_POINTS.md)."
           mkdir -p previous out
-          gh release download official-points --pattern 'es.official.tsv' --pattern 'es.geocache.tsv' --dir previous || true
-          [[ -f previous/es.geocache.tsv ]] && cp previous/es.geocache.tsv out/es.geocache.tsv || true
+          gh release download official-points --pattern "$CC.official.tsv" --pattern "$CC.geocache.tsv" --dir previous || true
+          [[ -f previous/$CC.geocache.tsv ]] && cp previous/$CC.geocache.tsv out/$CC.geocache.tsv || true
       - name: Ask the registers
         id: fetch
         run: |
-          args=(--geocache out/es.geocache.tsv)
-          [[ -f previous/es.official.tsv ]] && args+=(--previous previous/es.official.tsv)
-          [[ -n "$ONLY" ]] && args+=(--only $ONLY)
+          args=(--geocache out/$CC.geocache.tsv)
+          [[ -f previous/$CC.official.tsv ]] && args+=(--previous previous/$CC.official.tsv)
+          [[ "$CC" == es && -n "$ONLY" ]] && args+=(--only $ONLY)
           status=0
-          python3 -I scripts/official/es.py out/es.official.tsv "${args[@]}" || status=$?
+          python3 -I scripts/official/$CC.py out/$CC.official.tsv "${args[@]}" || status=$?
           echo "status=$status" >> "$GITHUB_OUTPUT"
-          cat out/es.official.report.json
+          cat out/$CC.official.report.json
       - name: Keep them
         run: |
-          [[ -s out/es.official.tsv ]] || { echo "::error::no output"; exit 1; }
-          gh release upload official-points out/es.official.tsv out/es.official.report.json out/es.geocache.tsv --clobber
+          [[ -s out/$CC.official.tsv ]] || { echo "::error::no output"; exit 1; }
+          files=(out/$CC.official.tsv out/$CC.official.report.json)
+          [[ -s out/$CC.geocache.tsv ]] && files+=(out/$CC.geocache.tsv)
+          gh release upload official-points "${files[@]}" --clobber
           if [[ "${{ steps.fetch.outputs.status }}" != "0" ]]; then
-            echo "::warning::some registers didn't answer: last month's rows kept (es.official.report.json)"
+            echo "::warning::some registers didn't answer: last month's rows kept ($CC.official.report.json)"
             exit 1
           fi

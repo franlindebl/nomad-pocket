@@ -46,9 +46,31 @@ STOP = {"farmacia", "farmacias", "botiquin", "lda", "ldo", "con", "por", "sur", 
         "medico", "rural", "atencion", "primaria", "nuestra", "senora", "quiron", "quironsalud", "hm", "vithas"}
 
 
+# Japanese names (scripts/official/jp.py) have no spaces: their generic words split them into the distinctive parts
+# (つがやす薬局東２条店 → つがやす, 東2条; OSM writes it つがやす薬局 東2条店).
+CJK_GENERIC = re.compile("医療法人社団|医療法人財団|医療法人|社会医療法人|社団法人|財団法人|公益|一般|株式会社|有限会社|合同会社|"
+                         "調剤薬局|保険薬局|薬局|薬店|ファーマシー|ドラッグストア|ドラッグ|調剤|クリニック|診療所|医院|病院|"
+                         "総合|内科|小児科|外科|整形|歯科|センター|メディカル|附属|付属|大学|国立|県立|府立|都立|道立|市立|町立|"
+                         "村立|店|支店|本店|分院|[\\s・･()（）「」『』、。.,\\-]")
+CJK = re.compile(r"[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff]")
+# Cyrillic names (scripts/official/ua.py): the register writes the company, OSM the chain's sign; both often share it.
+CYRILLIC = re.compile(r"[\u0400-\u04ff'\u02bc\u2019]{3,}")
+CYRILLIC_STOP = {"аптека", "аптечний", "аптечна", "пункт", "амбулаторія", "фап", "товариство", "обмеженою",
+                 "відповідальністю", "тов", "фоп", "кнп", "комунальне", "некомерційне", "підприємство", "центр", "первинної",
+                 "медико", "санітарної", "медичної", "допомоги", "міської", "сільської", "селищної", "ради", "району",
+                 "області", "філія", "місто", "село", "вулиця", "лікарня", "поліклініка", "приватне", "фельдшерсько",
+                 "акушерський"}
+
+
 def words(text):
     t = unicodedata.normalize("NFKD", text or "").encode("ascii", "ignore").decode().lower()
-    return {w for w in re.findall(r"[a-z]+", t) if len(w) > 2 and w not in STOP}
+    out = {w for w in re.findall(r"[a-z]+", t) if len(w) > 2 and w not in STOP}
+    if re.search(r"[\u0400-\u04ff]", text or ""):
+        out |= {w for w in CYRILLIC.findall((text or "").lower()) if w not in CYRILLIC_STOP}
+    if CJK.search(text or ""):
+        t = unicodedata.normalize("NFKC", text)
+        out |= {w for w in CJK_GENERIC.split(t) if len(w) > 1 and CJK.search(w)}
+    return out
 
 
 def meters(a_lat, a_lon, b_lat, b_lon):

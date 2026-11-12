@@ -3,7 +3,8 @@
 Desk research for the goal in `docs/OFFICIAL_POINTS.md` (do Spain's review for every country): one research agent per batch of
 countries, an independent verifier re-checking every source called usable (dataset page, licence page, a sample of the data), then
 this synthesis. Probes ran from a home connection, not from a GitHub runner: re-test every fetcher from a runner before building it.
-Nothing here is built yet.
+Built since (2026-11-12, `docs/OFFICIAL_POINTS.md`, "Other countries"): Japan, France, Czechia, Ukraine. Italy was
+tried and left out: its register's coordinates fail the comparison with OSM.
 
 Scope: pharmacies, hospitals and health centres completed from official open registers, as done for Spain. Where the verifier did not confirm a source, this report says "unconfirmed" or "rejected". Nothing here goes beyond the research and verifier input.
 
