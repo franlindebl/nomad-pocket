@@ -50,6 +50,10 @@ Spain first (done, below); the others are in the backlog of `docs/PROGRESS.md`, 
 | Hospitals | 615 | 482 | **133** |
 | Health centres and consultorios | 12,398 | 4,642 | **7,756** |
 
+With the regional centre lists and the regional gaps (2026-11-12, same baseline): pharmacies and botiquines 22,714 /
+15,924 / **6,790**; hospitals 676 / 556 / **120** (fewer duplicates of misplaced hospitals); health centres and
+consultorios 12,984 / 5,173 / **7,811**.
+
 Pharmacies added by region: Aragón 56%, La Rioja 58%, Castilla-La Mancha 49%, Navarra 44%, the REGCESS regions
 41%, Baleares 28%, Asturias 24% (its own list then; REGCESS since), Andalucía 23%, Madrid 18%, Cataluña 11%, País Vasco 5%. REGCESS placed 21,210 of
 22,483 addresses (613 pharmacies, 35 botiquines, 6 hospitals and 619 centres not placed).
@@ -88,6 +92,33 @@ First run: Aragón 30 (mostly botiquines), Cataluña 16, Navarra 14, La Rioja 4,
 Castilla-La Mancha's and Euskadi's codes don't match REGCESS's (13 and 4 more in REGCESS than in their lists): not
 yet. REGCESS names stored as UTF-8 read as Latin-1 ("SÃNCHEZ") are put back; pharmacy depots (military,
 hospital) aren't added.
+
+**Health centres with the regions' own points** (2026-11-12, `CENTRES` in `es.py`): REGCESS's addresses, geocoded,
+put some centres far off: a management address (Madrid's rural consultorios placed in the city), a village of the
+same name, a pedanía's street guessed (Murcia), the wrong place matched by name (Cazorla's hospital 15 km off).
+Twelve communities publish their centres with points under an open licence; a REGCESS centre a regional list has
+(same code, within 300 m, or sharing a distinctive word, not the town's name, in the same town or within 3 km)
+gives way to it, and those it doesn't list stay (Aragón publishes no consultorios). Madrid's register has no
+names: its points only move the REGCESS centres they match by code. Within 25 m of OSM's centre: 45–74% of the
+regional ones in Andalucía, Aragón, Baleares, Madrid, Euskadi and Cataluña, against 13% of REGCESS's.
+
+| Community | Source | Licence | Centres (2026-11-12) | REGCESS centres replaced | Joined by |
+|---|---|---|---|---|---|
+| Andalucía | DERA G12 (IECA): centros de salud and consultorios, hospitals (WFS) | CC BY 4.0 | 1,656 | 1,435 | INE + name, distance |
+| Aragón | opendata.aragon.es instalaciones sanitarias (UTM 30) | CC BY 4.0 | 129 | 133 | CCN |
+| Illes Balears | IDEIB equipament sanitari i hospitalari | CC BY | 175 | 159 | name, distance |
+| Castilla y León | Registro de centros sanitarios (monthly) | CC BY 4.0 | 3,361 | 3,648 | autonomic code |
+| Castilla-La Mancha | SESCAM centros de salud, consultorios locales, hospitales (ArcGIS) | CC BY 4.0 | 1,355 | 945 | code (partly), INE + name |
+| Cataluña | Equipaments de Catalunya (8gmd-gz7i): CAP, consultoris, PAC/CUAP, hospitals | Llicència oberta de Catalunya | 756 | 742 | INE + name, distance |
+| Comunitat Valenciana | Conselleria de Sanitat: centros de salud, consultorios auxiliares, hospitales (UTM 30, dated files via CKAN) | CC BY | 871 | 773 | INE + name, distance |
+| Madrid | Centros, servicios y establecimientos sanitarios (points only, UTM 30) | CC BY | 474 | 474 | autonomic code |
+| Murcia | Centros de salud y consultorios (CP850 CSV) | reuse with attribution (aviso legal) | 246 | 195 | name, distance |
+| Navarra | IDENA SNS atención primaria and especializada | CC BY 4.0 | 306 | 237 | name, distance |
+| País Vasco | Osakidetza centros, ambulatorios, PAC, hospitales | CC BY 4.0 | 370 | 310 | name, distance |
+| La Rioja | Registro de centros (the pharmacies' register) | CC BY | 190 | 191 | CCN |
+
+Not yet: Asturias (CC BY 4.0 layers on sig.asturias.es whose queries time out), Extremadura (lists without points),
+Canarias (only Tenerife's mixed list), Galicia (CC BY-SA) and Cantabria (non-commercial), Ceuta and Melilla (nothing).
 
 Left out on purpose: **Galicia**'s Sergas list (coordinates, daily) is CC BY-SA 4.0 and **Cantabria**'s
 (coordinates) is non-commercial: neither fits a file mixed with OSM's ODbL data, so both come from REGCESS.
@@ -347,7 +378,6 @@ as an indemnity. A source whose terms don't fit stays out until its publisher gi
 ## Improvements not built yet
 
 - Castilla-La Mancha's and Euskadi's lists against REGCESS by name and distance (their codes don't match).
-- Regional coordinates for health centres where a region publishes them (Castilla-La Mancha's "Centros de
-  salud", La Rioja's register has them for every centre) instead of geocoding REGCESS.
+- Asturias's health centres (SITPA layers) once its server answers queries, maybe from CI.
 - Opening hours: only Cantabria (sparse), Euskadi's botiquines and La Palma publish them.
 - A "source: official register" line on the place card (the id prefix already tells).

@@ -566,6 +566,10 @@ check and the release.
 - Spain: every regional pharmacy list is now checked against REGCESS by code (was Navarra only, by distance):
   REGCESS pharmacies and botiquines a list lacks are placed and added (first run +69: Aragón 30, Cataluña 16, Navarra
   14…); REGCESS's mangled names fixed.
+- Spain's health centres and hospitals from twelve regions' own lists with points (`CENTRES`): they replace the
+  REGCESS centres they match (9.1k), which geocoding had put up to 15 km off; 676 hospitals and 13k centres, and
+  within 25 m of OSM's 45–74% of the time where REGCESS managed 13%. US pharmacies from NPPES + the Census geocoder
+  tried and parked (points 100–150 m off in the west and south: duplicates).
 - Fifth round over South Asia, South-East Asia, the rest of Latin America, the Middle East and West Africa (four agents):
   only Niger (`ne.py`, carte sanitaire 2023: 2.7k centres) and Jamaica (`jm.py`, 2016: 291 centres) pass. India's data.gov.in,
   Bangladesh's DGHS and several Gulf and Central American portals don't answer the office network: `probe-urls.yml` asks

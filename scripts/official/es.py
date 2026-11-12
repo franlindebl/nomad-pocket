@@ -16,7 +16,8 @@ Where the points come from:
   fit a file mixed with OSM's, and Asturias's server (sig.asturias.es) doesn't answer GitHub's runners: REGCESS
   for them too.
 - Hospitals (general and specialised), health centres and consultorios: REGCESS, placed the same way (a
-  centre's name is often a place in CartoCiudad: tried first).
+  centre's name is often a place in CartoCiudad: tried first); where a region publishes its centres with points
+  (CENTRES: twelve communities), those replace the REGCESS centres they match, the rest of REGCESS's stay.
 A source that doesn't answer, or answers with far fewer rows than last month, keeps last month's rows
 (--previous). Geocoder answers are kept between runs (--geocache), so a month only asks for new addresses.
 Sources and licences: SOURCES, and the Credits screen (scripts/licenses/native.json, data).
@@ -707,6 +708,9 @@ def regcess_points(geocoder, covered, with_botiquines, known=None, limit=None):
                   name=name, precision=precision)
         out["_community"] = cc
         out["_gap"] = bool(r.get("_gap"))
+        auto = pick(r, "Código Autonómico del Centro") or ""
+        out["_keys"] = {code_key(c) for c in (code, auto, auto.split("/")[0]) if c}
+        out["_ine"] = (pick(r, "Código Municipio") or "")[:5]
         return out
 
     out, missed = [], {}
@@ -749,7 +753,326 @@ SOURCES = {
                    "url": "https://regcess.mscbs.es/regcessWeb/"},
     "es-geocoder": {"fetch": None, "name": "CartoCiudad geocoder (placing REGCESS addresses)", "publisher": "Instituto Geográfico Nacional",
                     "licence": "CC BY 4.0 (scne.es)", "url": "https://www.cartociudad.es/"},
+    # Regional health centres (CENTRES)
+    "es-an-centres": {"fetch": None, "name": "DERA G12 Servicios: centros de salud, hospitales", "publisher": "Junta de Andalucía. IECA",
+                      "licence": "CC BY 4.0", "url": "https://www.juntadeandalucia.es/institutodeestadisticaycartografia/dega/"},
+    "es-ar-centres": {"fetch": None, "name": "Sanidad: instalaciones sanitarias (centros de salud, hospitales)", "publisher": "Gobierno de Aragón",
+                      "licence": "CC BY 4.0", "url": "https://opendata.aragon.es/"},
+    "es-ib-centres": {"fetch": None, "name": "Equipament sanitari i hospitalari (IDEIB)", "publisher": "Govern de les Illes Balears",
+                      "licence": "CC BY", "url": "https://ideib.caib.es/"},
+    "es-cl-centres": {"fetch": None, "name": "Registro de centros sanitarios de Castilla y León", "publisher": "Junta de Castilla y León",
+                      "licence": "CC BY 4.0", "url": "https://datosabiertos.jcyl.es/"},
+    "es-cm-centres": {"fetch": None, "name": "Centros de salud, consultorios locales y hospitales de Castilla-La Mancha",
+                      "publisher": "Junta de Comunidades de Castilla-La Mancha (SESCAM)", "licence": "CC BY 4.0",
+                      "url": "https://services-eu1.arcgis.com/LVA9E9zjh6QfM7Mo/arcgis/rest/services"},
+    "es-ct-centres": {"fetch": None, "name": "Equipaments de Catalunya: centres sanitaris", "publisher": "Generalitat de Catalunya",
+                      "licence": "Llicència oberta d'ús d'informació - Catalunya", "url": "https://analisi.transparenciacatalunya.cat/d/8gmd-gz7i"},
+    "es-vc-centres": {"fetch": None, "name": "Centros de salud, consultorios auxiliares y hospitales de la Comunitat Valenciana",
+                      "publisher": "Generalitat Valenciana. Conselleria de Sanitat", "licence": "CC BY", "url": "https://dadesobertes.gva.es/"},
+    "es-md-centres": {"fetch": None, "name": "Centros, servicios y establecimientos sanitarios (points only)", "publisher": "Comunidad de Madrid",
+                      "licence": "CC BY", "url": "https://datos.comunidad.madrid/dataset/centros_servicios_establecimientos_sanitarios"},
+    "es-mc-centres": {"fetch": None, "name": "Centros de Salud y consultorios de la Región de Murcia", "publisher": "Región de Murcia (CARM)",
+                      "licence": "Reuse with attribution (aviso legal de datosabiertos.regiondemurcia.es)", "url": "https://datosabiertos.carm.es/"},
+    "es-nc-centres": {"fetch": None, "name": "Servicio Navarro de Salud: centros de atención primaria y especializada (IDENA)",
+                      "publisher": "Gobierno de Navarra", "licence": "CC BY 4.0", "url": "https://idena.navarra.es/"},
+    "es-pv-centres": {"fetch": None, "name": "Centros de salud, ambulatorios y hospitales públicos de Euskadi", "publisher": "Gobierno Vasco. Osakidetza",
+                      "licence": "CC BY 4.0", "url": "https://opendata.euskadi.eus/"},
+    "es-ri-centres": {"fetch": None, "name": "Registro de centros, servicios y establecimientos sanitarios (centres)", "publisher": "Gobierno de La Rioja",
+                      "licence": "CC BY", "url": "https://web.larioja.org/dato-abierto/datoabierto?n=opd-905"},
 }
+
+
+# --- Regional health centres -----------------------------------------------------------------
+# REGCESS's centres are placed by geocoding their address, and some land far off: a management address (Madrid's
+# rural consultorios placed in the city), a village of the same name, a pedanía's street guessed (Murcia). Where a
+# region publishes its centres with points under an open licence, those are used: a REGCESS centre the regional
+# list has (same code, within 300 m, or named alike in the same town or within 3 km) gives way to it; the ones it
+# doesn't list (Aragón's consultorios, say) stay. Madrid's register has no names: its points only move the REGCESS
+# centres they match by code.
+
+def regional_centre(source, code, rtype, lat, lon, name, phone_="", address="", municipality="", ine="", keys=()):
+    kind = "hospital" if rtype in ("C11", "C12") else "clinic"
+    n = re.sub(r"^(C\.?\s?S\.?|CS)\s+", "Centro de salud ", title(name), flags=re.I)
+    n = re.sub(r"^(C\.?\s?[VA]\.?|CA|CON\.?)\s+", "Consultorio ", n, flags=re.I)
+    n = re.sub(r"\b(cap|pac|cuap|suap|cae|ub|c\.a\.p\.)(?=\s|$)", lambda m: m.group(1).upper(), n, flags=re.I)
+    r = rec(source, code or "", lat, lon, "", phone_, address, municipality, kind,
+            name=centre_name(n, rtype) if n else "", precision="source")
+    r["_ine"] = str(ine or "")[:5]
+    r["_keys"] = {code_key(k) for k in keys if k}
+    return r
+
+
+def andalucia_centres():
+    base = ("https://www.ideandalucia.es/services/DERA_g12_servicios/wfs?service=WFS&version=2.0.0&request=GetFeature"
+            "&outputFormat=application/json&srsName=EPSG:4326&typeNames=DERA_g12_servicios:")
+    out = []
+    for p, lon, lat in wfs_points(base + "g12_01_CentroSalud"):  # centros de salud and consultorios together
+        rtype = "C232" if "consult" in folded(p.get("nombre")) else "C231"
+        out.append(regional_centre("es-an-centres", p.get("id_dera"), rtype, lat, lon, p.get("nombre"), p.get("telefono"),
+                                   p.get("direccion"), p.get("municipio"), p.get("cod_mun")))
+    for p, lon, lat in wfs_points(base + "g12_02_Hospital_CAE"):
+        if folded(p.get("tipo")) == "hospital":  # not the outpatient centres (CAE)
+            out.append(regional_centre("es-an-centres", p.get("id_dera"), "C11", lat, lon, p.get("nombre"), p.get("telefono"),
+                                       p.get("direccion"), p.get("municipio"), p.get("cod_mun")))
+    return out
+
+
+def aragon_centres():
+    # GeoJSON whose coordinates are UTM 30 (EPSG:25830) metres; `regcess` is the CCN. No consultorios published.
+    out = []
+    for rid, rtype in (("286", "C231"), ("287", "C11")):
+        d = get_json(f"https://opendata.aragon.es/GA_OD_Core/download?resource_id={rid}&formato=json", timeout=300)
+        for f in d.get("features", []):
+            p, c = f.get("properties") or {}, (f.get("geometry") or {}).get("coordinates") or []
+            if len(c) < 2 or not c[0]:
+                continue
+            lat, lon = utm_to_wgs84(float(c[0]), float(c[1]), 30)
+            out.append(regional_centre("es-ar-centres", p.get("regcess"), rtype, lat, lon, p.get("nombre"), p.get("telefono"),
+                                       p.get("direccion"), p.get("municipio") or p.get("localidad"), keys=(p.get("regcess"),)))
+    return out
+
+
+def illes_balears_centres():
+    base = "https://ideib.caib.es/geoserveis/rest/services/public/GOIB_SUPE_IB/MapServer/"
+    out = []
+    for layer in ("5", "6"):
+        for p, lon, lat in arcgis_features(base + layer):
+            f = folded(p.get("FUNCIO"))
+            rtype = {"unitat basica": "C232", "centre sanitari": "C231", "hospital": "C11"}.get(f)
+            if rtype:  # "centre sanitari previst" (planned) and untyped rows left out
+                out.append(regional_centre("es-ib-centres", p.get("INSPIREID") or p.get("NOM"), rtype, lat, lon, p.get("NOM"),
+                                           "", p.get("ADRECA"), p.get("MUNICIPI")))
+    return out
+
+
+def castilla_la_mancha_centres():
+    base = "https://services-eu1.arcgis.com/LVA9E9zjh6QfM7Mo/arcgis/rest/services/"
+    out = []
+    for layer, rtype in (("Centros_de_Salud_de_CastillaLa_Mancha", "C231"), ("Consultorios_Locales_de_CastillaLa_Mancha", "C232"),
+                         ("Hospitales_de_CastillaLa_Mancha", "C11")):
+        for p, lon, lat in arcgis_features(f"{base}{layer}/FeatureServer/0", page=2000):
+            code = p.get("COD_CEN") or p.get("CODIGO_CEN")
+            out.append(regional_centre("es-cm-centres", code, rtype, lat, lon, p.get("NOM_CEN") or p.get("NOMBRE"),
+                                       p.get("TEL_CEN") or p.get("TFNOS"), p.get("DIR_CEN") or p.get("DIRECCION") or "",
+                                       p.get("MUNICIPIO") or p.get("DES_LOC") or p.get("LOCALIDAD"),
+                                       p.get("CODMUN") or p.get("COD_MUN"), keys=(code,)))
+    return out
+
+
+def catalunya_centres():
+    where = " or ".join(f"categoria like '%Centres sanitaris|{n}.%'" for n in (1, 2, 3))
+    url = "https://analisi.transparenciacatalunya.cat/resource/8gmd-gz7i.json?" + urllib.parse.urlencode({"$where": where, "$limit": 5000})
+    out = []
+    for p in get_json(url, timeout=300):
+        cat = p.get("categoria") or ""
+        name = p.get("nom") or ""
+        rtype = "C11" if "sanitaris|3." in cat else ("C232" if "consultori" in folded(name) else "C231")
+        out.append(regional_centre("es-ct-centres", p.get("idequipament"), rtype, num(p.get("latitud")), num(p.get("longitud")),
+                                   name, p.get("telefon1"), " ".join(x for x in (p.get("tipus_via"), p.get("via"), p.get("num")) if x),
+                                   p.get("poblacio"), str(p.get("codi_municipi") or "")[:5]))
+    return out
+
+
+def valencia_centres():
+    # Three layers on dadesobertes.gva.es, whose file names carry their date (found through CKAN); UTM 30 metres.
+    out = []
+    for package in ("sanidad-sip-centros-salud", "sanidad-sip-consultorios-aux", "sanidad-sip-hospitales"):
+        meta = get_json(f"https://dadesobertes.gva.es/api/3/action/package_show?id={package}", timeout=120)["result"]
+        url = next(r["url"] for r in meta["resources"] if r.get("url", "").lower().endswith(".geojson"))
+        for f in get_json(url, timeout=300).get("features", []):
+            p = f.get("properties") or {}
+            rtype = {1: "C231", 2: "C232", 38: "C232", 14: "C11"}.get(int(num(p.get("TCE_CODI")) or 0))
+            x, y = num(p.get("X_COORD")), num(p.get("Y_COORD"))
+            if not rtype or not x or not y:
+                continue
+            lat, lon = utm_to_wgs84(x, y, 30)
+            ine = f"{int(num(p.get('CEN_PROV')) or 0):02d}{int(num(p.get('CEN_LOCA')) or 0):03d}"
+            out.append(regional_centre("es-vc-centres", p.get("CEN_COD"), rtype, lat, lon, p.get("CEN_DESCLA"), "",
+                                       " ".join(str(p.get(k) or "") for k in ("CEN_NOMBCA", "CEN_NUMCAL")).strip(), "", ine))
+    return out
+
+
+def madrid_centres():
+    # One row per service of every authorised centre; no names. UTM 30 metres. `centro_nro_registro` is REGCESS's
+    # autonomic code: these rows only move the REGCESS centres they match.
+    url = "https://datos.comunidad.madrid/dataset/d8a0a444-adf5-4c04-8999-0eac3de52cb7/resource/94090084-2276-4a07-87b4-cd028ea6b46d/download"
+    d = get_json(url, timeout=600)
+    rows = d.get("data", d) if isinstance(d, dict) else d
+    kinds = {"centro de salud": "C231", "consultorio de atencion primaria": "C232", "hospital general": "C11",
+             "hospital especializado": "C12"}
+    out, seen = [], set()
+    for p in rows:
+        code = p.get("centro_nro_registro")
+        rtype = kinds.get(folded(p.get("centro_tipo")))
+        x, y = num(p.get("localizacion_coordenada_x")), num(p.get("localizacion_coordenada_y"))
+        if not code or code in seen or not rtype or not x or not y:
+            continue
+        seen.add(code)
+        lat, lon = utm_to_wgs84(x, y, 30)
+        r = regional_centre("es-md-centres", code, rtype, lat, lon, "", "", "", p.get("municipio_nombre"), keys=(code,))
+        r["_override"] = True
+        out.append(r)
+    return out
+
+
+def murcia_centres():
+    # CP850 text, ';' separated, decimal commas; x is the longitude. The description is "street, municipality".
+    out = []
+    for p in csv_rows(get("https://datosabiertos.carm.es/odata/Sanidad/SANI_Centros_de_Salud.csv"), ";", "cp850"):
+        name = p.get("Name") or ""
+        rtype = "C232" if "consult" in folded(name) else "C231"
+        desc = p.get("description") or ""
+        muni = desc.rsplit(",", 1)[-1].strip() if "," in desc else ""
+        out.append(regional_centre("es-mc-centres", p.get("gid"), rtype, num(p.get("y")), num(p.get("x")), name, "",
+                                   desc.rsplit(",", 1)[0] if "," in desc else desc, muni))
+    return out
+
+
+def navarra_centres():
+    base = ("https://idena.navarra.es/ogc/wfs?service=WFS&version=2.0.0&request=GetFeature&outputFormat=application/json"
+            "&srsName=EPSG:4326&typeNames=IDENA:")
+    out = []
+    for p, lon, lat in wfs_points(base + "DOTACI_Sym_SNSPrimaria"):
+        name = p.get("CENSAN") or ""
+        if "hospital" in folded(name):
+            continue  # a hospital's paediatric unit listed with primary care
+        rtype = "C231" if "centro de salud" in folded(name) else "C232"
+        out.append(regional_centre("es-nc-centres", p.get("IDCENSAN"), rtype, lat, lon, name, p.get("TELEFONO"),
+                                   p.get("DIRECCION"), p.get("POBLACION")))
+    for p, lon, lat in wfs_points(base + "DOTACI_Sym_SNSEspecial"):
+        name = p.get("CENSAN") or ""
+        if re.search(r"hospital|clinica", folded(name)):  # not the emergency units listed apart at the same hospitals
+            out.append(regional_centre("es-nc-centres", p.get("IDCENSAN"), "C11", lat, lon, name, p.get("TELEFONO"),
+                                       p.get("DIRECCION"), p.get("POBLACION")))
+    return out
+
+
+def euskadi_centres():
+    d = get_json("https://opendata.euskadi.eus/contenidos/ds_localizaciones/centros_salud_en_euskadi/opendata/centros-salud.geojson", timeout=300)
+    kinds = {"consultorio": "C232", "centro de salud": "C231", "ambulatorio": "C231", "pac": "C231", "hospital": "C11"}
+    out = []
+    for f in d.get("features", []):
+        p, c = f.get("properties") or {}, (f.get("geometry") or {}).get("coordinates") or []
+        rtype = kinds.get(folded(p.get("tipodecentro")))
+        if rtype and len(c) >= 2:  # mental health, day hospitals, "otros" left out
+            out.append(regional_centre("es-pv-centres", p.get("codigodelcentro"), rtype, c[1], c[0], p.get("nombre"), "",
+                                       p.get("direccion"), p.get("municipio")))
+    return out
+
+
+def castilla_y_leon_centres():
+    url = ("https://analisis.datosabiertos.jcyl.es/api/explore/v2.1/catalog/datasets/"
+           "registro-de-centros-sanitarios-de-castilla-y-leon/exports/json")
+    kinds = {"consultorios de atencion primaria": "C232", "centros de atencion primaria: centros de salud": "C231",
+             "hospitales generales": "C11", "hospitales especializados": "C12"}
+    out = []
+    for p in get_json(url, timeout=600):
+        rtype = kinds.get(folded(p.get("tipo_de_centro")))
+        pos = p.get("posicion") or {}
+        if rtype and pos.get("lat"):
+            code = p.get("no_de_registro")
+            out.append(regional_centre("es-cl-centres", code, rtype, pos["lat"], pos["lon"], p.get("nombre_del_centro"),
+                                       p.get("telefono"), p.get("direccion"), p.get("localidad"), keys=(code,)))
+    return out
+
+
+def la_rioja_centres():
+    d = get_json("https://ias1.larioja.org/opendata/download?r=Y2Q9OTA1fGNmPTA0")
+    out, seen = [], set()
+    for p in d["data"] if isinstance(d, dict) else d:
+        rtype, ccn = p.get("COD_TIPO_CENTRO"), p.get("COD_ESTABLECIMIENTO_CCN")
+        if rtype not in CENTRE_KINDS or not ccn or ccn in seen or not num(p.get("LATITUD_X")):
+            continue
+        seen.add(ccn)
+        address = " ".join(str(p.get(k) or "") for k in ("COD_TIPO_VIA", "VIA", "NUMERO_VIA")).strip()
+        out.append(regional_centre("es-ri-centres", ccn, rtype, num(p.get("LATITUD_X")), num(p.get("LONGITUD_Y")),
+                                   p.get("DENOMINACION"), p.get("TELEFONO"), address, p.get("DESC_POBLACION"), keys=(ccn,)))
+    return out
+
+
+# source → (community, fetch)
+CENTRES = {
+    "es-an-centres": ("01", andalucia_centres), "es-ar-centres": ("02", aragon_centres),
+    "es-ib-centres": ("04", illes_balears_centres), "es-cl-centres": ("07", castilla_y_leon_centres),
+    "es-cm-centres": ("08", castilla_la_mancha_centres), "es-ct-centres": ("09", catalunya_centres),
+    "es-vc-centres": ("10", valencia_centres), "es-md-centres": ("13", madrid_centres),
+    "es-mc-centres": ("14", murcia_centres), "es-nc-centres": ("15", navarra_centres),
+    "es-pv-centres": ("16", euskadi_centres), "es-ri-centres": ("17", la_rioja_centres),
+}
+CENTRE_WORDS_STOP = GENERIC | {"centre", "sanitari", "consultori", "salut", "unitat", "basica", "ambulatorio", "osasun",
+                               "zentroa", "pac", "cap", "hospitalario", "universitario", "comarcal", "infanta", "infante"}
+
+
+def centre_words(s):
+    return {w for w in re.findall(r"[a-z0-9]+", folded(s)) if len(w) > 2 and w not in CENTRE_WORDS_STOP}
+
+
+def one_spot_per_kind(rows, metres=15):
+    out, grid, cell = [], {}, 0.0005
+    for r in rows:
+        key = (r["kind"], int(r["lat"] // cell), int(r["lon"] // cell))
+        near = [o for di in (-1, 0, 1) for dj in (-1, 0, 1) for o in grid.get((key[0], key[1] + di, key[2] + dj), ())]
+        if any(6371000 * math.hypot(math.radians(o["lon"] - r["lon"]) * math.cos(math.radians(r["lat"])),
+                                    math.radians(o["lat"] - r["lat"])) <= metres for o in near):
+            continue
+        grid.setdefault(key, []).append(r)
+        out.append(r)
+    return out
+
+
+def replace_centres(regcess_rows, regional, community):
+    """Which REGCESS centres of a community its regional list replaces; the regional rows to add (Madrid's take the
+    matched REGCESS centre's name). Returns (REGCESS rows kept, regional rows added)."""
+    def dist(a, b):
+        return 6371000 * math.hypot(math.radians(a["lon"] - b["lon"]) * math.cos(math.radians(a["lat"])), math.radians(a["lat"] - b["lat"]))
+
+    cell = 0.03  # ~3 km
+    by_key, grid, towns = {}, {}, {}
+    for r in regional:
+        r["_words"] = centre_words(r["name"])
+        for k in r.get("_keys") or ():
+            by_key.setdefault((r["kind"], k), r)
+        grid.setdefault((r["kind"], int(r["lat"] // cell), int(r["lon"] // cell)), []).append(r)
+        for t in (r.get("_ine"), folded(r["municipality"])):
+            if t:
+                towns.setdefault((r["kind"], t), []).append(r)
+    kept, matched = [], {}
+    for g in regcess_rows:
+        mine = g.get("_community") == community or community in g.get("_communities", ())
+        if g["source"] != "es-regcess" or not mine or g["kind"] not in ("hospital", "clinic"):
+            kept.append(g)
+            continue
+        hit = next((by_key[(g["kind"], k)] for k in g.get("_keys") or () if (g["kind"], k) in by_key), None)
+        around = [r for di in (-1, 0, 1) for dj in (-1, 0, 1)
+                  for r in grid.get((g["kind"], int(g["lat"] // cell) + di, int(g["lon"] // cell) + dj), ())]
+        if not hit:
+            close = [(dist(g, r), r) for r in around]
+            close = [x for x in close if x[0] <= 300]
+            if close:
+                hit = min(close, key=lambda x: x[0])[1]
+        if not hit:
+            # A shared word that isn't the town's name: "Hospital Quironsalud Torrevieja" is not "Hospital de Torrevieja".
+            gw = centre_words(g["name"]) - centre_words(g["municipality"])
+            if gw:
+                town = [r for t in (g.get("_ine"), folded(g["municipality"])) if t for r in towns.get((g["kind"], t), ())]
+                hit = next((r for r in town + [r for r in around if dist(g, r) <= 3000]
+                            if gw & (r["_words"] - centre_words(r["municipality"]))), None)
+        if hit and not (hit.get("_override") and id(hit) in matched):
+            matched.setdefault(id(hit), g)
+        else:
+            kept.append(g)
+    added = []
+    for r in regional:
+        g = matched.get(id(r))
+        if r.get("_override"):
+            if not g:
+                continue  # Madrid's rows have no names: only those matched by code move a centre
+            r = {**r, "name": g["name"], "phone": g["phone"], "address": g["address"], "municipality": g["municipality"]}
+        elif g:
+            r = {**r, "phone": r["phone"] or g["phone"], "name": r["name"] or g["name"]}
+        if r["name"]:
+            added.append(r)
+    return kept, added
 
 
 # --- Main -------------------------------------------------------------------------------------
@@ -849,6 +1172,43 @@ def main(argv):
             keep("es-regcess", e)
     else:
         rows.extend(before.get("es-regcess", []))
+    replaced = {}
+    for r in rows:  # last month's REGCESS rows (the register didn't answer) don't carry their community
+        if r["source"] == "es-regcess" and "_community" not in r:
+            r["_communities"] = {cc for cc, (_, bbox) in COMMUNITIES.items() if inside(r["lat"], r["lon"], bbox)}
+    for sid, (community, fetch) in CENTRES.items():
+        try:
+            if sid not in only:
+                raise RuntimeError("not asked")
+            fetched = fetch()
+            got = []
+            for r in fetched:
+                p = place(num(r["lat"]), num(r["lon"]), community)
+                if p:
+                    r["lat"], r["lon"] = p
+                    if not r["code"]:
+                        r["code"] = re.sub(r"\W+", "-", folded(f"{r['name']} {r['municipality']}")).strip("-")
+                    got.append(r)
+            got = one_spot_per_kind(sorted(got, key=lambda r: r["kind"] != "hospital"))
+            old = before.get(sid, [])
+            if old and len(got) < MIN_SHARE * len(old):
+                raise RuntimeError(f"{len(got)} rows, last month {len(old)}")
+            if not got:
+                raise RuntimeError("no rows")
+            fresh = True
+        except Exception as e:  # noqa: BLE001
+            got, fresh = [dict(r) for r in before.get(sid, [])], False
+            if str(e) != "not asked":
+                failed.append(sid)
+                print(f"[{sid}] FAILED ({e}); keeping {len(got)} rows from last month", file=sys.stderr)
+        if not got:
+            continue
+        n_before = len(rows)
+        rows[:], added = replace_centres(rows, got, community)
+        rows.extend(unique_codes(added))
+        replaced[sid] = n_before - (len(rows) - len(added))
+        report[sid] = {"rows": len(added), "status": "fresh" if fresh else "kept last month's", "replacedRegcess": replaced[sid]}
+        print(f"[{sid}] {len(added)} centres, {replaced[sid]} REGCESS centres replaced", file=sys.stderr)
     if opt("--geocache"):
         geocoder.save(opt("--geocache"))
     with open(out_path, "w", encoding="utf-8") as f:

@@ -410,10 +410,14 @@
         "Gobierno de Navarra",
         "Gobierno Vasco, Departamento de Salud",
         "Gobierno de La Rioja",
+        "Junta de Castilla y León",
+        "Generalitat Valenciana, Conselleria de Sanitat",
+        "Región de Murcia (CARM). Origen de los datos: Servicio Murciano de Salud",
+        "Osakidetza",
         "CartoCiudad © Instituto Geográfico Nacional (scne.es)"
       ],
       "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
-      "note": "Pharmacies, botiquines, hospitals, health centres and consultorios in Spain that OpenStreetMap lacks, added to the country's emergency points every month. REGCESS addresses placed with CartoCiudad. Each source's licence (CC BY 4.0, Llicència oberta d'ús d'informació de Catalunya, the Spanish reuse conditions of Ley 37/2007) and update date: docs/OFFICIAL_POINTS.md in the source.",
+      "note": "Pharmacies, botiquines, hospitals, health centres and consultorios in Spain that OpenStreetMap lacks, added to the country's emergency points every month. REGCESS addresses placed with CartoCiudad; regional lists of health centres with their own points where published. Each source's licence (CC BY 4.0, Llicència oberta d'ús d'informació de Catalunya, the Spanish reuse conditions of Ley 37/2007) and update date: docs/OFFICIAL_POINTS.md in the source.",
       "text": null
     },
     {
