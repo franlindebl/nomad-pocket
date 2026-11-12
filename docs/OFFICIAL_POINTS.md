@@ -110,6 +110,7 @@ packs of 2026-11-05:
 | Dominican Republic | `do.py`: SNS establecimientos de salud | ODbL | 141 hospitals, 25 m | **50 hospitals, 1,525 health centres and consultorios** (OSM: 540 clinics on the island) |
 | Malawi | `mw.py`: Malawi Health Facility Registry on HDX (2023) | CC BY | 53 hospitals, 78 m | **44 hospitals, 1,068 health centres, dispensaries and posts** (OSM has 88 clinics) |
 | New Caledonia | `nc.py`: DASS, situation des structures de santé | Licence Ouverte 2.0 | 52 pharmacies, 23 m | **12 pharmacies, 27 dispensaries** |
+| Mexico | `mx.py`: CLUES (DGIS), monthly, public institutions only | free use (DGIS) | 1,000 hospitals, 36 m; 349 centres, 11 m | **431 hospitals, 9,375 centros de salud, UMF and rural units** |
 | Argentina | `ar.py`: IGN's "Edificio de salud" layer (WFS; mostly the Ministry's SISA register) | IGN terms (attribution, shared freely) | 968 hospitals, 20 m; 1,959 centres, 14 m | **91 hospitals, 4,713 centres, posts and dispensaries** |
 
 - **Japan.** Clinics are the register's 診療所 offering internal medicine, paediatrics, surgery, general practice or
@@ -177,9 +178,11 @@ packs of 2026-11-05:
   has points on the building, no address, phone or date. IGN's terms: credit "FUENTE: Instituto Geográfico Nacional
   de la República Argentina", reuse may copy, modify and combine, the data must be shared freely, commercial use
   only in derived works. So Argentina has hospitals and centres but no pharmacies (would need REFAR licensed).
-- **Mexico (first run in CI).** CLUES's file host doesn't answer the office network, so `mx.py` was written from the
-  catalogue's known layout and runs first in CI; its report lists the file's columns. Its points are measured
-  against OSM from the release before Mexico's pack is rebuilt (and the script dropped if they fail).
+- **Mexico.** CLUES's file host doesn't answer the office network, so `mx.py` was written from the catalogue's known
+  layout, run first in CI (its report lists the file's 68 columns) and measured from the release: public hospitals
+  43% within 50 m of OSM's, private ones 12% (median 755 m), so the 3,562 private "hospitals" (many day-surgery
+  clinics under a company's name) are left out, with labs, dental and support units and points typed to two decimals.
+  OSM has few clinics there (6.5k), so the 9.4k centres can hardly be checked; those that match are 11 m away.
 - **Taiwan (not yet).** The NHI's contracted facilities (OGDL, 7.6k pharmacies against OSM's 2.3k) have addresses
   only; it waits for a Taiwanese geocoder (NLSC/TGOS) checked the way CartoCiudad was.
 - **Nigeria (not added).** GRID3 NGA v4.0 (CIESIN with the federal registry and NPHCDA, CC BY 4.0) has 48k usable
@@ -227,7 +230,7 @@ Numbers, filters and quality per country are in "Other countries" above; what ev
 | Malawi (`mw`) | hospitals, health centres, dispensaries, posts | Ministry of Health and Population, Malawi Health Facility Registry, via the Health Cluster on HDX | CC BY | snapshot 2023 |
 | New Caledonia (`nc`) | pharmacies, hospitals, dispensaries | Gouvernement de la Nouvelle-Calédonie, DASS, Situation des structures de santé (data.gouv.nc) | Licence Ouverte 2.0 | when DASS updates it |
 | Argentina (`ar`) | hospitals, public health centres, posts (no pharmacies) | Instituto Geográfico Nacional, "Edificio de salud" WFS layer (from the Ministry of Health's SISA) | IGN terms: attribution, shared freely | unstated ("periodically") |
-| Mexico (`mx`), on trial | hospitals, public primary care | Secretaría de Salud, DGIS, CLUES | free use ("no existen restricciones") | monthly |
+| Mexico (`mx`) | public hospitals, public primary care | Secretaría de Salud, DGIS, CLUES | free use ("no existen restricciones") | monthly |
 
 ### Not covered, and why
 

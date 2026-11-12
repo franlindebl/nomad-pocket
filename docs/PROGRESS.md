@@ -81,8 +81,8 @@ OP. **Official points: complete OSM with official registers, country by country*
    Canada (Ontario, BC), Australia (owner: the app is non-commercial, so Healthdirect's terms fit), the UK (postcodes
    on Code-Point Open) and the US (HRSA health centres, one file per US pack): their first CI run, then their packs.
    Italy and Nigeria tried and left out (coordinates fail against OSM; Italy needs ANNCSU geocoding). Second batch
-   built: Latvia, Iceland, Dominican Republic, Malawi, New Caledonia, Argentina (IGN layer), Mexico on trial (CLUES,
-   first run in CI, gate before its pack). Being built: Hong Kong, Singapore, Sierra Leone, Guinea, Chad, the other
+   built: Latvia, Iceland, Dominican Republic, Malawi, New Caledonia, Argentina (IGN layer), Mexico (CLUES, public
+   institutions only: private hospitals' points fail). Being built: Hong Kong, Singapore, Sierra Leone, Guinea, Chad, the other
    Canadian provinces. Blocked: Taiwan (TGOS key: the owner's to register), Brazil (DATASUS licence). The status of
    every country and why: "Coverage by country" in `docs/OFFICIAL_POINTS.md` (keep it up to date).
 
@@ -427,7 +427,8 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   pharmacies, 184 GP practices), Iceland (`is.py`: 31 health centres), Dominican Republic (`do.py`: 50 hospitals, 1.5k
   centres), Malawi (`mw.py`: 1.1k, hand-typed points, OSM nearly empty), New Caledonia (`nc.py`: 39), Argentina
   (`ar.py`: IGN's health buildings, 91 hospitals, 4.7k centres; REFES/REFAR rejected: no licence, Georef placed too
-  few well). Mexico (`mx.py`) written blind: its host doesn't answer the office network, so its first run is in CI.
+  few well). Mexico (`mx.py`) written blind (its host doesn't answer the office network), run in CI, measured from the release:
+  431 public hospitals and 9.4k public centres; private hospitals left out (12% within 50 m of OSM's).
 - Left out: Estonia (+28, map file without licence), Bahrain (points 50–100 m off, licence binds sub-licensees),
   Taiwan (geocoders need registration); a second look at Ireland, Greece, Norway, Romania and Morocco found nothing
   usable. `docs/OFFICIAL_POINTS.md` now has "Coverage by country": covered, built, not covered and why.

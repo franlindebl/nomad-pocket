@@ -6,10 +6,12 @@ scripts/official/merge.py adds to Mexico's emergency points where OpenStreetMap 
 
 The source: "Establecimientos de Salud" (XLSX, ~26 MB, monthly; the file name carries the month, so it is found on
 DGIS's CLUES page), one row per establishment with its point. DGIS: "Las variables de las CLUES están abiertas a
-todo el sector salud, no existen restricciones para su uso." Only establishments in operation; hospitals
-(establecimientos de hospitalización) of every institution, and outpatient care of the public institutions
-(centros de salud, unidades de medicina familiar, rural units, CAAPS); private surgeries, labs, dental, support
-and social-assistance establishments left out.
+todo el sector salud, no existen restricciones para su uso." Only establishments in operation, of the public
+institutions (SSA, IMSS, IMSS-Bienestar, ISSSTE, state services, the armed forces, Pemex…): hospitals and outpatient
+primary care (centros de salud, unidades de medicina familiar, rural units, CAAPS). Left out: private establishments
+(3,562 "hospitals", many of them day-surgery clinics under a company's name, whose points sit further from OSM's:
+12% within 50 m against 43% of the public ones), labs, dental, support and social-assistance establishments, and
+points typed to two decimals.
 The host doesn't answer some networks (it timed out from the office, 2026-11-12): CI runs it.
 The report lists the file's columns, so a change of layout is visible.
 A file that can't be read, or has far fewer rows than last month, keeps last month's rows (--previous).
@@ -146,6 +148,7 @@ def establishments(header, rows):
         "town": pick(header, "NOMBRE DE LA LOCALIDAD", "LOCALIDAD"),
         "municipality": pick(header, "NOMBRE DEL MUNICIPIO", "MUNICIPIO"),
         "state": pick(header, "NOMBRE DE LA ENTIDAD", "ENTIDAD"),
+        "phone": pick(header, "TELEFONO 1 DEL ESTABLECIMIENTO", "TELEFONO"),
     }
     missing = [k for k in ("code", "name", "type", "status", "lat", "lon") if not col[k]]
     if missing:
@@ -159,12 +162,14 @@ def establishments(header, rows):
             lat, lon = float(val("lat")), float(val("lon"))
         except ValueError:
             continue
+        if min(len((val("lat").split(".") + [""])[1]), len((val("lon").split(".") + [""])[1])) < 3:
+            continue  # a locality's point typed to two decimals (~1 km)
         if not (BBOX[0] <= lat <= BBOX[2] and BBOX[1] <= lon <= BBOX[3]):
             continue
         kind_text = plain(val("type"))
         typology = plain(f"{val('typology')} {val('subtypology')}")
         institution = plain(val("institution"))
-        if "HOSPITALIZACION" in kind_text and not NOT_PRIMARY.search(typology):
+        if "HOSPITALIZACION" in kind_text and PUBLIC.search(institution) and not NOT_PRIMARY.search(typology):
             kind = "hospital"
         elif ("CONSULTA EXTERNA" in kind_text and PUBLIC.search(institution) and PRIMARY.search(typology)
               and not NOT_PRIMARY.search(typology)):
@@ -176,7 +181,8 @@ def establishments(header, rows):
             name = f"{val('typology').strip().title()} {name}".strip()
         address = ", ".join(x for x in (f"{val('street')} {val('number')}".strip(), val("town"), val("state")) if x)
         out.append({"source": "mx-clues", "code": val("code"), "kind": kind, "lat": lat, "lon": lon,
-                    "name": name.title() if name.isupper() else name, "holder": val("institution"), "phone": "",
+                    "name": name.title() if name.isupper() else name, "holder": val("institution"),
+                    "phone": re.sub(r"[^\d+]", "", val("phone")) if len(re.sub(r"\D", "", val("phone"))) >= 10 else "",
                     "address": address, "municipality": val("municipality"), "precision": "source"})
     # A municipality's centre standing in for several establishments.
     stacked = collections.Counter((round(r["lat"], 4), round(r["lon"], 4)) for r in out)
