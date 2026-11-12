@@ -35,7 +35,7 @@ import { space, useTheme, type Colors } from '@/theme';
 
 import { levelRank, visible, type Alert, type Hazard, type LatLon, type Level } from './alerts-core';
 import { enableAlerts, declineAlerts } from './enable';
-import { alertKey, alertSubtitle, alertTitle } from './present';
+import { alertKey, alertLine, alertTitle } from './present';
 import { appliedSources, placeOf, useAlertsState } from './state';
 
 export const HAZARD_ICONS: Record<Hazard, LucideIcon> = {
@@ -101,8 +101,7 @@ export function AlertRow({ alert, pos, testID }: { alert: Alert; pos: LatLon | n
       leading={<AlertMark alert={alert} />}
       title={alertTitle(alert)}
       titleLines={2}
-      // MeteoAlarm relays national services, and its terms ask to name the one that issued each warning.
-      subtitle={alert.source === 'meteoalarm' ? `${alertSubtitle(alert, pos)} · ${alert.issuer || 'EUMETNET – MeteoAlarm'}` : alertSubtitle(alert, pos)}
+      subtitle={alertLine(alert, pos)}
       accessibilityHint={t(`levelChip.${alert.level}`)}
       chevron
       onPress={() => router.push({ pathname: '/alerts/[id]', params: { id: alertKey(alert) } })}
@@ -263,7 +262,7 @@ export function AlertsHomeCard({ style }: { style?: StyleProp<ViewStyle> }) {
       style={[{ borderColor: levelColor(top.level, colors) }, style]}
       accessibilityLabel={[
         alertTitle(top),
-        alertSubtitle(top, pos),
+        alertLine(top, pos),
         serious.length > 1 ? t('home.more', { count: serious.length - 1 }) : '',
       ]
         .filter(Boolean)
@@ -273,7 +272,7 @@ export function AlertsHomeCard({ style }: { style?: StyleProp<ViewStyle> }) {
         <View style={{ flex: 1, gap: 2 }}>
           <Text variant="headline">{alertTitle(top)}</Text>
           <Text variant="footnote" color="textSecondary">
-            {alertSubtitle(top, pos)}
+            {alertLine(top, pos)}
           </Text>
           {serious.length > 1 ? (
             <Text variant="footnote" color="text">

@@ -43,4 +43,11 @@ export const distanceLabel = (a: Alert, pos: LatLon | null): string | null => co
 /** One line under the title: the place, and when (or how far, for a quake). */
 export const alertSubtitle = (a: Alert, pos: LatLon | null, now = Date.now()): string => core.alertSubtitle(words(), a, pos, now);
 
+/**
+ * The subtitle a list row or Home's card shows. MeteoAlarm relays national services and its terms ask to name the one
+ * that issued each warning: first, so a cut line drops places, not the issuer.
+ */
+export const alertLine = (a: Alert, pos: LatLon | null, now = Date.now()): string =>
+  a.source === 'meteoalarm' ? `${a.issuer || 'EUMETNET – MeteoAlarm'} · ${alertSubtitle(a, pos, now)}` : alertSubtitle(a, pos, now);
+
 export const sourceName = (s: SourceId): string => i18n.t(`alerts:source.${s}`);

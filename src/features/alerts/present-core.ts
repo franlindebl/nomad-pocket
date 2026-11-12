@@ -88,7 +88,15 @@ export function distanceLabel(w: Words, a: Alert, pos: LatLon | null): string | 
 }
 
 /** One line under the title: the place, and when (or how far, for a quake). */
+/** A long list of places (MeteoAlarm and NWS name every district or county) cut to its first three. */
+export function shortArea(area: string): string {
+  if (area.length <= 90) return area;
+  const parts = area.split(/[;,]\s*/).filter(Boolean);
+  return parts.length > 3 ? `${parts.slice(0, 3).join(', ')}…` : area;
+}
+
 export function alertSubtitle(w: Words, a: Alert, pos: LatLon | null, now: number): string {
-  const parts = a.kind === 'quake' ? [distanceLabel(w, a, pos), a.area, windowLabel(w, a, now)] : [a.area, windowLabel(w, a, now)];
+  const area = shortArea(a.area);
+  const parts = a.kind === 'quake' ? [distanceLabel(w, a, pos), area, windowLabel(w, a, now)] : [area, windowLabel(w, a, now)];
   return parts.filter(Boolean).join(' · ');
 }

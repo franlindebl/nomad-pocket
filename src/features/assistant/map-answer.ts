@@ -4,7 +4,7 @@
 // from the data (docs/ASSISTANT_MAP_PLAN.md). Null means "not a map answer after all" (a weak intent whose
 // place the index doesn't know): the message goes the normal way.
 import { current, inPolygons, visible } from '@/features/alerts/alerts-core';
-import { alertKey, alertSubtitle, alertTitle, officialText } from '@/features/alerts/present';
+import { alertKey, alertLine, alertTitle, officialText } from '@/features/alerts/present';
 import { appliedSources, placeOf, useAlertsState } from '@/features/alerts/state';
 import { alongRoute, CORRIDOR_M, corridorBox, lastWithin, routeEntersRings } from '@/features/maps/along-core';
 import { currentCountries } from '@/features/maps/countries';
@@ -519,7 +519,7 @@ export async function runMapIntent(intent: MapIntent, previous: MapCard | null):
         enabled: st.enabled,
         checkedAt: st.cache.checkedAt,
         quakes: intent.quakes,
-        items: shown.slice(0, 6).map((a) => ({ key: alertKey(a), title: alertTitle(a), subtitle: alertSubtitle(a, pos), level: a.level ?? null })),
+        items: shown.slice(0, 6).map((a) => ({ key: alertKey(a), title: alertTitle(a), subtitle: alertLine(a, pos), level: a.level ?? null })),
       };
     }
     case 'whereIs': {
@@ -619,7 +619,7 @@ export async function runMapIntent(intent: MapIntent, previous: MapCard | null):
         .filter((a) => a.polygons?.length)
         .map((a) => ({ a, atM: routeEntersRings(r.shape, a.polygons!) }))
         .filter((x): x is { a: (typeof all)[number]; atM: number } => x.atM !== null)
-        .map(({ a, atM }) => ({ key: alertKey(a), title: alertTitle(a), subtitle: alertSubtitle(a, r.from), level: a.level ?? null, atM, rings: a.polygons! }));
+        .map(({ a, atM }) => ({ key: alertKey(a), title: alertTitle(a), subtitle: alertLine(a, r.from), level: a.level ?? null, atM, rings: a.polygons! }));
       const undrawn = all.filter((a) => !a.polygons?.length && a.kind !== 'quake').length;
       return { type: 'routeAlerts', to: r.toName, from: r.from, dest: r.dest, costing: r.costing, enabled: st.enabled, crossing, undrawn };
     }
@@ -641,7 +641,7 @@ export async function runMapIntent(intent: MapIntent, previous: MapCard | null):
       return {
         type: 'evacuate',
         enabled: st.enabled,
-        alerts: covering.slice(0, 3).map((a) => ({ key: alertKey(a), title: alertTitle(a), subtitle: alertSubtitle(a, f), level: a.level ?? null, instruction: officialText(a).instruction })),
+        alerts: covering.slice(0, 3).map((a) => ({ key: alertKey(a), title: alertTitle(a), subtitle: alertLine(a, f), level: a.level ?? null, instruction: officialText(a).instruction })),
         results: await withContext(out),
         costing,
       };

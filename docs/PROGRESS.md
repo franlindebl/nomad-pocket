@@ -411,16 +411,21 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
-### 2026-11-12 — 2.5.0 (51): official alerts push, to TestFlight
+### 2026-11-12 — 2.5.0 (52): official alerts push, to TestFlight
 
 Owner's request: get a version to Apple's review. Nothing was in review (2.4.3 live). Version 2.5.0, build 51
 (Android versionCode 33, not uploaded: Play's closed test). The owner approved `docs/store/listing-2.5.0.md` ("What's
 new") and `listing-next.md` (description paragraph, App Review notes); App Privacy changed in App Store Connect to
 Coarse Location (App Functionality, not linked, no tracking), published at once (Apple applies privacy answers
-immediately, so 2.4.3's page shows it too). Checks: tsc, lint, 564 tests, i18n, licenses; E2E smoke 23/24 with
-`--build`, map-12 alone passes. A Maestro run in Germany on the simulator found the country (GDACS, USGS, EMSC) but no
-APNs token there (likely the corporate VPN), so the MeteoAlarm list and detail weren't seen on screen; Firestore
-shows no simulator rows. Archived from a clean worktree of the release commit.
+immediately, so 2.4.3's page shows it too). Checks: tsc, lint, 565 tests, i18n, licenses; E2E smoke 23/24 with
+`--build`, map-12 alone passes. With the corporate VPN off, a Maestro run in Germany (Aurich) on the simulator
+registered with the server for real (cell 53.6/7.4, zones DE802/DE083/DE103, sources MeteoAlarm + quakes) and got
+DWD's two orange warnings: Home's card, the list, the detail (issuer and time of issue, the official text in Spanish
+from DWD's CAP, "Ver los avisos en meteoalarm.org", the delay notice). It showed the issuer cut off at the end of list
+rows and missing on Home's card, so build 51's archive was cancelled: the issuer now goes first (`present.ts
+alertLine`, also in the assistant's cards and local notifications) and long lists of places are cut to three
+(`present-core shortArea`, shared with the push server). The test registration was deleted afterwards. Archived
+from a clean worktree of the release commit as build 52.
 
 ### 2026-11-12 — Alerts server v2: NWS, MeteoAlarm, zones, fewer Firestore reads
 

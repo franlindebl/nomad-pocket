@@ -162,13 +162,6 @@ export type Push = {
 const MAX_EACH = 3;
 const HOUR = 3600_000;
 
-/** A long list of places (an NWS alert names every county) cut to its first few for a notification. */
-function shortArea(a: Alert): Alert {
-  if (a.area.length <= 90) return a;
-  const parts = a.area.split(/[;,]\s*/).filter(Boolean);
-  return { ...a, area: `${parts.slice(0, 3).join(', ')}…` };
-}
-
 /** "EUMETNET – MeteoAlarm" when a warning's CAP hasn't said which national service issued it. */
 export const METEOALARM_CREDIT = 'EUMETNET – MeteoAlarm';
 
@@ -186,7 +179,7 @@ export function plan(all: Alert[], r: Registration, now: number): { pushes: Push
   const pos = centre(r.cell);
   // MeteoAlarm's terms: the national service that issued it and the time of issue go wherever the warning does.
   const bodyOf = (a: Alert) => {
-    const line = alertSubtitle(w, shortArea(a), pos, now);
+    const line = alertSubtitle(w, a, pos, now);
     if (a.source !== 'meteoalarm') return line;
     const when = a.sent !== null ? formatWhen(w, a.sent, now) : '—';
     return `${line}\n${w.t('alerts:detail.issued', { source: a.issuer || METEOALARM_CREDIT, when })}`;

@@ -8,7 +8,7 @@ import { Platform } from 'react-native';
 import i18n from '@/i18n';
 
 import { timeSensitive, type Alert, type Place } from './alerts-core';
-import { alertKey, alertSubtitle, alertTitle } from './present';
+import { alertKey, alertLine, alertTitle } from './present';
 
 export const ALERT_KIND = 'official-alert';
 const CHANNEL = 'alerts';
@@ -41,7 +41,7 @@ export async function notifyAlerts(alerts: Alert[], place: Place): Promise<numbe
       identifier: `alert:${a.topic || alertKey(a)}`,
       content: {
         title: alertTitle(a),
-        body: alertSubtitle(a, place.pos),
+        body: alertLine(a, place.pos),
         data: { kind: ALERT_KIND, key: alertKey(a) },
         sound: true,
         interruptionLevel: timeSensitive(a) ? 'timeSensitive' : 'active',

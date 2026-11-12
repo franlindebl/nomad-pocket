@@ -17,7 +17,7 @@
         "com.apple.developer.usernotifications.time-sensitive": true
       },
       "bundleIdentifier": "com.fjlinde.nomadpocket",
-      "buildNumber": "51",
+      "buildNumber": "52",
       "supportsTablet": true,
       "infoPlist": {
         "CFBundleDevelopmentRegion": "es",

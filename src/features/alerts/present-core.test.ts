@@ -50,3 +50,11 @@ test('quake title, distance and age', () => {
   assert.equal(alertTitle(words(), q), 'Terremoto M 5,2');
   assert.equal(alertSubtitle(words(), q, { lat: 37.1, lon: -3.6 }, now), 'a 54 km · Granada · hace 12 min');
 });
+
+test('shortArea: a long list of places keeps its first three', async () => {
+  const { shortArea } = await import('./present-core.ts');
+  assert.equal(shortArea('Madrid'), 'Madrid');
+  const long = 'Kreis Wittmund - Küste, Kreis Aurich - Küste, Kreis Cuxhaven - Küste, Stadt Bremerhaven, Kreis Wesermarsch - Küste';
+  assert.equal(shortArea(long), 'Kreis Wittmund - Küste, Kreis Aurich - Küste, Kreis Cuxhaven - Küste…');
+  assert.equal(shortArea('Marion; Lamar; Fayette; Winston; Walker; Blount; Etowah; Calhoun; Cherokee; Cleburne; Pickens; Tuscaloosa'), 'Marion, Lamar, Fayette…');
+});
