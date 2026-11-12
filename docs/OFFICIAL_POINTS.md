@@ -85,12 +85,16 @@ Measured on 300 Castilla-La Mancha pharmacies against the Junta's coordinates: 9
 
 **Regional lists' gaps** (2026-11-12): a regional list lags behind the register (Navarra's points are from 2021,
 Aragón lacks the botiquines authorised since 2024, others a few new pharmacies). Where REGCESS carries the
-regional list's code (`CODE_FIELD`: the autonomic code for Andalucía, Baleares, Cataluña, Navarra; the CCN for
-Aragón, Madrid, La Rioja), REGCESS pharmacies and botiquines whose code the regional list lacks are placed and
+regional list's code (`CODE_FIELD`: the autonomic code for Andalucía, Baleares, Cataluña, Navarra, Euskadi (its
+`idif` 480969 is REGCESS's "48 E.1. 0969"); the CCN for Aragón, Madrid, La Rioja), REGCESS pharmacies and botiquines whose code the regional list lacks are placed and
 added, unless a listed pharmacy is within 200 m or one sharing the holder's name within 1.5 km (a changed code).
 First run: Aragón 30 (mostly botiquines), Cataluña 16, Navarra 14, La Rioja 4, Baleares 3, Madrid 2, Andalucía 0.
-Castilla-La Mancha's and Euskadi's codes don't match REGCESS's (13 and 4 more in REGCESS than in their lists): not
-yet. REGCESS names stored as UTF-8 read as Latin-1 ("SÃNCHEZ") are put back; pharmacy depots (military,
+Euskadi (2026-11-12): 843 of REGCESS's 847 pharmacies match by code; 1 added (the other 3 have a listed pharmacy
+near). Castilla-La Mancha's codes (TO-162-F) aren't in REGCESS and a third of its holders' names differ from
+REGCESS's (transfers), so it goes by count (`BY_COUNT`): in a municipality where REGCESS has more pharmacies than the
+list, its pharmacies there are placed and as many as the difference added, the farthest from a listed one (none
+within 200 m, none sharing two words of a listed holder's name within 3 km): 23, mostly in the growing towns around
+Madrid and Toledo (Alovera, Azuqueca, Yeles, Illescas…). REGCESS names stored as UTF-8 read as Latin-1 ("SÃNCHEZ") are put back; pharmacy depots (military,
 hospital) aren't added.
 
 **Health centres with the regions' own points** (2026-11-12, `CENTRES` in `es.py`): REGCESS's addresses, geocoded,
@@ -163,6 +167,7 @@ packs of 2026-11-05:
 | South Korea | `kr.py`: HIRA's national hospitals and pharmacies (data.go.kr 15051059), quarterly | KOGL Type 1 (attribution) | 2,813 pharmacies (91% of OSM's), 40 m | **20,992 pharmacies, 609 hospitals, 10,365 clinics and health centres** (OSM: 3,075 pharmacies) |
 | Niger | `ne.py`: Ministry of Health's carte sanitaire via OCHA on HDX (2023) | CC BY | 98 pharmacies, 16 m | **52 pharmacies, 2,738 health centres** (OSM has 292 clinics) |
 | Jamaica | `jm.py`: Ministry of Health facilities, data.gov.jm (2016) | ODC-By | 20 hospitals, 46 m | **4 hospitals, 291 health centres** |
+| Italy | `it.py`: Ministero della Salute's pharmacy register (daily), placed on ANNCSU house numbers | IODL 2.0 + CC BY 4.0 (ANNCSU) | 5,534 pharmacies, 8 m | **2,284 pharmacies and dispensari** (OSM: 16,871) |
 | Argentina | `ar.py`: IGN's "Edificio de salud" layer (WFS; mostly the Ministry's SISA register) | IGN terms (attribution, shared freely) | 968 hospitals, 20 m; 1,959 centres, 14 m | **91 hospitals, 4,713 centres, posts and dispensaries** |
 
 - **Japan.** Clinics are the register's 診療所 offering internal medicine, paediatrics, surgery, general practice or
@@ -271,10 +276,16 @@ packs of 2026-11-05:
   hospitals and primary-care points where OSM has 1.5k clinics, but calls itself "non-validated", and it shows:
   of 264 general and specialist hospitals that share a name with an OSM hospital, a quarter are over 2 km away
   (median 123 m). Worth another look with only its field-surveyed points, or a later release.
-- **Italy (not added).** The Ministry's daily pharmacy register (IODL 2.0, 20,777 open) has coordinates for 91%, but
-  they fail the test: only 17% are within 50 m of an OSM pharmacy (median 377 m), and 6,680 share their exact point
-  with another pharmacy (Turin's Piazza Vittorio Veneto 10 sits 9 km out of town). It needs the addresses placed
-  first, e.g. with ANNCSU, the Agenzia delle Entrate's open register of house numbers.
+- **Italy.** The Ministry's daily pharmacy register (IODL 2.0, 20,777 open) has its own coordinates, but they fail
+  the test (only 17% within 50 m of an OSM pharmacy, median 377 m, 6,680 sharing their exact point), so they aren't
+  used. Each address is placed instead on ANNCSU, the national register of house numbers (Agenzia delle Entrate and
+  ISTAT, `INDIR_ITA`, a 336 MB zip of 27M house numbers, 76% with a point set by the municipality; CC BY 4.0 per
+  its dati.gov.it / RNDT record): ISTAT code + normalised street + number (+ letter), kept only when every ANNCSU
+  point of that address lies within 50 m (precision `address`). 7,868 placed (7,717 pharmacies, 151 dispensari),
+  38% of the register: the rest have no number (snc, km), a street spelled differently, or a municipality without
+  points yet; coverage grows as municipalities add theirs. The 2,284 added are mostly in small southern and rural
+  towns where OSM is thin (1,278 over 1 km from an OSM pharmacy). The zip is read as a stream, keeping only the
+  streets needed; dati.salute.gov.it needs OpenSSL's DEFAULT ciphers (RSA key exchange).
 
 ## Coverage by country (keep this up to date)
 
@@ -284,8 +295,8 @@ Numbers, filters and quality per country are in "Other countries" above; what ev
 (`official-health-points-<cc>` in `scripts/licenses/native.json`) and a line in the routing release notes
 (`.github/workflows/country-packages.yml`). "In packs since" is the first pack build with them.
 
-In numbers (2026-11-12): official points in 32 of the 232 countries and territories with a pack (26 countries and 6
-territories), about 1.42 billion people, 17% of the world; with the countries where OSM is already near the official
+In numbers (2026-11-12): official points in 33 of the 232 countries and territories with a pack (27 countries and 6
+territories), about 1.48 billion people, 18% of the world; with the countries where OSM is already near the official
 totals (Germany, the Nordics…, ~200 million), about a fifth. The big gaps: India, China, Indonesia, Pakistan,
 Nigeria, Brazil (licence asked), Bangladesh, Russia, the Philippines, Egypt.
 
@@ -306,29 +317,30 @@ as an indemnity. A source whose terms don't fit stays out until its publisher gi
 | Peru (`pe`) | hospitals, health centres and posts | SUSALUD, RENIPRESS | ODC-By | monthly | 2026-11-12 |
 | Uruguay (`uy`) | hospitals, polyclinics | ASSE, unidades asistenciales | Licencia de Datos Abiertos de Uruguay | monthly | 2026-11-12 |
 | Ethiopia (`et`) | pharmacies, hospitals, health centres and posts, clinics | Ministry of Health's Master Facility Registry, via 3iS on HDX | CC BY | snapshot 2025-02 | 2026-11-12 |
-| Canada (`ca`) | pharmacies (ON, BC, MB), hospitals, primary care | Ontario MOHSERLO; HealthLink BC; Québec MSSS (Données Québec); Manitoba vaccine providers; NS, PEI, NL, Yukon facility lists; Statistics Canada ODHF (2020) for AB, SK, NB, NT, NU hospitals | OGL-Ontario, OGL-BC, CC BY 4.0, OpenMB, OGL-NS/PE/NL/YT, OGL-Canada | monthly | ON and BC 2026-11-12 (run 43235609769); the other provinces with the next build |
+| Canada (`ca`) | pharmacies (ON, BC, MB), hospitals, primary care | Ontario MOHSERLO; HealthLink BC; Québec MSSS (Données Québec); Manitoba vaccine providers; NS, PEI, NL, Yukon facility lists; Statistics Canada ODHF (2020) for AB, SK, NB, NT, NU hospitals | OGL-Ontario, OGL-BC, CC BY 4.0, OpenMB, OGL-NS/PE/NL/YT, OGL-Canada | monthly | ON and BC 2026-11-12 (run 43235609769); the other provinces 2026-11-12 (run 43248230554) |
 | Australia (`au`) | pharmacies, hospitals, general practices | Healthdirect's National Health Services Directory, via Geoscience Australia | CC BY 4.0 (+ G-NAF) | snapshot 2025-03 | 2026-11-12 (run 43235609769) |
 | United Kingdom (`gb`), Great Britain | pharmacies, GP practices | NHS England, Organisation Data Service (ORD API), placed on Ordnance Survey's Code-Point Open | OGL v3 | monthly | 2026-11-12 (run 43235609769) |
 | United States (`us-west`, `us-midwest`, `us-northeast`, `us-south`, `us-alaska`, `us-hawaii`), Puerto Rico (`pr`), US Virgin Islands (`vi`), Guam (`gu`), American Samoa (`as`), Northern Mariana Islands (`mp`) | community health centres | HRSA (HHS), Health Center Service Delivery and Look-Alike Sites | public domain | monthly | 2026-11-12 (run 43235609769) |
+| Latvia (`lv`) | pharmacies; hospitals and family doctors' practices | ZVA (State Agency of Medicines), FDU register; IeM Informācijas centrs, VKCP IĢIS medical institutions' addresses (2024 snapshot) | CC0 | monthly; snapshot | 2026-11-12 (run 43248230554) |
+| Iceland (`is`) | health centres, the walk-in clinic, emergency departments | Embætti landlæknis (Directorate of Health), Heilsuvera WFS | CC BY 4.0 | daily | 2026-11-12 (run 43248230554) |
+| Dominican Republic (`do`, with Haiti) | public hospitals, health centres, consultorios | Servicio Nacional de Salud, Establecimientos de Salud del SNS (datos.gob.do) | ODbL | when the SNS updates it | 2026-11-12 (run 43248230554) |
+| Malawi (`mw`) | hospitals, health centres, dispensaries, posts | Ministry of Health and Population, Malawi Health Facility Registry, via the Health Cluster on HDX | CC BY | snapshot 2023 | 2026-11-12 (run 43248230554) |
+| New Caledonia (`nc`) | pharmacies, hospitals, dispensaries | Gouvernement de la Nouvelle-Calédonie, DASS, Situation des structures de santé (data.gouv.nc) | Licence Ouverte 2.0 | when DASS updates it | 2026-11-12 (run 43248230554) |
+| Argentina (`ar`) | hospitals, public health centres, posts (no pharmacies) | Instituto Geográfico Nacional, "Edificio de salud" WFS layer (from the Ministry of Health's SISA) | IGN terms: attribution, shared freely | unstated ("periodically") | 2026-11-12 (run 43248230554) |
+| Sierra Leone (`sl`) | hospitals, community health centres and posts | Ministry of Health and Sanitation with CIESIN/GRID3, National Health Facilities Dataset v01 | CC BY 4.0 | snapshot 2023 | 2026-11-12 (run 43248230554) |
+| Chad (`td`) | hospitals, health centres | Ministère de la Santé Publique, list of health centres and districts, via OCHA on HDX | CC BY | snapshot 2020 | 2026-11-12 (run 43248230554) |
+| DR Congo (`cd`) | hospitals, health centres and posts (placed 2024 on) | CIESIN and GRID3 with the Ministère de la Santé Publique, GRID3 COD Health Facilities v9.0 (HDX) | CC BY 4.0 | per GRID3 version | 2026-11-12 (run 43286903964) |
+| South Korea (`kr`) | pharmacies, hospitals, health centres, primary-care clinics | 건강보험심사평가원 (HIRA), 전국 병의원 및 약국 현황 (data.go.kr) | KOGL Type 1 | quarterly | 2026-11-12 (run 43286903964) |
+| Mozambique (`mz`) | hospitals, health centres and posts | Ministério da Saúde (SIS-MA), Master Health Facility List, via OCHA on HDX | CC0 | snapshot 2017 | 2026-11-12 (run 43286903964) |
+| Niger (`ne`) | pharmacies, health centres | Ministère de la Santé Publique, carte sanitaire, via OCHA on HDX | CC BY | snapshot 2023 | 2026-11-12 (run 43286903964) |
+| Jamaica (`jm`) | hospitals, health centres | Ministry of Health and Wellness, Health Facilities (data.gov.jm) | ODC-By | snapshot 2016 | 2026-11-12 (run 43286903964) |
+| Mexico (`mx`) | public hospitals, public primary care | Secretaría de Salud, DGIS, CLUES | free use ("no existen restricciones") | monthly | 2026-11-12 (run 43248230554) |
 
 ### Built, waiting for their first CI run and packs
 
 | Country (pack) | Adds | Source: publisher, dataset | Licence | Refresh |
 |---|---|---|---|---|
-| Latvia (`lv`) | pharmacies; hospitals and family doctors' practices | ZVA (State Agency of Medicines), FDU register; IeM Informācijas centrs, VKCP IĢIS medical institutions' addresses (2024 snapshot) | CC0 | monthly; snapshot |
-| Iceland (`is`) | health centres, the walk-in clinic, emergency departments | Embætti landlæknis (Directorate of Health), Heilsuvera WFS | CC BY 4.0 | daily |
-| Dominican Republic (`do`, with Haiti) | public hospitals, health centres, consultorios | Servicio Nacional de Salud, Establecimientos de Salud del SNS (datos.gob.do) | ODbL | when the SNS updates it |
-| Malawi (`mw`) | hospitals, health centres, dispensaries, posts | Ministry of Health and Population, Malawi Health Facility Registry, via the Health Cluster on HDX | CC BY | snapshot 2023 |
-| New Caledonia (`nc`) | pharmacies, hospitals, dispensaries | Gouvernement de la Nouvelle-Calédonie, DASS, Situation des structures de santé (data.gouv.nc) | Licence Ouverte 2.0 | when DASS updates it |
-| Argentina (`ar`) | hospitals, public health centres, posts (no pharmacies) | Instituto Geográfico Nacional, "Edificio de salud" WFS layer (from the Ministry of Health's SISA) | IGN terms: attribution, shared freely | unstated ("periodically") |
-| Sierra Leone (`sl`) | hospitals, community health centres and posts | Ministry of Health and Sanitation with CIESIN/GRID3, National Health Facilities Dataset v01 | CC BY 4.0 | snapshot 2023 |
-| Chad (`td`) | hospitals, health centres | Ministère de la Santé Publique, list of health centres and districts, via OCHA on HDX | CC BY | snapshot 2020 |
-| DR Congo (`cd`) | hospitals, health centres and posts (placed 2024 on) | CIESIN and GRID3 with the Ministère de la Santé Publique, GRID3 COD Health Facilities v9.0 (HDX) | CC BY 4.0 | per GRID3 version |
-| South Korea (`kr`) | pharmacies, hospitals, health centres, primary-care clinics | 건강보험심사평가원 (HIRA), 전국 병의원 및 약국 현황 (data.go.kr) | KOGL Type 1 | quarterly |
-| Mozambique (`mz`) | hospitals, health centres and posts | Ministério da Saúde (SIS-MA), Master Health Facility List, via OCHA on HDX | CC0 | snapshot 2017 |
-| Niger (`ne`) | pharmacies, health centres | Ministère de la Santé Publique, carte sanitaire, via OCHA on HDX | CC BY | snapshot 2023 |
-| Jamaica (`jm`) | hospitals, health centres | Ministry of Health and Wellness, Health Facilities (data.gov.jm) | ODC-By | snapshot 2016 |
-| Mexico (`mx`) | public hospitals, public primary care | Secretaría de Salud, DGIS, CLUES | free use ("no existen restricciones") | monthly |
+| Italy (`it`) | pharmacies, dispensari | Ministero della Salute, Farmacie (FRM_FARMA_5); placed with ANNCSU, Agenzia delle Entrate and ISTAT | IODL 2.0; ANNCSU CC BY 4.0 | monthly |
 
 ### Not covered, and why
 
@@ -351,7 +363,6 @@ problem of ours.
 | Hong Kong | DATA.GOV.HK's terms allow redistribution with attribution but make the user indemnify the Government against any claim (owner, 2026-11-12: out). Only ~250 pharmacies would be added (geocoded with ALS, median 55 m); HA hospitals and clinics are all in OSM already. Script parked | Terms without the indemnity: the owner asked DATA.GOV.HK on 2026-11-12, waiting |
 | Singapore | Singapore Open Data Licence v1.0: indemnity, and "does not grant any rights to Downstream Sub-Licensees", which an open pack can't honour; CHAS clinics frozen at 2024-06, no hospital list with points (owner, 2026-11-12: out). Script parked | Permission for open packs, or a plain open licence, and a current CHAS list: the owner asked data.gov.sg on 2026-11-12, waiting |
 | Guinea | HDX copy of the Ministry's list uploaded by the American Red Cross (2018, licence only an HDX tag), rows filed under the wrong prefecture, same-named facilities often far from OSM's. Script parked | A Ministry-published, current list |
-| Italy | The Ministry's pharmacy register (IODL 2.0) has points, but they fail against OSM (median 377 m, thousands stacked) | Its addresses placed with ANNCSU |
 | Nigeria | GRID3 NGA v4.0 (CC BY 4.0) is "non-validated": a quarter of same-named hospitals over 2 km from OSM's | Only field-surveyed points, or a later release |
 | Ireland | No open list with coordinates: HSE's GP sites and health centres datasets were removed from data.gov.ie; the PSI pharmacy register is addresses only and Eircode has no open geocoder | HSE republishes its lists with coordinates |
 | Greece | Only some regions' and municipalities' layers (Crete, Athens, Thessaloniki…) with no licence; national lists are free-text addresses | A national layer with a licence |
@@ -374,17 +385,18 @@ problem of ours.
 | Colombia | Every health dataset on datos.gov.co, REPS included, is CC BY-SA; REPS has addresses only | MinSalud relicenses REPS or publishes points |
 | Ecuador | datosabiertos.gob.ec blocks scripts with a WAF; GeoSalud has no export | An MSP file or API |
 | Panama | Only the CSS's 77 units (2020, CC BY): too few | MINSA's list |
-| Paraguay, Costa Rica, Honduras, Guatemala, El Salvador, Bolivia, Nicaragua, Venezuela, Cuba, Trinidad and Tobago | No open list with points found, or portals down or unreachable (several only from the office: worth a probe from CI) | A Ministry list with points |
+| Costa Rica, Honduras, Guatemala, El Salvador, Bolivia, Nicaragua, Venezuela, Cuba, Trinidad and Tobago | No open list with points found, or portals down or unreachable (several only from the office: worth a probe from CI) | A Ministry list with points |
+| Paraguay | Looked at 2026-11-12: datos.gov.py answers every URL, its API included, with a "Sitio en Mantenimiento" page; MSPBS's site lists hospitals without points; DINAVISA publishes no pharmacy list (about 2,400 licensed, unpublished) | datos.gov.py back, with an MSPBS list with points; or MSPBS / DINAVISA share the register |
+| United Arab Emirates | Looked at 2026-11-12: Bayanat (CC BY 4.0, fine) has only statistics (counts of pharmacies, hospitals); the files with points (MOHAP's "Geocoded Location of Health Facilities 2022", EHS's geospatial hospitals and facilities) sit on mohap.gov.ae and ehs.gov.ae, which reset or time out from the office and from GitHub runners too; data.abudhabi answers runners but blocks the office | MOHAP or EHS reachable, and their terms read |
 | Mali | HeRAMS 2023 (CC BY) has points but no facility names or types | A Ministry list with names and types |
 | Israel, Qatar | Only special lists (cannabis pharmacies, psychiatric hospitals) or statistics | A national register |
-| Turkey, Egypt, Saudi Arabia, Jordan, Iraq, UAE, Kuwait, Oman, Algeria, Tunisia | Portals time out from the office or have no facility list; HDX only OSM copies | Probe from CI; a Ministry file |
+| Turkey, Egypt, Saudi Arabia, Jordan, Iraq, Kuwait, Oman, Algeria, Tunisia | Portals time out from the office or have no facility list; HDX only OSM copies | Probe from CI; a Ministry file |
 | Ghana, Senegal, Cameroon, Benin, Togo, Burkina Faso, Côte d'Ivoire | Only OSM-derived copies, aggregate counts or a 2012 list | A Ministry list with points |
 | Germany, Austria, Switzerland, Netherlands, Luxembourg, Monaco, Andorra, Denmark, Sweden, Finland, Portugal, Poland | Not worth it: OSM is near the official totals, or only cities publish | — |
 | ~135 others | No official open source found: most of the Caribbean, Central America, Central Asia and the Caucasus, South-East Asia, the Pacific, West Africa, Russia and Belarus, China, the western Balkans (`docs/OFFICIAL_POINTS_WORLD.md`) | A source turning up; a fallback could be the CC0 Maina 2019 compilation for sub-Saharan Africa (stale) |
 
 ## Improvements not built yet
 
-- Castilla-La Mancha's and Euskadi's lists against REGCESS by name and distance (their codes don't match).
 - Asturias's health centres (SITPA layers) once its server answers queries, maybe from CI.
 - Opening hours: only Cantabria (sparse), Euskadi's botiquines and La Palma publish them.
 - A "source: official register" line on the place card (the id prefix already tells).

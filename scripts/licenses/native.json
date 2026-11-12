@@ -704,6 +704,18 @@
       "text": null
     },
     {
+      "id": "official-health-points-it",
+      "name": "Italy: pharmacies of the Ministry of Health, placed with ANNCSU",
+      "license": "IODL-2.0 AND CC-BY-4.0",
+      "copyright": [
+        "Ministero della Salute, Farmacie (dati.salute.gov.it), Italian Open Data Licence v2.0",
+        "Agenzia delle Entrate and ISTAT, ANNCSU indirizzario (CC BY 4.0)"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Pharmacies in Italy that OpenStreetMap lacks, added to the country's emergency points; each placed on its address's house number in ANNCSU.",
+      "text": null
+    },
+    {
       "id": "wikipedia-kiwix",
       "name": "Wikipedia and Kiwix content",
       "license": "CC-BY-SA-4.0",

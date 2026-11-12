@@ -24,6 +24,7 @@ name: Official points
 # - cd: DR Congo's GRID3 health facilities (v9.0); mz: Mozambique's Ministry master list (2017).
 # - kr: South Korea's pharmacies, hospitals and primary care from HIRA's quarterly file (data.go.kr).
 # - ne: Niger's carte sanitaire (Ministry via OCHA, 2023); jm: Jamaica's Ministry of Health facilities (2016).
+# - it: Italy's pharmacy register (Ministero della Salute), placed by address with ANNCSU (Agenzia delle Entrate).
 # A source that doesn't answer keeps last month's rows, read back from the release (the job then ends in a warning).
 
 on:

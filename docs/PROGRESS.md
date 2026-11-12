@@ -84,7 +84,8 @@ OP. **Official points: complete OSM with official registers, country by country*
    built: Latvia, Iceland, Dominican Republic, Malawi, New Caledonia, Argentina (IGN layer), Mexico (CLUES, public
    institutions only: private hospitals' points fail). Then Sierra Leone, Chad and Canada's other provinces (Québec, Manitoba, NS, PEI, NL, Yukon; StatCan's
    ODHF hospitals for the rest). Then DR Congo (GRID3 v9, clinics placed
-   2024 on) and Mozambique (2017), South Korea (HIRA: 21k pharmacies), Niger, Jamaica. Left out: Hong Kong and Singapore (indemnity terms; owner asked them, and
+   2024 on) and Mozambique (2017), South Korea (HIRA: 21k pharmacies), Niger, Jamaica. Then Italy (register placed on ANNCSU house
+   numbers). Left out: Hong Kong and Singapore (indemnity terms; owner asked them, and
    DATASUS for Brazil, 2026-11-12), Guinea, Haiti, Kenya, Tanzania, Uganda, Rwanda, Madagascar, Zambia. Blocked: Taiwan (TGOS key: the owner's to register), Brazil (DATASUS licence). The status of
    every country and why: "Coverage by country" in `docs/OFFICIAL_POINTS.md` (keep it up to date).
 
@@ -621,6 +622,11 @@ check and the release.
   +7,812 centres; South Korea +20,984 / +609 / +10,364; DR Congo +1,231 hospitals, +12,389 centres; Niger +52
   pharmacies, +2,738 centres; Mozambique +31 / +777; Jamaica +4 / +291. The registers the office network couldn't reach
   don't answer a GitHub runner either (only Mexico's gobi does).
+- Italy (`it.py`): the Ministry's pharmacy register, its poor points replaced by ANNCSU house numbers (Agenzia delle
+  Entrate, CC BY 4.0 per its dati.gov.it record; the 336 MB national zip read as a stream, reachable from runners):
+  7.9k placed (38%), median 8 m from OSM's, +2,284 pharmacies. Spain: Euskadi's list matched to REGCESS by code (+1);
+  Castilla-La Mancha by count per municipality (+23). Paraguay (datos.gov.py in maintenance) and the UAE (Bayanat only
+  statistics; MOHAP and EHS unreachable from runners too) left out.
 
 - Built by five research agents (Sonnet) against the same brief and quality gate, reviewed here: Latvia (`lv.py`: 176
   pharmacies, 184 GP practices), Iceland (`is.py`: 31 health centres), Dominican Republic (`do.py`: 50 hospitals, 1.5k

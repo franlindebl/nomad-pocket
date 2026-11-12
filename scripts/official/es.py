@@ -582,16 +582,30 @@ REGIONAL = {
 # since 2024; Cataluña, Baleares, La Rioja a few new pharmacies). Where REGCESS carries the regional list's code,
 # by community: which REGCESS column holds it. REGCESS pharmacies (and botiquines, where the regional list has
 # them) whose code the regional list lacks are placed and added, unless a listed pharmacy is within 200 m or one
-# sharing the holder's name within 1.5 km (a code that changed). Castilla-La Mancha's and Euskadi's codes don't
-# match REGCESS's: none there (2026-11: 13 and 4 more in REGCESS than in their lists).
+# sharing the holder's name within 1.5 km (a code that changed). Euskadi's idif is REGCESS's "48 E.1. 0969" as
+# 480969 (code_key).
 CODE_FIELD = {"01": "Código Autonómico del Centro", "02": "Código de Centro Normalizado REGCESS (CCN)",
               "04": "Código Autonómico del Centro", "09": "Código Autonómico del Centro",
               "13": "Código de Centro Normalizado REGCESS (CCN)", "15": "Código Autonómico del Centro",
-              "17": "Código de Centro Normalizado REGCESS (CCN)"}
+              "16": "Código Autonómico del Centro", "17": "Código de Centro Normalizado REGCESS (CCN)"}
+# Castilla-La Mancha's codes (TO-162-F) aren't in REGCESS and a third of its holders differ from REGCESS's (transfers
+# not yet in one or the other): where REGCESS counts more pharmacies in a municipality than the list, its pharmacies
+# there are placed, and as many as the difference are added, those farthest from a listed one (none within 200 m).
+BY_COUNT = {"08"}
 
 
 def code_key(c):
+    basque = re.fullmatch(r"\s*(\d\d)\s*E\.?\s*1\.?\s*(\d+)\s*", str(c or ""))
+    if basque:
+        return (basque.group(1) + basque.group(2).zfill(4)).lstrip("0")
     return re.sub(r"[^0-9A-Z]", "", str(c or "").split("#")[0].upper()).lstrip("0")
+
+
+def town_key(s):
+    """REGCESS writes "Herrera, La", the regions "La Herrera"."""
+    s = folded(s)
+    article = re.fullmatch(r"(.+?),\s*(el|la|los|las)", s)
+    return f"{article.group(2)} {article.group(1)}" if article else s
 
 
 # --- REGCESS (Ministerio de Sanidad) ----------------------------------------------------------
@@ -641,7 +655,7 @@ def regcess_attempts(r, kind, unique_in_town):
     return attempts
 
 
-NAME_STOP = {"farmacia", "botiquin", "lda", "ldo", "del", "de", "la", "las", "los", "y", "san", "santa", "cb", "maria", "jose"}
+NAME_STOP = {"farmacia", "oficina", "botiquin", "lda", "ldo", "del", "de", "la", "las", "los", "y", "san", "santa", "cb", "maria", "jose"}
 
 
 def name_words(s):
@@ -664,20 +678,49 @@ def missing_from(regional, found, near=200, named=1500):
     return out
 
 
-def regcess_points(geocoder, covered, with_botiquines, known=None, limit=None):
+def by_count(regional, found, listed, near=200, named=3000):
+    """BY_COUNT: per municipality, the REGCESS pharmacies farthest from a listed one, as many as REGCESS has more.
+    One sharing two words of a listed holder's name within 3 km is that pharmacy, placed elsewhere."""
+    def dist(q, r):
+        return 6371000 * math.hypot(math.radians(q["lon"] - r["lon"]) * math.cos(math.radians(r["lat"])), math.radians(q["lat"] - r["lat"]))
+
+    def nearest(r):
+        return min((dist(q, r) for q in regional), default=math.inf)
+
+    def listed_by_name(r):
+        words = name_words(r["holder"])
+        return any(len(words & name_words(q["holder"])) >= 2 and dist(q, r) <= named for q in regional)
+    by_town = {}
+    for r in found:
+        if r["kind"] == "pharmacy":
+            by_town.setdefault(r["_town"], []).append(r)
+    out = []
+    for town, rs in by_town.items():
+        far = sorted(((nearest(r), r) for r in rs if not listed_by_name(r)), key=lambda x: -x[0])
+        out += [r for d, r in far[:max(0, len(rs) - listed.get(town, 0))] if d > near]
+    return out
+
+
+def regcess_points(geocoder, covered, with_botiquines, known=None, counts=None, limit=None):
     """Pharmacies and botiquines of the communities no regional register covers, plus the botiquines a regional
-    register leaves out and those whose code it lacks (known: community → its codes, CODE_FIELD); hospitals,
-    health centres and consultorios of every community. Rows a regional list lacks carry `_gap`."""
-    known = known or {}
+    register leaves out and those whose code it lacks (known: community → its codes, CODE_FIELD), or all the
+    pharmacies of a municipality where it lists fewer (counts: community → town_key → pharmacies, BY_COUNT);
+    hospitals, health centres and consultorios of every community. Rows a regional list lacks carry `_gap`."""
+    known, counts = known or {}, counts or {}
     jobs = []
     est = regcess("E")
-    towns = {}
+    towns, theirs = {}, {}
     for r in est:
         if r["_type"] == "E1":
             towns[pick(r, "Código Municipio")] = towns.get(pick(r, "Código Municipio"), 0) + 1
+            k = (pick(r, "Código Comunidad Autónoma"), town_key(pick(r, "Municipio")))
+            theirs[k] = theirs.get(k, 0) + 1
     for r in est:
         cc = pick(r, "Código Comunidad Autónoma")
         gap = cc in known and code_key(pick(r, CODE_FIELD[cc])) not in known[cc]
+        if cc in counts and r["_type"] == "E1":
+            town = town_key(pick(r, "Municipio"))
+            gap = theirs[(cc, town)] > counts[cc].get(town, 0)
         if gap and "DEPOSITO" in folded(pick(r, "Nombre Centro")).upper():
             gap = False  # a military or hospital depot, not open to the public
         if r["_type"] == "E1" and (cc not in covered or gap):
@@ -711,6 +754,7 @@ def regcess_points(geocoder, covered, with_botiquines, known=None, limit=None):
         auto = pick(r, "Código Autonómico del Centro") or ""
         out["_keys"] = {code_key(c) for c in (code, auto, auto.split("/")[0]) if c}
         out["_ine"] = (pick(r, "Código Municipio") or "")[:5]
+        out["_town"] = town_key(pick(r, "Municipio"))
         return out
 
     out, missed = [], {}
@@ -1154,16 +1198,23 @@ def main(argv):
                 with_botiquines.add(community)
     if "es-regcess" in only:
         try:
-            known = {}
+            known, counts = {}, {}
             for sid, (cc, _) in REGIONAL.items():
                 if cc in CODE_FIELD and cc in covered:
                     known.setdefault(cc, set()).update(code_key(r["code"]) for r in rows if r["source"] == sid)
-            got, missed, asked = regcess_points(geocoder, covered, with_botiquines, known, limit)
+                if cc in BY_COUNT and cc in covered:
+                    for r in rows:
+                        if r["source"] == sid and r["kind"] == "pharmacy":
+                            counts.setdefault(cc, {})[town_key(r["municipality"])] = counts.get(cc, {}).get(town_key(r["municipality"]), 0) + 1
+            got, missed, asked = regcess_points(geocoder, covered, with_botiquines, known, counts, limit)
             gaps = {}
-            for cc in known:
+            for cc in [*known, *counts]:
                 regional = [r for r in rows if r["source"] in REGIONAL and REGIONAL[r["source"]][0] == cc]
                 theirs = [r for r in got if r["_community"] == cc and r["_gap"]]
-                extra = missing_from(regional, theirs)
+                if cc in counts:
+                    extra = by_count(regional, theirs, counts[cc])
+                else:
+                    extra = missing_from(regional, theirs)
                 got = [r for r in got if not (r["_community"] == cc and r["_gap"])] + extra
                 gaps[COMMUNITIES[cc][0]] = len(extra)
             print(f"[es-regcess] pharmacies and botiquines the regional lists lack, added: {gaps}", file=sys.stderr)
