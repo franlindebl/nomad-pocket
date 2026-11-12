@@ -1,0 +1,9 @@
+rules_version = '2';
+// Only the alert functions touch Firestore (the Admin SDK skips these rules); no client reads or writes anything.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

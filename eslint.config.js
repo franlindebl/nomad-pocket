@@ -5,7 +5,8 @@ const expoConfig = require('eslint-config-expo/flat');
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ['dist/*'],
+    // server/ is its own package (Cloud Functions, Node), checked with its own tsc.
+    ignores: ['dist/*', 'server/**'],
   },
   {
     // src/db owns the SQLite files and where they live (Library/Application Support on iOS):

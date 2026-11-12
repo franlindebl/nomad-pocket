@@ -4,11 +4,13 @@
 import {
   addNotificationResponseReceivedListener,
   clearLastNotificationResponse,
+  getDevicePushTokenAsync,
   getLastNotificationResponse,
   type NotificationResponse,
 } from 'expo-notifications';
+import { File, Paths } from 'expo-file-system';
 import { router } from 'expo-router';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 import { whenNavigatorReady } from '@/components/navigation';
 import { registerInit } from '@/features/bootstrap';
@@ -37,6 +39,16 @@ registerInit(() => {
   addNotificationResponseReceivedListener(openAlert);
   const launch = getLastNotificationResponse();
   if (launch) openAlert(launch);
+
+  // Phase 2 spike (docs/ALERTS_PLAN.md, task 0a): a build made with EXPO_PUBLIC_PUSH_SPIKE=1 writes its APNs token to
+  // Library/push-spike-token.txt (read with `devicectl device copy from`) so the owner can send it a test push.
+  // Remove when the app registers with the server.
+  if (process.env.EXPO_PUBLIC_PUSH_SPIKE === '1' && Platform.OS === 'ios') {
+    getDevicePushTokenAsync().then(
+      (t) => new File(Paths.document, '..', 'Library', 'push-spike-token.txt').write(String(t.data)),
+      (e) => console.warn('[push-spike] no token', e),
+    );
+  }
 
   if (useAlertsState.getState().enabled) {
     void registerAlertsTask();

@@ -36,8 +36,9 @@ each one into two or three concrete actions inside the app.**
   channel `reminders`; **the notification handler is set there**, so alerts must share one handler, not set
   a second one).
 - `plugins/with-android-no-firebase.js` keeps Firebase and Play services out of the APK and removes
-  expo-notifications' `FirebaseMessagingService`. This stays: **no FCM on Android, ever** (`docs/ANDROID_PLAY.md`).
-  Android never gets push, in either phase: it checks the sources in the background.
+  expo-notifications' `FirebaseMessagingService`. This stays: **no Firebase or Play services code in the APK, ever**
+  (`docs/ANDROID_PLAY.md`). Android push without it, through the phone's own Play services over IPC, is being
+  analysed (phase 2, 2026-11-12); until then Android checks the sources in the background.
 - No background task module (`expo-background-task` / `expo-task-manager` are not dependencies).
   `UIBackgroundModes` is `location` + `audio` (navigation).
 - Atom/XML is parsed with a small regex parser (`src/features/catalog/opds.ts`; RN has no DOMParser). `fflate`
@@ -216,24 +217,135 @@ Still to do in phase 1:
 ## Phase 2 — push from a free server of our own
 
 Starts when phase 1 is on TestFlight and its background runs have been measured. Phase 1 stays as is: the app
-keeps reading the sources itself for its list, Android keeps checking in the background (no FCM), and iOS gains
-real push on top. So the server only does what the phone can't: watch the feeds every minute and wake iPhones.
+keeps reading the sources itself for its list and keeps its background check as the fallback, and push comes on
+top. So the server only does what the phone can't: watch the feeds every minute and wake the phones.
 
-### Where: Deno Deploy, free plan
+### Why push is needed (measured 2026-11-12)
 
-Verified 2026-11-04: 1 M requests/month, 10 h of active CPU/month, `Deno.cron` every minute (up to 10 per revision,
-no overlapping runs), Deno KV (1 GiB, 1 M read and 500 k write units/month), deploys from the GitHub repo. "Deploy
-Classic" shut down on 2026-07-20: use the new platform (console.deno.com; 2 regions; KV queues not supported there,
-not needed). Budget: the cron is ~43 k requests/month; iOS registrations a few per device per month; Android never
-calls the server, so the free plan isn't spent on polling.
+The owner's iPhone (the owner opens the app every day), Settings › Avisos oficiales › Comprobaciones recientes:
+background checks every ~30 min from 03:19 to 07:23, then **none until the app was opened at 12:44**. That is the
+pattern of a `BGProcessingTask`: `expo-background-task` submits a `BGProcessingTaskRequest`
+(`node_modules/expo-background-task/ios/BackgroundTaskScheduler.swift`), which iOS runs when the phone is idle,
+mostly at night on the charger. AEMET issues in the morning and the afternoon, exactly when nothing runs. A
+`BGAppRefreshTask` would not save it either: iOS spends it by how much the app is used, and the typical person
+installs the app and doesn't open it again. Android's WorkManager does better while the app is used, but App Standby
+Buckets cut a rarely opened app to about one run a day, and hibernation (Android 12+, months unused) stops it.
+**Background polling can't be the alert channel; it stays only as the fallback.**
+
+Owner's decisions (2026-11-12):
+- **No second app** for push (UnifiedPush through ntfy/Sunup is out: the person would have to install it).
+- **No Firebase/Play services code in the APK** (`docs/ANDROID_PLAY.md` rule 3; it would break the GPL of libkiwix,
+  libzim and Xapian, whose holders can't all be asked for an exception).
+- iOS: real APNs push (visible alerts, never silent `content-available` ones, which iOS throttles and drops for a
+  closed app). It reaches a person who never opens the app again; the server matches the cell registered at the
+  last fix (usually home), said in the opt-in.
+- Android: analyse and spike **FCM through the Play services already on the phone, over Android IPC, with only free
+  code in the APK** (next section). If it fails: WorkManager every 15 min + an invitation to exclude the app from
+  battery optimisation (the system's settings screen, not the `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` permission,
+  which Play restricts), with honest copy ("en Android los avisos pueden retrasarse").
+
+### Android: FCM over IPC to the phone's Play services (analysis 2026-11-12, to spike)
+
+**The idea.** FCM on a phone is delivered by the Google Play services app installed on it (`com.google.android.gms`),
+which keeps the one connection to Google. An app talks to it through Android intents. Firebase's client library
+(Apache 2.0) is only a wrapper around that conversation, but it pulls in Google's closed `play-services-*` AARs,
+which is what can't sit next to GPL libkiwix. If the APK carries **our own code** that speaks the same intents, the
+APK has no proprietary code at all, and Play services is a separate program the app talks to at arm's length.
+
+**What the protocol is, from open sources** (read 2026-11-12):
+- Registration request: the extras are built in the open `firebase-messaging` source,
+  `firebase-android-sdk/firebase-messaging/src/main/java/com/google/firebase/messaging/GmsRpc.java` (Apache 2.0):
+  `scope=*`, `sender`/`subtype` (the Firebase project number), `appid` (the Firebase Installation ID),
+  `Goog-Firebase-Installations-Auth` (its auth token), `gmp_app_id`, `Goog-Api-Key`, `gmsv`, `osv`, `app_ver`,
+  `app_ver_name`, `cliv`, `firebase-app-name-hash`. Only the transport (`com.google.android.gms.cloudmessaging.Rpc`)
+  is in the closed AAR.
+- Transport, reimplemented as free software by microG (Apache 2.0):
+  `GmsCore/play-services-gcm/src/main/java/org/microg/gms/gcm/CloudMessagingRpc.java` and
+  `play-services-iid/.../InstanceIdRpc.java`: an intent `com.google.android.c2dm.intent.REGISTER` to the Play
+  services package with the extras, a `google.messenger` `Messenger` for the reply and an `app` `PendingIntent` that
+  proves who is asking; the reply (`com.google.android.c2dm.intent.REGISTRATION`) carries `registration_id` (the
+  token) or `error`.
+- Firebase Installation ID + auth token: a plain REST call (`firebaseinstallations.googleapis.com`, API key header,
+  package + signing cert headers if the key is restricted). Our code, no library.
+- Receiving: a manifest receiver for `com.google.android.c2dm.intent.RECEIVE`, guarded by
+  `com.google.android.c2dm.permission.SEND` (Firebase's own manifest declares exactly this). Our receiver reads the
+  data payload and posts the notification on the `alerts` channel with the same frame as phase 1. Firebase's
+  receiver also declares `com.google.android.gms.cloudmessaging.FINISHED_AFTER_HANDLED` and acknowledges through the
+  closed `CloudMessagingReceiver`; without that meta-data Play services should fall back to the legacy ordered
+  broadcast (to verify).
+- Server: FCM HTTP v1 (`fcm.googleapis.com/v1/projects/<id>/messages:send`, OAuth2 from a service account), data-only
+  messages with `priority: high`, next to the APNs sender on the same server.
+
+**Licences.** The APK would contain only GPL code of ours, written from Apache-2.0 sources (compatible with GPLv3;
+libzim and Xapian are "2.0-or-later", so the whole is GPLv3). Talking to another program through intents is
+communication between separate programs, not linking (FSF's FAQ on "aggregate" vs combined works: pipes, sockets,
+command-line style exchanges of simple data; here, a bundle of strings). Play services is also part of the phone's
+system on certified devices. My reading: clean, and the same position as an app that calls a Google web API. Not
+legal advice; the owner decides. Side effects: F-Droid would accept such an app with the "NonFreeNet" anti-feature
+(like the open UnifiedPush FCM distributor on IzzyOnDroid); `docs/ANDROID_PLAY.md` rule 3 still holds literally (no
+proprietary code in the APK), but the app would use a Google service at run time, which the owner must accept.
+
+**Why it may hold up.** Play services must keep answering every Firebase SDK version still in apps on the store,
+so the registration intent can't change overnight; mirroring the current `GmsRpc` puts us on the newest one.
+
+**Risks and unknowns (the spike answers them):**
+1. Play services answers our REGISTER intent with a token (it can't tell our code from Firebase's, but it may check
+   `cliv`, the Firebase app id against the package, or the API key restrictions).
+2. FCM HTTP v1 delivers to that token, and our receiver wakes with the app swiped away, in Doze and in a rare
+   standby bucket (high-priority FCM is exempt from both while the messages end in a visible notification;
+   Google deprioritises high-priority messages that don't).
+3. The legacy ack path works without `FINISHED_AFTER_HANDLED`, and Play services doesn't redeliver or throttle us.
+4. Hibernation (months unused, Android 12+) blocks FCM for every app, official SDK included: same limit as any app.
+   Whether Play services' notification proxying (`setRetainProxiedNotifications` in `GmsRpc`) changes that is unknown.
+5. Phones without Play services (Huawei, de-Googled ROMs): no token; they keep the 15-min background check.
+6. Google may still change the protocol for old clients: the background check stays as the fallback forever, and
+   `/health` on the server can count registrations that stop refreshing.
+7. Privacy: Google sees that the phone gets our pushes and their payload. Send the minimum (alert id, level, the
+   official headline in the person's language); privacy policy and Play Data safety must say "Android: Google's
+   FCM delivers the alert" (the policy says today that the app has no Google services).
+8. The Mac's corporate TLS proxy may block the emulator's connection to Google (`mtalk.google.com:5228`): spike on a
+   real Android phone or another network.
+
+**Spike (about a day, after the owner creates a free Firebase project, Android app `com.fjlinde.nomadpocket`, and a
+service account key kept out of the repo):**
+- `modules/nomad-push` (Kotlin, Android only): `register(senderId, appId, apiKey, projectId)` → FIS REST → REGISTER
+  intent → token; the RECEIVE receiver → a local notification. No Firebase/GMS dependency (the
+  `releaseRuntimeClasspath` check in `docs/ANDROID_PLAY.md` stays empty).
+- `scripts/alerts/fcm-send.mjs`: one FCM HTTP v1 message to a token (the service account from the environment).
+- Measure on a real phone: token obtained; delivery with the app in the foreground, in the background, swiped away,
+  after a night in Doze, after `adb shell am set-standby-bucket com.fjlinde.nomadpocket rare`; delivery latency.
+- Go/no-go written here. Go → Android registers with the server like iPhones (`platform: 'android'`); no-go → the
+  fallback above.
+
+### Where: Firebase (Cloud Functions + Firestore), Blaze plan — chosen 2026-11-12
+
+**Deno Deploy is out**: Deno joined Cloudflare and Deno Deploy shuts down about six months after 2026-10-09, i.e.
+around April 2027 (https://deno.com/blog/cloudflare; the console shows the banner). Owner's choice the same day,
+among Firebase/Google Cloud (~0 €, nothing to maintain), Cloudflare Workers paid (5 $/month fixed, HTTP/2 to APNs
+unproven) and a Hetzner VPS (~4–5 €/month, patching): **Firebase**, the project the FCM spike already uses.
+
+- Project `nomad-pocket` (owner's personal Google account, created 2026-11-12; Gemini and Google Analytics off),
+  Android app `com.fjlinde.nomadpocket`, FCM HTTP v1 on. Blaze (pay as you go) is needed for Cloud Functions; the
+  owner adds the billing account and a **1 € budget alert** (alerts don't cap spending: optional later, a function
+  that unlinks billing when the budget's Pub/Sub topic fires).
+- Cloud Functions for Firebase (2nd gen, Node 22, TypeScript bundled with esbuild so it can import the app's pure
+  cores): `onSchedule('every 1 minutes')` for the poll (Cloud Scheduler: 3 free jobs per billing account) and one
+  `onRequest` for the API, region `europe-west1` (or Madrid, `europe-southwest1`, if every piece is available there).
+  Node's `http2` speaks to APNs directly; FCM v1 is plain HTTPS with the service account the function runs as.
+- Firestore (Native, same region) for registrations and source state; Secret Manager (`defineSecret`) for the APNs
+  key and the test-push secret.
+- Budget against the free tier: ~44 k scheduled runs/month (2 M invocations free), a few seconds of 256 MB each
+  (~20 k GB-s of 400 k free), Firestore writes only when a source or a registration changes (20 k writes/day free).
+- Secrets on the owner's Mac, never in the repo: `~/.nomad-pocket/secrets/` (the APNs `.p8` + `apns.json` with its key and team
+  ids: team-scoped, sandbox + production; `fcm-service-account.json`; `firebase-android.json`, the Android
+  client config, which ships in the APK and isn't secret).
 
 Not chosen:
-- **Cloudflare Workers free**: 10 ms CPU per invocation (cron included) and 50 subrequests per invocation, so parsing
-  a changed 200–700 KB feed may not fit and a push to more than ~45 phones must be split through Queues (10 k
-  operations/day ≈ 3.3 k messages). HTTP/2 to APNs from its `fetch` isn't documented (a Workers fork of `apns2`
-  exists with few users). First fallback.
-- **Google Cloud e2-micro** (always free: 1 VM in us-west1/us-central1/us-east1, 30 GB disk, 1 GB egress/month;
-  needs a billing account): a VM to keep patched. Second fallback; the code runs there unchanged (Deno + SQLite).
+- **Cloudflare Workers**: free plan 10 ms CPU and 50 subrequests per invocation (parsing a changed 200–700 KB feed may
+  not fit); the 5 $ plan lifts that, but HTTP/2 to APNs from its `fetch` isn't documented (a Workers fork of `apns2`,
+  `@fivesheepco/cloudflare-apns2`, exists). Fallback if Google ever stops fitting.
+- **A VPS** (Hetzner ~4–5 €/month, or Google Cloud's always-free e2-micro): works with anything, but a machine to keep
+  patched.
 - **GitHub Actions**: scheduled runs come 15–30+ min late or not at all under load, are disabled after 60 days
   without activity, and there is nowhere to keep device tokens. GitHub hosts the code and deploys it; a daily job
   can watch `/health` (its delays don't matter there).
@@ -247,16 +359,17 @@ Not chosen:
   `scripts/alerts/build-zones.mjs` covers MeteoAlarm EMMA_IDs (the phase-1 asset), NWS public zones and **US
   counties** (Census cartographic boundaries) for the alerts without geometry. Quakes → cells within the radius.
   A cell on a border gets both zones' warnings: acceptable.
-- **Layout** (`server/alerts/`, Deno + TypeScript, GPL like the app; it imports the app's pure cores directly, so
-  both parse the same way and share the tests):
+- **Layout** (`server/alerts/`, Cloud Functions for Firebase in TypeScript, GPL like the app; it imports the app's
+  pure cores directly, so both parse the same way and share the tests):
   ```
-  main.ts       HTTP API + Deno.cron("poll", "* * * * *")
-  poll.ts       sources with ETag/If-Modified-Since → normalised (the app's cores) → diff vs KV state
+  index.ts      exports: poll = onSchedule('every 1 minutes'), api = onRequest (register, unregister, health, test push)
+  poll.ts       sources with ETag/If-Modified-Since → normalised (the app's cores) → diff vs Firestore state
   cells.ts      polygon / radius / zone code → cells (data/zones.json.gz)
-  apns.ts       JWT (ES256, the .p8 key) + POST https://api.push.apple.com/3/device/<token> over HTTP/2;
+  apns.ts       JWT (ES256, the .p8 key) + POST https://api.push.apple.com/3/device/<token> over node:http2;
                 410/400 BadDeviceToken → delete the registration
-  store.ts      KV: ['reg', tokenHash] → {token, env, cell, lang, prefs, updatedAt}; ['cell', cell, tokenHash];
-                ['state', source] → Last-Modified/ETag + active alerts
+  fcm.ts        FCM HTTP v1, data-only, priority high (only if the Android spike is a go); UNREGISTERED → delete
+  store.ts      Firestore: regs/{tokenHash} → {platform, token, env, cell, lang, prefs, updatedAt} (query by cell);
+                state/{source} → Last-Modified/ETag + active alerts
   ```
 - **API**: `POST /v1/register`, `DELETE /v1/register/{token}`, `GET /health` (last successful poll per source),
   `POST /v1/test-push` guarded by a secret (owner only). No public way to send a push. Rate-limit by IP, cap body
@@ -266,9 +379,8 @@ Not chosen:
   marks pushed warnings so a background check doesn't notify them again.
 - **The app**: `enableRemoteNotifications: true` (iOS `aps-environment`; re-check that the Android build still has
   no Firebase/Play services pieces), `getDevicePushTokenAsync` on iOS, `registration.ts`. Android unchanged.
-- **Secrets** in Deno Deploy's environment: the APNs `.p8` key, Key ID, Team ID, the test-push secret. The owner
-  creates the APNs key (Apple Developer › Keys › Apple Push Notifications service) and the Deno Deploy account
-  (GitHub login).
+- **Secrets** in Secret Manager: the APNs `.p8` key with its Key ID and Team ID (created 2026-11-12; ids in `apns.json`, never in the repo) and
+  the test-push secret; FCM uses the functions' own service account (no key file in the cloud).
 - **Monitoring**: a free uptime monitor (e.g. UptimeRobot) or a daily GitHub Actions job on `/health` that fails,
   and emails the owner, when a source hasn't been polled for 15 min. When the server is down, iPhones fall back
   to phase 1's checks.
@@ -281,16 +393,19 @@ Not chosen:
 - Privacy policy: the app now has **one server of its own, only for iPhones with "Avisos oficiales" on**: what it
   stores (push token, 0.1° cell, language, thresholds), what it doesn't (coordinates, account, IP beyond request
   logs), retention (deleted on opt-out, when Apple reports the token dead, or after 90 days without a refresh),
-  who runs it (the owner, on Deno Deploy). GDPR: the owner is the controller of that table; the policy is the notice.
+  who runs it (the owner, on Google's Firebase, EU region). GDPR: the owner is the controller of that table; the
+  policy is the notice.
 - App Store privacy labels: "Coarse Location — App Functionality — not linked to you — no tracking" (the cell is
-  derived from location and kept on our server). Google Play's Data safety doesn't change (Android doesn't talk
-  to the server).
+  derived from location and kept on our server). Google Play's Data safety changes only if Android registers too
+  (the FCM spike is a go): the same coarse location, plus Google's FCM delivering the alerts.
 
 ### Phase 2 — tasks (in order)
 
-0. **Spike**: a Deno Deploy app that sends one APNs push (HTTP/2 + JWT) to a dev build on the owner's iPhone and
-   runs a 1-minute cron with KV. If Deno's `fetch` can't do APNs, try `node:http2`; if Deno is out, Cloudflare,
-   then the VM.
+0. **Spikes**: (a) a Firebase function that sends one APNs push (`node:http2` + JWT) to a dev build on the owner's
+   iPhone, and a 1-minute scheduled function writing to Firestore (needs Blaze). **Passed 2026-11-12**
+   (`server/alerts/`: APNs 200 in 0.7 s, banner on the iPhone; heartbeat every minute, ~1 s late; log in
+   `docs/PROGRESS.md`). Remote `data` goes under the payload's `body` key (that's where expo-notifications reads it). (b) Android FCM over IPC ("Android: FCM over IPC…" above); its go/no-go decides whether the server
+   also sends FCM and whether Android gets the 15-min + battery-optimisation fallback instead.
 1. `scripts/alerts/build-zones.mjs` + `data/zones.json.gz` (measure; Spain first, then EMMA, then NWS zones + counties).
 2. Server: poll + diff (AEMET, quakes, then the rest), register/unregister, APNs sending, health, test push.
 3. App: registration, push tap → detail, dedup with phase 1, opt-in copy for iPhone ("al momento") vs Android

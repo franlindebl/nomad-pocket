@@ -23,7 +23,9 @@ Details that already live elsewhere are linked, not repeated:
 3. **No Google Play services, Firebase or other proprietary code in the APK.** libkiwix is GPL; the owner chose
    (option A, 2026-10-28) to ship no proprietary library next to it. A dependency that pulls
    `com.google.android.gms`, Firebase or the Install Referrer needs the same treatment as the current ones
-   (section 5). Play's "automatic protection" (installer check) stays **off** for the same reason.
+   (section 5). Play's "automatic protection" (installer check) stays **off** for the same reason. Talking to the
+   Play services already on the phone through intents, with only our own code in the APK, is a different case
+   being spiked for alert push (`docs/ALERTS_PLAN.md`, "Android: FCM over IPC").
 4. **Never misrepresent the app to Google.** Declarations must match the binary, the listing and the screenshots.
    If the app changes (a new feature, a new permission, new data leaving the device), update the matching form
    (`docs/store/play-listing.md`) in the same release.

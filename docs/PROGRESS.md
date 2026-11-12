@@ -117,10 +117,14 @@ AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's d
    phase 1 (the plan's "Phase 1 — status"): measuring background
    runs on real phones for a few days (Settings › Avisos oficiales › Comprobaciones recientes), the owner's review of
    `docs/store/listing-2.3.0.md` and the privacy policy changes, a signing check of the Time Sensitive entitlement.
-   **Phase 2, right after**: push from a free server (Deno Deploy, `server/alerts/`): APNs on iOS; on Android, FCM
-   through the phone's Play services over IPC with only free code in the APK, if its spike works (else 15-min
-   checks + battery-optimisation exclusion). Needs from the owner: a Deno Deploy account, an APNs key and a free
-   Firebase project with a service account. Background polling measured 2026-11-12: iOS runs it only at night. Blocking for Europe: MeteoAlarm's extra redistribution terms and an
+   **Phase 2, right after**: push from our own server on Firebase (Cloud Functions + Firestore, `server/alerts/`;
+   Deno Deploy shuts down in 2027): APNs on iOS; on Android, FCM through the phone's Play services over IPC with
+   only free code in the APK, if its spike works (else 15-min checks + battery-optimisation exclusion). Done
+   2026-11-12: Firebase project `nomad-pocket` + Android app, FCM service account, APNs key (secrets in
+   `~/.nomad-pocket/secrets/`), Blaze + 1 € budget alert, Firestore (`europe-west1`), **spike (a) passed**: a
+   function in `server/alerts/` sent an APNs push that reached the owner's iPhone, and a 1-minute scheduled function
+   writes a heartbeat. Next: spike (b) on a real Android phone. Background polling
+   measured 2026-11-12: iOS runs it only at night. Blocking for Europe: MeteoAlarm's extra redistribution terms and an
    API token for its region geometries (email `meteoalarm@geosphere.at`).
 
 CU. **Content updates, next** (`docs/CONTENT_UPDATES_PLAN.md`): the owner tries build 27 on the iPhone; later an
@@ -388,6 +392,25 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   `GmsRpc.java`, the intent transport is reimplemented as free code by microG (`CloudMessagingRpc`, `InstanceIdRpc`),
   the installation id is a REST call, receiving is a manifest receiver. Licences look clean (only our GPL code in the
   APK, arm's-length IPC); eight risks listed; a one-day spike on a real phone decides go/no-go.
+- Accounts (agent in Chrome, owner's personal accounts): Firebase project `nomad-pocket` (Gemini and
+  Analytics off), Android app registered, FCM v1 on, Admin SDK service account key; APNs key
+  (team-scoped, sandbox + production). All in `~/.nomad-pocket/secrets/` (0600), nothing in the repo.
+- Deno Deploy dropped before signing up: it shuts down around April 2027 (Deno joined Cloudflare, 2026-10-09). The
+  owner chose Firebase (Cloud Functions + Firestore on Blaze, ~0 € inside the free tier) over Cloudflare Workers
+  paid and a VPS; the plan's "Where" and "Design" sections rewritten.
+- Spike (a) passed the same afternoon. Owner: Blaze billing (Firebase made a 10 € budget; lowered to 1 €, mails at
+  50/90/100 %), `firebase login`, the two Secret Manager secrets (`APNS` = JSON key + ids, `TEST_PUSH_SECRET`). Agent:
+  APIs enabled, Firestore `(default)` in `europe-west1`, `server/` (Firebase project files, rules deny every client)
+  and `server/alerts/` (TypeScript, own `package.json`/`tsc`, excluded from the app's tsc and ESLint): `heartbeat`
+  (`every 1 minutes`, writes `state/heartbeat`; first run ~4 min after deploy, 0.9 s late) and `api` (`/health`,
+  owner-only `/v1/test-push`); APNs over `node:http2` with an ES256 JWT from `node:crypto`, no library.
+  `POST /v1/test-push` → APNs 200 in 0.7 s → banner on the owner's iPhone 15 Pro (Release build, development
+  signing, sandbox token). Automatic signing added Push to the App ID without asking.
+- Found on the way: expo-notifications reads a remote push's `data` from the payload's `body` key, not the top level;
+  React Native logs go only to os_log in Release, and `idevicesyslog` (1.4.0) no longer sees the iPhone on iOS 27
+  even by cable, so the spike build (`EXPO_PUBLIC_PUSH_SPIKE=1`) writes its token to `Library/push-spike-token.txt`,
+  copied with `xcrun devicectl device copy from --domain-type appDataContainer`. `app.json` now has
+  `enableRemoteNotifications: true` (iOS `aps-environment`; Xcode turns it to production on App Store export).
 
 ### 2026-11-11 — 2.4.3 (50) submitted to App Review
 
