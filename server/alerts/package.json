@@ -8,9 +8,10 @@
     "node": "22"
   },
   "scripts": {
-    "build": "tsc -p .",
-    "typecheck": "tsc -p . --noEmit",
-    "test": "node --test --experimental-strip-types \"src/**/*.test.ts\""
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node22 --format=cjs --outfile=lib/index.js --external:firebase-functions --external:firebase-admin --sourcemap --log-level=warning",
+    "typecheck": "tsc -p .",
+    "test": "node --test --experimental-strip-types \"src/**/*.test.ts\"",
+    "check": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
     "firebase-admin": "^14.5.1",
@@ -18,6 +19,8 @@
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
+    "esbuild": "^0.25.12",
+    "fflate": "^0.8.3",
     "typescript": "~5.9"
   }
 }

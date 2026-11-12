@@ -11,7 +11,6 @@
         "./assets/*"
       ]
     },
-    "allowImportingTsExtensions": true,
     "noEmit": true
   },
   "include": [

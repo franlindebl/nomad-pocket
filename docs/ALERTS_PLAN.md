@@ -428,7 +428,10 @@ Not chosen:
    there). The server sends FCM too, and Android registers like iPhones; the 15-min check stays as the fallback for
    phones without Play services.
 1. `scripts/alerts/build-zones.mjs` + `data/zones.json.gz` (measure; Spain first, then EMMA, then NWS zones + counties).
-2. Server: poll + diff (AEMET, quakes, then the rest), register/unregister, APNs sending, health, test push.
+2. Server: poll + diff (AEMET, quakes, then the rest), register/unregister, APNs sending, health, test push. **v1 deployed
+   2026-11-12** (AEMET, USGS, EMSC, GDACS; APNs + FCM; no zones table yet: AEMET draws its areas, GDACS goes by country,
+   quakes by distance; NWS and MeteoAlarm need task 1). Firestore reads grow with registrations × source changes:
+   query by country/cell once there are more than a few hundred phones.
 3. App: registration, push tap → detail, dedup with phase 1, opt-in copy for iPhone ("al momento") vs Android
    ("cada media hora aprox.").
 4. Privacy policy, store labels, `docs/ARCHITECTURE.md` (server section), `docs/RELEASE.md` (deploying the server),

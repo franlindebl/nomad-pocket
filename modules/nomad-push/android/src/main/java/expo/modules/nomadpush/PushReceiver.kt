@@ -36,10 +36,10 @@ class PushReceiver : BroadcastReceiver() {
     PushEvents.received(extras.getString("google.message_id"), latency)
     val title = extras.getString("title") ?: return
     val body = extras.getString("body") ?: ""
-    show(context, title, body, extras.getString("key"))
+    show(context, title, body, extras.getString("key")?.takeIf { it.isNotEmpty() }, extras.getString("collapse"))
   }
 
-  private fun show(context: Context, title: String, body: String, key: String?) {
+  private fun show(context: Context, title: String, body: String, key: String?, collapse: String?) {
     val nm = context.getSystemService(NotificationManager::class.java)
     // The app creates the channel with its translated name when alerts are turned on; this is only a fallback.
     if (Build.VERSION.SDK_INT >= 26 && nm.getNotificationChannel(CHANNEL) == null) {
@@ -62,7 +62,8 @@ class PushReceiver : BroadcastReceiver() {
       .setCategory(android.app.Notification.CATEGORY_EVENT)
       .apply { tap?.let { setContentIntent(it) } }
       .build()
-    nm.notify((key ?: SystemClock.elapsedRealtime().toString()).hashCode(), notification)
+    // The same warning replaces its earlier notification (a raise) instead of stacking, as on iOS.
+    nm.notify((collapse ?: key ?: SystemClock.elapsedRealtime().toString()).hashCode(), notification)
   }
 }
 

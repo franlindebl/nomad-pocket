@@ -126,7 +126,9 @@ AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's d
    `~/.nomad-pocket/secrets/`), Blaze + 1 € budget alert, Firestore (`europe-west1`), **spike (a) passed**: a
    function in `server/alerts/` sent an APNs push that reached the owner's iPhone, and a 1-minute scheduled function
    writes a heartbeat. **Spike (b) GO**: `modules/nomad-push` got an FCM token from the Mi 9's Play services with only
-   our code, and messages arrived in < 1 s even with the app swiped away. Next: zones + the real server. Background polling
+   our code, and messages arrived in < 1 s even with the app swiped away. **Server v1 deployed** the same day
+   (AEMET, USGS, EMSC, GDACS every minute; register API; APNs + FCM; a real AEMET orange warning pushed to the owner's
+   iPhone). Next: the app registers itself (and stops notifying locally what the server pushes). Background polling
    measured 2026-11-12: iOS runs it only at night. Blocking for Europe: MeteoAlarm's extra redistribution terms and an
    API token for its region geometries (email `meteoalarm@geosphere.at`).
 
@@ -423,6 +425,20 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   started the process for the broadcast); not when force-stopped (like any app). APK: 0 Google/Firebase classes, clean
   `releaseRuntimeClasspath`. The spike build reads the Firebase client config from `EXPO_PUBLIC_FCM_*` at build time
   (from `~/.nomad-pocket/secrets/firebase-android.json`) and logs the token to logcat.
+- Server v1 (`server/alerts/`, deployed): `poll` every minute fetches AEMET (RSS, bundle only when new), USGS
+  (If-Modified-Since), EMSC and GDACS; a source counts as changed when the hash of its alerts' ids, levels and ends
+  changes; then every registration is matched and pushed what's new for it. The matching, notify policy and wording
+  are the app's own cores (`alerts-core`, `feeds-core`, `tar-core`, and the new `present-core`, the frame of
+  `present.ts` made pure and shared, with the person's time zone), bundled by esbuild; `match.ts` adds the 0.1° cell
+  (a drawn area counts if it holds the cell's centre or a corner) and `pushedSources` (Spain: AEMET + quakes; the US:
+  quakes only, NWS stays on the phone; elsewhere GDACS + quakes). `POST/DELETE /v1/register` (checked bodies, 30/h per
+  IP, the token's sha-256 as the row id; a new or moved phone's current alerts are recorded without a push),
+  `/health`, owner-only `/v1/test-push` and `/v1/run-notify`. APNs dead tokens (410, BadDeviceToken) and FCM
+  `UNREGISTERED` delete the row. 8 server tests on the app's fixtures; root `tsconfig.json` lost a duplicated key.
+- End to end with real data: both phones registered in a cell of Mallorca's Tramuntana coast (AEMET orange, coastal);
+  records cleared, `/v1/run-notify` → the iPhone got the push; the Mi 9's row was deleted as `NotRegistered`, because
+  the owner had already reinstalled the Play build (uninstalling the spike APK drops its FCM token). The FCM success
+  path from the function is still to see with the real Android build.
 
 ### 2026-11-11 — 2.4.3 (50) submitted to App Review
 
