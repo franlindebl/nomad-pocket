@@ -545,6 +545,9 @@ check and the release.
   The owner wrote to DATASUS, DATA.GOV.HK and data.gov.sg about their licences.
 - South Korea (`kr.py`, HIRA's quarterly file on data.go.kr, KOGL Type 1): 21k pharmacies, 609 hospitals, 10.4k clinics
   and health centres where OSM has 3k pharmacies; the biggest gain after Japan.
+- Spain: every regional pharmacy list is now checked against REGCESS by code (was Navarra only, by distance):
+  REGCESS pharmacies and botiquines a list lacks are placed and added (first run +69: Aragón 30, Cataluña 16, Navarra
+  14…); REGCESS's mangled names fixed.
 - Fifth round over South Asia, South-East Asia, the rest of Latin America, the Middle East and West Africa (four agents):
   only Niger (`ne.py`, carte sanitaire 2023: 2.7k centres) and Jamaica (`jm.py`, 2016: 291 centres) pass. India's data.gov.in,
   Bangladesh's DGHS and several Gulf and Central American portals don't answer the office network: `probe-urls.yml` asks

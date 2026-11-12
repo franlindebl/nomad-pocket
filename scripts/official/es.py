@@ -10,6 +10,8 @@ Where the points come from:
   open licence: REGIONAL below. The rest (and botiquines a regional list leaves out) come from the Ministry of
   Health's national register, REGCESS, whose monthly listing has every pharmacy and botiquín with its address
   but no coordinates: placed with CartoCiudad (IGN's geocoder) and checked against the register's municipality.
+  Regional lists lag behind (new pharmacies, Aragón's botiquines of 2024-25): where REGCESS carries the regional
+  code (CODE_FIELD), its pharmacies whose code the regional list lacks are placed and added too.
   Galicia (CC BY-SA) and Cantabria (non-commercial) publish lists with coordinates under licences that don't
   fit a file mixed with OSM's, and Asturias's server (sig.asturias.es) doesn't answer GitHub's runners: REGCESS
   for them too.
@@ -575,10 +577,20 @@ REGIONAL = {
     "es-an": ("01", False), "es-ar": ("02", True), "es-ib": ("04", True), "es-cm": ("08", False),
     "es-ct": ("09", True), "es-md": ("13", True), "es-nc": ("15", False), "es-pv": ("16", True), "es-ri": ("17", False),
 }
-# Regional lists known to lack recent pharmacies (Navarra's points date from 2021): REGCESS's pharmacies there are
-# placed too, and those the regional list doesn't have (no pharmacy within 200 m, none sharing the holder's
-# name within 1.5 km) are added.
-PARTIAL = {"15"}
+# Regional lists lag behind the register (Navarra's points date from 2021; Aragón lacks the botiquines authorised
+# since 2024; Cataluña, Baleares, La Rioja a few new pharmacies). Where REGCESS carries the regional list's code,
+# by community: which REGCESS column holds it. REGCESS pharmacies (and botiquines, where the regional list has
+# them) whose code the regional list lacks are placed and added, unless a listed pharmacy is within 200 m or one
+# sharing the holder's name within 1.5 km (a code that changed). Castilla-La Mancha's and Euskadi's codes don't
+# match REGCESS's: none there (2026-11: 13 and 4 more in REGCESS than in their lists).
+CODE_FIELD = {"01": "Código Autonómico del Centro", "02": "Código de Centro Normalizado REGCESS (CCN)",
+              "04": "Código Autonómico del Centro", "09": "Código Autonómico del Centro",
+              "13": "Código de Centro Normalizado REGCESS (CCN)", "15": "Código Autonómico del Centro",
+              "17": "Código de Centro Normalizado REGCESS (CCN)"}
+
+
+def code_key(c):
+    return re.sub(r"[^0-9A-Z]", "", str(c or "").split("#")[0].upper()).lstrip("0")
 
 
 # --- REGCESS (Ministerio de Sanidad) ----------------------------------------------------------
@@ -588,8 +600,19 @@ REGCESS = "https://regcesslm.sanidad.gob.es/recesAdminWeb/lm/GetExcelListadoMens
 CENTRE_KINDS = {"C11": "hospital", "C12": "hospital", "C231": "clinic", "C232": "clinic"}
 
 
+def unmangled(v):
+    """A few REGCESS names are UTF-8 read as Latin-1 ("SÃ\x81NCHEZ"): put them back."""
+    if isinstance(v, str) and "Ã" in v:
+        for codec in ("latin-1", "cp1252"):
+            try:
+                return v.encode(codec).decode("utf-8")
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                pass
+    return v
+
+
 def regcess(listing):
-    rows = xlsx_rows(get(REGCESS + listing, timeout=600))
+    rows = [{k: unmangled(v) for k, v in r.items()} for r in xlsx_rows(get(REGCESS + listing, timeout=600))]
     for r in rows:
         r["_type"] = r.get("Tipo centro", "").split(" ")[0]
     return rows
@@ -640,9 +663,11 @@ def missing_from(regional, found, near=200, named=1500):
     return out
 
 
-def regcess_points(geocoder, covered, with_botiquines, limit=None):
+def regcess_points(geocoder, covered, with_botiquines, known=None, limit=None):
     """Pharmacies and botiquines of the communities no regional register covers, plus the botiquines a regional
-    register leaves out; hospitals, health centres and consultorios of every community."""
+    register leaves out and those whose code it lacks (known: community → its codes, CODE_FIELD); hospitals,
+    health centres and consultorios of every community. Rows a regional list lacks carry `_gap`."""
+    known = known or {}
     jobs = []
     est = regcess("E")
     towns = {}
@@ -651,9 +676,14 @@ def regcess_points(geocoder, covered, with_botiquines, limit=None):
             towns[pick(r, "Código Municipio")] = towns.get(pick(r, "Código Municipio"), 0) + 1
     for r in est:
         cc = pick(r, "Código Comunidad Autónoma")
-        if r["_type"] == "E1" and (cc not in covered or cc in PARTIAL):
+        gap = cc in known and code_key(pick(r, CODE_FIELD[cc])) not in known[cc]
+        if gap and "DEPOSITO" in folded(pick(r, "Nombre Centro")).upper():
+            gap = False  # a military or hospital depot, not open to the public
+        if r["_type"] == "E1" and (cc not in covered or gap):
+            r["_gap"] = cc in covered
             jobs.append(("es-regcess", "pharmacy", r))
-        elif r["_type"] == "E2" and cc not in with_botiquines:
+        elif r["_type"] == "E2" and (cc not in with_botiquines or gap):
+            r["_gap"] = cc in with_botiquines
             jobs.append(("es-regcess", "botiquin", r))
     centres = [r for listing in ("C1", "C2") for r in regcess(listing) if r["_type"] in CENTRE_KINDS]
     jobs += [("es-regcess", CENTRE_KINDS[r["_type"]], r) for r in centres]
@@ -676,6 +706,7 @@ def regcess_points(geocoder, covered, with_botiquines, limit=None):
         out = rec(source, code, lat, lon, holder, pick(r, "Teléfono"), address, municipality_name(pick(r, "Municipio")), kind,
                   name=name, precision=precision)
         out["_community"] = cc
+        out["_gap"] = bool(r.get("_gap"))
         return out
 
     out, missed = [], {}
@@ -800,14 +831,20 @@ def main(argv):
                 with_botiquines.add(community)
     if "es-regcess" in only:
         try:
-            got, missed, asked = regcess_points(geocoder, covered, with_botiquines, limit)
-            for cc in PARTIAL & covered:
-                regional = [r for r in rows if r["source"] in REGIONAL and REGIONAL[r["source"]][0] == cc and r["kind"] == "pharmacy"]
-                theirs = [r for r in got if r["_community"] == cc and r["kind"] == "pharmacy"]
+            known = {}
+            for sid, (cc, _) in REGIONAL.items():
+                if cc in CODE_FIELD and cc in covered:
+                    known.setdefault(cc, set()).update(code_key(r["code"]) for r in rows if r["source"] == sid)
+            got, missed, asked = regcess_points(geocoder, covered, with_botiquines, known, limit)
+            gaps = {}
+            for cc in known:
+                regional = [r for r in rows if r["source"] in REGIONAL and REGIONAL[r["source"]][0] == cc]
+                theirs = [r for r in got if r["_community"] == cc and r["_gap"]]
                 extra = missing_from(regional, theirs)
-                got = [r for r in got if not (r["_community"] == cc and r["kind"] == "pharmacy")] + extra
-                print(f"[es-regcess] {COMMUNITIES[cc][0]}: {len(extra)} pharmacies its own list lacks", file=sys.stderr)
-            take("es-regcess", unique_codes(got), {"notPlaced": missed, "jobs": asked})
+                got = [r for r in got if not (r["_community"] == cc and r["_gap"])] + extra
+                gaps[COMMUNITIES[cc][0]] = len(extra)
+            print(f"[es-regcess] pharmacies and botiquines the regional lists lack, added: {gaps}", file=sys.stderr)
+            take("es-regcess", unique_codes(got), {"notPlaced": missed, "jobs": asked, "regionalGaps": gaps})
         except Exception as e:  # noqa: BLE001
             keep("es-regcess", e)
     else:

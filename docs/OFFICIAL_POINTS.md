@@ -74,10 +74,20 @@ Measured on 300 Castilla-La Mancha pharmacies against the Junta's coordinates: 9
 | Castilla-La Mancha | Junta's `Farmacias_de_CastillaLa_Mancha` FeatureServer | CC BY 4.0 (portal) | 1,276; the dataset itself states no licence; botiquines from REGCESS |
 | Cataluña | Establiments sanitaris autoritzats (Socrata `nrmq-ytje`) | Llicència oberta d'ús d'informació – Catalunya | 3,289 + 108 farmacioles; weekly |
 | Madrid | Oficinas de farmacia (datos.comunidad.madrid) | CC BY 4.0 | 2,953; UTM 30 ETRS89 (unstated, checked); no botiquines exist |
-| Navarra | Farmacias abiertas al público (daily) joined with IDENA's 2021 layer by code | CC BY 4.0 | 556; the ~30 opened since 2021 come from REGCESS (`PARTIAL`: added when no listed pharmacy is within 200 m, nor one sharing the holder's name within 1.5 km) |
+| Navarra | Farmacias abiertas al público (daily) joined with IDENA's 2021 layer by code | CC BY 4.0 | 556; those opened since 2021 come from REGCESS (see "Regional lists' gaps" below) |
 | País Vasco | Farmacias y botiquines de Euskadi (Open Data Euskadi) | CC BY 4.0 | 843 + 25; botiquines from the XLSX (the GeoJSON's points are broken) |
 | La Rioja | Registro de centros, servicios y establecimientos sanitarios | CC BY | 151 (E1 rows); 7 with bad coordinates (fixed or dropped) |
 | Asturias, Canarias, Cantabria, Castilla y León, C. Valenciana, Extremadura, Galicia, Murcia, Ceuta, Melilla | REGCESS + CartoCiudad | Ley 37/2007 reuse with attribution (sanidad.gob.es) | Valencia, Murcia, Canarias, Ceuta, Melilla publish no open list; CyL and Extremadura publish addresses only; Asturias's layer (SITPA-IDEAS, 2023) doesn't answer GitHub's runners (connection timeout, 2026-11-11) |
+
+**Regional lists' gaps** (2026-11-12): a regional list lags behind the register (Navarra's points are from 2021,
+Aragón lacks the botiquines authorised since 2024, others a few new pharmacies). Where REGCESS carries the
+regional list's code (`CODE_FIELD`: the autonomic code for Andalucía, Baleares, Cataluña, Navarra; the CCN for
+Aragón, Madrid, La Rioja), REGCESS pharmacies and botiquines whose code the regional list lacks are placed and
+added, unless a listed pharmacy is within 200 m or one sharing the holder's name within 1.5 km (a changed code).
+First run: Aragón 30 (mostly botiquines), Cataluña 16, Navarra 14, La Rioja 4, Baleares 3, Madrid 2, Andalucía 0.
+Castilla-La Mancha's and Euskadi's codes don't match REGCESS's (13 and 4 more in REGCESS than in their lists): not
+yet. REGCESS names stored as UTF-8 read as Latin-1 ("SÃNCHEZ") are put back; pharmacy depots (military,
+hospital) aren't added.
 
 Left out on purpose: **Galicia**'s Sergas list (coordinates, daily) is CC BY-SA 4.0 and **Cantabria**'s
 (coordinates) is non-commercial: neither fits a file mixed with OSM's ODbL data, so both come from REGCESS.
@@ -336,8 +346,7 @@ as an indemnity. A source whose terms don't fit stays out until its publisher gi
 
 ## Improvements not built yet
 
-- Cross-check every regional list against REGCESS the way Navarra's is (`PARTIAL` in `es.py`): ~15k more
-  addresses to place once, then cached.
+- Castilla-La Mancha's and Euskadi's lists against REGCESS by name and distance (their codes don't match).
 - Regional coordinates for health centres where a region publishes them (Castilla-La Mancha's "Centros de
   salud", La Rioja's register has them for every centre) instead of geocoding REGCESS.
 - Opening hours: only Cantabria (sparse), Euskadi's botiquines and La Palma publish them.
