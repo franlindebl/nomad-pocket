@@ -411,6 +411,17 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-12 — 2.5.0 (51): official alerts push, to TestFlight
+
+Owner's request: get a version to Apple's review. Nothing was in review (2.4.3 live). Version 2.5.0, build 51
+(Android versionCode 33, not uploaded: Play's closed test). The owner approved `docs/store/listing-2.5.0.md` ("What's
+new") and `listing-next.md` (description paragraph, App Review notes); App Privacy changed in App Store Connect to
+Coarse Location (App Functionality, not linked, no tracking), published at once (Apple applies privacy answers
+immediately, so 2.4.3's page shows it too). Checks: tsc, lint, 564 tests, i18n, licenses; E2E smoke 23/24 with
+`--build`, map-12 alone passes. A Maestro run in Germany on the simulator found the country (GDACS, USGS, EMSC) but no
+APNs token there (likely the corporate VPN), so the MeteoAlarm list and detail weren't seen on screen; Firestore
+shows no simulator rows. Archived from a clean worktree of the release commit.
+
 ### 2026-11-12 — Alerts server v2: NWS, MeteoAlarm, zones, fewer Firestore reads
 
 Owner's request: NWS on the server, the zones table with MeteoAlarm, and cheaper Firestore reads, before the Android
