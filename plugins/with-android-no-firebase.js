@@ -1,5 +1,5 @@
 // Keeps Firebase out of the APK. expo-notifications depends on firebase-messaging for push,
-// but the app only schedules local notifications (`enableRemoteNotifications: false`), and
+// but on Android the app only schedules local notifications (remote push is modules/nomad-push), and
 // Firebase brings Google's proprietary Play services pieces (cloud-messaging, stats) and its
 // datatransport telemetry along. Excluding the module from the app's classpath drops all of it.
 //

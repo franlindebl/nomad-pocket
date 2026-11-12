@@ -317,6 +317,26 @@ service account key kept out of the repo):**
 - Go/no-go written here. Go → Android registers with the server like iPhones (`platform: 'android'`); no-go → the
   fallback above.
 
+**Result (2026-11-12, Xiaomi Mi 9, MIUI on Android 11, Play services 26.42): GO.** `modules/nomad-push` (only our
+Kotlin, no dependency) and `scripts/alerts/fcm-send.mjs` (FCM v1 with an OAuth JWT from `node:crypto`):
+- FIS REST answered with a FID and auth token (the Firebase-made API key needed no extra headers).
+- The legacy REGISTER intent works. Play services first answers `registration_id = "|ID|1|:MESSENGER"` with its own
+  `Messenger` in `google.messenger`; the same request sent again through that Messenger returns
+  `"|ID|2|:<token>"`. Strip the `|ID|n|:` prefix. The token came back **equal to the FID** (22 characters), and FCM v1
+  accepted it (200). The bound-Messenger fallback was never needed.
+- Delivery, data-only and `priority: HIGH`, shown by our receiver on the `alerts` channel, under 1 s each time
+  (`google.delivered_priority=high`): app open; Doze forced (`dumpsys deviceidle force-idle`); standby bucket `rare`;
+  Doze + `rare`; **app swiped away from recents with the screen locked** (Android started the process for the
+  broadcast from Play services). Force-stopped: not delivered, as for any app (official FCM included) until the
+  person opens it again.
+- No `FINISHED_AFTER_HANDLED` meta-data: the ordered-broadcast result code was enough so far; no redelivery seen.
+- APK: 0 Google/Firebase class definitions in the dex (only expo-notifications' old dangling references,
+  `plugins/with-android-no-firebase.js`), `releaseRuntimeClasspath` clean; the manifest gains only the
+  `c2dm.permission.RECEIVE` permission and our receiver guarded by `c2dm.permission.SEND`.
+- Still to watch in the real build: a night of genuine Doze on battery; an Android 12+ phone; token refresh (Play
+  services' `RST`/`SYNC` messages, FIS auth tokens expire after 7 days: re-register on every app start and when the
+  server reports `UNREGISTERED`); and the privacy policy / Data safety lines from risk 7.
+
 ### Where: Firebase (Cloud Functions + Firestore), Blaze plan — chosen 2026-11-12
 
 **Deno Deploy is out**: Deno joined Cloudflare and Deno Deploy shuts down about six months after 2026-10-09, i.e.
@@ -404,8 +424,9 @@ Not chosen:
 0. **Spikes**: (a) a Firebase function that sends one APNs push (`node:http2` + JWT) to a dev build on the owner's
    iPhone, and a 1-minute scheduled function writing to Firestore (needs Blaze). **Passed 2026-11-12**
    (`server/alerts/`: APNs 200 in 0.7 s, banner on the iPhone; heartbeat every minute, ~1 s late; log in
-   `docs/PROGRESS.md`). Remote `data` goes under the payload's `body` key (that's where expo-notifications reads it). (b) Android FCM over IPC ("Android: FCM over IPC…" above); its go/no-go decides whether the server
-   also sends FCM and whether Android gets the 15-min + battery-optimisation fallback instead.
+   `docs/PROGRESS.md`). Remote `data` goes under the payload's `body` key (that's where expo-notifications reads it). (b) Android FCM over IPC ("Android: FCM over IPC…" above): **GO, 2026-11-12** (result
+   there). The server sends FCM too, and Android registers like iPhones; the 15-min check stays as the fallback for
+   phones without Play services.
 1. `scripts/alerts/build-zones.mjs` + `data/zones.json.gz` (measure; Spain first, then EMMA, then NWS zones + counties).
 2. Server: poll + diff (AEMET, quakes, then the rest), register/unregister, APNs sending, health, test push.
 3. App: registration, push tap → detail, dedup with phase 1, opt-in copy for iPhone ("al momento") vs Android

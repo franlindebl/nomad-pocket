@@ -24,8 +24,9 @@ Details that already live elsewhere are linked, not repeated:
    (option A, 2026-10-28) to ship no proprietary library next to it. A dependency that pulls
    `com.google.android.gms`, Firebase or the Install Referrer needs the same treatment as the current ones
    (section 5). Play's "automatic protection" (installer check) stays **off** for the same reason. Talking to the
-   Play services already on the phone through intents, with only our own code in the APK, is a different case
-   being spiked for alert push (`docs/ALERTS_PLAN.md`, "Android: FCM over IPC").
+   Play services already on the phone through intents, with only our own code in the APK, is a different case:
+   `modules/nomad-push` does it for alert push (spike GO 2026-11-12, `docs/ALERTS_PLAN.md`, "Android: FCM over IPC").
+   It must keep no dependency at all; the `releaseRuntimeClasspath` check above stays empty.
 4. **Never misrepresent the app to Google.** Declarations must match the binary, the listing and the screenshots.
    If the app changes (a new feature, a new permission, new data leaving the device), update the matching form
    (`docs/store/play-listing.md`) in the same release.

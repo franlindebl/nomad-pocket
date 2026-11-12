@@ -1,0 +1,17 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'expo.modules.nomadpush'
+version = '0.1.0'
+
+// No dependencies beyond the Android SDK and Expo: this module must never pull in Firebase or Play services
+// (docs/ALERTS_PLAN.md, "Android: FCM over IPC").
+android {
+  namespace "expo.modules.nomadpush"
+  defaultConfig {
+    versionCode 1
+    versionName "0.1.0"
+  }
+}

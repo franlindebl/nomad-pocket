@@ -12,6 +12,8 @@ import { File, Paths } from 'expo-file-system';
 import { router } from 'expo-router';
 import { AppState, Platform } from 'react-native';
 
+import NomadPush from '../../../modules/nomad-push';
+
 import { whenNavigatorReady } from '@/components/navigation';
 import { registerInit } from '@/features/bootstrap';
 import { setNotificationBehaviour } from '@/lib/notifications';
@@ -47,6 +49,21 @@ registerInit(() => {
     getDevicePushTokenAsync().then(
       (t) => new File(Paths.document, '..', 'Library', 'push-spike-token.txt').write(String(t.data)),
       (e) => console.warn('[push-spike] no token', e),
+    );
+  }
+  // Android: FCM through the phone's Play services with only our code (modules/nomad-push); the config comes from
+  // the build's environment for the spike.
+  if (process.env.EXPO_PUBLIC_PUSH_SPIKE === '1' && Platform.OS === 'android' && NomadPush) {
+    console.log('[push-spike] play services', NomadPush.playServicesVersion());
+    NomadPush.addListener('onMessage', (m) => console.log('[push-spike] message', m.messageId, 'latencyMs', m.latencyMs));
+    NomadPush.register(
+      process.env.EXPO_PUBLIC_FCM_PROJECT_ID ?? '',
+      process.env.EXPO_PUBLIC_FCM_PROJECT_NUMBER ?? '',
+      process.env.EXPO_PUBLIC_FCM_APP_ID ?? '',
+      process.env.EXPO_PUBLIC_FCM_API_KEY ?? '',
+    ).then(
+      (r) => console.log('[push-spike] fcm path', r.path, 'fid', r.fid, 'token', r.token),
+      (e) => console.warn('[push-spike] fcm failed', String(e)),
     );
   }
 

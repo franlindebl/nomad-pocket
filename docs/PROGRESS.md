@@ -125,7 +125,8 @@ AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's d
    2026-11-12: Firebase project `nomad-pocket` + Android app, FCM service account, APNs key (secrets in
    `~/.nomad-pocket/secrets/`), Blaze + 1 € budget alert, Firestore (`europe-west1`), **spike (a) passed**: a
    function in `server/alerts/` sent an APNs push that reached the owner's iPhone, and a 1-minute scheduled function
-   writes a heartbeat. Next: spike (b) on a real Android phone. Background polling
+   writes a heartbeat. **Spike (b) GO**: `modules/nomad-push` got an FCM token from the Mi 9's Play services with only
+   our code, and messages arrived in < 1 s even with the app swiped away. Next: zones + the real server. Background polling
    measured 2026-11-12: iOS runs it only at night. Blocking for Europe: MeteoAlarm's extra redistribution terms and an
    API token for its region geometries (email `meteoalarm@geosphere.at`).
 
@@ -413,6 +414,15 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   even by cable, so the spike build (`EXPO_PUBLIC_PUSH_SPIKE=1`) writes its token to `Library/push-spike-token.txt`,
   copied with `xcrun devicectl device copy from --domain-type appDataContainer`. `app.json` now has
   `enableRemoteNotifications: true` (iOS `aps-environment`; Xcode turns it to production on App Store export).
+- Spike (b), Android FCM over IPC, **GO** the same evening on the owner's Xiaomi Mi 9 (MIUI, Android 11, Play services
+  26.42), after the owner uninstalled the Play build (debug-signed APK). `modules/nomad-push` (Kotlin, no dependency):
+  FIS REST → REGISTER intent to `com.google.android.gms` → a `:MESSENGER` handshake, the request again through Play
+  services' Messenger → token (equal to the FID; reply prefixed `|ID|n|:`); a manifest receiver for `c2dm RECEIVE`
+  posts the notification. `scripts/alerts/fcm-send.mjs` sends FCM v1 (OAuth JWT by hand). Delivered in < 1 s with the
+  app open, in forced Doze, in the `rare` bucket, both together, and swiped away with the screen locked (the system
+  started the process for the broadcast); not when force-stopped (like any app). APK: 0 Google/Firebase classes, clean
+  `releaseRuntimeClasspath`. The spike build reads the Firebase client config from `EXPO_PUBLIC_FCM_*` at build time
+  (from `~/.nomad-pocket/secrets/firebase-android.json`) and logs the token to logcat.
 
 ### 2026-11-11 — 2.4.3 (50) submitted to App Review
 
