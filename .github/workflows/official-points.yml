@@ -1,7 +1,7 @@
 name: Official points
 
 # Points from official registers that OpenStreetMap lacks, refreshed monthly into the official-points
-# release two days before country-packages.yml adds them to the country packs' emergency points
+# release four days before country-packages.yml adds them to the country packs' emergency points
 # (scripts/routing/build-country.sh, step 6a; scripts/official/merge.py; docs/OFFICIAL_POINTS.md).
 # One job per country, each with its script scripts/official/<cc>.py → <cc>.official.tsv (+ .report.json, and
 # <cc>.geocache.tsv with its geocoder's answers, so a month only asks for new addresses):
@@ -25,7 +25,10 @@ name: Official points
 # - kr: South Korea's pharmacies, hospitals and primary care from HIRA's quarterly file (data.go.kr).
 # - ne: Niger's carte sanitaire (Ministry via OCHA, 2023); jm: Jamaica's Ministry of Health facilities (2016).
 # - it: Italy's pharmacy register (Ministero della Salute), placed by address with ANNCSU (Agenzia delle Entrate).
-# A source that doesn't answer keeps last month's rows, read back from the release (the job then ends in a warning).
+# A source that doesn't answer keeps last month's rows, read back from the release, and is asked again every day
+# (the daily schedule runs only the countries whose last fetch failed: four more tries from the 1st to the 4th, before
+# the packs are built on the 5th). scripts/official/state.py records in the report since when each source has failed: under a
+# week the job ends in a warning (no email), a week straight and it fails.
 
 on:
   workflow_dispatch:
@@ -38,8 +41,14 @@ on:
         description: 'Spain only: source ids from scripts/official/es.py (es-cm es-regcess …), space separated (empty: all)'
         required: false
         default: ''
+      retry:
+        description: 'Only the countries (and Spanish sources) whose last fetch failed, as the daily run does'
+        type: boolean
+        required: false
+        default: false
   schedule:
-    - cron: '0 3 3 * *' # monthly, two days before country-packages.yml
+    - cron: '0 3 1 * *' # monthly, every country and every source: four days before country-packages.yml (the 5th)
+    - cron: '0 5 * * *' # daily: again what failed last time (RETRY_CRON below), quick and silent when nothing did
 
 permissions:
   contents: write
@@ -53,9 +62,14 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       countries: ${{ steps.plan.outputs.countries }}
+      only: ${{ steps.plan.outputs.only }}
     env:
       GH_TOKEN: ${{ github.token }}
       INPUT: ${{ github.event.inputs.countries }}
+      ONLY: ${{ github.event.inputs.only }}
+      RETRY: ${{ github.event.inputs.retry }}
+      SCHEDULE: ${{ github.event.schedule }}
+      RETRY_CRON: '0 5 * * *'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -64,7 +78,22 @@ jobs:
         run: |
           all=$(cd scripts/official && ls ??.py | sed 's/\.py$//')
           want=${INPUT:-$all}
-          echo "countries=$(printf '%s\n' $want | python3 -I -c 'import json, sys; print(json.dumps(sys.stdin.read().split()))')" >> "$GITHUB_OUTPUT"
+          if [[ "$RETRY" == true || "$SCHEDULE" == "$RETRY_CRON" ]]; then
+            mkdir -p reports
+            if ! gh release download official-points --pattern "*.official.report.json" --dir reports; then
+              # Without the reports every country would look new and be asked again: skip today's retry instead.
+              echo "::warning::couldn't read the reports from the release: no retry today"
+              echo "countries=[]" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            plan=$(python3 -I scripts/official/state.py due reports $want)
+            echo "$plan"
+            echo "$plan" | grep '^countries=' >> "$GITHUB_OUTPUT"
+            [[ -n "$ONLY" ]] || echo "$plan" | grep '^only=' >> "$GITHUB_OUTPUT"
+          else
+            echo "countries=$(printf '%s\n' $want | python3 -I -c 'import json, sys; print(json.dumps(sys.stdin.read().split()))')" >> "$GITHUB_OUTPUT"
+          fi
+          [[ -z "$ONLY" ]] || echo "only=$ONLY" >> "$GITHUB_OUTPUT"
       - name: The release
         run: |
           source scripts/gh-releases.sh
@@ -73,6 +102,7 @@ jobs:
 
   fetch:
     needs: plan
+    if: needs.plan.outputs.countries != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
@@ -82,15 +112,16 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       CC: ${{ matrix.country }}
-      ONLY: ${{ github.event.inputs.only }}
+      ONLY: ${{ needs.plan.outputs.only }}
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Last month's
+      - name: The last run's
         run: |
           mkdir -p previous out
-          gh release download official-points --pattern "$CC.official.tsv" --pattern "$CC.geocache.tsv" --dir previous || true
+          gh release download official-points --pattern "$CC.official.tsv" --pattern "$CC.official.report.json" \
+            --pattern "$CC.geocache.tsv" --dir previous || true
           [[ -f previous/$CC.geocache.tsv ]] && cp previous/$CC.geocache.tsv out/$CC.geocache.tsv || true
       - name: Ask the registers
         id: fetch
@@ -100,17 +131,25 @@ jobs:
           [[ "$CC" == es && -n "$ONLY" ]] && args+=(--only $ONLY)
           status=0
           python3 -I scripts/official/$CC.py out/$CC.official.tsv "${args[@]}" || status=$?
-          echo "status=$status" >> "$GITHUB_OUTPUT"
+          [[ -s out/$CC.official.report.json ]] || exit 0
+          args=(--status $status --output "$GITHUB_OUTPUT")
+          [[ -f previous/$CC.official.report.json ]] && args+=(--previous previous/$CC.official.report.json)
+          [[ "$CC" == es && -n "$ONLY" ]] && args+=(--only $ONLY)
+          python3 -I scripts/official/state.py mark out/$CC.official.report.json "${args[@]}"
           cat out/$CC.official.report.json
       - name: Keep them
+        env:
+          LEVEL: ${{ steps.fetch.outputs.level }}
+          MESSAGE: ${{ steps.fetch.outputs.message }}
         run: |
-          [[ -s out/$CC.official.tsv ]] || { echo "::error::no output"; exit 1; }
+          [[ -s out/$CC.official.tsv && -s out/$CC.official.report.json ]] || { echo "::error::no output"; exit 1; }
           files=(out/$CC.official.tsv out/$CC.official.report.json)
           # A country of several packs writes one file per pack too (us.py: us-west.official.tsv…).
           for f in out/*.official.tsv; do [[ "$f" == out/$CC.official.tsv ]] || files+=("$f"); done
           [[ -s out/$CC.geocache.tsv ]] && files+=(out/$CC.geocache.tsv)
           gh release upload official-points "${files[@]}" --clobber
-          if [[ "${{ steps.fetch.outputs.status }}" != "0" ]]; then
-            echo "::warning::some registers didn't answer: last month's rows kept ($CC.official.report.json)"
-            exit 1
-          fi
+          # Last month's rows were kept for these sources; tomorrow's run asks them again.
+          case "$LEVEL" in
+            warn) echo "::warning::$CC: $MESSAGE" ;;
+            error) echo "::error::$CC: a register has failed for a week, last month's rows kept: $MESSAGE"; exit 1 ;;
+          esac

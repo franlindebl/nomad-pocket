@@ -420,6 +420,25 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-13 — Official points: a register down for a night retries the next day instead of failing the run
+
+The monthly run's Spain job ended red (run 43321768551) because Aragón's WFS timed out its TLS handshake from the
+runner, three tries; four hours earlier it had answered, and it answers now. Last month's 1,026 rows were kept as
+designed, but the email made a one-night outage look like a breakage. Owner, 2026-11-13: retry more often, and only
+fail when a source has failed for a week straight.
+
+- `official-points.yml` keeps the full run monthly, moved from the 3rd to the 1st, and adds a daily run (05:00 UTC)
+  that asks only the countries whose report says a source didn't answer, Spain only for its failed sources
+  (`es.py --only`); with nothing failed it ends after the plan job. Not a full daily run: the packs read the
+  release once a month, Spain's job takes 43 min and ~9,100 CartoCiudad requests, and most registers change monthly
+  or less. Dispatch input `retry` runs it by hand.
+- `scripts/official/state.py` (`mark`) writes `freshAt` / `failingSince` per source into `<cc>.official.report.json`,
+  carried over from the last run's report (sources `--only` didn't ask keep theirs), and sets the job's level:
+  a warning under 7 days (green, no email), an error from day 7. `due` picks the countries for the daily run
+  (by status, so reports from before this work too: Aragón is retried on the first daily run). Checked on copies
+  of the release's reports: a week of failures (warn ×7 then error), a retry with `--only es-ar` (the other 21
+  sources keep their state), a script failing with every source fresh, `%` and newlines in the message.
+
 ### 2026-11-12 — Alerts server: deploys from GitHub Actions
 
 Owner's request: the push server should deploy itself on every push to `main`, not from a command on the Mac.

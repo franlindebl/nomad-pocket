@@ -13,12 +13,18 @@ Spain first (done, below); the others are in the backlog of `docs/PROGRESS.md`, 
 
 ## How it works
 
-1. **Fetch** (`.github/workflows/official-points.yml`, monthly on the 3rd, one job per country): each
+1. **Fetch** (`.github/workflows/official-points.yml`, monthly on the 1st, one job per country): each
    `scripts/official/<cc>.py` reads its country's registers and writes `<cc>.official.tsv` (source, code, kind, lat,
    lon, name, holder, phone, address, municipality, precision) into the `official-points` release, with
    `<cc>.official.report.json` (rows per source, what failed) and, where it geocodes, `<cc>.geocache.tsv`
    (geocoder answers, so a month only asks for new addresses). A source that doesn't answer, or answers with under
-   80% of last month's rows, keeps last month's rows. A new country is a new script: the workflow picks up every
+   80% of last month's rows, keeps last month's rows and is asked again the next day: a daily run (05:00 UTC) asks
+   only the countries whose last fetch failed (Spain: only the failed sources, `es.py --only`), so a register down
+   for a night is fresh again before the packs are built on the 5th, and does nothing when nothing failed.
+   `scripts/official/state.py` writes into the report, per source, `freshAt` (the last day it answered) and
+   `failingSince`: a source failing for under a week ends its job in a warning (green run, no email), a week straight
+   and the job fails (GitHub emails, and keeps emailing daily until the source answers or is fixed). Dispatching with
+   `retry` does the daily run by hand (`gh workflow run official-points.yml -f retry=true`). A new country is a new script: the workflow picks up every
    two-letter `scripts/official/??.py`, and the merge and the app need nothing. Narrowing a script's filter by
    more than a fifth trips that guard: delete the country's assets from the release first
    (`gh release delete-asset official-points <cc>.official.tsv`), as was done for Mexico. A host that doesn't answer
