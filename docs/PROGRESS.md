@@ -75,8 +75,10 @@ OP. **Official points: complete OSM with official registers, country by country*
    runners?), then the next monthly packs; check the Sierra de San Vicente on a phone; the improvements listed in
    the doc. **Then every other country**, one at a time: find its open registers (pharmacies, hospitals, health
    centres), measure OSM against them as for Castilla-La Mancha, add a `scripts/official/<cc>.py` writing
-   `<cc>.official.tsv` (merge and app need nothing new). Likely first: Portugal, France, Italy, Germany, the UK, the
-   USA (national registers that publish open lists).
+   `<cc>.official.tsv` (merge and app need nothing new). World research done 2026-11-12
+   (`docs/OFFICIAL_POINTS_WORLD.md`): first Japan (MHLW, ~37k pharmacies and ~55k clinics missing), Ethiopia,
+   Ukraine, Italy, France, Czechia, Chile, Peru, Australia (licence chain to clear), Nigeria; Brazil waits on
+   DATASUS's licence; Germany, Austria, Switzerland, the Nordics, Benelux and Portugal have little to add.
 
 AM. **Assistant × maps** (`docs/ASSISTANT_MAP_PLAN.md`, approved 2026-11-05; **phase 1 and 1b built the same day**,
    checked on iOS and Android: see the plan's "Phase 1 — status" and "1b"): the assistant
@@ -375,6 +377,16 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   points (entry below; Spain's routing pack already republished with them, run 43016421128) and the Units setting.
   "What's new" approved by the owner (`docs/store/listing-2.4.3.md`). E2E smoke 23/24 with `--build`, map-12 alone
   passes (as in the last releases). Android `versionCode` 32 (not uploaded).
+
+### 2026-11-12 — Official points: world research
+
+- Owner asked whether the Spain work can be done worldwide with official sources. Research agents went through
+  every country in batches, an independent verifier re-checked each source called usable (licence page, dataset
+  page, a data sample), and the result is `docs/OFFICIAL_POINTS_WORLD.md`: about 13 countries have a source ready to
+  use, about 60 a partial one, 12 have addresses only, 5 are blocked by the licence (Brazil, Colombia, Belgium, New
+  Zealand, Mauritius), and the rest have nothing found (often portals that didn't answer: re-test from a runner).
+  Nothing built yet; backlog OP holds the suggested order.
+
 
 ### 2026-11-11 — Official points: Spain's pharmacies, hospitals and health centres where OSM lacks them
 

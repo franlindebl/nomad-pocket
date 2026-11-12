@@ -8,7 +8,8 @@ of the 15 in the Sierra de San Vicente. So each month the official registers fil
 
 Goal (owner, 2026-11-11): **do the same review for every country**, one by one: find its official open
 registers of pharmacies, hospitals and health centres, measure OSM against them, and add the missing ones.
-Spain first (done, below); the others are in the backlog of `docs/PROGRESS.md`.
+Spain first (done, below); the others are in the backlog of `docs/PROGRESS.md`, and what each country publishes
+(sources, licences, OSM gaps, suggested order) is in `docs/OFFICIAL_POINTS_WORLD.md` (research of 2026-11-12).
 
 ## How it works
 
