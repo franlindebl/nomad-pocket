@@ -667,6 +667,17 @@
       "text": null
     },
     {
+      "id": "official-health-points-kr",
+      "name": "South Korea: HIRA's national hospitals and pharmacies",
+      "license": "KOGL Type 1 (attribution)",
+      "copyright": [
+        "건강보험심사평가원 전국 병의원 및 약국 현황 (Health Insurance Review & Assessment Service, data.go.kr), 공공누리 제1유형"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Pharmacies, hospitals, health centres and primary-care clinics in South Korea that OpenStreetMap lacks, added to the country's emergency points (quarterly file).",
+      "text": null
+    },
+    {
       "id": "wikipedia-kiwix",
       "name": "Wikipedia and Kiwix content",
       "license": "CC-BY-SA-4.0",

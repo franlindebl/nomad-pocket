@@ -117,6 +117,7 @@ packs of 2026-11-05:
 | Chad | `td.py`: Ministry of Public Health's list via OCHA on HDX (2020) | CC BY | 57 centres, 24 m | **97 hospitals, 1,475 health centres** (OSM has 179 clinics) |
 | DR Congo | `cd.py`: GRID3 COD Health Facilities v9.0 (CIESIN/GRID3 with the Ministry) | CC BY 4.0 | 315 hospitals, 58 m; 495 centres, 20 m | **1,231 hospitals, 12,389 health centres and posts** (OSM: 2,956 clinics) |
 | Mozambique | `mz.py`: Ministry's (SIS-MA) master facility list on HDX (2017) | CC0 | 616 centres, 18 m | **31 hospitals, 777 health centres and posts** |
+| South Korea | `kr.py`: HIRA's national hospitals and pharmacies (data.go.kr 15051059), quarterly | KOGL Type 1 (attribution) | 2,813 pharmacies (91% of OSM's), 40 m | **20,992 pharmacies, 609 hospitals, 10,365 clinics and health centres** (OSM: 3,075 pharmacies) |
 | Argentina | `ar.py`: IGN's "Edificio de salud" layer (WFS; mostly the Ministry's SISA register) | IGN terms (attribution, shared freely) | 968 hospitals, 20 m; 1,959 centres, 14 m | **91 hospitals, 4,713 centres, posts and dispensaries** |
 
 - **Japan.** Clinics are the register's 診療所 offering internal medicine, paediatrics, surgery, general practice or
@@ -205,6 +206,15 @@ packs of 2026-11-05:
   validated by the government; volunteer community care sites left out. The HDX dataset id carries the version.
 - **Mozambique.** The Ministry's list of 2017 (the newest open one), coordinates written without their decimal point
   (the script puts it back). No status column: every unit counts as open. Psychiatric units left out.
+- **South Korea.** The largest gain after Japan. HIRA's file lists every institution billing national health
+  insurance (so every operating one) with WGS84 points; the portal has no stable file URL, so the script follows the
+  page's own anonymous download (page → download endpoint → attachment), checks the zip and retries (bodies come
+  cut short now and then). The portal can show a CAPTCHA to repeated downloads: one a month shouldn't meet it, and if
+  it does the run keeps last month's rows. Clinics: 의원 of internal medicine, family medicine or paediatrics with a
+  specialist (the department list alone includes eye and skin clinics), and public health centres and posts;
+  dental, oriental, long-term care and psychiatric hospitals left out. A building's many clinics share one point
+  (one per kind within 15 m); stacked points are real buildings, not dropped. Phones get their area code from the
+  province. LOCALDATA (localdata.go.kr, pharmacies with EPSG:5174 points) didn't answer from the office: a fallback.
 - **Taiwan (not yet).** The NHI's contracted facilities (OGDL, 7.6k pharmacies against OSM's 2.3k) have addresses
   only; it waits for a Taiwanese geocoder (NLSC/TGOS) checked the way CartoCiudad was.
 - **Nigeria (not added).** GRID3 NGA v4.0 (CIESIN with the federal registry and NPHCDA, CC BY 4.0) has 48k usable
@@ -259,6 +269,7 @@ as an indemnity. A source whose terms don't fit stays out until its publisher gi
 | Sierra Leone (`sl`) | hospitals, community health centres and posts | Ministry of Health and Sanitation with CIESIN/GRID3, National Health Facilities Dataset v01 | CC BY 4.0 | snapshot 2023 |
 | Chad (`td`) | hospitals, health centres | Ministère de la Santé Publique, list of health centres and districts, via OCHA on HDX | CC BY | snapshot 2020 |
 | DR Congo (`cd`) | hospitals, health centres and posts (placed 2024 on) | CIESIN and GRID3 with the Ministère de la Santé Publique, GRID3 COD Health Facilities v9.0 (HDX) | CC BY 4.0 | per GRID3 version |
+| South Korea (`kr`) | pharmacies, hospitals, health centres, primary-care clinics | 건강보험심사평가원 (HIRA), 전국 병의원 및 약국 현황 (data.go.kr) | KOGL Type 1 | quarterly |
 | Mozambique (`mz`) | hospitals, health centres and posts | Ministério da Saúde (SIS-MA), Master Health Facility List, via OCHA on HDX | CC0 | snapshot 2017 |
 | Mexico (`mx`) | public hospitals, public primary care | Secretaría de Salud, DGIS, CLUES | free use ("no existen restricciones") | monthly |
 
