@@ -126,7 +126,8 @@
     "web": "Ver en la web de {{source}}",
     "gone": "Este aviso ya no está en vigor",
     "goneBody": "Ha caducado o el servicio lo ha retirado.",
-    "quakeNote": "El terremoto ya ha ocurrido. Puede haber réplicas en las próximas horas y días."
+    "quakeNote": "El terremoto ya ha ocurrido. Puede haber réplicas en las próximas horas y días.",
+    "loading": "Buscando el aviso…"
   },
   "settings": {
     "row": "Avisos oficiales",
@@ -141,9 +142,8 @@
     "position": "Ubicación usada",
     "positionNone": "Ninguna todavía",
     "positionAt": "Aproximada (unos 100 m) · {{ago}}",
-    "positionBody": "Se guarda solo en el móvil y se actualiza cuando abres la app. En EE. UU. se envía al NWS redondeada a unos 5 km para pedir los avisos de ese punto.",
+    "positionBody": "Se guarda solo en el móvil y se actualiza cuando abres la app. Para avisarte al momento, al servidor de avisos de Nomad Pocket solo le llega la cuadrícula de unos 10 km en la que estás. En EE. UU. también se envía al NWS, redondeada a unos 5 km, para pedir los avisos de ese punto.",
     "sources": "Fuentes consultadas",
-    "background": "En segundo plano",
     "backgroundBody": "El sistema decide cuándo comprobar: pueden pasar horas entre comprobaciones, sobre todo en iPhone o si cierras la app del todo. Abrir la app comprueba siempre.",
     "runs": "Comprobaciones recientes",
     "runsEmpty": "Ninguna todavía",
@@ -152,13 +152,18 @@
       "foreground": "Al volver a la app",
       "background": "En segundo plano",
       "manual": "Manual",
-      "enable": "Al activar"
+      "enable": "Al activar",
+      "push": "Al abrir un aviso"
     },
     "runOk_one": "{{count}} fuente",
     "runOk_other": "{{count}} fuentes",
     "runFailed": "falló {{names}}",
     "runOffline": "sin conexión",
     "runNotified_one": "{{count}} notificación",
-    "runNotified_other": "{{count}} notificaciones"
+    "runNotified_other": "{{count}} notificaciones",
+    "push": "Avisos al momento",
+    "pushOn": "Activados",
+    "pushOnBody": "El servidor de avisos de Nomad Pocket consulta las fuentes cada minuto y te avisa en cuanto se publica un aviso para tu zona. Solo conoce tu cuadrícula de unos 10 km, tu idioma y tus preferencias.",
+    "pushOff": "No disponibles ahora"
   }
 }

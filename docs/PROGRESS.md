@@ -130,7 +130,10 @@ AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's d
    writes a heartbeat. **Spike (b) GO**: `modules/nomad-push` got an FCM token from the Mi 9's Play services with only
    our code, and messages arrived in < 1 s even with the app swiped away. **Server v1 deployed** the same day
    (AEMET, USGS, EMSC, GDACS every minute; register API; APNs + FCM; a real AEMET orange warning pushed to the owner's
-   iPhone). Next: the app registers itself (and stops notifying locally what the server pushes). Background polling
+   iPhone). The app registers itself (`push-register.ts`) and no longer rings locally
+   what the server pushes while it's healthy. **Waiting on the owner**: the privacy policy draft (`site/privacy.html`,
+   uncommitted) and the "no server of our own" claims on the landing and store texts; then App Store privacy labels
+   and Play Data safety, and builds. Background polling
    measured 2026-11-12: iOS runs it only at night. Blocking for Europe: MeteoAlarm's extra redistribution terms and an
    API token for its region geometries (email `meteoalarm@geosphere.at`).
 
@@ -441,6 +444,23 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   records cleared, `/v1/run-notify` → the iPhone got the push; the Mi 9's row was deleted as `NotRegistered`, because
   the owner had already reinstalled the Play build (uninstalling the spike APK drops its FCM token). The FCM success
   path from the function is still to see with the real Android build.
+- The app registers itself (`src/features/alerts/push-register.ts`): each check (and a change of thresholds) sends
+  the token, `cellOf(position)` (new in `alerts-core`, shared with the server), country, language, time zone and
+  prefs when they change or every 3 days; `/health` at most every 30 min; while the row is fresh and the server
+  healthy, `check.ts` doesn't ring the sources the server pushes (it rings them itself otherwise). Off DELETEs the
+  row. Taps: iOS through expo-notifications, Android through nomad-push's `takeLaunchKey`/`onOpen` (new); both run
+  a `push` check so the alert is in the cache ("Buscando el aviso…" meanwhile). Settings › Avisos oficiales gained
+  "Avisos al momento" (on / not available now) and the position text says the server gets the ~10 km square.
+  Android's Firebase client config comes from `EXPO_PUBLIC_FCM_*` at build time (`scripts/alerts/fcm-env.mjs`,
+  in RELEASE/ANDROID_PLAY): the key is already restricted to Firebase APIs, but it stays out of the public repo.
+  The server forgets rows not refreshed for 90 days. Docs: ARCHITECTURE (alerts, new "Alerts server", config,
+  external services), RELEASE (server deploy), DEVELOPMENT, ANDROID_PLAY (Data safety will change).
+- Checked on the owner's iPhone: the new Release build registered by itself (Madrid cell, `es`, `Europe/Madrid`,
+  sandbox from `expo-application`), replacing the Mallorca test row (same token) and recording 2 alerts in force
+  without a push.
+- Privacy policy drafted for the server (es + en: what it keeps, where, how long, consent, APNs/FCM), left
+  uncommitted for the owner: `site/` deploys on push, and the landing (`scripts/site/build.mjs`: "0 servidores
+  propios", "no hay nada que pueda caerse") and the store texts claim no server of our own.
 
 ### 2026-11-11 — 2.4.3 (50) submitted to App Review
 

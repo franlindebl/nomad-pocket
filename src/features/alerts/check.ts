@@ -1,5 +1,6 @@
 // One alerts check (docs/ALERTS_PLAN.md, phase 1): position (foreground only) → the sources for the country → their
-// answers cached → what covers the person → the notify policy → local notifications. Runs at launch, on coming to the
+// answers cached → what covers the person → the notify policy → local notifications (except what the push server
+// already rings, phase 2). Runs at launch, on coming to the
 // foreground (at most every 10 min unless the person moved), from the background task, and when asked. Headless-safe:
 // nothing here touches React, so the background task (a JS run with no UI) can call it.
 import * as Network from 'expo-network';
@@ -10,6 +11,7 @@ import { useSettings } from '@/stores/settings';
 
 import { decide, distanceKm, snap, sourcesFor, visible, type LatLon, type Place } from './alerts-core';
 import { notifyAlerts } from './notify';
+import { pushCovers, refreshPushHealth, syncPush } from './push-register';
 import { FETCHERS, type FetchedSource } from './sources';
 import { logRun, saveCache, saveNotified, savePosition, useAlertsState, type Cache, type SourceCache, type Trigger } from './state';
 
@@ -109,8 +111,11 @@ async function check(trigger: Trigger) {
   const { prefs, notified } = useAlertsState.getState();
   const decision = decide(covering, notified, { now, minLevel: prefs.minLevel });
   saveNotified(decision.notified);
+  // Phase 2: keep the server registration current; what it pushes isn't rung again here while it is healthy.
+  await syncPush(place);
+  await refreshPushHealth();
   // Turning the feature on shows the list at once: what is already in force there isn't rung on top of it.
-  const ring = trigger === 'enable' ? [] : decision.notify.filter((a) => prefs.quakes || a.kind !== 'quake');
+  const ring = trigger === 'enable' ? [] : decision.notify.filter((a) => (prefs.quakes || a.kind !== 'quake') && !pushCovers(a.source));
   const sent = await notifyAlerts(ring, place);
   logRun({ at: started, trigger, ms: Date.now() - started, ok, failed, notified: sent });
 }

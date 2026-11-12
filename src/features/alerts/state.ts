@@ -16,6 +16,7 @@ const KEYS = {
   notified: 'alerts.notified',
   runs: 'alerts.runs',
   prefs: 'alerts.prefs',
+  push: 'alerts.push',
 } as const;
 
 export type SavedPosition = { lat: number; lon: number; at: number };
@@ -36,7 +37,7 @@ export type SourceCache = {
 
 export type Cache = { checkedAt: number | null; sources: Partial<Record<SourceId, SourceCache>> };
 
-export type Trigger = 'launch' | 'foreground' | 'background' | 'manual' | 'enable';
+export type Trigger = 'launch' | 'foreground' | 'background' | 'manual' | 'enable' | 'push';
 export type Run = {
   at: number;
   trigger: Trigger;
@@ -56,6 +57,20 @@ export type Prefs = {
 };
 
 export const DEFAULT_PREFS: Prefs = { minLevel: 'orange', quakes: true };
+
+/** This phone's registration with the push server (phase 2; push-register.ts). */
+export type PushReg = {
+  platform: 'ios' | 'android';
+  token: string;
+  /** The body last accepted by the server: a different one is sent again. */
+  sent: string;
+  /** When the server last accepted it. */
+  at: number;
+  /** The sources the server pushes to this phone (the app doesn't notify those itself while push is healthy). */
+  sources: SourceId[];
+  /** Last time /health answered ok. */
+  healthyAt?: number;
+};
 const MAX_RUNS = 50;
 
 function read<T>(key: string, fallback: T, valid: (v: unknown) => boolean = (v) => v !== null && typeof v === 'object'): T {
@@ -83,6 +98,7 @@ type State = {
   notified: Notified;
   runs: Run[];
   prefs: Prefs;
+  push: PushReg | null;
   checking: boolean;
 };
 
@@ -98,6 +114,7 @@ function load(): Omit<State, 'checking'> {
     notified: read<Notified>(KEYS.notified, {}),
     runs: read<Run[]>(KEYS.runs, [], Array.isArray),
     prefs: { ...DEFAULT_PREFS, ...read<Partial<Prefs>>(KEYS.prefs, {}) },
+    push: read<PushReg | null>(KEYS.push, null, (v) => typeof (v as PushReg)?.token === 'string'),
   };
 }
 
@@ -138,6 +155,12 @@ export function savePrefs(prefs: Partial<Prefs>) {
   const next = { ...useAlertsState.getState().prefs, ...prefs };
   write(KEYS.prefs, next);
   useAlertsState.setState({ prefs: next });
+}
+
+export function savePush(push: PushReg | null) {
+  if (push) write(KEYS.push, push);
+  else Storage.removeItemSync(KEYS.push);
+  useAlertsState.setState({ push });
 }
 
 export function logRun(run: Run) {

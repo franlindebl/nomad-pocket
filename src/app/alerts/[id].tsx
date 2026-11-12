@@ -89,10 +89,15 @@ export default function AlertScreen() {
   const live = !!alert && (alert.expires === null || alert.expires > now) && current(all, now).some((a) => alertKey(a) === id);
 
   if (!alert) {
+    // Opened from a push before the phone fetched the alert: the check started on the tap is still running.
     return (
       <Screen>
         <Stack.Screen options={{ title: t('title') }} />
-        <EmptyState icon={ShieldCheck} title={t('detail.gone')} body={t('detail.goneBody')} />
+        {state.checking ? (
+          <EmptyState icon={ShieldCheck} title={t('detail.loading')} />
+        ) : (
+          <EmptyState icon={ShieldCheck} title={t('detail.gone')} body={t('detail.goneBody')} />
+        )}
       </Screen>
     );
   }

@@ -260,6 +260,22 @@ subsets in `site/fonts`, the document pages) and `landing.css`. No analytics and
   The landing page's claims (0 accounts, ads, trackers, servers; 200+ cards, 100+ archives, 14 courses) must stay
   true too.
 
+## Alerts server (Firebase)
+
+`server/alerts` (docs/ARCHITECTURE.md, "Alerts server"). Deploy from `server/` after `npm run check` in
+`server/alerts`:
+
+```bash
+cd server && npx firebase-tools deploy --only functions --project nomad-pocket   # + firestore:rules when they change
+curl -s https://europe-west1-nomad-pocket.cloudfunctions.net/api/health          # ok: true, poll under 5 min old
+```
+
+The owner's Google account is logged in (`npx firebase-tools login` in Terminal). Secrets live in Secret Manager
+(`npx firebase-tools functions:secrets:set NAME --data-file <file>`; local copies in `~/.nomad-pocket/secrets/`).
+Budget alert at 1 € a month on the billing account. A test push to a token:
+`curl -X POST …/api/v1/test-push -H "Authorization: Bearer $(cat ~/.nomad-pocket/secrets/test-push-secret)" -d
+'{"platform":"ios","env":"sandbox","token":"…"}'` (`node scripts/alerts/fcm-send.mjs <token>` for FCM directly).
+
 ## Android (Google Play)
 
 Policies, current state of the tracks, the health gate and the step-by-step release with Play Console's
@@ -290,10 +306,13 @@ integrity), which takes days. `plugins/with-store-build.js` signs release builds
 variable (dev, E2E) stay signed with the debug key, so a store build and an E2E build can't replace
 each other on a device without `adb uninstall`.
 
-**Build an upload** (from a tree that holds exactly the commit, as for iOS):
+**Build an upload** (from a tree that holds exactly the commit, as for iOS). The `fcm-env.mjs` line gives the
+build the Firebase client config for the alerts push (kept out of the repo); without it Android just doesn't
+register for push:
 
 ```bash
 export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+eval "$(node scripts/alerts/fcm-env.mjs)"
 NOMAD_STORE_BUILD=1 npx expo prebuild --platform android --clean --no-install
 (cd android && ./gradlew :app:bundleRelease)       # android/app/build/outputs/bundle/release/app-release.aab
 ```

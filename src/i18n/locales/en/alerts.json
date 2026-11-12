@@ -126,7 +126,8 @@
     "web": "Open on the {{source}} website",
     "gone": "This warning is no longer in force",
     "goneBody": "It expired or the service withdrew it.",
-    "quakeNote": "The earthquake has already happened. There may be aftershocks over the coming hours and days."
+    "quakeNote": "The earthquake has already happened. There may be aftershocks over the coming hours and days.",
+    "loading": "Fetching the alert…"
   },
   "settings": {
     "row": "Official alerts",
@@ -141,9 +142,8 @@
     "position": "Location used",
     "positionNone": "None yet",
     "positionAt": "Approximate (about 100 m) · {{ago}}",
-    "positionBody": "Kept only on your phone and updated when you open the app. In the USA it is sent to the NWS rounded to about 5 km to ask for that point's alerts.",
+    "positionBody": "Kept only on your phone and updated when you open the app. To alert you at once, Nomad Pocket's alerts server only gets the grid square of about 10 km you are in. In the USA it is also sent to the NWS, rounded to about 5 km, to ask for that point's alerts.",
     "sources": "Sources checked",
-    "background": "In the background",
     "backgroundBody": "The system decides when to check: hours can pass between checks, especially on iPhone or if you close the app completely. Opening the app always checks.",
     "runs": "Recent checks",
     "runsEmpty": "None yet",
@@ -152,13 +152,18 @@
       "foreground": "Back in the app",
       "background": "In the background",
       "manual": "Manual",
-      "enable": "On turning on"
+      "enable": "On turning on",
+      "push": "Opening an alert"
     },
     "runOk_one": "{{count}} source",
     "runOk_other": "{{count}} sources",
     "runFailed": "{{names}} failed",
     "runOffline": "offline",
     "runNotified_one": "{{count}} notification",
-    "runNotified_other": "{{count}} notifications"
+    "runNotified_other": "{{count}} notifications",
+    "push": "Instant alerts",
+    "pushOn": "On",
+    "pushOnBody": "Nomad Pocket's alerts server checks the sources every minute and alerts you as soon as a warning is published for your area. It only knows your grid square of about 10 km, your language and your preferences.",
+    "pushOff": "Not available right now"
   }
 }

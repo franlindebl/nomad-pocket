@@ -1538,8 +1538,9 @@ familiar" action and the plan/kit rows of "Tu preparación" (`features/home/read
 
 ### Official alerts (`src/features/alerts`, `src/app/alerts`, `src/app/settings/alerts.tsx`; `docs/ALERTS_PLAN.md`)
 
-Weather warnings and earthquakes published by official services, for where the person is, notified
-locally. Phase 1 of the plan: **no server of our own**, everything decided on the device. Off until
+Weather warnings and earthquakes published by official services, for where the person is. Phase 1 of the
+plan decides everything on the device and notifies locally; phase 2 adds **push from our own server**
+(`server/alerts`, below), which the phone registers with while alerts are on. Off until
 the person turns it on (its own onboarding step after the kit, skipped when already on; a once-only Home card for installs that had the app
 before, Settings › Avisos oficiales).
 
@@ -1547,7 +1548,9 @@ before, Settings › Avisos oficiales).
   regexes, RFC 822 dates by hand), `tar-core.ts` (AEMET's `.tar.gz`), `feeds-core.ts` (AEMET RSS +
   bundle, MeteoAlarm Atom + CAP, NWS, USGS, EMSC, GDACS → one `Alert`), `alerts-core.ts` (levels,
   hazards, `covers`, the quake rule M ≥ 4.5 within 100 km or M ≥ 6 within 500 km, USGS/EMSC merge,
-  `current`, `visible`, the notify policy `decide`, `sourcesFor`). Phase 2's server will reuse them.
+  `current`, `visible`, the notify policy `decide`, `sourcesFor`, the 0.1° push cell `cellOf`) and
+  `present-core.ts` (the frame's wording: title, window, age, distance, in a given time zone; `present.ts`
+  binds it to i18next). The server bundles these same files.
 - Sources by the country of the position (`maps/emergency.ts useHereCountry`, else
   `settings.country`): Spain → AEMET (one bundle covers Canarias too), US → NWS (`?point=` snapped
   to 0.05°), elsewhere → GDACS (Orange/Red, earthquakes excluded); USGS + EMSC everywhere.
@@ -1572,9 +1575,27 @@ before, Settings › Avisos oficiales).
 - `background.ts`: `expo-background-task` (WorkManager on Android, every 30 min at best; BGTaskScheduler
   on iOS, `processing` mode, when the system decides) + `expo-task-manager`. Defined at module scope
   from `index.ts`; the check is imported lazily inside the task. Registered while the feature is on.
+- `push-register.ts` (phase 2): with alerts on and notifications allowed, each check calls `syncPush(place)`:
+  the APNs token (`getDevicePushTokenAsync`; `expo-application` says sandbox or production) or, on Android,
+  an FCM token from `modules/nomad-push` (needs Play services and the `EXPO_PUBLIC_FCM_*` build variables,
+  `scripts/alerts/fcm-env.mjs`), plus `cellOf(position)`, country, language, time zone and prefs, POSTed to
+  `${ALERTS_API}/v1/register` when the body changes or every 3 days (a changed token deletes the old row).
+  `refreshPushHealth` asks `/health` at most every 30 min. `pushCovers(source)` (registration under 10 days
+  old, healthy in the last 2 h, the source among those the server said it pushes) makes `check.ts` skip ringing
+  that source itself; otherwise the phone rings as in phase 1. Turning alerts off DELETEs the row first. A tap
+  on a push (iOS: expo-notifications' response, `data` from the payload's `body`; Android: nomad-push's
+  `takeLaunchKey`/`onOpen`) opens `/alerts/[id]` and runs a `push` check so the alert is in the cache
+  (the screen says "Buscando el aviso…" meanwhile).
+- `modules/nomad-push` (Android only, our Kotlin, no dependency): `FcmRegistrar` (Firebase Installation over
+  REST, then the REGISTER intent to `com.google.android.gms`, a `:MESSENGER` handshake and the request again
+  through Play services' Messenger; reply `|ID|n|:<token>`), `PushReceiver` (manifest receiver for c2dm
+  RECEIVE guarded by c2dm SEND: data-only messages become a notification on the `alerts` channel, the
+  collapse id as notification id, the key in the launch intent). `docs/ALERTS_PLAN.md`, "Android: FCM over
+  IPC", has the protocol and the measurements.
 - State (`state.ts`, kv, sync reads): `alerts.enabled`, `alerts.offered`, `alerts.position`,
   `alerts.cache`, `alerts.notified`, `alerts.runs`, `alerts.prefs` (lowest level that notifies,
-  default orange; quakes on/off). Turning it off unregisters the task and deletes position, cache,
+  default orange; quakes on/off), `alerts.push` (the registration: token, body sent, when, pushed sources,
+  last healthy answer). Turning it off unregisters the task and deletes position, cache,
   notified and runs. Re-read from kv on every foreground (an Android background run may have written).
 - UI: `/alerts` (status, sources, no-position and no-notification cards, rows, disclaimer, credits),
   `/alerts/[id]` (frame + the source's own headline/description/instruction in the app's language,
@@ -1586,6 +1607,27 @@ before, Settings › Avisos oficiales).
   `settings-alerts`, `alerts-settings-switch`, `alerts-settings-open`, `alerts-status`, `alerts-refresh`,
   `alerts-no-position`, `alerts-no-notifications`, `alert-row-<i>`, `alert-title`, `alert-official`,
   `alert-action-(map|guide|plan|kit|call|web)`, `alerts-list-offer`.
+
+### Alerts server (`server/alerts`, Cloud Functions for Firebase; `docs/ALERTS_PLAN.md` phase 2)
+
+Its own package (Node 22, TypeScript bundled by esbuild into `lib/index.js`, `npm run check` = tsc + tests +
+build; excluded from the app's tsc and ESLint). Firebase project `nomad-pocket` (Blaze, inside the free tier),
+region `europe-west1`, one instance at most. `server/firebase.json` deploys it with `server/firestore.rules`
+(every client denied).
+- `poll` (every minute): `sources.ts` fetches AEMET, USGS, EMSC and GDACS (the app's fetchers without Expo);
+  a source changed when the hash of its alerts' ids/levels/ends changes; its answer is kept in memory and in
+  Firestore `state/{source}` (gzipped). On a change, `notifyAll` reads every `regs/{sha256(token)}`, runs
+  `match.ts plan()` (the app's `current`, `mergeQuakes`, `covers` on the cell's centre and corners, `decide`
+  with the row's `notified`, `present-core` in the row's language and time zone; at most 3 + a summary) and
+  `push.ts deliver()` (APNs over `node:http2` with an ES256 JWT, `apns.ts`; FCM v1 through firebase-admin,
+  data-only, priority high). Dead tokens and rows not refreshed for 90 days are deleted. `state/poll` keeps
+  the last run.
+- `api` (`api.ts`): `POST /v1/register` (checked body, 30/h per IP; a new or moved phone's current alerts are
+  recorded without a push; answers the sources it pushes: Spain AEMET + quakes, the US quakes only, elsewhere
+  GDACS + quakes), `DELETE /v1/register`, `GET /health` (503 when the last poll is over 5 min old), owner-only
+  `POST /v1/test-push` and `/v1/run-notify` (Bearer `TEST_PUSH_SECRET`).
+- Secrets in Secret Manager: `APNS` (JSON: the .p8 key, key id, team id) and `TEST_PUSH_SECRET`; FCM uses the
+  functions' own service account. Local copies only in `~/.nomad-pocket/secrets/`.
 
 ### Credits (`src/features/credits`, `src/app/settings/{credits,packages,license}.tsx`)
 
@@ -1606,12 +1648,12 @@ committed file is stale). `credits-core.ts` (pure, tested) groups and filters. t
 `locales/{es,en}.json`, so the location prompt is in the user's language), `expo-location` with its
 permission flags off (no background or always prompt; on Android it only adds the two location
 permissions, its module is left out of autolinking in `package.json`), `expo-notifications` with
-`enableRemoteNotifications: false` (local notifications only; the Time Sensitive entitlement in
-`ios.entitlements` is for official alerts), `expo-background-task` (adds the `processing` background
+`enableRemoteNotifications: true` (iOS `aps-environment` for the alerts push; Android still has no Firebase,
+`plugins/with-android-no-firebase.js`; the Time Sensitive entitlement in `ios.entitlements` is for official alerts), `expo-background-task` (adds the `processing` background
 mode and its task identifier; expo-task-manager adds `fetch`), and `plugins/with-android-backup-rules.js` (backup rules, see
 Storage layout). `ios/` and `android/` are generated from it.
 
-## External services (all optional at runtime, none receive user data)
+## External services (all optional at runtime; only our alerts server keeps anything, and only with alerts on)
 
 | Service | Used for |
 |---|---|
@@ -1622,6 +1664,8 @@ Storage layout). `ios/` and `android/` are generated from it.
 | `huggingface.co` | GGUF models |
 | `overpass-api.de`, `overpass.private.coffee`, `overpass.kumi.systems` (European operators only) | emergency points for a map without bundled points (only the region bbox is sent; public servers, best effort) |
 | `www.aemet.es`, `api.weather.gov`, `earthquake.usgs.gov`, `www.seismicportal.eu`, `www.gdacs.org` | **only while Official alerts are on**: the warnings and earthquakes (Official alerts). The same request for everyone except NWS, which gets the position snapped to 0.05° (~5 km) |
+| `europe-west1-nomad-pocket.cloudfunctions.net` (our alerts server, Firebase, EU) | **only while Official alerts are on**: the push registration (token, 0.1° cell, country, language, time zone, prefs) and `/health` |
+| `firebaseinstallations.googleapis.com` + the phone's Play services (Android) | **only while Official alerts are on**: the FCM token for the alerts push (`modules/nomad-push`) |
 | `nomad-pocket.app` | privacy policy / support page (`site/`), opened in the browser from Settings |
 
 Archive pages in the reader cannot reach the network at all (Library section).

@@ -3,7 +3,9 @@
 // app's own `decide` with the registration's record, so a raise notifies again and a re-issue doesn't, as on the
 // phone.
 import {
+  PUSH_CELL,
   alertSubtitle,
+  cellOf,
   alertTitle,
   covers,
   current,
@@ -20,7 +22,7 @@ import {
 } from './core.ts';
 
 /** Grid of the cell a phone registers with (~11 × 8 km in Spain): never its coordinates. */
-export const CELL = 0.1;
+export const CELL = PUSH_CELL;
 
 export type Prefs = { minLevel: Level; quakes: boolean };
 
@@ -45,10 +47,8 @@ export const SERVER_SOURCES: SourceId[] = ['aemet', 'usgs', 'emsc', 'gdacs'];
 /** The sources whose alerts the server pushes to a registration in `country` (the app skips its own notification for these). */
 export const pushedSources = (country: string | null): SourceId[] => sourcesFor(country).filter((s) => SERVER_SOURCES.includes(s));
 
-export function snapCell(p: LatLon): LatLon {
-  const f = (v: number) => Math.round(Math.floor(v / CELL + 1e-9) * CELL * 10) / 10;
-  return { lat: f(p.lat), lon: f(p.lon) };
-}
+/** The app computes the same cell (alerts-core `cellOf`); the server snaps again whatever it is sent. */
+export const snapCell = cellOf;
 
 const centre = (c: LatLon): LatLon => ({ lat: c.lat + CELL / 2, lon: c.lon + CELL / 2 });
 

@@ -165,7 +165,7 @@ under the "not medical advice" banner. Fresh installs (reviewers, closed testers
 | Foreground service (from the `carplay` branch, 2026-10-31) | Guidance with the screen off runs in a foreground service of type `location` (`FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_LOCATION`, notification "Navegación en curso"), started while the app is in front: no `ACCESS_BACKGROUND_LOCATION`. **Before the release that ships it**: Play Console › App content › Foreground service permissions: declare "Location" (navigation the user started) with a short video of starting a trip and locking the screen | `modules/nomad-location/android` (`NavigationService.kt`, manifest) |
 | 16 KB page support (Android 15+) | Every `.so` aligned | `llvm-objdump -p <lib>.so \| grep LOAD` (`2**14`+), `zipalign -c -P 16` |
 | 64-bit, size limit | arm64-v8a + x86_64 only (llama.rn has no 32-bit); ~90 MB download on arm64 (limit 200 MB) | `expo-build-properties` `android.buildArchs` |
-| Data safety | "No data collected": everything is on-device; downloads send only the request | `play-listing.md`, must match `site/privacy.html` |
+| Data safety | "No data collected": everything is on-device; downloads send only the request. **Changes with the alerts push** (first Android build that registers): approximate location (the 0.1° cell), app functionality, not shared, deletable (turning alerts off), plus the device push token | `play-listing.md`, must match `site/privacy.html` |
 | Open-source notices | Full transitive Android notices in Credits › Android libraries | `scripts/licenses/android-deps.mjs` then `node scripts/licenses.mjs` |
 | Auto Backup | Only the user's own data (SQLite folder, kv-store) goes to Google Drive backup; re-downloadable content stays out (cloud backup skips an app over 25 MB) | `plugins/with-android-backup-rules.js` |
 
@@ -176,7 +176,7 @@ under the "not medical advice" banner. Fresh installs (reviewers, closed testers
    downloads). Health-related change → section 4 checklist.
 2. **Bump** `android.versionCode` in `app.json`; update the "currently" line in `docs/RELEASE.md`; commit.
 3. **Build** from a clean tree at that commit (`docs/RELEASE.md`, "Build an upload"):
-   `NOMAD_STORE_BUILD=1 npx expo prebuild --platform android --clean --no-install`, then
+   `eval "$(node scripts/alerts/fcm-env.mjs)"` (alert push config), `NOMAD_STORE_BUILD=1 npx expo prebuild --platform android --clean --no-install`, then
    `cd android && ./gradlew :app:bundleRelease` with `JAVA_HOME` set to Android Studio's jbr. (`npm run e2e:android --
    --build` prebuilds with `NOMAD_E2E=1`, which lets the APK use plain http to localhost for the updates flow;
    the store prebuild takes that out: check `bundletool dump manifest` has no `networkSecurityConfig`.)

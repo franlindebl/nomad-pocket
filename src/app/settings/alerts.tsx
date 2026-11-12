@@ -7,14 +7,17 @@ import type { Level } from '@/features/alerts/alerts-core';
 import { AlertsDisclaimer, useAlertsView } from '@/features/alerts/components';
 import { disableAlerts, enableAlerts } from '@/features/alerts/enable';
 import { agoLabel, formatWhen, sourceName } from '@/features/alerts/present';
+import { pushActive } from '@/features/alerts/push-register';
 import { savePrefs, type Run } from '@/features/alerts/state';
 import { space } from '@/theme';
 
-/** Settings › Official alerts: the switch, what notifies, the position used, the sources, recent checks. */
+/** Settings › Official alerts: the switch, what notifies, the position used, the sources, instant alerts, recent checks. */
 export default function AlertsSettingsScreen() {
   const { t } = useTranslation('alerts');
   const { pos, sources, now, state } = useAlertsView();
   const [busy, setBusy] = useState(false);
+  // Re-read each render (the minute clock re-renders): fresh registration and a healthy server.
+  const instant = !!state.push && pushActive(now);
 
   const toggle = async (on: boolean) => {
     setBusy(true);
@@ -112,11 +115,12 @@ export default function AlertsSettingsScreen() {
             })}
           </ListGroup>
 
-          <SectionHeader title={t('settings.background')} />
+          <SectionHeader title={t('settings.push')} />
           <ListGroup>
             <View style={{ padding: space.lg, gap: space.sm }}>
+              <Text variant="headline">{instant ? t('settings.pushOn') : t('settings.pushOff')}</Text>
               <Text variant="footnote" color="textSecondary">
-                {t('settings.backgroundBody')}
+                {instant ? t('settings.pushOnBody') : t('settings.backgroundBody')}
               </Text>
             </View>
           </ListGroup>

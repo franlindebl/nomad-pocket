@@ -243,6 +243,15 @@ export function snap(p: LatLon, step: number): LatLon {
 // ---------------------------------------------------------------------------
 // Earthquakes
 
+/** Grid of the cell a phone gives the push server (~11 × 8 km in Spain): all it ever says about where it is. */
+export const PUSH_CELL = 0.1;
+
+/** South-west corner of the 0.1° cell holding a position. */
+export function cellOf(p: LatLon): LatLon {
+  const f = (v: number) => Math.floor(v / PUSH_CELL + 1e-9) / 10;
+  return { lat: f(p.lat), lon: f(p.lon) };
+}
+
 export type QuakeRule = { nearMag: number; nearKm: number; farMag: number; farKm: number };
 
 /** Owner's defaults: M ≥ 4.5 within 100 km, or M ≥ 6 within 500 km. */

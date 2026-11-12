@@ -433,7 +433,10 @@ Not chosen:
    quakes by distance; NWS and MeteoAlarm need task 1). Firestore reads grow with registrations × source changes:
    query by country/cell once there are more than a few hundred phones.
 3. App: registration, push tap → detail, dedup with phase 1, opt-in copy for iPhone ("al momento") vs Android
-   ("cada media hora aprox.").
+   ("cada media hora aprox."). **Done 2026-11-12** (`push-register.ts`, `modules/nomad-push` tap handling, Settings ›
+   "Avisos al momento"); the owner's iPhone registered itself (Madrid cell, sandbox). Android end to end still to
+   see on a build from the Play internal track (a debug APK can't replace the Play install). The opt-in copy is the
+   same on both platforms now that Android has push too.
 4. Privacy policy, store labels, `docs/ARCHITECTURE.md` (server section), `docs/RELEASE.md` (deploying the server),
    `docs/DEVELOPMENT.md` (running it locally).
 5. Verify: pushes on the owner's iPhone over a few days (`/v1/test-push`, then real warnings), the monitor firing when

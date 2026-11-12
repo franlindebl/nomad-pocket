@@ -20,6 +20,8 @@ import android.util.Log
 class PushReceiver : BroadcastReceiver() {
   companion object {
     const val CHANNEL = "alerts"
+    const val EXTRA_KIND = "nomadPushKind"
+    const val EXTRA_KEY = "nomadPushKey"
   }
 
   override fun onReceive(context: Context, intent: Intent) {
@@ -46,10 +48,10 @@ class PushReceiver : BroadcastReceiver() {
       nm.createNotificationChannel(NotificationChannel(CHANNEL, "Avisos oficiales", NotificationManager.IMPORTANCE_HIGH))
     }
     val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
-      putExtra("nomadPushKind", "official-alert")
-      key?.let { putExtra("nomadPushKey", it) }
+      putExtra(EXTRA_KIND, "official-alert")
+      putExtra(EXTRA_KEY, key ?: "")
     }
-    val tap = launch?.let { PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT) }
+    val tap = launch?.let { PendingIntent.getActivity(context, (collapse ?: key ?: "").hashCode(), it, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT) }
     val icon = context.resources.getIdentifier("notification_icon", "drawable", context.packageName).takeIf { it != 0 }
       ?: context.applicationInfo.icon
     val builder = if (Build.VERSION.SDK_INT >= 26) android.app.Notification.Builder(context, CHANNEL) else @Suppress("DEPRECATION") android.app.Notification.Builder(context)

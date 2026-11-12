@@ -1,6 +1,7 @@
 // Turning official alerts on and off (docs/ALERTS_PLAN.md, decision 1): opt-in only. On asks for notifications, then
 // for location "while using" if the app doesn't have it (never "Always"), registers the background check and runs a
-// first check. Off unregisters it and forgets what was fetched and the position: nothing is fetched while it is off.
+// first check (which also registers with the push server). Off unregisters both and forgets what was fetched and the
+// position: nothing is fetched while it is off.
 import { getPermissionsAsync, requestPermissionsAsync } from 'expo-notifications';
 import { Linking } from 'react-native';
 
@@ -9,6 +10,7 @@ import * as Location from '@/lib/location';
 import { registerAlertsTask, unregisterAlertsTask } from './background';
 import { runAlertsCheck } from './check';
 import { ensureAlertsChannel } from './notify';
+import { unregisterPush } from './push-register';
 import { clearAlertsData, saveEnabled, saveOffered } from './state';
 
 export type EnableResult = { notifications: boolean; location: boolean };
@@ -38,6 +40,7 @@ export async function enableAlerts(): Promise<EnableResult> {
 }
 
 export async function disableAlerts() {
+  await unregisterPush();
   saveEnabled(false);
   await unregisterAlertsTask();
   clearAlertsData();

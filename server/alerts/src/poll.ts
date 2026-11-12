@@ -11,6 +11,7 @@ import { FETCHERS, type PolledSource, type SourceState } from './sources.ts';
 import { allRegs, db, deleteReg, loadSource, noteSourceError, saveSource, updateNotified } from './store.ts';
 
 const SOURCES = Object.keys(FETCHERS) as PolledSource[];
+const FORGET_AFTER_MS = 90 * 24 * 3600_000;
 const memory = new Map<PolledSource, SourceState>();
 let running = false;
 
@@ -70,7 +71,13 @@ export async function notifyAll(now: number, apnsKey: ApnsKey | null) {
   const out: Outgoing[] = [];
   const records = new Map<string, Alert['id'][]>();
   const updates: Promise<unknown>[] = [];
+  const expired: string[] = [];
   for (const { id, reg } of regs) {
+    // A phone that hasn't refreshed its row for 90 days (it does every few days while alerts are on) is forgotten.
+    if (now - (reg.updatedAt ?? 0) > FORGET_AFTER_MS) {
+      expired.push(id);
+      continue;
+    }
     const { pushes, notified } = plan(all, reg, now);
     if (JSON.stringify(notified) !== JSON.stringify(reg.notified ?? {})) updates.push(updateNotified(id, notified));
     for (const push of pushes) out.push({ id, reg, push });
@@ -78,7 +85,7 @@ export async function notifyAll(now: number, apnsKey: ApnsKey | null) {
   }
   await Promise.all(updates);
   const { sent, dead } = out.length ? await deliver(out, apnsKey, now) : { sent: 0, dead: new Set<string>() };
-  await Promise.all([...dead].map((id) => deleteReg(id)));
+  await Promise.all([...dead, ...expired].map((id) => deleteReg(id)));
   if (out.length) logger.info('pushed', { pushes: out.length, sent, dead: dead.size, alerts: [...new Set([...records.values()].flat())] });
   return { regs: regs.length, pushes: out.length, sent, dead: dead.size };
 }

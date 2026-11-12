@@ -118,6 +118,7 @@ developer account can provision them is untested. The maintainer uses team `F3VY
 | `npm test` | unit tests, `node --test --experimental-strip-types "src/**/*.test.ts"` | always (pre-commit) |
 | `npm run check:i18n` | every `t('…')` key exists in `es` and `en`, same plural/template keys; also prints an informational list of unused keys | always (pre-commit) |
 | `node scripts/licenses.mjs --check` | the committed `src/data/licenses.json` matches `package-lock.json` and `scripts/licenses/native.json` | after dependency changes, before a store build |
+| `cd server/alerts && npm run check` | the alerts server: tsc, its tests (on the app's alert fixtures), the esbuild bundle | after touching `server/alerts` or an alert core |
 | `npm run check:catalog` | catalog schema + every download URL and size (`-- --offline` for schema only) | after editing `catalog.json` |
 | `PMTILES_NETWORK=1 npm test` | adds a live extract against build.protomaps.com | after touching `src/lib/pmtiles` |
 | `npm run e2e` (`-- --build`) | Maestro smoke suite on the iOS simulator | before every TestFlight build |
