@@ -126,6 +126,10 @@ packs of 2026-11-05:
 - **Ethiopia.** OSM has almost nothing (300 pharmacies, 424 clinics). The registry needs a login; the HDX copy
   (MoH as source, uploaded by 3iS) is a snapshot of 2025-02, so the monthly run reads the same file until a new one
   is published. Points stacked three or more on a spot (a woreda's centre) are left out.
+- **Nigeria (not added).** GRID3 NGA v4.0 (CIESIN with the federal registry and NPHCDA, CC BY 4.0) has 48k usable
+  hospitals and primary-care points where OSM has 1.5k clinics, but calls itself "non-validated", and it shows:
+  of 264 general and specialist hospitals that share a name with an OSM hospital, a quarter are over 2 km away
+  (median 123 m). Worth another look with only its field-surveyed points, or a later release.
 - **Italy (not added).** The Ministry's daily pharmacy register (IODL 2.0, 20,777 open) has coordinates for 91%, but
   they fail the test: only 17% are within 50 m of an OSM pharmacy (median 377 m), and 6,680 share their exact point
   with another pharmacy (Turin's Piazza Vittorio Veneto 10 sits 9 km out of town). It needs the addresses placed
