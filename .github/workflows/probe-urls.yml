@@ -1,0 +1,38 @@
+name: Probe URLs
+
+# Asks a few URLs from a GitHub runner, to see whether an official register's host answers there when it doesn't from
+# the office network (a proxy, a regional block): status, headers and the start of the body, in the job log.
+# Used before writing a scripts/official/<cc>.py blind (docs/OFFICIAL_POINTS.md). Read-only: it downloads nothing
+# into the repo or a release.
+
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: 'URLs, space separated'
+        required: true
+      bytes:
+        description: 'Bytes of each body to print'
+        required: false
+        default: '1500'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      URLS: ${{ github.event.inputs.urls }}
+      BYTES: ${{ github.event.inputs.bytes }}
+    steps:
+      - name: Ask
+        run: |
+          for u in $URLS; do
+            echo "::group::$u"
+            curl -sS -L --max-time 90 -A 'NomadPocket-official/1.0 (+https://github.com/franlindebl/nomad-pocket)' \
+              -D - -o body.bin -w 'status=%{http_code} size=%{size_download} type=%{content_type} final=%{url_effective}\n' "$u" || true
+            head -c "${BYTES:-1500}" body.bin 2>/dev/null | tr -c '[:print:]\n\t' '.' ; echo
+            echo "::endgroup::"
+          done

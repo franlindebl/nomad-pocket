@@ -21,7 +21,9 @@ Spain first (done, below); the others are in the backlog of `docs/PROGRESS.md`, 
    80% of last month's rows, keeps last month's rows. A new country is a new script: the workflow picks up every
    two-letter `scripts/official/??.py`, and the merge and the app need nothing. Narrowing a script's filter by
    more than a fifth trips that guard: delete the country's assets from the release first
-   (`gh release delete-asset official-points <cc>.official.tsv`), as was done for Mexico.
+   (`gh release delete-asset official-points <cc>.official.tsv`), as was done for Mexico. A host that doesn't answer
+   the office network (a proxy, a regional block) can be tried from a runner first with
+   `.github/workflows/probe-urls.yml` (`gh workflow run probe-urls.yml -f urls="…"`: status, headers, start of the body).
 2. **Merge** (country packs, monthly on the 5th): `scripts/routing/build-country.sh` step 6a downloads
    `<country>.official.tsv` (`OFFICIAL_CACHE`) and `scripts/official/merge.py` appends to `<pack>.pois.tsv` the
    official points with no OSM point of their group nearby (rows of type `official`, id `<source>:<code>`).
@@ -233,6 +235,11 @@ Numbers, filters and quality per country are in "Other countries" above; what ev
 `docs/OFFICIAL_POINTS_WORLD.md`. Every covered country has its script `scripts/official/<cc>.py`, its Credits entry
 (`official-health-points-<cc>` in `scripts/licenses/native.json`) and a line in the routing release notes
 (`.github/workflows/country-packages.yml`). "In packs since" is the first pack build with them.
+
+In numbers (2026-11-12): official points in 30 of the 232 countries and territories with a pack (24 countries and 6
+territories), about 1.39 billion people, 17% of the world; with the countries where OSM is already near the official
+totals (Germany, the Nordics…, ~200 million), about a fifth. The big gaps: India, China, Indonesia, Pakistan,
+Nigeria, Brazil (licence asked), Bangladesh, Russia, the Philippines, Egypt.
 
 Rule (2026-11-12): a source is used only under its licence, always credited. Merging it with OSM doesn't make it
 ours: hiding where points come from would break the attribution every licence asks for and wouldn't lift terms such
