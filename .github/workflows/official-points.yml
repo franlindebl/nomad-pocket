@@ -14,6 +14,10 @@ name: Official points
 # - ua: pharmacies and primary-care divisions from the National Health Service of Ukraine (NSZU).
 # - cl, pe, uy: hospitals and public primary care from MINSAL (DEIS), SUSALUD (RENIPRESS) and ASSE.
 # - et: pharmacies, hospitals, health centres, posts and clinics from the Ministry of Health's registry (HDX snapshot).
+# - ca: Ontario's (MOHSERLO) and British Columbia's (HealthLink BC) pharmacies, hospitals and primary care.
+# - au: pharmacies, hospitals and general practices from the National Health Services Directory (Geoscience Australia).
+# - gb: NHS pharmacies and GP practices (ODS), placed on their postcode with Ordnance Survey's Code-Point Open.
+# - us: HRSA's community health centres, also split into one file per US pack (us-west.official.tsv, pr…).
 # A source that doesn't answer keeps last month's rows, read back from the release (the job then ends in a warning).
 
 on:
@@ -95,6 +99,8 @@ jobs:
         run: |
           [[ -s out/$CC.official.tsv ]] || { echo "::error::no output"; exit 1; }
           files=(out/$CC.official.tsv out/$CC.official.report.json)
+          # A country of several packs writes one file per pack too (us.py: us-west.official.tsv…).
+          for f in out/*.official.tsv; do [[ "$f" == out/$CC.official.tsv ]] || files+=("$f"); done
           [[ -s out/$CC.geocache.tsv ]] && files+=(out/$CC.geocache.tsv)
           gh release upload official-points "${files[@]}" --clobber
           if [[ "${{ steps.fetch.outputs.status }}" != "0" ]]; then

@@ -24,7 +24,8 @@ Spain first (done, below); the others are in the backlog of `docs/PROGRESS.md`, 
    `<country>.official.tsv` (`OFFICIAL_CACHE`) and `scripts/official/merge.py` appends to `<pack>.pois.tsv` the
    official points with no OSM point of their group nearby (rows of type `official`, id `<source>:<code>`).
    Each OSM point absorbs one official point at most (hospitals excepted), a shared name first, then the nearest
-   (name words: Latin and Cyrillic words minus generic ones; Japanese names, which have no spaces, cut at their
+   (name words: Latin and Cyrillic words minus generic ones, "farmacia", "pharmacy", "clinique", "health"…, so two
+   pharmacies 300 m apart aren't one because both say "pharmacy"; Japanese names, which have no spaces, cut at their
    generic words, so つがやす薬局東２条店 and OSM's つがやす薬局 東2条店 share つがやす and 東2条):
 
    | Group | Official kinds | Same point when within | or, sharing a name word, within |
@@ -100,6 +101,10 @@ packs of 2026-11-05:
 | Peru | `pe.py`: SUSALUD RENIPRESS, monthly | ODC-By | 7,254 centres, 7 m | **263 hospitals, 3,535 centres** (puestos de salud, centros, policlínicos) |
 | Uruguay | `uy.py`: ASSE care units, monthly | Licencia de Datos Abiertos de Uruguay | 111 centres, 22 m | **7 hospitals, 752 polyclinics** |
 | Ethiopia | `et.py`: Ministry of Health's MFR on HDX (3iS), snapshot of 2025-02 | CC BY | 283 pharmacies; hospitals sharing a name 85 m | **8,658 pharmacies, 312 hospitals, 28,218 centres, posts and clinics** |
+| Canada | `ca.py`: Ontario's MOHSERLO (ArcGIS) and HealthLink BC's pharmacies, hospitals, walk-in clinics | OGL-Ontario, OGL-BC | 3,426 pharmacies, 22 m | **2,903 pharmacies, 16 hospitals, 429 clinics** (Ontario and BC only) |
+| Australia | `au.py`: National Health Services Directory via Geoscience Australia, snapshot of 2025-03 | CC BY 4.0 (+ G-NAF) | 2,811 pharmacies, 25 m | **2,602 pharmacies, 35 hospitals, 4,095 practices** |
+| United Kingdom | `gb.py`: NHS ODS (ORD API) placed on Code-Point Open postcodes | OGL v3 | 7,569 pharmacies, 33 m | **3,567 pharmacies, 1,958 GP practices** (Great Britain) |
+| United States | `us.py`: HRSA health center sites, daily, split by pack | public domain | 2,597 centres, 15 m | **7,599 community health centres** (west 2,243, south 2,862, midwest 1,411, northeast 1,083; plus AK, HI, PR…) |
 
 - **Japan.** Clinics are the register's 診療所 offering internal medicine, paediatrics, surgery, general practice or
   emergency care (51k of 80k: no eye, skin or cosmetic practices). 12% of the pharmacies and 6% of the clinics
@@ -126,6 +131,28 @@ packs of 2026-11-05:
 - **Ethiopia.** OSM has almost nothing (300 pharmacies, 424 clinics). The registry needs a login; the HDX copy
   (MoH as source, uploaded by 3iS) is a snapshot of 2025-02, so the monthly run reads the same file until a new one
   is published. Points stacked three or more on a spot (a woreda's centre) are left out.
+- **Canada.** Only Ontario and British Columbia publish such lists with points (the other provinces: nothing open
+  found yet). Ontario: retail pharmacies, hospitals (a corporation and its sites, one point when within 15 m),
+  community health centres, family health teams, nurse practitioner-led and Indigenous primary-care clinics; labs,
+  long-term care and support services left out. BC: HealthLink BC's pharmacies, hospitals and walk-in clinics (its
+  urgent and primary care centres list is "access only", not open).
+- **Australia.** The layers are Geoscience Australia's copy of Healthdirect's directory (a snapshot, March 2025);
+  Healthdirect's own terms allow non-commercial reuse, which this free app is, and GA publishes the copy under CC BY
+  4.0. Its terms also say not to rely on it to find a service in an emergency: the Credits entry says so. Hospital
+  pharmacies, outpatient, maternal-child and cancer services left out; a practice's several services are one point.
+- **United Kingdom.** ODS gives postcodes, not points: each is placed on its postcode's Code-Point Open point
+  (a postcode is about fifteen addresses; median 33 m from OSM's pharmacy), postcodes placed only on their sector
+  left out. GP practices sharing a postcode (a health centre's) are one point. Northern Ireland is left out
+  (Code-Point has no BT postcodes); hospitals too (ODS's trust sites mix wards, offices and clinics). The ORD API
+  refuses `Offset=0` (406).
+- **United States.** HRSA's health centres treat anyone whatever they can pay. Permanent sites only: school-based,
+  seasonal, mobile, administrative, prison and nursing-home sites, and those whose name says dentistry, behavioural
+  health, WIC, pharmacy or eyes only, are left out (10.6k of 19.6k). `us.py` writes `us.official.tsv` and one
+  `<pack>.official.tsv` per US pack (Geofabrik's regions by state, Alaska, Hawaii, the territories), which the
+  workflow uploads too. No federal list of pharmacies or hospitals with points: CMS's hospitals are addresses only
+  and refuse custom User-Agents; NPPES (pharmacies) is 1 GB of addresses.
+- **Taiwan (not yet).** The NHI's contracted facilities (OGDL, 7.6k pharmacies against OSM's 2.3k) have addresses
+  only; it waits for a Taiwanese geocoder (NLSC/TGOS) checked the way CartoCiudad was.
 - **Nigeria (not added).** GRID3 NGA v4.0 (CIESIN with the federal registry and NPHCDA, CC BY 4.0) has 48k usable
   hospitals and primary-care points where OSM has 1.5k clinics, but calls itself "non-validated", and it shows:
   of 264 general and specialist hospitals that share a name with an OSM hospital, a quarter are over 2 km away

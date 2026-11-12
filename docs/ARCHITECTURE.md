@@ -914,7 +914,7 @@ indexing, emergency-kind POIs found in the tiles (named or not, e.g. drinking wa
 stored as `t…` rows unless the region already has Overpass points — at z15 that is most
 of them, at z12/14 only the important ones (Protomaps gives most POIs min_zoom 15–17).
 Official points (`docs/OFFICIAL_POINTS.md`): a country pack's points file may carry rows of type `official`
-(pharmacies, hospitals, health centres from official registers that OSM lacks; Spain, Japan, France, Czechia, Ukraine, Chile, Peru, Uruguay, Ethiopia), merged at build time
+(pharmacies, hospitals, health centres from official registers that OSM lacks; Spain, Japan, France, Czechia, Ukraine, Chile, Peru, Uruguay, Ethiopia, Canada, Australia, the UK, the US), merged at build time
 by `scripts/official/merge.py`; `parseOverpassTsv` gives them `o<source>:<code>` ids and they behave like any point
 (app versions before that skip the type).
 Queries: `nearestEmergencyPlaces(category, from)` (equirectangular ORDER BY, GROUP BY

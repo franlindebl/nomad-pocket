@@ -43,7 +43,11 @@ STOP = {"farmacia", "farmacias", "botiquin", "lda", "ldo", "con", "por", "sur", 
         "nova", "nuevo", "nueva", "licenciada", "licenciado", "del", "de", "la", "las", "los",
         "y", "san", "santa", "cb", "sl", "slp", "c", "b", "dona", "don", "dr", "dra", "centro", "salud", "consultorio",
         "local", "hospital", "clinica", "clinico", "general", "universitario", "comarcal", "auxiliar", "periferico",
-        "medico", "rural", "atencion", "primaria", "nuestra", "senora", "quiron", "quironsalud", "hm", "vithas"}
+        "medico", "rural", "atencion", "primaria", "nuestra", "senora", "quiron", "quironsalud", "hm", "vithas",
+        # what a place is in English and French (the other registers), never which one it is: two pharmacies 300 m
+        # apart aren't one because both say "pharmacy"
+        "pharmacy", "pharmacie", "chemist", "chemists", "drug", "drugs", "clinic", "clinique", "surgery", "medical",
+        "health", "healthcare", "practice", "the", "and", "ltd", "inc", "limited"}
 
 
 # Japanese names (scripts/official/jp.py) have no spaces: their generic words split them into the distinctive parts

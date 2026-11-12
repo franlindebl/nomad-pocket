@@ -77,10 +77,12 @@ OP. **Official points: complete OSM with official registers, country by country*
    centres), measure OSM against them as for Castilla-La Mancha, add a `scripts/official/<cc>.py` writing
    `<cc>.official.tsv` (merge and app need nothing new). World research done 2026-11-12
    (`docs/OFFICIAL_POINTS_WORLD.md`). **Built 2026-11-12**: Japan, France, Czechia, Ukraine, Chile, Peru, Uruguay,
-   Ethiopia (`docs/OFFICIAL_POINTS.md`, "Other countries"); their first CI run, then their packs. Italy tried and left
-   out (the register's coordinates fail against OSM; needs ANNCSU geocoding). Next: Nigeria (GRID3), Australia
-   (licence chain to clear), Canada (Ontario, BC), the UK (postcodes), the US (HRSA); Brazil waits on DATASUS's licence;
-   Germany, Austria, Switzerland, the Nordics, Benelux and Portugal have little to add.
+   Ethiopia (`docs/OFFICIAL_POINTS.md`, "Other countries"), in CI and in their packs (republished 2026-11-12); then
+   Canada (Ontario, BC), Australia (owner: the app is non-commercial, so Healthdirect's terms fit), the UK (postcodes
+   on Code-Point Open) and the US (HRSA health centres, one file per US pack): their first CI run, then their packs.
+   Italy and Nigeria tried and left out (coordinates fail against OSM; Italy needs ANNCSU geocoding). Next: Taiwan
+   (needs a geocoder checked), other Canadian provinces, Malawi, Dominican Republic, Bahrain, Latvia, New Caledonia;
+   Brazil waits on DATASUS's licence; Germany, Austria, Switzerland, the Nordics, Benelux and Portugal have little to add.
 
 AM. **Assistant × maps** (`docs/ASSISTANT_MAP_PLAN.md`, approved 2026-11-05; **phase 1 and 1b built the same day**,
    checked on iOS and Android: see the plan's "Phase 1 — status" and "1b"): the assistant
@@ -393,6 +395,18 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   points (entry below; Spain's routing pack already republished with them, run 43016421128) and the Units setting.
   "What's new" approved by the owner (`docs/store/listing-2.4.3.md`). E2E smoke 23/24 with `--build`, map-12 alone
   passes (as in the last releases). Android `versionCode` 32 (not uploaded).
+
+### 2026-11-12 — Official points: Canada, Australia, the United Kingdom, the United States
+
+- The eight countries below are in CI (two `official-points` runs) and their packs republished with the points
+  (runs 43216788930, 43216966692; counts in each new `<cc>.pois.tsv` within a few dozen of the local ones).
+- `ca.py` (Ontario's MOHSERLO and HealthLink BC: 2.9k pharmacies, 429 clinics), `au.py` (Healthdirect's directory via
+  Geoscience Australia: 2.6k pharmacies, 4.1k practices), `gb.py` (NHS ODS on Code-Point Open postcodes, BNG → WGS84
+  in the script: 3.6k pharmacies, 2k GP practices; median 33 m from OSM's), `us.py` (HRSA health centres: 7.6k, one
+  file per US pack, which the workflow now uploads too). Taiwan waits for a geocoder.
+- `merge.py`: English and French type words ("pharmacy", "clinique", "health"…) no longer count as a shared name (two
+  pharmacies 300 m apart were one): France gets ~200 more pharmacies and centres at the next build; Spain's output is
+  byte-identical.
 
 ### 2026-11-12 — Official points: Japan, France, Czechia, Ukraine, Chile, Peru, Uruguay, Ethiopia
 

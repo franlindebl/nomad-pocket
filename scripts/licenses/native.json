@@ -495,6 +495,53 @@
       "text": null
     },
     {
+      "id": "official-health-points-ca",
+      "name": "Canada: Ontario's health service provider locations and HealthLink BC's directory",
+      "license": "OGL-Ontario-1.0 AND OGL-BC-2.0",
+      "copyright": [
+        "Contains information licensed under the Open Government Licence – Ontario (Ministry of Health, Land Information Ontario)",
+        "Contains information licensed under the Open Government Licence – British Columbia (HealthLink BC)"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Pharmacies, hospitals and primary-care clinics in Ontario and British Columbia that OpenStreetMap lacks, added to Canada's emergency points every month.",
+      "text": null
+    },
+    {
+      "id": "official-health-points-au",
+      "name": "Australia: National HealthDirect Health Facilities",
+      "license": "CC-BY-4.0",
+      "copyright": [
+        "© Commonwealth of Australia (Geoscience Australia), from Healthdirect Australia's National Health Services Directory",
+        "Incorporates or developed using G-NAF © Geoscape Australia licensed by the Commonwealth of Australia under the Open Geo-coded National Address File (G-NAF) End User Licence Agreement"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Pharmacies, hospitals and general practices in Australia that OpenStreetMap lacks, added to the country's emergency points. Not a complete or current list: check before relying on it in an emergency.",
+      "text": null
+    },
+    {
+      "id": "official-health-points-gb",
+      "name": "United Kingdom: NHS Organisation Data Service and Code-Point Open",
+      "license": "OGL-UK-3.0",
+      "copyright": [
+        "Contains public sector information licensed under the Open Government Licence v3.0 (NHS England, Organisation Data Service)",
+        "Contains OS data © Crown copyright and database right; contains Royal Mail data © Royal Mail copyright and database right; contains National Statistics data © Crown copyright and database right"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Pharmacies and GP practices in Great Britain that OpenStreetMap lacks, placed on their postcode and added to the UK's emergency points every month.",
+      "text": null
+    },
+    {
+      "id": "official-health-points-us",
+      "name": "United States: HRSA health center service delivery sites",
+      "license": "Public domain",
+      "copyright": [
+        "Health Resources and Services Administration (HRSA), U.S. Department of Health and Human Services (work of the U.S. federal government)"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Community health centres in the United States and its territories that OpenStreetMap lacks, added to the US packs' emergency points every month.",
+      "text": null
+    },
+    {
       "id": "wikipedia-kiwix",
       "name": "Wikipedia and Kiwix content",
       "license": "CC-BY-SA-4.0",
