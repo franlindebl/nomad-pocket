@@ -195,7 +195,7 @@
     "regionInfo_other": "{{count}} places · {{date}}",
     "regions": "Points by map",
     "refresh": "Update",
-    "source": "OpenStreetMap data. It may be incomplete or out of date: in an emergency, call {{number}}.",
+    "source": "OpenStreetMap data and, in some countries, official health registers. It may be incomplete or out of date: in an emergency, call {{number}}.",
     "preparingTitle": "Getting emergency points ready",
     "preparingBody": "Downloading the hospitals, pharmacies, drinking water and shelters of your maps…",
     "bundled": "Included with the map",
@@ -367,7 +367,7 @@
     "onPhone": "On this phone",
     "chooseRegion": "Choose at least one region",
     "removeRegion": "Delete {{name}}",
-    "crossRegions": "Routes from one region to another go in a straight line."
+    "crossRegions": "Between two downloaded regions, the route is a single trip; to one you don't have, it goes in a straight line."
   },
   "parts": {
     "us-west": {

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Política de privacidad · Nomad Pocket</title>
-  <meta name="description" content="Política de privacidad de Nomad Pocket: no recogemos ningún dato. Privacy policy of Nomad Pocket: we collect no data.">
+  <meta name="description" content="Política de privacidad de Nomad Pocket: sin cuentas, analítica ni rastreo, y lo mínimo que guarda el servidor de avisos opcional. Privacy policy of Nomad Pocket: no accounts, analytics or tracking, and the minimum the optional alerts server keeps.">
   <link rel="icon" href="favicon.png">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -21,11 +21,11 @@
 
   <section id="es" lang="es">
     <h1>Política de privacidad</h1>
-    <p class="muted">Última actualización: 12 de noviembre de 2026</p>
+    <p class="muted">Última actualización: 13 de noviembre de 2026</p>
 
     <div class="card">
-      <strong>En resumen:</strong> Nomad Pocket no recoge, no vende y no comparte ningún dato personal.
-      No hay cuentas, ni publicidad, ni analítica, ni rastreo. Lo que haces en la app se queda en tu dispositivo. La app solo se conecta
+      <strong>En resumen:</strong> Nomad Pocket no vende ni comparte ningún dato personal, y no recoge ninguno salvo lo mínimo
+      que guarda el servidor de avisos si activas los avisos oficiales. No hay cuentas, ni publicidad, ni analítica, ni rastreo. Lo que haces en la app se queda en tu dispositivo. La app solo se conecta
       a internet para descargar contenido y catálogos (y, si los activas, avisos oficiales) de servicios públicos de terceros, que ven tu dirección IP como en cualquier
       conexión, y, solo si activas los avisos oficiales, a nuestro servidor de avisos, que te avisa al momento y solo conoce una cuadrícula de unos 10 km
       (abajo explicamos cuáles y cuándo).
@@ -53,7 +53,8 @@
     <p>Estos datos nunca se envían a nosotros.</p>
     <p><strong>Dónde se guardan.</strong> En iPhone y iPad, tus datos (ajustes, historial, marcadores, conversaciones, lugares, plan y kit)
       están en la carpeta Application Support de la app, que no aparece en la app Archivos. El contenido descargado, el índice de búsqueda y los puntos de emergencia
-      están en la carpeta «content» de la app, que sí aparece en Archivos (puedes copiar ahí tus propios archivos ZIM o de mapa).
+      están en la carpeta «content» de la app, que sí aparece en Archivos. Puedes copiar tus propios archivos ZIM en su carpeta «zim»
+      (o mapas en «maps») y la app los añade la próxima vez que se abre; también puedes importar un ZIM desde Biblioteca › «Importar un archivo ZIM».
       En Android, todo está en el almacenamiento privado de la app.</p>
     <p><strong>Cómo borrarlos.</strong> En Ajustes puedes borrar cada mapa, país, libro o modelo descargado y vaciar el historial de lectura.
       El resto se borra donde se muestra: las conversaciones en la lista de conversaciones, los lugares guardados en el mapa,
@@ -70,27 +71,32 @@
       distancias a lugares y puntos de emergencia y guiarte hasta ellos. Cuando inicias la navegación hacia un destino, la app sigue
       usándola con la pantalla bloqueada o en segundo plano hasta que el viaje termina, para darte las indicaciones (en Android verás
       una notificación mientras tanto). La ubicación se procesa en el dispositivo y solo sale de él
-      si tú la compartes con el botón «Compartir mi posición», a quien tú elijas. Las indicaciones habladas las lee una voz instalada en el
+      si tú la compartes («Compartir mi posición», o el SMS que te prepara el asistente), a quien tú elijas, o, con los avisos
+      oficiales activados, como se explica a continuación. Las indicaciones habladas las lee una voz instalada en el
       dispositivo, sin conexión.</p>
     <p><strong>Avisos oficiales</strong> (desactivados salvo que los actives): la app guarda en el dispositivo la última posición que obtuvo
       mientras la usabas, redondeada a unos 100 m, y comprueba en el propio teléfono qué avisos la cubren. Para esto no pide la ubicación
-      «siempre» ni la consulta en segundo plano: usa esa última posición guardada. No sale del dispositivo, con una excepción: en Estados Unidos,
-      para pedir los avisos de tu zona, la app envía al Servicio Meteorológico Nacional (NWS) esa posición redondeada a unos 5 km.</p>
+      «siempre» ni la consulta en segundo plano: usa esa última posición guardada. Esa posición sale del dispositivo en dos casos: en Estados
+      Unidos, para pedir los avisos de tu zona, la app envía al Servicio Meteorológico Nacional (NWS) esa posición redondeada a unos 5 km; y,
+      para los avisos al momento, nuestro servidor recibe la cuadrícula en la que está, nunca la posición (a continuación).</p>
     <p><strong>Avisos al momento</strong> (solo con los avisos oficiales activados): para que te llegue una notificación en cuanto se publica un
-      aviso, aunque no abras la app, la app se registra en el servidor de avisos de Nomad Pocket. El servidor guarda solo: el identificador de
+      aviso, aunque no abras la app, la app se registra en el servidor de avisos de Nomad Pocket (cuando has permitido las notificaciones y
+      la app conoce tu posición). El servidor guarda solo: el identificador de
       notificaciones que el sistema da a la app (en iPhone, de Apple; en Android, de Firebase Cloud Messaging de Google), la cuadrícula de 0,1°
       (unos 11 × 8 km en España) en la que está tu última posición, nunca la posición, tu país, el idioma de la app, tu zona horaria, tus
-      preferencias (desde qué nivel avisar y si quieres terremotos) y qué avisos ya te ha enviado. Con la cuadrícula calcula y guarda también
-      las zonas de aviso oficiales que la contienen: las regiones de MeteoAlarm en Europa y, en Estados Unidos, las zonas y condados del NWS,
+      preferencias (desde qué nivel avisar y si quieres terremotos), qué avisos ya te ha enviado, la plataforma (iPhone o Android) y las
+      fechas en que se registró, se renovó y cambió por última vez. Con la cuadrícula calcula y guarda también
+      las zonas de aviso oficiales que la contienen: las regiones de MeteoAlarm en los 35 países europeos que cubre (en España, AEMET) y, en Estados Unidos, las zonas y condados del NWS,
       que pregunta a <code>api.weather.gov</code> enviando solo las esquinas de la cuadrícula. Las fuentes oficiales (AEMET, MeteoAlarm, NWS,
-      USGS, EMSC y GDACS) las lee el servidor por su cuenta, sin ningún dato tuyo; en Europa, la lista de avisos de MeteoAlarm de tu
-      cuadrícula te la da este servidor. No guarda tu nombre, ninguna cuenta ni tu
-      dirección IP, salvo en los registros técnicos que Google guarda unos días. Se borra al desactivar los avisos, cuando Apple o Google indican
+      USGS, EMSC y GDACS) las lee el servidor por su cuenta, sin ningún dato tuyo; en los países de MeteoAlarm, la lista de avisos de
+      MeteoAlarm de tu cuadrícula te la da este servidor. No guarda tu nombre ni ninguna cuenta; tu dirección IP solo la tiene en memoria,
+      como mucho una hora, para limitar el número de peticiones, sin escribirla en ningún sitio, aparte de los registros técnicos que Google guarda unos días. Se borra al desactivar los avisos, cuando Apple o Google indican
       que la app ya no está en el dispositivo, o tras 90 días sin que la app lo renueve. El servidor funciona en Firebase (Google Cloud), en la
       Unión Europea (Bélgica), y lo gestiona el responsable de esta política; la base para tratar estos datos es tu consentimiento al activar
       los avisos, y puedes retirarlo desactivándolos o pedir que lo borremos escribiendo al contacto de arriba. Para entregar cada notificación,
-      Apple (APNs) o Google (FCM) reciben su texto y el identificador de tu dispositivo, como con cualquier notificación push. Si el servidor no
-      responde, la app vuelve a comprobar los avisos por su cuenta.</p>
+      Apple (APNs) o Google (FCM) reciben su texto y el identificador de tu dispositivo, como con cualquier notificación push. La app sigue
+      consultando por su cuenta AEMET, el NWS, GDACS y los terremotos; si el servidor deja de responder (unas dos horas), vuelve a avisarte
+      ella misma de esos avisos. Los de MeteoAlarm solo llegan a través del servidor.</p>
 
     <h2>Asistente de IA</h2>
     <p>El asistente funciona íntegramente en tu dispositivo. En iPhone y iPad usa el modelo integrado del sistema (Apple Intelligence,
@@ -117,7 +123,8 @@
       <li><strong>Al abrirla con conexión</strong>, y al abrir las pantallas de países, la app consulta en <a href="https://github.com/franlindebl/nomad-pocket/releases">GitHub</a>
         (propiedad de Microsoft) los catálogos de mapas y paquetes de navegación de este proyecto: archivos pequeños, sin que la app envíe nada tuyo.
         Aunque no hayas descargado nada, GitHub ve tu dirección IP y cada cuánto abres la app. También sirve los mapas por país, los paquetes de
-        navegación y sus puntos de emergencia, calles y direcciones (generados por este proyecto a partir de OpenStreetMap) cuando decides descargarlos.</li>
+        navegación y sus puntos de emergencia, calles y direcciones (generados por este proyecto a partir de OpenStreetMap y, en algunos países,
+        de registros sanitarios oficiales) cuando decides descargarlos.</li>
       <li><a href="https://kiwix.org">Kiwix</a>: el catálogo (<code>opds.library.kiwix.org</code>), que recibe el texto que escribes al buscar en «Explorar»,
         sirve las miniaturas e indica la última versión de cada archivo ZIM (también una vez por semana, con conexión, para avisarte de versiones nuevas de los archivos que tienes: la app solo envía sus nombres); y los archivos ZIM (Wikipedia, guías, libros, cursos) desde
         <code>download.kiwix.org</code>, que reparte las descargas entre una red de servidores espejo de terceros. Para descargar más rápido, la app lee
@@ -143,7 +150,9 @@
         (<code>firebaseinstallations.googleapis.com</code>); la app no incluye ninguna librería de Google.</li>
     </ul>
     <p>Como en cualquier conexión a internet, esos servidores reciben tu dirección IP y la petición, y se rigen por sus propias
-      políticas de privacidad. La app no les envía ningún identificador tuyo ni datos personales. Si la opción «Solo con Wi‑Fi» está
+      políticas de privacidad. Salvo lo indicado arriba (la posición aproximada que recibe el NWS y, en Android, el identificador de instalación
+      aleatorio que Firebase Installations necesita para dar el identificador de notificaciones), la app no les envía ningún identificador tuyo
+      ni datos personales. Si la opción «Solo con Wi‑Fi» está
       activada, las descargas de contenido esperan a una red Wi‑Fi o a que autorices los datos móviles.</p>
 
     <h2>Correos que nos envías</h2>
@@ -157,7 +166,8 @@
       La web solo guarda en tu navegador si ya has cerrado el aviso de idioma, y ese dato no sale de él.</p>
 
     <h2>Tus derechos</h2>
-    <p>Puedes pedirnos acceso, rectificación o supresión de cualquier dato tuyo que tengamos (en la práctica, los correos que nos hayas enviado)
+    <p>Puedes pedirnos acceso, rectificación o supresión de cualquier dato tuyo que tengamos (en la práctica, los correos que nos hayas enviado
+      y, si tienes los avisos oficiales activados, el registro de tu móvil en el servidor de avisos, que también borras al desactivarlos)
       escribiendo a la dirección de contacto. También puedes reclamar ante la
       <a href="https://www.aepd.es">Agencia Española de Protección de Datos</a>.</p>
 
@@ -165,7 +175,8 @@
     <p>Los enlaces a sitios web externos se abren en el navegador; a partir de ahí se aplica la política de ese sitio.</p>
 
     <h2>Menores</h2>
-    <p>Como no recogemos datos de nadie, tampoco recogemos datos de menores.</p>
+    <p>La app no pide a nadie su edad ni su identidad. Si activas los avisos oficiales, el servidor guarda los mismos datos mínimos para
+      todo el mundo (arriba), sin saber quién eres.</p>
 
     <h2>Cambios</h2>
     <p>Si esta política cambia, publicaremos la nueva versión en esta página con su fecha. El código de la app es público en
@@ -174,11 +185,11 @@
 
   <section id="en" lang="en">
     <h1>Privacy policy</h1>
-    <p class="muted">Last updated: November 12, 2026</p>
+    <p class="muted">Last updated: November 13, 2026</p>
 
     <div class="card">
-      <strong>In short:</strong> Nomad Pocket does not collect, sell or share any personal data.
-      There are no accounts, ads, analytics or tracking. What you do in the app stays on your device. The app only goes online to download
+      <strong>In short:</strong> Nomad Pocket does not sell or share any personal data, and collects none except the minimum the
+      alerts server keeps if you turn on official alerts. There are no accounts, ads, analytics or tracking. What you do in the app stays on your device. The app only goes online to download
       content and catalogs (and, if you turn them on, official alerts) from public third-party services, which see your IP address as with any internet connection,
       and, only if you turn on official alerts, to our alerts server, which alerts you at once and only knows a grid square of about 10 km
       (we explain which ones and when below).
@@ -206,7 +217,8 @@
     <p>This data is never sent to us.</p>
     <p><strong>Where it lives.</strong> On iPhone and iPad, your data (settings, history, bookmarks, conversations, places, plan and kit)
       is in the app's Application Support folder, which does not show up in the Files app. Downloaded content, the search index and the emergency points are in the
-      app's “content” folder, which does show up in Files (you can copy your own ZIM or map files there).
+      app's “content” folder, which does show up in Files. You can copy your own ZIM files into its “zim” folder (or maps into “maps”)
+      and the app adds them the next time it opens; you can also import a ZIM from Library › “Import a ZIM file”.
       On Android, everything is in the app's private storage.</p>
     <p><strong>How to delete it.</strong> In Settings you can delete each downloaded map, country, book or model and clear your reading history.
       The rest is deleted where it is shown: conversations in the conversations list, saved places on the map, bookmarks in the reader,
@@ -221,27 +233,32 @@
     <p>If you allow it, the app uses your location only while you use it: to show where you are on offline maps, measure distances to
       places and emergency points, and guide you to them. Once you start navigating to a destination, the app keeps using it with the
       screen locked or in the background until the trip ends, to give you directions (on Android a notification shows meanwhile).
-      Location is processed on the device and only leaves it if you share it with the “Share my position” button, with whoever you choose.
+      Location is processed on the device and only leaves it if you share it (“Share my position”, or the SMS the assistant prepares for you),
+      with whoever you choose, or, with official alerts on, as explained next.
       Spoken directions are read by a voice installed on the device, offline.</p>
     <p><strong>Official alerts</strong> (off unless you turn them on): the app keeps on the device the last position it got while you were
       using it, rounded to about 100 m, and checks on the phone itself which alerts cover it. For this it never asks for your location
-      “always” nor reads it in the background: it uses that last saved position. It doesn't leave the device, with one exception: in the
-      United States, to ask for the alerts for your area, the app sends that position rounded to about 5 km to the National Weather Service (NWS).</p>
+      “always” nor reads it in the background: it uses that last saved position. That position leaves the device in two cases: in the
+      United States, to ask for the alerts for your area, the app sends it rounded to about 5 km to the National Weather Service (NWS); and,
+      for instant alerts, our server receives the grid square it falls in, never the position (next).</p>
     <p><strong>Instant alerts</strong> (only with official alerts on): so that a notification reaches you as soon as an alert is published,
-      even if you don't open the app, the app registers with Nomad Pocket's alerts server. The server keeps only: the notification identifier the
+      even if you don't open the app, the app registers with Nomad Pocket's alerts server (once you have allowed notifications and the app
+      knows your position). The server keeps only: the notification identifier the
       system gives the app (on iPhone, from Apple; on Android, from Google's Firebase Cloud Messaging), the 0.1° grid square (about 11 × 8 km in
       Spain) your last position falls in, never the position itself, your country, the app's language, your time zone, your preferences (from
-      which level to notify and whether you want earthquakes) and which alerts it has already sent you. From the grid square it also works out
-      and keeps the official warning zones that contain it: MeteoAlarm's regions in Europe and, in the United States, the NWS zones and counties,
+      which level to notify and whether you want earthquakes), which alerts it has already sent you, the platform (iPhone or Android) and the
+      dates it registered, was renewed and last changed. From the grid square it also works out
+      and keeps the official warning zones that contain it: MeteoAlarm's regions in the 35 European countries it covers (in Spain, AEMET) and, in the United States, the NWS zones and counties,
       which it asks <code>api.weather.gov</code> for by sending only the square's corners. The server reads the official sources (AEMET,
-      MeteoAlarm, NWS, USGS, EMSC and GDACS) on its own, with none of your data; in Europe, the list of MeteoAlarm warnings for your square
-      comes from this server. It keeps no name, no account and no IP
-      address, except in the technical logs Google keeps for a few days. It is deleted when you turn alerts off, when Apple or Google report that
+      MeteoAlarm, NWS, USGS, EMSC and GDACS) on its own, with none of your data; in MeteoAlarm's countries, the list of MeteoAlarm warnings
+      for your square comes from this server. It keeps no name and no account; it holds your IP address only in memory, for an hour at most,
+      to limit the number of requests, and never writes it down, apart from the technical logs Google keeps for a few days. It is deleted when you turn alerts off, when Apple or Google report that
       the app is no longer on the device, or after 90 days without the app renewing it. The server runs on Firebase (Google Cloud) in the
       European Union (Belgium) and is run by the controller named in this policy; the basis for processing this data is your consent when you
       turn alerts on, which you can withdraw by turning them off, or ask us to delete it by writing to the contact above. To deliver each
-      notification, Apple (APNs) or Google (FCM) receive its text and your device's identifier, as with any push notification. If the server
-      doesn't answer, the app goes back to checking alerts by itself.</p>
+      notification, Apple (APNs) or Google (FCM) receive its text and your device's identifier, as with any push notification. The app keeps
+      checking AEMET, the NWS, GDACS and earthquakes by itself; if the server stops answering (about two hours), it goes back to notifying
+      those alerts itself. MeteoAlarm's only come through the server.</p>
 
     <h2>AI assistant</h2>
     <p>The assistant runs entirely on your device. On iPhone and iPad it uses the system's built-in model (Apple Intelligence, when available)
@@ -267,7 +284,8 @@
       <li><strong>When it opens online</strong>, and when you open the country screens, the app checks <a href="https://github.com/franlindebl/nomad-pocket/releases">GitHub</a>
         (owned by Microsoft) for this project's map and navigation-pack catalogs: small files, with nothing of yours sent by the app.
         Even if you haven't downloaded anything, GitHub sees your IP address and how often you open the app. It also serves the country maps,
-        navigation packs and their emergency points, streets and addresses (built by this project from OpenStreetMap) when you choose to download them.</li>
+        navigation packs and their emergency points, streets and addresses (built by this project from OpenStreetMap and, in some countries,
+        official health registers) when you choose to download them.</li>
       <li><a href="https://kiwix.org">Kiwix</a>: the catalog (<code>opds.library.kiwix.org</code>), which receives the text you type when
         searching in “Explore”, serves the thumbnails and tells the newest version of each ZIM file (also once a week, when online, to tell you about new versions of the files you have: the app only sends their names); and the ZIM files (Wikipedia, guides, books, courses)
         from <code>download.kiwix.org</code>, which spreads downloads over a network of third-party mirror servers. To download faster, the app reads
@@ -293,7 +311,9 @@
         includes no Google library.</li>
     </ul>
     <p>As with any internet connection, those servers receive your IP address and the request, and are governed by their own
-      privacy policies. The app sends them no identifiers or personal data about you. If “Wi‑Fi only” is on, content downloads wait for a
+      privacy policies. Apart from what is described above (the approximate position the NWS receives and, on Android, the random installation
+      identifier Firebase Installations needs to issue the notification identifier), the app sends them no identifiers or personal data about
+      you. If “Wi‑Fi only” is on, content downloads wait for a
       Wi‑Fi network or for you to allow mobile data.</p>
 
     <h2>Emails you send us</h2>
@@ -307,7 +327,8 @@
       The site only stores in your browser whether you have closed the language notice, and that never leaves it.</p>
 
     <h2>Your rights</h2>
-    <p>You can ask us for access to, correction or deletion of any data of yours we hold (in practice, the emails you have sent us) by writing
+    <p>You can ask us for access to, correction or deletion of any data of yours we hold (in practice, the emails you have sent us and, if you
+      have official alerts on, your phone's registration on the alerts server, which turning alerts off also deletes) by writing
       to the contact address. You can also complain to Spain's data protection authority, the
       <a href="https://www.aepd.es/en">Agencia Española de Protección de Datos</a>.</p>
 
@@ -315,7 +336,8 @@
     <p>Links to external websites open in your browser; that site's policy applies from there.</p>
 
     <h2>Children</h2>
-    <p>Since we collect no data from anyone, we collect no data from children.</p>
+    <p>The app asks no one for their age or identity. If you turn on official alerts, the server keeps the same minimal data for everyone
+      (above), without knowing who you are.</p>
 
     <h2>Changes</h2>
     <p>If this policy changes, we'll publish the new version on this page with its date. The app's source code is public on

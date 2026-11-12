@@ -743,6 +743,19 @@
       "text": null
     },
     {
+      "id": "emergency-guide",
+      "name": "Emergency guide",
+      "license": "Public domain, Ley 37/2007 reuse and GPL-3.0-or-later",
+      "copyright": [
+        "US federal government works (public domain)",
+        "© Spanish public bodies (Protección Civil, Ministerio de Sanidad, INSST, La Moncloa), reused under Ley 37/2007",
+        "© 2026 Fran Linde Blázquez and contributors (own wording)"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/tree/main/docs/emergency-guide",
+      "note": "The cards bundled with the app: 202 on iPhone and iPad, 103 on Android (no health content). Of the 202, 114 are official texts, excerpted, copied or translated: 105 from US agencies (CDC, FEMA/Ready.gov, NIH/MedlinePlus, FDA, NIOSH…) and 9 from Spanish public bodies. The other 88 are written by Nomad Pocket following official guidelines (ERC 2025, NHS, Protección Civil…) and say so. Each card names its sources and licence.",
+      "text": null
+    },
+    {
       "id": "protomaps-basemaps",
       "name": "Protomaps basemaps",
       "license": "BSD-3-Clause AND CC0-1.0 AND MIT",

@@ -16,13 +16,14 @@ const empty: PrepareData = {
   custom: [],
 };
 
-const render = (data: PrepareData) =>
+const render = (data: PrepareData, health = true) =>
   planDocument({
     data,
     kit: [{ title: 'Agua', items: [{ title: 'Agua embotellada', detail: '24 L', have: true }] }],
     t: (key, o) => (o ? `${key}:${JSON.stringify(o)}` : key),
     formatCoords: (lat, lon) => `${lat},${lon}`,
     generatedAt: '25/10/2026',
+    health,
   });
 
 test('escapes user text', () => {
@@ -51,4 +52,12 @@ test('meeting point with coordinates and kit checks', () => {
   assert.ok(html.includes('40.4,-3.7'));
   assert.ok(html.includes('&#9745;'));
   assert.ok(html.includes('prepare:doc.generated:{&quot;date&quot;:&quot;25/10/2026&quot;}'));
+});
+
+test('without health features the PDF has no Health section', () => {
+  const data = { ...empty, people: [{ id: '1', name: 'Ana', medications: 'Insulina', allergies: '', bloodType: '0+', note: '' }] };
+  assert.ok(render(data).includes('prepare:plan.people'));
+  const html = render(data, false);
+  assert.ok(!html.includes('prepare:plan.people'));
+  assert.ok(!html.includes('Insulina'));
 });

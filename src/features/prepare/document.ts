@@ -12,6 +12,8 @@ export type PlanDocumentInput = {
   t: (k: string, options?: Record<string, unknown>) => string;
   formatCoords: (lat: number, lon: number) => string;
   generatedAt: string;
+  /** HEALTH_FEATURES: without them (Android) the PDF has no Health section, not even blank lines to fill in. */
+  health: boolean;
 };
 
 /** A4 in PostScript points (expo-print defaults to US Letter). */
@@ -133,7 +135,7 @@ ${section(
     data.numbers.map((n) => [n.label, n.value, n.note]),
   ),
 )}
-${section(t('prepare:plan.people'), people)}
+${input.health ? section(t('prepare:plan.people'), people) : ''}
 ${section(t('prepare:plan.homeNotes'), `<div class="box notes">${data.homeNotes.trim() ? text(data.homeNotes) : '<div class="line"></div><div class="line"></div>'}</div>`)}
 ${section(t('prepare:kit.title'), `<div class="kit">${kit}</div>`)}
 <footer>${escapeHtml(t('prepare:doc.footer'))}</footer>

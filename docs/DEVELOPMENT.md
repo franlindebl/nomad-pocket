@@ -5,8 +5,8 @@ How to set up, build, run and check Nomad Pocket. Architecture is in
 
 ## Prerequisites (macOS)
 
-- Node 22.6+ and npm (the repo uses `package-lock.json`; `npm test` needs
-  `--experimental-strip-types`).
+- Node 22.13+ or 24.3+ and npm (Expo SDK 58 and React Native 0.88 need it; the repo uses `package-lock.json`;
+  `npm test` needs `--experimental-strip-types`). The alerts server (`server/alerts`) runs on Node 22.
 - Xcode. The iOS 27 simulator runtime that comes with Xcode 27 is needed for Apple
   Intelligence (it fails on 26.5) and for the E2E suite (`scripts/e2e-setup.sh` creates its
   simulators on the iOS 27.0 runtime); plain builds and the unit tests also work with Xcode 26.

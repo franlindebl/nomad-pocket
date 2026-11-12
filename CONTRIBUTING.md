@@ -63,6 +63,10 @@ Also, when they apply:
 - `npm run check:catalog` after editing `src/data/catalog.json`.
 - `node scripts/licenses.mjs` after changing dependencies or `scripts/licenses/native.json`
   (`--check` fails on a stale `src/data/licenses.json`).
+- `cd server/alerts && npm run check` after touching the alerts server or the app's alert code and texts
+  (the server bundles them and deploys from `main`).
+- `node scripts/site/build.mjs` after editing the landing page's copy (`site/index.html` and `site/en/index.html` are
+  generated: don't edit them by hand; `--check` fails if they're stale).
 - Look at UI changes running (Release build on a simulator; the app is dark only) and run the Maestro
   suite if you touched a flow it covers: [docs/E2E.md](docs/E2E.md).
 - Every user-facing string goes through i18next in both `es` and `en`; use the design system in
@@ -82,5 +86,8 @@ Also, when they apply:
 ## Good places to start
 
 - Reproduce a bug on your phone and open an issue with the steps.
-- Translations (`src/i18n/locales`) and catalog suggestions (`src/data/catalog.json`).
-- Countries without offline routing (`scripts/routing/packs.json`).
+- Official registers of pharmacies, hospitals and health centres for a country that has none yet: one
+  `scripts/official/<cc>.py` per country ([docs/OFFICIAL_POINTS.md](docs/OFFICIAL_POINTS.md); what each country publishes:
+  [docs/OFFICIAL_POINTS_WORLD.md](docs/OFFICIAL_POINTS_WORLD.md)).
+- Translations (`src/i18n/locales`, plus the catalog texts, `locales/` and the guide's cards in `src/data/guide/` for a
+  new language) and catalog suggestions (`src/data/catalog.json`).

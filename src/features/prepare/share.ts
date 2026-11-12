@@ -6,6 +6,7 @@ import { Platform } from 'react-native';
 
 import { formatCoords } from '@/features/maps/markers';
 import i18n, { SUPPORTED_LANGUAGES } from '@/i18n';
+import { HEALTH_FEATURES } from '@/lib/health';
 
 import { A4, planDocument } from './document';
 import { kitGroups } from './rows';
@@ -40,6 +41,7 @@ export async function sharePlanPdf() {
     t,
     formatCoords,
     generatedAt: new Date().toLocaleDateString(i18n.language, { day: 'numeric', month: 'long', year: 'numeric' }),
+    health: HEALTH_FEATURES,
   });
   const { uri } = await Print.printToFileAsync({ html, ...A4 });
   // printToFileAsync names the file with a UUID: give it a readable name for the share sheet.

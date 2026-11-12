@@ -108,7 +108,7 @@ Next steps, in order:
 | Home | Survival guides shortcut (`home-guides`, Tent icon) instead of first aid (`home-first-aid`) | `app/(tabs)/(home)/index.tsx` |
 | Readiness | Points to the survival category instead of medicine | `features/home/readiness.ts` |
 | Onboarding | Welcome, guides and plan texts without medicine (`*NoHealth` keys) | `app/onboarding.tsx` |
-| Plan | No health card (medication, allergies, blood type); hub text `hub.planEmptyNoHealth` | `app/(tabs)/(home)/prepare/{index,plan}.tsx` |
+| Plan | No health card (medication, allergies, blood type); hub text `hub.planEmptyNoHealth`; the PDF has no Health section, not even blank lines (`health` input of `planDocument`) | `app/(tabs)/(home)/prepare/{index,plan}.tsx`, `features/prepare/{document,share}.ts` |
 | Emergency guide | Cards with `health: yes` (first aid, medicines, masks, the sick, coping, babies' feeding, disabilities) are neither listed, searched nor shown as answers | `features/guide/guide.ts` (`visibleCards`), `src/data/guide/*.md` front matter |
 | Assistant | A health question gets a fixed reply with the emergency number; the system prompt forbids treatment and first-aid steps; suggested questions only for guide cards the build shows (no health ones, `features/assistant/suggestions.ts`); empty-screen disclaimer without health | `features/assistant/rag-core.ts` (`isHealthQuestion`, `noHealthAnswer`, `NO_HEALTH_NOTE`), `features/assistant/chats.ts`, `app/(tabs)/assistant/index.tsx` |
 

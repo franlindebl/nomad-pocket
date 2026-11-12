@@ -420,6 +420,50 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-13 — Official points: Italy's hospitals and consultori left out
+
+An unfinished `it.py` change (left uncommitted after the Italy commit) added hospitals from the Ministry's beds list
+and the ASL consultori familiari, both placed on ANNCSU. Measured and dropped with the owner: 878 acute hospitals
+(2023) against OSM's 2,355, a third placeable, so a few dozen points; consultori aren't emergency points. Why, in
+`docs/OFFICIAL_POINTS.md` (Italy), so it isn't tried again.
+
+### 2026-11-13 — README, landing page and privacy policy match the app again
+
+The README and nomad-pocket.app were written on 2026-11-03; 2.1 to 2.5 shipped since. An audit (8 auditors over the
+code and data, every finding re-checked: 90 kept, none refuted) compared every public claim with main. Fixed:
+
+- **Privacy claims made false by the alerts server** (2.5.0): "your location never leaves your phone" (landing,
+  READMEs, and the in-app alerts offer `alerts.json` `offer.privacy`, shown at consent in onboarding and on Home),
+  "Do you collect my data? No" and "keeps nothing of yours" (landing FAQ + JSON-LD), `README.es.md`'s "no tiene servidor
+  propio" (2183718 fixed only the English one), "No connection, no account, no servers". `site/privacy.html`: meta
+  description, summary, Children and Rights no longer say "we collect no data"; location leaves the device in two cases
+  (NWS, the grid square), registration needs notifications and a position, the server's full row (platform, dates) and
+  in-memory IPs for rate limiting, MeteoAlarm's 35 countries, the fallback (MeteoAlarm has none; ~2 h), Firebase
+  Installations' random ID on Android, where to drop your own ZIM/map files (`content/zim`, `content/maps`, at launch).
+- **Wrong facts**: Android "in review" (closed test), "content in many languages" (es/en only), "100+ archives · 14
+  courses" counted courses twice (90 archives, 14 courses; Android 79 and 12), guide "from official sources" (114
+  official, 88 our wording), 7 emergency kinds (17 in 5 groups; "shelter" = any OSM shelter, dropped from the storm
+  scenario), "your country's" number (the one where you are), speed limit (car, where OSM has it), house numbers
+  (where OSM has them), country sizes (<1 MB to ~11 GB), updates (archives and courses too, old copy kept), Apple
+  Intelligence presented as the default, Android caveats (urgent health answers, dictation from Android 13, plan health
+  list), Node 22.13+, the Contributing ask (routing covers 233 of 241: official registers instead).
+- **Added**: official alerts (README section, landing card with an icon plate until there's an `alerts` capture, FAQ,
+  disclaimer), official health registers, map answers in the assistant, routes across borders, search (distance,
+  recents, coordinates), tap-any-point cards, navigation view, CarPlay speed/limit, PDF libraries, passing archives
+  phone to phone, plan and bag details, data table rows (registers, alert feeds and their terms, guide, emergency
+  numbers, map display), credits naming the alert sources (AEMET asks not to imply endorsement), developer section
+  (8 modules, `server/alerts`, `scripts/site/build.mjs`), `SECURITY.md` scope (nomad-push, alerts server,
+  scripts/official), `CONTRIBUTING.md` checks.
+- **In the app**: `offer.privacy` and `settings.enabledBody` (MeteoAlarm), the Emergencias caption names official
+  registers, the US regions note no longer says cross-region routes are straight lines (they join when both are
+  downloaded), Credits lists the emergency guide (`native.json` `emergency-guide`), and the plan PDF no longer prints a
+  blank Health section on Android (health gate, `docs/ANDROID_PLAY.md`). These ship with the next build.
+
+Not done, for the owner: on Android the guide's 103 cards can't be browsed (Home's first-aid button is the only way
+into `/guide`; they surface only in the assistant and alerts); a landing capture of an alert
+(`site/img/screens/<lang>/alerts.webp`, `scripts/site/images.py`); the store description could pick up the same
+corrections (`docs/store/listing-next.md`).
+
 ### 2026-11-13 — Official points: a register down for a night retries the next day instead of failing the run
 
 The monthly run's Spain job ended red (run 43321768551) because Aragón's WFS timed out its TLS handshake from the

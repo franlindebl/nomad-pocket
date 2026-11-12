@@ -19,18 +19,22 @@ if you want to be credited.
 ## What is in scope
 
 - The app (`src/`) and its native modules (`modules/`: `nomad-zim`, `nomad-llm`, `nomad-route`, `nomad-files`,
-  `nomad-location`, `nomad-voice`, `nomad-carplay`) on iOS and Android: for example the reader's sandbox for archive pages,
-  how downloaded files are verified and stored, the local databases, deep links and what leaves
+  `nomad-location`, `nomad-voice`, `nomad-carplay`, `nomad-push`) on iOS and Android: for example the reader's sandbox for
+  archive pages, how downloaded files are verified and stored, the local databases, deep links and what leaves
   the device.
+- The official alerts server (`server/alerts`, Cloud Functions for Firebase + Firestore) and its deploy workflow: its public
+  API, the push tokens and grid squares it stores, and anything that could make it push an alert the official sources
+  didn't publish.
 - The CI that builds and publishes the country packages (`.github/workflows/`, `scripts/maps/`,
-  `scripts/routing/`): anything that could make the published maps, routing packs or catalogs
+  `scripts/routing/`, `scripts/official/`): anything that could make the published maps, routing packs or catalogs
   carry content the workflow didn't build, or leak the repository's credentials.
 - The website (`site/`, nomad-pocket.app).
 
 ## What is not
 
-- Vulnerabilities in third-party servers the app downloads from (Kiwix and its mirrors,
-  Protomaps, Overpass, Hugging Face, GitHub) or in the libraries and models it bundles: report
+- Vulnerabilities in third-party servers the app or the alerts server talk to (Kiwix and its mirrors,
+  Protomaps, Overpass, Hugging Face, GitHub, the official alert feeds, the official health registers,
+  Apple's APNs, Google's FCM and Firebase) or in the libraries and models it bundles: report
   those upstream. If the app uses them unsafely, that is in scope.
 - Map, emergency-point or guide content that is wrong or out of date (open an ordinary issue),
   and attacks that need a rooted or jailbroken device or physical access to an unlocked one.

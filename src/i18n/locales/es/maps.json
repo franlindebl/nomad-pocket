@@ -195,7 +195,7 @@
     "regionInfo_other": "{{count}} puntos · {{date}}",
     "regions": "Puntos por mapa",
     "refresh": "Actualizar",
-    "source": "Datos de OpenStreetMap. Pueden estar incompletos o desactualizados: ante una emergencia, llama al {{number}}.",
+    "source": "Datos de OpenStreetMap y, en algunos países, de registros sanitarios oficiales. Pueden estar incompletos o desactualizados: ante una emergencia, llama al {{number}}.",
     "preparingTitle": "Preparando los puntos de emergencia",
     "preparingBody": "Descargando los hospitales, farmacias, agua potable y refugios de tus mapas…",
     "bundled": "Incluidos con el mapa",
@@ -367,7 +367,7 @@
     "onPhone": "En el móvil",
     "chooseRegion": "Elige al menos una región",
     "removeRegion": "Eliminar {{name}}",
-    "crossRegions": "Las rutas de una región a otra van en línea recta."
+    "crossRegions": "Entre dos regiones descargadas, la ruta es una sola; hacia una que no tengas, va en línea recta."
   },
   "parts": {
     "us-west": {
