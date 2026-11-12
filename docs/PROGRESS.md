@@ -82,8 +82,8 @@ OP. **Official points: complete OSM with official registers, country by country*
    on Code-Point Open) and the US (HRSA health centres, one file per US pack): their first CI run, then their packs.
    Italy and Nigeria tried and left out (coordinates fail against OSM; Italy needs ANNCSU geocoding). Second batch
    built: Latvia, Iceland, Dominican Republic, Malawi, New Caledonia, Argentina (IGN layer), Mexico (CLUES, public
-   institutions only: private hospitals' points fail). Being built: Hong Kong, Singapore, Sierra Leone, Guinea, Chad, the other
-   Canadian provinces. Blocked: Taiwan (TGOS key: the owner's to register), Brazil (DATASUS licence). The status of
+   institutions only: private hospitals' points fail). Then Sierra Leone, Chad and Canada's other provinces (Québec, Manitoba, NS, PEI, NL, Yukon; StatCan's
+   ODHF hospitals for the rest). Left out: Hong Kong and Singapore (indemnity terms; owner), Guinea. Blocked: Taiwan (TGOS key: the owner's to register), Brazil (DATASUS licence). The status of
    every country and why: "Coverage by country" in `docs/OFFICIAL_POINTS.md` (keep it up to date).
 
 AM. **Assistant × maps** (`docs/ASSISTANT_MAP_PLAN.md`, approved 2026-11-05; **phase 1 and 1b built the same day**,
@@ -432,6 +432,14 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   passes (as in the last releases). Android `versionCode` 32 (not uploaded).
 
 ### 2026-11-12 — Official points: second batch, and a coverage table
+
+- Third round: Sierra Leone (`sl.py`, MoHS + GRID3 2023: 1.3k centres and posts), Chad (`td.py`, Ministry via OCHA 2020:
+  97 hospitals, 1.5k centres), Canada's other provinces in `ca.py` (+248 pharmacies, +163 hospitals, +601 clinics).
+  Hong Kong and Singapore left out (their terms make us indemnify the government; Singapore's also gives downstream
+  users no rights), Guinea too (Red Cross upload of a 2018 list). Owner asked whether a merged list could go out as our
+  own without credits: no (`docs/OFFICIAL_POINTS.md`, the rule above "Covered").
+- Mexico's first CI run kept last month's wider file (the 80% guard); its assets were deleted from the release and
+  it re-ran with 10.6k rows. Documented: narrowing a filter needs the release's file deleted first.
 
 - Built by five research agents (Sonnet) against the same brief and quality gate, reviewed here: Latvia (`lv.py`: 176
   pharmacies, 184 GP practices), Iceland (`is.py`: 31 health centres), Dominican Republic (`do.py`: 50 hospitals, 1.5k

@@ -496,14 +496,18 @@
     },
     {
       "id": "official-health-points-ca",
-      "name": "Canada: Ontario's health service provider locations and HealthLink BC's directory",
-      "license": "OGL-Ontario-1.0 AND OGL-BC-2.0",
+      "name": "Canada: provincial and federal registers of health facilities",
+      "license": "OGL-Ontario-1.0 AND OGL-BC-2.0 AND CC-BY-4.0 AND OGL-Canada-2.0 AND OpenMB AND OGL-NS-1.1 AND OGL-PE-1.0 AND OGL-NL AND OGL-YT-2.0",
       "copyright": [
         "Contains information licensed under the Open Government Licence – Ontario (Ministry of Health, Land Information Ontario)",
-        "Contains information licensed under the Open Government Licence – British Columbia (HealthLink BC)"
+        "Contains information licensed under the Open Government Licence – British Columbia (HealthLink BC)",
+        "Ministère de la Santé et des Services sociaux du Québec, Données Québec (CC BY 4.0)",
+        "Contains information licensed under the Open Government Licence – Canada (Statistics Canada, Open Database of Healthcare Facilities)",
+        "Government of Manitoba, OpenMB Information and Data Use Licence",
+        "Contains information licensed under the Open Government Licence – Nova Scotia, – Prince Edward Island, – Newfoundland and Labrador and – Yukon"
       ],
       "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
-      "note": "Pharmacies, hospitals and primary-care clinics in Ontario and British Columbia that OpenStreetMap lacks, added to Canada's emergency points every month.",
+      "note": "Pharmacies, hospitals and primary-care clinics in Canada that OpenStreetMap lacks (Ontario, British Columbia, Québec, Manitoba, Nova Scotia, PEI, Newfoundland and Labrador, Yukon; hospitals elsewhere from Statistics Canada's 2020 database), added to the country's emergency points every month.",
       "text": null
     },
     {
@@ -616,6 +620,28 @@
       ],
       "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
       "note": "Hospitals and public primary-care centres in Mexico that OpenStreetMap lacks, added to the country's emergency points every month.",
+      "text": null
+    },
+    {
+      "id": "official-health-points-sl",
+      "name": "Sierra Leone: National Health Facilities Dataset v01",
+      "license": "CC-BY-4.0",
+      "copyright": [
+        "Copyright 2023 Sierra Leone Ministry of Health and Sanitation (MoHS) and Trustees of Columbia University (CIESIN, GRID3)"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Hospitals, community health centres and posts in Sierra Leone that OpenStreetMap lacks, added to the country's emergency points (2023).",
+      "text": null
+    },
+    {
+      "id": "official-health-points-td",
+      "name": "Chad: Ministry of Public Health's list of health centres and districts",
+      "license": "CC-BY-4.0",
+      "copyright": [
+        "Ministère de la Santé Publique du Tchad; published by OCHA Chad on the Humanitarian Data Exchange"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Hospitals and health centres in Chad that OpenStreetMap lacks, added to the country's emergency points (2020).",
       "text": null
     },
     {

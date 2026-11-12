@@ -19,7 +19,9 @@ Spain first (done, below); the others are in the backlog of `docs/PROGRESS.md`, 
    `<cc>.official.report.json` (rows per source, what failed) and, where it geocodes, `<cc>.geocache.tsv`
    (geocoder answers, so a month only asks for new addresses). A source that doesn't answer, or answers with under
    80% of last month's rows, keeps last month's rows. A new country is a new script: the workflow picks up every
-   two-letter `scripts/official/??.py`, and the merge and the app need nothing.
+   two-letter `scripts/official/??.py`, and the merge and the app need nothing. Narrowing a script's filter by
+   more than a fifth trips that guard: delete the country's assets from the release first
+   (`gh release delete-asset official-points <cc>.official.tsv`), as was done for Mexico.
 2. **Merge** (country packs, monthly on the 5th): `scripts/routing/build-country.sh` step 6a downloads
    `<country>.official.tsv` (`OFFICIAL_CACHE`) and `scripts/official/merge.py` appends to `<pack>.pois.tsv` the
    official points with no OSM point of their group nearby (rows of type `official`, id `<source>:<code>`).
@@ -101,7 +103,7 @@ packs of 2026-11-05:
 | Peru | `pe.py`: SUSALUD RENIPRESS, monthly | ODC-By | 7,254 centres, 7 m | **263 hospitals, 3,535 centres** (puestos de salud, centros, policlínicos) |
 | Uruguay | `uy.py`: ASSE care units, monthly | Licencia de Datos Abiertos de Uruguay | 111 centres, 22 m | **7 hospitals, 752 polyclinics** |
 | Ethiopia | `et.py`: Ministry of Health's MFR on HDX (3iS), snapshot of 2025-02 | CC BY | 283 pharmacies; hospitals sharing a name 85 m | **8,658 pharmacies, 312 hospitals, 28,218 centres, posts and clinics** |
-| Canada | `ca.py`: Ontario's MOHSERLO (ArcGIS) and HealthLink BC's pharmacies, hospitals, walk-in clinics | OGL-Ontario, OGL-BC | 3,426 pharmacies, 22 m | **2,903 pharmacies, 16 hospitals, 429 clinics** (Ontario and BC only) |
+| Canada | `ca.py`: Ontario's MOHSERLO, HealthLink BC, Québec's MSSS installations, Manitoba's vaccine providers, the NS, PEI, NL and Yukon facility lists; hospitals elsewhere from StatCan's ODHF (2020) | OGL-Ontario, OGL-BC, CC BY 4.0, OpenMB, OGL-NS/PE/NL/YT, OGL-Canada | 3,540 pharmacies, 22 m | **3,151 pharmacies, 179 hospitals, 1,030 clinics** |
 | Australia | `au.py`: National Health Services Directory via Geoscience Australia, snapshot of 2025-03 | CC BY 4.0 (+ G-NAF) | 2,811 pharmacies, 25 m | **2,602 pharmacies, 35 hospitals, 4,095 practices** |
 | United Kingdom | `gb.py`: NHS ODS (ORD API) placed on Code-Point Open postcodes | OGL v3 | 7,569 pharmacies, 33 m | **3,567 pharmacies, 1,958 GP practices** (Great Britain) |
 | United States | `us.py`: HRSA health center sites, daily, split by pack | public domain | 2,597 centres, 15 m | **7,599 community health centres** (west 2,243, south 2,862, midwest 1,411, northeast 1,083; plus AK, HI, PR…) |
@@ -111,6 +113,8 @@ packs of 2026-11-05:
 | Malawi | `mw.py`: Malawi Health Facility Registry on HDX (2023) | CC BY | 53 hospitals, 78 m | **44 hospitals, 1,068 health centres, dispensaries and posts** (OSM has 88 clinics) |
 | New Caledonia | `nc.py`: DASS, situation des structures de santé | Licence Ouverte 2.0 | 52 pharmacies, 23 m | **12 pharmacies, 27 dispensaries** |
 | Mexico | `mx.py`: CLUES (DGIS), monthly, public institutions only | free use (DGIS) | 1,000 hospitals, 36 m; 349 centres, 11 m | **431 hospitals, 9,375 centros de salud, UMF and rural units** |
+| Sierra Leone | `sl.py`: MoHS + CIESIN/GRID3 National Health Facilities Dataset v01 (2023) | CC BY 4.0 | 172 centres, 16 m | **25 hospitals, 1,289 CHC, CHP and MCHP** (OSM has 265 clinics) |
+| Chad | `td.py`: Ministry of Public Health's list via OCHA on HDX (2020) | CC BY | 57 centres, 24 m | **97 hospitals, 1,475 health centres** (OSM has 179 clinics) |
 | Argentina | `ar.py`: IGN's "Edificio de salud" layer (WFS; mostly the Ministry's SISA register) | IGN terms (attribution, shared freely) | 968 hospitals, 20 m; 1,959 centres, 14 m | **91 hospitals, 4,713 centres, posts and dispensaries** |
 
 - **Japan.** Clinics are the register's 診療所 offering internal medicine, paediatrics, surgery, general practice or
@@ -138,11 +142,21 @@ packs of 2026-11-05:
 - **Ethiopia.** OSM has almost nothing (300 pharmacies, 424 clinics). The registry needs a login; the HDX copy
   (MoH as source, uploaded by 3iS) is a snapshot of 2025-02, so the monthly run reads the same file until a new one
   is published. Points stacked three or more on a spot (a woreda's centre) are left out.
-- **Canada.** Only Ontario and British Columbia publish such lists with points (the other provinces: nothing open
-  found yet). Ontario: retail pharmacies, hospitals (a corporation and its sites, one point when within 15 m),
+- **Canada.** Ontario: retail pharmacies, hospitals (a corporation and its sites, one point when within 15 m),
   community health centres, family health teams, nurse practitioner-led and Indigenous primary-care clinics; labs,
   long-term care and support services left out. BC: HealthLink BC's pharmacies, hospitals and walk-in clinics (its
-  urgent and primary care centres list is "access only", not open).
+  urgent and primary care centres list is "access only", not open). Québec: MSSS's M02 installations (CHSGS as hospitals,
+  CLSC as clinics; no open pharmacy or GMF list). Manitoba: the registered flu and COVID vaccine providers (pharmacies
+  and clinics that vaccinate: not all of them). Nova Scotia (hospitals), PEI, Newfoundland and Labrador (KMZ, 2020),
+  Yukon (health centres). Alberta, Saskatchewan, New Brunswick, NWT and Nunavut publish no list with points: their
+  hospitals (and Saskatchewan's clinics) come from Statistics Canada's Open Database of Healthcare Facilities (2020;
+  a hospital listed twice within 250 m is one). New Brunswick's own hospital CSVs (gnb.socrata.com, OGL-NB) failed TLS
+  from the office: try from CI.
+- **Sierra Leone.** The Ministry's national dataset with CIESIN (GRID3), read from its ArcGIS layer; 21 "Non-Functional"
+  rows dropped, village-centre points kept with precision `village`. A 2023 snapshot.
+- **Chad.** The Ministry's 2020 list (OCHA on HDX): "Non Fonctionnelle" and planned facilities dropped. Weaker than
+  Sierra Leone: points mostly to 4 decimals, and same-named facilities sit ~490 m from OSM's at the median (village
+  names repeat); taken because OSM has almost nothing there (179 clinics).
 - **Australia.** The layers are Geoscience Australia's copy of Healthdirect's directory (a snapshot, March 2025);
   Healthdirect's own terms allow non-commercial reuse, which this free app is, and GA publishes the copy under CC BY
   4.0. Its terms also say not to rely on it to find a service in an emergency: the Credits entry says so. Hospital
@@ -202,6 +216,10 @@ Numbers, filters and quality per country are in "Other countries" above; what ev
 (`official-health-points-<cc>` in `scripts/licenses/native.json`) and a line in the routing release notes
 (`.github/workflows/country-packages.yml`). "In packs since" is the first pack build with them.
 
+Rule (2026-11-12): a source is used only under its licence, always credited. Merging it with OSM doesn't make it
+ours: hiding where points come from would break the attribution every licence asks for and wouldn't lift terms such
+as an indemnity. A source whose terms don't fit stays out until its publisher gives an open licence or permission.
+
 ### Covered
 
 | Country (pack) | Adds | Source: publisher, dataset | Licence | Refresh | In packs since |
@@ -215,7 +233,7 @@ Numbers, filters and quality per country are in "Other countries" above; what ev
 | Peru (`pe`) | hospitals, health centres and posts | SUSALUD, RENIPRESS | ODC-By | monthly | 2026-11-12 |
 | Uruguay (`uy`) | hospitals, polyclinics | ASSE, unidades asistenciales | Licencia de Datos Abiertos de Uruguay | monthly | 2026-11-12 |
 | Ethiopia (`et`) | pharmacies, hospitals, health centres and posts, clinics | Ministry of Health's Master Facility Registry, via 3iS on HDX | CC BY | snapshot 2025-02 | 2026-11-12 |
-| Canada (`ca`), Ontario and BC only | pharmacies, hospitals, primary care | Ontario Ministry of Health, MOHSERLO (Land Information Ontario); BC Ministry of Health, HealthLink BC directory | OGL-Ontario, OGL-BC | monthly | 2026-11-12 (run 43235609769) |
+| Canada (`ca`) | pharmacies (ON, BC, MB), hospitals, primary care | Ontario MOHSERLO; HealthLink BC; Québec MSSS (Données Québec); Manitoba vaccine providers; NS, PEI, NL, Yukon facility lists; Statistics Canada ODHF (2020) for AB, SK, NB, NT, NU hospitals | OGL-Ontario, OGL-BC, CC BY 4.0, OpenMB, OGL-NS/PE/NL/YT, OGL-Canada | monthly | ON and BC 2026-11-12 (run 43235609769); the other provinces with the next build |
 | Australia (`au`) | pharmacies, hospitals, general practices | Healthdirect's National Health Services Directory, via Geoscience Australia | CC BY 4.0 (+ G-NAF) | snapshot 2025-03 | 2026-11-12 (run 43235609769) |
 | United Kingdom (`gb`), Great Britain | pharmacies, GP practices | NHS England, Organisation Data Service (ORD API), placed on Ordnance Survey's Code-Point Open | OGL v3 | monthly | 2026-11-12 (run 43235609769) |
 | United States (`us-west`, `us-midwest`, `us-northeast`, `us-south`, `us-alaska`, `us-hawaii`), Puerto Rico (`pr`), US Virgin Islands (`vi`), Guam (`gu`), American Samoa (`as`), Northern Mariana Islands (`mp`) | community health centres | HRSA (HHS), Health Center Service Delivery and Look-Alike Sites | public domain | monthly | 2026-11-12 (run 43235609769) |
@@ -230,6 +248,8 @@ Numbers, filters and quality per country are in "Other countries" above; what ev
 | Malawi (`mw`) | hospitals, health centres, dispensaries, posts | Ministry of Health and Population, Malawi Health Facility Registry, via the Health Cluster on HDX | CC BY | snapshot 2023 |
 | New Caledonia (`nc`) | pharmacies, hospitals, dispensaries | Gouvernement de la Nouvelle-Calédonie, DASS, Situation des structures de santé (data.gouv.nc) | Licence Ouverte 2.0 | when DASS updates it |
 | Argentina (`ar`) | hospitals, public health centres, posts (no pharmacies) | Instituto Geográfico Nacional, "Edificio de salud" WFS layer (from the Ministry of Health's SISA) | IGN terms: attribution, shared freely | unstated ("periodically") |
+| Sierra Leone (`sl`) | hospitals, community health centres and posts | Ministry of Health and Sanitation with CIESIN/GRID3, National Health Facilities Dataset v01 | CC BY 4.0 | snapshot 2023 |
+| Chad (`td`) | hospitals, health centres | Ministère de la Santé Publique, list of health centres and districts, via OCHA on HDX | CC BY | snapshot 2020 |
 | Mexico (`mx`) | public hospitals, public primary care | Secretaría de Salud, DGIS, CLUES | free use ("no existen restricciones") | monthly |
 
 ### Not covered, and why
@@ -243,6 +263,9 @@ Numbers, filters and quality per country are in "Other countries" above; what ev
 | New Zealand | Medsafe's pharmacy list is non-commercial with no redistribution | Medsafe licenses it CC BY |
 | Estonia | Ravimiamet's pharmacy map (apteegid.json) states no licence (only the register it comes from is CC0 on andmed.eesti.ee) and adds 28 pharmacies; the health-centre lists are CC BY-NC-SA and CC BY-SA. Script parked, not in the repo | An explicit licence for the map file; health centres under an open licence |
 | Bahrain | data.gov.bh's clinics and hospitals: points sit 50–100 m from OSM's with no close peak, few to add, and the Bahrain Open Government Data License v1.1 binds sub-licensees to its terms (3.3d) and lets the government demand removal (3.3e). Script parked | A plain open licence, and better points |
+| Hong Kong | DATA.GOV.HK's terms allow redistribution with attribution but make the user indemnify the Government against any claim (owner, 2026-11-12: out). Only ~250 pharmacies would be added (geocoded with ALS, median 55 m); HA hospitals and clinics are all in OSM already. Script parked | Terms without the indemnity |
+| Singapore | Singapore Open Data Licence v1.0: indemnity, and "does not grant any rights to Downstream Sub-Licensees", which an open pack can't honour; CHAS clinics frozen at 2024-06, no hospital list with points (owner, 2026-11-12: out). Script parked | MOH publishes a current list under a plain open licence |
+| Guinea | HDX copy of the Ministry's list uploaded by the American Red Cross (2018, licence only an HDX tag), rows filed under the wrong prefecture, same-named facilities often far from OSM's. Script parked | A Ministry-published, current list |
 | Italy | The Ministry's pharmacy register (IODL 2.0) has points, but they fail against OSM (median 377 m, thousands stacked) | Its addresses placed with ANNCSU |
 | Nigeria | GRID3 NGA v4.0 (CC BY 4.0) is "non-validated": a quarter of same-named hospitals over 2 km from OSM's | Only field-surveyed points, or a later release |
 | Ireland | No open list with coordinates: HSE's GP sites and health centres datasets were removed from data.gov.ie; the PSI pharmacy register is addresses only and Eircode has no open geocoder | HSE republishes its lists with coordinates |

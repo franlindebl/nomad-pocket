@@ -20,6 +20,7 @@ name: Official points
 # - us: HRSA's community health centres, also split into one file per US pack (us-west.official.tsv, pr…).
 # - lv, is, do, mw, nc: Latvia's ZVA and medical institutions, Iceland's Heilsuvera, the Dominican SNS, Malawi's MHFR,
 #   New Caledonia's DASS list. ar: Argentina's IGN health buildings. mx: Mexico's CLUES catalogue (DGIS).
+# - sl, td: Sierra Leone's (MoHS + GRID3, 2023) and Chad's (Ministry via OCHA, 2020) facility lists.
 # A source that doesn't answer keeps last month's rows, read back from the release (the job then ends in a warning).
 
 on:
