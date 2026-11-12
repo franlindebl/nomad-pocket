@@ -270,6 +270,12 @@ cd server && npx firebase-tools deploy --only functions --project nomad-pocket  
 curl -s https://europe-west1-nomad-pocket.cloudfunctions.net/api/health          # ok: true, poll under 5 min old
 ```
 
+`npm run build` (the predeploy step) also writes `server/alerts/data/emma.json.gz`, MeteoAlarm's region shapes for
+matching, when it is missing: the first build needs the network (33 MB from MeteoAlarm's GitLab, cached in
+`data/cache/`, which the deploy leaves out). When MeteoAlarm's redistribution hub publishes a new geocodes file
+(https://meteoalarm.org/en/live/page/redistribution-hub), bump `GEOCODES` in `scripts/build-zones.mjs`, run
+`npm run zones` and deploy.
+
 The owner's Google account is logged in (`npx firebase-tools login` in Terminal). Secrets live in Secret Manager
 (`npx firebase-tools functions:secrets:set NAME --data-file <file>`; local copies in `~/.nomad-pocket/secrets/`).
 Budget alert at 1 € a month on the billing account. `.github/workflows/alerts-health.yml` checks `/health` twice an

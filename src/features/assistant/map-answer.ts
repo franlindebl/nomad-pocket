@@ -3,9 +3,9 @@
 // card shown in the chat. Nothing here is written by a model: names, distances, times and phones come
 // from the data (docs/ASSISTANT_MAP_PLAN.md). Null means "not a map answer after all" (a weak intent whose
 // place the index doesn't know): the message goes the normal way.
-import { current, inPolygons, sourcesFor, visible } from '@/features/alerts/alerts-core';
+import { current, inPolygons, visible } from '@/features/alerts/alerts-core';
 import { alertKey, alertSubtitle, alertTitle, officialText } from '@/features/alerts/present';
-import { useAlertsState } from '@/features/alerts/state';
+import { appliedSources, placeOf, useAlertsState } from '@/features/alerts/state';
 import { alongRoute, CORRIDOR_M, corridorBox, lastWithin, routeEntersRings } from '@/features/maps/along-core';
 import { currentCountries } from '@/features/maps/countries';
 import {
@@ -511,8 +511,8 @@ export async function runMapIntent(intent: MapIntent, previous: MapCard | null):
         placeName = r.anchor.name;
       }
       const country = useHereCountry.getState().id ?? useSettings.getState().country;
-      const all = sourcesFor(country).flatMap((src) => st.cache.sources[src]?.alerts ?? []);
-      const shown = visible(all, { pos, country }, Date.now()).alerts.filter((a) => !intent.quakes || a.kind === 'quake');
+      const all = appliedSources(country, st.push).flatMap((src) => st.cache.sources[src]?.alerts ?? []);
+      const shown = visible(all, placeOf(pos, country, st.push), Date.now()).alerts.filter((a) => !intent.quakes || a.kind === 'quake');
       return {
         type: 'alerts',
         place: placeName,
@@ -724,7 +724,7 @@ async function routeFor(
 function liveAlerts() {
   const st = useAlertsState.getState();
   const country = useHereCountry.getState().id ?? useSettings.getState().country;
-  return { st, country, all: current(sourcesFor(country).flatMap((src) => st.cache.sources[src]?.alerts ?? []), Date.now()) };
+  return { st, country, all: current(appliedSources(country, st.push).flatMap((src) => st.cache.sources[src]?.alerts ?? []), Date.now()) };
 }
 
 /** Emergency points from Overpass or from the maps' own tiles. */

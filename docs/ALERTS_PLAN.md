@@ -58,13 +58,30 @@ each one into two or three concrete actions inside the app.**
 | Source | Covers | How to read it | Licence / conditions |
 |---|---|---|---|
 | **AEMET** (Spain) | Weather warnings (rain, wind, storms, snow, heat/cold, coastal, dust, fog…), per zone, up to D+2/D+3 | Public RSS, **no API key**: `https://www.aemet.es/documentos_d/eltiempo/prediccion/avisos/rss/CAP_AFAE_RSS.xml` (Península, Baleares, Ceuta, Melilla; 24 KB, 43 items) and Canarias `…/CAP_AFAC65_RSS.xml` (9 KB); also per comunidad `CAP_AFAC{61–79}`, province `CAP_AFAP{code}`, zone `CAP_AFAZ{code}`. Headers: `Last-Modified`, `Cache-Control: max-age=60`. **The first item is a `.tar.gz` with all active CAP files** (`…/avisos/cap/Z_CAP_C_LEMM_<stamp>_AFAE.tar.gz`: 115 KB, 219 files, 3.5 MB unpacked); its URL changes with each new state. Each CAP 1.2 file: two `<info>` blocks (`<language>es-ES` / `en-GB`), `severity`, `onset`/`expires`, `headline`, `description`, `instruction`, parameter `AEMET-Meteoalerta nivel` (amarillo/naranja/rojo), `<area>` with a **`<polygon>`** and geocode `AEMET-Meteoalerta zona` (e.g. `610403`). Issue windows 07:30–09:00, 10:30–11:30 (D+1, D+2), 17:00–19:00, 23:50 (D+3), plus any time the forecast changes. Zone shapes: "Delimitación de las zonas" zip on the help page | `© AEMET` or "Información elaborada por la Agencia Estatal de Meteorología"; commercial and non-commercial reuse allowed; **must not "desnaturalizar el sentido"**; show the update date; never imply AEMET takes part in or endorses the reuse (`aemet.es/es/nota_legal`) |
-| **MeteoAlarm** (EUMETNET, ~38 European countries) | Weather warnings | One Atom feed per country: `https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-{country}` (Spain 195 KB, 125 entries; Germany ~275 KB), `Cache-Control: max-age=0, must-revalidate`, WebSub. Each `<entry>` = one area × one warning: `cap:event`, `cap:severity`, `cap:urgency`, `cap:onset`, `cap:expires`, `cap:areaDesc`, `cap:geocode` **EMMA_ID** (`ES084`, `DE329`), `cap:message_type`, `cap:identifier`, link to the full CAP (`…/api/v1/warnings/feeds-{country}/<uuid>`, ~3 KB, national language + `en-GB`, `parameter awareness_level` "2; yellow" / 3 orange / 4 red). **No polygons.** Geometries: the Metadata API (`https://api.meteoalarm.org/metadata/v1`, OpenAPI at `/metadata/v1/docs/openapi.yaml`) has `/geocodes` → each geocode's GeoJSON `feature_url`, but **needs a token** (Bearer; "Request API Access" on api.meteoalarm.org) | Feed `<rights>`: "terms equivalent to CC BY 4.0, **with additional requirements for redistributing outlined in our Terms and Conditions**". That page didn't render: **read it or ask `meteoalarm@geosphere.at` before shipping Europe** (ask for the API token in the same email) |
+| **MeteoAlarm** (EUMETNET, ~38 European countries) | Weather warnings | One Atom feed per country: `https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-{country}` (Spain 195 KB, 125 entries; Germany ~275 KB), `Cache-Control: max-age=0, must-revalidate`, WebSub. Each `<entry>` = one area × one warning: `cap:event`, `cap:severity`, `cap:urgency`, `cap:onset`, `cap:expires`, `cap:areaDesc`, `cap:geocode` **EMMA_ID** (`ES084`, `DE329`), `cap:message_type`, `cap:identifier`, link to the full CAP (`…/api/v1/warnings/feeds-{country}/<uuid>`, ~3 KB, national language + `en-GB`, `parameter awareness_level` "2; yellow" / 3 orange / 4 red). **No polygons.** Geometries: the Metadata API (`https://api.meteoalarm.org/metadata/v1`, OpenAPI at `/metadata/v1/docs/openapi.yaml`) has `/geocodes` → each geocode's GeoJSON `feature_url`, but **needs a token** (Bearer; "Request API Access" on api.meteoalarm.org) | Feed `<rights>`: "terms equivalent to CC BY 4.0, **with additional requirements for redistributing outlined in our Terms and Conditions**". **Read 2026-11-12** (the page is a JS app; its text is at `cms-visualization.meteoalarm.org/api/v1/content-pages/terms-and-conditions`), below |
 | **NWS** (USA) | All US alerts, tsunami warnings for US coasts included | `https://api.weather.gov/alerts/active?point=lat,lon` (6 KB for one alert); the whole country is ~2 MB. Each alert has `geocode.UGC` (zones `TXZ211`, counties `TXC453`) and `geocode.SAME` (county FIPS); **only 37 of 506 active alerts had a geometry**, so matching on the device needs `?point=`. Requires a `User-Agent` naming the app; at most every 30 s | US public domain |
 | **USGS** (world) | Earthquakes | `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson` (3 KB), every minute; `mag`, `time`, `place`, `alert` (PAGER), `tsunami`, `sig`. `tsunami: 1` only means a large event in an oceanic region, **not** that a tsunami exists | US public domain |
 | **EMSC** (Euro-Mediterranean + world) | Earthquakes, often faster than USGS around Europe (carries IGN's) | `https://www.seismicportal.eu/fdsnws/event/1/query?format=json&minmag=4.5&start=<ISO>&limit=50` (2 KB): `mag`, `lat`, `lon`, `time`, `flynn_region`, `lastupdate`, `unid`. Solutions are preliminary and get revised. A WebSocket exists (`ws://www.seismicportal.eu/standing_order/websocket`): phase 2 only | Free; cite EMSC |
 | **GDACS** (UN + EU JRC) | Disasters with humanitarian impact worldwide (EQ, TC, FL, VO, WF, DR), Green/Orange/Red | `https://www.gdacs.org/xml/rss_24h.xml` (350 KB, 114 items) and per-type feeds (`rss_tc_7d.xml`, `rss_fl_7d.xml`…), every 6 min; `gdacs:alertlevel`, `gdacs:eventtype`, `gdacs:country`/`iso3` | Cite GDACS. Orange/Red only, countries without a national source |
 | **NOAA tsunami.gov** (PTWC/NTWC) | Tsunami threat messages, Pacific and US | Atom `https://www.tsunami.gov/events/xml/PHEBAtom.xml`, `PAAQAtom.xml` (2 KB) | US public domain. US coasts already come through NWS; PTWC's international messages are later (phase 2) |
 | **IGN** (Spain) | Earthquakes | GeoRSS (~5 min). EMSC already carries them: not used | Cite IGN |
+
+**MeteoAlarm, checked again 2026-11-12** (unblocks Europe without a token):
+- **Terms** (last updated 15/03/2024, section 5): CC BY 4.0 plus: modified information goes with the unmodified
+  original; the source shown as "EUMETNET – MeteoAlarm" when it spans countries, else the **national service** that
+  issued it; the **time of issue** included; a **link to www.meteoalarm.org** in internet applications; operational
+  redistribution in real time (**< 5 min on average, never > 10 min** behind meteoalarm.org); and this disclaimer
+  published: "Time delays between this website and the www.meteoalarm.org website are possible. For the most
+  up-to-date awareness information as published by the participating National Meteorological and Hydrological
+  Services, please refer to www.meteoalarm.org."
+- **Geometries without a token**: the redistribution hub (`meteoalarm.org/en/live/page/redistribution-hub`) links a
+  public GeoJSON of every EMMA_ID region (`gitlab.com/meteoalarm-pm-group/documents/-/raw/master/MeteoAlarm_Geocodes_2026_07_31.json`,
+  33 MB, 2006 regions in 30 countries) plus shapefiles.
+- **The Atom feeds do draw some areas**: every entry has either an EMMA_ID (as a `geocode`, or only in its link
+  `meteoalarm.org?geocode=EMMA_ID:FR035`: France, Bulgaria, Romania, Belgium, Hungary give NUTS codes as the geocode)
+  or a `cap:polygon` (Norway, Sweden, Estonia, Slovenia, Ukraine, Andorra, part of France, Latvia, Iceland, the
+  Netherlands). The feeds answer neither `If-Modified-Since` nor `If-None-Match` and aren't gzipped (Germany 1.2 MB,
+  837 entries = 65 warnings: one entry per area). The UK, Switzerland and Israel publish nothing there any more.
 
 Out, on purpose:
 - **Bomb threats, attacks, police incidents**: no official public feed; relaying anything else would be
@@ -427,11 +444,20 @@ Not chosen:
    `docs/PROGRESS.md`). Remote `data` goes under the payload's `body` key (that's where expo-notifications reads it). (b) Android FCM over IPC ("Android: FCM over IPC…" above): **GO, 2026-11-12** (result
    there). The server sends FCM too, and Android registers like iPhones; the 15-min check stays as the fallback for
    phones without Play services.
-1. `scripts/alerts/build-zones.mjs` + `data/zones.json.gz` (measure; Spain first, then EMMA, then NWS zones + counties).
+1. Zones. **Done 2026-11-12**, simpler than planned: no cell table. A registration's zones are worked out when it
+   registers or moves (`server/alerts/src/zones.ts`) and kept on its row: MeteoAlarm EMMA_IDs from
+   `data/emma.json.gz` (`server/alerts/scripts/build-zones.mjs`: the public geocodes simplified to ~200 m, 0.6 MB,
+   built by `npm run build`, not committed: the server only matches with them) and NWS zones from api.weather.gov
+   `/points` for the cell's five points (forecast zone, county, fire zone; as `type/code`, since UGC codes alone mix
+   fire and forecast zones). US counties from the Census aren't needed.
 2. Server: poll + diff (AEMET, quakes, then the rest), register/unregister, APNs sending, health, test push. **v1 deployed
    2026-11-12** (AEMET, USGS, EMSC, GDACS; APNs + FCM; no zones table yet: AEMET draws its areas, GDACS goes by country,
-   quakes by distance; NWS and MeteoAlarm need task 1). Firestore reads grow with registrations × source changes:
-   query by country/cell once there are more than a few hundred phones.
+   quakes by distance; NWS and MeteoAlarm need task 1). **v2 built 2026-11-12** (deploy pending, by the owner):
+   NWS (the whole US every minute while a US phone is registered, matched by drawn area or zone) and MeteoAlarm (each
+   country with a registered phone every 3 min, by EMMA zone or drawn area; the push names the issuing service and the
+   time of issue; `POST /v1/alerts` gives the phone the warnings for its cell, since it has no shapes). Firestore
+   reads: registrations kept in memory and refreshed by `changedAt` (a warm poll reads ~1 doc a minute plus what
+   changed, instead of every row on every source change), `/health` reads one document.
 3. App: registration, push tap → detail, dedup with phase 1, opt-in copy for iPhone ("al momento") vs Android
    ("cada media hora aprox."). **Done 2026-11-12** (`push-register.ts`, `modules/nomad-push` tap handling, Settings ›
    "Avisos al momento"); the owner's iPhone registered itself (Madrid cell, sandbox). Android end to end still to
@@ -446,6 +472,8 @@ Not chosen:
 
 - AEMET: https://www.aemet.es/es/rss_info/avisos/esp, https://www.aemet.es/es/eltiempo/prediccion/avisos/ayuda, the national and
   Canarias RSS and the tar.gz (saved as fixtures); reuse terms https://www.aemet.es/es/nota_legal
+- MeteoAlarm (2026-11-12): terms and redistribution hub through `cms-visualization.meteoalarm.org/api/v1/content-pages/{terms-and-conditions,redistribution-hub}`,
+  the geocodes GeoJSON, all 38 country feeds (geocode style, polygons, sizes, conditional requests)
 - MeteoAlarm: https://feeds.meteoalarm.org (feed list, CC BY 4.0), the Spain/Germany feeds and a CAP file, https://api.meteoalarm.org,
   https://api.meteoalarm.org/metadata/v1/docs/openapi.yaml (`/geocodes`, Bearer token)
 - NWS: https://www.weather.gov/documentation/services-web-api, https://www.weather.gov/documentation/services-web-alerts, `/alerts/active`

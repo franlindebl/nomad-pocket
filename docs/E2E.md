@@ -565,7 +565,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `home-alert`, `home-alerts-status`, `home-alerts-offer`, `home-alerts-offer-enable`, `home-alerts-offer-decline` | Home: an orange/red warning where the person is; the quiet line while alerts are on and nothing serious applies; the once-only offer (installs from before the feature) and its buttons |
   | `settings-alerts`, `alerts-settings-switch` | Settings: the Avisos oficiales row; the on/off switch in its screen |
   | `alerts-status`, `alerts-refresh`, `alerts-no-position`, `alerts-no-notifications`, `alert-row-<n>`, `alerts-list-offer` | `/alerts`: freshness line, "Comprobar ahora", the no-location and no-notifications cards, rows (0-based), the offer while off |
-  | `alert-title`, `alert-official`, `alert-action-<map\|guide\|plan\|kit\|call\|web>` | `/alerts/[id]`: title, the official text, the action rows |
+  | `alert-title`, `alert-official`, `alert-action-<map\|guide\|plan\|kit\|call\|web\|meteoalarm>` | `/alerts/[id]`: title, the official text, the action rows |
   | `BackButton` | the native header's back button |
 
 - A control inside another button is invisible to VoiceOver and to Maestro (iOS merges it

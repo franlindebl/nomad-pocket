@@ -115,8 +115,8 @@ AI. **Assistant quality** (`docs/ASSISTANT_QUALITY_PLAN.md`, measured 2026-10-31
    harmful answers out of 50 (CPR, choking, bleach dose, CO); (7) Spanish Ready.gov/MedlinePlus in the kit.
 
 AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's decisions the same day; **phase 1 built
-   2026-11-05**): official weather warnings (AEMET for Spain, NWS for the US, GDACS elsewhere; MeteoAlarm for Europe
-   once unblocked) and earthquakes (USGS, EMSC) for where the person is, each warning turned into actions (the area's
+   2026-11-05**): official weather warnings (AEMET for Spain, NWS for the US, MeteoAlarm for most of Europe through
+   the push server, GDACS elsewhere) and earthquakes (USGS, EMSC) for where the person is, each warning turned into actions (the area's
    map, plan, kit, guide card, 112), notified locally, checked in the foreground and by a background task. Left in
    phase 1 (the plan's "Phase 1 — status"): measuring background
    runs on real phones for a few days (Settings › Avisos oficiales › Comprobaciones recientes), the owner's review of
@@ -141,14 +141,21 @@ AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's d
      cert issuer from the Mac first, then the alerts refresh → a row with `platform: android` → `/v1/test-push` with
      `platform: android` and `/v1/run-notify`), or the Mac on a phone hotspot, or a Play internal-track build. The
      owner's Moto G (1st gen) can't run the app (Android 8.0+).
-   - **Next steps**: (1) the Android check above; (2) the owner reviews `docs/store/listing-next.md`; (3) release
-     the push version: TestFlight, then App Store (App Privacy: Coarse Location) and Play (Data safety), Android
-     built after `eval "$(node scripts/alerts/fcm-env.mjs)"`; (4) the owner reinstalls TestFlight on the iPhone (it
-     re-registers as production); later (5) NWS on the server, (6) zones table + MeteoAlarm (needs their terms and
-     token), (7) Firestore reads by country/cell past a few hundred phones.
-   Background polling
-   measured 2026-11-12: iOS runs it only at night. Blocking for Europe: MeteoAlarm's extra redistribution terms and an
-   API token for its region geometries (email `meteoalarm@geosphere.at`).
+   - **Server v2 built the same evening, deploy pending (the owner runs it: the auto-mode classifier refuses
+     production deploys)**: NWS on the server (matched by zone or drawn area), MeteoAlarm for 35 European countries
+     (terms read: no token needed, geometries public; EMMA zones or drawn areas; the push and the app name the
+     issuing service, time of issue, meteoalarm.org link and delay notice), the zones of each cell worked out at
+     registration (`zones.ts`), and Firestore reads cut (registrations in memory + incremental `changedAt` reads,
+     `/health` one document). The app gets MeteoAlarm warnings from the server (`POST /v1/alerts`) for its list and
+     detail. Unit tests + a live run against the real feeds (NWS Alabama by zone; Germany, France by EMMA; Norway,
+     Slovenia by polygon). Deploy: `cd server && npx firebase-tools deploy --only functions --project nomad-pocket`,
+     then `curl …/api/health` and the checks in the log entry.
+   - **Next steps**: (1) deploy v2 and check it (log entry); (2) the Android check above; (3) the owner reviews
+     `docs/store/listing-next.md`; (4) release the push version: TestFlight, then App Store (App Privacy: Coarse
+     Location) and Play (Data safety), Android built after `eval "$(node scripts/alerts/fcm-env.mjs)"`; (5) the owner
+     reinstalls TestFlight on the iPhone (it re-registers as production). Later: PTWC tsunami messages, EMSC's
+     WebSocket.
+   Background polling measured 2026-11-12: iOS runs it only at night.
 
 CU. **Content updates, next** (`docs/CONTENT_UPDATES_PLAN.md`): the owner tries build 27 on the iPhone; later an
    optional "update automatically on Wi-Fi" switch. A delete-first update that goes through was checked by hand
@@ -403,6 +410,50 @@ U. **UX redesign and country packages** (`docs/UX_SURVIVAL_PLAN.md`, `docs/COUNT
 Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
+
+### 2026-11-12 — Alerts server v2: NWS, MeteoAlarm, zones, fewer Firestore reads
+
+Owner's request: NWS on the server, the zones table with MeteoAlarm, and cheaper Firestore reads, before the Android
+check and the release.
+
+- **MeteoAlarm unblocked without a token.** Its terms page is a JS app; the text comes from
+  `cms-visualization.meteoalarm.org/api/v1/content-pages/terms-and-conditions`: CC BY 4.0 plus name the issuing
+  national service (or "EUMETNET – MeteoAlarm"), the time of issue, a link to meteoalarm.org, < 5 min average delay,
+  the original next to anything reworded, and a fixed delay disclaimer (docs/ALERTS_PLAN.md). The redistribution hub
+  links the EMMA_ID geocodes as a public GeoJSON (33 MB). Surveying all 38 feeds: every entry has an EMMA_ID (a
+  geocode, or only in its meteoalarm.org link: France, Romania… give NUTS codes) or a `cap:polygon` (Norway, Sweden,
+  Estonia, Slovenia, Ukraine); no conditional requests, no gzip; UK, Switzerland, Israel empty.
+- **Zones** (`server/alerts/src/zones.ts`): worked out per registration when it registers or moves, kept on the row.
+  EMMA from `data/emma.json.gz` (`scripts/build-zones.mjs`: Douglas–Peucker ~200 m, 910 k → 136 k points, 0.6 MB,
+  2.4 ms for three lookups; generated at build, gitignored). NWS from `/points` for the cell's five points, as
+  `forecast/…`, `county/…`, `fire/…` (UGC codes alone confuse fire and forecast zones that share a number;
+  `parseNws` now keeps `zones` from `affectedZones`). No US Census counties needed.
+- **NWS on the server**: the whole US (`/alerts/active?status=actual`, 413 alerts, 1.8 MB, only 10 drawn; its ETag
+  isn't honoured) every minute while a US phone is registered; drawn area first, else zones. Long county lists cut
+  to three in the push.
+- **MeteoAlarm on the server**: `meteoalarm-<cc>` every 3 min per country with a registered phone; Atom entries of
+  one CAP merged into one alert (Germany: 837 entries → 65 warnings); the CAP fetched for warnings that cover someone
+  (texts in the national language + English, `issuer` from `senderName`); the push body ends with
+  "Fuente: Deutscher Wetterdienst · emitido hoy 16:09". In MeteoAlarm countries it replaces GDACS among the pushed
+  sources (the phone keeps checking GDACS). MeteoAlarm is pushed at once to a new phone (it never checked it);
+  sources the phone checks itself are recorded without a push when issued before it registered (`seededAt`, which
+  replaces the register-time seeding and its Firestore reads).
+- **The app**: `POST /v1/alerts` after `syncPush` fills `cache.sources.meteoalarm`; the registration's `zones` are
+  the place's codes; `appliedSources` / `placeOf` in `state.ts` for every reader (list, detail, assistant). Detail:
+  issuer, "Ver los avisos en meteoalarm.org", the delay notice; list rows name the issuer; credits and
+  `scripts/licenses/native.json` list EUMETNET – MeteoAlarm. Privacy policy (es + en) says the server keeps the
+  cell's zones, asks api.weather.gov with the cell's corners, and gives the MeteoAlarm list; review notes draft too.
+- **Firestore reads**: `RegCache` keeps every row in memory and reads only rows whose `changedAt` moved (2 min
+  overlap; tombstones for deletes, removed once seen with an update-time precondition); `/health` reads `state/poll`
+  only (it now carries each source's summary), cached 20 s; register no longer reads the source states.
+- **Checks**: server 13 tests (zones, NWS by zone and fire/forecast kept apart, MeteoAlarm issuer and immediate push,
+  `seededAt`), app 564 (MeteoAlarm merge, link codes, polygons, NWS zones, CAP issuer; new fixtures
+  `nws-active-us.json`, `meteoalarm-atom-germany.xml`); tsc, lint, i18n, licenses. Live run from the Mac against the
+  real feeds: NWS Freeze Watch reaching an Alabama cell by zone; Germany and France by EMMA; Norway and Slovenia by
+  polygon; CAP issuers DWD, Météo-France, MET Norway, ARSO.
+- **Not done**: the deploy (refused to me as a production deploy). After deploying: `curl …/api/health` (ok, `poll`
+  with `sources`), `state/poll.read` small on warm polls, the owner's iPhone row still there and no duplicate pushes
+  (the hash change makes every source "changed" once; `notified` keeps it quiet).
 
 ### 2026-11-12 — Official alerts: why push, and Android push without Firebase in the APK (analysis)
 

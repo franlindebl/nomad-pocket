@@ -92,6 +92,45 @@ test("MeteoAlarm's Atom: one alert per entry, EMMA zone, level from the title, t
   assert.equal(cap.texts.en.event, 'Moderate rain warning');
 });
 
+test("MeteoAlarm's Atom: the entries of one CAP over several areas become one alert with every zone", () => {
+  const atom = parseMeteoalarmAtom(fixture('meteoalarm-atom-germany.xml').toString());
+  assert.equal(atom.length, 4, '24 entries, 4 warnings');
+  const wide = atom.find((a) => a.codes!.length === 16)!;
+  assert.ok(wide, 'the warning over 16 areas');
+  assert.equal(wide.area.split(', ').length, 16);
+  assert.equal(wide.topic, `meteoalarm:${[...wide.codes!].sort().join('+')}:${wide.hazard}`);
+  assert.equal(new Set(atom.map((a) => a.id)).size, 4);
+});
+
+test("MeteoAlarm's Atom: an EMMA region only in the entry's link, or a drawn area, still places the warning", () => {
+  const entry = (id: string, inner: string) => `<entry><cap:identifier>${id}</cap:identifier><title>Orange Wind Warning issued for X</title>
+    <cap:event>Wind</cap:event><cap:message_type>Alert</cap:message_type><cap:areaDesc>Area ${id}</cap:areaDesc>${inner}</entry>`;
+  const xml = `<feed>${entry('F1', '<cap:geocode><valueName>NUTS3</valueName><value>FR718</value></cap:geocode><link href="https://meteoalarm.org?geocode=EMMA_ID:FR035"/>')}
+    ${entry('S1', '<cap:polygon>45.5,13.7 45.6,13.7 45.6,13.8 45.5,13.7</cap:polygon>')}</feed>`;
+  const [fr, si] = parseMeteoalarmAtom(xml);
+  assert.deepEqual(fr.codes, ['FR035']);
+  assert.equal(fr.polygons, undefined);
+  assert.equal(si.codes, undefined);
+  assert.deepEqual(si.polygons, [[13.7, 45.5, 13.7, 45.6, 13.8, 45.6, 13.7, 45.5]]);
+});
+
+test('NWS: affected zones keep their type (forecast, county, fire), the UGC codes alone lose it', () => {
+  const us = parseNws(JSON.parse(fixture('nws-active-us.json').toString()));
+  const statement = us.find((a) => a.zones?.length && a.zones.length > 3)!;
+  assert.ok(statement.zones!.every((z) => /^(forecast|county|fire)\/[A-Z]{2}[ZC]\d{3}$/.test(z)));
+  assert.deepEqual(
+    statement.zones!.map((z) => z.split('/')[1]),
+    statement.codes,
+  );
+  const point = parseNws(JSON.parse(fixture('nws-active-point.json').toString()));
+  assert.deepEqual(point[0].zones, ['county/LAC019']);
+});
+
+test('alertOfCap: the issuing service (senderName) is kept', () => {
+  const cap = alertOfCap(parseCap(fixture('meteoalarm-cap-spain.xml').toString())!, 'meteoalarm')!;
+  assert.equal(cap.issuer, 'AEMET. Agencia Estatal de Meteorología');
+});
+
 test('alertOfCap: a cancel without a level is kept as a cancel; exercises and green are not warnings', () => {
   const cap = (msgType: string, status = 'Actual', level = '') =>
     parseCap(`<alert><identifier>C1</identifier><status>${status}</status><msgType>${msgType}</msgType>

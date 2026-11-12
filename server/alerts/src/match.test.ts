@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
-import { alertsOfAemetBundle, parseUsgs, xmlFilesOfTarGz, type Alert } from './core.ts';
+import { alertsOfAemetBundle, parseMeteoalarmAtom, parseNws, parseUsgs, xmlFilesOfTarGz, type Alert } from './core.ts';
 import { coversCell, matching, plan, pushedSources, snapCell, type Registration } from './match.ts';
 
 const fixture = (name: string) => readFileSync(new URL(`../../../src/features/alerts/fixtures/${name}`, import.meta.url));
@@ -41,10 +41,13 @@ test('cells snap to their south-west corner', () => {
   assert.deepEqual(snapCell({ lat: 28.1, lon: -15.43 }), { lat: 28.1, lon: -15.5 });
 });
 
-test('Spain gets AEMET and quakes from the server; the US keeps NWS on the phone', () => {
+test('which sources the server pushes: national source and quakes; MeteoAlarm instead of GDACS in its countries', () => {
   assert.deepEqual(pushedSources('es'), ['aemet', 'usgs', 'emsc']);
-  assert.deepEqual(pushedSources('us'), ['usgs', 'emsc']);
-  assert.deepEqual(pushedSources('fr'), ['gdacs', 'usgs', 'emsc']);
+  assert.deepEqual(pushedSources('us'), ['nws', 'usgs', 'emsc']);
+  assert.deepEqual(pushedSources('fr'), ['meteoalarm', 'usgs', 'emsc']);
+  assert.deepEqual(pushedSources('no'), ['meteoalarm', 'usgs', 'emsc'], 'Norway draws its areas');
+  assert.deepEqual(pushedSources('gb'), ['gdacs', 'usgs', 'emsc'], 'nothing from the UK on MeteoAlarm');
+  assert.deepEqual(pushedSources('jp'), ['gdacs', 'usgs', 'emsc']);
 });
 
 test('an orange AEMET warning reaches a cell inside it once, in Spanish, then not again', () => {
@@ -61,14 +64,44 @@ test('an orange AEMET warning reaches a cell inside it once, in Spanish, then no
   assert.equal(again.pushes.length, 0);
 });
 
-test('a seeded registration records what covers it without pushing', () => {
+test('what the phone had already shown when it registered is recorded without a push', () => {
   const a = aemet.find((x) => x.level === 'orange' && x.polygons?.length && x.msgType !== 'cancel')!;
   const now = (a.onset ?? a.sent ?? 0) + 60_000;
-  const r = reg({ cell: snapCell(inside(a)) });
-  const seeded = plan(aemet, r, now, true);
-  assert.equal(seeded.pushes.length, 0);
+  const r = reg({ cell: snapCell(inside(a)), seededAt: (a.sent ?? 0) + 1000 });
+  const seeded = plan(aemet, r, now);
+  assert.ok(!seeded.pushes.some((p) => p.key === `aemet:${a.id}`));
   assert.ok(seeded.notified[a.id]);
   assert.equal(plan(aemet, { ...r, notified: seeded.notified }, now).pushes.length, 0);
+  // Issued after it registered: pushed.
+  assert.ok(plan(aemet, { ...r, seededAt: (a.sent ?? 0) - 1000 }, now).pushes.length > 0);
+});
+
+const nws = parseNws(JSON.parse(fixture('nws-active-us.json').toString()));
+
+test('NWS: zones match the zones of the cell (fire and forecast zones kept apart); a drawn area wins', () => {
+  const a = nws.find((x) => x.zones?.length && !x.polygons?.length);
+  assert.ok(a, 'fixture has an NWS alert named by zones');
+  const now = (a.onset ?? a.sent ?? 0) + 60_000;
+  const r = reg({ country: 'us', cell: { lat: 30, lon: -93.3 }, zones: [a.zones![0]], lang: 'en', timeZone: 'America/Chicago' });
+  assert.ok(coversCell(a, r));
+  const fireTwin = a.zones![0].replace(/^\w+\//, 'fire/');
+  assert.ok(!coversCell(a, { ...r, zones: a.zones![0].startsWith('fire/') ? [] : [fireTwin] }));
+  assert.ok(!coversCell(a, { ...r, zones: [] }));
+  const drawn: Alert = { ...a, polygons: [[0, 0, 1, 0, 1, 1, 0, 0]] };
+  assert.ok(!coversCell(drawn, r), 'a drawn area elsewhere: not this cell even with its zone');
+});
+
+const meteoalarm = parseMeteoalarmAtom(fixture('meteoalarm-atom-germany.xml').toString());
+
+test('MeteoAlarm: EMMA zones of the cell; pushed right after registering (the phone never checks it); issuer named', () => {
+  const a = { ...meteoalarm.find((x) => (x.codes?.length ?? 0) > 1)!, level: 'orange' as const, issuer: 'Deutscher Wetterdienst' };
+  const now = (a.onset ?? a.sent ?? 0) + 60_000;
+  const r = reg({ country: 'de', cell: { lat: 53.4, lon: 7.4 }, zones: [a.codes![1]], seededAt: now, lang: 'en', timeZone: 'Europe/Berlin' });
+  assert.ok(coversCell(a, r));
+  assert.ok(!coversCell(a, { ...r, zones: ['DE999'] }));
+  const p = plan([a], r, now).pushes;
+  assert.equal(p.length, 1);
+  assert.match(p[0].body, /Deutscher Wetterdienst · issued /);
 });
 
 test('yellow stays quiet with the default threshold; a cell far away gets nothing', () => {

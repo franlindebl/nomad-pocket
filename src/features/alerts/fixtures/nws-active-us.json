@@ -1,0 +1,510 @@
+{
+ "@context": [
+  "https://geojson.org/geojson-ld/geojson-context.jsonld",
+  {
+   "@version": "1.1",
+   "wx": "https://api.weather.gov/ontology#",
+   "@vocab": "https://api.weather.gov/ontology#"
+  }
+ ],
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.304ffaa05a1b4502577f290b96df54b1f615afc7.001.1",
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.304ffaa05a1b4502577f290b96df54b1f615afc7.001.1",
+    "@type": "wx:Alert",
+    "id": "urn:oid:2.49.0.1.840.0.304ffaa05a1b4502577f290b96df54b1f615afc7.001.1",
+    "areaDesc": "Pointe Coupee; West Feliciana; East Feliciana; St. Helena; Washington; Iberville; West Baton Rouge; East Baton Rouge; Northern Tangipahoa; Southeast St. Tammany; Northern St. Tammany; Southwestern St. Tammany; Central Tangipahoa; Lower Tangipahoa; Northern Livingston; Southern Livingston; Western Ascension; Eastern Ascension; Wilkinson; Amite; Pike; Walthall; Pearl River; Northern Hancock; Northern Harrison; Northern Jackson; Southern Hancock; Southern Harrison; Southern Jackson",
+    "geocode": {
+     "SAME": [
+      "022077",
+      "022125",
+      "022037",
+      "022091",
+      "022117",
+      "022047",
+      "022121",
+      "022033",
+      "022105",
+      "022103",
+      "022063",
+      "022005",
+      "028157",
+      "028005",
+      "028113",
+      "028147",
+      "028109",
+      "028045",
+      "028047",
+      "028059"
+     ],
+     "UGC": [
+      "LAZ034",
+      "LAZ035",
+      "LAZ036",
+      "LAZ037",
+      "LAZ039",
+      "LAZ046",
+      "LAZ047",
+      "LAZ048",
+      "LAZ071",
+      "LAZ076",
+      "LAZ079",
+      "LAZ080",
+      "LAZ081",
+      "LAZ082",
+      "LAZ083",
+      "LAZ084",
+      "LAZ085",
+      "LAZ086",
+      "MSZ068",
+      "MSZ069",
+      "MSZ070",
+      "MSZ071",
+      "MSZ077",
+      "MSZ083",
+      "MSZ084",
+      "MSZ085",
+      "MSZ086",
+      "MSZ087",
+      "MSZ088"
+     ]
+    },
+    "affectedZones": [
+     "https://api.weather.gov/zones/forecast/LAZ034",
+     "https://api.weather.gov/zones/forecast/LAZ035",
+     "https://api.weather.gov/zones/forecast/LAZ036",
+     "https://api.weather.gov/zones/forecast/LAZ037",
+     "https://api.weather.gov/zones/forecast/LAZ039",
+     "https://api.weather.gov/zones/forecast/LAZ046",
+     "https://api.weather.gov/zones/forecast/LAZ047",
+     "https://api.weather.gov/zones/forecast/LAZ048",
+     "https://api.weather.gov/zones/forecast/LAZ071",
+     "https://api.weather.gov/zones/forecast/LAZ076",
+     "https://api.weather.gov/zones/forecast/LAZ079",
+     "https://api.weather.gov/zones/forecast/LAZ080",
+     "https://api.weather.gov/zones/forecast/LAZ081",
+     "https://api.weather.gov/zones/forecast/LAZ082",
+     "https://api.weather.gov/zones/forecast/LAZ083",
+     "https://api.weather.gov/zones/forecast/LAZ084",
+     "https://api.weather.gov/zones/forecast/LAZ085",
+     "https://api.weather.gov/zones/forecast/LAZ086",
+     "https://api.weather.gov/zones/forecast/MSZ068",
+     "https://api.weather.gov/zones/forecast/MSZ069",
+     "https://api.weather.gov/zones/forecast/MSZ070",
+     "https://api.weather.gov/zones/forecast/MSZ071",
+     "https://api.weather.gov/zones/forecast/MSZ077",
+     "https://api.weather.gov/zones/forecast/MSZ083",
+     "https://api.weather.gov/zones/forecast/MSZ084",
+     "https://api.weather.gov/zones/forecast/MSZ085",
+     "https://api.weather.gov/zones/forecast/MSZ086",
+     "https://api.weather.gov/zones/forecast/MSZ087",
+     "https://api.weather.gov/zones/forecast/MSZ088"
+    ],
+    "references": [],
+    "sent": "2026-11-12T10:24:00-06:00",
+    "effective": "2026-11-12T10:24:00-06:00",
+    "onset": "2026-11-12T10:24:00-06:00",
+    "expires": "2026-11-12T18:00:00-06:00",
+    "ends": null,
+    "status": "Actual",
+    "messageType": "Alert",
+    "category": "Met",
+    "severity": "Moderate",
+    "certainty": "Observed",
+    "urgency": "Expected",
+    "event": "Special Weather Statement",
+    "sender": "w-nws.webmaster@noaa.gov",
+    "senderName": "NWS New Orleans LA",
+    "headline": "Special Weather Statement issued November 12 at 10:24AM CST by NWS New Orleans LA",
+    "description": "Elevated fire weather conditions can be expected across portions\nof southeast Louisiana and southern Mississippi this afternoon.\nRelative humidity values are forecast to drop into the 25 to 35\npercent range, especially near and north of the Interstate 10 and\n12 corridors. The 20 ft wind forecast is expected to remain at or\nbelow 10 mph in most areas, which should limit critical fire\nweather conditions or at least the effective spread of fires that\nmay ignite.\n\nNumerous local burn bans are in place across LA and MS due to\nongoing drought conditions. Outdoor burning is strongly\ndiscouraged as the ongoing drought conditions continue, and all\nlocal restrictions should be followed.",
+    "instruction": null,
+    "response": "Execute",
+    "note": null,
+    "parameters": {
+     "AWIPSidentifier": [
+      "SPSLIX"
+     ],
+     "WMOidentifier": [
+      "WWUS84 KLIX 121624"
+     ],
+     "NWSheadline": [
+      "ELEVATED FIRE WEATHER CONDITIONS THIS AFTERNOON"
+     ],
+     "BLOCKCHANNEL": [
+      "EAS",
+      "NWEM",
+      "CMAS"
+     ],
+     "EAS-ORG": [
+      "WXR"
+     ]
+    },
+    "scope": "Public",
+    "code": "IPAWSv1.0",
+    "language": "en-US",
+    "web": "http://www.weather.gov",
+    "eventCode": {
+     "SAME": [
+      "SPS"
+     ],
+     "NationalWeatherService": [
+      "SPS"
+     ]
+    }
+   }
+  },
+  {
+   "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.4ca765bf82b01168f9c630babc7216bbd7c5284c.003.2",
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.4ca765bf82b01168f9c630babc7216bbd7c5284c.003.2",
+    "@type": "wx:Alert",
+    "id": "urn:oid:2.49.0.1.840.0.4ca765bf82b01168f9c630babc7216bbd7c5284c.003.2",
+    "areaDesc": "Waters from Cape Shoalwater WA to Cape Falcon OR from 10 to 60 nm",
+    "geocode": {
+     "SAME": [
+      "057271"
+     ],
+     "UGC": [
+      "PZZ271"
+     ]
+    },
+    "affectedZones": [
+     "https://api.weather.gov/zones/forecast/PZZ271"
+    ],
+    "references": [
+     {
+      "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.9e470edbab709de605164823dc65b00e82993f0b.005.4",
+      "identifier": "urn:oid:2.49.0.1.840.0.9e470edbab709de605164823dc65b00e82993f0b.005.4",
+      "sender": "w-nws.webmaster@noaa.gov",
+      "sent": "2026-11-12T00:21:00-08:00"
+     }
+    ],
+    "sent": "2026-11-12T08:09:00-08:00",
+    "effective": "2026-11-12T08:09:00-08:00",
+    "onset": "2026-11-12T16:00:00-08:00",
+    "expires": "2026-11-13T00:15:00-08:00",
+    "ends": "2026-11-13T16:00:00-08:00",
+    "status": "Actual",
+    "messageType": "Update",
+    "category": "Met",
+    "severity": "Moderate",
+    "certainty": "Likely",
+    "urgency": "Expected",
+    "event": "Gale Warning",
+    "sender": "w-nws.webmaster@noaa.gov",
+    "senderName": "NWS Portland OR",
+    "headline": "Gale Warning issued November 12 at 8:09AM PST until November 13 at 4:00PM PST by NWS Portland OR",
+    "description": "* WHAT...For the Small Craft Advisory, seas 12 to 14 ft at 14\nseconds and south winds 15 to 25 kt with gusts up to 30 kt.\nFor the Gale Warning, seas 17 to 22 ft at 19 seconds and south\nwinds 25 to 35 kt with gusts up to 45 kt expected.\n\n* WHERE...Waters from Cape Shoalwater WA to Cape Falcon OR from\n10 to 60 NM.\n\n* WHEN...Small Craft Advisory, until 4 PM PST this afternoon.\nGale Warning, from 4 PM this afternoon to 4 PM PST Friday.\n\n* IMPACTS...Strong winds will cause hazardous seas which could\ncapsize or damage vessels and reduce visibility.",
+    "instruction": "A Gale Warning means winds of 34 to 47 knots are imminent or\noccurring. Operating a vessel in gale conditions requires\nexperience and properly equipped vessels. It is highly\nrecommended that mariners without the proper experience seek safe\nharbor prior to the onset of gale conditions.",
+    "response": "Avoid",
+    "note": null,
+    "parameters": {
+     "AWIPSidentifier": [
+      "MWWPQR"
+     ],
+     "WMOidentifier": [
+      "WHUS76 KPQR 121609"
+     ],
+     "NWSheadline": [
+      "SMALL CRAFT ADVISORY REMAINS IN EFFECT UNTIL 4 PM PST THIS AFTERNOON... ...GALE WARNING REMAINS IN EFFECT FROM 4 PM THIS AFTERNOON TO 4 PM PST FRIDAY"
+     ],
+     "BLOCKCHANNEL": [
+      "EAS",
+      "NWEM",
+      "CMAS"
+     ],
+     "VTEC": [
+      "/O.CON.KPQR.GL.W.0017.261113T0000Z-261114T0000Z/"
+     ],
+     "eventEndingTime": [
+      "2026-11-13T16:00:00-08:00"
+     ]
+    },
+    "scope": "Public",
+    "code": "IPAWSv1.0",
+    "language": "en-US",
+    "web": "http://www.weather.gov",
+    "eventCode": {
+     "SAME": [
+      "NWS"
+     ],
+     "NationalWeatherService": [
+      "GLW"
+     ]
+    }
+   }
+  },
+  {
+   "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.4ca765bf82b01168f9c630babc7216bbd7c5284c.002.2",
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.4ca765bf82b01168f9c630babc7216bbd7c5284c.002.2",
+    "@type": "wx:Alert",
+    "id": "urn:oid:2.49.0.1.840.0.4ca765bf82b01168f9c630babc7216bbd7c5284c.002.2",
+    "areaDesc": "Coastal waters from Cape Shoalwater WA to Cape Falcon OR out 10 nm; Waters from Cape Falcon to Cape Foulweather OR from 10 to 60 nm; Waters from Cape Foulweather to Florence OR from 10 to 60 nm",
+    "geocode": {
+     "SAME": [
+      "057251",
+      "057272",
+      "057273"
+     ],
+     "UGC": [
+      "PZZ251",
+      "PZZ272",
+      "PZZ273"
+     ]
+    },
+    "affectedZones": [
+     "https://api.weather.gov/zones/forecast/PZZ251",
+     "https://api.weather.gov/zones/forecast/PZZ272",
+     "https://api.weather.gov/zones/forecast/PZZ273"
+    ],
+    "references": [
+     {
+      "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.9e470edbab709de605164823dc65b00e82993f0b.002.4",
+      "identifier": "urn:oid:2.49.0.1.840.0.9e470edbab709de605164823dc65b00e82993f0b.002.4",
+      "sender": "w-nws.webmaster@noaa.gov",
+      "sent": "2026-11-12T00:21:00-08:00"
+     },
+     {
+      "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.9e470edbab709de605164823dc65b00e82993f0b.003.4",
+      "identifier": "urn:oid:2.49.0.1.840.0.9e470edbab709de605164823dc65b00e82993f0b.003.4",
+      "sender": "w-nws.webmaster@noaa.gov",
+      "sent": "2026-11-12T00:21:00-08:00"
+     },
+     {
+      "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.9e470edbab709de605164823dc65b00e82993f0b.006.4",
+      "identifier": "urn:oid:2.49.0.1.840.0.9e470edbab709de605164823dc65b00e82993f0b.006.4",
+      "sender": "w-nws.webmaster@noaa.gov",
+      "sent": "2026-11-12T00:21:00-08:00"
+     }
+    ],
+    "sent": "2026-11-12T08:09:00-08:00",
+    "effective": "2026-11-12T08:09:00-08:00",
+    "onset": "2026-11-12T19:00:00-08:00",
+    "expires": "2026-11-13T00:15:00-08:00",
+    "ends": "2026-11-13T16:00:00-08:00",
+    "status": "Actual",
+    "messageType": "Update",
+    "category": "Met",
+    "severity": "Moderate",
+    "certainty": "Likely",
+    "urgency": "Expected",
+    "event": "Gale Warning",
+    "sender": "w-nws.webmaster@noaa.gov",
+    "senderName": "NWS Portland OR",
+    "headline": "Gale Warning issued November 12 at 8:09AM PST until November 13 at 4:00PM PST by NWS Portland OR",
+    "description": "* WHAT...For the Small Craft Advisory, seas 11 to 14 ft at 15\nseconds and south winds 15 to 25 kt with gusts up to 30 kt. For\nthe Gale Warning, seas 18 to 23 ft at 19 seconds and south\nwinds 30 to 40 kt with gusts up to 45 kt expected.\n\n* WHERE...Coastal waters from Cape Shoalwater WA to Cape Falcon\nOR out 10 NM, Waters from Cape Falcon to Cape Foulweather OR\nfrom 10 to 60 NM and Waters from Cape Foulweather to Florence\nOR from 10 to 60 NM.\n\n* WHEN...Small Craft Advisory, until 7 PM PST this evening. Gale\nWarning, from 7 PM this evening to 4 PM PST Friday.\n\n* IMPACTS...Strong winds will cause hazardous seas which could\ncapsize or damage vessels and reduce visibility.",
+    "instruction": "A Gale Warning means winds of 34 to 47 knots are imminent or\noccurring. Operating a vessel in gale conditions requires\nexperience and properly equipped vessels. It is highly\nrecommended that mariners without the proper experience seek safe\nharbor prior to the onset of gale conditions.",
+    "response": "Avoid",
+    "note": null,
+    "parameters": {
+     "AWIPSidentifier": [
+      "MWWPQR"
+     ],
+     "WMOidentifier": [
+      "WHUS76 KPQR 121609"
+     ],
+     "NWSheadline": [
+      "SMALL CRAFT ADVISORY REMAINS IN EFFECT UNTIL 7 PM PST THIS EVENING... ...GALE WARNING REMAINS IN EFFECT FROM 7 PM THIS EVENING TO 4 PM PST FRIDAY"
+     ],
+     "BLOCKCHANNEL": [
+      "EAS",
+      "NWEM",
+      "CMAS"
+     ],
+     "VTEC": [
+      "/O.CON.KPQR.GL.W.0017.261113T0300Z-261114T0000Z/"
+     ],
+     "eventEndingTime": [
+      "2026-11-13T16:00:00-08:00"
+     ]
+    },
+    "scope": "Public",
+    "code": "IPAWSv1.0",
+    "language": "en-US",
+    "web": "http://www.weather.gov",
+    "eventCode": {
+     "SAME": [
+      "NWS"
+     ],
+     "NationalWeatherService": [
+      "GLW"
+     ]
+    }
+   }
+  },
+  {
+   "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.953524e5b5b8f80f2377de4346ad45542ee25c62.001.1",
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -74.2,
+       40.54
+      ],
+      [
+       -74.09,
+       40.59
+      ],
+      [
+       -74.13,
+       40.67
+      ],
+      [
+       -74.12,
+       40.68
+      ],
+      [
+       -74,
+       40.65
+      ],
+      [
+       -74.02,
+       40.62
+      ],
+      [
+       -73.97,
+       40.59
+      ],
+      [
+       -73.93,
+       40.64
+      ],
+      [
+       -73.76,
+       40.6
+      ],
+      [
+       -73.9,
+       40.39
+      ],
+      [
+       -73.97,
+       40.43
+      ],
+      [
+       -74.01,
+       40.48
+      ],
+      [
+       -73.98,
+       40.41
+      ],
+      [
+       -73.98,
+       40.4
+      ],
+      [
+       -74.13,
+       40.46
+      ],
+      [
+       -74.16,
+       40.45
+      ],
+      [
+       -74.18,
+       40.46
+      ],
+      [
+       -74.21,
+       40.44
+      ],
+      [
+       -74.21,
+       40.45
+      ],
+      [
+       -74.24,
+       40.46
+      ],
+      [
+       -74.2,
+       40.54
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.953524e5b5b8f80f2377de4346ad45542ee25c62.001.1",
+    "@type": "wx:Alert",
+    "id": "urn:oid:2.49.0.1.840.0.953524e5b5b8f80f2377de4346ad45542ee25c62.001.1",
+    "areaDesc": "New York Harbor; Sandy Hook NJ to Fire Island Inlet NY out 20 NM",
+    "geocode": {
+     "SAME": [
+      "073338",
+      "073355"
+     ],
+     "UGC": [
+      "ANZ338",
+      "ANZ355"
+     ]
+    },
+    "affectedZones": [
+     "https://api.weather.gov/zones/forecast/ANZ338",
+     "https://api.weather.gov/zones/forecast/ANZ355"
+    ],
+    "references": [],
+    "sent": "2026-11-12T11:16:00-05:00",
+    "effective": "2026-11-12T11:16:00-05:00",
+    "onset": "2026-11-12T11:16:00-05:00",
+    "expires": "2026-11-12T12:15:00-05:00",
+    "ends": null,
+    "status": "Actual",
+    "messageType": "Alert",
+    "category": "Met",
+    "severity": "Minor",
+    "certainty": "Observed",
+    "urgency": "Expected",
+    "event": "Marine Weather Statement",
+    "sender": "w-nws.webmaster@noaa.gov",
+    "senderName": "NWS Upton NY",
+    "headline": "Marine Weather Statement issued November 12 at 11:16AM EST by NWS Upton NY",
+    "description": "The areas affected include...\n\nSandy Hook NJ to Fire Island Inlet NY out 20 NM...\nNew York Harbor...\n\nAt 1116 AM EST, Doppler radar indicated a strong thunderstorm,\ncapable of producing winds to around 30 knots. This thunderstorm was\nlocated over Leonardo, moving north at 15 knots.\n\nThe strong thunderstorm will be near...\nSandy Hook and Sandy Hook Bay around 1120 AM EST.\nLower New York Harbor around 1140 AM EST.",
+    "instruction": "Mariners can expect gusty winds to around 30 knots, locally higher\nwaves, lightning strikes, and heavy downpours. Boaters should seek\nsafe harbor immediately until this storm passes.",
+    "response": "Monitor",
+    "note": null,
+    "parameters": {
+     "AWIPSidentifier": [
+      "MWSOKX"
+     ],
+     "WMOidentifier": [
+      "FZUS71 KOKX 121616"
+     ],
+     "NWSheadline": [
+      "A STRONG THUNDERSTORM APPROACHING THE WATERS"
+     ],
+     "BLOCKCHANNEL": [
+      "EAS",
+      "NWEM",
+      "CMAS"
+     ]
+    },
+    "scope": "Public",
+    "code": "IPAWSv1.0",
+    "language": "en-US",
+    "web": "http://www.weather.gov",
+    "eventCode": {
+     "SAME": [
+      "NWS"
+     ],
+     "NationalWeatherService": [
+      "MWS"
+     ]
+    }
+   }
+  }
+ ],
+ "title": "Current watches, warnings, and advisories",
+ "updated": "2026-11-12T16:25:13+00:00"
+}

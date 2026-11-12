@@ -62,6 +62,13 @@ export type Alert = {
   polygons?: number[][];
   /** Zone codes (MeteoAlarm EMMA_ID, NWS UGC, AEMET zone). */
   codes?: string[];
+  /**
+   * NWS zones as type/code ("forecast/TXZ213", "county/TXC201", "fire/CAZ211"): UGC codes alone mix up fire and
+   * forecast zones that share a number. The push server matches them to the zones of a phone's cell.
+   */
+  zones?: string[];
+  /** Who issued it when the source relays others (MeteoAlarm: the national weather service, from the CAP). */
+  issuer?: string;
   /** ISO 3166-1 alpha-2 countries, lower case (GDACS). */
   countries?: string[];
   /** Epicentre or event centre. */

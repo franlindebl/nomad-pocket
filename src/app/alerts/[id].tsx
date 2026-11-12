@@ -24,6 +24,10 @@ import { useEmergencyNumber } from '@/features/maps/emergency';
 import { useMapUi } from '@/features/maps/store';
 import { space, type Hue } from '@/theme';
 
+const METEOALARM_URL = 'https://meteoalarm.org/en/live/';
+/** MeteoAlarm's terms: the source when a warning's CAP didn't say which national service issued it. */
+const METEOALARM_CREDIT = 'EUMETNET – MeteoAlarm';
+
 /** The guide card for each hazard (none about health, so every build has them). */
 const GUIDE_CARD: Partial<Record<Hazard, string>> = {
   rain: 'flood',
@@ -103,6 +107,9 @@ export default function AlertScreen() {
   }
 
   const text = officialText(alert);
+  // MeteoAlarm relays national services: its terms ask to name the one that issued it (from the CAP).
+  const meteoalarm = alert.source === 'meteoalarm';
+  const issuer = meteoalarm ? alert.issuer || METEOALARM_CREDIT : sourceName(alert.source);
   const lang = appLang();
   const translated = !!alert.texts[lang];
   const guideId = GUIDE_CARD[alert.hazard];
@@ -171,7 +178,7 @@ export default function AlertScreen() {
           </>
         )}
         <Text variant="caption" color="textTertiary">
-          {t('detail.issued', { source: sourceName(alert.source), when: alert.sent !== null ? formatWhen(alert.sent, now) : '—' })}
+          {t('detail.issued', { source: issuer, when: alert.sent !== null ? formatWhen(alert.sent, now) : '—' })}
         </Text>
       </Card>
 
@@ -220,14 +227,27 @@ export default function AlertScreen() {
           <ListRow
             testID="alert-action-web"
             leading={<IconBadge icon={ExternalLink} hue="reference" size={36} />}
-            title={t('detail.web', { source: sourceName(alert.source) })}
+            title={t('detail.web', { source: issuer })}
             onPress={() => void WebBrowser.openBrowserAsync(alert.url!)}
+          />
+        ) : null}
+        {meteoalarm ? (
+          <ListRow
+            testID="alert-action-meteoalarm"
+            leading={<IconBadge icon={ExternalLink} hue="reference" size={36} />}
+            title={t('detail.meteoalarmWeb')}
+            onPress={() => void WebBrowser.openBrowserAsync(METEOALARM_URL)}
           />
         ) : null}
       </ListGroup>
 
       <View style={{ marginTop: space.xl, gap: space.md }}>
         <AlertsDisclaimer />
+        {meteoalarm ? (
+          <Text variant="footnote" color="textSecondary">
+            {t('detail.meteoalarmDelay')}
+          </Text>
+        ) : null}
         <Text variant="caption" color="textTertiary">
           {t('list.credits')}
         </Text>

@@ -6,7 +6,7 @@ import { create } from 'zustand';
 
 import Storage from '@/db/kv';
 
-import type { Alert, Level, Notified, SourceId } from './alerts-core';
+import { sourcesFor, type Alert, type LatLon, type Level, type Notified, type Place, type SourceId } from './alerts-core';
 
 const KEYS = {
   enabled: 'alerts.enabled',
@@ -68,6 +68,8 @@ export type PushReg = {
   at: number;
   /** The sources the server pushes to this phone (the app doesn't notify those itself while push is healthy). */
   sources: SourceId[];
+  /** The zones of its cell, as the server worked them out (MeteoAlarm EMMA_IDs: the phone has no region shapes). */
+  zones?: string[];
   /** Last time /health answered ok. */
   healthyAt?: number;
 };
@@ -173,4 +175,14 @@ export function logRun(run: Run) {
 export function clearAlertsData() {
   for (const key of [KEYS.position, KEYS.cache, KEYS.notified, KEYS.runs]) Storage.removeItemSync(key);
   useAlertsState.setState({ position: null, cache: { checkedAt: null, sources: {} }, notified: {}, runs: [] });
+}
+
+/** The sources whose cached answers apply here: the country's own, plus those only the push server reads for this phone. */
+export function appliedSources(country: string | null, push: PushReg | null): SourceId[] {
+  return [...sourcesFor(country), ...(push?.sources ?? []).filter((s) => s === 'meteoalarm')];
+}
+
+/** Where the person is for matching, with the MeteoAlarm regions the server found for the registered cell. */
+export function placeOf(pos: LatLon | null, country: string | null, push: PushReg | null): Place {
+  return { pos, country, ...(push?.zones?.length ? { codes: push.zones } : {}) };
 }

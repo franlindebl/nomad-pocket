@@ -104,7 +104,7 @@
     "offline": "Offline: showing the last saved data.",
     "off": "Official alerts are off",
     "offBody": "Turn them on to see the weather warnings and earthquakes for your area.",
-    "credits": "Data: © AEMET · NOAA/NWS · USGS · EMSC-CSEM · GDACS (EC JRC, UN OCHA)."
+    "credits": "Data: © AEMET · EUMETNET – MeteoAlarm and its national services (CC BY 4.0) · NOAA/NWS · USGS · EMSC-CSEM · GDACS (EC JRC, UN OCHA)."
   },
   "detail": {
     "official": "Official text",
@@ -124,6 +124,8 @@
     "guide": "Guide: {{title}}",
     "call": "Call {{number}}",
     "web": "Open on the {{source}} website",
+    "meteoalarmWeb": "See the warnings on meteoalarm.org",
+    "meteoalarmDelay": "Time delays between this website and the www.meteoalarm.org website are possible. For the most up-to-date awareness information as published by the participating National Meteorological and Hydrological Services, please refer to www.meteoalarm.org.",
     "gone": "This warning is no longer in force",
     "goneBody": "It expired or the service withdrew it.",
     "quakeNote": "The earthquake has already happened. There may be aftershocks over the coming hours and days.",

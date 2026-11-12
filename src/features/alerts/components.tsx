@@ -33,10 +33,10 @@ import { useEmergencyNumber, useHereCountry } from '@/features/maps/emergency';
 import { useSettings } from '@/stores/settings';
 import { space, useTheme, type Colors } from '@/theme';
 
-import { levelRank, sourcesFor, visible, type Alert, type Hazard, type LatLon, type Level } from './alerts-core';
+import { levelRank, visible, type Alert, type Hazard, type LatLon, type Level } from './alerts-core';
 import { enableAlerts, declineAlerts } from './enable';
 import { alertKey, alertSubtitle, alertTitle } from './present';
-import { useAlertsState } from './state';
+import { appliedSources, placeOf, useAlertsState } from './state';
 
 export const HAZARD_ICONS: Record<Hazard, LucideIcon> = {
   rain: CloudRain,
@@ -101,7 +101,8 @@ export function AlertRow({ alert, pos, testID }: { alert: Alert; pos: LatLon | n
       leading={<AlertMark alert={alert} />}
       title={alertTitle(alert)}
       titleLines={2}
-      subtitle={alertSubtitle(alert, pos)}
+      // MeteoAlarm relays national services, and its terms ask to name the one that issued each warning.
+      subtitle={alert.source === 'meteoalarm' ? `${alertSubtitle(alert, pos)} · ${alert.issuer || 'EUMETNET – MeteoAlarm'}` : alertSubtitle(alert, pos)}
       accessibilityHint={t(`levelChip.${alert.level}`)}
       chevron
       onPress={() => router.push({ pathname: '/alerts/[id]', params: { id: alertKey(alert) } })}
@@ -126,14 +127,14 @@ export function useAlertsView() {
   const now = useMinuteClock();
   const country = here ?? chosen;
   const pos = state.position ? { lat: state.position.lat, lon: state.position.lon } : null;
-  const sources = sourcesFor(country);
-  const { cache } = state;
+  const { cache, push } = state;
+  const sources = appliedSources(country, push);
   const shown = useMemo(() => {
     const all = sources.flatMap((s) => cache.sources[s]?.alerts ?? []);
-    return visible(all, { pos, country }, now);
+    return visible(all, placeOf(pos, country, push), now);
     // The position and sources are rebuilt each render; their values are what matter.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cache, pos?.lat, pos?.lon, country, now]);
+  }, [cache, pos?.lat, pos?.lon, country, now, push]);
   return { ...shown, pos, country, sources, now, state };
 }
 

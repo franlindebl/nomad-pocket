@@ -777,6 +777,15 @@
       "text": null
     },
     {
+      "id": "meteoalarm",
+      "name": "EUMETNET – MeteoAlarm",
+      "license": "CC BY 4.0 with MeteoAlarm's redistribution terms",
+      "copyright": ["EUMETNET – MeteoAlarm and the participating National Meteorological and Hydrological Services"],
+      "url": "https://meteoalarm.org/en/live/page/terms-and-conditions",
+      "note": "Official weather warnings for most of Europe (feeds.meteoalarm.org), read by Nomad Pocket's alerts server and shown with the issuing national service and its time of issue, when Official alerts are on. Time delays between this website and the www.meteoalarm.org website are possible. For the most up-to-date awareness information as published by the participating National Meteorological and Hydrological Services, please refer to www.meteoalarm.org.",
+      "text": null
+    },
+    {
       "id": "nws",
       "name": "NOAA / National Weather Service",
       "license": "Public domain",

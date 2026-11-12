@@ -104,7 +104,7 @@
     "offline": "Sin conexión: se muestran los últimos datos guardados.",
     "off": "Los avisos oficiales están desactivados",
     "offBody": "Actívalos para ver los avisos meteorológicos y terremotos de tu zona.",
-    "credits": "Datos: © AEMET · NOAA/NWS · USGS · EMSC-CSEM · GDACS (CE JRC, ONU OCHA)."
+    "credits": "Datos: © AEMET · EUMETNET – MeteoAlarm y sus servicios nacionales (CC BY 4.0) · NOAA/NWS · USGS · EMSC-CSEM · GDACS (CE JRC, ONU OCHA)."
   },
   "detail": {
     "official": "Texto oficial",
@@ -124,6 +124,8 @@
     "guide": "Guía: {{title}}",
     "call": "Llamar al {{number}}",
     "web": "Ver en la web de {{source}}",
+    "meteoalarmWeb": "Ver los avisos en meteoalarm.org",
+    "meteoalarmDelay": "Puede haber retrasos entre esta app y la web www.meteoalarm.org. Para la información más reciente, tal como la publican los servicios meteorológicos e hidrológicos nacionales participantes, consulta www.meteoalarm.org.",
     "gone": "Este aviso ya no está en vigor",
     "goneBody": "Ha caducado o el servicio lo ha retirado.",
     "quakeNote": "El terremoto ya ha ocurrido. Puede haber réplicas en las próximas horas y días.",

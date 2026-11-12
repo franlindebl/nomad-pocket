@@ -1,7 +1,8 @@
 // Nomad Pocket official alerts server (docs/ALERTS_PLAN.md, phase 2), on Cloud Functions for Firebase:
-// - `poll` every minute: AEMET, USGS, EMSC and GDACS fetched conditionally; when one really changes, every registered
-//   phone is matched against the current alerts (the app's own cores) and pushed what is new for it, over APNs or FCM.
-// - `api`: registration, health and the owner's test push (api.ts).
+// - `poll` every minute: AEMET, USGS, EMSC and GDACS fetched conditionally, NWS while a US phone is registered and
+//   each MeteoAlarm country while a phone there is; when one really changes, every registered phone is matched against
+//   the current alerts (the app's own cores; zones by zones.ts) and pushed what is new for it, over APNs or FCM.
+// - `api`: registration, the MeteoAlarm list for a phone, health and the owner's test push (api.ts).
 import { initializeApp } from 'firebase-admin/app';
 import { logger } from 'firebase-functions';
 import { onRequest } from 'firebase-functions/https';

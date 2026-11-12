@@ -14,13 +14,14 @@ import {
   levelOfCap,
   levelOfGdacs,
   levelOfSeverity,
+  maxLevel,
   quakeLevel,
   type Alert,
   type AlertText,
   type Kind,
   type SourceId,
 } from './alerts-core.ts';
-import { attrs, blocks, parseCap, parseTime, text, type CapAlert, type CapInfo } from './cap-core.ts';
+import { attrs, blocks, parseCap, parsePolygon, parseTime, text, xmlText, type CapAlert, type CapInfo } from './cap-core.ts';
 
 const msgTypeOf = (s: string): Alert['msgType'] => {
   const t = s.trim().toLowerCase();
@@ -102,6 +103,7 @@ export function alertOfCap(cap: CapAlert, source: SourceId): Alert | null {
     ...(polygons.length ? { polygons } : {}),
     ...(zones.length ? { codes: zones } : {}),
     ...(info.web ? { url: info.web } : {}),
+    ...(info.senderName ? { issuer: info.senderName } : {}),
   };
 }
 
@@ -124,34 +126,48 @@ export function alertsOfAemetBundle(files: { xml: string }[]): Alert[] {
 // MeteoAlarm
 
 /**
- * MeteoAlarm's Atom: one entry per area × warning, English event only, no polygons (EMMA_ID zones). The full texts
- * are in the CAP the entry links to (`capUrl`), fetched for the warnings that cover the person.
+ * MeteoAlarm's Atom: one entry per area × warning, English event only. Each entry names its area by an EMMA_ID
+ * region (a `geocode`, or only in its link to meteoalarm.org: France, Bulgaria, Romania give NUTS codes as the
+ * geocode) or draws it (`cap:polygon`: Norway, Sweden, Estonia, Slovenia, Ukraine…). Entries of the same CAP (one
+ * warning over several areas) become one alert with every zone and polygon. The full texts are in the CAP the entry
+ * links to (`capUrl`), fetched for the warnings that cover someone.
  */
 export function parseMeteoalarmAtom(xml: string): (Alert & { capUrl: string | null })[] {
-  const out: (Alert & { capUrl: string | null })[] = [];
+  const byId = new Map<string, Alert & { capUrl: string | null }>();
   for (const e of blocks(xml, 'entry')) {
     const id = text(e, 'cap:identifier');
     const title = text(e, 'title');
     const colour = /^(yellow|orange|red)\b/i.exec(title)?.[1]?.toLowerCase();
     const level = (colour as Alert['level'] | undefined) ?? levelOfSeverity(text(e, 'cap:severity'));
     if (!id || !level) continue;
-    const codes = blocks(e, 'cap:geocode')
+    const linked = [...e.matchAll(/geocode=EMMA_ID:([A-Z0-9]+)/g)].map((m) => m[1]);
+    const coded = blocks(e, 'cap:geocode')
       .filter((g) => text(g, 'valueName') === 'EMMA_ID')
       .map((g) => text(g, 'value'));
-    const event = text(e, 'cap:event');
-    const hazard = hazardOfEvent(event);
+    const codes = [...new Set([...coded, ...linked])];
+    const polygons = blocks(e, 'cap:polygon')
+      .map((p) => parsePolygon(xmlText(p)))
+      .filter((p): p is number[] => p !== null);
     const area = text(e, 'cap:areaDesc');
-    const capUrl = attrs(e, 'link', (a) => a.type === 'application/cap+xml')?.href ?? null;
-    out.push({
+    const seen = byId.get(id);
+    if (seen) {
+      seen.codes = [...new Set([...(seen.codes ?? []), ...codes])];
+      if (polygons.length) seen.polygons = [...(seen.polygons ?? []), ...polygons];
+      if (!seen.codes.length) delete seen.codes;
+      if (area && !seen.area.split(', ').includes(area)) seen.area = seen.area ? `${seen.area}, ${area}` : area;
+      seen.level = maxLevel(seen.level, level) ?? level;
+      continue;
+    }
+    const event = text(e, 'cap:event');
+    byId.set(id, {
       id,
       source: 'meteoalarm',
       kind: 'weather',
-      hazard,
+      hazard: hazardOfEvent(event),
       level,
       msgType: msgTypeOf(text(e, 'cap:message_type')),
       references: [],
-      // Same key as alertOfCap gives the entry's CAP: zone + hazard (the event name changes with the level).
-      topic: codes.length ? `meteoalarm:${[...codes].sort().join('+')}:${hazard}` : '',
+      topic: '',
       sent: parseTime(text(e, 'cap:sent')),
       onset: parseTime(text(e, 'cap:onset')) ?? parseTime(text(e, 'cap:effective')),
       expires: parseTime(text(e, 'cap:expires')),
@@ -159,9 +175,13 @@ export function parseMeteoalarmAtom(xml: string): (Alert & { capUrl: string | nu
       texts: { en: { event, headline: title, description: '', instruction: '' } },
       original: 'en',
       ...(codes.length ? { codes } : {}),
-      capUrl,
+      ...(polygons.length ? { polygons } : {}),
+      capUrl: attrs(e, 'link', (a) => a.type === 'application/cap+xml')?.href ?? null,
     });
   }
+  const out = [...byId.values()];
+  // Same key as alertOfCap gives the entry's CAP: zone(s) + hazard (the event name changes with the level).
+  for (const a of out) a.topic = a.codes?.length ? `meteoalarm:${[...a.codes].sort().join('+')}:${a.hazard}` : '';
   return out;
 }
 
@@ -213,6 +233,9 @@ export function parseNws(json: unknown): Alert[] {
     const vtec = str(arr(obj(p.parameters).VTEC)[0]);
     const tracked = vtecEvent(vtec);
     const ugc = arr(obj(p.geocode).UGC).map(str).filter(Boolean);
+    const zones = arr(p.affectedZones)
+      .map((u) => /\/zones\/(\w+)\/(\w+)$/.exec(str(u)))
+      .flatMap((m) => (m ? [`${m[1]}/${m[2]}`] : []));
     const rings = ringsOfGeometry(obj(f).geometry);
     const language = lang2(str(p.language) || 'en-US');
     out.push({
@@ -233,6 +256,7 @@ export function parseNws(json: unknown): Alert[] {
       original: language,
       ...(rings.length ? { polygons: rings } : {}),
       ...(ugc.length ? { codes: ugc } : {}),
+      ...(zones.length ? { zones } : {}),
       // No `url`: `@id` is the API's JSON, not a page for people.
     });
   }

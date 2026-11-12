@@ -80,7 +80,11 @@
       aviso, aunque no abras la app, la app se registra en el servidor de avisos de Nomad Pocket. El servidor guarda solo: el identificador de
       notificaciones que el sistema da a la app (en iPhone, de Apple; en Android, de Firebase Cloud Messaging de Google), la cuadrícula de 0,1°
       (unos 11 × 8 km en España) en la que está tu última posición, nunca la posición, tu país, el idioma de la app, tu zona horaria, tus
-      preferencias (desde qué nivel avisar y si quieres terremotos) y qué avisos ya te ha enviado. No guarda tu nombre, ninguna cuenta ni tu
+      preferencias (desde qué nivel avisar y si quieres terremotos) y qué avisos ya te ha enviado. Con la cuadrícula calcula y guarda también
+      las zonas de aviso oficiales que la contienen: las regiones de MeteoAlarm en Europa y, en Estados Unidos, las zonas y condados del NWS,
+      que pregunta a <code>api.weather.gov</code> enviando solo las esquinas de la cuadrícula. Las fuentes oficiales (AEMET, MeteoAlarm, NWS,
+      USGS, EMSC y GDACS) las lee el servidor por su cuenta, sin ningún dato tuyo; en Europa, la lista de avisos de MeteoAlarm de tu
+      cuadrícula te la da este servidor. No guarda tu nombre, ninguna cuenta ni tu
       dirección IP, salvo en los registros técnicos que Google guarda unos días. Se borra al desactivar los avisos, cuando Apple o Google indican
       que la app ya no está en el dispositivo, o tras 90 días sin que la app lo renueve. El servidor funciona en Firebase (Google Cloud), en la
       Unión Europea (Bélgica), y lo gestiona el responsable de esta política; la base para tratar estos datos es tu consentimiento al activar
@@ -134,7 +138,7 @@
         (<code>earthquake.usgs.gov</code>) y <a href="https://www.emsc-csem.org">EMSC</a> (<code>www.seismicportal.eu</code>). Salvo al NWS,
         la petición es la misma para todo el mundo y no incluye tu ubicación: qué avisos te afectan se decide en el teléfono.</li>
       <li><strong>Solo si activas «Avisos oficiales»</strong>: el servidor de avisos de Nomad Pocket (<code>europe-west1-nomad-pocket.cloudfunctions.net</code>,
-        en Firebase de Google, en la Unión Europea), con los datos que se explican arriba. En Android, para obtener el identificador de
+        en Firebase de Google, en la Unión Europea), con los datos que se explican arriba; en Europa, la app también le pide los avisos de MeteoAlarm de tu cuadrícula. En Android, para obtener el identificador de
         notificaciones, la app pregunta a los servicios de Google Play del propio teléfono y a Firebase Installations de Google
         (<code>firebaseinstallations.googleapis.com</code>); la app no incluye ninguna librería de Google.</li>
     </ul>
@@ -227,7 +231,11 @@
       even if you don't open the app, the app registers with Nomad Pocket's alerts server. The server keeps only: the notification identifier the
       system gives the app (on iPhone, from Apple; on Android, from Google's Firebase Cloud Messaging), the 0.1° grid square (about 11 × 8 km in
       Spain) your last position falls in, never the position itself, your country, the app's language, your time zone, your preferences (from
-      which level to notify and whether you want earthquakes) and which alerts it has already sent you. It keeps no name, no account and no IP
+      which level to notify and whether you want earthquakes) and which alerts it has already sent you. From the grid square it also works out
+      and keeps the official warning zones that contain it: MeteoAlarm's regions in Europe and, in the United States, the NWS zones and counties,
+      which it asks <code>api.weather.gov</code> for by sending only the square's corners. The server reads the official sources (AEMET,
+      MeteoAlarm, NWS, USGS, EMSC and GDACS) on its own, with none of your data; in Europe, the list of MeteoAlarm warnings for your square
+      comes from this server. It keeps no name, no account and no IP
       address, except in the technical logs Google keeps for a few days. It is deleted when you turn alerts off, when Apple or Google report that
       the app is no longer on the device, or after 90 days without the app renewing it. The server runs on Firebase (Google Cloud) in the
       European Union (Belgium) and is run by the controller named in this policy; the basis for processing this data is your consent when you
@@ -280,7 +288,7 @@
         (<code>earthquake.usgs.gov</code>) and <a href="https://www.emsc-csem.org">EMSC</a> (<code>www.seismicportal.eu</code>). Except for the NWS,
         the request is the same for everyone and contains no location: which alerts affect you is worked out on the phone.</li>
       <li><strong>Only if you turn on “Official alerts”</strong>: Nomad Pocket's alerts server (<code>europe-west1-nomad-pocket.cloudfunctions.net</code>,
-        on Google's Firebase, in the European Union), with the data explained above. On Android, to get the notification identifier, the app asks
+        on Google's Firebase, in the European Union), with the data explained above; in Europe, the app also asks it for the MeteoAlarm warnings for your square. On Android, to get the notification identifier, the app asks
         the phone's own Google Play services and Google's Firebase Installations (<code>firebaseinstallations.googleapis.com</code>); the app
         includes no Google library.</li>
     </ul>

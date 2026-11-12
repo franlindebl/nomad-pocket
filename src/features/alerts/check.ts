@@ -9,11 +9,11 @@ import { noteHere, useHereCountry } from '@/features/maps/emergency';
 import * as Location from '@/lib/location';
 import { useSettings } from '@/stores/settings';
 
-import { decide, distanceKm, snap, sourcesFor, visible, type LatLon, type Place } from './alerts-core';
+import { decide, distanceKm, snap, sourcesFor, visible, type LatLon, type Place, type SourceId } from './alerts-core';
 import { notifyAlerts } from './notify';
-import { pushCovers, refreshPushHealth, syncPush } from './push-register';
+import { pushCovers, refreshPushHealth, serverAlerts, serverOnly, syncPush } from './push-register';
 import { FETCHERS, type FetchedSource } from './sources';
-import { logRun, saveCache, saveNotified, savePosition, useAlertsState, type Cache, type SourceCache, type Trigger } from './state';
+import { logRun, placeOf, saveCache, saveNotified, savePosition, useAlertsState, type Cache, type SourceCache, type Trigger } from './state';
 
 const FOREGROUND_EVERY_MS = 10 * 60_000;
 /** Moving this far since the last check is worth a check even inside the 10 minutes. */
@@ -59,8 +59,8 @@ async function refreshPosition(fresh: boolean): Promise<LatLon | null> {
 
 /** Where the person is for matching: the kept position and its country, else the country chosen in onboarding. */
 export function currentPlace(): Place {
-  const pos = useAlertsState.getState().position;
-  return { pos: pos ? { lat: pos.lat, lon: pos.lon } : null, country: useHereCountry.getState().id ?? useSettings.getState().country };
+  const { position: pos, push } = useAlertsState.getState();
+  return placeOf(pos ? { lat: pos.lat, lon: pos.lon } : null, useHereCountry.getState().id ?? useSettings.getState().country, push);
 }
 
 async function check(trigger: Trigger) {
@@ -81,16 +81,15 @@ async function check(trigger: Trigger) {
     return;
   }
 
-  const place = currentPlace();
+  let place = currentPlace();
   const now = Date.now();
   const sources = sourcesFor(place.country).filter((s): s is FetchedSource => s in FETCHERS);
   const prev = useAlertsState.getState().cache;
   const results = await Promise.allSettled(sources.map((s) => FETCHERS[s](prev.sources[s], now, place.pos)));
   const next: Cache = { checkedAt: prev.checkedAt, sources: {} };
-  const ok: FetchedSource[] = [];
-  const failed: FetchedSource[] = [];
-  results.forEach((r, i) => {
-    const s = sources[i];
+  const ok: SourceId[] = [];
+  const failed: SourceId[] = [];
+  const keep = (s: SourceId, r: PromiseSettledResult<SourceCache>) => {
     if (r.status === 'fulfilled') {
       next.sources[s] = r.value;
       ok.push(s);
@@ -100,20 +99,26 @@ async function check(trigger: Trigger) {
       failed.push(s);
       console.warn('[alerts] source failed', s, r.reason);
     }
-  });
+  };
+  results.forEach((r, i) => keep(sources[i], r));
+
+  // Phase 2: keep the server registration current; what it pushes isn't rung again here while it is healthy. The
+  // sources only the server reads (MeteoAlarm) come from it, for the cell it has.
+  await syncPush(place);
+  await refreshPushHealth();
+  const fromServer = serverOnly();
+  for (const s of fromServer) keep(s, (await Promise.allSettled([serverAlerts(now)]))[0]);
+  place = currentPlace();
   if (ok.length) next.checkedAt = now;
   saveCache(next);
 
   // Notify only what covers the person; without a position nothing does (the list shows the country instead).
-  const all = sources.flatMap((s) => next.sources[s]?.alerts ?? []);
+  const all = [...sources, ...fromServer].flatMap((s) => next.sources[s]?.alerts ?? []);
   const shown = visible(all, place, now);
   const covering = shown.nearby ? shown.alerts : [];
   const { prefs, notified } = useAlertsState.getState();
   const decision = decide(covering, notified, { now, minLevel: prefs.minLevel });
   saveNotified(decision.notified);
-  // Phase 2: keep the server registration current; what it pushes isn't rung again here while it is healthy.
-  await syncPush(place);
-  await refreshPushHealth();
   // Turning the feature on shows the list at once: what is already in force there isn't rung on top of it.
   const ring = trigger === 'enable' ? [] : decision.notify.filter((a) => (prefs.quakes || a.kind !== 'quake') && !pushCovers(a.source));
   const sent = await notifyAlerts(ring, place);

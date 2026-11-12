@@ -1,8 +1,12 @@
 // The alerts server's HTTP API (docs/ALERTS_PLAN.md, phase 2 design):
-//   POST   /v1/register   a phone with alerts on: its push token, 0.1° cell, country, language, time zone, thresholds
+//   POST   /v1/register   a phone with alerts on: its push token, 0.1° cell, country, language, time zone, thresholds;
+//                         answers the sources the server pushes to it
 //   DELETE /v1/register   alerts off (body {token}): the row is deleted
-//   GET    /health        last poll and each source's last answer (for a monitor)
+//   POST   /v1/alerts     body {token}: the current MeteoAlarm warnings for that phone's cell (the phone has no
+//                         region shapes, so its list and the warning a push opens come from here)
+//   GET    /health        last poll and each source's summary (for a monitor and the phones)
 //   POST   /v1/test-push  owner only (Bearer secret): one push to a token
+//   POST   /v1/run-notify owner only: match every registration now
 // Nothing public can send a push to anyone. Bodies are small and checked; tokens are never echoed back.
 import { timingSafeEqual } from 'node:crypto';
 
@@ -11,25 +15,53 @@ import type { Request } from 'firebase-functions/https';
 import type { ApnsKey } from './apns.ts';
 import { sendApns } from './apns.ts';
 import { lang2, type Level } from './core.ts';
-import { plan, pushedSources, snapCell, type Registration } from './match.ts';
-import { currentAlerts, notifyAll } from './poll.ts';
+import { matching, METEOALARM_FEEDS, pushedSources, snapCell, type Registration } from './match.ts';
+import { notifyAllNow, storedAlerts } from './poll.ts';
 import { BUNDLE_ID, deliver } from './push.ts';
-import { db, deleteReg, getReg, putReg, regId } from './store.ts';
+import { withDetails } from './sources.ts';
+import { buryReg, db, getReg, putReg, regId } from './store.ts';
+import { emmaZonesOf, nwsZonesOf } from './zones.ts';
 
 type Reply = { status: number; body: unknown };
 const reply = (status: number, body: unknown): Reply => ({ status, body });
 
-// One instance at most (setGlobalOptions), so an in-memory limit per IP is a real limit.
-const hits = new Map<string, number[]>();
-const LIMIT = 30;
+// One instance at most (setGlobalOptions), so an in-memory limit per IP is a real limit. Generous enough for many
+// phones behind one carrier NAT: registering happens every few days per phone, the alerts list every check.
 const WINDOW_MS = 3600_000;
+const LIMITS = { register: 60, alerts: 240 };
+const hits = { register: new Map<string, number[]>(), alerts: new Map<string, number[]>() };
 
-function limited(ip: string, now: number): boolean {
-  const recent = (hits.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
+function limited(kind: keyof typeof LIMITS, ip: string, now: number): boolean {
+  const map = hits[kind];
+  const recent = (map.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
   recent.push(now);
-  hits.set(ip, recent);
-  if (hits.size > 10_000) hits.clear();
-  return recent.length > LIMIT;
+  map.set(ip, recent);
+  if (map.size > 10_000) map.clear();
+  return recent.length > LIMITS[kind];
+}
+
+/** The cell's zones for the sources that name zones (NWS in the US, MeteoAlarm's EMMA regions in Europe). */
+async function zonesOf(cell: Registration['cell'], country: string | null): Promise<string[]> {
+  if (country === 'us') return nwsZonesOf(cell);
+  if (country && METEOALARM_FEEDS[country]) return emmaZonesOf(cell, country);
+  return [];
+}
+
+/** /health is asked by every phone every half hour: one Firestore read, shared for a short while. */
+const HEALTH_CACHE_MS = 20_000;
+let health: { at: number; reply: Reply } | null = null;
+
+/** MeteoAlarm states by country, read at most once a minute per instance for the phones' lists. */
+const STATE_CACHE_MS = 60_000;
+const states = new Map<string, { at: number; alerts: Promise<import('./core.ts').Alert[]> }>();
+
+function stateAlerts(key: string, now: number) {
+  const hit = states.get(key);
+  if (hit && now - hit.at < STATE_CACHE_MS) return hit.alerts;
+  const alerts = storedAlerts([key]);
+  states.set(key, { at: now, alerts });
+  alerts.catch(() => states.delete(key));
+  return alerts;
 }
 
 const LEVELS: Level[] = ['yellow', 'orange', 'red'];
@@ -84,41 +116,55 @@ export async function handle(req: Request, secrets: { testPush: string; apns: ()
   const body = (req.body && typeof req.body === 'object' ? req.body : {}) as Record<string, unknown>;
 
   if (req.method === 'GET' && req.path === '/health') {
-    const docs = await db().collection('state').get();
-    const state = Object.fromEntries(
-      docs.docs.map((d) => {
-        const { alertsGz: _gz, ...rest } = d.data();
-        return [d.id, rest];
-      }),
-    );
-    const poll = state.poll as { at?: number } | undefined;
+    if (health && now - health.at < HEALTH_CACHE_MS) return health.reply;
+    const poll = (await db().doc('state/poll').get()).data() as { at?: number } | undefined;
     const ok = !!poll?.at && now - poll.at < 5 * 60_000;
-    return reply(ok ? 200 : 503, { ok, state });
+    health = { at: now, reply: reply(ok ? 200 : 503, { ok, poll: poll ?? null }) };
+    return health.reply;
   }
 
   if (req.path === '/v1/register' && (req.method === 'POST' || req.method === 'DELETE')) {
-    if (limited(req.ip ?? 'unknown', now)) return reply(429, { error: 'too many requests' });
+    if (limited('register', req.ip ?? 'unknown', now)) return reply(429, { error: 'too many requests' });
     if (req.method === 'DELETE') {
       if (typeof body.token !== 'string' || body.token.length > 4096) return reply(400, { error: 'token' });
-      await deleteReg(regId(body.token));
+      await buryReg(regId(body.token), now);
       return reply(200, { ok: true });
     }
     const parsed = parseRegistration(body);
     if (typeof parsed === 'string') return reply(400, { error: parsed });
     const id = regId(parsed.token);
     const prev = await getReg(id);
-    const base: Registration = { ...parsed, notified: prev?.notified ?? {} };
-    // A new phone, or one that moved: what covers its cell now is recorded without a push (its own check just showed it).
+    // A new phone, or one that moved: what its own check just showed is recorded without a push (match.ts `plan`),
+    // and its cell's zones are worked out again.
     const moved = !prev || prev.cell.lat !== parsed.cell.lat || prev.cell.lon !== parsed.cell.lon || prev.country !== parsed.country;
-    const notified = moved ? plan(await currentAlerts(), base, now, true).notified : base.notified;
-    await putReg(id, { ...base, notified, createdAt: (prev as { createdAt?: number } | undefined)?.createdAt ?? now, updatedAt: now });
-    return reply(200, { ok: true, sources: pushedSources(parsed.country) });
+    const zones = moved || !prev.zones?.length ? await zonesOf(parsed.cell, parsed.country) : prev.zones;
+    await putReg(id, {
+      ...parsed,
+      zones,
+      seededAt: moved ? now : (prev.seededAt ?? prev.createdAt),
+      notified: prev?.notified ?? {},
+      createdAt: prev?.createdAt ?? now,
+      updatedAt: now,
+      changedAt: now,
+    });
+    return reply(200, { ok: true, sources: pushedSources(parsed.country), zones });
+  }
+
+  if (req.method === 'POST' && req.path === '/v1/alerts') {
+    if (limited('alerts', req.ip ?? 'unknown', now)) return reply(429, { error: 'too many requests' });
+    if (typeof body.token !== 'string' || body.token.length > 4096) return reply(400, { error: 'token' });
+    const reg = await getReg(regId(body.token));
+    if (!reg) return reply(404, { error: 'not registered' });
+    if (!reg.country || !METEOALARM_FEEDS[reg.country]) return reply(200, { alerts: [] });
+    const mine = matching(await stateAlerts(`meteoalarm-${reg.country}`, now), reg, now).filter((a) => a.source === 'meteoalarm');
+    const alerts = await Promise.all(mine.slice(0, 30).map(withDetails));
+    return reply(200, { alerts: alerts.map(({ capUrl: _c, ...a }: typeof alerts[number] & { capUrl?: unknown }) => a) });
   }
 
   // Owner only: match every registration now (end-to-end checks without waiting for a source to change).
   if (req.method === 'POST' && req.path === '/v1/run-notify') {
     if (!authorised(req.get('authorization'), secrets.testPush)) return reply(401, { error: 'unauthorised' });
-    return reply(200, await notifyAll(now, secrets.apns()));
+    return reply(200, await notifyAllNow(now, secrets.apns()));
   }
 
   if (req.method === 'POST' && req.path === '/v1/test-push') {

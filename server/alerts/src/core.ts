@@ -6,9 +6,10 @@ import es from '../../../src/i18n/locales/es/alerts.json' with { type: 'json' };
 import type { Words } from '../../../src/features/alerts/present-core.ts';
 
 export * from '../../../src/features/alerts/alerts-core.ts';
-export { alertsOfAemetBundle, parseAemetRss, parseEmsc, parseGdacs, parseUsgs } from '../../../src/features/alerts/feeds-core.ts';
+export { alertOfCap, alertsOfAemetBundle, parseAemetRss, parseEmsc, parseGdacs, parseMeteoalarmAtom, parseNws, parseUsgs } from '../../../src/features/alerts/feeds-core.ts';
 export { xmlFilesOfTarGz } from '../../../src/features/alerts/tar-core.ts';
-export { alertSubtitle, alertTitle, type Words } from '../../../src/features/alerts/present-core.ts';
+export { parseCap } from '../../../src/features/alerts/cap-core.ts';
+export { alertSubtitle, alertTitle, formatWhen, type Words } from '../../../src/features/alerts/present-core.ts';
 
 const LOCALES: Record<string, unknown> = { es, en };
 

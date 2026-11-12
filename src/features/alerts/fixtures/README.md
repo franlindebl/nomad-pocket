@@ -12,6 +12,8 @@ change): the tests assert things that were true in these files.
 | `meteoalarm-atom-spain.xml` | MeteoAlarm, `feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-spain` | **Trimmed**: feed head + the first 8 of 125 entries |
 | `meteoalarm-cap-spain.xml` | MeteoAlarm, the CAP linked from the first entry above | No polygon; EMMA_ID geocode |
 | `nws-active-point.json` | NWS, `api.weather.gov/alerts/active?point=30.38,-93.14` | One Flood Warning (Louisiana) |
+| `nws-active-us.json` | NWS, `api.weather.gov/alerts/active?status=actual` (the whole US, 2026-11-12 ~17:30 CET) | **Trimmed**: 4 of 413 alerts (3 named only by zones, 1 drawn); for the push server's zone matching |
+| `meteoalarm-atom-germany.xml` | MeteoAlarm, `…/meteoalarm-legacy-atom-germany` (2026-11-12 ~17:30 CET) | **Trimmed**: feed head + 24 of 837 entries: two warnings over 16 and 6 areas, two over one |
 | `usgs-4.5_day.geojson` | USGS, `summary/4.5_day.geojson` | |
 | `emsc-query.json` | EMSC, `/fdsnws/event/1/query?format=json&minmag=4.5&start=<24 h ago>&limit=50` | 4 events |
 | `tsunami-pheb-atom.xml` | NOAA PTWC, `tsunami.gov/events/xml/PHEBAtom.xml` | No active event at download time |

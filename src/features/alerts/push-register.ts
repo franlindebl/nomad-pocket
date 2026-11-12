@@ -5,6 +5,8 @@
 // Play services keep the background check). The body is sent again when it changes and every few days; turning
 // alerts off deletes the row. While the registration is fresh and the server's /health is ok, the phone doesn't
 // notify the sources the server pushes (check.ts), so nothing rings twice; if either fails, it notifies them itself.
+// MeteoAlarm (Europe) has no shapes on the phone: its warnings for the registered cell come from the server
+// (`serverAlerts`), so they show in the list and a push opens them.
 import * as Application from 'expo-application';
 import { getDevicePushTokenAsync, getPermissionsAsync } from 'expo-notifications';
 import { Platform } from 'react-native';
@@ -12,8 +14,8 @@ import { Platform } from 'react-native';
 import i18n from '@/i18n';
 
 import NomadPush from '../../../modules/nomad-push';
-import { cellOf, lang2, type Place, type SourceId } from './alerts-core';
-import { savePush, useAlertsState, type PushReg } from './state';
+import { cellOf, lang2, type Alert, type Place, type SourceId } from './alerts-core';
+import { savePush, useAlertsState, type PushReg, type SourceCache } from './state';
 
 export const ALERTS_API = process.env.EXPO_PUBLIC_ALERTS_API?.replace(/\/$/, '') ?? 'https://europe-west1-nomad-pocket.cloudfunctions.net/api';
 
@@ -123,10 +125,23 @@ async function sync(place: Place) {
   if (prev && prev.sent === sent && !due) return;
   const res = await call('POST', '/v1/register', body);
   if (!res.ok) throw new Error(`register HTTP ${res.status}`);
-  const answer = (await res.json()) as { sources?: SourceId[] };
+  const answer = (await res.json()) as { sources?: SourceId[]; zones?: string[] };
   // A new token replaces the old row: the old one is deleted so it doesn't get pushes twice.
   if (prev && prev.token !== token.token) void call('DELETE', '/v1/register', { token: prev.token }).catch(() => {});
-  savePush({ platform: token.platform, token: token.token, sent, at: now, sources: answer.sources ?? [], healthyAt: now });
+  savePush({ platform: token.platform, token: token.token, sent, at: now, sources: answer.sources ?? [], zones: answer.zones ?? [], healthyAt: now });
+}
+
+/** Sources only the server reads for this phone (it pushes them, and the phone gets its list from it). */
+export const serverOnly = (): SourceId[] => (useAlertsState.getState().push?.sources ?? []).filter((s) => s === 'meteoalarm');
+
+/** The server's current MeteoAlarm warnings for this phone's registered cell; throws when it can't answer. */
+export async function serverAlerts(now = Date.now()): Promise<SourceCache> {
+  const p = useAlertsState.getState().push;
+  if (!p) return { fetchedAt: now, alerts: [] };
+  const res = await call('POST', '/v1/alerts', { token: p.token });
+  if (!res.ok) throw new Error(`alerts HTTP ${res.status}`);
+  const { alerts } = (await res.json()) as { alerts?: Alert[] };
+  return { fetchedAt: now, alerts: Array.isArray(alerts) ? alerts : [] };
 }
 
 /** Alerts off: the server forgets this phone. Offline, the row goes stale and the server drops it later. */
