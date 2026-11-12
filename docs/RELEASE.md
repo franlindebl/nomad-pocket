@@ -272,7 +272,8 @@ curl -s https://europe-west1-nomad-pocket.cloudfunctions.net/api/health         
 
 The owner's Google account is logged in (`npx firebase-tools login` in Terminal). Secrets live in Secret Manager
 (`npx firebase-tools functions:secrets:set NAME --data-file <file>`; local copies in `~/.nomad-pocket/secrets/`).
-Budget alert at 1 € a month on the billing account. A test push to a token:
+Budget alert at 1 € a month on the billing account. `.github/workflows/alerts-health.yml` checks `/health` twice an
+hour and fails (GitHub emails the owner) when the last poll is over 5 minutes old. A test push to a token:
 `curl -X POST …/api/v1/test-push -H "Authorization: Bearer $(cat ~/.nomad-pocket/secrets/test-push-secret)" -d
 '{"platform":"ios","env":"sandbox","token":"…"}'` (`node scripts/alerts/fcm-send.mjs <token>` for FCM directly).
 

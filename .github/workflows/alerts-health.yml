@@ -1,0 +1,25 @@
+# Watches the official alerts push server (server/alerts, docs/ALERTS_PLAN.md phase 2). /health answers 503 when the
+# last poll is over 5 minutes old; this job then fails, and GitHub emails the owner. Scheduled runs can start late
+# (that doesn't matter here). Phones fall back to their own checks while the server is down.
+name: Alerts server health
+
+on:
+  schedule:
+    - cron: '7,37 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: GET /health
+        run: |
+          set -euo pipefail
+          body=$(curl -sS --max-time 30 --retry 2 --retry-delay 20 -w '\n%{http_code}' https://europe-west1-nomad-pocket.cloudfunctions.net/api/health)
+          code=$(printf '%s' "$body" | tail -n1)
+          printf '%s\n' "$body" | head -n -1 | head -c 2000
+          echo
+          if [ "$code" != "200" ]; then echo "::error::alerts server unhealthy (HTTP $code)"; exit 1; fi
