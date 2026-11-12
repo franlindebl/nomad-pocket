@@ -18,6 +18,8 @@ name: Official points
 # - au: pharmacies, hospitals and general practices from the National Health Services Directory (Geoscience Australia).
 # - gb: NHS pharmacies and GP practices (ODS), placed on their postcode with Ordnance Survey's Code-Point Open.
 # - us: HRSA's community health centres, also split into one file per US pack (us-west.official.tsv, pr…).
+# - lv, is, do, mw, nc: Latvia's ZVA and medical institutions, Iceland's Heilsuvera, the Dominican SNS, Malawi's MHFR,
+#   New Caledonia's DASS list. ar: Argentina's IGN health buildings. mx: Mexico's CLUES catalogue (DGIS).
 # A source that doesn't answer keeps last month's rows, read back from the release (the job then ends in a warning).
 
 on:

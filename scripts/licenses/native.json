@@ -542,6 +542,83 @@
       "text": null
     },
     {
+      "id": "official-health-points-lv",
+      "name": "Latvia: State Agency of Medicines' pharmacy register and medical institutions' addresses",
+      "license": "CC0-1.0",
+      "copyright": [
+        "Zāļu valsts aģentūra (FDU register); Iekšlietu ministrijas Informācijas centrs (VKCP IĢIS), data.gov.lv"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Pharmacies, hospitals and family doctors' practices in Latvia that OpenStreetMap lacks, added to the country's emergency points every month.",
+      "text": null
+    },
+    {
+      "id": "official-health-points-is",
+      "name": "Iceland: Heilsuvera health services map",
+      "license": "CC-BY-4.0",
+      "copyright": [
+        "Embætti landlæknis (Directorate of Health of Iceland)"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Health centres and emergency departments in Iceland that OpenStreetMap lacks, added to the country's emergency points every month.",
+      "text": null
+    },
+    {
+      "id": "official-health-points-do",
+      "name": "Dominican Republic: health establishments of the Servicio Nacional de Salud",
+      "license": "ODbL-1.0",
+      "copyright": [
+        "Servicio Nacional de Salud (SNS), datos.gob.do"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Public hospitals and health centres in the Dominican Republic that OpenStreetMap lacks, added to the pack's emergency points every month.",
+      "text": null
+    },
+    {
+      "id": "official-health-points-mw",
+      "name": "Malawi: Malawi Health Facility Registry",
+      "license": "CC-BY-4.0",
+      "copyright": [
+        "Ministry of Health and Population, Malawi; published by the Health Cluster on the Humanitarian Data Exchange"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Hospitals, health centres, dispensaries and health posts in Malawi that OpenStreetMap lacks, added to the country's emergency points (snapshot of 2023).",
+      "text": null
+    },
+    {
+      "id": "official-health-points-nc",
+      "name": "New Caledonia: situation of health establishments",
+      "license": "Licence Ouverte 2.0",
+      "copyright": [
+        "Gouvernement de la Nouvelle-Calédonie, DASS (data.gouv.nc)"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Pharmacies, hospitals and dispensaries in New Caledonia that OpenStreetMap lacks, added to the pack's emergency points every month.",
+      "text": null
+    },
+    {
+      "id": "official-health-points-ar",
+      "name": "Argentina: Instituto Geográfico Nacional, health buildings layer",
+      "license": "IGN Términos y Condiciones (attribution, shared freely)",
+      "copyright": [
+        "FUENTE: Instituto Geográfico Nacional de la República Argentina"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Hospitals and primary-care centres in Argentina that OpenStreetMap lacks, added to the country's emergency points every month.",
+      "text": null
+    },
+    {
+      "id": "official-health-points-mx",
+      "name": "Mexico: CLUES, catalogue of health establishments",
+      "license": "Free use (DGIS: no restrictions)",
+      "copyright": [
+        "Dirección General de Información en Salud (DGIS), Secretaría de Salud"
+      ],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Hospitals and public primary-care centres in Mexico that OpenStreetMap lacks, added to the country's emergency points every month.",
+      "text": null
+    },
+    {
       "id": "wikipedia-kiwix",
       "name": "Wikipedia and Kiwix content",
       "license": "CC-BY-SA-4.0",

@@ -5,7 +5,10 @@ countries, an independent verifier re-checking every source called usable (datas
 this synthesis. Probes ran from a home connection, not from a GitHub runner: re-test every fetcher from a runner before building it.
 Built since (2026-11-12, `docs/OFFICIAL_POINTS.md`, "Other countries"): Japan, France, Czechia, Ukraine, Chile, Peru,
 Uruguay, Ethiopia, Canada (Ontario, BC), Australia, the United Kingdom (Great Britain), the United States (HRSA). Italy and
-Nigeria were tried and left out: their coordinates fail the comparison with OSM. Taiwan waits for a geocoder.
+Nigeria were tried and left out: their coordinates fail the comparison with OSM. Second batch (2026-11-12): Latvia, Iceland,
+Dominican Republic, Malawi, New Caledonia built; Taiwan blocked on a geocoder key, Estonia and Bahrain left out, and a
+second look at Ireland, Greece, Norway, Romania, Morocco and Mexico found nothing usable yet. The current status of every
+country, and why, is the table "Coverage by country" in `docs/OFFICIAL_POINTS.md`: this file is the research as it was.
 
 Scope: pharmacies, hospitals and health centres completed from official open registers, as done for Spain. Where the verifier did not confirm a source, this report says "unconfirmed" or "rejected". Nothing here goes beyond the research and verifier input.
 

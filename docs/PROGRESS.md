@@ -80,9 +80,11 @@ OP. **Official points: complete OSM with official registers, country by country*
    Ethiopia (`docs/OFFICIAL_POINTS.md`, "Other countries"), in CI and in their packs (republished 2026-11-12); then
    Canada (Ontario, BC), Australia (owner: the app is non-commercial, so Healthdirect's terms fit), the UK (postcodes
    on Code-Point Open) and the US (HRSA health centres, one file per US pack): their first CI run, then their packs.
-   Italy and Nigeria tried and left out (coordinates fail against OSM; Italy needs ANNCSU geocoding). Next: Taiwan
-   (needs a geocoder checked), other Canadian provinces, Malawi, Dominican Republic, Bahrain, Latvia, New Caledonia;
-   Brazil waits on DATASUS's licence; Germany, Austria, Switzerland, the Nordics, Benelux and Portugal have little to add.
+   Italy and Nigeria tried and left out (coordinates fail against OSM; Italy needs ANNCSU geocoding). Second batch
+   built: Latvia, Iceland, Dominican Republic, Malawi, New Caledonia, Argentina (IGN layer), Mexico on trial (CLUES,
+   first run in CI, gate before its pack). Being built: Hong Kong, Singapore, Sierra Leone, Guinea, Chad, the other
+   Canadian provinces. Blocked: Taiwan (TGOS key: the owner's to register), Brazil (DATASUS licence). The status of
+   every country and why: "Coverage by country" in `docs/OFFICIAL_POINTS.md` (keep it up to date).
 
 AM. **Assistant × maps** (`docs/ASSISTANT_MAP_PLAN.md`, approved 2026-11-05; **phase 1 and 1b built the same day**,
    checked on iOS and Android: see the plan's "Phase 1 — status" and "1b"): the assistant
@@ -418,6 +420,17 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   points (entry below; Spain's routing pack already republished with them, run 43016421128) and the Units setting.
   "What's new" approved by the owner (`docs/store/listing-2.4.3.md`). E2E smoke 23/24 with `--build`, map-12 alone
   passes (as in the last releases). Android `versionCode` 32 (not uploaded).
+
+### 2026-11-12 — Official points: second batch, and a coverage table
+
+- Built by five research agents (Sonnet) against the same brief and quality gate, reviewed here: Latvia (`lv.py`: 176
+  pharmacies, 184 GP practices), Iceland (`is.py`: 31 health centres), Dominican Republic (`do.py`: 50 hospitals, 1.5k
+  centres), Malawi (`mw.py`: 1.1k, hand-typed points, OSM nearly empty), New Caledonia (`nc.py`: 39), Argentina
+  (`ar.py`: IGN's health buildings, 91 hospitals, 4.7k centres; REFES/REFAR rejected: no licence, Georef placed too
+  few well). Mexico (`mx.py`) written blind: its host doesn't answer the office network, so its first run is in CI.
+- Left out: Estonia (+28, map file without licence), Bahrain (points 50–100 m off, licence binds sub-licensees),
+  Taiwan (geocoders need registration); a second look at Ireland, Greece, Norway, Romania and Morocco found nothing
+  usable. `docs/OFFICIAL_POINTS.md` now has "Coverage by country": covered, built, not covered and why.
 
 ### 2026-11-12 — Official points: Canada, Australia, the United Kingdom, the United States
 
