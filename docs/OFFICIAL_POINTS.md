@@ -96,6 +96,10 @@ packs of 2026-11-05:
 | France | `fr.py`: FINESS - Structures, monthly (ANS) | Licence Ouverte 2.0 | 16,530 pharmacies | **1,996 pharmacies, 331 hospitals, 3,871 centres** |
 | Czechia | `cz.py`: NRPZS places of provision, monthly (ÚZIS) | CC BY 4.0 | 2,231 pharmacies, 9 m | **242 pharmacies, 15 hospitals, 3,876 GP practices** |
 | Ukraine | `ua.py`: NSZU reimbursement pharmacies and primary-care divisions, weekly | CC BY 4.0 | 8,676 pharmacies, 21 m | **8,183 pharmacies, 10,778 primary-care points** (1,600 ФАП) |
+| Chile | `cl.py`: MINSAL/DEIS establecimientos de salud, weekly | CC0 | 1,957 centres, 11 m | **61 hospitals, 593 centres** (CESFAM, postas rurales, SAPU/SAR/SUR) |
+| Peru | `pe.py`: SUSALUD RENIPRESS, monthly | ODC-By | 7,254 centres, 7 m | **263 hospitals, 3,535 centres** (puestos de salud, centros, policlínicos) |
+| Uruguay | `uy.py`: ASSE care units, monthly | Licencia de Datos Abiertos de Uruguay | 111 centres, 22 m | **7 hospitals, 752 polyclinics** |
+| Ethiopia | `et.py`: Ministry of Health's MFR on HDX (3iS), snapshot of 2025-02 | CC BY | 283 pharmacies; hospitals sharing a name 85 m | **8,658 pharmacies, 312 hospitals, 28,218 centres, posts and clinics** |
 
 - **Japan.** Clinics are the register's 診療所 offering internal medicine, paediatrics, surgery, general practice or
   emergency care (51k of 80k: no eye, skin or cosmetic practices). 12% of the pharmacies and 6% of the clinics
@@ -114,6 +118,14 @@ packs of 2026-11-05:
   Points are entered by the providers: those with under four decimals, or stacked three or more on one spot (a
   town's centre standing in for several), are left out. Cities have a pharmacy every few doors, so an added one is
   often within 300 m of an OSM one (half of them).
+- **Chile, Peru, Uruguay.** Public primary care and hospitals; private doctors' offices, labs, dental and specialist
+  centres left out. A post named after its village alone gets its kind in front ("Puesto de Salud La Novia").
+  Pharmacies: Chile's Farmanet service answers automated clients with 403, Peru's DIGEMID has no bulk download,
+  Uruguay's list has none. Peru's portal answers 418 to a User-Agent carrying a URL; a quarter of its active
+  establishments have no coordinates (left out).
+- **Ethiopia.** OSM has almost nothing (300 pharmacies, 424 clinics). The registry needs a login; the HDX copy
+  (MoH as source, uploaded by 3iS) is a snapshot of 2025-02, so the monthly run reads the same file until a new one
+  is published. Points stacked three or more on a spot (a woreda's centre) are left out.
 - **Italy (not added).** The Ministry's daily pharmacy register (IODL 2.0, 20,777 open) has coordinates for 91%, but
   they fail the test: only 17% are within 50 m of an OSM pharmacy (median 377 m), and 6,680 share their exact point
   with another pharmacy (Turin's Piazza Vittorio Veneto 10 sits 9 km out of town). It needs the addresses placed

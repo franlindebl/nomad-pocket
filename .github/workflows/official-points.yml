@@ -12,6 +12,8 @@ name: Official points
 # - fr: pharmacies, hospitals, health centres, maisons de santé and walk-in care from FINESS, the rest placed with the BAN.
 # - cz: pharmacies, hospitals and primary care from ÚZIS's register of providers (NRPZS).
 # - ua: pharmacies and primary-care divisions from the National Health Service of Ukraine (NSZU).
+# - cl, pe, uy: hospitals and public primary care from MINSAL (DEIS), SUSALUD (RENIPRESS) and ASSE.
+# - et: pharmacies, hospitals, health centres, posts and clinics from the Ministry of Health's registry (HDX snapshot).
 # A source that doesn't answer keeps last month's rows, read back from the release (the job then ends in a warning).
 
 on:

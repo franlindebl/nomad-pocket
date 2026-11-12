@@ -96,7 +96,7 @@ jobs:
               --notes "Admin boundaries per routing pack (Overpass answers, OSM data © OpenStreetMap contributors, ODbL), read by the monthly build: not by the app."
             for c in $(continents "$COUNTRIES" 1); do
               gh release create "routing-$STAMP-$c" --prerelease --title "Routing packs routing-$STAMP-$c" \
-                --notes "Offline routing packs (Valhalla 3.9.1 tiles), emergency points, street names, places and house numbers. Data © OpenStreetMap contributors, ODbL. Emergency points of Spain, Japan, France, Czechia and Ukraine add pharmacies, hospitals and health centres from official registers (Spain: Ministerio de Sanidad, the autonomous communities, CartoCiudad/IGN; Japan: 厚生労働省 医療情報ネット, processed, and GSI address search; France: FINESS, Licence Ouverte, and the BAN; Czechia: ÚZIS NRPZS, CC BY 4.0; Ukraine: NSZU, CC BY 4.0): docs/OFFICIAL_POINTS.md."
+                --notes "Offline routing packs (Valhalla 3.9.1 tiles), emergency points, street names, places and house numbers. Data © OpenStreetMap contributors, ODbL. Emergency points of Spain, Japan, France, Czechia, Ukraine, Chile, Peru, Uruguay and Ethiopia add pharmacies, hospitals and health centres from official registers (Spain: Ministerio de Sanidad, the autonomous communities, CartoCiudad/IGN; Japan: 厚生労働省 医療情報ネット, processed, and GSI address search; France: FINESS, Licence Ouverte, and the BAN; Czechia: ÚZIS NRPZS, CC BY 4.0; Ukraine: NSZU, CC BY 4.0; Chile: MINSAL DEIS, CC0; Peru: SUSALUD RENIPRESS, ODC-By; Uruguay: ASSE, Licencia de Datos Abiertos de Uruguay, modified; Ethiopia: Ministry of Health via 3iS/HDX, CC BY): docs/OFFICIAL_POINTS.md."
             done
           fi
           if want maps; then

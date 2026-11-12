@@ -76,10 +76,10 @@ OP. **Official points: complete OSM with official registers, country by country*
    the doc. **Then every other country**, one at a time: find its open registers (pharmacies, hospitals, health
    centres), measure OSM against them as for Castilla-La Mancha, add a `scripts/official/<cc>.py` writing
    `<cc>.official.tsv` (merge and app need nothing new). World research done 2026-11-12
-   (`docs/OFFICIAL_POINTS_WORLD.md`). **Built 2026-11-12**: Japan, France, Czechia, Ukraine (`docs/OFFICIAL_POINTS.md`,
-   "Other countries"); their first CI run, then their packs. Italy tried and left out (the register's coordinates
-   fail against OSM; needs ANNCSU geocoding). Next: Chile, Peru, Ethiopia, Nigeria, Australia (licence chain to
-   clear), Uruguay, Canada (Ontario, BC), the UK (postcodes), the US (HRSA); Brazil waits on DATASUS's licence;
+   (`docs/OFFICIAL_POINTS_WORLD.md`). **Built 2026-11-12**: Japan, France, Czechia, Ukraine, Chile, Peru, Uruguay,
+   Ethiopia (`docs/OFFICIAL_POINTS.md`, "Other countries"); their first CI run, then their packs. Italy tried and left
+   out (the register's coordinates fail against OSM; needs ANNCSU geocoding). Next: Nigeria (GRID3), Australia
+   (licence chain to clear), Canada (Ontario, BC), the UK (postcodes), the US (HRSA); Brazil waits on DATASUS's licence;
    Germany, Austria, Switzerland, the Nordics, Benelux and Portugal have little to add.
 
 AM. **Assistant × maps** (`docs/ASSISTANT_MAP_PLAN.md`, approved 2026-11-05; **phase 1 and 1b built the same day**,
@@ -394,7 +394,7 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
   "What's new" approved by the owner (`docs/store/listing-2.4.3.md`). E2E smoke 23/24 with `--build`, map-12 alone
   passes (as in the last releases). Android `versionCode` 32 (not uploaded).
 
-### 2026-11-12 — Official points: Japan, France, Czechia, Ukraine
+### 2026-11-12 — Official points: Japan, France, Czechia, Ukraine, Chile, Peru, Uruguay, Ethiopia
 
 - One fetch script per country, each checked against the app's OSM points before going in (where both have a
   pharmacy the points must be metres apart): `jp.py` (MHLW 医療情報ネット; 12% without coordinates placed with GSI's
@@ -405,6 +405,9 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 - `official-points.yml` runs one job per `scripts/official/??.py`. `merge.py` matches names in Japanese (cut at
   generic words) and Cyrillic too. Credits: one entry per country.
 - Italy left out: its register's points are 377 m from OSM's pharmacies at the median, 6,680 share a point.
+- Then Chile (`cl.py`, MINSAL/DEIS: 61 hospitals, 593 centres), Peru (`pe.py`, RENIPRESS: 263 hospitals, 3,535
+  centres), Uruguay (`uy.py`, ASSE: 752 polyclinics) and Ethiopia (`et.py`, the MoH registry on HDX: 8.7k pharmacies,
+  312 hospitals, 28k centres, posts and clinics, where OSM has almost none).
 
 
 ### 2026-11-12 — Official points: world research

@@ -459,6 +459,42 @@
       "text": null
     },
     {
+      "id": "official-health-points-cl",
+      "name": "Chile: register of health establishments",
+      "license": "CC0-1.0",
+      "copyright": ["Ministerio de Salud de Chile, DEIS (datos.gob.cl)"],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Hospitals, family health centres, rural posts and urgent care in Chile that OpenStreetMap lacks, added to the country's emergency points every month.",
+      "text": null
+    },
+    {
+      "id": "official-health-points-pe",
+      "name": "Peru: RENIPRESS register of health providers",
+      "license": "ODC-By-1.0",
+      "copyright": ["Superintendencia Nacional de Salud (SUSALUD), datosabiertos.gob.pe"],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Hospitals, health centres, polyclinics and health posts in Peru that OpenStreetMap lacks, added to the country's emergency points every month.",
+      "text": null
+    },
+    {
+      "id": "official-health-points-uy",
+      "name": "Uruguay: ASSE care units",
+      "license": "Licencia de Datos Abiertos de Uruguay",
+      "copyright": ["Administración de los Servicios de Salud del Estado (ASSE), catalogodatos.gub.uy"],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Public hospitals, health centres and polyclinics in Uruguay that OpenStreetMap lacks, added to the country's emergency points every month (dataset \"Unidades Asistenciales de ASSE\", modified: filtered and merged with OpenStreetMap).",
+      "text": null
+    },
+    {
+      "id": "official-health-points-et",
+      "name": "Ethiopia: health facilities of the Master Facility Registry",
+      "license": "CC-BY-4.0",
+      "copyright": ["Ministry of Health Ethiopia; published by 3iS on the Humanitarian Data Exchange"],
+      "url": "https://github.com/franlindebl/nomad-pocket/blob/main/docs/OFFICIAL_POINTS.md",
+      "note": "Pharmacies, hospitals, health centres, health posts and clinics in Ethiopia that OpenStreetMap lacks, added to the country's emergency points (snapshot of 2025-02).",
+      "text": null
+    },
+    {
       "id": "wikipedia-kiwix",
       "name": "Wikipedia and Kiwix content",
       "license": "CC-BY-SA-4.0",
