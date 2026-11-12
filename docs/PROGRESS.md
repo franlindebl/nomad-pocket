@@ -616,6 +616,11 @@ check and the release.
   them from a runner. Philippines and Thailand block scripts (Cloudflare); Colombia stays CC BY-SA.
 - Mexico's first CI run kept last month's wider file (the 80% guard); its assets were deleted from the release and
   it re-ran with 10.6k rows. Documented: narrowing a filter needs the release's file deleted first.
+- First CI run of DR Congo, Mozambique, South Korea, Niger, Jamaica and the new Spain (official-points 43282585429), then
+  their packs (country-packages 43286903964). Added where OSM lacks them: Spain +6,786 pharmacies, +120 hospitals,
+  +7,812 centres; South Korea +20,984 / +609 / +10,364; DR Congo +1,231 hospitals, +12,389 centres; Niger +52
+  pharmacies, +2,738 centres; Mozambique +31 / +777; Jamaica +4 / +291. The registers the office network couldn't reach
+  don't answer a GitHub runner either (only Mexico's gobi does).
 
 - Built by five research agents (Sonnet) against the same brief and quality gate, reviewed here: Latvia (`lv.py`: 176
   pharmacies, 184 GP practices), Iceland (`is.py`: 31 health centres), Dominican Republic (`do.py`: 50 hospitals, 1.5k
