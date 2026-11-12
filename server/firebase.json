@@ -10,8 +10,6 @@
         "*.log",
         "src",
         "scripts",
-        "data/cache",
-        "data/cache/**",
         "*.test.ts"
       ],
       "predeploy": [

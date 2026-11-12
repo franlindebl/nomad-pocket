@@ -3,7 +3,8 @@
 // 0.1° cell to the regions it touches (docs/ALERTS_PLAN.md, phase 2, "zones table"). The geocodes come from
 // MeteoAlarm's redistribution hub (https://meteoalarm.org/en/live/page/redistribution-hub), a public GeoJSON on
 // their GitLab; the server only uses them to match, it never hands them out. The output is generated, not committed
-// (data/ is gitignored): `npm run build` makes it when it's missing, so a deploy always carries it.
+// (data/ is gitignored): `npm run build` makes it when it's missing, so a deploy always carries it. The download is
+// cached in server/.zones-cache/ (gitignored).
 //
 //   node scripts/build-zones.mjs [--force]
 //
@@ -22,7 +23,8 @@ const SCALE = 1000;
 const here = dirname(fileURLToPath(import.meta.url));
 const dataDir = join(here, '..', 'data');
 const out = join(dataDir, 'emma.json.gz');
-const cache = join(dataDir, 'cache', GEOCODES.split('/').pop().split('?')[0]);
+// The 33 MB download is cached outside the functions folder, so a deploy never uploads it.
+const cache = join(here, '..', '..', '.zones-cache', GEOCODES.split('/').pop().split('?')[0]);
 
 if (existsSync(out) && !process.argv.includes('--force')) process.exit(0);
 mkdirSync(dirname(cache), { recursive: true });

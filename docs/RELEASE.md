@@ -274,9 +274,37 @@ curl -s https://europe-west1-nomad-pocket.cloudfunctions.net/api/health         
 
 `npm run build` (the predeploy step) also writes `server/alerts/data/emma.json.gz`, MeteoAlarm's region shapes for
 matching, when it is missing: the first build needs the network (33 MB from MeteoAlarm's GitLab, cached in
-`data/cache/`, which the deploy leaves out). When MeteoAlarm's redistribution hub publishes a new geocodes file
+`server/.zones-cache/`, outside the deployed folder). When MeteoAlarm's redistribution hub publishes a new geocodes file
 (https://meteoalarm.org/en/live/page/redistribution-hub), bump `GEOCODES` in `scripts/build-zones.mjs`, run
 `npm run zones` and deploy.
+
+**Planned (owner's request 2026-11-12, not built yet): deploy from GitHub Actions on every push to `main`**, instead of
+the command above on the owner's Mac.
+- Workflow `.github/workflows/alerts-deploy.yml`: `on: push` to `main` with `paths:` `server/**`,
+  `src/features/alerts/{alerts-core,feeds-core,cap-core,tar-core,present-core}.ts`, `src/i18n/locales/*/alerts.json`
+  (everything `server/alerts` bundles), plus `workflow_dispatch`; `concurrency: alerts-deploy` (no overlapping
+  deploys). Steps: checkout, `actions/setup-node` 22 with npm cache, `npm ci` + `npm run check` in `server/alerts`
+  (tsc, tests, build; `build-zones.mjs` downloads the geocodes on a fresh runner: cache `server/.zones-cache/` with
+  `actions/cache` keyed on the `GEOCODES` URL), `google-github-actions/auth` (Workload Identity Federation),
+  `npx firebase-tools deploy --only functions --project nomad-pocket --force --non-interactive`, then
+  `curl /api/health` until a poll newer than the deploy answers ok (fail the job otherwise). Pin actions by SHA.
+- Google Cloud, once (no `gcloud` on the Mac: Cloud Shell in the console, or the REST APIs with the firebase-tools
+  token; IAM changes are the owner's call):
+  1. Service account `github-deploy@nomad-pocket.iam.gserviceaccount.com` with only what a functions deploy needs:
+     `roles/cloudfunctions.developer`, `roles/run.admin`, `roles/cloudbuild.builds.editor`,
+     `roles/artifactregistry.writer`, `roles/cloudscheduler.admin`, `roles/eventarc.admin` (scheduled 2nd-gen
+     functions), `roles/secretmanager.viewer` (the deploy checks `APNS` and `TEST_PUSH_SECRET` exist, never reads them),
+     `roles/firebase.viewer`, `roles/serviceusage.serviceUsageConsumer`, and `roles/iam.serviceAccountUser` on the
+     runtime service account only (the default compute SA the functions run as). Check the first run's errors for a
+     missing role rather than granting Editor.
+  2. Workload Identity pool `github` + OIDC provider `github-actions` (issuer `https://token.actions.githubusercontent.com`,
+     attribute condition `assertion.repository == 'franlindebl/nomad-pocket' && assertion.ref == 'refs/heads/main'`),
+     and `roles/iam.workloadIdentityUser` for that principal set on `github-deploy`. No key file anywhere.
+  3. Repo variables (not secrets; they aren't secret): `GCP_WIF_PROVIDER` (the provider's full name) and
+     `GCP_DEPLOY_SA`. The workflow gets `permissions: id-token: write, contents: read`.
+- Then: pushes happen 22:00–08:00 (commit-hours hooks), so deploys do too; a failed check or deploy emails the owner
+  (like `alerts-health.yml`); the local command stays as the manual fallback. Document it here and in
+  ARCHITECTURE.md's "Alerts server" when built.
 
 The owner's Google account is logged in (`npx firebase-tools login` in Terminal). Secrets live in Secret Manager
 (`npx firebase-tools functions:secrets:set NAME --data-file <file>`; local copies in `~/.nomad-pocket/secrets/`).

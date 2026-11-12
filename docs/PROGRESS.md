@@ -155,7 +155,11 @@ AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's d
    - **Next steps**: (1) ~~deploy v2~~ done and checked; (2) ~~the Android check~~ done; (3) ~~the owner reviews
      `docs/store/listing-next.md`~~ approved; (4) release the push version (2.5.0 (52) **submitted to App Review 2026-11-12**; Play waits for the closed test): TestFlight, then App Store (App Privacy: Coarse
      Location) and Play (Data safety), Android built after `eval "$(node scripts/alerts/fcm-env.mjs)"`; (5) the owner
-     reinstalls TestFlight on the iPhone (it re-registers as production). Later: PTWC tsunami messages, EMSC's
+     reinstalls TestFlight on the iPhone (it re-registers as production; a production iOS row in Madrid appeared at
+     19:20 on 2026-11-12, probably that). **Next to build: server deploys from GitHub Actions** on pushes to `main`
+     (plan in `docs/RELEASE.md`, "Alerts server": workflow + Workload Identity Federation, no keys). Still to verify
+     (plan task 5): real pushes on the iPhone over days, the health workflow failing when the poll stops, a phone with
+     alerts off getting nothing; phase 1's background runs on real phones. Later: PTWC tsunami messages, EMSC's
      WebSocket.
    Background polling measured 2026-11-12: iOS runs it only at night.
 
