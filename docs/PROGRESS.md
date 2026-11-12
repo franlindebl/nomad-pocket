@@ -131,9 +131,22 @@ AL. **Official alerts** (`docs/ALERTS_PLAN.md`, researched 2026-11-04, owner's d
    our code, and messages arrived in < 1 s even with the app swiped away. **Server v1 deployed** the same day
    (AEMET, USGS, EMSC, GDACS every minute; register API; APNs + FCM; a real AEMET orange warning pushed to the owner's
    iPhone). The app registers itself (`push-register.ts`) and no longer rings locally
-   what the server pushes while it's healthy. **Waiting on the owner**: the privacy policy draft (`site/privacy.html`,
-   uncommitted) and the "no server of our own" claims on the landing and store texts; then App Store privacy labels
-   and Play Data safety, and builds. Background polling
+   what the server pushes while it's healthy. Privacy policy, landing and README corrected (2026-11-12); store texts
+   drafted in `docs/store/listing-next.md`. **State at the end of 2026-11-12:**
+   - Live: server `poll` + `api` (europe-west1), `/health` watched by `.github/workflows/alerts-health.yml`. One row
+     in Firestore: the owner's iPhone (dev build, sandbox, Madrid cell). The Mi 9 is back on the Play build.
+   - Android end to end (server → FCM → our receiver) not seen yet: the Pixel_API_36 emulator (Play image, es-ES,
+     Madrid via test location providers, alerts on, APK with `fcm-env.mjs`) gets `SERVICE_NOT_AVAILABLE` from Play
+     services because the Mac's corporate VPN/TLS proxy intercepts Google. **Next: retry with the VPN off** (check a
+     cert issuer from the Mac first, then the alerts refresh → a row with `platform: android` → `/v1/test-push` with
+     `platform: android` and `/v1/run-notify`), or the Mac on a phone hotspot, or a Play internal-track build. The
+     owner's Moto G (1st gen) can't run the app (Android 8.0+).
+   - **Next steps**: (1) the Android check above; (2) the owner reviews `docs/store/listing-next.md`; (3) release
+     the push version: TestFlight, then App Store (App Privacy: Coarse Location) and Play (Data safety), Android
+     built after `eval "$(node scripts/alerts/fcm-env.mjs)"`; (4) the owner reinstalls TestFlight on the iPhone (it
+     re-registers as production); later (5) NWS on the server, (6) zones table + MeteoAlarm (needs their terms and
+     token), (7) Firestore reads by country/cell past a few hundred phones.
+   Background polling
    measured 2026-11-12: iOS runs it only at night. Blocking for Europe: MeteoAlarm's extra redistribution terms and an
    API token for its region geometries (email `meteoalarm@geosphere.at`).
 
