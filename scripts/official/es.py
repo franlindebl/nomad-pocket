@@ -1082,8 +1082,7 @@ def replace_centres(regcess_rows, regional, community):
                 towns.setdefault((r["kind"], t), []).append(r)
     kept, matched = [], {}
     for g in regcess_rows:
-        mine = g.get("_community") == community or community in g.get("_communities", ())
-        if g["source"] != "es-regcess" or not mine or g["kind"] not in ("hospital", "clinic"):
+        if g["source"] != "es-regcess" or g.get("_community") != community or g["kind"] not in ("hospital", "clinic"):
             kept.append(g)
             continue
         hit = next((by_key[(g["kind"], k)] for k in g.get("_keys") or () if (g["kind"], k) in by_key), None)
@@ -1117,6 +1116,35 @@ def replace_centres(regcess_rows, regional, community):
         if r["name"]:
             added.append(r)
     return kept, added
+
+
+def as_last_matched(rows, last_regcess, community):
+    """A centres list from the last run against a fresh REGCESS: the REGCESS centres its matching took then (absent
+    from the last run's file) stay taken, and its rows are kept as they were. Matching the rows again doesn't work:
+    the file lacks what the match used (Valencia's rows have no town name, only the INE code the fetch had), and
+    Madrid's rows hold the name of the centre they took. A centre new in REGCESS waits for the list to answer."""
+    return [g for g in rows if g["source"] != "es-regcess" or g.get("_community") != community
+            or g["kind"] not in ("hospital", "clinic") or g["code"] in last_regcess]
+
+
+def with_last_names(got, old_rows):
+    """Fresh regional centres when REGCESS is the last run's: what the matching would have filled in comes from the
+    same centre's row in the last run (by code); Madrid's codes the last run didn't place stay out."""
+    old = {}
+    for o in old_rows:
+        old.setdefault(re.sub(r"#\d+$", "", o["code"]), o)
+    out = []
+    for r in got:
+        o = old.get(r["code"])
+        if r.get("_override"):
+            if not o:
+                continue
+            r = {**r, "name": o["name"], "phone": o["phone"], "address": o["address"], "municipality": o["municipality"]}
+        elif o:
+            r = {**r, "phone": r["phone"] or o["phone"], "name": r["name"] or o["name"]}
+        if r["name"]:
+            out.append(r)
+    return out
 
 
 # --- Main -------------------------------------------------------------------------------------
@@ -1224,9 +1252,16 @@ def main(argv):
     else:
         rows.extend(before.get("es-regcess", []))
     replaced = {}
-    for r in rows:  # last month's REGCESS rows (the register didn't answer) don't carry their community
+    # REGCESS rows from the last run (not asked, or it didn't answer) are what its matching left: matching them again
+    # against the same centres lost distinct centres (2026-11-13: Ruber Juan Bravo to San Camilo next door, Madrid's
+    # SAMUR bases to a centre named "Ayuntamiento", a Teruel consultorio to a Valencian one 3 km off). Then a centres
+    # list from the last run is kept as it was, and a fresh one replaces its last rows by code without matching; with
+    # a fresh REGCESS, a list from the last run keeps what it took then (as_last_matched).
+    regcess_fresh = report.get("es-regcess", {}).get("status") == "fresh"
+    last_regcess = {r["code"] for r in before.get("es-regcess", [])}
+    for r in rows:  # a REGCESS code starts with its community's INE code (1328…: Madrid)
         if r["source"] == "es-regcess" and "_community" not in r:
-            r["_communities"] = {cc for cc, (_, bbox) in COMMUNITIES.items() if inside(r["lat"], r["lon"], bbox)}
+            r["_community"] = r["code"][:2]
     for sid, (community, fetch) in CENTRES.items():
         try:
             if sid not in only:
@@ -1255,7 +1290,14 @@ def main(argv):
         if not got:
             continue
         n_before = len(rows)
-        rows[:], added = replace_centres(rows, got, community)
+        if regcess_fresh and fresh:
+            rows[:], added = replace_centres(rows, got, community)
+        elif regcess_fresh and last_regcess:
+            rows[:], added = as_last_matched(rows, last_regcess, community), got
+        elif regcess_fresh:  # no REGCESS in the last run's file to tell what was taken: match as best it can
+            rows[:], added = replace_centres(rows, got, community)
+        else:
+            added = with_last_names(got, before.get(sid, [])) if fresh else got
         rows.extend(unique_codes(added))
         replaced[sid] = n_before - (len(rows) - len(added))
         report[sid] = {"rows": len(added), "status": "fresh" if fresh else "kept last month's", "replacedRegcess": replaced[sid]}

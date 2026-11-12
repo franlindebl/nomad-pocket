@@ -438,6 +438,19 @@ fail when a source has failed for a week straight.
   (by status, so reports from before this work too: Aragón is retried on the first daily run). Checked on copies
   of the release's reports: a week of failures (warn ×7 then error), a retry with `--only es-ar` (the other 21
   sources keep their state), a script failing with every source fresh, `%` and newlines in the message.
+- First manual retry (run 43392417981, 29 s): Spain only, `es-ar` only, Aragón fresh, green. But Spain's file lost 9
+  centres. Reproduced locally (cache-only geocoder: the full run came out identical to CI's, 36,398 rows): a partial
+  run matched the regional centres lists again against REGCESS's leftovers, read back from the file without what the
+  full run's match used (each REGCESS centre's community: bbox guesses instead; Madrid's one-centre-by-code rule; Madrid
+  rows nameless). Lost: Hospital Ruber Juan Bravo (taken by San Camilo, same point), two SAMUR bases and Madrid Salud
+  (word "ayuntamiento", same town), a Teruel consultorio (a Valencian one 3 km off, word "mas"), Gandullas (Piñuécar's),
+  and three centres sharing a building with another. `es.py` now matches only against a fresh REGCESS: with REGCESS
+  from the last run a centres list from the last run is kept as it was and a fresh one replaces its rows by code
+  (`with_last_names`); with a fresh REGCESS a list from the last run keeps the centres it took then
+  (`as_last_matched`: REGCESS codes missing from the last file). A read-back REGCESS row's community comes from its
+  code (first two digits, all 11,941 checked). Checked: old and new code give the same full run, and partial runs of
+  `es-ar`, `es-ct`, `es-regcess`, `es-md-centres`, `es-ar-centres`, `es-vc-centres`, and `es-regcess` with
+  `es-vc-centres`, all reproduce the full run row for row. A full Spain run in CI puts the 9 back.
 
 ### 2026-11-12 — Alerts server: deploys from GitHub Actions
 

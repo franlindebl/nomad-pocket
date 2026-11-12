@@ -109,7 +109,13 @@ same name, a pedanía's street guessed (Murcia), the wrong place matched by name
 Twelve communities publish their centres with points under an open licence; a REGCESS centre a regional list has
 (same code, within 300 m, or sharing a distinctive word, not the town's name, in the same town or within 3 km)
 gives way to it, and those it doesn't list stay (Aragón publishes no consultorios). Madrid's register has no
-names: its points only move the REGCESS centres they match by code. Within 25 m of OSM's centre: 45–74% of the
+names: its points only move the REGCESS centres they match by code. That matching only runs against a fresh REGCESS:
+when REGCESS comes from the last run (not asked with `--only`, or it didn't answer), its rows are what the matching
+left, and matching them again lost distinct centres (2026-11-13, a retry of `es-ar` alone: Ruber Juan Bravo, Madrid's
+SAMUR bases, a Teruel consultorio taken by a Valencian one); then a centres list from the last run is kept as it was,
+and a fresh one replaces its rows by code. Against a fresh REGCESS, a centres list from the last run keeps its rows
+and the REGCESS centres it took then stay out (`as_last_matched`: those missing from the last run's file; the file
+lacks what the match used, such as the INE code of Valencia's rows, which have no town name). Within 25 m of OSM's centre: 45–74% of the
 regional ones in Andalucía, Aragón, Baleares, Madrid, Euskadi and Cataluña, against 13% of REGCESS's.
 
 | Community | Source | Licence | Centres (2026-11-12) | REGCESS centres replaced | Joined by |
