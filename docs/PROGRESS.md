@@ -427,6 +427,13 @@ and the ASL consultori familiari, both placed on ANNCSU. Measured and dropped wi
 (2023) against OSM's 2,355, a third placeable, so a few dozen points; consultori aren't emergency points. Why, in
 `docs/OFFICIAL_POINTS.md` (Italy), so it isn't tried again.
 
+### 2026-11-13 — Official points: Italy's hospitals and consultori left out
+
+An unfinished `it.py` change (left uncommitted after the Italy commit) added hospitals from the Ministry's beds list
+and the ASL consultori familiari, both placed on ANNCSU. Measured and dropped with the owner: 878 acute hospitals
+(2023) against OSM's 2,355, a third placeable, so a few dozen points; consultori aren't emergency points. Why, in
+`docs/OFFICIAL_POINTS.md` (Italy), so it isn't tried again.
+
 ### 2026-11-13 — README, landing page and privacy policy match the app again
 
 The README and nomad-pocket.app were written on 2026-11-03; 2.1 to 2.5 shipped since. An audit (8 auditors over the

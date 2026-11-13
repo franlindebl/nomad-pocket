@@ -298,6 +298,12 @@ packs of 2026-11-05:
   points yet; coverage grows as municipalities add theirs. The 2,284 added are mostly in small southern and rural
   towns where OSM is thin (1,278 over 1 km from an OSM pharmacy). The zip is read as a stream, keeping only the
   streets needed; dati.salute.gov.it needs OpenSSL's DEFAULT ciphers (RSA key exchange).
+  Hospitals and primary care tried and left out (2026-11-13): the Ministry's "Posti letto per struttura ospedaliera"
+  (yearly, 2023 the newest) has 878 hospitals with acute beds (40% private accredited clinics, mostly without an
+  emergency department) against OSM's 2,355, and only about a third of its addresses place on ANNCSU (no number, a
+  campus road): a few dozen points at most. The only territorial list with addresses is the consultori familiari
+  (family planning, pregnancy, youth: not where to go in an emergency, every name cut at 30 characters); guardia
+  medica and case della comunità aren't published as open data.
 
 ## Coverage by country (keep this up to date)
 
