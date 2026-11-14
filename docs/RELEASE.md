@@ -221,7 +221,7 @@ External Displays menu can reach the wrong one.
 ## Website (landing, privacy, support)
 
 `site/` is a static site deployed to GitHub Pages by `.github/workflows/pages.yml` on every push to `main`
-that touches `site/**`. It holds the landing page (`index.html` in Spanish at the root, `en/index.html`),
+that touches `site/**`, and daily for the donations counter. It holds the landing page (`index.html` in Spanish at the root, `en/index.html`),
 `privacy.html` (both languages, also the support/privacy URL of both stores), `404.html`, `sitemap.xml`,
 `robots.txt` and `site.webmanifest`. Same "Precisión" look as the app: `style.css` (tokens, self-hosted font
 subsets in `site/fonts`, the document pages) and `landing.css`. No analytics and no third-party requests.
@@ -238,6 +238,18 @@ subsets in `site/fonts`, the document pages) and `landing.css`. No analytics and
   `site/img/og-<lang>.jpg`, plus the README's screens (`docs/readme/<lang>/*.jpg`) and banner
   (`docs/readme/hero-<lang>.jpg`). A screen missing in one language falls back to the other; missing in both, the page
   shows the feature's icon instead of a phone. Rerun `build.mjs` after it.
+- **Donations:** the ways of giving live in `scripts/site/donate.mjs` (GitHub Sponsors user, Bitcoin and Ethereum
+  addresses; null hides one, all null hides the section). The README's "Support the project" / "Apoya el proyecto"
+  and `.github/FUNDING.yml` repeat them by hand (when Sponsors is approved: its line in both READMEs, "By card" /
+  "Con tarjeta", and `github:` in `FUNDING.yml`). After changing an address, regenerate its QR code and rebuild:
+  `npx --yes qrcode@1.5.4 -t svg -e M -m 2 -o site/img/donate/qr-btc.svg "bitcoin:<address>"` (`ethereum:<address>`
+  for `qr-eth.svg`). The counter isn't in the repo: `pages.yml` runs `scripts/site/donations.mjs` on every deploy and
+  daily at 05:17 UTC, which adds up what the addresses received (mempool.space or blockstream.info for Bitcoin;
+  Etherscan with the optional `ETHERSCAN_API_KEY` secret, else Blockscout, for ETH and USDC on Ethereum mainnet),
+  values it with CoinGecko's price, fills the `<!--donations-->` slot of both pages and publishes
+  `donations.json` (the README badge reads it through shields.io). A source that fails keeps the live figure;
+  try it locally with `DONATE_BTC=… DONATE_ETH=… node scripts/site/donations.mjs --dry-run`. Donations stay off the
+  app: Apple and Google require their own in-app purchase for tips to the developer.
 - **Google Play:** when the listing is public, set `GOOGLE_PLAY` in `build.mjs` to the store URL and rebuild:
   the "coming soon" chip becomes Google's badge (`site/img/badge-google-play-<lang>.png`). In both READMEs, swap the
   "Google Play: coming soon" line under the App Store badge for that badge, and update Status and the FAQ. Also drop

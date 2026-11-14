@@ -387,6 +387,25 @@ Security problems: [SECURITY.md](SECURITY.md). Good places to start:
   (`locales/`) and the emergency guide's cards (`src/data/guide/`).
 - **Content**: suggest collections for the catalog (`src/data/catalog.json`).
 
+### Support the project
+
+Nomad Pocket is free, with no ads, no purchases and no investors, and it will stay that way. If you
+find it useful and can afford it, a donation helps cover what it costs (Apple's and Google's
+developer accounts, the alerts server) and the hours behind it. If you can't, recommending it to
+someone helps too.
+
+- **Bitcoin**: `bc1qnf8wfuuy4t4pjr0jhpa3dln2t94farapsazeaj`
+- **Ethereum**, ETH or USDC on the Ethereum network: `0x34fb22461bC015d8cA09952Fff3BBa09ADD46120`
+
+| Bitcoin | Ethereum |
+|:---:|:---:|
+| <img src="site/img/donate/qr-btc.svg" width="150" alt="QR code of the Bitcoin address"> | <img src="site/img/donate/qr-eth.svg" width="150" alt="QR code of the Ethereum address"> |
+
+![Received in crypto](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnomad-pocket.app%2Fdonations.json&query=%24.badge.en&label=received%20in%20crypto&color=FFD60A&labelColor=0C0C0C)
+The addresses are public: the total is worked out from them once a day and shown on the
+[website](https://nomad-pocket.app/en/#donate). The only valid ones are those in this repository
+and on nomad-pocket.app.
+
 ## Status
 
 On the [App Store](https://apps.apple.com/app/nomad-pocket-kit-offline/id6826502392) for iPhone

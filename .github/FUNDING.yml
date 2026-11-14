@@ -1,0 +1,5 @@
+# The "Sponsor" button on the repository. Keep in step with scripts/site/donate.mjs and the README's
+# "Support the project" section. Each line goes live with its way of giving: github once the Sponsors
+# profile is approved, custom once the site's donations section has its addresses.
+# github: [franlindebl]
+custom: ['https://nomad-pocket.app/#apoyar']

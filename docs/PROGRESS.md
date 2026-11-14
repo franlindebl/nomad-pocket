@@ -420,6 +420,29 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-14 — Donations: Bitcoin and Ethereum on the site and the README, with a daily counter
+
+An "Apóyalo / Support it" section on the landing page (`#apoyar`, `#donate`; footer link, a line in the "free" FAQ
+answer) and "Apoya el proyecto / Support the project" in both READMEs: a Bitcoin and an Ethereum address (ETH or
+USDC on mainnet) with QR codes, copy buttons and wallet links, and the total received. The ways of giving live in
+`scripts/site/donate.mjs` (a null hides one); `.github/FUNDING.yml` points the repo's Sponsor button at the section.
+Both addresses come from one 24-word seed of the owner's (Sparrow for Bitcoin, native SegWit; Trust Wallet for
+both); both QR codes decode back to their `bitcoin:` / `ethereum:` URIs.
+
+The counter is filled at deploy time, not in the browser, so the site still loads nothing from other sites:
+`pages.yml` now also runs daily and calls `scripts/site/donations.mjs` (Bitcoin received without change outputs from
+mempool.space or blockstream.info; ETH, internal ETH and Circle's USDC on mainnet from Etherscan with an optional
+`ETHERSCAN_API_KEY` secret, else Blockscout's REST API, whose Etherscan-style API answers 429 keyless; CoinGecko for
+the price), which publishes `site/donations.json` for the README's shields.io badge. It shows even at 0 € (the
+owner's call), retries the explorers' 429 and 5xx, and keeps yesterday's figure when a source fails. The owner's two
+test transfers from Coinbase (10 € of BTC; 8 € of ETH, which Coinbase pays out as an internal transaction from a
+contract) were counted (≈ 18 €) and are left out by `EXCLUDE_TXS`. Not in the app on purpose: Apple and Google
+require their in-app purchase for tips to the developer. The privacy policy (es, en) says how the total is worked
+out and what a donor reveals.
+
+Pending, the owner: GitHub Sponsors (profile not approved yet). Then `githubSponsors` in `donate.mjs`, the "By card"
+line in both READMEs and `github:` in `FUNDING.yml` (`docs/RELEASE.md`, Website › Donations).
+
 ### 2026-11-13 — Official points: Italy's hospitals and consultori left out
 
 An unfinished `it.py` change (left uncommitted after the Italy commit) added hospitals from the Ministry's beds list

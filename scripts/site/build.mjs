@@ -8,6 +8,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { DONATE } from './donate.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const SITE = join(ROOT, 'site');
@@ -51,6 +52,13 @@ const ICONS = {
   navigation: '<polygon points="3 11 22 2 13 21 11 13 3 11"/>',
   bellRing:
     '<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M22 8c0-2.3-.8-4.3-2-6"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/><path d="M4 2C2.8 3.7 2 5.7 2 8"/>',
+  heart:
+    '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  bitcoin:
+    '<path d="M11.767 19.089c4.924.868 6.14-6.025 1.216-6.894m-1.216 6.894L5.86 18.047m5.908 1.042-.347 1.97m1.563-8.864c4.924.869 6.14-6.025 1.215-6.893m-1.215 6.893-3.94-.694m5.155-6.2L8.29 4.26m5.908 1.042.348-1.97M7.48 20.364l3.126-17.727"/>',
+  // Not in Lucide: the Ethereum diamond, drawn in the same stroke style.
+  ethereum: '<path d="M12 2 5 12.2l7 4 7-4z"/><path d="m5 13.8 7 8.2 7-8.2-7 4z"/>',
+  copy: '<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
   car: '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
 };
 const icon = (name, extra = '') =>
@@ -69,7 +77,7 @@ const COPY = {
     ogAlt: 'Nomad Pocket: navegador GPS y guías de supervivencia en tu móvil, aunque haya un apagón.',
     skip: 'Saltar al contenido',
     nav: [['#escenarios', 'Por qué'], ['#funciones', 'Funciones'], ['#como-funciona', 'Cómo funciona'], ['#privacidad', 'Privacidad'], ['#preguntas', 'Preguntas']],
-    ids: { scenarios: 'escenarios', features: 'funciones', how: 'como-funciona', privacy: 'privacidad', faq: 'preguntas', download: 'descargar', support: 'soporte' },
+    ids: { scenarios: 'escenarios', features: 'funciones', how: 'como-funciona', privacy: 'privacidad', faq: 'preguntas', download: 'descargar', support: 'soporte', donate: 'apoyar' },
     langSwitch: { href: 'en/', label: 'EN', title: 'Read in English', hreflang: 'en' },
     langHint: { test: '!es', text: 'This page is also in English.', link: 'Read in English →' },
     download: 'Descargar',
@@ -217,18 +225,36 @@ const COPY = {
       ['¿Cuánto espacio ocupa?', 'Tú eliges. El asistente de bienvenida propone un kit para tu país y tu espacio libre (mapa y navegación, guías esenciales, Wikipedia y asistente) y puedes desactivar cada pieza. Un país ocupa desde menos de 1 MB (una isla pequeña) hasta unos 11 GB (Alemania); España, unos 4,7 GB. Estados Unidos, Canadá y Rusia van por regiones. La app te dice el tamaño exacto antes de descargar.'],
       ['¿Funciona con CarPlay?', 'Sí. Al conectar el iPhone al coche, Nomad Pocket aparece en CarPlay con el mapa de tu país: busca destinos, encuentra emergencias cercanas y te guía por voz, todo sin conexión. Android Auto todavía no.'],
       ['¿Funciona en mi país?', 'Hay mapas de 241 países y territorios, y rutas, búsqueda de calles y puntos de emergencia en 233; un mapa mundial viene incluido desde el primer segundo. Estados Unidos, Canadá y Rusia se descargan por regiones. En más de 25 países, las farmacias, hospitales y centros de salud se completan con registros oficiales. La app y su biblioteca están en español e inglés (tus propios archivos ZIM pueden estar en cualquier idioma).'],
-      ['¿Es gratis? ¿Dónde está el truco?', 'No hay truco: es gratis, sin anuncios, sin compras y sin suscripciones. Es un proyecto de código abierto que no vive de tus datos: no hay nada que cobrar ni nada que vender.'],
+      ['¿Es gratis? ¿Dónde está el truco?', 'No hay truco: es gratis, sin anuncios, sin compras y sin suscripciones. Es un proyecto de código abierto que no vive de tus datos: no hay nada que cobrar ni nada que vender.{donate}'],
       ['¿Qué dispositivos son compatibles?', 'iPhone y iPad con iOS 16.4 o posterior. Android 8.0 o posterior, muy pronto en Google Play. El asistente usa un modelo abierto que descargas desde la app (desde 533 MB; los más grandes necesitan más memoria) o, en los iPhone y iPad que lo tienen, Apple Intelligence.'],
       ['¿Y en Android?', 'Está en prueba cerrada en Google Play y se abrirá a todo el mundo cuando Google la apruebe, con mapas, rutas, emergencias, biblioteca, plan y asistente. Los primeros auxilios y la información médica solo están en iPhone y iPad.'],
       ['¿Recogéis mis datos?', 'No hay cuentas, ni analítica, ni publicidad, ni rastreo: lo que haces en la app se queda en tu dispositivo. Lo único que guardamos es para los avisos oficiales al momento, si los activas: el identificador de notificaciones del móvil y la cuadrícula de unos 10 km en la que estás (nunca tu posición), que se borran al desactivarlos. Los detalles, en la <a href="{privacy}">política de privacidad</a>.'],
       ['¿Sustituye a los servicios de emergencia?', 'No. Te ayuda cuando no hay red, pero la IA puede equivocarse y la información médica no sustituye a un profesional. Los avisos oficiales no sustituyen a las alertas de tus autoridades en el móvil. Si puedes, llama siempre al número de emergencias.'],
     ],
     cta: { h2: 'Prepárate hoy. <br>Mañana puede ser tarde.', p: 'Gratis, de código abierto y listo en un minuto. Funciona cuando todo lo demás falla.' },
+    donate: {
+      over: ['06', 'Apóyalo'],
+      h2: 'Gratis para todos. <em>Sostenida por quien puede.</em>',
+      p: 'Nomad Pocket no tiene anuncios, ni compras, ni inversores, y no los tendrá. Si te resulta útil y puedes, una donación ayuda a cubrir lo que cuesta (las cuentas de desarrollador de Apple y Google, el servidor de los avisos) y las horas que hay detrás. Si no puedes, recomendarla a alguien también ayuda.',
+      faq: ' Si quieres apoyarla, puedes <a href="#apoyar">hacer una donación</a>.',
+      sponsorsH: 'Con tarjeta',
+      sponsorsP: 'Una vez o cada mes, a través de GitHub Sponsors. GitHub no se queda comisión.',
+      sponsorsBtn: 'Patrocinar en GitHub',
+      btcH: 'Bitcoin',
+      btcP: 'En la red Bitcoin.',
+      ethH: 'Ethereum',
+      ethP: 'ETH o USDC, en la red Ethereum.',
+      copy: 'Copiar dirección',
+      copied: 'Copiada',
+      wallet: 'Abrir en mi cartera',
+      qr: (coin) => `Código QR de la dirección de ${coin}`,
+      note: `Las únicas direcciones válidas son las de esta web y las del <a href="${GITHUB}/blob/main/README.es.md#apoya-el-proyecto">repositorio en GitHub</a>. Son públicas: cualquiera puede ver lo que han recibido, y el total se calcula una vez al día a partir de ellas.`,
+    },
     support: { h2: '¿Dudas, errores o ideas?', p: 'Escríbenos o abre una incidencia: respondemos a todo.', mail: 'Escribir un correo', issues: 'Incidencias en GitHub' },
     footer: {
       tagline: 'El conocimiento que nunca se desconecta',
       credits: `App gratuita y de código abierto creada por <a href="https://github.com/franlindebl">Fran Linde Blázquez</a> · Código fuente: <a href="${GITHUB}">github.com/franlindebl/nomad-pocket</a>`,
-      links: [['{privacy}', 'Privacidad'], [GITHUB, 'GitHub'], ['#soporte', 'Soporte'], ['en/', 'English']],
+      links: [['{privacy}', 'Privacidad'], [GITHUB, 'GitHub'], ['#soporte', 'Soporte'], ['#apoyar', 'Donar'], ['en/', 'English']],
       legal: [
         '© 2026 Fran Linde Blázquez y colaboradores · Software libre bajo licencia GPL‑3.0 o posterior.',
         'La IA puede equivocarse y la información médica no sustituye a un profesional. Nomad Pocket no emite avisos: los avisos oficiales son los que publican los servicios oficiales y pueden llegar tarde o no llegar. En una emergencia, llama siempre a los servicios de emergencia si puedes.',
@@ -247,7 +273,7 @@ const COPY = {
     ogAlt: 'Nomad Pocket: GPS navigation and survival guides on your phone, even in a blackout.',
     skip: 'Skip to content',
     nav: [['#scenarios', 'Why'], ['#features', 'Features'], ['#how-it-works', 'How it works'], ['#privacy', 'Privacy'], ['#faq', 'FAQ']],
-    ids: { scenarios: 'scenarios', features: 'features', how: 'how-it-works', privacy: 'privacy', faq: 'faq', download: 'download', support: 'support' },
+    ids: { donate: 'donate', scenarios: 'scenarios', features: 'features', how: 'how-it-works', privacy: 'privacy', faq: 'faq', download: 'download', support: 'support' },
     langSwitch: { href: '../', label: 'ES', title: 'Leer en español', hreflang: 'es' },
     langHint: { test: 'es', text: 'Esta página también está en español.', link: 'Leer en español →' },
     download: 'Download',
@@ -395,18 +421,36 @@ const COPY = {
       ['How much space does it take?', 'You decide. The welcome wizard suggests a kit for your country and free space (map and navigation, essential guides, Wikipedia and the assistant) and you can switch off each piece. A country takes from under 1 MB (a small island) to about 11 GB (Germany); Spain is about 4.7 GB. The United States, Canada and Russia go by regions. The app shows the exact size before you download.'],
       ['Does it work with CarPlay?', 'Yes. Connect your iPhone to the car and Nomad Pocket shows up in CarPlay with your country’s map: search for destinations, find emergency services nearby and get spoken directions, all offline. Not on Android Auto yet.'],
       ['Does it work in my country?', 'There are maps for 241 countries and territories, and routes, street search and emergency points for 233; a world map is built in from the first second. The United States, Canada and Russia download by regions. In more than 25 countries, pharmacies, hospitals and health centres are completed with official registers. The app and its library are in English and Spanish (your own ZIM files can be in any language).'],
-      ['Is it free? What’s the catch?', 'No catch: it’s free, with no ads, no purchases and no subscriptions. It’s an open source project that doesn’t live off your data: there’s nothing to charge for and nothing to sell.'],
+      ['Is it free? What’s the catch?', 'No catch: it’s free, with no ads, no purchases and no subscriptions. It’s an open source project that doesn’t live off your data: there’s nothing to charge for and nothing to sell.{donate}'],
       ['Which devices are supported?', 'iPhone and iPad with iOS 16.4 or later. Android 8.0 or later, coming soon to Google Play. The assistant uses an open model you download in the app (from 533 MB; larger ones need more memory) or, on iPhones and iPads that have it, Apple Intelligence.'],
       ['What about Android?', 'It’s in a closed test on Google Play and opens to everyone once Google approves it, with maps, routes, emergency services, the library, the plan and the assistant. First aid and medical information are only on iPhone and iPad.'],
       ['Do you collect my data?', 'No accounts, no analytics, no ads, no tracking: what you do in the app stays on your device. The only thing we keep is for instant official alerts, if you turn them on: your phone’s notification identifier and the grid square of about 10 km you’re in (never your position), deleted when you turn them off. The details are in the <a href="{privacy}">privacy policy</a>.'],
       ['Does it replace the emergency services?', 'No. It helps when there’s no network, but the AI can make mistakes and medical information is no substitute for a professional. Official alerts don’t replace your authorities’ alerts on your phone. If you can, always call the emergency number.'],
     ],
     cta: { h2: 'Get ready today. <br>Tomorrow may be too late.', p: 'Free, open source and ready in a minute. It works when everything else fails.' },
+    donate: {
+      over: ['06', 'Support it'],
+      h2: 'Free for everyone. <em>Kept going by those who can.</em>',
+      p: 'Nomad Pocket has no ads, no purchases and no investors, and it never will. If you find it useful and can afford it, a donation helps cover what it costs (Apple’s and Google’s developer accounts, the alerts server) and the hours behind it. If you can’t, recommending it to someone helps too.',
+      faq: ' If you’d like to support it, you can <a href="#donate">make a donation</a>.',
+      sponsorsH: 'By card',
+      sponsorsP: 'Once or monthly, through GitHub Sponsors. GitHub takes no fee.',
+      sponsorsBtn: 'Sponsor on GitHub',
+      btcH: 'Bitcoin',
+      btcP: 'On the Bitcoin network.',
+      ethH: 'Ethereum',
+      ethP: 'ETH or USDC, on the Ethereum network.',
+      copy: 'Copy address',
+      copied: 'Copied',
+      wallet: 'Open in my wallet',
+      qr: (coin) => `QR code of the ${coin} address`,
+      note: `The only valid addresses are the ones on this site and in the <a href="${GITHUB}#support-the-project">GitHub repository</a>. They are public: anyone can see what they have received, and the total is worked out from them once a day.`,
+    },
     support: { h2: 'Questions, bugs or ideas?', p: 'Email us or open an issue: we answer everything.', mail: 'Send an email', issues: 'Issues on GitHub' },
     footer: {
       tagline: 'Knowledge that never goes offline',
       credits: `A free, open source app made by <a href="https://github.com/franlindebl">Fran Linde Blázquez</a> · Source code: <a href="${GITHUB}">github.com/franlindebl/nomad-pocket</a>`,
-      links: [['{privacy}', 'Privacy'], [GITHUB, 'GitHub'], ['#support', 'Support'], ['../', 'Español']],
+      links: [['{privacy}', 'Privacy'], [GITHUB, 'GitHub'], ['#support', 'Support'], ['#donate', 'Donate'], ['../', 'Español']],
       legal: [
         '© 2026 Fran Linde Blázquez and contributors · Free software under the GPL‑3.0-or-later licence.',
         'The AI can make mistakes and medical information is no substitute for a professional. Nomad Pocket doesn’t issue alerts: official alerts are the ones official services publish and can arrive late or not at all. In an emergency, always call the emergency services if you can.',
@@ -449,7 +493,52 @@ function page(lang) {
   };
 
   const overline = ([n, label]) => `<p class="overline"><span><b>${n}</b> / ${label}</span></p>`;
-  const fixLinks = (s) => s.replaceAll('{privacy}', priv);
+  // The donations section shows only the ways of giving set in donate.mjs, and only when there's one.
+  const giving = DONATE.githubSponsors || DONATE.btc || DONATE.eth;
+  const fixLinks = (s) => s.replaceAll('{privacy}', priv).replaceAll('{donate}', giving ? t.donate.faq : '');
+
+  // A crypto address: its QR code (site/img/donate/qr-<coin>.svg, docs/RELEASE.md), the address to copy and a
+  // payment link that opens the visitor's wallet app.
+  const coin = (key, address, scheme) => {
+    const qr = `img/donate/qr-${key}.svg`;
+    return `<div class="panel ticks give reveal">
+          <span class="icon-badge">${icon(key === 'btc' ? 'bitcoin' : 'ethereum')}</span>
+          <h3>${t.donate[`${key}H`]}</h3>
+          <p>${t.donate[`${key}P`]}</p>
+          ${existsSync(join(SITE, qr)) ? `<img class="qr" src="${base}${qr}" width="168" height="168" alt="${attr(t.donate.qr(t.donate[`${key}H`]))}" loading="lazy">` : ''}
+          <code class="address">${address}</code>
+          <div class="actions">
+            <button class="btn btn-secondary btn-sm" type="button" data-copy="${address}" data-done="${attr(t.donate.copied)}">${icon('copy')}<span>${t.donate.copy}</span></button>
+            <a class="btn btn-secondary btn-sm" href="${scheme}:${address}">${t.donate.wallet}</a>
+          </div>
+        </div>`;
+  };
+  const donateSection = () => `  <section class="section" id="${t.ids.donate}">
+    <div class="wrap">
+      ${overline(t.donate.over)}
+      <h2 class="h2">${t.donate.h2}</h2>
+      <p class="intro">${t.donate.p}</p>
+      <p class="donate-total"><!--donations--><!--/donations--></p>
+      <div class="gives">
+        ${[
+          DONATE.githubSponsors &&
+            `<div class="panel ticks give reveal">
+          <span class="icon-badge">${icon('heart')}</span>
+          <h3>${t.donate.sponsorsH}</h3>
+          <p>${t.donate.sponsorsP}</p>
+          <a class="btn btn-primary" href="https://github.com/sponsors/${DONATE.githubSponsors}">${icon('heart')}${t.donate.sponsorsBtn}</a>
+        </div>`,
+          DONATE.btc && coin('btc', DONATE.btc, 'bitcoin'),
+          DONATE.eth && coin('eth', DONATE.eth, 'ethereum'),
+        ]
+          .filter(Boolean)
+          .join('\n        ')}
+      </div>
+      <p class="small donate-note">${t.donate.note}</p>
+    </div>
+  </section>
+
+`;
 
   const alternates = ['es', 'en']
     .map((l) => `<link rel="alternate" hreflang="${l}" href="${ORIGIN + COPY[l].path}">`)
@@ -687,7 +776,7 @@ function page(lang) {
     </div>
   </section>
 
-  <section class="section" id="${t.ids.support}" style="padding-top:56px">
+${giving ? donateSection() : ''}  <section class="section" id="${t.ids.support}" style="padding-top:56px">
     <div class="wrap">
       <div class="support panel ticks">
         <div>
@@ -711,7 +800,7 @@ function page(lang) {
         <p class="tagline">${t.footer.tagline}</p>
       </div>
       <nav aria-label="Footer">
-        ${t.footer.links.map(([h, l]) => `<a href="${fixLinks(h)}">${l}</a>`).join('\n        ')}
+        ${t.footer.links.filter(([h]) => giving || h !== `#${t.ids.donate}`).map(([h, l]) => `<a href="${fixLinks(h)}">${l}</a>`).join('\n        ')}
       </nav>
     </div>
     <p class="credits-line">${t.footer.credits}</p>
@@ -749,6 +838,17 @@ function page(lang) {
     }, { rootMargin: '0px 0px -8% 0px' });
     items.forEach(function (el) { io.observe(el); });
   } else items.forEach(function (el) { el.classList.add('in'); });
+  // Donation addresses: copy to the clipboard, and say so on the button for a moment.
+  document.querySelectorAll('[data-copy]').forEach(function (b) {
+    var label = b.querySelector('span'), idle = label.textContent;
+    b.addEventListener('click', function () {
+      if (!navigator.clipboard) return;
+      navigator.clipboard.writeText(b.dataset.copy).then(function () {
+        label.textContent = b.dataset.done;
+        setTimeout(function () { label.textContent = idle; }, 2000);
+      });
+    });
+  });
   // Suggest the other language once, when the browser's differs from the page's.
   var hint = document.querySelector('.lang-hint');
   try {
