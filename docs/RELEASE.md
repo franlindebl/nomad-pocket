@@ -231,7 +231,9 @@ subsets in `site/fonts`, the document pages) and `landing.css`. No analytics and
   `site/en/index.html` or `site/sitemap.xml`.
 - **Images:** `python3 scripts/site/images.py [--extra DIR]` turns the raw store captures
   (`docs/store/screenshots/<lang>/iphone/NN-name.png`, matched by name: home, navigation|route, emergency,
-  firstaid|guide, assistant, library, kit, carplay; the car's screen from `NN-carplay.car.png` as `carplay-car`) into
+  firstaid|guide, assistant, library, kit, carplay; the car's screen from `NN-carplay.car.png` as `carplay-car`), then
+  the captures only the page and the README show (`docs/site-captures/<lang>/iphone/`: `10-alerts.png`, the stand-in
+  orange warning over Madrid of `scripts/e2e-alerts-feed.py` with the "(E2E)" label taken out, on the E2E build) into
   `site/img/screens/<lang>/*.webp` and draws the social cards
   `site/img/og-<lang>.jpg`, plus the README's screens (`docs/readme/<lang>/*.jpg`) and banner
   (`docs/readme/hero-<lang>.jpg`). A screen missing in one language falls back to the other; missing in both, the page

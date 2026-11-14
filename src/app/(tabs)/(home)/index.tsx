@@ -182,7 +182,7 @@ export default function HomeScreen() {
             testID="home-guides"
             icon={Tent}
             title={t('crisis.guides')}
-            onPress={() => router.navigate({ pathname: '/library/category/[slug]', params: { slug: 'survival' } })}
+            onPress={() => router.push('/guide')}
           />
         )}
         <QuickAction testID="home-plan" icon={Users} title={t('crisis.plan')} onPress={() => router.push('/prepare/plan')} />

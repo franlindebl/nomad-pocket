@@ -109,7 +109,7 @@ server) to the device everyone already carries.
   </tr>
 </table>
 
-<sub>First aid and medical information: on iPhone and iPad. On Android, the guide's other 100+ cards (fires, floods, earthquakes, gas leaks…) come up in the assistant's answers and in alerts.</sub>
+<sub>First aid and medical information: on iPhone and iPad. On Android, the guide keeps its other 100+ cards (fires, floods, earthquakes, gas leaks…).</sub>
 
 ### 🔔 Official alerts
 
@@ -132,6 +132,10 @@ server) to the device everyone already carries.
   MeteoAlarm's warnings need notifications and location allowed. Nomad Pocket doesn't issue alerts:
   they're the official services' own and can arrive late or not at all. In an emergency, follow
   your authorities' alerts on your phone and call the emergency number.
+
+<p align="center">
+  <img src="docs/readme/en/alerts.jpg" width="240" alt="An official orange rain warning: the official text, who issued it, until when and what to do">
+</p>
 
 ### 🗺️ Maps and navigation
 

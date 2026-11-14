@@ -2,7 +2,9 @@
 """Build the landing page's and the README's images from the raw store captures.
 
 Reads docs/store/screenshots/<lang>/iphone/NN-name.png (the same simulator captures
-scripts/store-screenshots.py frames for the stores) and writes:
+scripts/store-screenshots.py frames for the stores), then docs/site-captures/<lang>/iphone/NN-name.png (captures
+only the page and the README show, such as an official alert: kept out of the store folder so they don't become
+store screenshots), and writes:
   site/img/screens/<lang>/<key>.webp   phone screens, 600 px wide (shown at ~300 pt, 2x)
   site/img/screens/<lang>/carplay-car.webp  the CarPlay screen (NN-carplay.car.png, 800 x 480 as captured)
   site/img/og-<lang>.jpg               1200 x 630 social card (Open Graph / X)
@@ -22,6 +24,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / 'docs/store/screenshots'
+SITE_SRC = ROOT / 'docs/site-captures'
 OUT = ROOT / 'site/img'
 README = ROOT / 'docs/readme'
 FONTS = ROOT / 'assets/fonts'
@@ -39,6 +42,7 @@ SCREENS = {
     'plan': ('plan',),
     'kit': ('kit',),
     'carplay': ('carplay',),
+    'alerts': ('alerts',),
 }
 # The car's screen of a CarPlay capture: NN-carplay.car.png next to the phone's NN-carplay.png.
 CAR = ('carplay',)
@@ -173,7 +177,7 @@ def readme_hero(shots, dst: Path):
 
 
 def main(argv):
-    roots = [SRC]
+    roots = [SRC, SITE_SRC]
     args = list(argv)
     while '--extra' in args:
         i = args.index('--extra')

@@ -111,7 +111,7 @@ conocimiento sin conexión) al dispositivo que todos llevamos encima.
   </tr>
 </table>
 
-<sub>Primeros auxilios e información médica: en iPhone y iPad. En Android, las más de 100 fichas restantes de la guía (incendios, inundaciones, terremotos, fugas de gas…) aparecen en las respuestas del asistente y en los avisos.</sub>
+<sub>Primeros auxilios e información médica: en iPhone y iPad. En Android, la guía conserva sus otras más de 100 fichas (incendios, inundaciones, terremotos, fugas de gas…).</sub>
 
 ### 🔔 Avisos oficiales
 
@@ -136,6 +136,10 @@ conocimiento sin conexión) al dispositivo que todos llevamos encima.
   Nomad Pocket no emite avisos: son los de los servicios oficiales y pueden llegar tarde o no
   llegar. En una emergencia, sigue las alertas de tus autoridades en el móvil y llama al número de
   emergencias.
+
+<p align="center">
+  <img src="docs/readme/es/alerts.jpg" width="240" alt="Un aviso oficial naranja por lluvias: el texto oficial, quién lo emite, hasta cuándo y qué hacer">
+</p>
 
 ### 🗺️ Mapas y navegación
 

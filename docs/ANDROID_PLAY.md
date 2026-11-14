@@ -105,7 +105,7 @@ Next steps, in order:
 |---|---|---|
 | Catalog | No `medicine` category, no resource with `medical: true`, no `subject: 'health'` course, no `zimgit-post-disaster_en` ("Después del desastre") | `features/catalog/health-core.ts` (`withoutHealth`, `FIRST_AID_ARCHIVES`; pure, tested), applied in `features/catalog/index.ts` |
 | Explore (Kiwix OPDS) | Hides catalog health ids and anything `looksMedical` | `app/(tabs)/library/explore.tsx`, `features/catalog/index.ts` (`isHiddenHealthBook`), `features/library/medical.ts` |
-| Home | Survival guides shortcut (`home-guides`, Tent icon) instead of first aid (`home-first-aid`) | `app/(tabs)/(home)/index.tsx` |
+| Home | Survival guides shortcut (`home-guides`, Tent icon) instead of first aid (`home-first-aid`); it opens the emergency guide without its health cards, which ends with a link to the Library's survival archives (`guide-more-library`) | `app/(tabs)/(home)/index.tsx`, `app/guide/index.tsx` |
 | Readiness | Points to the survival category instead of medicine | `features/home/readiness.ts` |
 | Onboarding | Welcome, guides and plan texts without medicine (`*NoHealth` keys) | `app/onboarding.tsx` |
 | Plan | No health card (medication, allergies, blood type); hub text `hub.planEmptyNoHealth`; the PDF has no Health section, not even blank lines (`health` input of `planDocument`) | `app/(tabs)/(home)/prepare/{index,plan}.tsx`, `features/prepare/{document,share}.ts` |

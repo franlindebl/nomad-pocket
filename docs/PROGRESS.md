@@ -459,10 +459,16 @@ code and data, every finding re-checked: 90 kept, none refuted) compared every p
   downloaded), Credits lists the emergency guide (`native.json` `emergency-guide`), and the plan PDF no longer prints a
   blank Health section on Android (health gate, `docs/ANDROID_PLAY.md`). These ship with the next build.
 
-Not done, for the owner: on Android the guide's 103 cards can't be browsed (Home's first-aid button is the only way
-into `/guide`; they surface only in the assistant and alerts); a landing capture of an alert
-(`site/img/screens/<lang>/alerts.webp`, `scripts/site/images.py`); the store description could pick up the same
-corrections (`docs/store/listing-next.md`).
+Follow-ups done the same day (owner's choices): on Android, Home's "Guías de supervivencia" opens the emergency guide
+(its 103 cards without health; until now `/guide` was reachable only from iOS's first-aid button), and the guide ends
+with "Más guías en la Biblioteca" (`guide-more-library`) to the survival archives; checked on the emulator (Pixel API
+36 wiped to a 12 GB data partition: the old 6 GB one couldn't take the release APK): Home → guide from Agua on, no
+first-aid section, "reanimación" finds nothing, "incendio" finds cards, the link opens Biblioteca › Supervivencia.
+The landing's alerts card and both READMEs show a real alert (`docs/site-captures/<lang>/iphone/10-alerts.png`, the
+E2E build with the stand-in feeds and the "(E2E)" label taken out; `images.py` reads that folder after the store
+captures, so it never becomes a store screenshot). `docs/store/listing-next.md` now holds the whole App Store
+description with the same corrections, under 4000 characters, for the owner to review before the next version.
+iOS: `scripts/e2e.sh --build` ALR-01 passed on the new build.
 
 ### 2026-11-13 — Official points: a register down for a night retries the next day instead of failing the run
 

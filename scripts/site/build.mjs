@@ -153,14 +153,14 @@ const COPY = {
         p: 'Cuando AEMET, MeteoAlarm u otro servicio oficial emite un aviso naranja o rojo para tu zona, o hay un terremoto fuerte cerca, te llega una notificación en cuanto se publica, para que te prepares mientras aún hay conexión.',
         checks: ['AEMET en España, MeteoAlarm en 35 países europeos, el NWS en Estados Unidos, GDACS en el resto del mundo y terremotos de USGS y EMSC', 'El texto oficial, quién lo emite y hasta cuándo, con la zona en el mapa, la ficha de la guía, tu plan y tu mochila', 'Opcional: tú eliges desde qué nivel avisar y si quieres terremotos'],
         note: 'Nomad Pocket no emite avisos. En una emergencia, sigue las alertas de tus autoridades y llama al número de emergencias.',
-        alt: 'Avisos oficiales de tu zona',
+        alt: 'Aviso oficial naranja por lluvias en Madrid: texto oficial, vigencia y qué hacer',
       },
       {
         screen: 'firstaid', icon: 'heartPulse', hue: HUE.survival, over: 'Guía de emergencia',
         h3: 'Qué hacer, paso a paso',
         p: 'Más de 200 fichas basadas en fuentes oficiales: reanimación, hemorragias, quemaduras, atragantamiento, incendios, inundaciones… En la app desde el primer minuto, sin descargar nada.',
         checks: ['Textos breves, pensados para leerse con prisa', 'Cada ficha indica su fuente y su licencia, y si es texto oficial o redacción nuestra', 'Búsqueda instantánea dentro de la guía'],
-        note: 'Primeros auxilios e información médica: en iPhone y iPad. En Android, el resto de fichas aparecen en el asistente y en los avisos.',
+        note: 'Primeros auxilios e información médica: en iPhone y iPad. En Android, el resto de la guía.',
         alt: 'Guía de emergencias con fichas de primeros auxilios',
       },
       {
@@ -331,14 +331,14 @@ const COPY = {
         p: 'When AEMET, MeteoAlarm or another official service issues an orange or red warning for your area, or there’s a strong earthquake nearby, you get a notification as soon as it’s published, so you can get ready while there’s still a connection.',
         checks: ['AEMET in Spain, MeteoAlarm in 35 European countries, the NWS in the US, GDACS elsewhere, and USGS and EMSC earthquakes', 'The official text, who issued it and until when, with the area on the map, the guide card, your plan and your bag', 'Optional: you choose from which level and whether you want earthquakes'],
         note: 'Nomad Pocket doesn’t issue alerts. In an emergency, follow your authorities’ alerts and call the emergency number.',
-        alt: 'Official alerts for your area',
+        alt: 'Official orange rain warning in Madrid: official text, validity and what to do',
       },
       {
         screen: 'firstaid', icon: 'heartPulse', hue: HUE.survival, over: 'Emergency guide',
         h3: 'What to do, step by step',
         p: '200+ cards based on official sources: CPR, bleeding, burns, choking, fires, floods… In the app from the first minute, nothing to download.',
         checks: ['Short texts, written to be read in a hurry', 'Every card names its source and license, and says whether it’s an official text or our wording', 'Instant search inside the guide'],
-        note: 'First aid and medical information: on iPhone and iPad. On Android, the other cards come up in the assistant and in alerts.',
+        note: 'First aid and medical information: on iPhone and iPad. On Android, the rest of the guide.',
         alt: 'Emergency guide with first-aid cards',
       },
       {
@@ -456,7 +456,7 @@ function page(lang) {
     .concat(`<link rel="alternate" hreflang="x-default" href="${ORIGIN}/">`)
     .join('\n  ');
 
-  const screenshots = ['home', 'navigation', 'carplay-car', 'emergency', 'firstaid', 'assistant', 'library', 'plan', 'kit']
+  const screenshots = ['home', 'navigation', 'carplay-car', 'emergency', 'alerts', 'firstaid', 'assistant', 'library', 'plan', 'kit']
     .filter(hasScreen)
     .map((k) => `${ORIGIN}/${screenPath(k)}`);
   const jsonLd = {
