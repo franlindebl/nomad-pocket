@@ -4,9 +4,10 @@ on:
   push:
     branches: [main]
     paths: ['site/**', 'scripts/site/donate.mjs', 'scripts/site/donations.mjs', '.github/workflows/pages.yml']
-  # Daily, so the donations counter stays current (scripts/site/donations.mjs).
+  # Hourly, so the donations counter stays current; it deploys only when the figures or the day changed
+  # (scripts/site/donations.mjs).
   schedule:
-    - cron: '17 5 * * *'
+    - cron: '17 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -31,15 +32,19 @@ jobs:
           node-version: 22
       # Fills the counter into the checked-out pages and writes site/donations.json; never fails the deploy.
       - name: Donations counter
+        id: counter
         timeout-minutes: 10
         continue-on-error: true
         run: node scripts/site/donations.mjs
         env:
           GITHUB_TOKEN: ${{ github.token }}
           ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - if: github.event_name != 'schedule' || steps.counter.outputs.changed == 'true'
+        uses: actions/configure-pages@v5
+      - if: github.event_name != 'schedule' || steps.counter.outputs.changed == 'true'
+        uses: actions/upload-pages-artifact@v3
         with:
           path: site
-      - id: deployment
+      - if: github.event_name != 'schedule' || steps.counter.outputs.changed == 'true'
+        id: deployment
         uses: actions/deploy-pages@v4

@@ -430,7 +430,7 @@ Both addresses come from one 24-word seed of the owner's (Sparrow for Bitcoin, n
 both); both QR codes decode back to their `bitcoin:` / `ethereum:` URIs.
 
 The counter is filled at deploy time, not in the browser, so the site still loads nothing from other sites:
-`pages.yml` now also runs daily and calls `scripts/site/donations.mjs` (Bitcoin received without change outputs from
+`pages.yml` now also runs hourly (deploying only when the amounts or the day changed) and calls `scripts/site/donations.mjs` (Bitcoin received without change outputs from
 mempool.space or blockstream.info; ETH, internal ETH and Circle's USDC on mainnet from Etherscan with an optional
 `ETHERSCAN_API_KEY` secret, else Blockscout's REST API, whose Etherscan-style API answers 429 keyless; CoinGecko for
 the price), which publishes `site/donations.json` for the README's shields.io badge. It shows even at 0 € (the

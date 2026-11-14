@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The donations counter, filled in at deploy time (.github/workflows/pages.yml, daily and on every push) rather
+// The donations counter, filled in at deploy time (.github/workflows/pages.yml, hourly and on every push) rather
 // than in the visitor's browser: the site keeps loading nothing from other sites (site/privacy.html), and the
 // explorers see one request a day from GitHub instead of one per visitor. It adds up what the addresses in
 // donate.mjs have received from public block explorers, values it at today's price, writes site/donations.json
@@ -9,7 +9,7 @@
 // Run from the repo root: node scripts/site/donations.mjs [--dry-run]
 // To try it with any public address: DONATE_BTC=bc1… DONATE_ETH=0x… node scripts/site/donations.mjs --dry-run
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DONATE, EXCLUDE_TXS, USDC_ETHEREUM } from './donate.mjs';
@@ -241,3 +241,9 @@ for (const [lang, rel] of [
   );
 }
 if (!DRY) writeFileSync(join(SITE, 'donations.json'), JSON.stringify(data, null, 2) + '\n');
+
+// The hourly run republishes the site only when the figures or the day changed (not for price moves alone), so
+// the site isn't deployed 24 times a day for nothing. Pushes always deploy (the workflow ignores this then).
+const changed = !live || ['btc', 'eth', 'usdc', 'sponsors', 'updated'].some((k) => live[k] !== data[k]);
+console.log(`changed: ${changed}`);
+if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `changed=${changed}\n`);

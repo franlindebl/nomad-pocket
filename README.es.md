@@ -416,7 +416,7 @@ también ayuda.
 | <img src="site/img/donate/qr-btc.svg" width="150" alt="Código QR de la dirección de Bitcoin"> | <img src="site/img/donate/qr-eth.svg" width="150" alt="Código QR de la dirección de Ethereum"> |
 
 ![Recibido en cripto](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnomad-pocket.app%2Fdonations.json&query=%24.badge.es&label=recibido%20en%20cripto&color=FFD60A&labelColor=0C0C0C)
-Las direcciones son públicas: el total se calcula a partir de ellas una vez al día y se muestra en
+Las direcciones son públicas: el total se calcula a partir de ellas cada hora y se muestra en
 la [web](https://nomad-pocket.app/#apoyar). Las únicas válidas son las de este repositorio y las
 de nomad-pocket.app.
 

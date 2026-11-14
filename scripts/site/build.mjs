@@ -248,7 +248,7 @@ const COPY = {
       copied: 'Copiada',
       wallet: 'Abrir en mi cartera',
       qr: (coin) => `Código QR de la dirección de ${coin}`,
-      note: `Las únicas direcciones válidas son las de esta web y las del <a href="${GITHUB}/blob/main/README.es.md#apoya-el-proyecto">repositorio en GitHub</a>. Son públicas: cualquiera puede ver lo que han recibido, y el total se calcula una vez al día a partir de ellas.`,
+      note: `Las únicas direcciones válidas son las de esta web y las del <a href="${GITHUB}/blob/main/README.es.md#apoya-el-proyecto">repositorio en GitHub</a>. Son públicas: cualquiera puede ver lo que han recibido, y el total se calcula cada hora a partir de ellas.`,
     },
     support: { h2: '¿Dudas, errores o ideas?', p: 'Escríbenos o abre una incidencia: respondemos a todo.', mail: 'Escribir un correo', issues: 'Incidencias en GitHub' },
     footer: {
@@ -444,7 +444,7 @@ const COPY = {
       copied: 'Copied',
       wallet: 'Open in my wallet',
       qr: (coin) => `QR code of the ${coin} address`,
-      note: `The only valid addresses are the ones on this site and in the <a href="${GITHUB}#support-the-project">GitHub repository</a>. They are public: anyone can see what they have received, and the total is worked out from them once a day.`,
+      note: `The only valid addresses are the ones on this site and in the <a href="${GITHUB}#support-the-project">GitHub repository</a>. They are public: anyone can see what they have received, and the total is worked out from them every hour.`,
     },
     support: { h2: 'Questions, bugs or ideas?', p: 'Email us or open an issue: we answer everything.', mail: 'Send an email', issues: 'Issues on GitHub' },
     footer: {

@@ -221,7 +221,7 @@ External Displays menu can reach the wrong one.
 ## Website (landing, privacy, support)
 
 `site/` is a static site deployed to GitHub Pages by `.github/workflows/pages.yml` on every push to `main`
-that touches `site/**`, and daily for the donations counter. It holds the landing page (`index.html` in Spanish at the root, `en/index.html`),
+that touches `site/**`, and hourly for the donations counter (only when its figures or the day changed). It holds the landing page (`index.html` in Spanish at the root, `en/index.html`),
 `privacy.html` (both languages, also the support/privacy URL of both stores), `404.html`, `sitemap.xml`,
 `robots.txt` and `site.webmanifest`. Same "Precisión" look as the app: `style.css` (tokens, self-hosted font
 subsets in `site/fonts`, the document pages) and `landing.css`. No analytics and no third-party requests.
@@ -244,7 +244,7 @@ subsets in `site/fonts`, the document pages) and `landing.css`. No analytics and
   "Con tarjeta", and `github:` in `FUNDING.yml`). After changing an address, regenerate its QR code and rebuild:
   `npx --yes qrcode@1.5.4 -t svg -e M -m 2 -o site/img/donate/qr-btc.svg "bitcoin:<address>"` (`ethereum:<address>`
   for `qr-eth.svg`). The counter isn't in the repo: `pages.yml` runs `scripts/site/donations.mjs` on every deploy and
-  daily at 05:17 UTC, which adds up what the addresses received (mempool.space or blockstream.info for Bitcoin;
+  hourly at :17 (deploying then only if the amounts or the day changed), which adds up what the addresses received (mempool.space or blockstream.info for Bitcoin;
   Etherscan with the optional `ETHERSCAN_API_KEY` secret, else Blockscout, for ETH and USDC on Ethereum mainnet),
   values it with CoinGecko's price, fills the `<!--donations-->` slot of both pages and publishes
   `donations.json` (the README badge reads it through shields.io). A source that fails keeps the live figure;

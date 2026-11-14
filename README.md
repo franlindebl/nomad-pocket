@@ -402,7 +402,7 @@ someone helps too.
 | <img src="site/img/donate/qr-btc.svg" width="150" alt="QR code of the Bitcoin address"> | <img src="site/img/donate/qr-eth.svg" width="150" alt="QR code of the Ethereum address"> |
 
 ![Received in crypto](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fnomad-pocket.app%2Fdonations.json&query=%24.badge.en&label=received%20in%20crypto&color=FFD60A&labelColor=0C0C0C)
-The addresses are public: the total is worked out from them once a day and shown on the
+The addresses are public: the total is worked out from them every hour and shown on the
 [website](https://nomad-pocket.app/en/#donate). The only valid ones are those in this repository
 and on nomad-pocket.app.
 
