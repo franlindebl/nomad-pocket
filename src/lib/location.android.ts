@@ -5,6 +5,7 @@ import type { EventSubscription } from 'expo-modules-core';
 import type * as Expo from 'expo-location';
 
 import NomadLocation from '../../modules/nomad-location';
+import { nextWatchId } from './navigation-watch';
 
 export type { LocationHeadingObject, LocationObject, LocationSubscription } from 'expo-location';
 export { watchNavigationAsync } from './navigation-watch';
@@ -38,12 +39,11 @@ export const getLastKnownPositionAsync: typeof Expo.getLastKnownPositionAsync = 
 export const getCurrentPositionAsync: typeof Expo.getCurrentPositionAsync = (options = {}) =>
   NomadLocation.getCurrent(options.accuracy ?? Accuracy.Balanced);
 
-let nextWatchId = 0;
 const positionCallbacks = new Map<number, Expo.LocationCallback>();
 let positionEvents: EventSubscription | null = null;
 
 export const watchPositionAsync: typeof Expo.watchPositionAsync = async (options, callback) => {
-  const id = ++nextWatchId;
+  const id = nextWatchId();
   const accuracy = options.accuracy ?? Accuracy.Balanced;
   const defaults = WATCH_DEFAULTS[accuracy] ?? WATCH_DEFAULTS[3];
   positionCallbacks.set(id, callback);

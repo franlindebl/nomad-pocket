@@ -7,7 +7,13 @@ import type { LocationCallback, LocationSubscription } from 'expo-location';
 
 import NomadLocation from '../../modules/nomad-location';
 
-let nextId = 0;
+// One id sequence for every watch modules/nomad-location keeps (the position watches of location.android.ts and
+// the trip watches here): the native side keys them all in one map. With a counter each, both starting at 1, a
+// trip got the preview's id, and removing the preview's watch right after "Iniciar" removed the trip's: the
+// service and its notification stayed on, but guidance got no more fixes.
+let lastWatchId = 0;
+export const nextWatchId = () => ++lastWatchId;
+
 const callbacks = new Map<number, LocationCallback>();
 let events: EventSubscription | null = null;
 
@@ -15,7 +21,7 @@ export async function watchNavigationAsync(
   options: { distanceInterval: number; timeInterval: number; automotive: boolean; notice: { title: string; body: string } },
   callback: LocationCallback,
 ): Promise<LocationSubscription> {
-  const id = ++nextId;
+  const id = nextWatchId();
   callbacks.set(id, callback);
   events ??= NomadLocation.addListener('onNavigation', (e) => callbacks.get(e.watchId)?.(e.location));
   try {
