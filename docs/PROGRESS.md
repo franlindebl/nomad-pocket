@@ -420,6 +420,17 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-16 — 2.5.1 (34) for Google Play: the Android fixes and Android Auto
+
+Owner: "when the tests pass, release 2.5.1 and upload it to Play", with Android Auto in it, and the go-ahead to accept
+Play's Android Auto terms and add car screenshots to the listing. 2.5.1 (34) carries the download sheet that scrolls
+on Android (countries in regions), the picker's keyboard fix, and Android Auto on (`plugins/with-android-auto`,
+`enabled: true`; phase 5 of `docs/ANDROID_AUTO_PLAN.md`): the Car App Library and its artifacts are in the Credits
+(`scripts/licenses/android.json`). `npm run e2e:androidauto -- --build` passed on the Automotive emulator (the first
+run after a cold boot found no "Destinos" in 40 s; the second, everything). Car screenshots for the listing from that
+run (Destinos, Emergencias cerca › Seguridad, the trip preview, turn-by-turn), cropped of the emulator's system bars.
+iOS stays on 2.5.0 (52).
+
 ### 2026-11-15 — E2E: the whole suite runs on Android; two Android bugs it found
 
 Owner: "extend the E2E so they fully cover the app's main features, every screen". Instead of a second Android suite,

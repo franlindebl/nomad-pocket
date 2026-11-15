@@ -2,7 +2,7 @@
   "expo": {
     "name": "Nomad Pocket",
     "slug": "nomad-pocket",
-    "version": "2.5.0",
+    "version": "2.5.1",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "nomadpocket",
@@ -37,7 +37,7 @@
     },
     "android": {
       "package": "com.fjlinde.nomadpocket",
-      "versionCode": 33,
+      "versionCode": 34,
       "blockedPermissions": [
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -206,7 +206,7 @@
       [
         "./plugins/with-android-auto",
         {
-          "enabled": false
+          "enabled": true
         }
       ],
       "./plugins/with-store-build",

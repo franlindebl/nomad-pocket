@@ -118,4 +118,5 @@ library's allowlist (Android Auto, Android Automotive).
 
 ## Status
 
-See `docs/PROGRESS.md` (Android Auto entries).
+On in the store build since 2.5.1 (34), sent to Play with the Android Auto form factor on 2026-11-16 (phase 5). See
+`docs/PROGRESS.md` (Android Auto entries).

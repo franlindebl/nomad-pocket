@@ -77,6 +77,13 @@
   "url": "https://cs.android.com/androidx/platform/frameworks/support"
  },
  {
+  "id": "androidx.car.app:app",
+  "name": "androidx.car.app:app",
+  "version": "1.7.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
+ },
+ {
   "id": "androidx.cardview:cardview",
   "name": "androidx.cardview:cardview",
   "version": "1.0.0",
@@ -390,6 +397,13 @@
   "version": "1.0.0",
   "license": "Apache-2.0",
   "url": "http://source.android.com"
+ },
+ {
+  "id": "androidx.media:media",
+  "name": "androidx.media:media",
+  "version": "1.6.0",
+  "license": "Apache-2.0",
+  "url": "https://cs.android.com/androidx/platform/frameworks/support"
  },
  {
   "id": "androidx.profileinstaller:profileinstaller",
@@ -1003,7 +1017,7 @@
  {
   "id": "com.google.guava:guava",
   "name": "com.google.guava:guava",
-  "version": "28.1-android",
+  "version": "31.1-android",
   "license": "Apache-2.0",
   "url": "https://github.com/google/guava"
  },
@@ -1225,18 +1239,11 @@
   "url": "https://github.com/google/brotli"
  },
  {
-  "id": "org.checkerframework:checker-compat-qual",
-  "name": "org.checkerframework:checker-compat-qual",
-  "version": "2.5.5",
-  "license": "GPL-2.0-only WITH Classpath-exception-2.0 OR MIT",
-  "url": "https://github.com/typetools/checker-framework.git"
- },
- {
-  "id": "org.codehaus.mojo:animal-sniffer-annotations",
-  "name": "org.codehaus.mojo:animal-sniffer-annotations",
-  "version": "1.18",
+  "id": "org.checkerframework:checker-qual",
+  "name": "org.checkerframework:checker-qual",
+  "version": "3.12.0",
   "license": "MIT",
-  "url": "https://github.com/mojohaus/animal-sniffer"
+  "url": "https://github.com/typetools/checker-framework.git"
  },
  {
   "id": "org.jetbrains:annotations",
@@ -1283,6 +1290,13 @@
  {
   "id": "org.jetbrains.kotlin:kotlin-stdlib",
   "name": "org.jetbrains.kotlin:kotlin-stdlib",
+  "version": "2.3.0",
+  "license": "Apache-2.0",
+  "url": "https://github.com/JetBrains/kotlin"
+ },
+ {
+  "id": "org.jetbrains.kotlin:kotlin-stdlib-common",
+  "name": "org.jetbrains.kotlin:kotlin-stdlib-common",
   "version": "2.3.0",
   "license": "Apache-2.0",
   "url": "https://github.com/JetBrains/kotlin"
