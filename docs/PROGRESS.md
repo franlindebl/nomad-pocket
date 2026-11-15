@@ -430,6 +430,11 @@ on Android (countries in regions), the picker's keyboard fix, and Android Auto o
 run after a cold boot found no "Destinos" in 40 s; the second, everything). Car screenshots for the listing from that
 run (Destinos, Emergencias cerca › Seguridad, the trip preview, turn-by-turn), cropped of the emulator's system bars.
 iOS stays on 2.5.0 (52).
+Play: release 34 at 100 %, notes es/en (Android Auto, countries in regions, the picker's keyboard), sent to review
+2026-11-16. The Android Auto form factor showed up as active by itself once the bundle declared the car app
+(nothing to accept; the listing has no car screenshots slot, so the cropped screenshots weren't needed). The final
+full Android run couldn't go on that night: something on the Mac kept killing the adb server ("adb server killed by
+remote request") and the emulator never registered; every flow had passed on its own before.
 
 ### 2026-11-15 — E2E: the whole suite runs on Android; two Android bugs it found
 
