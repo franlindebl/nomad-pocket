@@ -1,6 +1,6 @@
 # Google Play listing and forms — 1.1.0 (2026-10-29)
 
-Policies, track state and release steps: `docs/ANDROID_PLAY.md`. This file holds the texts and form answers.
+Policies, track state and release steps: `docs/ANDROID_PLAY.md`. This file holds the texts and form answers of 1.1.0; **2.5.0 changed the description, screenshots, graphics and Data safety: `play-2.5.0.md`**.
 
 Everything Play Console asks before the first release, adapted from the App Store listing approved by
 the owner (`listing-1.1.0.md`; the owner approved this file on 2026-10-29). **In Play Console since

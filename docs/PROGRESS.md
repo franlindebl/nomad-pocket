@@ -420,6 +420,23 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-15 — Google Play: 2.5.0 (33) prepared; a frozen-guidance bug fixed on the way
+
+Owner: "publish 2.5.0 with everything it needs". Checks green (tsc, lint, 566 tests, i18n, licences). Store AAB built
+(`fcm-env.mjs`, `NOMAD_STORE_BUILD=1`), verified: versionCode 33, upload key, no `networkSecurityConfig`, nothing from
+Play services/Firebase on the release classpath, download 90 MB arm64 / 66 MB x86_64. In Play Console: Data safety
+(phone number, approximate location, device IDs), es-ES and en-US listings (Android description without health, the 2.0
+screenshots, icon and feature graphics), all saved to the publishing overview; texts in `docs/store/play-2.5.0.md`.
+Recording the foreground-service video on the emulator showed guidance frozen after "Iniciar": the position and trip
+watches had separate id counters over one native map, so removing the preview's watch removed the trip's (service and
+notification on, no fixes). Fixed (one id sequence, `navigation-watch.ts`), rebuilt 33 (tag `v2.5.0-android-33` moved
+to the fix), checked on the emulator: the trip keeps its HIGH_ACCURACY listener and guidance advances with the screen
+locked. Video: `~/Downloads/nomadpocket-navigation-screen-locked.mp4`. Left for the owner: upload the AAB (205 MB,
+over the browser tool's limit), the video to YouTube (unlisted) for the declaration, then the release and send.
+Emulator notes: Maestro's `setLocation` leaves mock providers behind (drive them with `cmd location providers
+set-test-provider-location fused …`), and under the corporate proxy the emulator's mobile network goes "partial
+connectivity" until airplane mode is toggled.
+
 ### 2026-11-15 — Google Play: 1.1.0 (26) to production review, rejected over the phone number, resubmitted, live
 
 The closed test (12+ testers, 14 days) unlocked production: the dashboard says production access is granted. Owner's
