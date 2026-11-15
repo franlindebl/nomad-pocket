@@ -5,7 +5,7 @@ appId: com.fjlinde.nomadpocket
 tags: [smoke, maps, seeded-map]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - extendedWaitUntil:
     visible: "Tus mapas"
     timeout: 20000
@@ -20,7 +20,15 @@ tags: [smoke, maps, seeded-map]
 - tapOn: "Tus mapas"
 - tapOn: { id: "region-delete" }
 - assertVisible: "¿Eliminar Melilla.*"
-# The row's delete button behind the alert has the same label: take the one above it.
-- tapOn: { text: "Eliminar", above: { id: "region-delete" } }
+# The row's delete button behind the alert has the same label: take the one above it. Android's dialog is a
+# window of its own, with nothing of the screen behind it to tell apart.
+- runFlow:
+    when: { platform: iOS }
+    commands:
+      - tapOn: { text: "Eliminar", above: { id: "region-delete" } }
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - tapOn: "Eliminar"
 - assertNotVisible: "Melilla.*"
 - assertVisible: "Descargar tu país.*"

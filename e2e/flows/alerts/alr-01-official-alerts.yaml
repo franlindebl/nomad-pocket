@@ -18,6 +18,10 @@ tags: [smoke, full, alerts, alerts-server]
 - tapOn:
     text: "Permitir"
     optional: true
+# Android asks for location itself (Maestro's launch permissions don't grant it there).
+- tapOn:
+    text: "While using the app|Mientras se usa la aplicación"
+    optional: true
 - extendedWaitUntil:
     visible: { id: "onboarding-start" }
     timeout: 20000
@@ -26,10 +30,7 @@ tags: [smoke, full, alerts, alerts-server]
 - extendedWaitUntil:
     visible: { id: "kit-country" }
     timeout: 10000
-- tapOn: { id: "kit-country" }
-- tapOn: { id: "kit-guides" }
-- tapOn: { id: "kit-wikipedia" }
-- tapOn: { id: "kit-assistant" }
+- runFlow: ../../subflows/kit-off.yaml
 - extendedWaitUntil:
     visible: "Continuar sin descargar"
     timeout: 10000
@@ -43,6 +44,10 @@ tags: [smoke, full, alerts, alerts-server]
 # Maestro's launch permissions don't cover iOS's notification prompt: answer it if it shows.
 - tapOn:
     text: "Permitir"
+    optional: true
+# Android asks for location itself (Maestro's launch permissions don't grant it there).
+- tapOn:
+    text: "While using the app|Mientras se usa la aplicación"
     optional: true
 - extendedWaitUntil:
     visible: { id: "onboarding-finish" }
@@ -95,9 +100,9 @@ tags: [smoke, full, alerts, alerts-server]
     visible: "Aviso de inundación"
     timeout: 10000
 - waitForAnimationToEnd
-- tapOn: { id: "BackButton" }
+- runFlow: ../../subflows/back.yaml
 - waitForAnimationToEnd
-- tapOn: { id: "BackButton" }
+- runFlow: ../../subflows/back.yaml
 - tapOn: "Terremoto M 4,8.*"
 - extendedWaitUntil:
     visible: "Magnitud"
@@ -105,9 +110,9 @@ tags: [smoke, full, alerts, alerts-server]
 - assertVisible: "El terremoto ya ha ocurrido.*"
 - takeScreenshot: alr-01-05-quake
 - waitForAnimationToEnd
-- tapOn: { id: "BackButton" }
+- runFlow: ../../subflows/back.yaml
 - waitForAnimationToEnd
-- tapOn: { id: "BackButton" }
+- runFlow: ../../subflows/back.yaml
 # Home: two orange alerts in force here now.
 - extendedWaitUntil:
     visible: { id: "home-alert" }

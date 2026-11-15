@@ -3,7 +3,7 @@ appId: com.fjlinde.nomadpocket
 tags: [smoke, search, seeded]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "books.vertical" }
+- runFlow: ../../subflows/tab-library.yaml
 - tapOn: { id: "library-search" }
 - tapOn: "Texto completo"
 - inputText: "Thriller"

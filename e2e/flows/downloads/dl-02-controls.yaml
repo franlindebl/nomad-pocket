@@ -9,7 +9,7 @@ tags: [nightly, downloads, network]
     optional: true
 - tapOn: "Descargar · .*"
 - swipe: { direction: DOWN }
-- tapOn: { id: "house" }
+- runFlow: ../../subflows/tab-home.yaml
 - tapOn: "Descargas"
 - extendedWaitUntil:
     visible: "Pausar"

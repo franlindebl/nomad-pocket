@@ -15,6 +15,10 @@ tags: [smoke, maps]
 - assertVisible: "UTM 30T.*"
 - assertVisible: "Descarga el mapa de tu país: trae.*"
 - takeScreenshot: 01-emergency-empty
-- tapOn: "Elegir un país"
-- assertVisible: "Buscar un país"
+# By id: on Android the map's own "Elegir un país" card, under this sheet, is in the hierarchy too.
+- tapOn: { id: "emergency-pick-region" }
+# The picker takes a few seconds to come up on the Android emulator (~240 rows).
+- extendedWaitUntil:
+    visible: "Buscar un país"
+    timeout: 15000
 - assertVisible: { id: "country-es" }

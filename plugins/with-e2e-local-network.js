@@ -4,6 +4,8 @@
 // cleartext by default; this allows it for localhost only, through a network security config.
 // Without the variable (and always for store builds) the config is removed again, since prebuild
 // merges into an existing android/. iOS needs nothing: the E2E builds keep NSAllowsLocalNetworking.
+// The E2E build is also debuggable, so `adb shell run-as` can seed fixtures into the app's files, as
+// scripts/e2e.sh does on the simulator (a release build is otherwise sealed). Never a store build.
 const fs = require('fs');
 const path = require('path');
 const { withAndroidManifest, withDangerousMod } = require('expo/config-plugins');
@@ -24,8 +26,16 @@ function withManifest(config) {
   return withAndroidManifest(config, (config) => {
     const app = config.modResults.manifest.application?.[0];
     if (!app) return config;
-    if (isE2E()) app.$['android:networkSecurityConfig'] = `@xml/${NAME}`;
-    else if (app.$['android:networkSecurityConfig'] === `@xml/${NAME}`) delete app.$['android:networkSecurityConfig'];
+    if (isE2E()) {
+      app.$['android:networkSecurityConfig'] = `@xml/${NAME}`;
+      app.$['android:debuggable'] = 'true';
+      config.modResults.manifest.$['xmlns:tools'] ??= 'http://schemas.android.com/tools';
+      app.$['tools:ignore'] = 'HardcodedDebugMode';
+    } else {
+      if (app.$['android:networkSecurityConfig'] === `@xml/${NAME}`) delete app.$['android:networkSecurityConfig'];
+      delete app.$['android:debuggable'];
+      if (app.$['tools:ignore'] === 'HardcodedDebugMode') delete app.$['tools:ignore'];
+    }
     return config;
   });
 }

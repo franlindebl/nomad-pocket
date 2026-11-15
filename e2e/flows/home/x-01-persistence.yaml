@@ -5,14 +5,14 @@ tags: [smoke, cross, seeded]
 - runFlow: ../../subflows/launch.yaml
 - runFlow: ../../subflows/open-wikipedia.yaml
 - tapOn: "Guardar"
-- tapOn: { id: "BackButton" }
+- runFlow: ../../subflows/back.yaml
 - runFlow: ../../subflows/open-courses.yaml
 - tapOn: "freeCodeCamp en español.*"
 - extendedWaitUntil:
     visible: { id: "lesson-check-1" }
     timeout: 30000
 - tapOn: { id: "lesson-check-1" }
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - extendedWaitUntil:
     visible: "Tus mapas"
     timeout: 20000
@@ -23,7 +23,7 @@ tags: [smoke, cross, seeded]
 - launchApp
 - assertNotVisible: "Siguiente"
 - takeScreenshot: 01-relaunched
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - tapOn: "Lugares guardados"
 - assertVisible: "Refugio.*"
 - swipe: { direction: DOWN }

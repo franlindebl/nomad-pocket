@@ -1,0 +1,23 @@
+# Turns off every switch of the setup wizard's kit that is still on ("Continuar sin descargar" afterwards).
+appId: com.fjlinde.nomadpocket
+---
+# Each switch that is still on, again until the button says so (at most 5 rounds): a tap can be lost while the rows re-render (the map's size arrives
+# late, seen on Android), so a plain tap per row sometimes left Wikipedia and the assistant on.
+- repeat:
+    while:
+      notVisible: "Continuar sin descargar"
+    times: 5
+    commands:
+      - runFlow:
+          when: { visible: { id: "kit-country", checked: true } }
+          commands: [{ tapOn: { id: "kit-country" } }]
+      - runFlow:
+          when: { visible: { id: "kit-guides", checked: true } }
+          commands: [{ tapOn: { id: "kit-guides" } }]
+      - runFlow:
+          when: { visible: { id: "kit-wikipedia", checked: true } }
+          commands: [{ tapOn: { id: "kit-wikipedia" } }]
+      - runFlow:
+          when: { visible: { id: "kit-assistant", checked: true } }
+          commands: [{ tapOn: { id: "kit-assistant" } }]
+      - waitForAnimationToEnd

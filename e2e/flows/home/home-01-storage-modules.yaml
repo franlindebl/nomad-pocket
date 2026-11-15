@@ -5,7 +5,15 @@ tags: [smoke, home, seeded]
 ---
 - runFlow: ../../subflows/launch.yaml
 - assertVisible: { id: "home-emergency" }
-- assertVisible: { id: "home-first-aid" }
+# First aid is a health feature: none on Android (src/lib/health.ts, docs/ANDROID_PLAY.md).
+- runFlow:
+    when: { platform: iOS }
+    commands:
+      - assertVisible: { id: "home-first-aid" }
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - assertNotVisible: { id: "home-first-aid" }
 - assertVisible: { id: "home-plan" }
 - assertVisible: "Llamar al 112"
 - takeScreenshot: 01-home-seeded
@@ -24,11 +32,11 @@ tags: [smoke, home, seeded]
     timeout: 15000
 - assertVisible: "España"
 - swipe: { direction: DOWN }
-- tapOn: { id: "books.vertical" }
+- runFlow: ../../subflows/tab-library.yaml
 - assertVisible: "Colecciones|COLECCIONES"
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - extendedWaitUntil:
     visible: "Descarga el mapa de tu país"
     timeout: 15000
-- tapOn: { id: "text.bubble" }
+- runFlow: ../../subflows/tab-assistant.yaml
 - assertVisible: "Elige un modelo para empezar|¿En qué te ayudo\\?"

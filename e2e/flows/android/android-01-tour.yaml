@@ -3,7 +3,7 @@
 # a release build can't be seeded. Run with npm run e2e:android.
 # Tabs are a text bar at the bottom whose labels repeat on Home's cards: tapped by position.
 appId: com.fjlinde.nomadpocket
-tags: [android, network]
+tags: [android, network, routing-live, maps-live]
 ---
 - runFlow: ../../subflows/launch.yaml
 - takeScreenshot: 01-home

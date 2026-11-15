@@ -49,7 +49,7 @@ tags: [smoke, prepare]
     element: "Gafas de repuesto.*"
 - assertVisible: "Mis artículos"
 - takeScreenshot: 02-kit-custom
-- tapOn: { id: "BackButton" }
+- runFlow: ../../subflows/back.yaml
 # Home's checklist: the expiring item comes before the count.
 - scrollUntilVisible:
     element: { id: "ready-kit" }

@@ -45,7 +45,8 @@ Each flow is tagged with one suite. Bigger suites include the smaller ones.
 | `npm run e2e:all` | 67 | ~41 min | + P2: real downloads (incl. a published routing pack), OSM emergency points and the on-device AI | internet, Apple Intelligence, the GGUF fixture |
 | `PLANET_PORT=8766 scripts/e2e.sh --build --tags planet` | 2 | ~12 min | extraction resumed after a kill (`map-22`) and retried after a network failure (`map-23`) (tag `planet`, their own build: rebuild without `PLANET_PORT` before other suites) | nothing (local stand-in planet) |
 | `npm run e2e:ipad` | 1 | ~3 min | iPad tour: every main screen, portrait and landscape | nothing (offline) |
-| `npm run e2e:android` | 8 | ~22 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack, content updates, official alerts, the assistant's map answers | internet, Android emulator |
+| `npm run e2e:android` | 7 | ~22 min | Android tour: main screens and the shared controls (find bar, row buttons, bookmarks, course check), map search and Emergencias, Preparedness, road routing with a published pack, content updates, official alerts, the assistant's map answers, against the published catalogs | internet, Android emulator |
+| `npm run e2e:android:full` / `:all` | the shared smoke + full (+ nightly) | ~70 min / ~2 h | The iOS suite on Android (tabs, back and platform differences through subflows; iOS-only flows skipped) | Android emulator; nightly also internet |
 | `npm run e2e:carplay` | 1 + car steps | ~5 min | CarPlay on the simulator's car screen: opened from the car, Destinos › Emergencias cerca › trip preview › Ir › ✕ (map button), the phone adopting the app the car started, a phone trip shown and ended on the car (section CarPlay) | Xcode 26.5's Simulator + iOS 26.5 simulator (`scripts/carplay/carplay-sim.sh setup`), a Release build with CarPlay on, Accessibility permission for the terminal |
 | `npm run e2e:androidauto` | 1 + car steps | ~8 min | Android Auto on the Android Automotive emulator: opened from the car with the app not running, Destinos › Emergencias cerca › preview › Ir › Terminar, Buscar › preview › back, a `geo:` destination › Ir › arrival, the phone UI on the JS the car started (section Android Auto) | The Automotive emulator `NP-auto-34` (created on the first run), Maestro, the Automotive APK (`--build`) |
 
@@ -61,19 +62,53 @@ runs the fast checks instead: typecheck, lint, unit tests and i18n keys (~5–10
 The iPhone flows don't run on iPad: there the tabs are a text bar at the top instead of
 icons. The iPad tour taps them by name (`tapOn: { text: "Mapas", index: 0 }`).
 
-Android has its own tour (`e2e/flows/android/`, `scripts/e2e-android.sh`; `ONLY=<flow name>` runs one flow,
-`ANDROID_SERIAL=emulator-5554` picks the emulator when another one runs, e.g. the Android Auto session's Automotive
-emulator): it installs the release APK on the `Pixel_API_36` emulator (`--build` rebuilds it), gives the app Spanish as
-its per-app language (`cmd locale set-app-locales`) and location, and runs the flows tagged
-`android`. A release build can't be seeded (no `run-as`), so the tour downloads a 1 MB and
-a 12 MB archive; the runner turns the emulator's Wi-Fi off (`svc wifi disable`), so it is on mobile data and
-"Wi-Fi only" (on by default) always asks first ("Descargas solo con Wi-Fi"): android-03 and
-android-05 wait for that question and accept it ("Usar datos móviles"); without the answer a
-country download would wait for Wi-Fi. Android tabs show only the active label, so they are tapped
-by position (4 tabs: Inicio 12 %, Mapas 37 %, Biblioteca 63 %, Asistente 88 %). The
-script-labels tour (`android-02-map-scripts`, six cities by visible-area download) was
-removed with the visible-area downloads in the 2026-10-25 redesign: maps are whole
-countries now, too big for a per-script check; check map labels in other scripts by hand.
+**Android runs the same suite** (since 2026-11-15), with `scripts/e2e-android.sh` on the `Pixel_API_36` emulator:
+`npm run e2e:android:smoke`, `e2e:android:full` (smoke + full), `e2e:android:all` (the Android tour + smoke + full +
+nightly), or any `--tags` / folder / file as with `scripts/e2e.sh` (`--build` rebuilds the APK, `--list` lists).
+`npm run e2e:android` alone runs the Android tour (`e2e/flows/android/`, tag `android`: real downloads from the
+published catalogs, mobile data). `ONLY=<flow name>` runs one flow; `ANDROID_SERIAL=emulator-5554` picks the emulator
+when another one runs (e.g. the Android Auto session's Automotive emulator).
+
+How the shared flows work on both platforms:
+
+- **Tabs and back** go through `e2e/subflows/tab-{home,maps,library,assistant}.yaml` and `back.yaml`: iOS taps the
+  tab's SF Symbol id and the navigation bar's `BackButton`; Android's tabs show only the active label (and the labels
+  repeat on Home's cards), so they are tapped by position (Inicio 12 %, Mapas 37 %, Biblioteca 63 %, Asistente 88 %),
+  and back is the system back. Never write `tapOn: { id: "map" }` or `BackButton` in a shared flow.
+- **Platform differences** inside a flow: `runFlow: { when: { platform: iOS | Android }, commands: [...] }`, or a value
+  from `maestro.platform` in an `evalScript` (lib-03 picks its collection that way). The recurring ones:
+  - Health features (first aid, medicine, people's health data in the plan): iOS asserts them, Android asserts they
+    are absent (`src/lib/health.ts`).
+  - Android's alert dialog is a window of its own: `tapOn: { text: "Eliminar", above: { id: … } }` can't see the row
+    behind it, so Android taps the button by its text; its buttons sit side by side (no `above: "Cancelar"`).
+  - The keyboard: Android's suggestion strip covers the first rows under a search field and offers the typed word as a
+    suggestion (a tap meant for "Michael Jackson" picked "Jacksonville"); close it first. `hideKeyboard` on Android is
+    a back press: only when the keyboard is surely up, or it closes the sheet.
+  - Permissions: Maestro's `launchApp: permissions` doesn't grant location on Android; the runner grants location and
+    notifications (`pm grant`) and the alerts flows answer the system prompt if it shows ("While using the app").
+  - The country picker takes a few seconds to draw on the emulator: wait for "Buscar un país" (`extendedWaitUntil`).
+  - Android's hierarchy keeps what a sheet covers: the map's own "Elegir un país" sits under Emergencias' one (hence
+    `emergency-pick-region`). Prefer ids over texts that appear on the screen behind.
+  - The reader's article text (the WebView) isn't handed to Maestro after a link on Android: wait for the title.
+- **Flows tagged `ios-only`** never run on Android: Apple Intelligence (ai-03, ai-05, ai-06, ai-09, ai-11), health
+  (rdr-09), and map-18 (known issue below). The iPad, CarPlay, Android Auto and `planet` flows have their own runners.
+
+The runner, per flow: `pm clear`, Spanish as the app's language (`cmd locale set-app-locales`), location and
+notifications granted, the emulator at Madrid (`emu geo fix`), then the seeding tags of `scripts/e2e.sh` through
+`run-as` (the E2E APK is debuggable: `plugins/with-e2e-local-network.js`; never a store build): the fixtures are pushed
+once to `/data/local/tmp/nomad-e2e` and copied into the app's `files/content/…`. The stand-in server
+(`scripts/e2e-serve.sh`, shared with `scripts/e2e.sh`) runs on the Mac and reaches the emulator through
+`adb reverse`; flows tagged `routing-live` / `maps-live` get copies of the published catalogs instead (the Android
+tour). Network: mobile data only (the emulator's Wi-Fi connects, but the app finds no internet on it). "Wi-Fi only" is
+on by default, so the Android tour gets "Descargas solo con Wi-Fi" before each download and answers it ("Usar datos
+móviles"); the shared flows start with the setting off (the runner seeds the settings store), as the iOS simulator
+counts as Wi-Fi. Maestro runs with `--no-reinstall-driver` (reinstalling its driver every flow dropped the emulator's
+adb link), and a flow is run again (up to 3 times) only when that link drops ("device offline", "Device server died",
+"unreachable"), never on an app failure. A cold boot (`-no-snapshot-load`) avoids the drops of an old snapshot; if adb
+keeps dropping, something else on the Mac may be restarting the adb server (Android Studio).
+
+Known issue (2026-11-15): on Android the OpenStreetMap credit (map-18) is mounted for its 5 s but the map hides it
+about a second after it draws; map-18 is iOS-only until that's fixed.
 Results go to `e2e/artifacts/latest-android/`.
 
 Emulator network (2026-10-26): the app follows Android's "validated" flag
@@ -549,7 +584,7 @@ tags: [full, reader, seeded]     # suite, area, needs (seeded / network)
   | `search-kiwix` | search screen: "Buscar «…» en Kiwix" (online only) |
   | `settings-country`, `settings-credits` | Settings: your country, Credits & licenses |
   | `credits-source`, `credits-gpl`, `credits-js`, `credits-search` | Credits screen: source link, GPL text, JavaScript packages, package search |
-  | `emergency-call`, `emergency-share`, `emergency-position`, `emergency-number-country` | Emergencias sheet: call, share position, position text, the country whose number it is |
+  | `emergency-call`, `emergency-share`, `emergency-position`, `emergency-number-country`, `emergency-pick-region` | Emergencias sheet: call, share position, position text, the country whose number it is, "Elegir un país" with no country yet |
   | `emergency-cat-<category>`, `emergency-place`, `emergency-guide` | category chips (health, security, water, supplies, official), rows and their Llévame button |
   | `emergency-region`, `emergency-fetch` | per-map rows and their retry/refresh button (points come with the country; Overpass runs by itself for maps without them) |
   | `marker-guide` | Llévame in a saved place's sheet |

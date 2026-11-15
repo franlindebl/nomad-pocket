@@ -10,7 +10,7 @@ tags: [smoke, assistant, maps, seeded-country]
     latitude: 42.5075
     longitude: 1.5218
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "text.bubble" }
+- runFlow: ../../subflows/tab-assistant.yaml
 - assertNotVisible: { id: "assistant-new-chat" }   # a fresh chat has nothing to start: no New chat button
 - tapOn: "Pregunta .*"
 - inputText: "Búscame una farmacia cerca de Sant Julià de Lòria"

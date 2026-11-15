@@ -18,10 +18,7 @@ tags: [android]
 - extendedWaitUntil:
     visible: { id: "kit-country" }
     timeout: 15000
-- tapOn: { id: "kit-country" }
-- tapOn: { id: "kit-guides" }
-- tapOn: { id: "kit-wikipedia" }
-- tapOn: { id: "kit-assistant" }
+- runFlow: ../../subflows/kit-off.yaml
 - extendedWaitUntil:
     visible: "Continuar sin descargar"
     timeout: 10000

@@ -4,11 +4,15 @@ appId: com.fjlinde.nomadpocket
 tags: [full, maps, routing-server, maps-server]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - extendedWaitUntil:
     visible: "Elegir un país"
     timeout: 20000
 - tapOn: "Elegir un país"
+# The picker takes a few seconds to come up on the Android emulator (~240 rows).
+- extendedWaitUntil:
+    visible: "Buscar un país"
+    timeout: 15000
 - assertVisible: "Tu país|TU PAÍS"
 - tapOn: "Buscar un país"
 - inputText: "Madrid"

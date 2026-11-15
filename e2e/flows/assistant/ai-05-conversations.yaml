@@ -1,9 +1,9 @@
 # AI-05 — a chat is listed under Today in Conversations and can be deleted with confirmation.
 appId: com.fjlinde.nomadpocket
-tags: [nightly, assistant]
+tags: [nightly, assistant, ios-only]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "text.bubble" }
+- runFlow: ../../subflows/tab-assistant.yaml
 - tapOn:   # the most capable model is already chosen since build 20: the button may not show
     text: "Usar modelo integrado"
     optional: true

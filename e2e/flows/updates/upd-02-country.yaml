@@ -20,7 +20,7 @@ tags: [full, updates, seeded-old-country, routing-server, maps-server]
     timeout: 90000
 - takeScreenshot: upd-02-02-done
 - swipe: { direction: DOWN }
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - extendedWaitUntil:
     visible: "Tus mapas"
     timeout: 20000

@@ -420,6 +420,30 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-15 — E2E: the whole suite runs on Android; two Android bugs it found
+
+Owner: "extend the E2E so they fully cover the app's main features, every screen". Instead of a second Android suite,
+the iOS suite (~60 flows) now runs on Android too (`npm run e2e:android:smoke|full|all`, `docs/E2E.md`):
+- `scripts/e2e-android.sh` works as `scripts/e2e.sh` does (tags, folders, `--list`), seeds the fixtures through
+  `run-as` (the E2E APK is debuggable, `plugins/with-e2e-local-network.js`; never a store build), and shares the
+  stand-in server with iOS (`scripts/e2e-serve.sh`, through `adb reverse`; the Android tour keeps the published
+  catalogs with `routing-live` / `maps-live`). Mobile data only; the shared flows start with "Wi-Fi only" off.
+- Tabs and back go through `e2e/subflows/tab-*.yaml` and `back.yaml`; platform differences through `runFlow: when:
+  platform` (health features absent on Android, Android's dialogs and keyboard, permissions, the WebView's text).
+  `kit-off.yaml` turns the wizard's switches off until they are (a tap could be lost while the rows re-render).
+- Maestro with `--no-reinstall-driver` and a rerun (up to 3) only when the emulator's adb link drops; the emulator
+  cold-boots (an old snapshot dropped it again and again).
+- `ios-only`: Apple Intelligence flows, rdr-09 (health), map-18 (below).
+Bugs found and fixed:
+- **Countries in regions couldn't be downloaded on Android** (in 2.5.0 on Play): the content-sized download sheet was
+  taller than the screen, cut off and not scrollable, with "Descargar" under the tab bar (the USA has six regions).
+  On Android it now takes the whole height and scrolls (`maps/_layout.tsx`).
+- The country picker's keyboard came back over "Tus mapas" after an alert, long after the picker closed (Android,
+  some iOS simulators): it is dismissed when a country is picked (`maps/pick.tsx`).
+Known issues: on Android the OpenStreetMap credit shows ~1 s instead of 5 (mounted for 5 s, hidden by the map once it
+draws; map-18 iOS-only); the setup wizard's buttons sit under the keyboard on Android while searching a country (back
+closes it); the country picker takes ~2–3 s to draw on the emulator.
+
 ### 2026-11-15 — Google Play: 2.5.0 (33) live; the README and the site link to it
 
 Play Console: production is 33 (2.5.0), active in 178 countries (17 installs so far); approved the same day it was

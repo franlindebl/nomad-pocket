@@ -18,6 +18,10 @@ tags: [smoke, full, alerts, alerts-server, seeded-onboarded]
 - tapOn:
     text: "Permitir"
     optional: true
+# Android asks for location itself (Maestro's launch permissions don't grant it there).
+- tapOn:
+    text: "While using the app|Mientras se usa la aplicación"
+    optional: true
 - extendedWaitUntil:
     visible: { id: "home-alerts-offer" }
     timeout: 20000
@@ -29,6 +33,10 @@ tags: [smoke, full, alerts, alerts-server, seeded-onboarded]
 - tapOn: { id: "home-alerts-offer-enable" }
 - tapOn:
     text: "Permitir"
+    optional: true
+# Android asks for location itself (Maestro's launch permissions don't grant it there).
+- tapOn:
+    text: "While using the app|Mientras se usa la aplicación"
     optional: true
 # The first check records the warning and the quake in force (without ringing) and Home shows them.
 - extendedWaitUntil:

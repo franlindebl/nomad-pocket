@@ -11,7 +11,7 @@ tags: [full, maps, routing-server, maps-server]
     latitude: 42.5075
     longitude: 1.5218
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - extendedWaitUntil:
     visible: { id: "map-search" }
     timeout: 20000

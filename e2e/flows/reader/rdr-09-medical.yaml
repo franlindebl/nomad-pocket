@@ -1,9 +1,9 @@
 # RDR-09 — a medical archive shows the disclaimer; once dismissed it stays dismissed after reopening.
 appId: com.fjlinde.nomadpocket
-tags: [full, reader, seeded]
+tags: [full, reader, seeded, ios-only]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "books.vertical" }
+- runFlow: ../../subflows/tab-library.yaml
 - tapOn: { id: "collection-medicine" }
 # The archive sits in its level of the collection; its row's button opens it.
 - scrollUntilVisible:
@@ -15,10 +15,10 @@ tags: [full, reader, seeded]
     timeout: 15000
 - takeScreenshot: 01-disclaimer
 - tapOn: "Cerrar"
-- tapOn: { id: "BackButton" }
+- runFlow: ../../subflows/back.yaml
 - stopApp
 - launchApp
-- tapOn: { id: "books.vertical" }
+- runFlow: ../../subflows/tab-library.yaml
 - tapOn: { id: "collection-medicine" }
 # The archive sits in its level of the collection; its row's button opens it.
 - scrollUntilVisible:

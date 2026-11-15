@@ -3,7 +3,7 @@ appId: com.fjlinde.nomadpocket
 tags: [full, library]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "books.vertical" }
+- runFlow: ../../subflows/tab-library.yaml
 - tapOn: { id: "collection-wikipedia" }
 - assertVisible: "Elige tu Wikipedia"
 - assertVisible: "Consulta rápida.*"

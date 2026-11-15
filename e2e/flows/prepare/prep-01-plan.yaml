@@ -24,22 +24,37 @@ tags: [smoke, prepare]
 - inputText: "A las 18:00"
 - tapOn: { id: "meeting-save" }
 - assertVisible: ".*Puerta del colegio · A las 18:00.*"
-- scrollUntilVisible:
-    element: { id: "add-person" }
-- tapOn: { id: "add-person" }
-- inputText: "Lucas"
-- tapOn: { id: "entry-allergies" }
-- inputText: "Penicilina"
-- tapOn: { id: "entry-save" }
-- assertVisible: "Lucas.*"
-- assertVisible: ".*Penicilina.*"
+# Each person's allergies and medication are health data: iOS only (Android has no health features).
+- runFlow:
+    when: { platform: iOS }
+    commands:
+      - scrollUntilVisible:
+          element: { id: "add-person" }
+      - tapOn: { id: "add-person" }
+      - inputText: "Lucas"
+      - tapOn: { id: "entry-allergies" }
+      - inputText: "Penicilina"
+      - tapOn: { id: "entry-save" }
+      - assertVisible: "Lucas.*"
+      - assertVisible: ".*Penicilina.*"
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - assertNotVisible: { id: "add-person" }
 - scrollUntilVisible:
     element: { id: "home-notes" }
 - tapOn: { id: "home-notes" }
 - inputText: "Llave de paso bajo el fregadero"
-# Not hideKeyboard: Maestro's dismiss gesture can land on "Añadir número" and open its sheet.
-# Tapping the section title (not pressable) ends editing.
-- tapOn: "NOTAS DE CASA"
+# iOS: not hideKeyboard (Maestro's dismiss gesture can land on "Añadir número" and open its sheet): tapping the
+# section title (not pressable) ends editing. Android: the keyboard covers the title; hideKeyboard is a back press.
+- runFlow:
+    when: { platform: iOS }
+    commands:
+      - tapOn: "NOTAS DE CASA"
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - hideKeyboard
 - takeScreenshot: 02-plan-filled
 # Edit and delete: the contact sheet opens with its values.
 - scrollUntilVisible:
@@ -49,7 +64,7 @@ tags: [smoke, prepare]
 - assertVisible: "Editar contacto"
 - tapOn: "Eliminar"
 - assertNotVisible: "Ana López.*"
-- tapOn: { id: "BackButton" }
+- runFlow: ../../subflows/back.yaml
 # Home's checklist counts the plan as ready.
 - scrollUntilVisible:
     element: { id: "ready-plan" }

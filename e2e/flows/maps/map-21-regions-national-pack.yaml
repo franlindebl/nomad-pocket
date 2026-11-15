@@ -6,16 +6,21 @@
 appId: com.fjlinde.nomadpocket
 tags: [full, maps, routing-server, maps-server]
 ---
+# The country sheet is taller than the screen on Android with regions: scrollUntilVisible reaches its button (a no-op on iOS).
 - runFlow: ../../subflows/launch.yaml
 # Toronto, set after the wizard: it would offer Canada's kit in the wizard otherwise.
 - setLocation:
     latitude: 43.65
     longitude: -79.38
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - extendedWaitUntil:
     visible: "Elegir un país"
     timeout: 20000
 - tapOn: "Elegir un país"
+# The picker takes a few seconds to come up on the Android emulator (~240 rows).
+- extendedWaitUntil:
+    visible: "Buscar un país"
+    timeout: 15000
 - tapOn: "Buscar un país"
 - inputText: "Canadá"
 - tapOn: { id: "country-ca" }
@@ -25,8 +30,11 @@ tags: [full, maps, routing-server, maps-server]
 # The pack is shared: the sheet says it comes with the first region.
 - assertVisible: "(?s).*vienen con la primera región.*"
 # Ontario's map (2.5 MB) + the national pack (3.4 MB).
-- assertVisible: "Descargar · 5,9 MB"
+- scrollUntilVisible:
+    element: "Descargar · 5,9 MB"
 - takeScreenshot: 01-ontario-from-location
+- scrollUntilVisible:
+    element: { id: "country-download" }
 - tapOn: { id: "country-download" }
 - extendedWaitUntil:
     visible: "Canadá.*Ontario · .*"
@@ -43,6 +51,8 @@ tags: [full, maps, routing-server, maps-server]
 - assertVisible: "2,5 MB"
 - takeScreenshot: 03-quebec-map-only
 - tapOn: { id: "region-ca-quebec" }
+- scrollUntilVisible:
+    element: { id: "country-download" }
 - tapOn: { id: "country-download" }
 # The sheet closes on download: back in "Tus mapas", open it again once Quebec is in.
 - extendedWaitUntil:
@@ -63,8 +73,13 @@ tags: [full, maps, routing-server, maps-server]
 - takeScreenshot: 04-ontario-deleted
 # Delete Quebec, the last region: the pack goes too, so the sheet offers it again.
 # The picker's search keyboard may come back under the sheet after the first alert (not on every simulator).
-- hideKeyboard:
-    optional: true
+# (iOS only: on Android hideKeyboard is a back press, which closed the country sheet. The picker drops its keyboard
+# when a country is picked since 2026-11-15.)
+- runFlow:
+    when: { platform: iOS }
+    commands:
+      - hideKeyboard:
+          optional: true
 - tapOn: { id: "region-delete-ca-quebec" }
 - assertVisible: "¿Eliminar Canadá · Quebec\\?"
 - tapOn: "Eliminar"

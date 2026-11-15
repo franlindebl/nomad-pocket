@@ -1,10 +1,10 @@
 # AI-03 + AI-04 — system model (Apple Intelligence, iOS 27 simulator) answers from the library with
 # source chips that open the reader. Asserts structure only: the answer text is not deterministic.
 appId: com.fjlinde.nomadpocket
-tags: [nightly, assistant, seeded]
+tags: [nightly, assistant, seeded, ios-only]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "text.bubble" }
+- runFlow: ../../subflows/tab-assistant.yaml
 - tapOn:   # the most capable model is already chosen since build 20: the button may not show
     text: "Usar modelo integrado"
     optional: true

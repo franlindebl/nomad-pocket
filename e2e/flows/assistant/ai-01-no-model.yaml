@@ -5,11 +5,19 @@ appId: com.fjlinde.nomadpocket
 tags: [smoke, assistant]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "text.bubble" }
+- runFlow: ../../subflows/tab-assistant.yaml
 - assertVisible: "¿En qué te ayudo\\?|Elige un modelo para empezar"
 - takeScreenshot: 01-assistant
 - tapOn: "Modelo: .*"
 - assertVisible: "Tu dispositivo"
-- assertVisible: "Modelo integrado"
+# The phone's own model is Apple Intelligence: Android offers downloadable models only.
+- runFlow:
+    when: { platform: iOS }
+    commands:
+      - assertVisible: "Modelo integrado"
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - assertNotVisible: "Modelo integrado"
 - assertVisible: "Descargar un modelo"
 - takeScreenshot: 02-models

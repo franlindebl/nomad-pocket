@@ -4,7 +4,7 @@
 # emergency button, and the nearest hospital opens the trip preview. The New chat button is hidden on a fresh chat and
 # shows once there is one.
 appId: com.fjlinde.nomadpocket
-tags: [android, network]
+tags: [android, network, routing-live, maps-live]
 ---
 - setLocation: { latitude: 42.5075, longitude: 1.5218 }
 - runFlow: ../../subflows/launch.yaml

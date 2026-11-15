@@ -4,14 +4,19 @@
 appId: com.fjlinde.nomadpocket
 tags: [nightly, assistant, maps, seeded-country]
 ---
+# Android: the keyboard stays up after "Enviar" and covers the answer's lower half (its buttons, "Guardado"): each
+# question closes it (hideKeyboard is a back press there, and the keyboard is surely up).
 - setLocation:
     latitude: 42.5075
     longitude: 1.5218
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "text.bubble" }
+- runFlow: ../../subflows/tab-assistant.yaml
 - tapOn: "Pregunta .*"
 - inputText: "Guarda dónde estoy como el coche"
 - tapOn: "Enviar"
+- runFlow:
+    when: { platform: Android }
+    commands: [hideKeyboard]
 - extendedWaitUntil:
     visible: { id: "map-answer-save" }
     timeout: 60000
@@ -22,6 +27,9 @@ tags: [nightly, assistant, maps, seeded-country]
 - tapOn: "Pregunta .*"
 - inputText: "¿Dónde he aparcado?"
 - tapOn: "Enviar"
+- runFlow:
+    when: { platform: Android }
+    commands: [hideKeyboard]
 - extendedWaitUntil:
     visible: { id: "map-answer-coords" }
     timeout: 30000
@@ -30,6 +38,9 @@ tags: [nightly, assistant, maps, seeded-country]
 - tapOn: "Pregunta .*"
 - inputText: "¿A qué hora anochece?"
 - tapOn: "Enviar"
+- runFlow:
+    when: { platform: Android }
+    commands: [hideKeyboard]
 - extendedWaitUntil:
     visible: { id: "map-answer-sun" }
     timeout: 30000
@@ -38,6 +49,9 @@ tags: [nightly, assistant, maps, seeded-country]
 - tapOn: "Pregunta .*"
 - inputText: "Estoy perdido"
 - tapOn: "Enviar"
+- runFlow:
+    when: { platform: Android }
+    commands: [hideKeyboard]
 - extendedWaitUntil:
     visible: { id: "map-answer-lost" }
     timeout: 30000
@@ -49,11 +63,23 @@ tags: [nightly, assistant, maps, seeded-country]
 - setLocation:
     latitude: 42.4780
     longitude: 1.5880
+# Android's mock location reaches the app a few seconds later (a pause: wait for something that never shows).
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - extendedWaitUntil:
+          visible: "__pause__"
+          timeout: 6000
+          optional: true
 - tapOn: "Pregunta .*"
 - inputText: "Me he perdido en el monte"
 - tapOn: "Enviar"
-- extendedWaitUntil:
-    visible: { id: "map-answer-town" }
+- runFlow:
+    when: { platform: Android }
+    commands: [hideKeyboard]
+# The answer can end under the chat's model banner: scroll to the arrow.
+- scrollUntilVisible:
+    element: { id: "map-answer-town" }
     timeout: 30000
 - takeScreenshot: 03b-lost-arrow
 - setLocation:
@@ -62,6 +88,9 @@ tags: [nightly, assistant, maps, seeded-country]
 - tapOn: "Pregunta .*"
 - inputText: "¿Qué coordenadas tiene Encamp?"
 - tapOn: "Enviar"
+- runFlow:
+    when: { platform: Android }
+    commands: [hideKeyboard]
 - extendedWaitUntil:
     visible: "(?s).*UTM 31T.*"
     timeout: 30000
@@ -69,6 +98,9 @@ tags: [nightly, assistant, maps, seeded-country]
 - tapOn: "Pregunta .*"
 - inputText: "¿Hay avisos oficiales?"
 - tapOn: "Enviar"
+- runFlow:
+    when: { platform: Android }
+    commands: [hideKeyboard]
 - extendedWaitUntil:
     visible: "(?s).*avisos oficiales están desactivados.*"
     timeout: 30000
@@ -76,6 +108,9 @@ tags: [nightly, assistant, maps, seeded-country]
 - tapOn: "Pregunta .*"
 - inputText: "¿Cómo voy de Sant Julià de Lòria a Encamp?"
 - tapOn: "Enviar"
+- runFlow:
+    when: { platform: Android }
+    commands: [hideKeyboard]
 - extendedWaitUntil:
     visible: "Ver la ruta en el mapa"
     timeout: 60000

@@ -4,7 +4,7 @@ appId: com.fjlinde.nomadpocket
 tags: [nightly, search, network]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "books.vertical" }
+- runFlow: ../../subflows/tab-library.yaml
 - tapOn: { id: "library-search" }
 - inputText: "wikipedia"
 - scrollUntilVisible:

@@ -3,7 +3,7 @@ appId: com.fjlinde.nomadpocket
 tags: [nightly, library, network]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "books.vertical" }
+- runFlow: ../../subflows/tab-library.yaml
 - scrollUntilVisible:
     element: "Explorar todo Kiwix.*"
 - tapOn: "Explorar todo Kiwix.*"

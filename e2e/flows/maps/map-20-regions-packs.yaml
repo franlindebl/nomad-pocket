@@ -6,12 +6,17 @@
 appId: com.fjlinde.nomadpocket
 tags: [full, maps, routing-server, maps-server]
 ---
+# The country sheet is taller than the screen on Android with regions: scrollUntilVisible reaches its button (a no-op on iOS).
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - extendedWaitUntil:
     visible: "Elegir un país"
     timeout: 20000
 - tapOn: "Elegir un país"
+# The picker takes a few seconds to come up on the Android emulator (~240 rows).
+- extendedWaitUntil:
+    visible: "Buscar un país"
+    timeout: 15000
 - tapOn: "Buscar un país"
 - inputText: "Estados Unidos"
 - tapOn: { id: "country-us" }
@@ -20,11 +25,15 @@ tags: [full, maps, routing-server, maps-server]
     timeout: 30000
 - assertVisible: { id: "region-us-hawaii" }
 - assertVisible: { id: "region-all" }
-- assertVisible: "Elige al menos una región"
+- scrollUntilVisible:
+    element: "Elige al menos una región"
 - takeScreenshot: 01-nothing-ticked
 - tapOn: { id: "region-us-alaska" }
-- assertVisible: "Descargar · 5,9 MB"
+- scrollUntilVisible:
+    element: "Descargar · 5,9 MB"
 - takeScreenshot: 02-alaska-ticked
+- scrollUntilVisible:
+    element: { id: "country-download" }
 - tapOn: { id: "country-download" }
 # The picker leaves for "Tus mapas", where the region shows once its map is on the phone.
 - extendedWaitUntil:
@@ -42,6 +51,8 @@ tags: [full, maps, routing-server, maps-server]
 - assertNotVisible: { id: "region-delete-us-hawaii" }
 - takeScreenshot: 04-regions
 - tapOn: { id: "region-us-hawaii" }
+- scrollUntilVisible:
+    element: { id: "country-download" }
 - tapOn: { id: "country-download" }
 # The sheet closes on download: back in "Tus mapas", open it again once Hawaii is in.
 - extendedWaitUntil:
@@ -63,8 +74,13 @@ tags: [full, maps, routing-server, maps-server]
 - takeScreenshot: 06-alaska-deleted
 # Delete Hawaii, the last one: the country is gone from "Tus mapas".
 # The picker's search keyboard may come back under the sheet after the first alert (not on every simulator).
-- hideKeyboard:
-    optional: true
+# (iOS only: on Android hideKeyboard is a back press, which closed the country sheet. The picker drops its keyboard
+# when a country is picked since 2026-11-15.)
+- runFlow:
+    when: { platform: iOS }
+    commands:
+      - hideKeyboard:
+          optional: true
 - tapOn: { id: "region-delete-us-hawaii" }
 - assertVisible: "¿Eliminar Estados Unidos · Hawái\\?"
 - tapOn: "Eliminar"

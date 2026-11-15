@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import { Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { useStackOptions } from '@/components/navigation';
@@ -14,8 +15,13 @@ export default function Layout() {
       <Stack.Screen name="index" options={{ title: t('title'), headerShown: false }} />
       <Stack.Screen name="regions" options={{ ...sheet, title: t('regions.title'), sheetAllowedDetents: [0.6, 1] }} />
       <Stack.Screen name="pick" options={{ ...sheet, title: t('picker.title'), sheetAllowedDetents: [1] }} />
-      {/* Content-sized sheets draw their own title: a native header overlaps non-scroll-view content. */}
-      <Stack.Screen name="download" options={{ ...sheet, headerShown: false, sheetAllowedDetents: 'fitToContents' }} />
+      {/* Content-sized sheets draw their own title: a native header overlaps non-scroll-view content. On Android a
+          content-sized sheet taller than the screen is cut off and doesn't scroll: a country in regions (the USA has six)
+          hid its download button under the tab bar. There it takes the whole height and its ScrollView scrolls. */}
+      <Stack.Screen
+        name="download"
+        options={{ ...sheet, headerShown: false, sheetAllowedDetents: Platform.OS === 'android' ? [1] : 'fitToContents' }}
+      />
       <Stack.Screen name="points" options={{ ...sheet, title: t('points.title'), sheetAllowedDetents: [0.75, 1] }} />
       <Stack.Screen name="markers" options={{ ...sheet, title: t('markers.title'), sheetAllowedDetents: [0.5, 1] }} />
       <Stack.Screen name="marker" options={{ ...sheet, headerShown: false, sheetAllowedDetents: 'fitToContents' }} />

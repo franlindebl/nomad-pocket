@@ -1,7 +1,7 @@
 # Opens the seeded "Wikipedia 100" archive in the reader from the Library tab (its Wikipedia collection).
 appId: com.fjlinde.nomadpocket
 ---
-- tapOn: { id: "books.vertical" }
+- runFlow: tab-library.yaml
 - tapOn: { id: "collection-wikipedia" }
 - tapOn: "Wikipedia 100.*"
 - extendedWaitUntil:

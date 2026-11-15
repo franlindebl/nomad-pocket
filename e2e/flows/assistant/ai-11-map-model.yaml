@@ -3,13 +3,13 @@
 # estoy cerca de Sant Julià de Lòria" as petrol stations near that town, and the answer is the map card (Andorra seeded).
 # A library question naming a town the maps have gets a "Ver … en el mapa" chip under its answer.
 appId: com.fjlinde.nomadpocket
-tags: [nightly, assistant, maps, seeded, seeded-country]
+tags: [nightly, assistant, maps, seeded, seeded-country, ios-only]
 ---
 - setLocation:
     latitude: 42.5075
     longitude: 1.5218
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "text.bubble" }
+- runFlow: ../../subflows/tab-assistant.yaml
 - tapOn:   # the most capable model is already chosen since build 20: the button may not show
     text: "Usar modelo integrado"
     optional: true

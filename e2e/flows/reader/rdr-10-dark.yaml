@@ -5,9 +5,21 @@ tags: [full, reader, seeded]
 - runFlow: ../../subflows/launch.yaml
 - runFlow: ../../subflows/open-wikipedia.yaml
 - tapOn: "Michael Jackson"
-- extendedWaitUntil:
-    visible: "Born"
-    timeout: 10000
+# Android's WebView doesn't hand the article's text to Maestro after a link (only the reader's own bar): wait for the
+# article's title in the header there, and let the page draw.
+- runFlow:
+    when: { platform: iOS }
+    commands:
+      - extendedWaitUntil:
+          visible: "Born"
+          timeout: 10000
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - extendedWaitUntil:
+          visible: "Michael Jackson"
+          timeout: 10000
+      - waitForAnimationToEnd
 - takeScreenshot: 01-reader-dark
 # Paper page (optional, off by default): dark text on cream, and back to dark.
 - tapOn: "Texto y fondo"

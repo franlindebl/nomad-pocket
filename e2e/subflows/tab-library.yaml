@@ -1,0 +1,12 @@
+# Opens the Biblioteca tab on either platform: iOS's tab bar exposes the SF Symbol's name as the id; Android's
+# tabs show only the active label (and the labels repeat on Home's cards), so they are tapped by position.
+appId: com.fjlinde.nomadpocket
+---
+- runFlow:
+    when: { platform: iOS }
+    commands:
+      - tapOn: { id: "books.vertical" }
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - tapOn: { point: "63%,93%" }

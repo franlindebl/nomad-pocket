@@ -4,7 +4,7 @@ appId: com.fjlinde.nomadpocket
 tags: [smoke, maps]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - extendedWaitUntil:
     visible: "Descarga el mapa de tu país"
     timeout: 20000

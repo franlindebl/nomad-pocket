@@ -20,10 +20,7 @@ tags: [smoke, onboarding]
 - assertVisible: "Mapa de España.*"
 - assertVisible: "Guías esenciales.*"
 - takeScreenshot: 03-kit
-- tapOn: { id: "kit-country" }
-- tapOn: { id: "kit-guides" }
-- tapOn: { id: "kit-wikipedia" }
-- tapOn: { id: "kit-assistant" }
+- runFlow: ../../subflows/kit-off.yaml
 - extendedWaitUntil:
     visible: "Continuar sin descargar"
     timeout: 10000

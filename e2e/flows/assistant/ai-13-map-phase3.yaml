@@ -8,7 +8,7 @@ tags: [nightly, assistant, maps, seeded-country]
     latitude: 42.5075
     longitude: 1.5218
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "text.bubble" }
+- runFlow: ../../subflows/tab-assistant.yaml
 - tapOn: "Pregunta .*"
 - inputText: "Gasolineras de camino a Encamp"
 - tapOn: "Enviar"

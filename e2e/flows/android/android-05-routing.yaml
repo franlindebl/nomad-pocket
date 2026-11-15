@@ -3,7 +3,7 @@
 # and the pack from GitHub Releases) with the map; the engine routes on it and the pack's
 # emergency points reach Emergencias.
 appId: com.fjlinde.nomadpocket
-tags: [android, network]
+tags: [android, network, routing-live, maps-live]
 ---
 - setLocation: { latitude: 42.5075, longitude: 1.5218 }
 - runFlow: ../../subflows/launch.yaml

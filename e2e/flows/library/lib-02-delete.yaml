@@ -6,7 +6,7 @@ appId: com.fjlinde.nomadpocket
 tags: [smoke, library, seeded]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "books.vertical" }
+- runFlow: ../../subflows/tab-library.yaml
 - scrollUntilVisible:
     element: { id: "collection-computing" }
     centerElement: true
@@ -28,7 +28,7 @@ tags: [smoke, library, seeded]
 - scrollUntilVisible:
     element: "1 de 17 en tu dispositivo.*|1 DE 17 EN TU DISPOSITIVO.*"
     direction: UP
-- tapOn: { id: "BackButton" }
+- runFlow: ../../subflows/back.yaml
 - scrollUntilVisible:
     element: { id: "collection-wikipedia" }
     direction: UP
@@ -37,22 +37,30 @@ tags: [smoke, library, seeded]
 - longPressOn: "Wikipedia 100.*"
 - tapOn: "Eliminar"
 - tapOn: "Eliminar"
-- tapOn: { id: "BackButton" }
-- scrollUntilVisible:
-    element: { id: "collection-medicine" }
-    direction: UP
-    centerElement: true
-- tapOn: { id: "collection-medicine" }
-- scrollUntilVisible:
-    element: ".*NHS.*|.*[Mm]edicines.*"
-    centerElement: true
-- longPressOn: ".*NHS.*|.*[Mm]edicines.*"
-- tapOn: "Eliminar"
-- tapOn: "Eliminar"
-- tapOn: { id: "BackButton" }
-- scrollUntilVisible:
-    element: "Medicina, 0 de .*"
-    direction: UP
+- runFlow: ../../subflows/back.yaml
+# Medicine is a health collection: iOS only (Android has none, src/lib/health.ts).
+- runFlow:
+    when: { platform: iOS }
+    commands:
+      - scrollUntilVisible:
+          element: { id: "collection-medicine" }
+          direction: UP
+          centerElement: true
+      - tapOn: { id: "collection-medicine" }
+      - scrollUntilVisible:
+          element: ".*NHS.*|.*[Mm]edicines.*"
+          centerElement: true
+      - longPressOn: ".*NHS.*|.*[Mm]edicines.*"
+      - tapOn: "Eliminar"
+      - tapOn: "Eliminar"
+      - runFlow: ../../subflows/back.yaml
+      - scrollUntilVisible:
+          element: "Medicina, 0 de .*"
+          direction: UP
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - assertNotVisible: { id: "collection-medicine" }
 - scrollUntilVisible:
     element: "Informática y tecnología, 1 de .*"
     centerElement: true

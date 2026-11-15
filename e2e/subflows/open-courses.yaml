@@ -1,7 +1,7 @@
 # Opens Courses, a section of the Library tab.
 appId: com.fjlinde.nomadpocket
 ---
-- tapOn: { id: "books.vertical" }
+- runFlow: tab-library.yaml
 - scrollUntilVisible:
     element: { id: "collection-courses" }
     direction: DOWN

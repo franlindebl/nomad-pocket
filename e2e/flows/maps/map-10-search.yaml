@@ -5,7 +5,7 @@ appId: com.fjlinde.nomadpocket
 tags: [smoke, maps, seeded-map]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - extendedWaitUntil:
     visible: { id: "map-search" }
     timeout: 20000

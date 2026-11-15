@@ -3,7 +3,7 @@ appId: com.fjlinde.nomadpocket
 tags: [smoke, search]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "books.vertical" }
+- runFlow: ../../subflows/tab-library.yaml
 - tapOn: { id: "library-search" }
 - assertVisible: "Aún no tienes libros"
 # With nothing downloaded, the search still finds what the bundled catalog offers (offline too).

@@ -19,8 +19,16 @@ tags: [full, courses, seeded]
 - assertVisible: { id: "lesson-check-2", text: "Marcar como pendiente" }
 - tapOn: "Reiniciar progreso"
 - assertVisible: "Se borrará tu progreso en este curso."
-# The alert's button: its title and the screen's link have the same text.
-- tapOn: { text: "Reiniciar progreso", below: "Se borrará.*", above: "Cancelar" }
+# The alert's button: its title and the screen's link have the same text. Android's dialog puts its buttons side
+# by side, and only the dialog's own views are reachable while it is up.
+- runFlow:
+    when: { platform: iOS }
+    commands:
+      - tapOn: { text: "Reiniciar progreso", below: "Se borrará.*", above: "Cancelar" }
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - tapOn: { text: "Reiniciar progreso", below: "Se borrará.*" }
 - assertVisible: { id: "lesson-check-2", text: "Marcar como hecha" }
 - tapOn: "Empezar curso"
 - extendedWaitUntil:
@@ -31,5 +39,5 @@ tags: [full, courses, seeded]
     visible: "Los comentarios son líneas.*"
     timeout: 30000
 - takeScreenshot: 02-lesson
-- tapOn: { id: "BackButton" }
+- runFlow: ../../subflows/back.yaml
 - assertVisible: "Continuar"

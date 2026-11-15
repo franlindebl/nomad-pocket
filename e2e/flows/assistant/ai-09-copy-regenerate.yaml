@@ -2,10 +2,10 @@
 # (answers the same question again; the buttons come back once it ends). Needs the system model
 # (Apple Intelligence, iOS 27 simulator). Asserts structure only: the answer text is not deterministic.
 appId: com.fjlinde.nomadpocket
-tags: [nightly, assistant, seeded]
+tags: [nightly, assistant, seeded, ios-only]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "text.bubble" }
+- runFlow: ../../subflows/tab-assistant.yaml
 - tapOn:
     text: "Usar modelo integrado"
     optional: true

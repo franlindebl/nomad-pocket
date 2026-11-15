@@ -2,7 +2,7 @@
 # downloads a small country (Andorra: map extracted on the phone while the country maps
 # catalog has none; its routing pack and emergency points from the published catalog).
 appId: com.fjlinde.nomadpocket
-tags: [android, network]
+tags: [android, network, routing-live, maps-live]
 ---
 - runFlow: ../../subflows/launch.yaml
 - tapOn: { point: "37%,93%" }   # Mapas

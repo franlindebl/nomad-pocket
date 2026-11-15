@@ -3,13 +3,18 @@ appId: com.fjlinde.nomadpocket
 tags: [smoke, search, seeded]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "books.vertical" }
+- runFlow: ../../subflows/tab-library.yaml
 - tapOn: { id: "library-search" }
 - inputText: "Jackson"
 - extendedWaitUntil:
     visible: "Michael Jackson.*"
     timeout: 10000
 - takeScreenshot: 01-title-hits
+# Android's keyboard suggestion strip covers the first rows (a tap there picked "Jacksonville").
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - hideKeyboard
 - tapOn: "Michael Jackson.*"
 - extendedWaitUntil:
     visible: "Buscar en este libro"

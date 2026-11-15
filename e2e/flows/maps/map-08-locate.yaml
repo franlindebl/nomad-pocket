@@ -3,7 +3,7 @@ appId: com.fjlinde.nomadpocket
 tags: [full, maps]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - extendedWaitUntil:
     visible: "Mostrar mi ubicación"
     timeout: 20000

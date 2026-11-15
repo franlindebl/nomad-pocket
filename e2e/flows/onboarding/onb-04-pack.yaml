@@ -12,7 +12,12 @@ tags: [nightly, onboarding, network, routing-server, maps-server]
 - tapOn: "Buscar un país"
 - inputText: "Andorra"
 - tapOn: { id: "country-ad" }
-# The wizard's buttons stay above the keyboard (Maestro's hideKeyboard taps whatever is below).
+# The wizard's buttons stay above the keyboard on iOS (Maestro's hideKeyboard taps whatever is below there); on
+# Android the keyboard covers them, and hideKeyboard is a back press that only closes it.
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - hideKeyboard
 - tapOn: { id: "onboarding-next" }
 - extendedWaitUntil:
     visible: "Mapa de Andorra.*"

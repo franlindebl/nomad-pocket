@@ -16,10 +16,11 @@ tags: [nightly, library, network]
 - extendedWaitUntil:
     visible: "Buscar en este libro"
     timeout: 15000
-- tapOn: { id: "BackButton" }
-- tapOn: { id: "books.vertical" }
+- runFlow: ../../subflows/back.yaml
+- runFlow: ../../subflows/tab-library.yaml
 - scrollUntilVisible:
     element: { id: "collection-computing" }
     centerElement: true
 - tapOn: { id: "collection-computing" }
-- assertVisible: ".*Bash.*"
+- scrollUntilVisible:
+    element: ".*Bash.*"

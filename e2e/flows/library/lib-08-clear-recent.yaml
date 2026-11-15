@@ -5,8 +5,8 @@ tags: [full, library, home, seeded]
 ---
 - runFlow: ../../subflows/launch.yaml
 - runFlow: ../../subflows/open-wikipedia.yaml
-- tapOn: { id: "BackButton" }   # reader → Wikipedia
-- tapOn: { id: "BackButton" }   # Wikipedia → Library
+- runFlow: ../../subflows/back.yaml   # reader → Wikipedia
+- runFlow: ../../subflows/back.yaml   # Wikipedia → Library
 - assertVisible: { id: "continue-reading" }
 - takeScreenshot: 01-library-continue
 - tapOn: { id: "continue-reading-clear" }
@@ -17,8 +17,8 @@ tags: [full, library, home, seeded]
 - tapOn: "Borrar"
 - assertNotVisible: { id: "continue-reading" }
 - runFlow: ../../subflows/open-wikipedia.yaml
-- tapOn: { id: "BackButton" }
-- tapOn: { id: "house" }
+- runFlow: ../../subflows/back.yaml
+- runFlow: ../../subflows/tab-home.yaml
 - scrollUntilVisible:
     element: { id: "home-continue-clear" }
 - takeScreenshot: 02-home-continue

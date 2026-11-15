@@ -6,7 +6,7 @@ appId: com.fjlinde.nomadpocket
 tags: [planet, maps, maps-server, planet-server]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - extendedWaitUntil:
     visible: "Elegir un país"
     timeout: 20000
@@ -36,7 +36,7 @@ tags: [planet, maps, maps-server, planet-server]
 - extendedWaitUntil:
     notVisible: ".*descarga activa.*"
     timeout: 300000
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - tapOn: "Tus mapas"
 # Installed once the row prepares search and points (that can take minutes on a busy Mac) or is ready.
 - extendedWaitUntil:

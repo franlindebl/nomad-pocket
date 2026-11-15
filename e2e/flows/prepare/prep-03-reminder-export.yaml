@@ -12,15 +12,19 @@ tags: [full, prepare]
 - tapOn: { id: "item-add-expiry" }
 - assertVisible: "Te avisaremos a principios de .*"
 - tapOn: { id: "item-save" }
-# First reminder: iOS asks for permission (the simulator runs in Spanish).
-- extendedWaitUntil:
-    visible: "Permitir"
-    timeout: 10000
-- tapOn: "Permitir"
+# First reminder: iOS asks for permission (the simulator runs in Spanish). Android: scripts/e2e-android.sh grants
+# POST_NOTIFICATIONS before the flow, so nothing asks.
+- runFlow:
+    when: { platform: iOS }
+    commands:
+      - extendedWaitUntil:
+          visible: "Permitir"
+          timeout: 10000
+      - tapOn: "Permitir"
 - assertVisible: ".*Caduca en .*"
 - assertNotVisible: "Las notificaciones están desactivadas.*"
 # The Preparedness hub (PDF export): Home's plan row.
-- tapOn: { id: "BackButton" }
+- runFlow: ../../subflows/back.yaml
 - scrollUntilVisible:
     element: { id: "ready-plan" }
 - tapOn: { id: "ready-plan" }

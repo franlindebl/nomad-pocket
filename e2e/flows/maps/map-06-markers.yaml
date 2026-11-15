@@ -3,7 +3,7 @@ appId: com.fjlinde.nomadpocket
 tags: [full, maps]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - extendedWaitUntil:
     visible: "Tus mapas"
     timeout: 20000
@@ -24,6 +24,14 @@ tags: [full, maps]
 - tapOn: "Cancelar"
 - assertVisible: "(?s)Campamento.*"
 - tapOn: { id: "marker-delete" }
-# The row's delete button behind the alert has the same label: take the one above it.
-- tapOn: { text: "Eliminar", above: { id: "marker-delete" } }
+# The row's delete button behind the alert has the same label: take the one above it. Android's dialog is a
+# window of its own, with nothing of the screen behind it to tell apart.
+- runFlow:
+    when: { platform: iOS }
+    commands:
+      - tapOn: { text: "Eliminar", above: { id: "marker-delete" } }
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - tapOn: "Eliminar"
 - assertVisible: "No hay lugares guardados.*"

@@ -6,12 +6,31 @@ appId: com.fjlinde.nomadpocket
 tags: [full, updates, seeded, updates-server]
 ---
 - runFlow: ../../subflows/launch.yaml
+# Android: the launch check (10 s in) can beat the registration of the seeded files, find nothing installed and count
+# as this week's check; "Buscar ahora" in the Updates sheet checks again. (Files the app downloads are registered as
+# they finish, so only seeded ones meet this.)
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - openLink: nomadpocket:///updates
+      - repeat:   # again while the seeded files may still be registering
+          while:
+            notVisible: "Wikipedia 100.*2099.*"
+          times: 4
+          commands:
+            - tapOn: { id: "updates-check" }
+            - extendedWaitUntil:
+                visible: "Wikipedia 100.*2099.*"
+                timeout: 15000
+                optional: true
+      - assertVisible: "Wikipedia 100.*2099.*"
+      - runFlow: ../../subflows/back.yaml
 # The check runs ~10 s after launch; Wikipedia 100 (January) is old enough for the card.
 - extendedWaitUntil:
     visible: { id: "home-updates" }
     timeout: 45000
 - takeScreenshot: upd-01-01-home
-- tapOn: { id: "books.vertical" }
+- runFlow: ../../subflows/tab-library.yaml
 # The Library lists collections, not archives (since build 36): its link to the updates is what shows.
 - extendedWaitUntil:
     visible: "3 actualizaciones disponibles"

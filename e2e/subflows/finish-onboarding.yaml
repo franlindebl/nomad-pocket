@@ -11,17 +11,14 @@ appId: com.fjlinde.nomadpocket
 - extendedWaitUntil:
     visible: { id: "kit-country" }
     timeout: 10000
-- tapOn: { id: "kit-country" }
-- tapOn: { id: "kit-guides" }
-- tapOn: { id: "kit-wikipedia" }
-- tapOn: { id: "kit-assistant" }
+- runFlow: kit-off.yaml
 - extendedWaitUntil:
     visible: "Continuar sin descargar"
     timeout: 10000
 - tapOn: { id: "onboarding-download" }
 - extendedWaitUntil:
     visible: { id: "onboarding-alerts-decline" }
-    timeout: 10000
+    timeout: 20000
 - tapOn: { id: "onboarding-alerts-decline" }
 - tapOn: { id: "onboarding-finish" }
 - extendedWaitUntil:

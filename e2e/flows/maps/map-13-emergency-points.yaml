@@ -6,7 +6,7 @@ appId: com.fjlinde.nomadpocket
 tags: [nightly, maps, network, seeded-map]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - extendedWaitUntil:
     visible: { id: "map-emergency" }
     timeout: 20000

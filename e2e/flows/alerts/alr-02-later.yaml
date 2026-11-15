@@ -18,6 +18,10 @@ tags: [full, alerts, alerts-server]
 - tapOn:
     text: "Permitir"
     optional: true
+# Android asks for location itself (Maestro's launch permissions don't grant it there).
+- tapOn:
+    text: "While using the app|Mientras se usa la aplicación"
+    optional: true
 - extendedWaitUntil:
     visible: { id: "onboarding-start" }
     timeout: 20000
@@ -26,10 +30,7 @@ tags: [full, alerts, alerts-server]
 - extendedWaitUntil:
     visible: { id: "kit-country" }
     timeout: 10000
-- tapOn: { id: "kit-country" }
-- tapOn: { id: "kit-guides" }
-- tapOn: { id: "kit-wikipedia" }
-- tapOn: { id: "kit-assistant" }
+- runFlow: ../../subflows/kit-off.yaml
 - extendedWaitUntil:
     visible: "Continuar sin descargar"
     timeout: 10000
@@ -67,6 +68,10 @@ tags: [full, alerts, alerts-server]
 - tapOn: { id: "alerts-settings-switch" }
 - tapOn:
     text: "Permitir"
+    optional: true
+# Android asks for location itself (Maestro's launch permissions don't grant it there).
+- tapOn:
+    text: "While using the app|Mientras se usa la aplicación"
     optional: true
 - extendedWaitUntil:
     visible: "Notificar desde"

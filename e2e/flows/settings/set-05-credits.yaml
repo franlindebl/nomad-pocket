@@ -12,15 +12,23 @@ tags: [full, settings]
 - assertVisible: { id: "credits-source" }
 - assertVisible: { id: "credits-gpl" }
 - takeScreenshot: 01-credits
+# The data sources come first and are many (official registers): scrolling past them takes a while on Android.
 - scrollUntilVisible:
     element: "libkiwix.*"
     direction: DOWN
+    timeout: 90000
 - scrollUntilVisible:
     element: { id: "credits-js" }
+    timeout: 90000
     direction: DOWN
 - tapOn: { id: "credits-js" }
 - tapOn: { id: "credits-search" }
 - inputText: "zustand"
+# Android: the keyboard's suggestion strip offers "zustand" too, under the field: close the keyboard first.
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - hideKeyboard
 # The query in the field also reads "zustand": take the row under it.
 - tapOn: { text: "zustand.*", below: { id: "credits-search" } }
 - assertVisible: "(?i)texto de la licencia"

@@ -3,14 +3,14 @@ appId: com.fjlinde.nomadpocket
 tags: [full, prepare, maps, seeded-map]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "map" }
+- runFlow: ../../subflows/tab-maps.yaml
 - extendedWaitUntil:
     visible: "Tus mapas"
     timeout: 20000
 - longPressOn: { point: "50%,25%" }
 - inputText: "Refugio"
 - tapOn: "Guardar"
-- tapOn: { id: "house" }
+- runFlow: ../../subflows/tab-home.yaml
 - tapOn: { id: "home-plan" }
 - tapOn: { id: "meeting-secondary" }
 - tapOn: "Refugio.*"

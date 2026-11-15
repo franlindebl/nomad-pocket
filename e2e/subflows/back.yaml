@@ -1,0 +1,11 @@
+# Goes back one screen on either platform: the navigation bar's back button on iOS, the system back on Android.
+appId: com.fjlinde.nomadpocket
+---
+- runFlow:
+    when: { platform: iOS }
+    commands:
+      - tapOn: { id: "BackButton" }
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - back

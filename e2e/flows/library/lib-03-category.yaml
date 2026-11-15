@@ -3,10 +3,16 @@ appId: com.fjlinde.nomadpocket
 tags: [full, library]
 ---
 - runFlow: ../../subflows/launch.yaml
-- tapOn: { id: "books.vertical" }
-- tapOn: "Medicina.*"
+- runFlow: ../../subflows/tab-library.yaml
+# Medicine on iOS; Android has no health collections (src/lib/health.ts), so Survival there, laid out the same way.
+- evalScript: "${output.collection = maestro.platform === 'android' ? 'survival' : 'medicine'}"
+- runFlow:
+    when: { platform: Android }
+    commands:
+      - assertNotVisible: { id: "collection-medicine" }
+- tapOn: { id: "collection-${output.collection}" }
 - assertVisible: "Nivel 1 · Esencial|NIVEL 1 · ESENCIAL"
-- tapOn: { id: "pack-download-medicine-essential" }
+- tapOn: { id: "pack-download-${output.collection}-essential" }
 - assertVisible: "¿Descargar .*"
 - takeScreenshot: 01-pack-confirm
 - tapOn: "Cancelar"
