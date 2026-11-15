@@ -4,30 +4,24 @@ Living document: current status, backlog, known issues and a dated log. Update i
 the end of every work block (status table, a log entry, next steps) so the next session
 can pick up without re-deriving anything.
 
-## Current state (2026-10-28)
+## Current state (2026-11-16)
 
-- **Version 1.1.0 (iOS build 23)** on TestFlight 2026-10-28 (build 22 plus assistant retrieval in English; build 22 = build 21 plus the right neighbourhood on search results, first aid in the app's language, an assistant that no longer greets every answer and empty image boxes gone; build 21 added a photo library purpose string): dictation in the assistant, a more
-  capable model becomes the default, answers survive switching chats, the navigation view reworked,
-  Canada and Russia by regions, on top of build 19 (document collections, map legend, SOS button);
-  **1.1.0 (build 23) waiting for App Review** since 2026-10-28 (it replaced 1.0.1 in the same submission after
-  a 2.1(b) business-model question; listing `docs/store/listing-1.1.0.md`, auto-release after approval). Release process and version table: `docs/RELEASE.md`;
-  store builds are tagged from build 13 on (`v1.1.0-23`). Build 17 shipped another session's
-  unfinished edits: don't use it.
-- All four MVP modules plus onboarding work end to end on the iOS simulator (iOS 27,
-  Release) and the Android emulator (API 36, release APK). iPad layout verified (visual
-  tour). Downloads measured and tuned by the agent on the owner's iPhone 14 Pro (2026-10-27), re-timed
-  2026-10-28 with segments from 4 MiB: the 20.7 GB kit in 6:47 (`docs/DOWNLOADS_SPEED_PLAN.md`, run 8).
-- Checks: `npm test` (the count drifts: run it), `tsc` clean, lint clean, i18n keys complete. E2E: 63 Maestro flows
-  (21 smoke, 22 full, 13 nightly, 1 iPad tour, 4 Android, 2 by hand: `map-22` and `map-23`, their own build); which cases they cover
-  is in the catalog of `docs/E2E.md`. On f4b32d4 (2026-10-28): smoke 21/21, full 20/20 after a stale `map-15`
-  assertion was fixed (`map-19` flaked once on a tap), iPad tour 1/1. The flows added later (map-20/21/22, ai-09)
-  passed on their own branches; on main afb07af smoke + full passed 43/43 (2026-10-28, after making the region
-  flows' `hideKeyboard` optional), then ai-09, map-22 and the Android tour (4/4) too.
-- Routes across routing packs (Madrid to Paris, US regions) are on main and pushed since bdc1fae/6f68b43
-  (2026-10-28), but need packs that carry `<pack>.crossings.tsv`. The CI run that rebuilds them (run
-  40681896621, launched by hand on 2026-10-28: `ad` and `pt` as the small check, under a Europe
-  release tag) succeeded: the published `ad` and `pt` packs now carry `crossings` (264 B and 3.2 KB in the
-  routing manifest). Every other pack gets them with the monthly full run on 2026-11-05.
+- **iOS**: 2.5.0 (build 52, official alerts push and MeteoAlarm) submitted to App Review 2026-11-12 with auto-release
+  (check App Store Connect for its state); CarPlay since 2.2.0. `expo.version` is already 2.5.1 (Android); the next
+  iOS build would be 2.5.1 with the picker's keyboard fix. Versions and history: `docs/RELEASE.md`.
+- **Android / Google Play**: **2.5.0 (33) live in production since 2026-11-15** (178 countries;
+  https://play.google.com/store/apps/details?id=com.fjlinde.nomadpocket, linked from the README and the site).
+  **2.5.1 (34) in review since 2026-11-16**: Android Auto on, countries in regions downloadable again (their download
+  sheet was cut off), the picker's keyboard. Play's quick checks passed; the Android Auto form factor shows as
+  active. State of the tracks and how to release: `docs/ANDROID_PLAY.md`.
+- **E2E**: the iOS suite also runs on Android since 2026-11-15 (`npm run e2e:android:smoke|full|all`, `docs/E2E.md`);
+  every smoke and full flow passed on Android one by one; of nightly, ai-07, ai-08, ai-13, dl-02, lib-06 and
+  srch-05 passed, and ai-12, lib-07, map-04, map-13, map-16 and onb-04 got fixes not yet seen passing: the last full
+  run (`e2e:android:all`) couldn't finish (see "Pending now"). Android Auto: `npm run e2e:androidauto`
+  passed on the Automotive emulator with the 2.5.1 code. The iOS suite has **not** been run since the shared flows
+  moved to platform subflows.
+- Checks: `npm test` (566 on 2026-11-15), `tsc` and lint clean, i18n keys complete; the pre-commit hook runs them.
+- Older milestones (MVP, downloads tuning, routes across packs, the 2026-10 audit) are in the log below.
 
 | Area | Status |
 |---|---|
@@ -42,11 +36,12 @@ can pick up without re-deriving anything.
 | Maps road routing on the device (Valhalla, plan phase 2): packs, catalog, downloads, route guidance | done — iOS sim + Android emulator (Andorra pack); 237 packs live (every inhabited country; the USA in six regions) since 2026-10-27; E2E vs the live catalog on iOS + Android |
 | Maps turn-by-turn (voice, background location; plan phase 3) | built on branch `carplay` (2026-10-31): spoken prompts (iOS + Android, offline system voices), guidance with the screen locked (iOS background location, Android foreground service); iOS sim E2E map-14/17 pass; Android emulator: tour 4/4, foreground service checked by hand (starts with Iniciar, survives Home, ends with Finalizar); not yet heard on a real phone |
 | CarPlay navigation (`docs/CARPLAY_PLAN.md`) | built on branch `carplay` (2026-10-31): map, destinations (search, saved, Emergencias cerca), trip preview, turn-by-turn session; **tested on the CarPlay simulator screen** (Xcode 26.5's Simulator + iOS 26.5 + shim, `scripts/carplay/carplay-sim.sh`), every flow in the plan's "Testing" list works; **on since 2.2.0 (42)** (entitlement granted 2026-11-04); a real car is pending |
+| Android Auto navigation (`docs/ANDROID_AUTO_PLAN.md`) | built 2026-11-05 (phases 1–4), checked end to end on the Automotive emulator; **on in the store build since 2.5.1 (34)**, in Play review since 2026-11-16; a real car is pending |
 | Assistant (Apple Intelligence / 4 GGUF models, RAG with citations, conversational: the model decides when to search; the most capable installed model is the default; on-device dictation; reads the PDFs inside archives (document index) and the family plan; copy and regenerate an answer) | done — iOS sim (Apple FM + llama.cpp), Android emulator (llama.cpp, before the conversational change). Android: no system model (ML Kit removed 2026-10-26), downloadable models only |
-| Store (listing, screenshots, privacy site, in-app disclaimers) | done for iOS; Android: app created in Play Console, App content forms done (PEGI 3 since 2026-10-29, see `docs/store/play-listing.md`), 1.1.0 (23) on internal testing, Android screenshots and en-US listing done, 1.1.0 (24) for the closed test **rejected** 2026-10-29 (health apps need an organization account): Android now ships without health features; listing, screenshots, Health apps and content rating redone; **1.1.0 (26) approved for the closed test 2026-10-30**; then 12 testers × 14 days and production (`docs/ANDROID_PLAY.md`) |
+| Store (listing, screenshots, privacy site, in-app disclaimers) | iOS: live (2.5.0 in review since 2026-11-12). Android: **2.5.0 (33) live on Google Play since 2026-11-15**, 2.5.1 (34) in review since 2026-11-16 (`docs/ANDROID_PLAY.md`); no health features on Android (personal account) |
 | Content updates (`docs/CONTENT_UPDATES_PLAN.md`): weekly Kiwix check of installed archives, countries' newer builds, `/updates` sheet, "Actualizar todo" that keeps the old copy until the new one is in, delete-first only on purpose, Home card for urgent ones | done 2026-10-31 — iOS sim + Android emulator E2E (`upd-01`, `upd-02`, `android-06`), delete-first by hand; TestFlight build 27 |
 | Preparedness (family plan, emergency kit with expiry reminders, printable PDF, offline guides) | done — iOS sim + Android emulator (E2E) |
-| E2E suite (Maestro) + pre-commit hook | done |
+| E2E suite (Maestro) + pre-commit hook | done; runs on iOS and Android (shared flows since 2026-11-15) + CarPlay and Android Auto checks |
 | Pre-release audit (2026-10-26): ~60 verified findings fixed in code and docs | merged to main; device checks and the deferred items below pending |
 
 ## Decisions (kickoff 2026-10-24, by the owner)
@@ -62,6 +57,30 @@ can pick up without re-deriving anything.
   by a visual tour; release builds uploaded locally with xcodebuild (no EAS).
 
 ## Next steps / backlog
+
+### Pending now (2026-11-16)
+
+1. **Google Play review of 2.5.1 (34)** (up to ~7 days; Android Auto apps also go through the car app quality
+   review). If it's rejected, read the reason in Policy status and the email, fix, bump `versionCode` to 35, resubmit.
+   Once approved: say so in the README and on the site (Android Auto next to CarPlay), the listing text
+   (`docs/store/play-2.5.0.md` has none about the car; owner reviews it first), and the social post the owner
+   held back ("Android Auto, muy pronto").
+2. **Full Android E2E run**: `npm run e2e:android:all`. The 2026-11-16 run couldn't go on: something on the Mac kept
+   killing the adb server ("adb server killed by remote request" in `$TMPDIR/adb.501.log`, no visible
+   `kill-server` process; Android Studio wasn't running) and the cold-booted emulator never registered. The fixed
+   ai-12, lib-07, map-04, map-13, map-16 (these three failed on the network) and onb-04 haven't been seen passing.
+3. **iOS suite after the shared-flow change**: rebuild (`npm run e2e -- --build`: new `emergency-pick-region`
+   testID, the picker's keyboard, the shared `scripts/e2e-serve.sh`) and run smoke + full; the platform subflows
+   (`tab-*.yaml`, `back.yaml`, `kit-off.yaml`) replaced the iOS-only taps in every shared flow.
+4. **iOS 2.5.1**: an iOS build only if wanted for the picker's keyboard fix (the download-sheet fix is Android only).
+5. **Android issues found by the E2E run, not fixed**: the OpenStreetMap credit shows ~1 s instead of 5 (mounted
+   for 5 s, hidden once the map draws; map-18 is `ios-only` until then); the setup wizard's buttons sit under the
+   keyboard while searching a country (back closes it); the country picker takes ~2–3 s to draw on the emulator;
+   the content updates check at launch can run before seeded (E2E-only) files are registered and count as the
+   week's check.
+6. **Android Auto on a real car** (or the Desktop Head Unit with a phone): only the Automotive emulator so far.
+7. **Play's suggestions for 33/34** (optional): APIs it calls deprecated for edge-to-edge, and R8 optimisation.
+8. **Owner**: the dedicated Gmail for the public contact email (`docs/ANDROID_PLAY.md`, open items).
 
 Roughly by value. Items A, U and 0 are in progress; 3, 4 and 7 are partly done (see each); the rest are not
 started. (Preparedness was added
