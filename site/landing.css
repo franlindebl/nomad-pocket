@@ -133,6 +133,10 @@
 .badge-ios { display: block; height: 54px; transition: transform 120ms ease-out; }
 .badge-ios img { height: 54px; width: auto; }
 .badge-ios:active { transform: scale(0.98); }
+/* Google's badge PNG carries transparent padding above and below (29 of 250 px each): 70 px tall shows 54 px, as the App Store one. */
+.badge-play { display: block; height: 54px; transition: transform 120ms ease-out; }
+.badge-play img { height: 70px; width: auto; margin-top: -8px; }
+.badge-play:active { transform: scale(0.98); }
 .soon {
   display: inline-flex;
   align-items: center;

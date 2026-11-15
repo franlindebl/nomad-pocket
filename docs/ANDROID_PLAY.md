@@ -53,7 +53,7 @@ Details that already live elsewhere are linked, not repeated:
 | Internal testing | 1.1.0 (23), list "Nomad Pocket interno" (the owner's two accounts). Still has health features: internal only |
 | Closed testing ("Prueba cerrada - Alpha") | 1.1.0 (24) **rejected** 2026-10-29 (health apps need an organization). **1.1.0 (26) approved and live for testers 2026-10-30** (sent the same day with the redone listing and forms, 15 changes). Join: https://play.google.com/apps/testing/com.fjlinde.nomadpocket. Testers: account list "Friends and family", all countries |
 | Production | Access granted after the closed test (12+ testers × 14 days). **1.1.0 (26) sent to review 2026-11-15**: promoted from the closed test, full rollout, 178 countries (177 + rest of the world, as the closed test). Play's quick checks flagged "phone number not declared" (Data safety) for 26; the app sends none (plan contacts leave only by share sheet, dialer or Auto Backup), so it went with «Continuar de todos modos»: **rejected** the same day (Data safety: phone number not declared). Phone number declared (below), resubmitted and **approved: live on Google Play since 2026-11-15**. Production track id 4699339424733113509 |
-| Production update | **2.5.0 (33) sent to review 2026-11-15** (100 % rollout; Data safety with phone, approximate location and device IDs; 2.0 listing; foreground service "Navigation" with the video https://www.youtube.com/watch?v=ltA_nNxvXCI). Texts: `docs/store/play-2.5.0.md` |
+| Production update | **2.5.0 (33) approved and live 2026-11-15** (https://play.google.com/store/apps/details?id=com.fjlinde.nomadpocket; linked from the README and the site). Sent to review 2026-11-15 (100 % rollout; Data safety with phone, approximate location and device IDs; 2.0 listing; foreground service "Navigation" with the video https://www.youtube.com/watch?v=ltA_nNxvXCI). Texts: `docs/store/play-2.5.0.md` |
 | Content rating | PEGI 3 / ESRB Everyone (redone 2026-10-29; the first one was PEGI 18 because of injury photos in medical guides) |
 | Target audience | 13 and over |
 | Health apps declaration | "My app doesn't provide any health features" |
@@ -66,8 +66,8 @@ Next steps, in order:
 2. Testers opt in through the closed-test link and install from Play; keep **12+ testers opted in for 14 days in a
    row** (from 2026-10-30, the earliest production application is ~2026-11-13 if 12 join today).
 3. ~~Apply for production~~ granted; 1.1.0 (26) sent to production review 2026-11-15, rejected over the phone number
-   (Data safety), phone number declared, resubmitted and live the same day. 2.5.0 (33) sent to review the same day. Next: 2.5.0 as an update, with Data
-   safety for the alerts push, the foreground-service declaration (video), the 2.0 screenshots and texts.
+   (Data safety), phone number declared, resubmitted and live the same day. 2.5.0 (33) sent to review the same day, with Data
+   safety for the alerts push, the foreground-service declaration (video), the 2.0 screenshots and texts: live the same day.
 4. Open items: the owner's dedicated Gmail to replace the public contact email (`REPORT_EMAIL`, `site/`, Play
    contact, `play-listing.md`). **IARC answered on 2026-11-04** (see `play-listing.md`, Content rating): the
    educational question covers the encyclopedias, but the on-device AI must be disclosed on its own. Our "no" to

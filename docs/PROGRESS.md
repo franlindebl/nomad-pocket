@@ -420,6 +420,14 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-15 — Google Play: 2.5.0 (33) live; the README and the site link to it
+
+Play Console: production is 33 (2.5.0), active in 178 countries (17 installs so far); approved the same day it was
+sent. The README (badges, devices, status) and the site (both download blocks, the devices and Android questions, the
+JSON-LD's operating systems and links) now point to https://play.google.com/store/apps/details?id=com.fjlinde.nomadpocket instead of "coming soon".
+Play's release dashboard suggests two optional things for 33: APIs or parameters it considers deprecated for edge-to-edge
+display, and R8 optimisation for memory and performance.
+
 ### 2026-11-15 — Google Play: 2.5.0 (33) sent to review; a frozen-guidance bug fixed on the way
 
 Owner: "publish 2.5.0 with everything it needs". Checks green (tsc, lint, 566 tests, i18n, licences). Store AAB built

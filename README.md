@@ -12,8 +12,8 @@
 </p>
 
 <p align="center">
-  <a href="https://apps.apple.com/app/nomad-pocket-kit-offline/id6826502392"><img src="site/img/badge-app-store-en.svg" height="48" alt="Download on the App Store"></a><br>
-  <sub>Android · Google Play: coming soon</sub>
+  <a href="https://apps.apple.com/app/nomad-pocket-kit-offline/id6826502392"><img src="site/img/badge-app-store-en.svg" height="48" alt="Download on the App Store"></a>
+  <a href="https://play.google.com/store/apps/details?id=com.fjlinde.nomadpocket"><img src="site/img/badge-google-play-en.png" height="62" alt="Get it on Google Play"></a>
 </p>
 
 <p align="center">
@@ -326,9 +326,9 @@ offline. Android Auto isn't supported yet.
 <details>
 <summary><b>Which devices are supported? What about Android?</b></summary>
 
-iPhone and iPad with iOS 16.4 or later, on the App Store. Android 8.0 or later is in a closed
-test on Google Play and opens to everyone once Google approves it, with maps, routes, emergency
-services, the library, the plan and the assistant. First aid and medical information are only on
+iPhone and iPad with iOS 16.4 or later, on the App Store. Android 8.0 or later, on
+[Google Play](https://play.google.com/store/apps/details?id=com.fjlinde.nomadpocket), with maps, routes, emergency services, the library, the plan and the
+assistant. First aid and medical information are only on
 iPhone and iPad, so Android has 103 guide cards, 79 archives and 12 courses. The assistant uses an
 open model you download in the app (from 533 MB; larger ones need more memory) or, on iPhones and
 iPads that have it, Apple Intelligence.
@@ -410,7 +410,7 @@ and on nomad-pocket.app.
 
 On the [App Store](https://apps.apple.com/app/nomad-pocket-kit-offline/id6826502392) for iPhone
 and iPad, with CarPlay since 2.2 and official alerts since 2.4 (instant, with MeteoAlarm, from
-2.5). Android is in a closed test on Google Play and opens to everyone once Google approves it.
+2.5). On [Google Play](https://play.google.com/store/apps/details?id=com.fjlinde.nomadpocket) for Android since 2026-11-15 (2.5.0).
 Progress, backlog and known limits: [docs/PROGRESS.md](docs/PROGRESS.md).
 
 ## For developers
