@@ -29,27 +29,27 @@ Location: turn-by-turn navigation the person starts ("Iniciar"), kept going with
 type `location`). Video recorded on the emulator with this build (Andorra, a simulated drive, screen locked and woken,
 the "Navegación en curso" notification in the shade). Recording it found a bug: the trip's location watch shared the
 preview's id and was removed right after "Iniciar" (fixed before the upload, commit "Android: trip watch no longer
-shares the preview watch's id").
+shares the preview watch's id"). Video (unlisted, the owner's channel): https://www.youtube.com/watch?v=ltA_nNxvXCI.
 
-## Release notes
+## Release notes (as sent: Play allows 500 characters per language, so the first draft was cut)
 
 <es-ES>
 Nomad Pocket 2.5, la gran actualización para Android:
 • Nuevo diseño, más claro y rápido de leer
-• Avisos oficiales al momento (opcional): AEMET, MeteoAlarm, NWS y terremotos fuertes cerca de ti
-• Navegación giro a giro por voz, también con la pantalla bloqueada, y límite de velocidad
+• Avisos oficiales al momento (opcional): AEMET, MeteoAlarm, NWS y terremotos fuertes
+• Navegación giro a giro por voz, también con la pantalla bloqueada
 • Guías de supervivencia en la app desde el primer minuto
-• Pregunta al asistente por el mapa: lo más cercano, cómo llegar o dónde estás
-• Más puntos de emergencia gracias a registros oficiales, y mejor búsqueda en el mapa
+• Pregunta al asistente por el mapa: lo más cercano o cómo llegar
+• Más puntos de emergencia con registros oficiales y mejor búsqueda
 </es-ES>
 <en-US>
 Nomad Pocket 2.5, the big update for Android:
 • New design, clearer and quicker to read
-• Instant official alerts (optional): AEMET, MeteoAlarm, NWS and strong earthquakes near you
-• Spoken turn-by-turn navigation, also with the screen locked, and speed limits
+• Instant official alerts (optional): AEMET, MeteoAlarm, NWS and strong earthquakes
+• Spoken turn-by-turn navigation, also with the screen locked
 • Survival guides in the app from the first minute
-• Ask the assistant about the map: the nearest place, how to get there or where you are
-• More emergency points from official registers, and better map search
+• Ask the assistant about the map: the nearest place or how to get there
+• More emergency points from official registers and better map search
 </en-US>
 
 ## Full description, es-ES

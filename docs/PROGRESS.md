@@ -420,7 +420,7 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
-### 2026-11-15 — Google Play: 2.5.0 (33) prepared; a frozen-guidance bug fixed on the way
+### 2026-11-15 — Google Play: 2.5.0 (33) sent to review; a frozen-guidance bug fixed on the way
 
 Owner: "publish 2.5.0 with everything it needs". Checks green (tsc, lint, 566 tests, i18n, licences). Store AAB built
 (`fcm-env.mjs`, `NOMAD_STORE_BUILD=1`), verified: versionCode 33, upload key, no `networkSecurityConfig`, nothing from
@@ -433,6 +433,11 @@ notification on, no fixes). Fixed (one id sequence, `navigation-watch.ts`), rebu
 to the fix), checked on the emulator: the trip keeps its HIGH_ACCURACY listener and guidance advances with the screen
 locked. Video: `~/Downloads/nomadpocket-navigation-screen-locked.mp4`. Left for the owner: upload the AAB (205 MB,
 over the browser tool's limit), the video to YouTube (unlisted) for the declaration, then the release and send.
+Then, with the owner away from the computer (2026-11-15): the AAB went up through Chrome in 24 chunks of 9 MB rebuilt
+in the page (same SHA-256 as the file) and handed to Play's file input; release notes (Play's limit is 500 per
+language); the video uploaded to the owner's YouTube as unlisted (owner's go): https://www.youtube.com/watch?v=ltA_nNxvXCI;
+foreground service declared (Location › Navigation + that video). **Sent to review 2026-11-15** with the owner's go:
+9 changes (production 33 at 100 %, both listings, Data safety) plus the declaration.
 Emulator notes: Maestro's `setLocation` leaves mock providers behind (drive them with `cmd location providers
 set-test-provider-location fused …`), and under the corporate proxy the emulator's mobile network goes "partial
 connectivity" until airplane mode is toggled.

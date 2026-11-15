@@ -31,7 +31,11 @@ Details that already live elsewhere are linked, not repeated:
    If the app changes (a new feature, a new permission, new data leaving the device), update the matching form
    (`docs/store/play-listing.md`) in the same release.
 5. **Who does what in Play Console** (the agent drives Chrome, the owner decides):
-   - The owner uploads AABs (files over 10 MB can't be uploaded by the agent's browser tool).
+   - The owner uploads AABs (files over 10 MB can't be uploaded by the agent's browser tool). When the owner is away and
+     asks the agent to: split the AAB in 9 MB parts, upload each to a file input the agent adds to the page, join them
+     there into a File (check its SHA-256 with `crypto.subtle`) and set it on Play's `.aab` input with a DataTransfer
+     (done for 2.5.0 (33)). A fetch from the page to a localhost server doesn't work: Chrome asks for local-network
+     permission.
    - The owner accepts any terms, declarations or policies (IARC terms, Health apps checkboxes, app creation).
    - The owner clicks **«Enviar cambios a revisión»**. The agent prepares everything and says when it's ready.
    - The agent never enters passwords or keys and never changes account or security settings.
@@ -49,6 +53,7 @@ Details that already live elsewhere are linked, not repeated:
 | Internal testing | 1.1.0 (23), list "Nomad Pocket interno" (the owner's two accounts). Still has health features: internal only |
 | Closed testing ("Prueba cerrada - Alpha") | 1.1.0 (24) **rejected** 2026-10-29 (health apps need an organization). **1.1.0 (26) approved and live for testers 2026-10-30** (sent the same day with the redone listing and forms, 15 changes). Join: https://play.google.com/apps/testing/com.fjlinde.nomadpocket. Testers: account list "Friends and family", all countries |
 | Production | Access granted after the closed test (12+ testers × 14 days). **1.1.0 (26) sent to review 2026-11-15**: promoted from the closed test, full rollout, 178 countries (177 + rest of the world, as the closed test). Play's quick checks flagged "phone number not declared" (Data safety) for 26; the app sends none (plan contacts leave only by share sheet, dialer or Auto Backup), so it went with «Continuar de todos modos»: **rejected** the same day (Data safety: phone number not declared). Phone number declared (below), resubmitted and **approved: live on Google Play since 2026-11-15**. Production track id 4699339424733113509 |
+| Production update | **2.5.0 (33) sent to review 2026-11-15** (100 % rollout; Data safety with phone, approximate location and device IDs; 2.0 listing; foreground service "Navigation" with the video https://www.youtube.com/watch?v=ltA_nNxvXCI). Texts: `docs/store/play-2.5.0.md` |
 | Content rating | PEGI 3 / ESRB Everyone (redone 2026-10-29; the first one was PEGI 18 because of injury photos in medical guides) |
 | Target audience | 13 and over |
 | Health apps declaration | "My app doesn't provide any health features" |
@@ -61,7 +66,7 @@ Next steps, in order:
 2. Testers opt in through the closed-test link and install from Play; keep **12+ testers opted in for 14 days in a
    row** (from 2026-10-30, the earliest production application is ~2026-11-13 if 12 join today).
 3. ~~Apply for production~~ granted; 1.1.0 (26) sent to production review 2026-11-15, rejected over the phone number
-   (Data safety), phone number declared, resubmitted and live the same day. Next: 2.5.0 as an update, with Data
+   (Data safety), phone number declared, resubmitted and live the same day. 2.5.0 (33) sent to review the same day. Next: 2.5.0 as an update, with Data
    safety for the alerts push, the foreground-service declaration (video), the 2.0 screenshots and texts.
 4. Open items: the owner's dedicated Gmail to replace the public contact email (`REPORT_EMAIL`, `site/`, Play
    contact, `play-listing.md`). **IARC answered on 2026-11-04** (see `play-listing.md`, Content rating): the
