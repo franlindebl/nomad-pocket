@@ -40,7 +40,7 @@ Details that already live elsewhere are linked, not repeated:
    commit (`docs/RELEASE.md`).
 7. `android/` is generated (CNG): never edit it. Configure in `app.json`, `plugins/` and `modules/*`.
 
-## 2. Current state (2026-10-30)
+## 2. Current state (2026-11-15)
 
 | Item | State |
 |---|---|
@@ -48,7 +48,7 @@ Details that already live elsewhere are linked, not repeated:
 | App | Nomad Pocket, package `com.fjlinde.nomadpocket`, created 2026-10-29 |
 | Internal testing | 1.1.0 (23), list "Nomad Pocket interno" (the owner's two accounts). Still has health features: internal only |
 | Closed testing ("Prueba cerrada - Alpha") | 1.1.0 (24) **rejected** 2026-10-29 (health apps need an organization). **1.1.0 (26) approved and live for testers 2026-10-30** (sent the same day with the redone listing and forms, 15 changes). Join: https://play.google.com/apps/testing/com.fjlinde.nomadpocket. Testers: account list "Friends and family", all countries |
-| Production | Not yet. A new app in a personal account needs a closed test with **≥ 12 opted-in testers for 14 days in a row** before it can apply |
+| Production | Access granted after the closed test (12+ testers × 14 days). **1.1.0 (26) sent to review 2026-11-15**: promoted from the closed test, full rollout, 178 countries (177 + rest of the world, as the closed test). Play's quick checks flagged "phone number not declared" (Data safety) for 26; the app sends none (plan contacts leave only by share sheet, dialer or Auto Backup), so it went with «Continuar de todos modos»: **rejected** the same day (Data safety: phone number not declared). Phone number declared (below), resubmitted and **approved: live on Google Play since 2026-11-15**. Production track id 4699339424733113509 |
 | Content rating | PEGI 3 / ESRB Everyone (redone 2026-10-29; the first one was PEGI 18 because of injury photos in medical guides) |
 | Target audience | 13 and over |
 | Health apps declaration | "My app doesn't provide any health features" |
@@ -60,7 +60,9 @@ Next steps, in order:
    Policy status and the email, fix it, bump `versionCode`, rebuild, upload, resubmit.)
 2. Testers opt in through the closed-test link and install from Play; keep **12+ testers opted in for 14 days in a
    row** (from 2026-10-30, the earliest production application is ~2026-11-13 if 12 join today).
-3. Then apply for production from the dashboard (Play asks questions about the test) and publish to production.
+3. ~~Apply for production~~ granted; 1.1.0 (26) sent to production review 2026-11-15, rejected over the phone number
+   (Data safety), phone number declared, resubmitted and live the same day. Next: 2.5.0 as an update, with Data
+   safety for the alerts push, the foreground-service declaration (video), the 2.0 screenshots and texts.
 4. Open items: the owner's dedicated Gmail to replace the public contact email (`REPORT_EMAIL`, `site/`, Play
    contact, `play-listing.md`). **IARC answered on 2026-11-04** (see `play-listing.md`, Content rating): the
    educational question covers the encyclopedias, but the on-device AI must be disclosed on its own. Our "no" to
@@ -165,7 +167,7 @@ under the "not medical advice" banner. Fresh installs (reviewers, closed testers
 | Foreground service (from the `carplay` branch, 2026-10-31) | Guidance with the screen off runs in a foreground service of type `location` (`FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_LOCATION`, notification "Navegación en curso"), started while the app is in front: no `ACCESS_BACKGROUND_LOCATION`. **Before the release that ships it**: Play Console › App content › Foreground service permissions: declare "Location" (navigation the user started) with a short video of starting a trip and locking the screen | `modules/nomad-location/android` (`NavigationService.kt`, manifest) |
 | 16 KB page support (Android 15+) | Every `.so` aligned | `llvm-objdump -p <lib>.so \| grep LOAD` (`2**14`+), `zipalign -c -P 16` |
 | 64-bit, size limit | arm64-v8a + x86_64 only (llama.rn has no 32-bit); ~90 MB download on arm64 (limit 200 MB) | `expo-build-properties` `android.buildArchs` |
-| Data safety | "No data collected": everything is on-device; downloads send only the request. **Changes with the alerts push** (first Android build that registers): approximate location (the 0.1° cell), app functionality, not shared, deletable (turning alerts off), plus the device push token | `play-listing.md`, must match `site/privacy.html` |
+| Data safety | Since 2026-11-15: only **Phone number** (collected, optional, app functionality, not shared; Play's scan saw the plan's contact numbers leave by backup/share and rejected "no data"); everything else on-device; downloads send only the request. **Changes with the alerts push** (first Android build that registers): approximate location (the 0.1° cell), app functionality, not shared, deletable (turning alerts off), plus the device push token | `play-listing.md`, must match `site/privacy.html` |
 | Open-source notices | Full transitive Android notices in Credits › Android libraries | `scripts/licenses/android-deps.mjs` then `node scripts/licenses.mjs` |
 | Auto Backup | Only the user's own data (SQLite folder, kv-store) goes to Google Drive backup; re-downloadable content stays out (cloud backup skips an app over 25 MB) | `plugins/with-android-backup-rules.js` |
 

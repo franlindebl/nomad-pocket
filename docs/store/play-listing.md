@@ -137,7 +137,13 @@ Answers, matching `site/privacy.html` (re-read it before filling this in):
 **From the first build with alerts push** these change: approximate location and the FCM token are collected
 while official alerts are on (`docs/store/listing-next.md`, "Google Play Data safety").
 
-- **Does your app collect or share any of the required user data types?** No.
+- **Since 2026-11-15 (production rejection over it): Phone number is declared.** Play's automated review said build 26
+  sends a phone number off the device and rejected "no data collected". The only numbers are the family plan's
+  contacts, which leave by the shared PDF and Android Auto Backup. Form now: collects or shares → Yes; encrypted in
+  transit → Yes; account creation → "Mi aplicación no permite que los usuarios creen una cuenta", outside sign-in → No;
+  deletion request (optional) → unanswered; Personal info › **Phone number**: collected, not shared, not processed
+  ephemerally, optional (users choose), purpose App functionality. The rest below still holds.
+- **Does your app collect or share any of the required user data types?** No (until 2026-11-15, see above).
   - Location, the family plan, contacts typed into it, questions to the assistant, voice for dictation:
     all processed only on the device, never sent off it, so Play doesn't count them as collected
     ("data processed ephemerally on the device" / "on-device only").

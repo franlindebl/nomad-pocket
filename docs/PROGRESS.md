@@ -420,6 +420,29 @@ Build gotchas moved to `docs/DEVELOPMENT.md`.
 
 ## Log
 
+### 2026-11-15 — Google Play: 1.1.0 (26) to production review, rejected over the phone number, resubmitted, live
+
+The closed test (12+ testers, 14 days) unlocked production: the dashboard says production access is granted. Owner's
+choice: promote the closed test's 1.1.0 (26) as it is (same bundle, notes and forms) and ship 2.5.0 later as an update
+with its declarations. Production track: release 26, full rollout, the closed test's release notes; countries the
+same as the closed test (177 + rest of the world, 178). Play's quick checks flagged "phone number not declared" in
+Data safety for 26; build 26 sends no phone number anywhere (the plan's contacts stay in SQLite and leave only through
+the share sheet, the dialer or Android Auto Backup to the user's own Drive), so the owner chose «Continuar de todos
+modos» and the 3 changes were sent to review on 2026-11-15 (Google says up to 7 days). If it's rejected over the phone
+number: read the reason, then either declare it or keep the plan out of Auto Backup in a new build.
+**Rejected the same day** (Policy status: "Formulario de seguridad de los datos no válido", phone number not declared,
+versionCode 26; "declare it or remove the feature"). Owner's choice: declare it. Data safety now says: collects or
+shares data → yes; encrypted in transit → yes; no accounts (none created in the app, no outside sign-in); Personal
+info › Phone number: collected, not shared, not ephemeral, optional (users choose), purpose App functionality.
+Resubmitted 2026-11-15 with the production release and countries (4 changes). The privacy policy already describes
+the two ways the plan's numbers leave the phone (the shared PDF, system backups).
+**Approved and live on Google Play the same day (2026-11-15)**: production track active, 1.1.0 (26), 178 countries.
+Play's suggestions on the track (not blocking): deprecated edge-to-edge APIs, bitmap optimisation, R8 optimisation.
+
+Next: 2.5.0 for Android (versionCode 33 or later) with Data safety for the alerts push (approximate location, push
+token), the foreground-service declaration (location, video of a trip with the screen locked), the 2.0 screenshots and
+texts (`docs/ANDROID_PLAY.md`).
+
 ### 2026-11-14 — Donations: Bitcoin and Ethereum on the site and the README, with a daily counter
 
 An "Apóyalo / Support it" section on the landing page (`#apoyar`, `#donate`; footer link, a line in the "free" FAQ
